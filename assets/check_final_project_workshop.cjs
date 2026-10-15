@@ -31,12 +31,12 @@ const {chromium}=require('playwright');
   await p.locator('#pov-player').scrollIntoViewIfNeeded();await p.screenshot({path:folder+'/'+name+'-pov.png'});
   await p.locator('[data-pov-play]').click();assert.equal(await p.locator('[data-pov-play]').getAttribute('aria-pressed'),'true');await p.locator('[data-pov-play]').click();assert.equal(await p.locator('[data-pov-play]').getAttribute('aria-pressed'),'false');
   if(width<=700)await p.locator('#pov-stage-select').selectOption('3');else await p.locator('[data-pov-select="3"]').click();
-  assert.equal(await p.locator('#pov-player').getAttribute('data-pov-step'),'3');await p.screenshot({path:folder+'/'+name+'-pov-interrupted.png'});
+  assert.equal(await p.locator('#pov-player').getAttribute('data-pov-step'),'3');await p.locator('[data-pov-scene="3"]').evaluate(e=>Promise.all(e.getAnimations().map(a=>a.finished)));await p.screenshot({path:folder+'/'+name+'-pov-interrupted.png'});
   await p.locator('[data-pov-next]').focus();await p.keyboard.press('Enter');assert.equal(await p.locator('#pov-player').getAttribute('data-pov-step'),'4');assert.equal(await p.locator('[data-pov-scene="4"]').evaluate(e=>e.getAnimations().length),0);
   await p.locator('[data-pov-reset]').click();assert.equal(await p.locator('#pov-player').getAttribute('data-pov-step'),'0');
   const proof=await p.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,lang:document.documentElement.lang,dir:document.documentElement.dir,svgNodes:document.querySelectorAll('[data-flow-node]').length}));assert.equal(proof.width,proof.scrollWidth);assert.equal(proof.svgNodes,8);assert.deepEqual(errors,[]);
   await p.evaluate(()=>location.hash='chapter-8');await p.waitForFunction(()=>document.querySelector('#design-reference').open&&document.querySelector('#chapter-8').open);assert(await p.locator('#chapter-8').isVisible());
-  report.push({name,...proof,errors,checks:['draft closed by default','guided lesson navigation','15 ADRs','estimates recalculated','play/pause/step/reset','reduced motion or keyboard instant','reference deep links']});await c.close();
+  report.push({name,...proof,errors,checks:['draft closed by default','guided lesson navigation','15 ADRs','estimates recalculated','play/pause/step/reset','reduced motion or keyboard instant','reference deep links','recovery contracts','POV manual controls, no autoplay and keyboard instant']});await c.close();
  }
  fs.writeFileSync(folder+'/browser-report.json',JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));await b.close();
 })().catch(e=>{console.error(e);process.exit(1)});

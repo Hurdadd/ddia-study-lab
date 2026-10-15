@@ -82,6 +82,3 @@
 
   document.addEventListener("DOMContentLoaded", function(){ init(); reveal(); spy(); });
 })();
-
-/* Original study-site authorship; book and third-party rights remain separate. */
-(function(){if(document.body.classList.contains('platform-page'))return;var script=document.querySelector('script[src$="assets/site.js"]');if(!script)return;var base=new URL('../',script.src),p=document.createElement('p');p.className='author-credit';var a=document.createElement('a');a.href=new URL('AUTHORS.md',base).href;a.textContent='hurdad ashouri';p.append('Written by ',a,' · AGPL-3.0-only');document.body.append(p)})();
