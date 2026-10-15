@@ -22,8 +22,8 @@ recoverability, not merely an archive timer. Failed archiving can violate it.
 Region: 30m detect/declare + 60m provision + 60m restore + 60m validate + 30m reopen = 4h.
 A 15-minute cross-region recovery gap trades pilot loss tolerance against warm-standby cost.
 Real customer data or contractual requirements require revisiting both targets.
-Index: 1,000,000/100 docs/s = 2.778h; catch-up with 10 docs/s arrivals and 60 docs/s
-service takes 0.556h; validation adds 0.5h, totaling 3.834h. The four-hour budget has
+Index: 1,000,000/100 docs/s = 2.778h; catch-up with 5 changes/s arrivals and 30 changes/s
+replay service takes 0.556h; validation adds 0.5h, totaling 3.834h. The four-hour budget has
 about ten minutes of margin. Different throughput, arrivals or dataset size invalidates it.
 These capacities are assumptions, not benchmark results.
 
