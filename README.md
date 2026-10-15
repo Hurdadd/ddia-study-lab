@@ -17,6 +17,9 @@ for future sharing and does not make it public.
 
 ## Explore
 
+[Private hosted site](https://own-the-stack.vercel.app/final-project/index.html) —
+requires Vercel authentication.
+
 - [Study home](index.html): fourteen chapters inspired by *Designing Data-Intensive
   Applications, 2nd Edition* (Martin Kleppmann and Chris Riccomini).
 - [Understand the project](final-project/index.html#overview): product, audience,
