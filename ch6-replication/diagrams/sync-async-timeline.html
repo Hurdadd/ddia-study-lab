@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sync vs semisync vs async writes — concept sketch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#f7f2e8;font-family:'Nunito','Vazirmatn',system-ui,sans-serif}
+  .wrap{max-width:1240px;margin:0 auto;padding:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Timeline comparing synchronous, semisynchronous and asynchronous replication writes">
+<title>Sync vs semisync vs async writes</title>
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0 0L10 5L0 10z" fill="#302828"/>
+</marker>
+</defs>
+<rect x="0" y="0" width="1240" height="660" rx="24" fill="#f7f2e8"/>
+<text x="620" y="52" text-anchor="middle" font-size="24" font-weight="900" fill="#302828">Sync vs semisync vs async writes</text>
+
+<line x1="20" y1="262" x2="1220" y2="262" stroke="#e2d8c2" stroke-width="2" stroke-dasharray="8 6"/>
+<line x1="20" y1="432" x2="1220" y2="432" stroke="#e2d8c2" stroke-width="2" stroke-dasharray="8 6"/>
+
+<!-- lane 1 -->
+<text x="105" y="181" text-anchor="middle" font-size="15" font-weight="800" fill="#302828">Synchronous</text>
+<rect x="230" y="145" width="140" height="60" rx="16" fill="#c3ceff" stroke="#302828" stroke-width="2"/>
+<text x="300" y="181" text-anchor="middle" font-size="16" font-weight="800" fill="#302828">Client</text>
+<line x1="370" y1="175" x2="440" y2="175" stroke="#302828" stroke-width="2.5" marker-end="url(#ah)"/>
+<text x="405" y="161" text-anchor="middle" font-size="13" fill="#302828">write</text>
+<rect x="440" y="145" width="190" height="60" rx="16" fill="#ffcfb8" stroke="#302828" stroke-width="2"/>
+<text x="535" y="181" text-anchor="middle" font-size="16" font-weight="800" fill="#302828">Leader</text>
+<line x1="630" y1="175" x2="720" y2="175" stroke="#302828" stroke-width="2.5" marker-end="url(#ah)"/>
+<text x="675" y="161" text-anchor="middle" font-size="13" fill="#302828">wait ack</text>
+<rect x="720" y="145" width="180" height="60" rx="16" fill="#bfe6c9" stroke="#302828" stroke-width="2"/>
+<text x="810" y="181" text-anchor="middle" font-size="16" font-weight="800" fill="#302828">Follower</text>
+<text x="1070" y="169" text-anchor="middle" font-size="15" font-weight="800" fill="#302828">OK after ack</text>
+<text x="1070" y="195" text-anchor="middle" font-size="13" fill="#302828">slow node blocks</text>
+<text x="565" y="233" text-anchor="middle" font-size="14" fill="#302828">safe on 2 nodes · one slow node blocks writes</text>
+
+<!-- lane 2 -->
+<text x="105" y="351" text-anchor="middle" font-size="15" font-weight="800" fill="#302828">Semisync (1+1)</text>
+<rect x="230" y="315" width="140" height="60" rx="16" fill="#c3ceff" stroke="#302828" stroke-width="2"/>
+<text x="300" y="351" text-anchor="middle" font-size="16" font-weight="800" fill="#302828">Client</text>
+<line x1="370" y1="345" x2="440" y2="345" stroke="#302828" stroke-width="2.5" marker-end="url(#ah)"/>
+<text x="405" y="331" text-anchor="middle" font-size="13" fill="#302828">write</text>
+<rect x="440" y="315" width="190" height="60" rx="16" fill="#ffcfb8" stroke="#302828" stroke-width="2"/>
+<text x="535" y="351" text-anchor="middle" font-size="16" font-weight="800" fill="#302828">Leader</text>
+<line x1="630" y1="345" x2="720" y2="345" stroke="#302828" stroke-width="2.5" marker-end="url(#ah)"/>
+<text x="675" y="331" text-anchor="middle" font-size="13" fill="#302828">wait 1 ack</text>
+<rect x="720" y="315" width="180" height="60" rx="16" fill="#bfe6c9" stroke="#302828" stroke-width="2"/>
+<text x="810" y="351" text-anchor="middle" font-size="16" font-weight="800" fill="#302828">Sync one</text>
+<text x="1070" y="339" text-anchor="middle" font-size="15" font-weight="800" fill="#302828">OK after 1 ack</text>
+<text x="1070" y="365" text-anchor="middle" font-size="13" fill="#302828">swap in a new sync</text>
+<text x="565" y="403" text-anchor="middle" font-size="14" fill="#302828">always 2 fresh copies · rest async</text>
+
+<!-- lane 3 -->
+<text x="105" y="521" text-anchor="middle" font-size="15" font-weight="800" fill="#302828">Asynchronous</text>
+<rect x="230" y="485" width="140" height="60" rx="16" fill="#c3ceff" stroke="#302828" stroke-width="2"/>
+<text x="300" y="521" text-anchor="middle" font-size="16" font-weight="800" fill="#302828">Client</text>
+<line x1="370" y1="515" x2="440" y2="515" stroke="#302828" stroke-width="2.5" marker-end="url(#ah)"/>
+<text x="405" y="501" text-anchor="middle" font-size="13" fill="#302828">write</text>
+<rect x="440" y="485" width="190" height="60" rx="16" fill="#ffcfb8" stroke="#302828" stroke-width="2"/>
+<text x="535" y="521" text-anchor="middle" font-size="16" font-weight="800" fill="#302828">Leader</text>
+<line x1="630" y1="515" x2="720" y2="515" stroke="#302828" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#ah)"/>
+<text x="675" y="501" text-anchor="middle" font-size="13" fill="#302828">no waiting</text>
+<rect x="720" y="485" width="180" height="60" rx="16" fill="#ffe08a" stroke="#302828" stroke-width="2"/>
+<text x="810" y="521" text-anchor="middle" font-size="16" font-weight="800" fill="#302828">Async rest</text>
+<text x="1070" y="509" text-anchor="middle" font-size="15" font-weight="800" fill="#302828">OK at once</text>
+<text x="1070" y="535" text-anchor="middle" font-size="13" fill="#302828">may lose acked writes</text>
+<text x="565" y="573" text-anchor="middle" font-size="14" fill="#302828">never blocks · unreplicated acks can be lost</text>
+
+<text x="620" y="626" text-anchor="middle" font-size="14" font-weight="700" fill="#302828">rule: all-sync halts on one failure · all-async can lose acked writes</text>
+</svg>
+</div>
+</body>
+</html>

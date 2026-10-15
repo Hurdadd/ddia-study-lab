@@ -1,0 +1,261 @@
+{
+  "steps": [
+    {
+      "t_en": "Write the three histories",
+      "t_fa": "سه history را بنویس",
+      "en": "Write v7 is ACKed at <span class=\"ltr\">LSN</span> 7; follower A applies it at once, follower B still sits at <span class=\"ltr\">LSN</span> 5. Read-your-writes breaks when the first read hits B and sees v5. Monotonic reads break when the second read hits A (v7) and the third hits B (v5): time moved backward. Causal order breaks when reply@7 is read from A while its question@6 never reached B: answer before question.",
+      "fa": "نوشته v7 با <span class=\"ltr\">LSN</span> برابر ۷ تأیید می‌شود؛ follower A فوراً اعمالش می‌کند و follower B هنوز روی <span class=\"ltr\">LSN</span> برابر ۵ است. read-your-writes وقتی می‌شکند که خواندن اول به B بخورد و v5 ببیند. monotonic reads وقتی می‌شکند که خواندن دوم به A بخورد (v7) و سومی به B (v5): زمان عقب رفته. ترتیب علّی وقتی می‌شکند که reply@7 از A خوانده شود ولی question@6 هیچ‌وقت به B نرسیده باشد: جواب پیش از سؤال."
+    },
+    {
+      "t_en": "Read-your-writes: pay for the leader",
+      "t_fa": "خواندن نوشته خود: قیمت leader را بده",
+      "en": "Route reads of keys the user may just have written to the leader (or a synchronous follower): always fresh, always costs leader load. The one-minute all-from-leader window and dropping over-lagging followers from the read path are the same idea with a timer — honest only as a heuristic, because lag has no bound.",
+      "fa": "خواندن کلیدهایی که کاربر شاید همین حالا نوشته به leader (یا follower هم‌زمان) برود: همیشه تازه، همیشه به قیمت بار leader. پنجره یک‌دقیقه‌ای همه‌از-leader و حذف followerهای عقب‌افتاده از مسیر خواندن همان ایده با تایمرند — فقط به‌عنوان heuristic صادق‌اند چون lag کران ندارد."
+    },
+    {
+      "t_en": "Monotonic and causal: pin or compare",
+      "t_fa": "یکنوا و علّی: پین کن یا مقایسه کن",
+      "en": "Monotonic reads come from pinning each session to one replica (hash of the user ID is the simple form) or from carrying a seen-version floor the answering replica must beat. Causal order needs more: keep causally related writes on one shard, or ship explicit dependencies. Multi-device sessions must keep the last-write metadata central, or the laptop regresses what the phone wrote.",
+      "fa": "monotonic reads از پین کردن هر نشست به یک replica می‌آید (hash شناسه کاربر شکل ساده‌اش است) یا از حمل کف نسخه دیده‌شده که replica پاسخ‌دهنده باید از آن بگذرد. ترتیب علّی بیشتر می‌خواهد: نوشته‌های وابسته علّی روی یک shard بمانند یا وابستگی‌ها صریح حمل شوند. نشست‌های چنددستگاهی باید metadata آخرین نوشته را مرکزی نگه دارند وگرنه لپ‌تاپ نوشته گوشی را عقب می‌برد."
+    },
+    {
+      "t_en": "No bound: fall back, never sleep",
+      "t_fa": "بدون کران: fallback بزن، هرگز sleep نکن",
+      "en": "A fixed sleep proves nothing: a stalled follower sleeps through it. The version barrier refuses stale replicas with evidence (<span class=\"ltr\">5 &lt; 7</span>), and when no follower qualifies the router falls back to the leader. If even that is too costly, stop pretending async is synchronous and buy a stronger database — linearizable plus ACID — instead of complicating the application.",
+      "fa": "sleep ثابت هیچ‌چیز را ثابت نمی‌کند: follower گیرکرده از رویش رد می‌شود. barrier نسخه با مدرک replica کهنه را رد می‌کند (<span class=\"ltr\">5 &lt; 7</span>) و وقتی هیچ followerای احراز نشد مسیریاب به leader برمی‌گردد. اگر حتی آن پرهزینه است، وانمود نکن ناهمزمان هم‌زمان است و به‌جای پیچیده کردن اپلیکیشن پایگاه‌ داده قوی‌تر بخر — linearizable به‌علاوه ACID."
+    }
+  ],
+  "design_fa": "<p>مسیریاب خواندن سه ورودی دارد: <code>lastLsn</code> نشست، جدول <code>replicaLsn</code> و پرچم <code>ownWrite</code>. اگر <code>ownWrite</code> درست باشد مستقیم به leader؛ وگرنه replicaای که <code>replicaLsn</code> آن دست‌کم <code>lastLsn</code> است وگرنه leader. کلید پارتیشن کاربر همان کلید مسیریابی stickiness است و هر خواندن نسخه‌ای که دیده را در پاسخ برمی‌گرداند تا نشست کفش را بالا ببرد.</p>",
+  "design_en": "<p>The read router takes three inputs: the session <code>lastLsn</code>, a <code>replicaLsn</code> table, and an <code>ownWrite</code> flag. Own-write reads go straight to the leader; other reads go to a replica whose <code>replicaLsn</code> is at least <code>lastLsn</code>, else the leader. The user partition key doubles as the stickiness key, and every read returns the version it saw so the session can raise its floor.</p>",
+  "worked_fa": "<p>نوشته v7 در <span class=\"ltr\">LSN</span> برابر ۷؛ A روی ۷ و B روی ۵. خواندن اول با نیاز ۷ به B می‌رسد و رد می‌شود (<span class=\"ltr\">5 &lt; 7</span>) پس به leader می‌رود؛ خواندن دوم به A می‌رسد و با v7 پذیرفته می‌شود (<span class=\"ltr\">7 &gt;= 7</span>). اگر هر دو follower روی ۵ بمانند و leader به ۹ برسد، هر خواندن با نیاز ۷ به fallback می‌رسد. همه اعداد آموزشی‌اند.</p>",
+  "worked_en": "<p>Write v7 lands at <span class=\"ltr\">LSN</span> 7; A sits at 7 and B at 5. The first read needing 7 reaches B and is refused (<span class=\"ltr\">5 &lt; 7</span>), so it goes to the leader; the second read reaches A and is admitted with v7 (<span class=\"ltr\">7 &gt;= 7</span>). If both followers stall at 5 while the leader advances to 9, every read needing 7 falls back. All numbers are teaching numbers.</p>",
+  "alternatives": [
+    {
+      "en": "Fixed sleep before reading: cheapest to write, guarantees nothing — keep it only as a latency-hiding heuristic with the barrier still enforcing correctness.",
+      "fa": "sleep ثابت پیش از خواندن: ارزان‌ترین برای نوشتن و بدون هیچ تضمینی — فقط به‌عنوان heuristic پنهان‌سازی تأخیر نگهش دار و barrier همچنان درستی را اجرا کند."
+    },
+    {
+      "en": "Synchronous or semisynchronous replication: followers are fresh by construction, but one slow follower stalls every write — freshness moved its price to availability.",
+      "fa": "تکثیر هم‌زمان یا نیمه‌هم‌زمان: followerها ذاتاً تازه‌اند ولی یک follower کند هر نوشته را متوقف می‌کند — قیمت تازگی به availability منتقل شده."
+    }
+  ],
+  "failures": [
+    {
+      "en": "Primary dies right after ACK with async replication: ACKed-but-unreplicated writes are lost, so read-your-writes to the new leader misses the user's own write. Guard: semisynchronous replication or state the loss window honestly.",
+      "fa": "مرگ primary دقیقاً بعد از ACK با تکثیر ناهمزمان: نوشته‌های تأییدشده ولی تکثیرنشده گم می‌شوند پس read-your-writes به leader تازه نوشته خود کاربر را از دست می‌دهد. نگهبان: تکثیر نیمه‌هم‌زمان یا اعلام صادقانه پنجره گم‌شدن."
+    },
+    {
+      "en": "Pinned replica dies and the session re-pins to a staler one: monotonic reads regress silently. Guard: carry the seen-version floor across the re-pin and refuse replicas below it.",
+      "fa": "مرگ replica پین‌شده و پین مجدد نشست به کهنه‌تر: monotonic reads بی‌صدا عقب می‌رود. نگهبان: حمل کف نسخه دیده‌شده در پین مجدد و رد replicaهای پایین‌تر از آن."
+    }
+  ],
+  "code": {
+    "lang": "java",
+    "code": "import java.util.*;\n\n// Teaching demo: version-barrier read routing over one leader + two followers.\n// The router never trusts a fixed sleep; it compares versions and falls back\n// to the leader when no follower is fresh enough (unbounded lag).\npublic class LagRoutingDemo {\n    record Replica(String name, long lsn, String profile) {}\n\n    // Route a read that must see at least requiredLsn. Returns replica name or LEADER.\n    static String route(long requiredLsn, long sessionSeen, List<Replica> followers) {\n        long need = Math.max(requiredLsn, sessionSeen); // read-your-writes + monotonic floor\n        Replica best = null;\n        for (Replica r : followers)\n            if (r.lsn() >= need && (best == null || r.lsn() > best.lsn())) best = r;\n        return best == null ? \"LEADER (fallback: no follower fresh enough)\" : best.name();\n    }\n\n    public static void main(String[] a) {\n        // Leader just applied profile v7 at LSN 7; A caught up, B lags at LSN 5.\n        List<Replica> followers = List.of(\n                new Replica(\"A\", 7, \"v7\"),\n                new Replica(\"B\", 5, \"v5\"));\n        long sessionSeen = 7; // client wrote v7, so it must never read older than v7\n\n        System.out.println(\"read-your-writes  -> \" + route(7, sessionSeen, followers));\n        // Monotonic check: a second read pinned to B would regress 7 -> 5, so refuse B.\n        System.out.println(\"monotonic-second-read pinned-to-B would regress 7->5: refused, use \"\n                + route(0, sessionSeen, followers));\n        // Causal: reply (LSN 7) depends on question (LSN 6); a replica at 5 has neither in order.\n        System.out.println(\"causal(question@6,reply@7) on B@5: unsafe, use \"\n                + route(7, sessionSeen, followers));\n        // Unbounded lag: both followers stall at 5 while leader advances to 9.\n        List<Replica> stalled = List.of(\n                new Replica(\"A\", 5, \"v5\"),\n                new Replica(\"B\", 5, \"v5\"));\n        System.out.println(\"unbounded-lag      -> \" + route(7, sessionSeen, stalled));\n        System.out.println(\"OK: no fixed sleep used; every route names its version evidence\");\n    }\n}\n",
+    "run_fa": "javac LagRoutingDemo.java && java LagRoutingDemo — فقط استاندارد جاوا، فوری.",
+    "run_en": "javac LagRoutingDemo.java && java LagRoutingDemo — stdlib Java only, instant.",
+    "expected_fa": "read-your-writes به A می‌رسد؛ خواندن دوم پین‌شده به B رد می‌شود و A می‌دهد؛ علّی روی B@5 ناامن و A می‌دهد؛ lag بی‌حد به LEADER برمی‌گردد؛ OK پایانی. (خروجی واقعی همین محیط)",
+    "expected_en": "read-your-writes routes to A; the second read pinned to B is refused for A; causal on B@5 is unsafe for A; unbounded lag falls back to LEADER; closing OK. (actual output of this environment)",
+    "status": "verified"
+  },
+  "tests_fa": "در آزمایشگاه هر سه ناهنجاری را عمداً بازتولید کن: نوشتن و خواندن فوری از follower، دو خواندن از دو replica، و جابه‌جایی ترتیب علّی؛ بعد برای هرکدام راه‌حل (leader، پین، barrier) را روشن کن و ناپدید شدن ناهنجاری را نشان بده. lag را به‌صورت توزیع (نه یک عدد) بسنج و نرخ fallback را هشدار بده.",
+  "tests_en": "In the lab deliberately reproduce all three anomalies: write plus immediate follower read, two reads from two replicas, and swapped causal order; then switch on each fix (leader, pin, barrier) and show the anomaly gone. Measure lag as a distribution, not one number, and alert on the fallback rate.",
+  "followups": [
+    {
+      "q_en": "If the primary fails after ACK, how does read-your-writes depend on replication durability?",
+      "q_fa": "اگر primary بعد از ACK خراب شود، read-your-writes چه وابستگی‌ای به replication durability دارد؟",
+      "a_en": "Totally: read-your-writes promises the user's own write is readable, and an async primary can ACK a write it never replicated — the new leader simply never had it. With semisynchronous replication at least one follower holds every ACKed write, so routing own-write reads there (or to the promoted leader) keeps the promise. With fully async replication the honest answer names the loss window: ACKed-but-unreplicated writes can vanish, and no routing trick recovers them.",
+      "a_fa": "کاملاً: read-your-writes قول می‌دهد نوشته خود کاربر خواندنی است و primary ناهمزمان می‌تواند نوشته‌ای را ACK کند که هیچ‌وقت تکثیر نکرده — leader تازه اصلاً آن را نداشته. با تکثیر نیمه‌هم‌زمان دست‌کم یک follower هر نوشته ACKشده را دارد پس مسیریابی خواندنِ نوشته خود به آنجا (یا leader ارتقایافته) قول را نگه می‌دارد. با تکثیر کاملاً ناهمزمان جواب صادق پنجره گم‌شدن را نام می‌برد: نوشته‌های ACKشده ولی تکثیرنشده می‌توانند ناپدید شوند و هیچ ترفند مسیریابی برشان نمی‌گرداند.",
+      "level": "senior"
+    },
+    {
+      "q_en": "Two devices share one account: the phone writes, the laptop reads. Where does your barrier break?",
+      "q_fa": "دو دستگاه یک حساب مشترک دارند: گوشی می‌نویسد و لپ‌تاپ می‌خواند. barrier تو کجا می‌شکند؟",
+      "a_en": "At the session state: if lastLsn lives in the phone's memory, the laptop's barrier starts at zero and happily serves stale reads. The fix is central last-write metadata (or routing both devices' post-write reads to the leader), at the price of a cross-device lookup on the read path. Name that lookup as part of the design, not as an afterthought.",
+      "a_fa": "در حالت نشست: اگر lastLsn در حافظه گوشی باشد، barrier لپ‌تاپ از صفر شروع می‌کند و با خوشحالی خواندن کهنه سرو می‌کند. راه‌حل metadata مرکزی آخرین نوشته است (یا مسیریابی خواندن‌های پس از نوشته هر دو دستگاه به leader) به قیمت یک lookup بین‌دستگاهی در مسیر خواندن. آن lookup را جزو طراحی نام ببر نه تبصره.",
+      "level": "staff"
+    },
+    {
+      "q_fa": "هزار درخواست هم‌زمان یک cache miss می‌بینند؛ چه می‌کنی؟",
+      "q_en": "A thousand requests miss the same cache key. What do you do?",
+      "a_fa": "single-flight برای هر key بازسازی هم‌زمان را یکی می‌کند؛ انتظار بقیه باید deadline و سقف داشته باشد. TTL jitter از انقضای هم‌زمان کلیدها می‌کاهد ولی hot key واحد را حل نمی‌کند. stale-while-revalidate فقط در مرز تازگی پذیرفته‌شدهٔ محصول مجاز است؛ دادهٔ مالی/ACL را بی‌قید stale نکن. شمار بازسازی هم‌زمان باید کران داشته باشد تا miss storm به DB منتقل نشود.",
+      "a_en": "Use per-key single-flight to coalesce rebuilds with bounded waiters and deadlines. TTL jitter spreads expiry across keys but does not solve one hot key. Stale-while-revalidate needs an explicit product freshness contract; do not serve financial or ACL state arbitrarily stale. Bound concurrent rebuilds to keep miss storms from overwhelming the database.",
+      "level": "staff"
+    }
+  ],
+  "mistakes": [
+    {
+      "en": "Sleeping a fixed time after writing and calling it consistency. Lag has no bound; a stall outlives any sleep, and the sleep still taxes every read.",
+      "fa": "sleep ثابت بعد از نوشتن و اسمش را consistency گذاشتن. lag کران ندارد؛ توقف از هر sleepای بیشتر عمر می‌کند و sleep باز هم از هر خواندن مالیات می‌گیرد."
+    },
+    {
+      "en": "Pinning a session to one replica and claiming read-your-writes. Stickiness stops backward time; it says nothing about a write that landed elsewhere.",
+      "fa": "پین کردن نشست به یک replica و ادعای read-your-writes. stickiness زمان عقب‌گرد را می‌بندد؛ درباره نوشته‌ای که جای دیگر نشسته هیچ‌چیز نمی‌گوید."
+    },
+    {
+      "en": "Comparing wall-clock timestamps instead of versions. Clocks skew across machines (that is Chapter 9); only LSNs or version vectors order writes.",
+      "fa": "مقایسه timestamp ساعت دیواری به‌جای نسخه. ساعت‌ها بین ماشین‌ها skew دارند (آن فصل ۹ است)؛ فقط LSN یا version vector نوشته‌ها را مرتب می‌کند."
+    }
+  ],
+  "lab_fa": "<p>آزمایشگاه تکمیلی (تمرین ۱ در بخش تمرین‌ها): نصب replica، اندازه‌گیری lag، بازتولید عمدی هر سه ناهنجاری و پیاده‌سازی یک راه‌حل عملی برای هرکدام. بحث مصاحبه‌ای بالا فرض می‌کند replica هست؛ ساختن و سنجیدن آن کار آزمایشگاه است.</p>",
+  "lab_en": "<p>Extended lab (exercise 1 in the exercises section): install a replica, measure lag, deliberately reproduce all three anomalies, and implement one practical fix each. The interview discussion above assumes the replica exists; building and measuring it is lab work.</p>",
+  "answer_en": "Route reads by version, never by sleep: own-write reads go to the leader, repeats go to a pinned replica or one past a version barrier, and the barrier admits only replicas at <span class=\"ltr\">LSN</span> 7 or more. Lag has no upper bound, so the honest fallback is the leader. The price is leader load and read latency; after a primary failure the whole scheme rests on replication durability.",
+  "answer_fa": "خواندن را با نسخه مسیریابی کن، هرگز با sleep: خواندنِ نوشته خود به leader می‌رود، تکرارها به replicaی پین‌شده یا عبوری از barrier نسخه می‌روند و barrier فقط replicaهای با <span class=\"ltr\">LSN</span> برابر ۷ یا بیشتر را می‌پذیرد. lag حد بالا ندارد پس fallback صادقانه leader است. قیمتش بار leader و تأخیر خواندن است؛ بعد از مرگ primary کل طرح روی durability تکثیر سوار است.",
+  "assumptions": [
+    {
+      "en": "Single-leader store with asynchronous replication; every write carries a leader <span class=\"ltr\">LSN</span> or version the router can compare.",
+      "fa": "فروشگاه تک‌رهبر با تکثیر ناهمزمان؛ هر نوشته <span class=\"ltr\">LSN</span> یا نسخه‌ای دارد که مسیریاب می‌تواند مقایسه کند."
+    },
+    {
+      "en": "Teaching numbers: lag is fractions of a second normally, seconds to minutes under stress; the one-minute leader window below is illustrative, never a guarantee.",
+      "fa": "اعداد آموزشی: lag در حالت عادی کسری از ثانیه و زیر فشار ثانیه تا دقیقه است؛ پنجره یک‌دقیقه‌ای leader در ادامه illustrative است، هرگز تضمین نیست."
+    },
+    {
+      "en": "Replica installation and measurement belong to the extended lab; the interview discussion assumes one leader and two followers exist.",
+      "fa": "نصب و اندازه‌گیری replica مال آزمایشگاه تکمیلی است؛ بحث مصاحبه فرض می‌کند یک leader و دو follower هست."
+    }
+  ],
+  "interview_q_en": "After a profile edit, a read replica returns the old value. Show read-your-writes, monotonic-read and causal anomalies with short versioned histories. Compare primary routing, session stickiness and version/LSN barriers, and define the fallback for unbounded lag.",
+  "interview_q_fa": "بعد از ویرایش پروفایل، یک read replica مقدار قدیمی برمی‌گرداند. read-your-writes، monotonic reads و causal consistency را با history کوتاه نسخه‌دار نشان بده. routing به primary، session stickiness و version/LSN barrier را مقایسه کن و برای lag بی‌حد fallback تعریف کن.",
+  "mental_en": "Think of lag as time travel: each follower lives slightly in the past, and the past has no fixed distance. A version number is the boarding pass — the router checks the pass, not the clock on the wall, because no fixed sleep can prove a follower caught up.",
+  "mental_fa": "lag را سفر در زمان ببین: هر follower کمی در گذشته زندگی می‌کند و گذشته فاصله ثابت ندارد. شماره نسخه بلیت سوار شدن است — مسیریاب بلیت را چک می‌کند نه ساعت دیواری را، چون هیچ sleep ثابتی ثابت نمی‌کند follower رسیده است.",
+  "number": 1,
+  "slug": "trap-the-lag",
+  "diagrams": [
+    {
+      "file": "diagrams/sol1-step1-anomaly-histories.html",
+      "made": "archify",
+      "source": ".archify/sequence-ch6-sol1-anomaly-20261014-190000",
+      "kind_fa": "توالی",
+      "kind_en": "sequence",
+      "caption_fa": "سه ناهنجاری، یک follower کهنه",
+      "caption_en": "Three anomalies, one stale follower",
+      "height": 640,
+      "narration": {
+        "scenario_fa": "کلاینت پروفایل را می‌نویسد و <span class=\"ltr\">ACK</span> را در <span class=\"ltr\">LSN</span> برابر ۷ می‌گیرد؛ follower A فوراً اعمال می‌کند و B هنوز روی ۵ است. شکل را بالا‌به‌پایین در سه پرده بخوان.",
+        "scenario_en": "The client writes the profile and gets its ACK at LSN 7; follower A applies it at once while B still sits at 5. Read top to bottom in three acts.",
+        "steps": [
+          {
+            "fa": "پیام‌های ۱ تا ۳: نوشتن به leader و دو فلش تکثیر — یکی توپر به A و یکی چین‌چین به B که هنوز روی ۵ است.",
+            "en": "Messages 1 to 3: the write to the leader and two replication arrows — one solid to A, one dashed to B, still at 5."
+          },
+          {
+            "fa": "پیام‌های ۴ و ۵: خواندن از B مقدار v5 برمی‌گرداند — نوشته خودت نامرئی است و read-your-writes شکسته.",
+            "en": "Messages 4 and 5: reading from B returns v5 — your own write is invisible, read-your-writes is broken."
+          },
+          {
+            "fa": "پیام‌های ۶ تا ۹: خواندن از A مقدار v7 می‌دهد ولی سومی دوباره از B مقدار v5 — همان query، دو جواب؛ زمان عقب رفته.",
+            "en": "Messages 6 to 9: A answers v7 but the third read from B says v5 again — one query, two answers; time moved backward."
+          },
+          {
+            "fa": "پیام‌های ۱۰ و ۱۱: reply@7 از A دیده می‌شود ولی question@6 روی B نیست — جواب پیش از سؤال، ترتیب علّی شکسته.",
+            "en": "Messages 10 and 11: reply@7 is visible from A while question@6 never reached B — answer before question, causal order broken."
+          }
+        ],
+        "point_fa": "نقطه تصمیم مقایسه نسخه است: هر ناهنجاری یعنی خواندن نسخه‌ای پایین‌تر از آنچه باید دیده شود.",
+        "point_en": "The decision point is the version comparison: every anomaly means reading below the version that should have been seen.",
+        "failure_fa": "اگر B هم اعمال کرده بود هر سه ناهنجاری ناپدید می‌شد — lag تنها علت است؛ اگر کلاینت ننوشته بود، پیام ۵ فقط eventual consistency بود.",
+        "failure_en": "Had B applied too, all three anomalies would vanish — lag is the single cause; had the client never written, message 5 would be mere eventual consistency.",
+        "guarantee_fa": "شکل نشان می‌دهد کدام خواندن کدام نسخه را می‌بیند و چرا. کران lag در پروداکشن را ثابت نمی‌کند.",
+        "guarantee_en": "The figure shows which read sees which version and why. It proves no production lag bound.",
+        "nonguarantee_fa": "درباره مدت lag و نحوه مسیریابی ساکت است — آن‌ها مال نمودار دوم و اسمبل‌اند.",
+        "nonguarantee_en": "It is silent on how long B lags and on how to route — those belong to the second diagram and the assembly."
+      },
+      "selfcheck": {
+        "q_fa": "کدام پیام read-your-writes را می‌شکند و مدرک نسخه‌ای آن چیست؟",
+        "q_en": "Which message breaks read-your-writes, and what is its version evidence?",
+        "a_fa": "پیام ۵: بعد از <span class=\"ltr\">ACK</span> در <span class=\"ltr\">LSN</span> برابر ۷، مقدار v5 از replicaی روی ۵ برمی‌گردد.",
+        "a_en": "Message 5: after the ACK at LSN 7, value v5 comes back from a replica sitting at 5."
+      }
+    },
+    {
+      "file": "diagrams/sol1-step2-routing-guard.html",
+      "made": "archify",
+      "source": ".archify/dataflow-ch6-sol1-routing-20261014-190100",
+      "kind_fa": "جریان داده",
+      "kind_en": "dataflow",
+      "caption_fa": "سه قاعده مسیریابی، یک fallback",
+      "caption_en": "Three routing rules, one fallback",
+      "height": 640,
+      "narration": {
+        "scenario_fa": "همان کلاینت <span class=\"ltr\">LSN</span> برابر ۷ را به خاطر دارد و سه قاعده برای خواندن بعدی رقابت می‌کنند. چپ‌به‌راست بخوان: زمینه، قاعده، replicaها، نتیجه.",
+        "scenario_en": "The same client remembers LSN 7, and three rules compete for the next read. Read left to right: context, rule, replicas, result.",
+        "steps": [
+          {
+            "fa": "سه فلش از کلاینت: خواندنِ نوشته خود به primary، نیاز <span class=\"ltr\">LSN &gt;= 7</span> به barrier، و تکرارها به stickiness.",
+            "en": "Three arrows out of the client: own-write reads to primary, the LSN >= 7 need to the barrier, repeats to stickiness."
+          },
+          {
+            "fa": "barrier نسخه A را با <span class=\"ltr\">7 &gt;= 7</span> می‌پذیرد و B را با <span class=\"ltr\">5 &lt; 7</span> رد می‌کند — هر دو با مدرک روی فلش.",
+            "en": "The version barrier admits A with 7 >= 7 and refuses B with 5 < 7 — both carry their evidence on the arrow."
+          },
+          {
+            "fa": "stickiness تکرارها را به A پین می‌کند و فلش چین‌چین fallback می‌گوید: هیچ‌کدام تازه نبودند، از leader بخوان.",
+            "en": "Stickiness pins repeats to A, and the dashed fallback arrow says: none was fresh, read from the leader."
+          }
+        ],
+        "point_fa": "نقطه تصمیم برچسب هر فلش است: پذیرش یا رد همیشه یک مقایسه نسخه نام می‌برد، هرگز یک حدس زمانی.",
+        "point_en": "The decision point is each arrow's label: every admit or refuse names a version comparison, never a time guess.",
+        "failure_fa": "اگر A هم stall کند barrier هیچ‌کس را نمی‌پذیرد و همه خواندن‌ها قیمت leader را می‌دهند — بهای نداشتن کران.",
+        "failure_en": "If A stalls too, the barrier admits nobody and every read pays leader price — the cost of having no bound.",
+        "guarantee_fa": "شکل منطق مسیریابی را نشان می‌دهد؛ durability بعد از failover را نشان نمی‌دهد.",
+        "guarantee_en": "The figure shows the routing logic; it does not show durability after failover.",
+        "nonguarantee_fa": "درباره مرگ primary و metadata چنددستگاهی ساکت است — آن‌ها مال پیگیری‌ها و بحث‌اند.",
+        "nonguarantee_en": "It is silent on primary death and multi-device metadata — those belong to the follow-ups and the discussion."
+      },
+      "selfcheck": {
+        "q_fa": "B روی ۵ است و نیاز ۷؛ کدام فلش شلیک می‌شود و خواندن کجا می‌رود؟",
+        "q_en": "B sits at 5 and the need is 7; which edge fires, and where does the read go?",
+        "a_fa": "فلش refuse با مدرک <span class=\"ltr\">5 &lt; 7</span>؛ خواندن از مسیر fallback به leader می‌رود (یا از اول primary).",
+        "a_en": "The refuse edge with its 5 < 7 evidence; the read goes to the leader through fallback (or via primary from the start)."
+      }
+    },
+    {
+      "file": "diagrams/sol1-lag-fallback.html",
+      "made": "hand",
+      "kind_fa": "خط زمانی",
+      "kind_en": "timeline",
+      "caption_fa": "خط زمانی lag: پنجره کهنگی، barrier و fallback",
+      "caption_en": "Lag timeline: stale window, barrier, fallback",
+      "height": 640,
+      "narration": {
+        "scenario_fa": "نوشتن در t0، رسیدن B در t1، و شروع ناحیه stall در t2. سه لاین را با محور زمان بخوان: leader، follower B، و مسیریاب.",
+        "scenario_en": "The write lands at t0, B catches up at t1, and the stall zone starts at t2. Read the three lanes against the time axis: leader, follower B, and router.",
+        "steps": [
+          {
+            "fa": "لاین leader: نوار سبز یکدست — v7 از t0 با <span class=\"ltr\">LSN</span> برابر ۷ اعمال شده.",
+            "en": "Leader lane: one solid green bar — v7 applied since t0 at LSN 7."
+          },
+          {
+            "fa": "لاین B: قرمز تا t1 (کهنه، سرو v5) و سبز بعدش (v7)؛ خواندن r1 در پنجره قرمز رد می‌شود و r2 بعد از t1 پذیرفته.",
+            "en": "B lane: red until t1 (stale, serves v5), green after (v7); read r1 inside the red window is refused, r2 past t1 admitted."
+          },
+          {
+            "fa": "ناحیه stall از t2 کران بالا ندارد: اگر B آنجا بماند، خواندن r3 با هیچ barrierای پذیرفته نمی‌شود و fallback به leader می‌رود.",
+            "en": "The stall zone past t2 has no upper bound: if B stalls there, no barrier admits read r3, and fallback goes to the leader."
+          }
+        ],
+        "point_fa": "نقطه تصمیم همان barrier نمودار دوم است، این‌بار روی محور زمان؛ fallback یک ناحیه است نه یک لحظه.",
+        "point_en": "The decision point is the same barrier as diagram two, now against time; fallback is a region, not a moment.",
+        "failure_fa": "اگر ناحیه stall هیچ‌وقت نیاید fallback بیکار می‌ماند — ولی طراحی باید برایش آماده باشد، چون lag کران ندارد.",
+        "failure_en": "If the stall zone never arrives, fallback idles — but the design must still be ready for it, because lag is unbounded.",
+        "guarantee_fa": "شکل دو گام اول را در یک خط زمانی سوار می‌کند؛ سازوکار تازه‌ای اضافه نمی‌کند.",
+        "guarantee_en": "The figure composes the first two steps onto one timeline; it adds no new mechanism.",
+        "nonguarantee_fa": "زمان‌ها آموزشی‌اند نه اندازه‌گیری؛ فرکانس fallback را مانیتورینگ واقعی می‌گوید.",
+        "nonguarantee_en": "The times are teaching times, not measurements; real monitoring reports the fallback rate."
+      },
+      "selfcheck": {
+        "q_fa": "r1 و r2 چه فرقی دارند؟",
+        "q_en": "How do r1 and r2 differ?",
+        "a_fa": "r1 در پنجره کهنگی است (<span class=\"ltr\">5 &lt; 7</span> رد و به leader) و r2 بعد از t1 است (<span class=\"ltr\">7 &gt;= 7</span> پذیرفته از replica).",
+        "a_en": "r1 lands in the stale window (5 < 7, refused, to the leader) and r2 lands past t1 (7 >= 7, admitted from the replica)."
+      }
+    }
+  ],
+  "sources": [
+    "amazon",
+    "atlassian"
+  ],
+  "reasoning_fa": "<p>پنجرهٔ یک‌دقیقه‌ای خواندن از leader یک heuristic است؛ replica ممکن است بیش از یک دقیقه عقب باشد. token آخرین write را مقایسه می‌کنیم چون applied_version ≥ required_version مستقیماً نشان می‌دهد همان write به replica رسیده است. اگر پس از سه ثانیه صبر به leader برگردیم، سه ثانیه فقط بودجهٔ انتظار تجربهٔ کاربر است و تضمین رسیدن replica نیست. بودجه باید از deadline کل درخواست کم شود؛ هدف freshness نیز با latency پاسخ فرق دارد.</p>",
+  "reasoning_en": "<p>A one-minute leader-read window is a heuristic: lag can exceed it. Compare applied_version ≥ required_version because it directly proves that replica received the required write. Falling back after three seconds uses a user waiting budget, not a replication guarantee. Derive it from the remaining request deadline and distinguish freshness from response latency.</p>"
+}

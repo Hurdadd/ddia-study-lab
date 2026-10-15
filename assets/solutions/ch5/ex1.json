@@ -1,0 +1,239 @@
+{
+  "answer_en": "JSON carries every field name (81 teaching bytes, human-readable, no evolution rules); MessagePack binarizes the same model (66 teaching bytes) but still ships the names; Protobuf replaces names with <span class=\"ltr\">tags</span> (33 teaching bytes) plus declared evolution rules. The interview point is not the byte totals but the <span class=\"ltr\">email</span> test: a binary round-trip through a proper runtime preserves unknown tag 4, while converting through JSON or copying field-by-field silently drops it. Wire compatibility is not meaning preservation, and neither equals code compatibility.",
+  "answer_fa": "‏<span class=\"ltr\">JSON</span> نام همه فیلدها را حمل می‌کند (۸۱ بایت آموزشی، انسان‌خوان، بدون قاعده تکامل)؛ <span class=\"ltr\">MessagePack</span> همان مدل را باینری می‌کند (۶۶ بایت آموزشی) ولی نام‌ها همچنان در داده‌اند؛ <span class=\"ltr\">Protobuf</span> نام‌ها را با <span class=\"ltr\">tag</span> جایگزین می‌کند (۳۳ بایت آموزشی) به‌علاوه قواعد تکامل مشخص. نکته مصاحبه عدد بایت‌ها نیست بلکه آزمون <span class=\"ltr\">email</span> است: ‏<span class=\"ltr\">round-trip</span> باینری با <span class=\"ltr\">runtime</span> درست، تگ ناشناخته ۴ را حفظ می‌کند، ولی تبدیل از مسیر <span class=\"ltr\">JSON</span> یا کپی فیلدبه‌فیلد بی‌صدا حذفش می‌کند. سازگاری سیمی با حفظ معنا یکی نیست و هیچ‌کدام با سازگاری کد برابر نیستند.",
+  "assumptions": [
+    {
+      "en": "Teaching record only: <span class=\"ltr\">userName=Martin, favoriteNumber=1337, interests=[daydreaming, hacking]</span>. Byte totals 81/66/33 are teaching numbers from the chapter, not benchmarks.",
+      "fa": "فقط رکورد آموزشی: <span class=\"ltr\">userName=Martin, favoriteNumber=1337, interests=[daydreaming, hacking]</span>. مجموع بایت‌های ۸۱/۶۶/۳۳ اعداد آموزشی فصل‌اند، نه بنچمارک."
+    },
+    {
+      "en": "Binary path uses generated Protobuf code whose runtime retains unknown fields; the JSON path decodes into a JSON object (or a fresh message built field-by-field), which has nowhere to store unknown bytes.",
+      "fa": "مسیر باینری با کد تولیدشده <span class=\"ltr\">Protobuf</span> است که <span class=\"ltr\">runtime</span> آن فیلدهای ناشناخته را نگه می‌دارد؛ مسیر <span class=\"ltr\">JSON</span> به آبجکت <span class=\"ltr\">JSON</span> (یا پیام تازه ساخته‌شده فیلدبه‌فیلد) <span class=\"ltr\">decode</span> می‌شود که جایی برای بایت‌های ناشناخته ندارد."
+    },
+    {
+      "en": "The new field is <span class=\"ltr\">email</span> with fresh tag 4, never reusing a retired tag.",
+      "fa": "فیلد تازه <span class=\"ltr\">email</span> با تگ تازه ۴ است؛ تگ بازنشسته دوباره استفاده نمی‌شود."
+    }
+  ],
+  "interview_q_en": "Compare JSON, MessagePack and Protobuf, decode one tag, then add email. Test unknown-field preservation in binary round-trips against JSON conversion or field-by-field copying.",
+  "interview_q_fa": "با یک رکورد کوچک تفاوت JSON، MessagePack و Protobuf را در schema، حجم و debugging توضیح بده. یک tag را دستی decode کن. فیلد email اضافه کن و دو مسیر binary round-trip و تبدیل به JSON را از نظر حفظ unknown field مقایسه کن.",
+  "mental_en": "Think of the bytes as a letter and the schema as the reader's dictionary. JSON posts the full words every time; Protobuf posts short numbered codes and both sides agree on the codebook in advance. When a new word (tag 4) arrives that the old reader never learned, the only question that matters is: does the old reader pocket the sealed envelope untouched, or open it, copy out the words it knows, and throw the rest away?",
+  "mental_fa": "بایت‌ها را نامه و <span class=\"ltr\">schema</span> را لغت‌نامه خواننده فرض کن. <span class=\"ltr\">JSON</span> هر بار واژه‌های کامل را پست می‌کند؛ <span class=\"ltr\">Protobuf</span> کدهای شماره‌دار کوتاه می‌فرستد و دو طرف از قبل روی دفترچه کد توافق کرده‌اند. وقتی واژه تازه (تگ ۴) می‌رسد که خواننده قدیمی نیاموخته، فقط یک سؤال مهم است: خواننده قدیمی پاکت دربسته را دست‌نخورده نگه می‌دارد، یا بازش می‌کند، واژه‌هایی که می‌شناسد را رونویسی می‌کند و بقیه را دور می‌ریزد؟",
+  "number": 1,
+  "slug": "unknown-fields",
+  "sources": [
+    "protobuf",
+    "atlassian"
+  ],
+  "steps": [
+    {
+      "en": "JSON writes the names: <code>userName</code>, <code>favoriteNumber</code>, <code>interests</code> travel inside the 81 teaching bytes, so any reader — and any human with a text editor — sees the structure. Cost: size, number ambiguity, and zero evolution rules unless you add a registry and conventions yourself.",
+      "fa": "<span class=\"ltr\">JSON</span> نام‌ها را می‌نویسد: <code>userName</code> و <code>favoriteNumber</code> و <code>interests</code> داخل همان ۸۱ بایت آموزشی سفر می‌کنند، پس هر خواننده‌ای — و هر انسانی با ویرایشگر متن — ساختار را می‌بیند. هزینه: حجم، ابهام اعداد، و صفر قاعده تکامل مگر خودت <span class=\"ltr\">registry</span> و قرارداد اضافه کنی.",
+      "t_en": "Names on the wire",
+      "t_fa": "نام‌ها روی سیم"
+    },
+    {
+      "en": "MessagePack binarizes the same schemaless model: type and length bytes replace quotes and colons, landing near 66 teaching bytes. Names still travel, debugging needs a decoder, and evolution is exactly as disciplined — or undisciplined — as your JSON conventions.",
+      "fa": "<span class=\"ltr\">MessagePack</span> همان مدل بدون <span class=\"ltr\">schema</span> را باینری می‌کند: بایت‌های نوع و طول جای گیومه و دونقطه می‌نشینند و به حدود ۶۶ بایت آموزشی می‌رسیم. نام‌ها همچنان سفر می‌کنند، اشکال‌زدایی <span class=\"ltr\">decoder</span> می‌خواهد، و تکامل دقیقاً به‌اندازه قراردادهای <span class=\"ltr\">JSON</span> خودت منضبط است — یا بی‌انضباط.",
+      "t_en": "Same model, binary",
+      "t_fa": "همان مدل، باینری"
+    },
+    {
+      "en": "Protobuf drops the names and writes <b>tag + wire type</b> instead: byte <code>0x0a</code> is field 1 (<code>0x0a &gt;&gt; 3</code>) with wire type 2 (<code>0x0a &amp; 7</code>, length-prefixed), and 1337 rides as the two-byte varint <code>b9 0a</code>. Total: 33 teaching bytes. Renaming a field is free; changing a tag is forbidden.",
+      "fa": "<span class=\"ltr\">Protobuf</span> نام‌ها را حذف می‌کند و به‌جایش <b>تگ + نوع سیمی</b> می‌نویسد: بایت <code>0x0a</code> یعنی فیلد ۱ (<code>0x0a &gt;&gt; 3</code>) با نوع سیمی ۲ (<code>0x0a &amp; 7</code> یعنی طول‌دار)، و ۱۳۳۷ با <span class=\"ltr\">varint</span> دوبایتی <code>b9 0a</code> می‌رود. جمع: ۳۳ بایت آموزشی. تغییر نام فیلد آزاد است؛ تغییر تگ ممنوع.",
+      "t_en": "Decode one tag by hand",
+      "t_fa": "یک تگ را دستی decode کن"
+    },
+    {
+      "en": "Add <code>email</code> as tag 4 and run the two paths. <b>Binary round-trip</b> (old generated code reads, rewrites): the runtime carries tag 4's bytes through untouched, and the new reader finds the address intact. <b>JSON conversion or field-by-field copy</b>: the middle step only knows fields 1–3, so tag 4 has nowhere to live and the new reader sees a missing email. Same wire, opposite outcomes — the difference is the decoder contract, not the bytes.",
+      "fa": "<code>email</code> را با تگ ۴ اضافه کن و دو مسیر را اجرا کن. <b><span class=\"ltr\">round-trip</span> باینری</b> (کد قدیمی تولیدشده می‌خواند و بازمی‌نویسد): <span class=\"ltr\">runtime</span> بایت‌های تگ ۴ را دست‌نخورده عبور می‌دهد و خواننده جدید نشانی را سالم می‌یابد. <b>تبدیل <span class=\"ltr\">JSON</span> یا کپی فیلدبه‌فیلد</b>: گام میانی فقط فیلدهای ۱ تا ۳ را می‌شناسد، پس تگ ۴ جایی برای زندگی ندارد و خواننده جدید <span class=\"ltr\">email</span> گمشده می‌بیند. سیم یکسان، نتیجه برعکس — تفاوت در قرارداد <span class=\"ltr\">decoder</span> است نه بایت‌ها.",
+      "t_en": "Two paths, two fates",
+      "t_fa": "دو مسیر، دو سرنوشت"
+    }
+  ],
+  "worked_en": "<p>Teaching record <code>{\"userName\":\"Martin\",\"favoriteNumber\":1337,\"interests\":[\"daydreaming\",\"hacking\"]}</code>: spaceless JSON = <b>81 bytes</b>, MessagePack ≈ <b>66 bytes</b>, Protobuf = <b>33 bytes</b> (8 for field 1 + 3 for field 2 + 22 for the two repeated items). Adding <code>email</code> (tag 4, 13 text bytes + 2 framing bytes) grows the binary record to 48 bytes; the old binary reader still parses fields 1–3 and forwards tag 4 unseen.</p>",
+  "worked_fa": "<p>رکورد آموزشی <code>{\"userName\":\"Martin\",\"favoriteNumber\":1337,\"interests\":[\"daydreaming\",\"hacking\"]}</code>: ‏<span class=\"ltr\">JSON</span> بدون فاصله = <b>۸۱ بایت</b>، ‏<span class=\"ltr\">MessagePack</span> حدود <b>۶۶ بایت</b>، ‏<span class=\"ltr\">Protobuf</span> برابر <b>۳۳ بایت</b> (۸ بایت فیلد ۱ + ۳ بایت فیلد ۲ + ۲۲ بایت دو آیتم تکراری). افزودن <code>email</code> (تگ ۴، ۱۳ بایت متن + ۲ بایت قاب) رکورد باینری را به ۴۸ بایت می‌رساند؛ خواننده باینری قدیمی همچنان فیلدهای ۱ تا ۳ را می‌فهمد و تگ ۴ را ندیده عبور می‌دهد.</p>",
+  "code": {
+    "lang": "java",
+    "code": "import java.nio.charset.StandardCharsets;\n\npublic class TagDemo {\n    static byte[] varint(long n) {\n        byte[] tmp = new byte[10];\n        int i = 0;\n        while (true) {\n            int b = (int) (n & 0x7F);\n            n >>>= 7;\n            if (n != 0) {\n                tmp[i++] = (byte) (b | 0x80);\n            } else {\n                tmp[i++] = (byte) b;\n                break;\n            }\n        }\n        byte[] out = new byte[i];\n        System.arraycopy(tmp, 0, out, 0, i);\n        return out;\n    }\n\n    static String hex(byte[] a) {\n        StringBuilder sb = new StringBuilder();\n        for (byte b : a) {\n            sb.append(String.format(\"%02x\", b));\n        }\n        return sb.toString();\n    }\n\n    static byte[] join(byte[]... parts) {\n        int n = 0;\n        for (byte[] p : parts) {\n            n += p.length;\n        }\n        byte[] out = new byte[n];\n        int o = 0;\n        for (byte[] p : parts) {\n            System.arraycopy(p, 0, out, o, p.length);\n            o += p.length;\n        }\n        return out;\n    }\n\n    public static void main(String[] args) {\n        byte[] v = varint(1337);\n        System.out.println(\"1337 as varint: \" + hex(v));\n        byte[] rec = join(\n                new byte[]{0x0a, 0x06}, \"Martin\".getBytes(StandardCharsets.UTF_8),\n                new byte[]{0x10}, v,\n                new byte[]{0x1a, 0x0b}, \"daydreaming\".getBytes(StandardCharsets.UTF_8),\n                new byte[]{0x1a, 0x07}, \"hacking\".getBytes(StandardCharsets.UTF_8));\n        System.out.println(\"record bytes: \" + rec.length);\n        int first = rec[0] & 0xFF;\n        System.out.printf(\"first tag byte 0x%02x: field %d, wire type %d (2 = length-prefixed)%n\",\n                first, first >> 3, first & 7);\n    }\n}\n",
+    "run_fa": "javac TagDemo.java && java TagDemo — فقط استاندارد جاوا (JDK 27)، فوری. به‌جای ۱۳۳۷ عدد خودت را بگذار و ببین طول varint در مرزهای ۶۴ و ۸۱۹۲ چطور عوض می‌شود.",
+    "run_en": "javac TagDemo.java && java TagDemo — Java stdlib only (JDK 27), instant. Change 1337 to your own number and watch the varint length move at the 64 and 8192 boundaries.",
+    "expected_fa": "1337 به‌صورت varint برابر b90a؛ بایت‌های رکورد: ۳۳؛ بایت اول تگ 0x0a: فیلد ۱، نوع سیمی ۲.",
+    "expected_en": "1337 as varint: b90a; record bytes: 33; first tag byte 0x0a: field 1, wire type 2 (2 = length-prefixed).",
+    "status": "verified"
+  },
+  "tests_en": "Verify: re-encode after adding tag 4 and confirm fields 1–3 decode identically; feed the bytes to real generated old code and confirm tag 4 survives a binary rewrite but vanishes through a JSON round-trip; assert no retired tag number is reused.",
+  "tests_fa": "راستی‌آزمایی کن: بعد از افزودن تگ ۴ دوباره کد کن و مطمئن شو فیلدهای ۱ تا ۳ یکسان decode می‌شوند؛ بایت‌ها را به کد تولیدشده واقعی قدیمی بده و مطمئن شو تگ ۴ در بازنویسی باینری می‌ماند ولی در round-trip از مسیر JSON می‌رود؛ مطمئن شو هیچ تگ بازنشسته‌ای دوباره استفاده نشده.",
+  "alternatives": [
+    {
+      "en": "Stay on JSON with a registry and strict review: keeps human-readable debugging and cross-org exchange, at the cost of bigger payloads and hand-enforced evolution rules.",
+      "fa": "ماندن روی <span class=\"ltr\">JSON</span> با <span class=\"ltr\">registry</span> و بازبینی سخت‌گیرانه: اشکال‌زدایی انسان‌خوان و تبادل بین‌سازمانی می‌ماند، به قیمت payload بزرگ‌تر و قواعد تکامل دستی."
+    }
+  ],
+  "failures": [
+    {
+      "en": "Old proxy rewrites the record field-by-field: tag 4 is dropped at the copy step and every downstream new reader permanently sees a missing email — data loss, not a parse error.",
+      "fa": "پراکسی قدیمی رکورد را فیلدبه‌فیلد بازنویسی می‌کند: تگ ۴ در همان گام کپی حذف می‌شود و هر خواننده جدید پایین‌دستی برای همیشه <span class=\"ltr\">email</span> گمشده می‌بیند — گم‌شدن داده، نه خطای <span class=\"ltr\">parse</span>."
+    },
+    {
+      "en": "Reusing tag 4's number for a different field later: old records' emails silently become the new field's values — corruption no compatibility test can catch after the fact.",
+      "fa": "استفاده دوباره از شماره تگ ۴ برای فیلد دیگر: ایمیل‌های رکوردهای قدیمی بی‌صدا مقدار فیلد تازه می‌شوند — خرابی‌ای که هیچ تست سازگاری بعداً نمی‌گیرد."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "The bytes for tag 4 never make it into the fresh message: the proxy decodes into a model that only has fields 1–3, then re-encodes from that model. The email is gone for every downstream reader, even though nothing errored. The fix is to forward opaque bytes (or upgrade the proxy's schema) instead of copying recognized fields.",
+      "a_fa": "بایت‌های تگ ۴ اصلاً به پیام تازه نمی‌رسند: پراکسی به مدلی decode می‌کند که فقط فیلدهای ۱ تا ۳ را دارد، بعد از همان مدل دوباره encode می‌کند. <span class=\"ltr\">email</span> برای هر خواننده پایین‌دستی رفته، با این‌که هیچ خطایی رخ نداده. راه‌حل: به‌جای کپی فیلدهای شناخته‌شده، بایت‌های ناشناخته را دست‌نخورده عبور بده (یا schema پراکسی را به‌روز کن).",
+      "level": "senior",
+      "q_en": "An old proxy copies recognized fields into a fresh message. What data disappears?",
+      "q_fa": "proxy قدیمی پیام را field-by-field به پیام جدید کپی می‌کند؛ چه داده‌ای گم می‌شود؟"
+    }
+  ],
+  "mistakes": [
+    {
+      "en": "Memorizing 81/66/33 instead of the mechanism. Sizes change with field names and values; the decoder contract is what the interview grades.",
+      "fa": "حفظ کردن ۸۱/۶۶/۳۳ به‌جای مکانیزم. اندازه‌ها با نام و مقدار فیلدها عوض می‌شوند؛ مصاحبه قرارداد <span class=\"ltr\">decoder</span> را نمره می‌دهد."
+    },
+    {
+      "en": "Saying 'Protobuf always preserves unknown fields'. Only a proper runtime on the binary path does — JSON conversion and hand-rolled copies drop them.",
+      "fa": "گفتن «<span class=\"ltr\">Protobuf</span> همیشه فیلد ناشناخته را نگه می‌دارد». فقط <span class=\"ltr\">runtime</span> درست در مسیر باینری این کار را می‌کند — تبدیل <span class=\"ltr\">JSON</span> و کپی‌های دستی حذفشان می‌کنند."
+    },
+    {
+      "en": "Treating wire compatibility as code compatibility. Old code can forward bytes it cannot interpret — that is the whole point of forward compatibility.",
+      "fa": "یکی دانستن سازگاری سیمی با سازگاری کد. کد قدیمی می‌تواند بایت‌هایی را عبور دهد که نمی‌فهمد — اصل سازگاری forward همین است."
+    }
+  ],
+  "diagrams": [
+    {
+      "file": "diagrams/sol1a-binary-keeps.html",
+      "made": "archify",
+      "source": ".archify/sequence-unknown-fields-kept-20261014-182300",
+      "kind_fa": "توالی",
+      "kind_en": "sequence",
+      "caption_fa": "round-trip باینری تگ ۴ را نگه می‌دارد",
+      "caption_en": "Binary round-trip keeps tag 4",
+      "height": 640,
+      "narration": {
+        "scenario_fa": "نسخه جدید (v2.2) رکورد را با تگ‌های ۱ تا ۴ می‌نویسد در حالی که نسخه قدیمی (v2.1) هنوز سرو می‌دهد. شش فلش را بالا‌به‌پایین دنبال کن.",
+        "scenario_en": "Version 2.2 writes the record with tags 1–4 while 2.1 still serves. Follow the six arrows top to bottom.",
+        "steps": [
+          {
+            "fa": "دو فلش اول: نوشتن رکورد تازه و خواندن آن توسط کد قدیمی — تگ ۴ ناشناخته به دست قدیمی می‌رسد.",
+            "en": "First two arrows: the fresh write, then the old read — unknown tag 4 lands in old hands."
+          },
+          {
+            "fa": "فلش پررنگ میانی (بازنویسی) قهرمان است: runtime بایت‌های ناشناخته را دست‌نخورده عبور می‌دهد.",
+            "en": "The bold middle arrow (write-back) is the hero: the runtime forwards unknown bytes untouched."
+          },
+          {
+            "fa": "دو فلش آخر: خواندن دوباره توسط جدید و پاسخ «tag 4 intact» — ایمیل سالم است.",
+            "en": "Last two arrows: the new re-read with the reply 'tag 4 intact' — the email survives."
+          }
+        ],
+        "point_fa": "نقطه تصمیم فلش بازنویسی است: عبور بایت ناشناخته یا بازسازی از دانسته‌ها؟",
+        "point_en": "The decision point is the write-back arrow: forward unknown bytes or rebuild from known fields?",
+        "failure_fa": "اگر runtime ناشناخته‌ها را می‌انداخت، خواندن دوباره ایمیل گمشده می‌دید — همان شکل مسیر دوم.",
+        "failure_en": "If the runtime dropped unknowns, the re-read would see a missing email — exactly the second path's shape.",
+        "guarantee_fa": "شکل ترتیب و حفظ را نشان می‌دهد؛ ثابت نمی‌کند هر runtimeای نگه می‌دارد — مال خودت را تست کن.",
+        "guarantee_en": "The figure shows order and preservation; it does not prove every runtime preserves — test your own.",
+        "nonguarantee_fa": "درباره معنای تگ ۴ چیزی نمی‌گوید: حفظ بایت با فهم درست یکی نیست.",
+        "nonguarantee_en": "It says nothing about tag 4's meaning: kept bytes are not understood bytes."
+      },
+      "selfcheck": {
+        "q_fa": "چرا کد قدیمی بایت‌هایی را عبور می‌دهد که نمی‌فهمد؟",
+        "q_en": "Why does old code forward bytes it cannot parse?",
+        "a_fa": "چون سازگاری forward یعنی حمل، نه فهم: ناشناخته را نادیده بگیر ولی بایت‌هایش را نگه دار.",
+        "a_en": "Because forward compatibility means carrying, not comprehending: ignore the unknown but keep its bytes."
+      }
+    },
+    {
+      "file": "diagrams/sol1b-json-drops.html",
+      "made": "archify",
+      "source": ".archify/sequence-unknown-fields-dropped-20261014-182310",
+      "kind_fa": "توالی",
+      "kind_en": "sequence",
+      "caption_fa": "کپی JSON تگ ۴ را می‌اندازد",
+      "caption_en": "JSON copy drops tag 4",
+      "height": 640,
+      "narration": {
+        "scenario_fa": "همان نوشتن تازه، ولی این بار یک پراکسی قدیمی وسط است که رکورد را از فیلدهای شناخته‌شده بازمی‌سازد.",
+        "scenario_en": "The same fresh write, but now an old proxy in the middle rebuilds the record from known fields.",
+        "steps": [
+          {
+            "fa": "فلش اول: بایت‌های ۱ تا ۴ به پراکسی می‌رسند — هنوز کامل است.",
+            "en": "First arrow: bytes 1–4 reach the proxy — still whole."
+          },
+          {
+            "fa": "فلش دوم: پراکسی فقط ۱ تا ۳ را کپی می‌کند؛ تگ ۴ جایی برای زندگی ندارد.",
+            "en": "Second arrow: the proxy copies only 1–3; tag 4 has nowhere to live."
+          },
+          {
+            "fa": "فلش چین‌چین آخر: هشدار پایین‌دستی «email missing» — گم‌شدن بی‌صدا دیر کشف می‌شود.",
+            "en": "Last dashed arrow: the downstream 'email missing' alert — silent loss is found late."
+          }
+        ],
+        "point_fa": "نقطه تصمیم فلش کپی است: مدل میانی فقط دانسته‌ها را دارد.",
+        "point_en": "The decision point is the copy arrow: the middle model holds only known fields.",
+        "failure_fa": "هیچ‌جا خطایی بالا نمی‌آید؛ مانیتور سبز روی داده گمشده — بدترین نوع خرابی.",
+        "failure_en": "No error is raised anywhere; a green monitor over lost data — the worst kind of failure.",
+        "guarantee_fa": "شکل نقطه مرگ تگ ۴ را نشان می‌دهد؛ راه‌حل (عبور بایت یا ارتقای پراکسی) بیرون شکل است.",
+        "guarantee_en": "The figure shows where tag 4 dies; the remedy (byte forwarding or proxy upgrade) is outside it.",
+        "nonguarantee_fa": "درباره این‌که کدام کتابخانه‌ها نگه می‌دارند چیزی نمی‌گوید — قرارداد هر runtime را جدا بخوان.",
+        "nonguarantee_en": "It says nothing about which libraries preserve — read each runtime's contract separately."
+      },
+      "selfcheck": {
+        "q_fa": "با یک تغییر کوچک چه چیزی تگ ۴ را نجات می‌دهد؟",
+        "q_en": "What one small change saves tag 4?",
+        "a_fa": "عبور بایت‌های ناشناخته دست‌نخورده به‌جای کپی فیلدبه‌فیلد — یا به‌روزرسانی schema پراکسی.",
+        "a_en": "Forwarding unknown bytes untouched instead of field-by-field copying — or upgrading the proxy schema."
+      }
+    },
+    {
+      "file": "diagrams/sol1-unknown-fields.html",
+      "made": "hand",
+      "kind_fa": "دو مسیر",
+      "kind_en": "two paths",
+      "caption_fa": "دو سرنوشت تگ ناشناخته ۴: round-trip باینری نگهش می‌دارد، کپی JSON حذفش می‌کند",
+      "caption_en": "Two fates for unknown tag 4: binary round-trip keeps it, JSON copy drops it",
+      "height": 640,
+      "narration": {
+        "failure_en": "Trace Path B box by box: the old proxy's 'copies 1-3' subtitle is where tag 4 dies — the fresh record is born without it, so the new reader's 'email gone' is decided two boxes earlier. No error is raised anywhere, which is why the loss is silent.",
+        "failure_fa": "مسیر B را جعبه‌به‌جعبه دنبال کن: تگ ۴ دقیقاً در زیرنویس «copies 1-3» پراکسی قدیمی می‌میرد — رکورد تازه بدون آن متولد می‌شود، پس «email gone» خواننده جدید دو جعبه زودتر رقم خورده. هیچ‌جا خطایی بالا نمی‌آید و به همین دلیل گم‌شدن بی‌صداست.",
+        "guarantee_en": "The figure guarantees the path matters more than the format: same input bytes, opposite outcomes. It does not guarantee any particular library keeps unknown fields — that must be tested per runtime.",
+        "guarantee_fa": "شکل تضمین می‌کند مسیر از قالب مهم‌تر است: بایت‌های ورودی یکسان، نتیجه برعکس. تضمین نمی‌کند فلان کتابخانه خاص فیلد ناشناخته را نگه می‌دارد — این را باید برای هر <span class=\"ltr\">runtime</span> جدا آزمایش کرد.",
+        "nonguarantee_en": "It says nothing about semantic compatibility: a preserved tag 4 can still be misinterpreted if a tag number is ever reused.",
+        "nonguarantee_fa": "درباره سازگاری معنایی چیزی نمی‌گوید: تگ ۴ حفظشده اگر شماره تگی روزی دوباره استفاده شود باز هم می‌تواند اشتباه فهمیده شود.",
+        "point_en": "The decision point is the middle box of each path: does the old code forward opaque bytes or rebuild from known fields?",
+        "point_fa": "نقطه تصمیم جعبه میانی هر مسیر است: کد قدیمی بایت‌های ناشناخته را عبور می‌دهد یا از فیلدهای شناخته‌شده بازمی‌سازد؟",
+        "scenario_en": "A new app version writes user records with an email field while old servers are still live. Follow the record left to right through each path and watch what the final new reader sees.",
+        "scenario_fa": "نسخه جدید اپ رکوردهای کاربر را با فیلد <span class=\"ltr\">email</span> می‌نویسد در حالی که سرورهای قدیمی هنوز زنده‌اند. رکورد را در هر مسیر چپ‌به‌راست دنبال کن و ببین خواننده جدید آخر چه می‌بیند.",
+        "steps": [
+          {
+            "en": "Top lane first: new writer emits tags 1–4 — the full record, nothing lost yet.",
+            "fa": "اول نوار بالا: نویسنده جدید تگ‌های ۱ تا ۴ را می‌فرستد — رکورد کامل، هنوز چیزی گم نشده."
+          },
+          {
+            "en": "Old reader knows only 1–3 but its runtime pockets tag 4's bytes; the write-back box ('bytes untouched') is the hero of Path A.",
+            "fa": "خواننده قدیمی فقط ۱ تا ۳ را می‌شناسد ولی <span class=\"ltr\">runtime</span> آن بایت‌های تگ ۴ را جیب می‌زند؛ جعبه بازنویسی («bytes untouched») قهرمان مسیر A است."
+          },
+          {
+            "en": "Bottom lane: the old proxy copies only what it knows ('copies 1–3'), so the fresh record is born missing tag 4.",
+            "fa": "نوار پایین: پراکسی قدیمی فقط دانسته‌هایش را کپی می‌کند («copies 1-3»)، پس رکورد تازه بدون تگ ۴ متولد می‌شود."
+          },
+          {
+            "en": "End boxes: green KEPT versus red LOST — the footer moral is that wire compatibility is not meaning preservation.",
+            "fa": "جعبه‌های آخر: KEPT سبز در برابر LOST قرمز — پیام پانوشت این است که سازگاری سیمی همان حفظ معنا نیست."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Only the binary round-trip through a preserving runtime. JSON text has no slot for tag 4's bytes, so anything that passes through a JSON-shaped model loses it.",
+        "a_fa": "فقط <span class=\"ltr\">round-trip</span> باینری با <span class=\"ltr\">runtime</span> نگه‌دارنده. متن <span class=\"ltr\">JSON</span> جایی برای بایت‌های تگ ۴ ندارد، پس هر چیزی که از مدل <span class=\"ltr\">JSON</span>-شکل بگذرد آن را می‌بازد.",
+        "q_en": "Which paths in the diagram preserve tag 4 — and why can't the JSON path?",
+        "q_fa": "کدام مسیرهای شکل تگ ۴ را حفظ می‌کنند — و چرا مسیر JSON نمی‌تواند؟"
+      }
+    }
+  ],
+  "reasoning_fa": "<p>اندازهٔ wire را با جمع tag، length و payload می‌سنجیم چون هر سه واقعاً ارسال می‌شوند. varint در هر بایت هفت بیت داده دارد، پس برای عدد مثبت ۱۳۳۷ دو بایت لازم است چون از ۱۲۷ بزرگ‌تر و از ۱۶۳۸۳ کوچک‌تر است. تفاوت ۸۱/۶۶/۳۳ به متن، فاصله‌ها، encoding و schema همین نمونه وابسته است. حفظ unknown field به runtime و مسیر round-trip وابسته است؛ JSON جای بایت ناشناخته را تضمین نمی‌کند.</p>",
+  "reasoning_en": "<p>Sum tag, length and payload because all travel on the wire. A varint carries seven data bits per byte: positive 1337 needs two bytes because it exceeds 127 but is below 16384. The 81/66/33 totals depend on this sample’s text, whitespace, encoding and schema. Unknown-field preservation depends on runtime and round-trip path; JSON does not guarantee retention of unknown bytes.</p>"
+}

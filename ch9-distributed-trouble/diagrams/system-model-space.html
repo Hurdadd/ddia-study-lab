@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System Models — Timing Assumptions, Fault Assumptions, Safety and Liveness</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .cls-t{font:700 13.5px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .attr-m{font:12.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .edge-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .note{font:12.5px system-ui,sans-serif; fill:#cfe3ff}
+  .note-h{font:700 13px system-ui,sans-serif; fill:#fbbf24}
+  .pick-h{font:700 13.5px system-ui,sans-serif; fill:#fbbf24}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="System model taxonomy: timing models, fault models, and safety versus liveness properties">
+  <defs>
+    <marker id="gen" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" orient="auto">
+      <path d="M1,1 L11,6 L1,11 z" fill="#1b2438" stroke="#93c5fd" stroke-width="1.4"/>
+    </marker>
+    <marker id="dia" viewBox="0 0 12 10" refX="11" refY="5" markerWidth="11" markerHeight="9" orient="auto">
+      <path d="M0,5 L6,0 L12,5 L6,10 z" fill="#1b2438" stroke="#fbbf24"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="30" text-anchor="middle">The System Model — the Assumptions an Algorithm Is Proven Correct Inside</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">two hierarchies of assumptions on the left and right · safety and liveness properties along the bottom</text>
+
+  <!-- ============ LEFT: timing model ============ -->
+  <g>
+    <rect x="110" y="82" width="300" height="30" rx="8" fill="#475569" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="260" y="102" text-anchor="middle">«abstract» TimingModel</text>
+    <rect x="110" y="112" width="300" height="52" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr-m" x="126" y="136">network delay : bounded?</text>
+    <text class="attr-m" x="126" y="156">pause + clock error : bounded?</text>
+
+    <rect x="110" y="230" width="300" height="64" rx="10" fill="#161d2e" stroke="#2563eb" stroke-width="1.5"/>
+    <text class="cls-t" x="260" y="254" text-anchor="middle">Synchronous</text>
+    <text class="attr" x="126" y="278">known upper bound on delay,</text>
+    <text class="attr" x="126" y="296">pauses and clock drift</text>
+
+    <rect x="110" y="310" width="300" height="64" rx="10" fill="#2a1f13" stroke="#fbbf24" stroke-width="2"/>
+    <text class="cls-t" x="260" y="334" text-anchor="middle">PartiallySynchronous</text>
+    <text class="attr" x="126" y="358">bounded most of the time,</text>
+    <text class="attr" x="126" y="376">sometimes exceeded</text>
+
+    <rect x="110" y="390" width="300" height="64" rx="10" fill="#161d2e" stroke="#0e7490" stroke-width="1.5"/>
+    <text class="cls-t" x="260" y="414" text-anchor="middle">Asynchronous</text>
+    <text class="attr" x="126" y="438">no timing assumption at all,</text>
+    <text class="attr" x="126" y="456">not even a clock</text>
+
+    <path d="M92 120 L110 120" fill="none" stroke="#93c5fd" stroke-width="1.6" marker-end="url(#gen)"/>
+    <line x1="92" y1="120" x2="92" y2="422" stroke="#93c5fd" stroke-width="1.6"/>
+    <line x1="92" y1="262" x2="110" y2="262" stroke="#93c5fd" stroke-width="1.6"/>
+    <line x1="92" y1="342" x2="110" y2="342" stroke="#93c5fd" stroke-width="1.6"/>
+    <line x1="92" y1="422" x2="110" y2="422" stroke="#93c5fd" stroke-width="1.6"/>
+    <text class="edge-lbl" x="260" y="192" text-anchor="middle">timing assumptions</text>
+  </g>
+
+  <!-- ============ RIGHT: fault model ============ -->
+  <g>
+    <rect x="830" y="82" width="300" height="30" rx="8" fill="#475569" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="980" y="102" text-anchor="middle">«abstract» FaultModel</text>
+    <rect x="830" y="112" width="300" height="52" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr-m" x="846" y="136">crash : allowed? recovery : returns?</text>
+    <text class="attr-m" x="846" y="156">behavior : honest or arbitrary?</text>
+
+    <rect x="830" y="210" width="300" height="52" rx="10" fill="#161d2e" stroke="#2563eb" stroke-width="1.5"/>
+    <text class="cls-t" x="980" y="232" text-anchor="middle">CrashStop</text>
+    <text class="attr" x="846" y="252">stops once, never comes back</text>
+
+    <rect x="830" y="274" width="300" height="52" rx="10" fill="#2a1f13" stroke="#fbbf24" stroke-width="2"/>
+    <text class="cls-t" x="980" y="296" text-anchor="middle">CrashRecovery</text>
+    <text class="attr" x="846" y="316">restarts later, memory lost</text>
+
+    <rect x="830" y="338" width="300" height="52" rx="10" fill="#161d2e" stroke="#7c3aed" stroke-width="1.5"/>
+    <text class="cls-t" x="980" y="360" text-anchor="middle">Limping (fail-slow)</text>
+    <text class="attr" x="846" y="380">answers health checks, no work</text>
+
+    <rect x="830" y="402" width="300" height="52" rx="10" fill="#161d2e" stroke="#be123c" stroke-width="1.5"/>
+    <text class="cls-t" x="980" y="424" text-anchor="middle">Byzantine</text>
+    <text class="attr" x="846" y="444">may lie, forge, or contradict itself</text>
+
+    <path d="M1168 120 L1148 120" fill="none" stroke="#93c5fd" stroke-width="1.6" marker-end="url(#gen)"/>
+    <line x1="1168" y1="120" x2="1168" y2="428" stroke="#93c5fd" stroke-width="1.6"/>
+    <line x1="1168" y1="236" x2="1148" y2="236" stroke="#93c5fd" stroke-width="1.6"/>
+    <line x1="1168" y1="300" x2="1148" y2="300" stroke="#93c5fd" stroke-width="1.6"/>
+    <line x1="1168" y1="364" x2="1148" y2="364" stroke="#93c5fd" stroke-width="1.6"/>
+    <line x1="1168" y1="428" x2="1148" y2="428" stroke="#93c5fd" stroke-width="1.6"/>
+    <text class="edge-lbl" x="980" y="192" text-anchor="middle">fault assumptions</text>
+  </g>
+
+  <!-- ============ middle: the practical pick ============ -->
+  <g>
+    <rect x="460" y="250" width="320" height="180" rx="12" fill="#1b2438" stroke="#fbbf24" stroke-width="1.6" stroke-dasharray="7 4"/>
+    <text class="pick-h" x="620" y="280" text-anchor="middle">The practical combination</text>
+    <line x1="476" y1="292" x2="764" y2="292" stroke="#2a3652" stroke-width="1.2"/>
+    <text class="note" x="480" y="316">partially synchronous</text>
+    <text class="note" x="480" y="338">+ crash-recovery</text>
+    <text class="note" x="480" y="366">delays, pauses and slow nodes</text>
+    <text class="note" x="480" y="386">are all allowed to be unbounded</text>
+    <text class="note" x="480" y="412">algorithms are proven inside</text>
+    <text class="note" x="480" y="430">exactly this world</text>
+
+    <path d="M460 342 L412 342" fill="none" stroke="#fbbf24" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#dia)"/>
+    <path d="M780 300 L828 300" fill="none" stroke="#fbbf24" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#dia)"/>
+  </g>
+
+  <!-- ============ bottom: safety vs liveness ============ -->
+  <g>
+    <rect x="60" y="480" width="370" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="245" y="500" text-anchor="middle">Safety — nothing bad happens</text>
+    <rect x="60" y="510" width="370" height="88" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="76" y="534">a violation has one moment in time</text>
+    <text class="attr" x="76" y="556">once broken, it cannot be undone</text>
+    <text class="attr" x="76" y="578">e.g. token uniqueness, monotonic order</text>
+
+    <rect x="455" y="480" width="370" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="640" y="500" text-anchor="middle">Liveness — something good eventually</text>
+    <rect x="455" y="510" width="370" height="88" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="471" y="534">may be false now, may become true</text>
+    <text class="attr" x="471" y="556">the definition says "eventually"</text>
+    <text class="attr" x="471" y="578">e.g. availability, eventual consistency</text>
+
+    <rect x="850" y="480" width="370" height="30" rx="8" fill="#475569" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="1035" y="500" text-anchor="middle">How an algorithm uses them</text>
+    <rect x="850" y="510" width="370" height="88" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="866" y="534">safety must hold in every situation</text>
+    <text class="attr" x="866" y="556">liveness may assume a recovery</text>
+    <text class="attr" x="866" y="578">"if the network comes back and a"</text>
+    <text class="attr" x="866" y="594">majority survives, a reply arrives"</text>
+  </g>
+
+  <!-- ============ closing note ============ -->
+  <rect x="60" y="612" width="1150" height="38" rx="10" fill="#1b2438" stroke="#2a3652" stroke-width="1.3"/>
+  <text class="note" x="76" y="636">Models are simplifications: crash-recovery assumes stable storage survives a crash, yet a misconfiguration can wipe the disk and break the model itself.</text>
+</svg>
+</div>
+</body>
+</html>

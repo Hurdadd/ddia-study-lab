@@ -1,0 +1,222 @@
+{
+  "alternatives": [
+    {
+      "en": "TrueTime-style uncertainty waits: when you have a bounded clock uncertainty epsilon, a writer waits epsilon past its timestamp before committing, turning wall time into safe order at the cost of latency. Right when cross-host order on wall stamps is unavoidable — overkill for timeouts and durations, where monotonic is free.",
+      "fa": "انتظار عدم‌قطعیت به‌سبک TrueTime: وقتی کران عدم‌قطعیت ساعت epsilon را داری، نویسنده epsilon بعد از timestamp صبر می‌کند بعد commit می‌کند و زمان دیواری را به ترتیب امن تبدیل می‌کند به قیمت latency. درست وقتی ترتیب میان‌ماشینی روی stamp دیواری اجتناب‌ناپذیر است — برای timeout و duration که monotonic رایگان است زیاده‌روی است."
+    },
+    {
+      "en": "Logical clocks for order: Lamport timestamps or version vectors decide 'who wrote last' from causality, not from wall readings. Right whenever writers live on machines whose clocks you do not trust — which, across hosts, is always.",
+      "fa": "ساعت منطقی برای ترتیب: timestamp لمپورت یا بردار نسخه «کی آخر نوشت» را از علیت می‌فهمد نه از خوانش دیواری. درست هر وقتی که نویسنده‌ها روی ماشین‌هایی‌اند که به ساعتشان اعتماد نداری — که میان ماشین‌ها همیشه همین است."
+    }
+  ],
+  "answer_en": "Wall time stamps, monotonic measures — on one host only, and never the twain. Measure durations, timeouts and TTL waits with CLOCK_MONOTONIC; use wall time only to stamp logs for humans. Real skew needs two independent hosts or VMs plus the sampling uncertainty (half the RTT); two containers on one host share a clock and prove nothing. Mocked shifts are labelled MOCK, and wall timestamps never decide last-writer-wins — a 250ms-ahead clock buries a genuinely later write.",
+  "answer_fa": "زمان دیواری stamp می‌زند و monotonic اندازه می‌گیرد — فقط در یک ماشین و هرگز جابه‌جا. duration و timeout و انتظار TTL را با CLOCK_MONOTONIC بسنج؛ زمان دیواری فقط برای stamp لاگ برای انسان. skew واقعی دو host/VM مستقل می‌خواهد به‌علاوهٔ عدم‌قطعیت نمونه‌برداری (نصف RTT)؛ دو کانتینر روی یک host ساعت مشترک دارند و هیچ‌چیز را ثابت نمی‌کنند. جابه‌جایی‌های mock با برچسب MOCK می‌آیند و stamp دیواری هرگز last-writer-wins را تعیین نمی‌کند — ساعت ۲۵۰ms جلوتر، نوشتهٔ واقعاً دیرتر را دفن می‌کند.",
+  "assumptions": [
+    {
+      "en": "Demo numbers are teaching MOCKS: +250ms B-ahead skew, 40ms sample RTT, -500ms NTP step, 120ms of real work.",
+      "fa": "اعداد دمو MOCK آموزشی‌اند: skew جلو بودن B به‌اندازهٔ ۲۵۰ms، RTT نمونه ۴۰ms، گام NTP به‌اندازهٔ ۵۰۰ms- و ۱۲۰ms کار واقعی."
+    },
+    {
+      "en": "Two hosts means two independent clocks (separate VMs/hosts); one host with two containers means one clock.",
+      "fa": "دو ماشین یعنی دو ساعت مستقل (VM/host جدا)؛ یک host با دو کانتینر یعنی یک ساعت."
+    },
+    {
+      "en": "LWW register keeps the value with the greatest wall timestamp, ties broken arbitrarily.",
+      "fa": "رجیستر LWW مقداری را نگه می‌دارد که بزرگ‌ترین timestamp دیواری را دارد و مساوی‌ها دلبخواهی شکسته می‌شوند."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n// Teaching demo with EXPLICITLY MOCKED clocks (labelled MOCK - not a real\n// two-host measurement). Host B's wall clock runs 250ms ahead. Shows:\n// wall breaks durations when NTP steps it; monotonic is safe for durations\n// but meaningless across hosts; LWW lets the wall-ahead write bury a later one.\npublic class SkewDemo {\n    static class MockWall { long offset; long now(long truth) { return truth + offset; } }\n    static class Mono { long t; long now() { return t; } void advance(long d) { t += d; } }\n    public static void main(String[] a) {\n        MockWall wallA = new MockWall(), wallB = new MockWall();\n        wallB.offset = 250;                                            // MOCK skew: B ahead 250ms\n        long truth = 1_000_000;\n        long sampleA = wallA.now(truth), sampleB = wallB.now(truth);\n        long rtt = 40;                                                 // MOCK round-trip of the sample\n        System.out.println(\"MOCK wallA=\" + sampleA + \" wallB=\" + sampleB\n            + \" rawDiff=\" + (sampleB - sampleA) + \"ms rtt=\" + rtt + \"ms uncertainty=+-\" + (rtt / 2) + \"ms\");\n        Mono mono = new Mono();\n        mono.advance(120);                                             // real work takes 120ms\n        long wallStart = wallA.now(truth);\n        wallA.offset -= 500;                                           // MOCK NTP step: wall jumps back\n        long wallDur = wallA.now(truth + 120) - wallStart;             // wall-measured duration\n        System.out.println(\"MOCK NTP step -500ms: wall duration=\" + wallDur + \"ms (lies) mono duration=\"\n            + mono.now() + \"ms (true) -> timeouts/TTL must use monotonic\");\n        Map<String, String> reg = new HashMap<>();                     // LWW register\n        Map<String, Long> ts = new HashMap<>();\n        // B writes at its wall time (truth t, wall t+250); A writes LATER (truth t+100) at wall t+100.\n        reg.put(\"k\", \"from-B\"); ts.put(\"k\", wallB.now(truth));\n        long tsA = wallA.now(truth + 100);                             // wallA offset is now -500\n        if (tsA > ts.get(\"k\")) { reg.put(\"k\", \"from-A\"); ts.put(\"k\", tsA); }\n        System.out.println(\"LWW keeps=\" + reg.get(\"k\") + \" (B's earlier write buries A's later write)\");\n        Mono mA = new Mono(), mB = new Mono();\n        mA.advance(999); mB.advance(5);\n        System.out.println(\"monoA=\" + mA.now() + \" monoB=\" + mB.now()\n            + \" -> cross-host compare is meaningless (different zeroes)\");\n        System.out.println(\"OK: real skew needs two independent hosts; mock is labelled mock\");\n    }\n}\n",
+    "expected_en": "Five lines: the MOCK sample (rawDiff=250ms, uncertainty=+-20ms), the NTP step (wall duration=-380ms lying, mono 120ms true), LWW keeping from-B, the meaningless monoA=999 vs monoB=5 compare, and the OK line. (actual output of this environment)",
+    "expected_fa": "پنج خط: نمونهٔ MOCK (با rawDiff=250ms و uncertainty برابر ۲۰ms+-)، گام NTP (با duration دیواری ۳۸۰ms- دروغگو و mono درست ۱۲۰ms)، ماندن from-B در LWW، مقایسهٔ بی‌معنی monoA=999 با monoB=5 و خط OK. (خروجی واقعی همین محیط)",
+    "lang": "java",
+    "run_en": "javac SkewDemo.java && java SkewDemo — stdlib Java only, instant.",
+    "run_fa": "javac SkewDemo.java && java SkewDemo — فقط استاندارد جاوا، فوری.",
+    "status": "verified"
+  },
+  "diagrams": [
+    {
+      "caption_en": "Mocked 250ms skew, an NTP step, and the burial it causes",
+      "caption_fa": "skew ساختگی ۲۵۰ms، یک گام NTP و دفنی که می‌سازد",
+      "file": "diagrams/sol2-step1-skew-timeline.html",
+      "height": 640,
+      "kind_en": "timeline: two walls, one mock",
+      "kind_fa": "تایم‌لاین: دو دیواری و یک ساختگی",
+      "made": "hand",
+      "narration": {
+        "failure_en": "Trace the two diamonds: B writes at truth t with stamp t+250, A writes later at truth t+100 with stamp t-400 (its clock stepped back). The verdict box compares 250 against -400 and keeps B — the later write is gone, and no error is raised. That silent burial is the LWW failure mode.",
+        "failure_fa": "دو لوزی را دنبال کن: B در حقیقت t با stamp برابر t+250 می‌نویسد و A دیرتر در حقیقت t+100 با stamp برابر t-400 می‌نویسد (ساعتش عقب رفته). جعبهٔ رأی ۲۵۰ را با ۴۰۰- مقایسه می‌کند و B را نگه می‌دارد — نوشتهٔ دیرتر رفته و هیچ خطایی بالا نیامده. آن دفن بی‌صدا همان حالت خرابی LWW است.",
+        "guarantee_en": "The figure shows the skew, the step, the burial, and the sampling uncertainty side by side. It does not prove any real host's skew — every shifted number wears its MOCK label.",
+        "guarantee_fa": "شکل skew و گام و دفن و عدم‌قطعیت نمونه را کنار هم نشان می‌دهد. skew واقعی هیچ ماشینی را اثبات نمی‌کند — هر عدد جابه‌جاشده برچسب MOCK دارد.",
+        "nonguarantee_en": "It does not tell you which clock your timeout should use — that is the assembly diagram's rule.",
+        "nonguarantee_fa": "نمی‌گوید timeout تو باید از کدام ساعت استفاده کند — آن قاعدهٔ نمودار اسمبل است.",
+        "point_en": "The decision point is the dashed truth-lines: same truth, different stamps. Whenever two stamps from two hosts disagree, believe the truth-lines (causality), never the stamps.",
+        "point_fa": "نقطهٔ تصمیم خط‌چین‌های حقیقت‌اند: حقیقت یکسان و stamp متفاوت. هر وقت دو stamp از دو ماشین اختلاف داشتند، به خط‌های حقیقت (علیت) اعتماد کن، هرگز به stampها.",
+        "scenario_en": "Two hosts, two wall clocks, and B runs 250ms ahead — mocked, labelled, on purpose. Read the two timelines top to bottom, then the verdict, the sample panel, and the rule bar.",
+        "scenario_fa": "دو ماشین و دو ساعت دیواری و B عمداً ۲۵۰ms جلوتر است — ساختگی و برچسب‌دار و عمدی. دو تایم‌لاین را از بالا به پایین بخوان، بعد جعبهٔ رأی و پنل نمونه و نوار قاعده را.",
+        "steps": [
+          {
+            "en": "Top timeline: host A's wall equals truth until the orange NTP zigzag steps it back 500ms mid-row.",
+            "fa": "تایم‌لاین بالا: دیواری ماشین A وسط سطر با زیگزاگ نارنجی NTP به‌اندازهٔ ۵۰۰ms عقب می‌رود."
+          },
+          {
+            "en": "Bottom timeline: host B's wall runs 250ms ahead the whole way — the MOCK skew, labelled on the row itself.",
+            "fa": "تایم‌لاین پایین: دیواری ماشین B کل مسیر ۲۵۰ms جلوتر است — همان skew ساختگی که روی خود سطر برچسب دارد."
+          },
+          {
+            "en": "The diamonds: B writes at truth t (stamp t+250), A writes later at truth t+100 (stamp t-400) — the dashed lines prove who was really later.",
+            "fa": "لوزی‌ها: B در حقیقت t می‌نویسد (stamp برابر t+250) و A دیرتر در حقیقت t+100 (stamp برابر t-400) — خط‌چین‌ها ثابت می‌کنند واقعاً کی دیرتر بوده."
+          },
+          {
+            "en": "Verdict plus sample panel: LWW keeps B, and the skew sample reports +-20ms uncertainty from its 40ms RTT.",
+            "fa": "جعبهٔ رأی به‌علاوهٔ پنل نمونه: LWW همان B را نگه می‌دارد و نمونهٔ skew با RTT برابر ۴۰ms عدم‌قطعیت ۲۰ms+- را گزارش می‌کند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Because LWW compares wall stamps, not truth: B's stamp (t+250) beats A's stamp (t-400) even though A wrote 100ms later in truth. The dashed truth-lines are the evidence.",
+        "a_fa": "چون LWW stampهای دیواری را مقایسه می‌کند نه حقیقت را: stamp برابر t+250 برای B از stamp برابر t-400 برای A می‌برد با این‌که A در حقیقت ۱۰۰ms دیرتر نوشته. خط‌چین‌های حقیقت همان مدرک‌اند.",
+        "q_en": "A wrote later in truth, yet LWW keeps B. Which two numbers decide it, and what proves A was later?",
+        "q_fa": "با این‌که A در حقیقت دیرتر نوشته ولی LWW همان B را نگه می‌دارد. کدام دو عدد تصمیم می‌گیرند و چه چیزی ثابت می‌کند A دیرتر بوده؟"
+      }
+    },
+    {
+      "caption_en": "Spans on monotonic, stamps on wall, order never on wall",
+      "caption_fa": "spanها با monotonic، stampها با دیواری و ترتیب هرگز با دیواری",
+      "file": "diagrams/sol2-skew-measure.html",
+      "height": 640,
+      "kind_en": "workflow: clock choice",
+      "kind_fa": "گردش‌کار: انتخاب ساعت",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Trace each red hazard leaf: cross-host monotonic compares two different zeroes; the NTP step pushes wall-measured spans negative; wall-stamped LWW buries the later write. Three misuses, three silent corruptions, zero errors raised.",
+        "failure_fa": "هر سه برگ قرمز خطر را دنبال کن: monotonic میان‌ماشینی دو صفر متفاوت را مقایسه می‌کند؛ گام NTPspanهای دیواری‌سنج را منفی می‌کند؛ LWW با stamp دیواری نوشتهٔ دیرتر را دفن می‌کند. سه سوءاستفاده و سه corruption بی‌صدا و صفر خطای بالا آمده.",
+        "guarantee_en": "The figure assigns every need to its clock and names the three misuses. It does not set your NTP policy or your epsilon — those are measured per fleet.",
+        "guarantee_fa": "شکل هر نیاز را به ساعتش می‌سپارد و سه سوءاستفاده را نام می‌برد. سیاست NTP یا epsilon تو را تعیین نمی‌کند — آن‌ها برای هر ناوگان اندازه‌گیری می‌شوند.",
+        "nonguarantee_en": "It does not prove any real skew number — the timeline step shows mocked numbers only, honestly labelled.",
+        "nonguarantee_fa": "هیچ عدد skew واقعی را اثبات نمی‌کند — گام تایم‌لاین فقط اعداد ساختگی صادقانه‌برچسب‌دار نشان می‌دهد.",
+        "point_en": "The decision order is the point: duration first (monotonic), stamp second (wall, display only), order third (logical or interval — never wall). Asking in another order is how wall time sneaks into decisions.",
+        "point_fa": "نکته ترتیب سؤال است: اول duration (با monotonic)، دوم stamp (با دیواری و فقط نمایشی) و سوم ترتیب (با منطقی یا بازه‌ای — هرگز دیواری). پرسیدن به ترتیب دیگر همان راهی است که زمان دیواری به تصمیم‌ها می‌خزد.",
+        "scenario_en": "You need a clock and there are two, plus a mock. Start at the need on the left and answer duration, stamp, order, and sampling in order; every leaf names its clock and its hazard.",
+        "scenario_fa": "به ساعت نیاز داری و دو تا هست به‌علاوهٔ یک ساختگی. از نیاز در چپ شروع کن و duration و stamp و ترتیب و نمونه‌برداری را به‌ترتیب جواب بده؛ هر برگ ساعت و خطرش را نام می‌برد.",
+        "steps": [
+          {
+            "en": "Duration? Yes takes the Monotonic leaf: spans, timeouts and TTL waits run on CLOCK_MONOTONIC — the cross-host compare beside it is the hazard.",
+            "fa": "سؤال Duration؟ بله به برگ Monotonic می‌رسد: span و timeout و انتظار TTL با CLOCK_MONOTONIC کار می‌کنند — مقایسهٔ میان‌ماشینی کنارش همان خطر است."
+          },
+          {
+            "en": "Stamp? Yes takes the Wall leaf for display and record only — with the NTP step-back hazard hanging beneath it.",
+            "fa": "سؤال Stamp؟ بله به برگ دیواری فقط برای نمایش و ثبت می‌رسد — با خطر عقب‌رفتن NTP که زیرش آویزان است."
+          },
+          {
+            "en": "Order? Yes takes Logical-or-Interval (Lamport, TrueTime wait) — wall ordering instead ends in the LWW burial.",
+            "fa": "سؤال Order؟ بله به منطقی-یا-بازه‌ای (لمپورت و انتظار TrueTime) می‌رسد — مرتب‌سازی دیواری به‌جایش به دفن LWW ختم می‌شود."
+          },
+          {
+            "en": "Sampling? Two independent hosts with uncertainty, or explicitly labelled MOCK — then the Rule collects all four answers.",
+            "fa": "سؤال نمونه‌برداری؟ دو ماشین مستقل با عدم‌قطعیت یا MOCK صریح‌برچسب‌دار — بعد قاعده هر چهار جواب را جمع می‌کند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Monotonic: a wall step can push the remaining wait negative or stretch it, firing early or hanging. Monotonic only moves forward on its own host, so the wait is honest.",
+        "a_fa": "Monotonic: چون گام دیواری می‌تواند انتظار باقی‌مانده را منفی یا کش‌آمده کند و زود شلیک کند یا آویزان بماند. monotonic در ماشین خودش فقط جلو می‌رود، پس انتظار صادقانه است.",
+        "q_en": "NTP steps the wall clock backwards mid-timeout. Which clock must the timeout use, and why?",
+        "q_fa": "وسط timeout ساعت دیواری با NTP عقب می‌رود. timeout باید از کدام ساعت استفاده کند و چرا؟"
+      },
+      "source": ".archify/workflow-ch9-sol2-clocks-20261014-210103"
+    }
+  ],
+  "failures": [
+    {
+      "en": "NTP steps the wall clock backwards: every wall-measured duration, timeout and TTL in flight lies at that moment (the demo shows -380ms for 120ms of work). Guard by measuring all spans on the monotonic clock; wall is for stamps only.",
+      "fa": "NTP ساعت دیواری را عقب می‌برد: هر duration و timeout و TTL دیواری‌سنج همان لحظه دروغ می‌گوید (دمو برای ۱۲۰ms کار، ۳۸۰ms- نشان می‌دهد). نگهبان: همهٔ spanها را با ساعت monotonic بسنج؛ دیواری فقط برای stamp است."
+    },
+    {
+      "en": "Cross-host monotonic compare: monoA=999 against monoB=5 looks decisive and means nothing — different zeroes, different rates. Guard by never comparing them; order across hosts needs logical clocks or uncertainty intervals.",
+      "fa": "مقایسهٔ monotonic میان ماشین‌ها: monoA=999 در برابر monoB=5 قاطع به‌نظر می‌رسد و هیچ معنایی ندارد — صفرهای متفاوت و نرخ‌های متفاوت. نگهبان: هرگز مقایسه‌شان نکن؛ ترتیب میان ماشین‌ها ساعت منطقی یا بازهٔ عدم‌قطعیت می‌خواهد."
+    },
+    {
+      "en": "Single-host 'skew experiment': two containers on one host share the underlying clock (unless time namespaces split them), so the measured diff is ~0 and proves nothing about real skew. Guard with two independent hosts/VMs, or label the shift MOCK and report the RTT-based uncertainty.",
+      "fa": "«آزمایش skew» تک‌ماشینی: دو کانتینر روی یک host ساعت زیرین مشترک دارند (مگر namespace زمانی جداشان کند)، پس اختلاف اندازه‌گیری‌شده ~۰ است و دربارهٔ skew واقعی هیچ‌چیز را ثابت نمی‌کند. نگهبان: دو host/VM مستقل یا برچسب MOCK برای جابه‌جایی و گزارش عدم‌قطعیت مبتنی بر RTT."
+    },
+    {
+      "en": "Wall-stamped LWW across writers: the ahead clock's earlier write wins over the later real write, silently. Guard by never ordering on wall stamps — use per-key causality, logical clocks, or an uncertainty wait.",
+      "fa": "LWW با stamp دیواری میان نویسنده‌ها: نوشتهٔ زودتر ساعت جلوتر بر نوشتهٔ واقعاً دیرتر می‌برد، بی‌صدا. نگهبان: هرگز روی stamp دیواری مرتب نکن — علیت per-key یا ساعت منطقی یا انتظار عدم‌قطعیت."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "Monotonic — CLOCK_MONOTONIC — for both. A timeout measures 'how long have I waited', and a TTL measures 'how much longer is this valid': both are durations on one host, and only the monotonic clock survives an NTP step without jumping. Wall time enters only when you stamp an absolute moment for humans or for cross-system records ('revoked at 14:03:11Z'), never for measuring or waiting. The demo's -380ms wall duration for 120ms of real work is the whole argument.",
+      "a_fa": "برای هر دو monotonic یعنی CLOCK_MONOTONIC. timeout می‌سنجد «چقدر صبر کرده‌ام» و TTL می‌سنجد «این چقدر دیگر معتبر است»: هر دو duration در یک ماشین‌اند و فقط ساعت monotonic از گام NTP بدون پرش جان سالم به‌در می‌برد. زمان دیواری فقط وقتی وارد می‌شود که لحظهٔ مطلق را برای انسان یا رکوردهای میان‌سیستمی stamp می‌زنی («باطل‌شده در 14:03:11Z»)، هرگز برای سنجش یا انتظار. همان duration دیواری ۳۸۰ms- برای ۱۲۰ms کار واقعی در دمو کل استدلال است.",
+      "level": "senior",
+      "q_en": "NTP steps the wall clock. Which clock should application timeouts and TTL durations use?",
+      "q_fa": "NTP ساعت را step کند؛ timeout و TTL برنامه کدام clock را باید استفاده کنند؟"
+    },
+    {
+      "a_en": "Three labelled parts: the raw diff (250ms in the demo), the sampling uncertainty (+-20ms from the 40ms RTT — the reply could have been delayed on either leg), and the method tag: REAL on two independent hosts/VMs, or MOCK with the injected shift stated. Report '250ms +-20ms (MOCK, +250 injected on B, RTT 40ms)' — never a bare '250ms'. A bare number hides whether you measured the world or staged the play; the tag is what makes the next engineer trust or redo the experiment.",
+      "a_fa": "سه جزء برچسب‌دار: اختلاف خام (در دمو ۲۵۰ms)، عدم‌قطعیت نمونه‌برداری (۲۰ms+- از RTT برابر ۴۰ms — پاسخ ممکن است در هر دو مسیر تأخیر خورده باشد) و برچسب روش: REAL روی دو host/VM مستقل یا MOCK با جابه‌جایی تزریق‌شدهٔ اعلام‌شده. گزارش بده «250ms با 20ms+- (MOCK با ۲۵۰+ تزریق‌شده روی B و RTT برابر ۴۰ms)» — هرگز «۲۵۰ms» لخت. عدد لخت پنهان می‌کند دنیا را اندازه گرفتی یا نمایش را صحنه کردی؛ همان برچسب است که باعث می‌شود مهندس بعدی به آزمایش اعتماد یا آن را تکرار کند.",
+      "level": "staff",
+      "q_en": "You report a skew number to the team. What must the report contain so it is honest?",
+      "q_fa": "می‌خواهی عدد skew را به تیم گزارش بدهی. گزارش چه چیزی باید داشته باشد تا صادقانه باشد؟"
+    }
+  ],
+  "interview_q_en": "Compare wall and monotonic clocks for durations, deadlines and LWW. Use independent hosts/VMs or explicitly mocked skew. Report sampling uncertainty and show how a future timestamp hides a later real write.",
+  "interview_q_fa": "wall clock و monotonic clock را در deadline، اندازه‌گیری duration و LWW مقایسه کن. skew را با دو host/VM مستقل یا ساعت mock تزریق کن. uncertainty ناشی از زمان ارسال نمونه را گزارش کن و نشان بده timestamp آینده چگونه write واقعی بعدی را می‌پوشاند.",
+  "mental_en": "Every clock answers one question well and the others badly: monotonic knows 'how long' on this host, wall knows 'what time is it' roughly everywhere, and neither knows 'which write came last' across hosts. Skew is not a number — it is a number plus an uncertainty plus a method tag (REAL or MOCK). Forget any of the three and the measurement is a rumor.",
+  "mental_fa": "هر ساعت یک سؤال را خوب جواب می‌دهد و بقیه را بد: monotonic می‌داند «چقدر طول کشید» در همین ماشین، دیواری می‌داند «ساعت چند است» تقریباً همه‌جا و هیچ‌کدام نمی‌دانند «کدام نوشته آخر آمد» میان ماشین‌ها. skew یک عدد نیست — یک عدد است به‌علاوهٔ عدم‌قطعیت به‌علاوهٔ برچسب روش (REAL یا MOCK). هر کدام از سه‌تا را فراموش کنی، اندازه‌گیری شایعه است.",
+  "mistakes": [
+    {
+      "en": "Measuring 'skew' with two containers on one host: same underlying clock, ~0 diff, zero information about real divergence. Independence means separate kernels Clocks, not separate namespaces.",
+      "fa": "اندازه‌گیری «skew» با دو کانتینر روی یک host: ساعت زیرین مشترک و اختلاف ~۰ و صفر اطلاعات دربارهٔ واگرایی واقعی. استقلال یعنی ساعت‌های کرنل جدا، نه namespace جدا."
+    },
+    {
+      "en": "Comparing monotonic readings across hosts (monoA vs monoB): each starts at its own boot and ticks its own rate — the comparison is numerology. Monotonic is strictly single-host.",
+      "fa": "مقایسهٔ خوانش‌های monotonic میان ماشین‌ها (monoA با monoB): هرکدام از بوت خودش شروع و با نرخ خودش می‌زند — مقایسه عددبازی است. monotonic اکیداً تک‌ماشینی است."
+    },
+    {
+      "en": "Ordering writes by wall timestamps (LWW on wall): the fastest liar wins — an ahead clock's stale write beats a later honest one with no error. Wall stamps record, they do not arbitrate.",
+      "fa": "مرتب کردن نوشته‌ها با timestamp دیواری (LWW روی دیواری): سریع‌ترین دروغگو می‌برد — نوشتهٔ کهنهٔ ساعت جلوتر بدون خطا بر نوشتهٔ دیرتر صادق می‌چربد. stampهای دیواری ثبت می‌کنند، داوری نمی‌کنند."
+    }
+  ],
+  "number": 2,
+  "slug": "skew-measure",
+  "sources": [
+    "clocks",
+    "atlassian"
+  ],
+  "steps": [
+    {
+      "en": "Split the clocks by job: monotonic (CLOCK_MONOTONIC) for how-long on one host — durations, timeouts, TTL waits; wall (CLOCK_REALTIME) for what-time for humans and logs. The demo's NTP step turns 120ms of work into a -380ms wall duration while monotonic stays exact.",
+      "fa": "ساعت‌ها را با کار جدا کن: monotonic برای چقدر طول کشید در یک ماشین — duration و timeout و انتظار TTL؛ دیواری برای ساعت چند است برای انسان و لاگ. گام NTP در دمو ۱۲۰ms کار را به duration دیواری ۳۸۰ms- تبدیل می‌کند ولی monotonic دقیق می‌ماند.",
+      "t_en": "One job per clock",
+      "t_fa": "هر ساعت یک کار"
+    },
+    {
+      "en": "Measure real skew on two independent hosts or VMs: exchange timestamps, halve the RTT for the uncertainty (40ms RTT gives +-20ms), and report raw diff plus uncertainty plus method. Containers on one host share the clock — that experiment measures ~0 by construction.",
+      "fa": "skew واقعی را روی دو host/VM مستقل بسنج: timestamp ردوبدل کن، RTT را نصف کن برای عدم‌قطعیت (RTT برابر ۴۰ms می‌دهد ۲۰ms+-) و اختلاف خام به‌علاوهٔ عدم‌قطعیت به‌علاوهٔ روش را گزارش بده. کانتینرهای یک host ساعت مشترک دارند — آن آزمایش از روی ساختار ~۰ اندازه می‌گیرد.",
+      "t_en": "Two hosts plus uncertainty",
+      "t_fa": "دو ماشین به‌علاوهٔ عدم‌قطعیت"
+    },
+    {
+      "en": "When you cannot use two hosts, mock openly: inject a stated shift (+250ms on B), label every shifted number MOCK, and keep the uncertainty math identical. A mock teaches the mechanism; only the label keeps it from becoming a false measurement.",
+      "fa": "وقتی دو ماشین نداری، آشکارا mock کن: جابه‌جایی اعلام‌شده تزریق کن (۲۵۰+ روی B)، به هر عدد جابه‌جاشده برچسب MOCK بزن و حساب عدم‌قطعیت را یکسان نگه دار. mock سازوکار را یاد می‌دهد؛ فقط برچسب است که نمی‌گذارد اندازه‌گیری دروغین شود.",
+      "t_en": "Mock openly or not at all",
+      "t_fa": "آشکارا mock کن یا اصلاً نکن"
+    },
+    {
+      "en": "Never order on wall: with B 250ms ahead, B's truth-t write (stamp t+250) beats A's truth-t+100 write (stamp t-400) — LWW keeps the earlier write and drops the later one silently. Cross-host last-write needs causality or an uncertainty wait, never a stamp compare.",
+      "fa": "هرگز روی دیواری مرتب نکن: با ۲۵۰ms جلو بودن B، نوشتهٔ حقیقت-t برای B (با stamp برابر t+250) بر نوشتهٔ حقیقت-t+100 برای A (با stamp برابر t-400) می‌چربد — LWW نوشتهٔ زودتر را نگه می‌دارد و دیرتر را بی‌صدا می‌اندازد. last-write میان‌ماشینی علیت یا انتظار عدم‌قطعیت می‌خواهد، هرگز مقایسهٔ stamp.",
+      "t_en": "Wall stamps never arbitrate",
+      "t_fa": "stamp دیواری هرگز داوری نمی‌کند"
+    }
+  ],
+  "tests_en": "Invariants: a monotonic duration never goes negative across an NTP step test; two hosts report skew as diff +- RTT/2 with the method tag attached; an LWW register fed a late-but-honest write keeps it when causality says so. Measure with: per-minute wall-vs-monotonic drift logs on each host, NTP step injection in staging, and a chaos write pair (ahead-clock early write vs honest late write) asserting the honest one survives under your real ordering rule.",
+  "tests_fa": "ناورداها: duration با monotonic در تست گام NTP هرگز منفی نمی‌شود؛ دو ماشین skew را به‌صورت اختلاف با ۲۰ms+- و برچسب روش گزارش می‌دهند؛ رجیستر LWW که نوشتهٔ دیر-ولی-صادق می‌گیرد وقتی علیت می‌گوید نگهش می‌دارد. بسنج با: لاگ دقیقه‌ای drift دیواری-دربرابر-monotonic در هر ماشین، تزریق گام NTP در staging و جفت‌نوشتهٔ آشوب (نوشتهٔ زود ساعت-جلوتر در برابر نوشتهٔ دیر صادق) که assert می‌کند صادق زیر قاعدهٔ ترتیب واقعی تو زنده می‌ماند.",
+  "worked_en": "<p>Teaching numbers from the demo run: B ahead by a MOCK 250ms; one sample over a MOCK 40ms RTT reports rawDiff=250ms with uncertainty=+-20ms — the true skew sits somewhere in 230..270ms, and a second sample could legitimately disagree by 40ms. The MOCK NTP step of -500ms mid-measurement turns 120ms of real work into a wall duration of -380ms: negative time, the signature of a stepped clock. LWW then compares stamp t+250 (truth t) against stamp t-400 (truth t+100) and keeps the earlier write.</p>",
+  "worked_fa": "<p>اعداد آموزشی از اجرای دمو: جلو بودن B به‌اندازهٔ MOCK برابر ۲۵۰ms؛ یک نمونه روی RTT ساختگی ۴۰ms گزارش می‌دهد rawDiff=250ms با uncertainty برابر ۲۰ms+- — skew واقعی جایی در ۲۳۰ تا ۲۷۰ms است و نمونهٔ دوم می‌تواند موجه ۴۰ms اختلاف داشته باشد. گام MOCK برابر NTP به‌اندازهٔ ۵۰۰ms- وسط سنجش، ۱۲۰ms کار واقعی را به duration دیواری ۳۸۰ms- تبدیل می‌کند: زمان منفی، امضای ساعت stepخورده. بعد LWWstamp برابر t+250 (حقیقت t) را با stamp برابر t-400 (حقیقت t+100) مقایسه می‌کند و نوشتهٔ زودتر را نگه می‌دارد.</p>",
+  "lab_fa": "<p>روی دو host/VM با ساعت مستقل، نمونه‌های CLOCK_REALTIME و مدت‌های CLOCK_MONOTONIC را ثبت کن. offset ساعت دوم نسبت به اول را با timestamp exchange و RTT اندازه بگیر؛ عدم‌قطعیت مسیر نامتقارن و زمان پردازش را ثبت کن و فرض‌های استفاده از RTT/2 را توضیح بده. مقدارهای monotonic دو host را از هم کم نکن چون مبدأ مشترک ندارند. دو کانتینر روی یک Linux host معمولاً CLOCK_REALTIME مشترک دارند. بدون زیرساخت، +۲۵۰ میلی‌ثانیه را در clock mock تزریق و همهٔ خروجی‌ها را شبیه‌سازی بنام. نشان بده LWW مبتنی بر ساعت دیواری چگونه نوشتن واقعاً دیرتر را کنار می‌گذارد و چرا ساعت واقعی سیستم کاربر لازم نیست تغییر کند.</p>",
+  "lab_en": "<p>On two independent-clock hosts/VMs, record CLOCK_REALTIME samples and local CLOCK_MONOTONIC durations. Estimate the second wall clock's offset using timestamp exchange and RTT; document processing and asymmetric-delay uncertainty and the assumptions behind RTT/2. Never subtract monotonic timestamps from different hosts: their origins differ. Two containers on one Linux host normally share CLOCK_REALTIME. Without infrastructure inject +250ms into a mock clock and label every output simulated. Show wall-clock LWW discarding a genuinely later write; no change to the user's real system clock is needed.</p>",
+  "reasoning_fa": "<p>RTT/2 برآورد تأخیر یک‌طرفه تحت فرض تقارن است، نه اندازه‌گیری دقیق آن. اختلاف مسیر رفت و برگشت offset برآوردشده را جابه‌جا می‌کند؛ timestamp exchange یک بازهٔ ممکن برای offset می‌دهد و باید پردازش و drift طی نمونه‌گیری حساب شوند. ۲۵۰ms جابه‌جایی و ۵۰۰ms step برای واضح‌شدن اثر انتخاب شده‌اند؛ هر skew بزرگ‌تر از فاصلهٔ واقعی دو write می‌تواند ترتیب LWW را برعکس کند. monotonic برای مدت است چون با اصلاح ساعت دیواری عقب نمی‌پرد.</p>",
+  "reasoning_en": "<p>RTT/2 estimates one-way delay under symmetry; it is not a measured one-way delay. Asymmetry shifts offset estimates, so timestamp exchange should report a possible interval with processing and drift accounted for. The 250ms skew and 500ms step make the effect visible; skew exceeding the true write separation can reverse LWW order. Monotonic clocks measure local duration without wall-clock steps.</p>"
+}

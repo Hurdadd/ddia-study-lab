@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linearizability — Operation Bars, Linearization Points, the Recency Guarantee</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .pill-t{font:700 13px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .edge-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .band-h{font:700 14px system-ui,sans-serif; fill:#93c5fd}
+  .tick-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .warn-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#fda4af}
+  .win-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .note{font:12.5px system-ui,sans-serif; fill:#cfe3ff}
+  .note-h{font:700 13px system-ui,sans-serif; fill:#fbbf24}
+  .lane{font:700 13px ui-monospace,Menlo,monospace; fill:#93c5fd}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="Timeline of client operation bars showing a linearizable execution and a stale-read violation">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+    <marker id="arrb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#93c5fd"/>
+    </marker>
+    <marker id="arrw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#fda4af"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="30" text-anchor="middle">Linearizability — One Copy of the Data, Atomic Operations, No Going Back</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">each bar is a request from send to response · the client only knows the database processed it somewhere inside the bar</text>
+
+  <!-- ============ band 1 : legal execution ============ -->
+  <text class="band-h" x="60" y="92">① A linearizable execution — register x flips from 0 to 1 at one hidden instant (Figures 10-2 / 10-3)</text>
+
+  <!-- lane labels -->
+  <rect x="60" y="118" width="110" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="115" y="138" text-anchor="middle">client A</text>
+  <rect x="60" y="198" width="110" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="115" y="218" text-anchor="middle">client B</text>
+  <rect x="60" y="278" width="110" height="30" rx="8" fill="#7c3aed" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="115" y="298" text-anchor="middle">client C</text>
+
+  <!-- A bars -->
+  <rect x="230" y="118" width="190" height="30" rx="8" fill="#161d2e" stroke="#93c5fd" stroke-width="1.6"/>
+  <text class="attr" x="325" y="138" text-anchor="middle">read(x) ⇒ 0</text>
+  <rect x="580" y="118" width="190" height="30" rx="8" fill="#161d2e" stroke="#86efac" stroke-width="1.6"/>
+  <text class="attr" x="675" y="138" text-anchor="middle">read(x) ⇒ 1</text>
+
+  <!-- B bar -->
+  <rect x="810" y="198" width="190" height="30" rx="8" fill="#161d2e" stroke="#86efac" stroke-width="1.6"/>
+  <text class="attr" x="905" y="218" text-anchor="middle">read(x) ⇒ 1</text>
+
+  <!-- C write bar -->
+  <rect x="500" y="278" width="380" height="30" rx="8" fill="#1b2438" stroke="#c084fc" stroke-width="1.8"/>
+  <text class="attr" x="690" y="298" text-anchor="middle">write(x, 1) ⇒ OK</text>
+
+  <!-- linearization point -->
+  <line x1="660" y1="106" x2="660" y2="330" stroke="#fbbf24" stroke-width="2" stroke-dasharray="7 6"/>
+  <text class="win-lbl" x="660" y="348" text-anchor="middle">linearization point — x becomes 1 atomically here</text>
+
+  <!-- annotations -->
+  <text class="small" x="230" y="110">ends before the write starts ⇒ must see the old value</text>
+  <text class="small" x="580" y="110">overlaps the write ⇒ 0 or 1 both legal; returns 1</text>
+  <text class="small" x="810" y="190">starts after A saw 1 ⇒ must see at least 1</text>
+  <path d="M770 140 C 800 150, 800 180, 806 196" fill="none" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="784" y="176">real-time order</text>
+
+  <!-- ============ band 2 : the violation ============ -->
+  <text class="band-h" x="60" y="414">② The violation — a read goes backwards in real time (Figure 10-1: two fans, one hears the final score first)</text>
+
+  <rect x="60" y="440" width="110" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="115" y="460" text-anchor="middle">reader 1</text>
+  <rect x="60" y="520" width="110" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="115" y="540" text-anchor="middle">reader 2</text>
+
+  <rect x="230" y="440" width="210" height="30" rx="8" fill="#161d2e" stroke="#86efac" stroke-width="1.6"/>
+  <text class="attr" x="335" y="460" text-anchor="middle">read(x) ⇒ 1 (fresh)</text>
+
+  <rect x="530" y="520" width="210" height="30" rx="8" fill="#2a1620" stroke="#fda4af" stroke-width="1.8"/>
+  <text class="warn-lbl" x="635" y="540" text-anchor="middle">read(x) ⇒ 0 — STALE</text>
+
+  <path d="M440 462 C 490 470, 490 510, 526 526" fill="none" stroke="#fda4af" stroke-width="1.6" marker-end="url(#arrw)"/>
+  <text class="warn-lbl" x="452" y="500">2 reloads after 1 reported the result</text>
+
+  <!-- note box -->
+  <rect x="800" y="432" width="380" height="128" rx="12" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="note-h" x="816" y="458">The recency guarantee</text>
+  <text class="note" x="816" y="482">Once any read returns the new value,</text>
+  <text class="note" x="816" y="502">every later read — on any client — must</text>
+  <text class="note" x="816" y="522">return at least that value until it is</text>
+  <text class="note" x="816" y="542">overwritten again.</text>
+
+  <!-- footnote -->
+  <text class="small" x="60" y="592">Concurrent operations (bars overlapping) may be ordered either way — the database may reorder them internally.</text>
+  <text class="small" x="60" y="612">But the joined-up linearization points must always move forward in time: real-time-before must stay before.</text>
+  <text class="small" x="60" y="632">Serializability is a different axis (grouping ops into transactions); linearizability is about single-object recency.</text>
+</svg>
+</div>
+</body>
+</html>

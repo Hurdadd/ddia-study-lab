@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trigram candidates then regex verify — DDIA Chapter 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Trigram candidate filtering followed by regex verification, plus an IVF recall and latency panel">
+<title>Trigram candidates, then regex verify</title>
+<text x="620" y="52" font-size="27" font-weight="900" text-anchor="middle">Candidates first, proof after: /appl./ over 11 docs</text>
+<text x="620" y="82" font-size="15" text-anchor="middle">trigram app proposes, the regex disposes (teaching data)</text>
+<g>
+<rect x="30" y="105" width="740" height="250" rx="20" fill="#cfe3ff"/>
+<text x="400" y="140" font-size="19" font-weight="800" text-anchor="middle">Lexical pipeline: filter, then verify</text>
+<rect x="55" y="160" width="160" height="70" rx="14" fill="#f7f2e8"/>
+<text x="135" y="190" font-size="16" font-weight="800" text-anchor="middle">regex /appl./</text>
+<text x="135" y="214" font-size="14" text-anchor="middle">fixed: app</text>
+<rect x="240" y="160" width="160" height="70" rx="14" fill="#f7f2e8"/>
+<text x="320" y="190" font-size="16" font-weight="800" text-anchor="middle">trigram app</text>
+<text x="320" y="214" font-size="14" text-anchor="middle">8 candidates</text>
+<rect x="425" y="160" width="160" height="70" rx="14" fill="#ffe08a"/>
+<text x="505" y="190" font-size="16" font-weight="800" text-anchor="middle">verify each</text>
+<text x="505" y="214" font-size="14" text-anchor="middle">doc 10 drops</text>
+<rect x="600" y="160" width="145" height="70" rx="14" fill="#bfe6c9"/>
+<text x="672" y="190" font-size="16" font-weight="800" text-anchor="middle">7 matches</text>
+<text x="672" y="214" font-size="14" text-anchor="middle">exact hits</text>
+<text x="227" y="200" font-size="16" text-anchor="middle">-&gt;</text>
+<text x="412" y="200" font-size="16" text-anchor="middle">-&gt;</text>
+<text x="592" y="200" font-size="16" text-anchor="middle">-&gt;</text>
+<text x="400" y="268" font-size="14" text-anchor="middle">red AND apples: intersect postings red and apples to doc 0</text>
+<text x="400" y="306" font-size="14" text-anchor="middle">no fixed trigram: fall back to full scan or selective filter first</text>
+</g>
+<g>
+<rect x="790" y="105" width="420" height="250" rx="20" fill="#ffe08a"/>
+<text x="1000" y="140" font-size="19" font-weight="800" text-anchor="middle">IVF probe vs recall@3</text>
+<rect x="820" y="165" width="200" height="34" rx="10" fill="#bfe6c9"/>
+<text x="920" y="189" font-size="14" text-anchor="middle">nprobe 1: 0.900</text>
+<rect x="820" y="210" width="240" height="34" rx="10" fill="#bfe6c9"/>
+<text x="940" y="234" font-size="14" text-anchor="middle">nprobe 2: 0.967</text>
+<rect x="820" y="255" width="300" height="34" rx="10" fill="#bfe6c9"/>
+<text x="970" y="279" font-size="14" text-anchor="middle">nprobe 4: 1.000 exact</text>
+<text x="1000" y="322" font-size="14" text-anchor="middle">ground truth is exact top-k</text>
+</g>
+<g>
+<rect x="30" y="375" width="1180" height="255" rx="20" fill="#e9e2d2"/>
+<text x="620" y="412" font-size="19" font-weight="800" text-anchor="middle">Ranking, latency and tenants (teaching rules)</text>
+<text x="620" y="452" font-size="14" text-anchor="middle">hybrid score: lexical signal plus vector signal, one ranker</text>
+<text x="620" y="492" font-size="14" text-anchor="middle">report p95 latency beside recall, never recall alone</text>
+<text x="620" y="532" font-size="14" text-anchor="middle">tenant filter before vector search, or one index per tenant</text>
+<text x="620" y="572" font-size="14" text-anchor="middle">fresh writes visible only after the index refresh window</text>
+</g>
+</svg>
+</div>
+</body>
+</html>

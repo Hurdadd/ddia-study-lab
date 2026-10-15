@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One commit, one log, four views — DDIA Chapter 1 Solution 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Order record committing once to an outbox log feeding four derived views">
+<title>One commit, one log, four views with freshness contracts</title>
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0 0L10 5L0 10z" fill="#302828"/>
+</marker>
+</defs>
+<text x="620" y="52" font-size="30" font-weight="900" text-anchor="middle">One commit, one log, four views</text>
+<text x="620" y="86" font-size="16" text-anchor="middle">synchronous write ends at the record, everything else follows the log</text>
+<g>
+<rect x="40" y="140" width="220" height="220" rx="20" fill="#9278ef"/>
+<text x="150" y="190" font-size="19" font-weight="800" text-anchor="middle">orders DB</text>
+<text x="150" y="222" font-size="14" text-anchor="middle">system of record</text>
+<text x="150" y="250" font-size="14" text-anchor="middle">sync durable write</text>
+<text x="150" y="278" font-size="14" text-anchor="middle">outbox row inside</text>
+<text x="150" y="306" font-size="14" text-anchor="middle">the same txn</text>
+</g>
+<line x1="260" y1="250" x2="326" y2="250" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<g>
+<rect x="330" y="140" width="230" height="220" rx="20" fill="#ffe08a"/>
+<text x="445" y="190" font-size="19" font-weight="800" text-anchor="middle">outbox / CDC log</text>
+<text x="445" y="222" font-size="14" text-anchor="middle">one arrow in per commit</text>
+<text x="445" y="250" font-size="14" text-anchor="middle">ordered stream out</text>
+<text x="445" y="278" font-size="14" text-anchor="middle">relay retries to delivery</text>
+<text x="445" y="306" font-size="14" text-anchor="middle">idempotent consumers</text>
+</g>
+<g>
+<rect x="640" y="130" width="270" height="100" rx="16" fill="#c3ceff"/>
+<text x="775" y="166" font-size="16" font-weight="800" text-anchor="middle">status cache</text>
+<text x="775" y="194" font-size="14" text-anchor="middle">invalidate key, fresh in sec</text>
+<rect x="930" y="130" width="270" height="100" rx="16" fill="#c3ceff"/>
+<text x="1065" y="166" font-size="16" font-weight="800" text-anchor="middle">search index</text>
+<text x="1065" y="194" font-size="14" text-anchor="middle">consume event, tens of sec</text>
+<rect x="640" y="250" width="270" height="100" rx="16" fill="#bfe6c9"/>
+<text x="775" y="286" font-size="16" font-weight="800" text-anchor="middle">monthly report</text>
+<text x="775" y="314" font-size="14" text-anchor="middle">batch, next period</text>
+<rect x="930" y="250" width="270" height="100" rx="16" fill="#bfe6c9"/>
+<text x="1065" y="286" font-size="16" font-weight="800" text-anchor="middle">recommender</text>
+<text x="1065" y="314" font-size="14" text-anchor="middle">retrain, next cycle</text>
+</g>
+<line x1="560" y1="180" x2="636" y2="180" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="560" y1="250" x2="636" y2="290" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="560" y1="320" x2="636" y2="320" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="445" y1="360" x2="445" y2="470" stroke="#302828" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#arr)"/>
+<line x1="445" y1="470" x2="920" y2="470" stroke="#302828" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#arr)"/>
+<text x="683" y="500" font-size="14" text-anchor="middle">dashed: replay path, rebuild any dropped view from the log</text>
+<rect x="40" y="400" width="340" height="110" rx="16" fill="#ffcfb8"/>
+<text x="210" y="436" font-size="15" font-weight="800" text-anchor="middle">commit without publication</text>
+<text x="210" y="464" font-size="14" text-anchor="middle">order is safe, relay retries,</text>
+<text x="210" y="488" font-size="14" text-anchor="middle">views lag then converge</text>
+<text x="620" y="570" font-size="14" text-anchor="middle">legend: purple = truth, yellow = the single publication, blue/green = derived views with contracts</text>
+<text x="620" y="600" font-size="14" text-anchor="middle">no view is ever written before the record commits</text>
+</svg>
+</div>
+</body>
+</html>

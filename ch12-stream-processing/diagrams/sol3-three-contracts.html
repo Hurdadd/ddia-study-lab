@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three Contracts: Snapshot, Outbox Events, and Compacted Entity State</title>
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+.ttl{font-size:19px;font-weight:900}
+.sub{font-size:13px}
+.pill-t{font-size:13px;font-weight:800}
+.attr{font-size:13px}
+.small{font-size:13px}
+.note{font-size:13px}
+.note-h{font-size:13px;font-weight:800}
+.k{font-size:13px;font-weight:800}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Three-contract strip comparing record snapshot, append-only outbox events, and compacted entity state">
+  <text class="ttl" x="620" y="30" text-anchor="middle">Three Contracts: Snapshot, Outbox Events, Compacted State</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">a purged diary cannot seed a newcomer; the phone book or a fresh photograph can</text>
+
+  <!-- column 1: snapshot -->
+  <rect x="60" y="90" width="350" height="300" rx="12" fill="#ffe08a"/>
+  <rect x="76" y="102" width="150" height="28" rx="7" fill="#f7f2e8"/>
+  <text class="pill-t" x="151" y="121" text-anchor="middle">Record snapshot</text>
+  <text class="k" x="76" y="160">boundary</text>
+  <text class="attr" x="76" y="182">consistent copy at LSN B</text>
+  <text class="k" x="76" y="218">pressure</text>
+  <text class="attr" x="76" y="240">throttled replica reads</text>
+  <text class="k" x="76" y="276">lifetime</text>
+  <text class="attr" x="76" y="298">dropped after catch-up</text>
+  <text class="k" x="76" y="334">seeds newcomer</text>
+  <text class="attr" x="76" y="356">yes, exactly once per bootstrap</text>
+
+  <!-- column 2: outbox events -->
+  <rect x="445" y="90" width="350" height="300" rx="12" fill="#c3ceff"/>
+  <rect x="461" y="102" width="150" height="28" rx="7" fill="#f7f2e8"/>
+  <text class="pill-t" x="536" y="121" text-anchor="middle">Outbox events</text>
+  <text class="k" x="461" y="160">key</text>
+  <text class="attr" x="461" y="182">event id, for dedup</text>
+  <text class="k" x="461" y="218">kept as</text>
+  <text class="attr" x="461" y="240">append-only plus retention</text>
+  <text class="k" x="461" y="276">deletes are</text>
+  <text class="attr" x="461" y="298">tombstone events, kept briefly</text>
+  <text class="k" x="461" y="334">seeds newcomer</text>
+  <text class="attr" x="461" y="356">never: purged pages stay torn</text>
+
+  <!-- column 3: entity state -->
+  <rect x="830" y="90" width="350" height="300" rx="12" fill="#bfe6c9"/>
+  <rect x="846" y="102" width="140" height="28" rx="7" fill="#f7f2e8"/>
+  <text class="pill-t" x="916" y="121" text-anchor="middle">Entity state</text>
+  <text class="k" x="846" y="160">key</text>
+  <text class="attr" x="846" y="182">entity key, latest wins</text>
+  <text class="k" x="846" y="218">kept as</text>
+  <text class="attr" x="846" y="240">compacted: latest per key</text>
+  <text class="k" x="846" y="276">deletes are</text>
+  <text class="attr" x="846" y="298">tombstones until observed</text>
+  <text class="k" x="846" y="334">seeds newcomer</text>
+  <text class="attr" x="846" y="356">yes, while retention holds</text>
+
+  <!-- verdict -->
+  <rect x="60" y="415" width="1120" height="105" rx="12" fill="#ffcfb8"/>
+  <text class="note-h" x="76" y="447">The rule this strip exists to teach</text>
+  <text class="note" x="76" y="477">Snapshot, event topic, and state topic are three different contracts: state when each compacts, what each keys by,</text>
+  <text class="note" x="76" y="501">and which one may seed a newcomer. A purged outbox replays zero events, so it seeds nothing.</text>
+
+  <!-- footer -->
+  <rect x="60" y="540" width="1120" height="100" rx="12" fill="#f7f2e8" stroke="#302828" stroke-width="1.4"/>
+  <text class="note-h" x="76" y="572">Two corollaries</text>
+  <text class="note" x="76" y="600">Tombstones must outlive every follower's lag, or a delete resurrects. The outbox contract shields the index</text>
+  <text class="note" x="76" y="624">from internal schema changes: drop a column upstream, the event shape stays green.</text>
+</svg>
+</div>
+</body>
+</html>

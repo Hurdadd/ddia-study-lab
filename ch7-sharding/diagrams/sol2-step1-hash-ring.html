@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consistent hashing ring by hand — DDIA Chapter 7 Solution 2 step 1</title>
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Hash ring with ten nodes, a joining eleventh node, and the single remapped arc">
+<title>Hash ring: n10 joins and takes one arc, the rest stays</title>
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0 0L10 5L0 10z" fill="#d64545"/>
+</marker>
+</defs>
+<text x="620" y="48" font-size="30" font-weight="900" text-anchor="middle">One join moves one arc</text>
+<text x="620" y="78" font-size="16" text-anchor="middle">10 nodes hold the ring; n10 joins and takes a single arc</text>
+<circle cx="600" cy="355" r="210" fill="none" stroke="#302828" stroke-width="3"/>
+<circle cx="600" cy="145" r="9" fill="#9278ef"/>
+<circle cx="713.5" cy="178.3" r="9" fill="#9278ef"/>
+<circle cx="791" cy="267.8" r="9" fill="#9278ef"/>
+<circle cx="807.9" cy="384.9" r="9" fill="#9278ef"/>
+<circle cx="758.7" cy="492.5" r="9" fill="#9278ef"/>
+<circle cx="659.2" cy="556.5" r="9" fill="#9278ef"/>
+<circle cx="540.8" cy="556.5" r="9" fill="#9278ef"/>
+<circle cx="441.3" cy="492.5" r="9" fill="#9278ef"/>
+<circle cx="392.1" cy="384.9" r="9" fill="#9278ef"/>
+<circle cx="409" cy="267.8" r="9" fill="#9278ef"/>
+<circle cx="486.5" cy="178.3" r="12" fill="#2e9e5b" stroke="#302828" stroke-width="2"/>
+<circle cx="671.8" cy="157.7" r="4" fill="#302828"/>
+<circle cx="760.9" cy="220" r="4" fill="#302828"/>
+<circle cx="809.2" cy="336.7" r="4" fill="#302828"/>
+<circle cx="790.3" cy="443.7" r="4" fill="#302828"/>
+<circle cx="705" cy="536.9" r="4" fill="#302828"/>
+<circle cx="581.7" cy="564.2" r="4" fill="#302828"/>
+<circle cx="465" cy="515.9" r="4" fill="#302828"/>
+<circle cx="397.1" cy="409.3" r="4" fill="#302828"/>
+<circle cx="397.1" cy="300.7" r="4" fill="#302828"/>
+<circle cx="443.9" cy="214.5" r="6" fill="#d64545"/>
+<circle cx="528.2" cy="157.7" r="4" fill="#302828"/>
+<path d="M392.6 260.3 A228 228 0 0 1 476.7 163.2" fill="none" stroke="#d64545" stroke-width="4" marker-end="url(#arr)"/>
+<text x="600" y="97" font-size="15" text-anchor="middle">n0</text>
+<text x="739.5" y="137.9" font-size="15" text-anchor="middle">n1</text>
+<text x="834.7" y="247.8" font-size="15" text-anchor="middle">n2</text>
+<text x="855.4" y="391.7" font-size="15" text-anchor="middle">n3</text>
+<text x="795" y="524" font-size="15" text-anchor="middle">n4</text>
+<text x="672.7" y="602.5" font-size="15" text-anchor="middle">n5</text>
+<text x="527.3" y="602.5" font-size="15" text-anchor="middle">n6</text>
+<text x="405" y="524" font-size="15" text-anchor="middle">n7</text>
+<text x="344.6" y="391.7" font-size="15" text-anchor="middle">n8</text>
+<text x="365.3" y="247.8" font-size="15" text-anchor="middle">n9</text>
+<text x="460.5" y="137.9" font-size="15" font-weight="800" text-anchor="middle">n10</text>
+<text x="318" y="188" font-size="14" text-anchor="middle">only this arc moves</text>
+<line x1="398" y1="192" x2="424" y2="204" stroke="#d64545" stroke-width="2"/>
+<rect x="950" y="230" width="260" height="170" rx="16" fill="#c3ceff"/>
+<text x="1080" y="262" font-size="15" font-weight="800" text-anchor="middle">lookup rule</text>
+<text x="1080" y="292" font-size="14" text-anchor="middle">hash the key to a point</text>
+<text x="1080" y="318" font-size="14" text-anchor="middle">walk clockwise</text>
+<text x="1080" y="344" font-size="14" text-anchor="middle">first vnode owns it</text>
+<text x="1080" y="370" font-size="14" text-anchor="middle">100 vnodes per node</text>
+<rect x="950" y="420" width="260" height="130" rx="16" fill="#bfe6c9"/>
+<text x="1080" y="452" font-size="15" font-weight="800" text-anchor="middle">join rule</text>
+<text x="1080" y="482" font-size="14" text-anchor="middle">new node takes one arc</text>
+<text x="1080" y="508" font-size="14" text-anchor="middle">near 9% move, rest stay</text>
+<text x="620" y="640" font-size="14" text-anchor="middle">mod-N moves 91% on the same join — node count must stay out of the key mapping</text>
+</svg>
+</div>
+</body>
+</html>

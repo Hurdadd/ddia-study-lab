@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MVCC Row Versions — UML Class and Object Diagram</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .cls-t{font:700 14px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .obj-t{font:700 12.5px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .edge-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .note{font:12.5px system-ui,sans-serif; fill:#cfe3ff}
+  .note-h{font:700 13px system-ui,sans-serif; fill:#fbbf24}
+  .card-lbl{font:700 11.5px ui-monospace,Menlo,monospace; fill:#86efac}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="UML class and object diagram of MVCC row versions and visibility">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+    <marker id="dia" viewBox="0 0 12 10" refX="11" refY="5" markerWidth="11" markerHeight="9" orient="auto">
+      <path d="M0,5 L6,0 L12,5 L6,10 z" fill="#1b2438" stroke="#93c5fd"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="32" text-anchor="middle">MVCC Under the Hood — Row Versions, Visibility, the Version Chain</text>
+  <text class="sub" x="620" y="54" text-anchor="middle">left: the classes · right: a live object graph for “account 2” across transactions 12 and 13</text>
+
+  <!-- ======================= LEFT: class diagram ======================= -->
+  <g>
+    <rect x="50" y="90" width="300" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="200" y="110" text-anchor="middle">RowVersion</text>
+    <rect x="50" y="120" width="300" height="128" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="66" y="144">inserted_by : TxID</text>
+    <text class="attr" x="66" y="166">deleted_by : TxID?</text>
+    <text class="attr" x="66" y="188">payload    : row data</text>
+    <text class="attr" x="66" y="210">next_older : RowVersion?</text>
+    <text class="attr" x="66" y="232">next_newer : RowVersion?</text>
+  </g>
+
+  <g>
+    <rect x="50" y="330" width="300" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="200" y="350" text-anchor="middle">Transaction</text>
+    <rect x="50" y="360" width="300" height="106" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="66" y="384">txid   : int (always increasing)</text>
+    <text class="attr" x="66" y="406">state  : active | committed |</text>
+    <text class="attr" x="80" y="426">aborted</text>
+    <text class="attr" x="66" y="448">snapshot: set of active txids</text>
+  </g>
+
+  <g>
+    <rect x="50" y="530" width="300" height="30" rx="8" fill="#7c3aed" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="200" y="550" text-anchor="middle">IndexEntry</text>
+    <rect x="50" y="560" width="300" height="62" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="66" y="584">key       : indexed value</text>
+    <text class="attr" x="66" y="606">points_to : one RowVersion</text>
+  </g>
+
+  <!-- associations -->
+  <line x1="200" y1="248" x2="200" y2="330" stroke="#93c5fd" stroke-width="1.6" marker-start="url(#dia)"/>
+  <text class="edge-lbl" x="212" y="272">1</text>
+  <text class="edge-lbl" x="212" y="292">0..*</text>
+  <text class="edge-lbl" x="212" y="312">writes / marks</text>
+
+  <line x1="350" y1="600" x2="350" y2="254" stroke="#86efac" stroke-width="1.4" marker-end="url(#arr)"/>
+  <path d="M350 254 L350 240 L352 240" stroke="#86efac" stroke-width="1.4" fill="none"/>
+  <text class="edge-lbl" x="360" y="470">finds the visible</text>
+  <text class="edge-lbl" x="360" y="488">version by walking</text>
+  <text class="edge-lbl" x="360" y="506">the chain</text>
+
+  <!-- self association: version chain -->
+  <path d="M350 150 C 420 150, 420 210, 350 210" fill="none" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="378" y="166">next_older /</text>
+  <text class="edge-lbl" x="378" y="183">next_newer</text>
+
+  <!-- ======================= RIGHT: object diagram ======================= -->
+  <text class="note-h" x="700" y="96">Object diagram — versions of “account 2”</text>
+
+  <!-- v3 -->
+  <g>
+    <rect x="700" y="112" width="240" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="obj-t" x="820" y="132" text-anchor="middle">v3 : RowVersion</text>
+    <rect x="700" y="142" width="240" height="66" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="714" y="164">balance     = 400</text>
+    <text class="attr" x="714" y="184">inserted_by = 13</text>
+  </g>
+  <text class="card-lbl" x="952" y="128">invisible to tx 12</text>
+
+  <!-- v2 -->
+  <g>
+    <rect x="700" y="252" width="240" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="obj-t" x="820" y="272" text-anchor="middle">v2 : RowVersion</text>
+    <rect x="700" y="282" width="240" height="86" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="714" y="304">balance     = 500</text>
+    <text class="attr" x="714" y="324">inserted_by = 11</text>
+    <text class="attr" x="714" y="344">deleted_by  = 13</text>
+  </g>
+  <text class="card-lbl" x="952" y="268">visible to tx 12</text>
+  <text class="small" x="952" y="288">“deleted” only means</text>
+  <text class="small" x="952" y="306">marked by tx 13</text>
+
+  <!-- v1 -->
+  <g>
+    <rect x="700" y="412" width="240" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="obj-t" x="820" y="432" text-anchor="middle">v1 : RowVersion</text>
+    <rect x="700" y="442" width="240" height="86" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="714" y="464">balance     = 500</text>
+    <text class="attr" x="714" y="484">inserted_by = 11</text>
+    <text class="attr" x="714" y="504">deleted_by  = 13</text>
+  </g>
+  <text class="small" x="952" y="430">older history —</text>
+  <text class="small" x="952" y="448">kept until no</text>
+  <text class="small" x="952" y="466">snapshot needs it</text>
+
+  <!-- chain arrows -->
+  <path d="M820 208 L820 248" fill="none" stroke="#86efac" stroke-width="1.6" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="830" y="232">next_older</text>
+  <path d="M820 368 L820 408" fill="none" stroke="#86efac" stroke-width="1.6" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="830" y="392">next_older</text>
+
+  <!-- visibility note -->
+  <rect x="700" y="556" width="500" height="88" rx="10" fill="#1b2438" stroke="#fbbf24" stroke-width="1.3" stroke-dasharray="6 4"/>
+  <text class="note-h" x="716" y="578">Visibility rules (why tx 12 sees v2)</text>
+  <text class="note" x="716" y="598">1. ignore writes of transactions still active at snapshot start</text>
+  <text class="note" x="716" y="616">2. ignore writes of any later txid · 3. ignore aborted writes</text>
+  <text class="note" x="716" y="634">4. everything else is visible — update is never an overwrite</text>
+</svg>
+</div>
+</body>
+</html>

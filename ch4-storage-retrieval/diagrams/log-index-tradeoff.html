@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concept: from append-only log to index</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#f7f2e8;display:flex;justify-content:center;padding:24px;font-family:'Nunito','Vazirmatn',system-ui,sans-serif}
+  .stage{width:100%;max-width:1240px;background:#f7f2e8}
+  svg{display:block;width:100%;height:auto;background:#f7f2e8}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Flow from append-only log through the read problem to adding a derived index, and the index trade-off panel">
+<title>From append-only log to index: the core trade-off</title>
+<text x="620" y="52" text-anchor="middle" font-size="20" font-weight="800">From append-only log to index: the core trade-off</text>
+<rect x="60" y="110" width="300" height="170" rx="18" fill="#ffe08a" stroke="#302828" stroke-width="2.5"/>
+<text x="210" y="152" text-anchor="middle" font-size="18" font-weight="800">Append-only log</text>
+<text x="210" y="182" text-anchor="middle" font-size="14">every db_set appends</text>
+<text x="210" y="210" text-anchor="middle" font-size="14">writes: O(1), sequential</text>
+<text x="210" y="240" text-anchor="middle" font-size="14">reads: full scan O(n)</text>
+<line x1="372" y1="195" x2="428" y2="195" stroke="#302828" stroke-width="3"/>
+<polygon points="428,183 452,195 428,207" fill="#302828"/>
+<text x="400" y="172" text-anchor="middle" font-size="14">cheap writes</text>
+<rect x="460" y="110" width="320" height="170" rx="18" fill="#ffc2da" stroke="#302828" stroke-width="2.5"/>
+<text x="620" y="152" text-anchor="middle" font-size="18" font-weight="800">The read problem</text>
+<text x="620" y="182" text-anchor="middle" font-size="14">db_get scans every line</text>
+<text x="620" y="210" text-anchor="middle" font-size="14">no index, no shortcuts</text>
+<text x="620" y="240" text-anchor="middle" font-size="14">restart = rescan all</text>
+<line x1="792" y1="195" x2="848" y2="195" stroke="#302828" stroke-width="3"/>
+<polygon points="848,183 872,195 848,207" fill="#302828"/>
+<text x="820" y="172" text-anchor="middle" font-size="14">slow reads</text>
+<rect x="860" y="110" width="320" height="170" rx="18" fill="#bfe6c9" stroke="#302828" stroke-width="2.5"/>
+<text x="1030" y="152" text-anchor="middle" font-size="18" font-weight="800">Add a derived index</text>
+<text x="1030" y="182" text-anchor="middle" font-size="14">key-sorted structure</text>
+<text x="1030" y="210" text-anchor="middle" font-size="14">reads: O(log n)</text>
+<text x="1030" y="240" text-anchor="middle" font-size="14">writes update it too</text>
+<rect x="60" y="330" width="1120" height="250" rx="20" fill="#c3ceff" stroke="#302828" stroke-width="2.5"/>
+<text x="620" y="378" text-anchor="middle" font-size="18" font-weight="800">Every index is a trade-off</text>
+<text x="260" y="425" text-anchor="middle" font-size="16" font-weight="800">Reads: faster</text>
+<text x="260" y="455" text-anchor="middle" font-size="14">jump straight to data</text>
+<text x="620" y="425" text-anchor="middle" font-size="16" font-weight="800">Writes: slower</text>
+<text x="620" y="455" text-anchor="middle" font-size="14">index updated per write</text>
+<text x="980" y="425" text-anchor="middle" font-size="16" font-weight="800">Space: bigger</text>
+<text x="980" y="455" text-anchor="middle" font-size="14">a derived copy on disk</text>
+<text x="620" y="530" text-anchor="middle" font-size="15" font-weight="800">No free index: choose by query pattern</text>
+</svg>
+</div>
+</body>
+</html>

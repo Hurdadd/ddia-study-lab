@@ -1,0 +1,292 @@
+/* DDIA Study — shared design system, "Tiimo" direction.
+   Palette extracted from Tiimo's own production CSS (Oct 2026):
+   ink #302828, grounds #f6f5f4/#f8f7f3, greige #e5e0da, brand purple #9278ef,
+   lavenders #bcaaff/#c3ceff, pinks #ffb2da/#ffe0f0, coral #ff7e49, sage #7f9a7a.
+   Warm cream ground, cocoa ink, pastel color-coding per chapter. file:// safe. */
+:root{
+  --ground:#f7f2e8;          /* warm cream paper */
+  --ground-2:#fffdf7;        /* raised card tone */
+  --ground-3:#eee5d3;        /* inset / chip tone */
+  --ink:#302828;             /* Tiimo cocoa ink — all body text */
+  --muted:#6e665c;           /* secondary, ~5:1 on cream */
+  --faint:#9b9184;           /* meta microcopy */
+  --link:#4f44b8;            /* deepened Tiimo purple, readable on cream */
+  --link-hover:#9278ef;      /* Tiimo brand purple */
+  --line:#e2d8c2;            /* hairlines: tables + code only */
+  --measure:72ch;
+  --font-body:'Vazirmatn',Tahoma,system-ui,sans-serif;
+  --font-display:'Nunito','Vazirmatn',system-ui,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.22,.8,.24,1);
+
+  /* per-chapter hue: pastel fill + deep tone. Overridden by html[data-hue]. */
+  --hue:#ffcfb8;
+  --hue-deep:#d95f33;
+}
+html[data-hue="peach"]{--hue:#ffcfb8; --hue-deep:#d95f33}
+html[data-hue="butter"]{--hue:#ffe08a; --hue-deep:#97721a}
+html[data-hue="mint"]{--hue:#bfe6c9; --hue-deep:#2e7d54}
+html[data-hue="sky"]{--hue:#c3ceff; --hue-deep:#3b5fc0}
+html[data-hue="lilac"]{--hue:#d3c3f2; --hue-deep:#6a4fd0}
+html[data-hue="rose"]{--hue:#ffc2da; --hue-deep:#c2437f}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html[lang="en"]{direction:ltr}
+html[lang="fa"]{direction:rtl}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--font-body); font-size:17px; line-height:2;
+  -webkit-font-smoothing:antialiased;
+}
+/* whisper of grain so the cream never looks like flat printer paper */
+body::after{
+  content:""; position:fixed; inset:0; z-index:60; pointer-events:none; opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+}
+::selection{background:#d3c3f2; color:var(--ink)}
+:focus-visible{outline:3px solid #ff7e49; outline-offset:3px; border-radius:8px}
+h1,h2,h3,h4{font-family:var(--font-display); line-height:1.3; letter-spacing:0; text-wrap:balance}
+html[lang="fa"] h1,html[lang="fa"] h2{font-family:var(--font-body); font-weight:900}
+p{margin:.6em 0; max-width:var(--measure)}
+html[lang="en"] body{line-height:1.75}
+a{color:var(--link)}
+a:hover{color:var(--link-hover)}
+.ltr{direction:ltr; unicode-bidi:isolate}
+code,.mono{
+  direction:ltr; unicode-bidi:isolate; display:inline-block;
+  font-family:var(--font-mono); font-size:.84em;
+  background:var(--ground-3); border-radius:8px; padding:0 .45em; color:var(--ink);
+}
+pre{
+  direction:ltr; text-align:left; background:#1a1a1f; color:#f3e9d6;
+  border-radius:16px; padding:18px 20px; overflow:auto;
+  font-family:var(--font-mono); font-size:13.5px; line-height:1.7;
+}
+/* bilingual visibility: the whole i18n system is these two rules */
+html[lang="fa"] .en{display:none !important}
+html[lang="en"] .fa{display:none !important}
+
+/* ---------- top bar ---------- */
+.topbar{
+  display:flex; align-items:center; gap:26px;
+  max-width:1200px; margin:0 auto; padding:22px 24px;
+}
+.wordmark{
+  font-family:var(--font-display); font-weight:900; font-size:20px;
+  letter-spacing:.1em; color:var(--ink); text-decoration:none; white-space:nowrap;
+}
+.wordmark em{color:#ff7e49; font-style:normal}
+.topnav{display:flex; gap:22px; margin-inline-start:auto}
+.topnav a{color:var(--muted); text-decoration:none; font-size:15px; font-weight:700}
+.topnav a:hover{color:var(--ink)}
+.topnav a[aria-current="page"]{color:var(--link)}
+.langbtn{
+  font-family:var(--font-display); font-size:14px; font-weight:800;
+  background:var(--ink); color:var(--ground);
+  border:0; border-radius:999px; padding:9px 22px; cursor:pointer;
+  transition:transform .2s var(--ease), background .2s;
+}
+.langbtn:hover{background:#d95f33; transform:translateY(-1px)}
+.langbtn:active{transform:scale(.96)}
+
+/* ---------- hero + flat pastel blobs ---------- */
+.hero{position:relative; max-width:1200px; margin:0 auto; padding:84px 24px 44px; overflow:clip}
+.blobs{position:absolute; inset:0; pointer-events:none}
+.blobs i{position:absolute; display:block}
+.blobs .b1{width:340px; height:340px; inset-inline-end:-90px; top:-70px; background:#ffe08a; border-radius:46% 54% 58% 42%/48% 44% 56% 52%}
+.blobs .b2{width:150px; height:150px; inset-inline-end:220px; top:170px; background:#ffc2da; border-radius:58% 42% 45% 55%/52% 58% 42% 48%}
+.blobs .b3{width:110px; height:110px; inset-inline-start:6%; bottom:-30px; background:#bfe6c9; border-radius:52% 48% 60% 40%/46% 52% 48% 54%}
+html[lang="en"] .blobs{transform:scaleX(-1)}
+.crumb{position:relative; color:var(--muted); font-size:14.5px; font-weight:700; margin:0 0 18px}
+.crumb a{color:var(--muted); text-decoration:none}
+.crumb a:hover{color:var(--link)}
+.hero h1{position:relative; font-size:clamp(2.6rem,6.5vw,4.6rem); font-weight:900; margin:0 0 12px; max-width:16ch}
+.hero .lede{position:relative; font-size:19px; color:var(--muted); max-width:58ch; margin:0 0 30px}
+html[lang="en"] .hero .lede{font-size:18px; line-height:1.7}
+.actions{position:relative; display:flex; align-items:center; gap:26px; flex-wrap:wrap}
+.btn{
+  display:inline-block; background:var(--ink); color:var(--ground);
+  font-family:var(--font-display); font-weight:800; font-size:16px; text-decoration:none;
+  padding:16px 40px; border-radius:999px;
+  transition:transform .2s var(--ease), background .2s;
+}
+.btn:hover{background:#d95f33; color:#fff8ee; transform:translateY(-2px)}
+.btn:active{transform:scale(.97)}
+.link-arrow{color:var(--ink); text-decoration:none; font-weight:800; font-size:16px}
+.link-arrow:hover{color:var(--link)}
+.meta-row{position:relative; display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:34px; color:var(--faint); font-size:14.5px; font-weight:700}
+.meta-row b{color:var(--ink); font-weight:800}
+.meta-row .dot{color:#ff7e49}
+
+/* ---------- chapter index: numbered rows with pastel chips ---------- */
+.chapters{max-width:1200px; margin:0 auto; padding:30px 24px 20px}
+.chapters-head{display:flex; align-items:baseline; gap:18px; margin-bottom:8px}
+.chapters-head h2{font-size:1.7rem; font-weight:900; margin:0}
+.chapters-head span{color:var(--faint); font-size:14.5px; font-weight:700}
+.chrow{
+  display:grid; grid-template-columns:130px 1fr auto; gap:8px 28px; align-items:center;
+  padding:26px 6px; text-decoration:none; color:inherit;
+  border-top:2px solid var(--line); transition:background .2s var(--ease);
+}
+.chrow:last-child{border-bottom:2px solid var(--line)}
+.chrow:hover{background:var(--ground-2)}
+.chnum{
+  font-family:var(--font-display); font-size:1.9rem; font-weight:900;
+  color:#302828; background:var(--hue);
+  border-radius:26px; text-align:center; padding:10px 0; transition:transform .2s var(--ease);
+}
+.chrow:hover .chnum{transform:rotate(-3deg) scale(1.04)}
+/* Tiimo-style color-coding: each row carries its own pastel */
+.chrow:nth-child(6n+2) .chnum{background:#ffcfb8}
+.chrow:nth-child(6n+3) .chnum{background:#ffe08a}
+.chrow:nth-child(6n+4) .chnum{background:#bfe6c9}
+.chrow:nth-child(6n+5) .chnum{background:#c3ceff}
+.chrow:nth-child(6n+6) .chnum{background:#d3c3f2}
+.chrow:nth-child(6n+7) .chnum{background:#ffc2da}
+.chrow h3{font-size:1.3rem; margin:0 0 6px; font-weight:800}
+.chrow p{margin:0; color:var(--muted); font-size:15.5px; max-width:68ch}
+.chmeta{display:flex; gap:6px; align-items:baseline; color:var(--faint); font-size:13.5px; font-weight:800; white-space:nowrap}
+.chmeta b{color:var(--ink); font-size:1.1rem}
+
+/* ---------- how-it-works: staggered steps ---------- */
+.how{max-width:1200px; margin:0 auto; padding:70px 24px}
+.how h2{font-size:1.7rem; font-weight:900; margin:0 0 34px}
+.step{display:grid; grid-template-columns:130px 1fr; gap:28px; padding:26px 0; border-top:2px solid var(--line); align-items:center}
+.stepnum{font-family:var(--font-display); font-size:1.4rem; font-weight:900; color:#302828; background:var(--hue); border-radius:999px; text-align:center; padding:8px 0}
+.step:nth-child(2) .stepnum{background:#ffcfb8}
+.step:nth-child(3) .stepnum{background:#bfe6c9}
+.step:nth-child(4) .stepnum{background:#c3ceff}
+.step h3{margin:0 0 6px; font-size:1.2rem; font-weight:800}
+.step p{margin:0; color:var(--muted); max-width:64ch}
+
+/* ---------- closing footer ---------- */
+.footer{border-top:2px solid var(--line); margin-top:40px}
+.footer .giant{
+  max-width:1200px; margin:0 auto; padding:64px 24px 10px;
+  font-family:var(--font-display); font-size:clamp(3rem,10vw,8rem); font-weight:900;
+  letter-spacing:.04em; line-height:1; color:var(--ink);
+}
+.footer .giant em{font-style:normal; color:#ff7e49}
+.footer .small{max-width:1200px; margin:0 auto; padding:0 24px 46px; color:var(--faint); font-size:14px; font-weight:700}
+
+/* ---------- chapter page ---------- */
+.doc-hero{max-width:1200px; margin:0 auto; padding:60px 24px 30px; position:relative; overflow:clip}
+.doc-hero h1{position:relative; font-size:clamp(2.2rem,5vw,3.4rem); font-weight:900; margin:0 0 10px; max-width:20ch}
+.doc-hero .lede{position:relative; color:var(--muted); font-size:18px; max-width:62ch}
+.doc-wrap{display:grid; grid-template-columns:280px minmax(0,1fr); gap:44px; max-width:1200px; margin:0 auto; padding:10px 24px 100px}
+.toc{position:sticky; top:20px; align-self:start; max-height:calc(100vh - 40px); overflow:auto; padding-inline-end:8px}
+.toc h3{font-family:var(--font-body); font-size:13px; font-weight:800; color:var(--faint); margin:0 0 10px}
+.toc a{display:block; color:var(--muted); text-decoration:none; font-size:14.5px; font-weight:500; padding:5px 0; line-height:1.8}
+.toc a:hover{color:var(--ink)}
+.toc a.active{color:var(--hue-deep); font-weight:800}
+.toc .lvl2{padding-inline-start:16px; font-size:13.5px}
+.doc{min-width:0}
+.doc section{margin:0 0 88px}
+.doc section > h2{font-size:1.8rem; font-weight:900; margin:0 0 14px; display:flex; gap:16px; align-items:center}
+.secnum{
+  font-family:var(--font-display); font-weight:900; font-size:1.5rem; color:#302828;
+  background:var(--hue); border-radius:20px; min-width:64px; text-align:center; padding:6px 10px;
+}
+.doc h3{font-size:1.25rem; margin:2em 0 .5em; font-weight:800}
+.doc h4{font-size:1.05rem; margin:1.6em 0 .4em}
+.doc ul,.doc ol{margin:.5em 0 1em; padding-inline-start:1.4em}
+.doc li{margin:.3em 0; max-width:var(--measure)}
+.doc table{width:100%; border-collapse:collapse; margin:20px 0; font-size:15px; background:var(--ground-2); border-radius:16px; overflow:hidden}
+.doc th,.doc td{border:1px solid var(--line); padding:10px 14px; text-align:start; vertical-align:top}
+.doc th{background:var(--hue); color:#302828; font-weight:800; font-size:14px; border-color:transparent}
+/* callouts: warm paper panels with the chapter hue as a filled side bar */
+.callout{background:var(--ground-2); border-inline-start:8px solid var(--hue-deep); border-radius:18px; padding:16px 22px; margin:20px 0}
+.callout .tag{font-weight:800; font-size:14.5px; color:var(--hue-deep)}
+.callout.warn{border-inline-start-color:#c2437f}
+.callout.warn .tag{color:#c2437f}
+.callout p,.callout ul{max-width:none}
+.technical-example{scroll-margin-top:24px}
+.technical-example code{max-width:100%; white-space:normal; overflow-wrap:anywhere}
+.technical-example pre code{white-space:pre; max-width:none; background:none; padding:0; color:inherit}
+.teacher{background:var(--ground-2); border-inline-start:8px solid var(--hue); border-radius:18px; padding:18px 24px; margin:20px 0}
+.teacher .tag{font-weight:800; font-size:14.5px; color:var(--hue-deep)}
+/* embedded archify diagrams keep their dark stage — a deliberate contrast */
+.diagram{margin:24px 0; background:#151519; border-radius:20px; overflow:hidden}
+.diagram .cap{
+  display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:14px 20px; color:#c9c5bb; font-size:14.5px; font-weight:700;
+}
+.diagram .cap b{color:#f4f2ec; font-weight:800}
+.diagram .open{color:#ffc9a3; font-size:13.5px; text-decoration:none; white-space:nowrap}
+.diagram .open:hover{text-decoration:underline}
+.diagram iframe{width:100%; height:640px; border:0; display:block; background:#0b111c}
+.doc details{background:var(--ground-2); border-radius:16px; padding:14px 20px; margin:12px 0}
+.doc details summary{cursor:pointer; font-weight:800}
+.doc details summary:hover{color:var(--link)}
+.doc details[open] summary{margin-bottom:.5em; color:var(--link)}
+.doc-nav{display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-top:20px}
+.doc-nav a{color:var(--muted); text-decoration:none; font-weight:800}
+.doc-nav a:hover{color:var(--link)}
+
+/* ---------- motion ---------- */
+.reveal{opacity:0; transform:translateY(20px); transition:opacity .6s var(--ease), transform .6s var(--ease)}
+.reveal.in{opacity:1; transform:none}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .reveal{opacity:1; transform:none; transition:none}
+  *{transition:none !important}
+}
+/* ---------- responsive ---------- */
+@media (max-width:980px){
+  .doc-wrap{grid-template-columns:1fr}
+  .toc{position:static; max-height:none; border-bottom:2px solid var(--line); padding-bottom:16px}
+  .diagram iframe{height:520px}
+  .topnav{display:none}
+  .blobs .b1{width:220px; height:220px}
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  .chrow{grid-template-columns:1fr; gap:8px}
+  .chnum{max-width:110px}
+  .step{grid-template-columns:1fr; gap:8px}
+  .stepnum{max-width:90px}
+  .hero{padding:60px 20px 32px}
+}
+
+/* ---------- dark mode: neutral night, same pastels ---------- */
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#141417;
+  --ground-2:#1d1d22;
+  --ground-3:#2b2b33;
+  --ink:#f4f2ec;
+  --muted:#b8b5ad;
+  --faint:#8b8880;
+  --link:#c3ceff;
+  --link-hover:#e7ebff;
+  --line:#303038;
+}
+html[data-theme="dark"] .callout{border-inline-start-color:var(--hue)}
+html[data-theme="dark"] .callout .tag{color:var(--hue)}
+html[data-theme="dark"] .callout.warn{border-inline-start-color:#ffb2da}
+html[data-theme="dark"] .callout.warn .tag{color:#ffb2da}
+html[data-theme="dark"] .teacher .tag{color:var(--hue)}
+html[data-theme="dark"] .toc a.active{color:var(--hue)}
+html[data-theme="dark"] .btn:hover{background:#ff7e49; color:#241a10}
+html[data-theme="dark"] .langbtn:hover{background:#ff7e49}
+
+/* ---------- theme toggle (icon button beside the language button) ---------- */
+.iconbtn{
+  font-family:var(--font-display);
+  background:transparent; color:var(--ink);
+  border:2px solid var(--line); border-radius:999px; padding:8px 12px; cursor:pointer;
+  display:inline-flex; align-items:center;
+  transition:border-color .2s var(--ease), transform .2s var(--ease);
+}
+.iconbtn:hover{border-color:var(--ink); transform:translateY(-1px)}
+.iconbtn:active{transform:scale(.94)}
+.iconbtn svg{display:block}
+.iconbtn .icon-sun{display:none}
+html[data-theme="dark"] .iconbtn .icon-sun{display:block}
+html[data-theme="dark"] .iconbtn .icon-moon{display:none}
+
+/* ---------- compat: old chapter markup that survived migration ---------- */
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0}
+.cardmini{background:var(--ground-2); border-radius:16px; padding:16px 20px}
+.cardmini h4{margin:.1em 0 .45em; font-size:16px}
+@media (max-width:980px){.grid2{grid-template-columns:1fr}}

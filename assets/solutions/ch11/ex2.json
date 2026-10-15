@@ -1,0 +1,261 @@
+{
+  "alternatives": [
+    {
+      "en": "Broadcast (map-side) join: when the profile side fits in RAM, load it into a hash table once and stream clicks past it — no sort of the big side at all. Wins while profiles fit; loses the day they stop fitting, when you fall back to this solution.",
+      "fa": "join پخشی (سمت-map): وقتی سمت پروفایل در RAM جا می‌شود، یک‌بار در جدول hash بگذار و کلیک‌ها را از کنارش جاری کن — سمت بزرگ اصلاً sort نمی‌شود. تا وقتی پروفایل‌ها جا می‌شوند می‌برد؛ روزی که جا نشوند می‌بازد و به همین حل برمی‌گردی."
+    },
+    {
+      "en": "Mixed-reducer join with profile-first secondary sort: the right answer when one shuffle delivers clicks and profiles interleaved. It pays a stronger sort key to recover streaming; do not pay it for two already-separate files.",
+      "fa": "join میکس-reducer با secondary sortِ profile-first: جواب درست وقتی یک shuffle کلیک‌ها و پروفایل‌ها را درهم می‌رساند. کلید sort قوی‌تر را می‌پردازد تا جاری بودن را پس بگیرد؛ برای دو فایل ازقبل‌جدا آن را نپرداز."
+    }
+  ],
+  "answer_en": "Externally sort both files by user_id with real spills, then streaming-merge the two cursors while holding at most one profile: equality emits (url, dob), clicks without profiles become counted NULLs. Two separately sorted streams need only the join-key order — profile-first secondary sort belongs to the mixed-reducer contract, not here. The top trade-off is I/O for bounded memory: two full sorts cost disk traffic to guarantee O(1) join state.",
+  "answer_fa": "هر دو فایل را با spill واقعی بر اساس user_id مرتب بیرونی کن، بعد دو cursor را با نگه‌داشتن حداکثر یک پروفایل ادغام جاری کن: تساوی (url, dob) می‌دهد و کلیک‌های بدون پروفایل NULL شمارش‌شده می‌شوند. دو جریان مرتبِ جدا فقط ترتیب کلید join را لازم دارند — secondary sortِ profile-first مال قرارداد mixed-reducer است نه این‌جا. تریدآف اصلی I/O در برابر حافظه کران‌دار است: دو sort کامل ترافیک دیسک می‌پردازند تا حالت join از نوع O(1) تضمین شود.",
+  "assumptions": [
+    {
+      "en": "Teaching files: 30,000 clicks over 3,500 ids, 3,000 unique profiles (user_id,dob) — both exceed the 1,000-row chunk cap, so spills are real, not staged.",
+      "fa": "فایل‌های آموزشی: ۳۰٬۰۰۰ کلیک روی ۳٬۵۰۰ شناسه و ۳٬۰۰۰ پروفایل یکتا (user_id,dob) — هر دو از سقف chunk هزارسطری می‌گذرند پس spill واقعی است نه نمایشی."
+    },
+    {
+      "en": "One unique profile per user, declared up front; history and duplicates are handled as explicit failure cases, not silent fan-out.",
+      "fa": "یک پروفایل یکتا به‌ازای هر کاربر که از اول اعلام شده؛ تاریخچه و تکراری‌ها حالت خرابی صریح‌اند نه fan-out بی‌صدا."
+    },
+    {
+      "en": "Left-join semantics: every click emits exactly once, with NULL plus a counter when its profile is missing.",
+      "fa": "معنای left-join: هر کلیک دقیقاً یک‌بار می‌دهد، با NULL به‌علاوه شمارنده وقتی پروفایلش نیست."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n\n// Teaching demo: sort-merge join on two files bigger than the memory cap.\n// clicks(user_id,url,ts) + profiles(user_id,dob), one unique profile per\n// user. Each side is externally sorted by user_id (bounded chunk, spill to\n// temp files), then a streaming merge holds AT MOST one profile record in\n// memory and emits (url,dob) per visit. Missing profiles are counted, not\n// silently dropped. Two separately sorted streams: NO secondary sort needed.\npublic class SortMergeJoinDemo {\n    static final int CLICKS = 30_000, USERS = 3_000, CHUNK = 1_000;\n\n    public static void main(String[] a) throws Exception {\n        Random rnd = new Random(12);\n        java.nio.file.Path clickFile = java.nio.file.Files.createTempFile(\"clicks\", \".csv\");\n        java.nio.file.Path profFile = java.nio.file.Files.createTempFile(\"profiles\", \".csv\");\n        List<String> buf = new ArrayList<>();\n        for (int i = 0; i < CLICKS; i++)\n            buf.add((rnd.nextInt(USERS + 500)) + \",/p/\" + rnd.nextInt(400) + \",\" + (1_700_000_000L + i));\n        java.nio.file.Files.write(clickFile, buf);\n        buf.clear();\n        for (int u = 0; u < USERS; u++) buf.add(u + \",1990-01-\" + String.format(\"%02d\", 1 + (u % 28)));\n        java.nio.file.Files.write(profFile, buf);\n\n        java.nio.file.Path sortedClicks = externalSort(clickFile);\n        java.nio.file.Path sortedProfiles = externalSort(profFile);\n\n        // Streaming merge: advance the lagging cursor; equality emits.\n        var clicks = java.nio.file.Files.newBufferedReader(sortedClicks);\n        var profs = java.nio.file.Files.newBufferedReader(sortedProfiles);\n        String c = clicks.readLine(), p = profs.readLine();\n        long emitted = 0, missing = 0, heldProfiles = 0, maxHeld = 0;\n        String heldDob = null;\n        int heldUser = -1;\n        List<String> sample = new ArrayList<>();\n        while (c != null && p != null) {\n            int cu = Integer.parseInt(c.split(\",\")[0]);\n            int pu = Integer.parseInt(p.split(\",\")[0]);\n            if (cu == pu) {\n                heldUser = pu; heldDob = p.split(\",\")[1]; heldProfiles = 1;\n                maxHeld = Math.max(maxHeld, heldProfiles);\n                emitted++;\n                if (sample.size() < 3) sample.add(c.split(\",\")[1] + \" -> \" + heldDob);\n                c = clicks.readLine();\n            } else if (cu < pu) {\n                missing++; // click whose profile id is absent on the profile side\n                c = clicks.readLine();\n            } else {\n                p = profs.readLine(); // profile with no clicks: skip\n            }\n        }\n        while (c != null) { missing++; c = clicks.readLine(); }\n        clicks.close(); profs.close();\n\n        System.out.println(\"clicks=\" + CLICKS + \" profiles=\" + USERS\n            + \" chunk_cap=\" + CHUNK + \" (both files exceed it: real spill)\");\n        for (String s : sample) System.out.println(\"emit \" + s);\n        System.out.println(\"emitted=\" + emitted + \" missing_profile=\" + missing\n            + \" max_profiles_held=\" + maxHeld);\n        System.out.println(\"OK\");\n    }\n\n    static java.nio.file.Path externalSort(java.nio.file.Path in) throws Exception {\n        List<java.nio.file.Path> runs = new ArrayList<>();\n        List<String> chunk = new ArrayList<>(CHUNK);\n        for (String line : java.nio.file.Files.readAllLines(in)) {\n            chunk.add(line);\n            if (chunk.size() == CHUNK) runs.add(spill(chunk));\n        }\n        if (!chunk.isEmpty()) runs.add(spill(chunk));\n        Comparator<String> byUser = Comparator.comparingInt(s -> Integer.parseInt(s.split(\",\")[0]));\n        if (runs.size() == 1) return runs.get(0);\n        // K-way merge of runs into one sorted file.\n        java.nio.file.Path out = java.nio.file.Files.createTempFile(\"sorted\", \".csv\");\n        List<java.io.BufferedReader> brs = new ArrayList<>();\n        PriorityQueue<String[]> pq = new PriorityQueue<>((x, y) -> byUser.compare(x[0], y[0]));\n        for (java.nio.file.Path p : runs) {\n            var br = java.nio.file.Files.newBufferedReader(p);\n            brs.add(br);\n            String h = br.readLine();\n            if (h != null) pq.add(new String[]{h, String.valueOf(brs.size() - 1)});\n        }\n        var w = java.nio.file.Files.newBufferedWriter(out);\n        while (!pq.isEmpty()) {\n            String[] e = pq.poll();\n            w.write(e[0]); w.newLine();\n            var br = brs.get(Integer.parseInt(e[1]));\n            String h = br.readLine();\n            if (h != null) pq.add(new String[]{h, e[1]});\n        }\n        w.close();\n        for (var br : brs) br.close();\n        return out;\n    }\n\n    static java.nio.file.Path spill(List<String> chunk) throws Exception {\n        chunk.sort(Comparator.comparingInt(s -> Integer.parseInt(s.split(\",\")[0])));\n        java.nio.file.Path p = java.nio.file.Files.createTempFile(\"run\", \".csv\");\n        java.nio.file.Files.write(p, chunk);\n        chunk.clear();\n        p.toFile().deleteOnExit();\n        return p;\n    }\n}\n",
+    "expected_en": "clicks=30000 profiles=3000 chunk_cap=1000 (both files exceed it: real spill); three sample emits such as /p/203 -> 1990-01-01; emitted=25692 missing_profile=4308 max_profiles_held=1; OK. (actual output of this environment)",
+    "expected_fa": "clicks=30000 profiles=3000 chunk_cap=1000 (هر دو فایل می‌گذرند: spill واقعی)؛ سه نمونه مثل <code>/p/203 -&gt; 1990-01-01</code>؛ emitted=25692 missing_profile=4308 max_profiles_held=1؛ OK. (خروجی واقعی همین محیط)",
+    "lang": "java",
+    "run_en": "javac SortMergeJoinDemo.java && java SortMergeJoinDemo — stdlib Java only.",
+    "run_fa": "javac SortMergeJoinDemo.java && java SortMergeJoinDemo — فقط استاندارد جاوا.",
+    "status": "verified"
+  },
+  "design_en": "<p><b>Formats:</b> clicks <code>user_id,url,ts</code>, profiles <code>user_id,dob</code>; sort key <code>user_id</code> on both sides; spill runs are sorted CSV temp files.</p><p><b>Merge:</b> two file cursors; advance the lagging side; on equality hold one profile and emit per click; missing clicks go to the NULL counter, profiles without clicks are skipped.</p><p><b>Skew and history:</b> hot users split by salt with a combine step (priced openly); versioned profiles join by the live-at-ts rule declared before the run.</p>",
+  "design_fa": "<p><b>فرمت‌ها:</b> کلیک‌ها <code>user_id,url,ts</code> و پروفایل‌ها <code>user_id,dob</code>؛ کلید sort هر دو سمت <code>user_id</code>؛ runهای spill فایل‌های موقت CSV مرتب‌اند.</p><p><b>ادغام:</b> دو cursor فایلی؛ سمت عقب‌مانده جلو می‌رود؛ روی تساوی یک پروفایل نگه داشته و به‌ازای هر کلیک می‌دهد؛ کلیک‌های بی‌پروفایل به شمارنده NULL می‌روند و پروفایل‌های بدون کلیک رد می‌شوند.</p><p><b>چولگی و تاریخچه:</b> کاربران داغ با salt شکافته و با گام combine جمع می‌شوند (با قیمت علنی)؛ پروفایل‌های نسخه‌دار با قاعده live-at-ts که قبل از اجرا اعلام شده join می‌شوند.</p>",
+  "diagrams": [
+    {
+      "caption_en": "Two separately sorted streams, one streaming merge, one profile held",
+      "caption_fa": "دو جریان مرتبِ جدا، یک ادغام جاری و یک پروفایل نگه‌داشته",
+      "file": "diagrams/sol2-step1-two-stream-merge.html",
+      "height": 640,
+      "kind_en": "dataflow",
+      "kind_fa": "جریان‌داده",
+      "made": "archify",
+      "narration": {
+        "failure_en": "If a click's profile never arrives, the merge must not stall: the lagging cursor advances and the click lands in the counted bin. Trace that dashed edge — silence there would be data loss.",
+        "failure_fa": "اگر پروفایل کلیکی هرگز نرسد ادغام نباید بایستد: cursor عقب‌مانده جلو می‌رود و کلیک در bin شمارش‌شده می‌نشیند. آن یال خط‌چین را دنبال کن — سکوت آن‌جا یعنی از دست رفتن داده.",
+        "guarantee_en": "The figure shows both real spills, the two-cursor walk, and the O(1) profile invariant. It does not show skew handling or versioned history — those arrive in the assembly.",
+        "guarantee_fa": "شکل هر دو spill واقعی، قدم‌زدن دو cursor و ناوردای پروفایل O(1) را نشان می‌دهد. چولگی و تاریخچه نسخه‌دار را نشان نمی‌دهد — آن‌ها در اسمبلی می‌آیند.",
+        "nonguarantee_en": "It promises nothing about the mixed single-stream contract: no profile-first ordering appears here, deliberately.",
+        "nonguarantee_fa": "درباره قرارداد تک‌جریان میکس قولی نمی‌دهد: هیچ ترتیب profile-first این‌جا نیست، عمداً.",
+        "point_en": "The decision point is the merge box: two cursors plus one held profile is the whole join state — anything more is a different design.",
+        "point_fa": "نقطه تصمیم جعبه ادغام است: دو cursor به‌علاوه یک پروفایل نگه‌داشته کل حالت join است — هرچه بیشتر طراحی دیگری است.",
+        "scenario_en": "Two files, each bigger than memory. Sort each by user_id with spills, then walk both orders with two cursors.",
+        "scenario_fa": "دو فایل که هرکدام از حافظه بزرگ‌ترند. هرکدام را با spill بر اساس user_id مرتب کن، بعد هر دو ترتیب را با دو cursor قدم بزن.",
+        "steps": [
+          {
+            "en": "Sort both sides by user_id: bounded chunks, real spills, one sorted order each.",
+            "fa": "مرتب‌سازی هر دو سمت بر اساس user_id: chunkهای کران‌دار، spill واقعی و یک ترتیب مرتب برای هرکدام."
+          },
+          {
+            "en": "Walk with two cursors: advance the lagging side; equality holds one profile and emits per click.",
+            "fa": "قدم‌زدن با دو cursor: سمت عقب‌مانده جلو می‌رود؛ تساوی یک پروفایل نگه می‌دارد و به‌ازای هر کلیک می‌دهد."
+          },
+          {
+            "en": "Count the missing: clicks without profiles become NULLs with a counter, never silence.",
+            "fa": "شمارش گمشده‌ها: کلیک‌های بدون پروفایل NULL با شمارنده می‌شوند، هرگز سکوت نه."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Both sides sorted by user_id, two cursors walking, at most one profile held, missing counted.",
+        "a_fa": "هر دو سمت مرتب بر اساس user_id، دو cursor قدم‌زننده، حداکثر یک پروفایل نگه‌داشته و گمشده‌ها شمارش‌شده.",
+        "q_en": "What is the maximum join state, and where do missing profiles go?",
+        "q_fa": "حداکثر حالت join چقدر است و پروفایل‌های گمشده کجا می‌روند؟"
+      },
+      "source": ".archify/dataflow-ch11-sol2-streams-20261014-222102"
+    },
+    {
+      "caption_en": "One mixed stream per reducer: profile-first ordering or buffering",
+      "caption_fa": "یک جریان میکس به‌ازای هر reducer: ترتیب profile-first یا بافرینگ",
+      "file": "diagrams/sol2-step2-mixed-reducer.html",
+      "height": 640,
+      "kind_en": "dataflow",
+      "kind_fa": "جریان‌داده",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Take the dashed branch without a bound and a huge group overflows the buffer — the same OOM in a new place. The diagram prices buffering as memory risk, not as a free default.",
+        "failure_fa": "شاخه خط‌چین را بدون کران بگیر و گروه عظیم بافر را لبریز می‌کند — همان OOM در جای تازه. شکل بافرینگ را ریسک حافظه قیمت می‌گذارد نه پیش‌فرض رایگان.",
+        "guarantee_en": "The figure shows exactly where profile-first avoids buffering (mixed groups) and where it is unnecessary (separate streams). It does not claim one contract is always better.",
+        "guarantee_fa": "شکل دقیقاً نشان می‌دهد profile-first کجا بافرینگ را حذف می‌کند (گروه‌های میکس) و کجا لازم نیست (جریان‌های جدا). ادعا نمی‌کند یک قرارداد همیشه بهتر است.",
+        "nonguarantee_en": "Group-size distribution and sort-key CPU costs are outside this frame — measured per workload.",
+        "nonguarantee_fa": "توزیع اندازه گروه و هزینه CPU کلید sort بیرون این قاب‌اند — per-workload اندازه‌گیری می‌شوند.",
+        "point_en": "The decision point is the contract, named before the mechanism: mixed stream means order-or-buffer; separate streams mean join keys suffice.",
+        "point_fa": "نقطه تصمیم قرارداد است که قبل از سازوکار نام برده می‌شود: جریان میکس یعنی ترتیب-یا-بافر؛ جریان‌های جدا یعنی کلیدهای join کافی‌اند.",
+        "scenario_en": "One shuffle delivers clicks and profiles interleaved to a single reducer. Arrival order inside the group is arbitrary.",
+        "scenario_fa": "یک shuffle کلیک‌ها و پروفایل‌ها را درهم به یک reducer می‌رساند. ترتیب رسیدن داخل گروه دلخواه است.",
+        "steps": [
+          {
+            "en": "Partition by user_id: each reducer owns whole groups, but order inside is arbitrary.",
+            "fa": "پارتیشن بر اساس user_id: هر reducer مالک کل گروه‌هاست ولی ترتیب داخل دلخواه است."
+          },
+          {
+            "en": "Upper branch: secondary sort puts the profile first, then clicks by ts — the reducer streams again.",
+            "fa": "شاخه بالا: secondary sort پروفایل را اول و بعد کلیک‌ها را با ts می‌گذارد — reducer دوباره جاری می‌شود."
+          },
+          {
+            "en": "Lower branch: without the ordering, clicks wait in a buffer until the profile lands — bounded or risky.",
+            "fa": "شاخه پایین: بدون آن ترتیب، کلیک‌ها تا رسیدن پروفایل در بافر می‌مانند — کران‌دار یا پرریسک."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Mixed stream: profile-first secondary sort streams with O(1) state; otherwise buffer clicks with an explicit bound.",
+        "a_fa": "جریان میکس: secondary sortِ profile-first با حالت O(1) جاری می‌شود؛ وگرنه کلیک‌ها با کران صریح بافر می‌شوند.",
+        "q_en": "Where does profile-first ordering avoid buffering, and where is it unnecessary?",
+        "q_fa": "ترتیب profile-first کجا بافرینگ را حذف می‌کند و کجا لازم نیست؟"
+      },
+      "source": ".archify/dataflow-ch11-sol2-mixed-20261014-222103"
+    },
+    {
+      "caption_en": "The whole join: sorted merge, version rule, counted missing",
+      "caption_fa": "کل join: ادغام مرتب، قاعده نسخه و گمشده شمارش‌شده",
+      "file": "diagrams/sol2-join-assembly.html",
+      "height": 640,
+      "kind_en": "dataflow",
+      "kind_fa": "جریان‌داده",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Break uniqueness with duplicate profiles and equality fans out: the merge emits one row per profile copy. The declared precondition plus a dedupe assert is the guard — trace where it would fire.",
+        "failure_fa": "یکتایی را با پروفایل تکراری بشکن و تساوی fan-out می‌کند: ادغام به‌ازای هر کپی پروفایل یک سطر می‌دهد. پیش‌شرط اعلام‌شده به‌علاوه assertِ dedupe نگهبان است — دنبال کن کجا شلیک می‌کند.",
+        "guarantee_en": "The assembly composes both steps plus history and skew: same boxes, same labels, one invariant end to end. It still measures nothing — the demo carries the numbers.",
+        "guarantee_fa": "اسمبلی هر دو گام را به‌علاوه تاریخچه و چولگی ترکیب می‌کند: همان جعبه‌ها، همان برچسب‌ها و یک ناوردا سرتاسری. هنوز چیزی اندازه نمی‌گیرد — عددها با دموست.",
+        "nonguarantee_en": "Salt factors and version-resolution costs are workload-measured, not diagrammed.",
+        "nonguarantee_fa": "فاکتور salt و هزینه حل نسخه workload-measured است نه نمودارشده.",
+        "point_en": "The decision points are the two new boxes: the version rule (which profile a click joins) and the missing bin (what absence means).",
+        "point_fa": "نقطه‌های تصمیم دو جعبه تازه‌اند: قاعده نسخه (کلیک به کدام پروفایل وصل می‌شود) و bin گمشده (نبودن یعنی چه).",
+        "scenario_en": "The full pipeline in one frame: sort both, resolve versions, merge, emit or count.",
+        "scenario_fa": "کل pipeline در یک قاب: هر دو را مرتب کن، نسخه‌ها را حل کن، ادغام کن، بده یا بشمار.",
+        "steps": [
+          {
+            "en": "Sort both sides and resolve history: each click meets the profile live at its ts.",
+            "fa": "مرتب‌سازی هر دو سمت و حل تاریخچه: هر کلیک به پروفایل زنده در ts خودش می‌رسد."
+          },
+          {
+            "en": "Merge with one profile held and count the missing on the side.",
+            "fa": "ادغام با یک پروفایل نگه‌داشته و شمارش گمشده‌ها در کنار."
+          },
+          {
+            "en": "Skew rides along as priced work: salt the heavy key, join parts, combine.",
+            "fa": "چولگی به‌عنوان کار قیمت‌گذاشته‌شده همراه است: کلید سنگین را salt بزن، تکه‌ها را join کن و combine کن."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Sorted merge plus a declared version rule plus a counted missing bin, with skew priced as salt-and-combine.",
+        "a_fa": "ادغام مرتب به‌علاوه قاعده نسخه اعلام‌شده به‌علاوه bin گمشده شمارش‌شده، با چولگی قیمت‌گذاشته‌شده به‌صورت salt-and-combine.",
+        "q_en": "What do the two assembly-only boxes decide?",
+        "q_fa": "دو جعبه فقط-اسمبلی چه چیزی را تصمیم می‌گیرند؟"
+      },
+      "source": ".archify/dataflow-ch11-sol2-full-20261014-222104"
+    }
+  ],
+  "failures": [
+    {
+      "en": "Duplicate profiles break declared uniqueness: equality fans out into several rows per click. Guard with a dedupe assert on the profile side before the merge, and fail the job — never emit the fan-out silently.",
+      "fa": "پروفایل تکراری یکتایی اعلام‌شده را می‌شکند: تساوی به چند سطر به‌ازای هر کلیک fan-out می‌کند. نگهبان assertِ dedupe روی سمت پروفایل قبل از ادغام است و job را بینداز — هرگز fan-out را بی‌صدا نده."
+    },
+    {
+      "en": "Hot-user skew: one user owns a huge click share and its join worker stalls while others idle. Guard by measuring key distribution, salting the heavy key, joining parts, then combining — priced, not hidden.",
+      "fa": "چولگی کاربر داغ: یک کاربر سهم عظیم کلیک دارد و worker joinش می‌خوابد ولی بقیه بیکارند. نگهبان اندازه‌گیری توزیع کلید، salt زدن کلید سنگین، join تکه‌ها و بعد combine است — قیمت‌گذاشته‌شده نه پنهان."
+    },
+    {
+      "en": "Versioned history without a rule: several profiles share one user and the join is undefined. Guard with the live-at-ts rule declared before the run; without it, stop instead of joining.",
+      "fa": "تاریخچه نسخه‌دار بدون قاعده: چند پروفایل یک کاربر را شریک‌اند و join تعریف‌نشده است. نگهبان قاعده live-at-ts اعلام‌شده قبل از اجراست؛ بدون آن به‌جای join بایست."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "Join each click to the profile version live at its ts: order each user's profiles by validity interval and pick the one containing the click ts. Clicks outside every interval go to the missing bin with a version-miss counter (separate from never-had-profile), and overlapping intervals fail the job — they mean the history itself is corrupt.",
+      "a_fa": "هر کلیک را به نسخه پروفایل زنده در ts خودش وصل کن: پروفایل‌های هر کاربر را با بازه اعتبار مرتب کن و آنی که ts کلیک را دارد بردار. کلیک‌های بیرون همه بازه‌ها به bin گمشده با شمارنده version-miss می‌روند (جدا از هرگز-پروفایل-نداشته) و بازه‌های هم‌پوشان job را می‌اندازند — یعنی خود تاریخچه خراب است.",
+      "level": "senior",
+      "q_en": "With multiple historical profiles per user, which version belongs to a click?",
+      "q_fa": "اگر برای هر کاربر چند نسخه پروفایل تاریخی باشد، کدام نسخه به کلیک وصل می‌شود؟"
+    },
+    {
+      "a_en": "In the mixed stream without profile-first, the reducer must buffer clicks until the profile arrives — so bound the buffer (spill it past N groups, fail past M bytes) and monitor its high-water mark. The breakage of skipping the ordering is exact: unbounded groups, unbounded memory, then OOM at the worst moment.",
+      "a_fa": "در جریان میکس بدون profile-first، reducer باید کلیک‌ها را تا رسیدن پروفایل بافر کند — پس بافر را کران بده (بعد از N گروه spill کن و بعد از M بایت بینداز) و high-water mark را رصد کن. شکستِ رد کردن ترتیب دقیق است: گروه‌های بی‌کران، حافظه بی‌کران و بعد OOM در بدترین لحظه.",
+      "level": "staff",
+      "q_en": "In a mixed reducer stream without profile-first ordering, where exactly does it break?",
+      "q_fa": "در جریان mixed-reducer بدون ترتیب profile-first، دقیقاً کجا می‌شکنی؟"
+    }
+  ],
+  "interview_q_en": "Externally sort and merge clicks with one unique profile per user. Define missing-profile behavior and skew. Contrast this with a mixed reducer stream that needs profile-first ordering or buffering; explain the different contracts.",
+  "interview_q_fa": "کلیک‌های بزرگ و یک پروفایل یکتا به‌ازای user را با external sort و streaming merge join ترکیب کن. null/missing profile و skew را تعریف کن. سپس ورودی mixed reducer را مقایسه کن که در آن profile-first secondary sort یا buffering لازم است؛ تفاوت دو قرارداد را بگو.",
+  "mental_en": "A join aligns two ordered lines by key: two cursors walk forward, the lagging side catches up, equality emits. Sorting is what makes the lines walkable; the merge itself never looks back.",
+  "mental_fa": "join دو خط مرتب را با کلید هم‌تراز می‌کند: دو cursor جلو می‌روند، سمت عقب‌مانده جبران می‌کند و تساوی می‌دهد. مرتب‌سازی است که خط‌ها را قدم‌زدنی می‌کند؛ خود ادغام هرگز به عقب نگاه نمی‌کند.",
+  "mistakes": [
+    {
+      "en": "Demanding profile-first secondary sort for two separately sorted streams. It adds sort work for zero correctness gain: the merge only compares join keys. Profile-first belongs to the mixed single-stream contract — say exactly where each breaks instead of applying one rule everywhere.",
+      "fa": "الزام secondary sortِ profile-first برای دو جریان مرتبِ جدا. کار sort اضافه می‌کند با صفر سود درستی: ادغام فقط کلیدهای join را مقایسه می‌کند. profile-first مال قرارداد تک‌جریان میکس است — به‌جای اعمال یک قاعده همه‌جا بگو هرکدام دقیقاً کجا می‌شکنند."
+    },
+    {
+      "en": "Silently dropping clicks without profiles. Absence is a business fact (deleted user, late dimension) — emit NULL, count it, alert on its ratio.",
+      "fa": "انداختن بی‌صدای کلیک‌های بدون پروفایل. نبودن یک واقعیت کسب‌وکاری است (کاربر حذف‌شده، بعدِ دیررس) — NULL بده، بشمار و روی نسبتش هشدار بده."
+    },
+    {
+      "en": "Holding every profile in memory because 'dimensions are small'. Small today is big next quarter: the merge holds one profile by construction, so growth never revisits this decision.",
+      "fa": "نگه‌داشتن همه پروفایل‌ها در حافظه چون «بعدها کوچک‌اند». کوچکِ امروز بزرگِ فصل بعد است: ادغام ذاتاً یک پروفایل نگه می‌دارد پس رشد هرگز این تصمیم را برنمی‌گرداند."
+    }
+  ],
+  "number": 2,
+  "slug": "sort-merge-join",
+  "sources": [
+    "microsoft",
+    "atlassian"
+  ],
+  "steps": [
+    {
+      "en": "State left-join semantics and profile uniqueness before touching data: every click emits once, missing means NULL plus a counter.",
+      "fa": "قبل از دست زدن به داده معنای left-join و یکتایی پروفایل را اعلام کن: هر کلیک یک‌بار می‌دهد و گمشده یعنی NULL به‌علاوه شمارنده.",
+      "t_en": "Declare uniqueness and join type",
+      "t_fa": "اعلام یکتایی و نوع join"
+    },
+    {
+      "en": "Sort each side by user_id with bounded chunks and real spills; each side yields exactly one ordered stream.",
+      "fa": "هر سمت را بر اساس user_id با chunkهای کران‌دار و spill واقعی مرتب کن؛ هر سمت دقیقاً یک جریان مرتب می‌دهد.",
+      "t_en": "Sort both past memory",
+      "t_fa": "مرتب‌سازی هر دو آن‌سوی حافظه"
+    },
+    {
+      "en": "Walk both orders with two cursors: advance the lagging side, hold at most one profile, emit (url, dob) on equality, count the missing.",
+      "fa": "هر دو ترتیب را با دو cursor قدم بزن: سمت عقب‌مانده را جلو ببر، حداکثر یک پروفایل نگه دار، روی تساوی (url, dob) بده و گمشده‌ها را بشمار.",
+      "t_en": "Merge with one profile held",
+      "t_fa": "ادغام با یک پروفایل نگه‌داشته"
+    },
+    {
+      "en": "Contrast the mixed stream: one interleaved input per reducer needs profile-first secondary sort — or explicit buffering with a bound. Two separate streams need neither.",
+      "fa": "جریان میکس را مقایسه کن: یک ورودی درهم به‌ازای هر reducer ترتیب profile-first می‌خواهد — یا بافرینگ صریح با کران. دو جریان جدا هیچ‌کدام را نمی‌خواهند.",
+      "t_en": "Contrast the mixed contract",
+      "t_fa": "مقایسه قرارداد میکس"
+    },
+    {
+      "en": "Price skew with salt-and-combine and settle history with the live-at-ts rule; both declared before the run, both monitored during it.",
+      "fa": "چولگی را با salt-and-combine قیمت بگذار و تاریخچه را با قاعده live-at-ts فیصله بده؛ هر دو قبل از اجرا اعلام و حین آن رصد می‌شوند.",
+      "t_en": "Skew and history, priced",
+      "t_fa": "چولگی و تاریخچه، قیمت‌گذاشته"
+    }
+  ],
+  "tests_en": "Assert emitted plus missing equals total clicks; assert each run file is sorted; assert max profiles held equals one; run twice for determinism; alert when the missing ratio crosses its threshold; fail on duplicate profile keys.",
+  "tests_fa": "assert کن emitted به‌علاوه missing برابر جمع کلیک‌هاست؛ assert کن هر فایل run مرتب است؛ assert کن حداکثر پروفایل نگه‌داشته برابر یک است؛ برای قطعیت دو بار اجرا کن؛ وقتی نسبت missing از آستانه گذشت هشدار بده؛ روی کلید پروفایل تکراری بینداز.",
+  "worked_en": "<p>Demo numbers (teaching, this environment): 30,000 clicks, 3,000 profiles, chunk cap 1,000 rows → real spills on both sides. Emitted 25,692 visits, 4,308 counted missing, <code>max_profiles_held=1</code>.</p><p>Interpretation: completeness first (emitted plus missing equals clicks), then the invariant (one profile), then cost (spill I/O). Sample emits read <code>/p/203 -&gt; 1990-01-01</code>.</p>",
+  "worked_fa": "<p>عددهای دمو (آموزشی، همین محیط): ۳۰٬۰۰۰ کلیک، ۳٬۰۰۰ پروفایل، سقف chunk هزار سطر ← spill واقعی هر دو سمت. ۲۵٬۶۹۲ بازدید داده شد و ۴٬۳۰۸ گمشده شمارش شد با <code>max_profiles_held=1</code>.</p><p>تفسیر: اول تمامیت (emitted به‌علاوه missing برابر کلیک‌ها)، بعد ناوردا (یک پروفایل) و بعد هزینه (I/O اسپیل). نمونه‌ها مثل <code>/p/203 -&gt; 1990-01-01</code> خوانده می‌شوند.</p>",
+  "lab_fa": "<p>دو CSV کلیک (user_id,url,ts) و پروفایل یکتا (user_id,dob) بساز که از سقف chunk مرتب‌سازی بزرگ‌تر باشند. هر دو را با spill به دیسک برحسب user_id مرتب کن و با دو cursor، left join بده؛ پروفایل گمشده NULL و metric دارد. توضیح بده چرا join به O(1) state پروفایل نیاز دارد ولی حافظهٔ sort و merge fan-in جدا محاسبه می‌شود. سپس یک جریان mixed reducer بساز که در آن کلیک پیش از پروفایل می‌رسد و هزینهٔ buffering را با profile-first secondary sort مقایسه کن. ترتیب ts فقط اگر خروجی آن را بخواهد لازم است. skew و پروفایل تکراری را آزمایش و سیاست رد یا تجمیع آن را صریح تعیین کن.</p>",
+  "lab_en": "<p>Create clicks (user_id,url,ts) and unique profiles (user_id,dob) CSVs larger than the sort chunk limit. Externally sort both by user_id with real disk spills, then left-join using two cursors; emit NULL and a metric for missing profiles. Explain O(1) profile state while accounting separately for sort memory and merge fan-in. Contrast a mixed reducer receiving clicks before profiles: compare buffering with profile-first secondary sort. Timestamp order is required only if the output contract demands it. Test skew and duplicate profiles with an explicit reject/aggregation policy.</p>",
+  "reasoning_fa": "<p>در دو جریان جدا، cursor پروفایل را تا user_id کلیک جلو می‌بریم؛ یکتایی پروفایل یعنی فقط یک رکورد لازم است. این O(1) دربارهٔ state join است، نه همهٔ حافظهٔ external sort. در mixed stream، کلیک زودرس بدون پروفایل نیاز به نگهداری دارد؛ profile-first همین buffering را حذف می‌کند. ۳۰هزار و سه‌هزار رکورد از chunk هزارسطری بزرگ‌ترند تا spill واقعی رخ دهد. duplicate profile فرض یکتایی را می‌شکند و باید با قرارداد جدا حل شود.</p>",
+  "reasoning_en": "<p>With separate streams, advance the profile cursor to the click’s user_id; unique profiles require one retained record. O(1) describes join state, not all external-sort memory. Early clicks in a mixed stream need buffering until their profile arrives; profile-first removes that buffering. Thirty thousand and three thousand records exceed the 1k-row chunk to force spills. Duplicate profiles violate the uniqueness premise and need a separate policy.</p>"
+}

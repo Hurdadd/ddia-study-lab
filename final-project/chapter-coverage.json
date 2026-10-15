@@ -1,0 +1,282 @@
+[
+  {
+    "chapter": 1,
+    "source": "../ch1-tradeoffs/index.html",
+    "concepts": [
+      {
+        "topic_fa": "مرجع/مشتق، OLTP/OLAP، ETL/reverse ETL",
+        "topic_en": "Record/derived, OLTP/OLAP, ETL/reverse ETL",
+        "decision_fa": "run و policy مرجع؛ retrieval و dashboard مشتق؛ تحلیل offline از manifest پایدار.",
+        "decision_en": "Runs/policies are records; retrieval/dashboards are derived; offline analytics use stable manifests."
+      },
+      {
+        "topic_fa": "build/buy، کلاود، توزیع، microservice/serverless",
+        "topic_en": "Build/buy, cloud, distribution, microservices/serverless",
+        "decision_fa": "adapter و engine موجود؛ worker جدا برای کار طولانی؛ استقرار اولیه محدود و تصمیمِ توزیع مستند.",
+        "decision_en": "Use existing adapters/engines; separate long-running workers; document initial deployment/distribution decisions."
+      }
+    ],
+    "evidence_fa": "یک ADR با دو گزینه و هزینه/latency/پیچیدگی بنویس.",
+    "evidence_en": "Write an ADR comparing two options on cost, latency, and complexity."
+  },
+  {
+    "chapter": 2,
+    "source": "../ch2-nonfunctional/index.html",
+    "concepts": [
+      {
+        "topic_fa": "response time، throughput، percentile، tail latency",
+        "topic_en": "Response time, throughput, percentiles, tail latency",
+        "decision_fa": "admission و completion جدا؛ صف، p95 و retry storm در load test.",
+        "decision_en": "Separate admission/completion; load-test queues, p95, and retry storms."
+      },
+      {
+        "topic_fa": "SLO/SLA، reliability، overload، maintainability",
+        "topic_en": "SLO/SLA, reliability, overload, maintainability",
+        "decision_fa": "SLO آموزشی، error budget، backpressure، ران‌بوک و deployment تکرارپذیر.",
+        "decision_en": "Experimental SLOs, error budgets, backpressure, runbooks, repeatable deployments."
+      }
+    ],
+    "evidence_fa": "burst را تزریق و نمودار queue/latency/error تهیه کن.",
+    "evidence_en": "Inject bursts and plot queue, latency, and errors."
+  },
+  {
+    "chapter": 3,
+    "source": "../ch3-data-models/index.html",
+    "concepts": [
+      {
+        "topic_fa": "relational/document، normalization، ORM، schema-on-read/write",
+        "topic_en": "Relational/document, normalization, ORM, read/write schemas",
+        "decision_fa": "رابطهٔ tenant/run نرمال؛ payload سند versioned؛ JSON مرزِ constraint را حذف نمی‌کند.",
+        "decision_en": "Normalize tenant/run relations; version document payloads; JSON does not replace constraints."
+      },
+      {
+        "topic_fa": "graph، declarative query، star/snowflake/OBT، CQRS/event sourcing",
+        "topic_en": "Graphs, declarative queries, star/snowflake/OBT, CQRS/event sourcing",
+        "decision_fa": "dependency سرویس با graph منطقی؛ SQL محدود؛ OLAP fact/dimension؛ session log با state مشتق.",
+        "decision_en": "Logical service graph, bounded SQL, analytical facts/dimensions, session log with derived state."
+      }
+    ],
+    "evidence_fa": "FK cross-tenant را رد و projection از event را بازسازی کن.",
+    "evidence_en": "Reject cross-tenant FKs and rebuild an event projection."
+  },
+  {
+    "chapter": 4,
+    "source": "../ch4-storage-retrieval/index.html",
+    "concepts": [
+      {
+        "topic_fa": "WAL، B-tree، LSM، SSTable، Bloom، compaction",
+        "topic_en": "WAL, B-trees, LSM, SSTables, Bloom, compaction",
+        "decision_fa": "WAL برای recovery؛ index claim؛ گزینهٔ LSM در log store؛ false positive Bloom صحت را تغییر ندهد.",
+        "decision_en": "WAL recovery, claim indexes, LSM alternatives for logs; Bloom false positives must not change correctness."
+      },
+      {
+        "topic_fa": "secondary/local/global index، columnar، compression، materialization، text/vector",
+        "topic_en": "Secondary/local/global indexes, columnar, compression, materialization, text/vector",
+        "decision_fa": "lookup tenant-local؛ telemetry زمان‌محور؛ eval ستونی؛ retrieval lexical/dense با benchmark.",
+        "decision_en": "Tenant-local lookup, time-based telemetry, columnar evaluation, benchmarked lexical/dense retrieval."
+      }
+    ],
+    "evidence_fa": "explain query و مقایسهٔ recall/latency سه روش retrieval را ثبت کن.",
+    "evidence_en": "Record query plans and recall/latency for three retrieval baselines."
+  },
+  {
+    "chapter": 5,
+    "source": "../ch5-encoding-evolution/index.html",
+    "concepts": [
+      {
+        "topic_fa": "JSON/Protobuf/Avro، default، unknown field، backward/forward",
+        "topic_en": "JSON/Protobuf/Avro, defaults, unknown fields, backward/forward",
+        "decision_fa": "envelope نسخه‌دار؛ rollout producer/consumer؛ golden fixture قدیمی و جدید.",
+        "decision_en": "Versioned envelope, producer/consumer rollouts, old/new golden fixtures."
+      },
+      {
+        "topic_fa": "DB/RPC/event dataflow، durable execution، schema lifecycle",
+        "topic_en": "DB/RPC/event dataflow, durable execution, schema lifecycle",
+        "decision_fa": "HTTP sync برای query، event async برای تغییر؛ expand/migrate/contract و mapper manifest.",
+        "decision_en": "Sync HTTP queries, async change events, expand/migrate/contract, mapper manifests."
+      }
+    ],
+    "evidence_fa": "consumer قبلی را با event تازه و replay قدیمی تست کن.",
+    "evidence_en": "Test old consumers with new events and old replay."
+  },
+  {
+    "chapter": 6,
+    "source": "../ch6-replication/index.html",
+    "concepts": [
+      {
+        "topic_fa": "single/multi/leaderless، sync/async، snapshot، failover، log methods",
+        "topic_en": "Single/multi/leaderless, sync/async, snapshots, failover, log methods",
+        "decision_fa": "primary واحد برای budget/claim؛ logical CDC؛ snapshot هماهنگ؛ HA مشروط به writer fencing.",
+        "decision_en": "One primary for budgets/claims, logical CDC, coordinated snapshots, HA with writer fencing."
+      },
+      {
+        "topic_fa": "read-your-writes، monotonic/prefix، quorum، conflict/version vector، tombstone",
+        "topic_en": "Read-your-writes, monotonic/prefix, quorum, conflicts/version vectors, tombstones",
+        "decision_fa": "token پیشرفت برای خواندن؛ primary برای guard؛ multi-leader در budget انتخاب نمی‌شود؛ افق حذف صریح.",
+        "decision_en": "Progress tokens, primary guard reads, no multi-leader budget writes, explicit deletion horizon."
+      }
+    ],
+    "evidence_fa": "replica lag و failover را تزریق و read-after-write را بررسی کن.",
+    "evidence_en": "Inject replica lag/failover and check read-after-write."
+  },
+  {
+    "chapter": 7,
+    "source": "../ch7-sharding/index.html",
+    "concepts": [
+      {
+        "topic_fa": "range/hash، consistent hashing، mod N، virtual bucket، hotspot",
+        "topic_en": "Range/hash, consistent hashing, mod N, virtual buckets, hotspots",
+        "decision_fa": "telemetry با زمان+tenant؛ run با hash؛ tenant بزرگ virtual bucket؛ quota از hotspot دفاع می‌کند.",
+        "decision_en": "Time/tenant telemetry, hashed runs, large-tenant virtual buckets, hotspot quotas."
+      },
+      {
+        "topic_fa": "routing، rebalancing، shard lifecycle، secondary local/global",
+        "topic_en": "Routing, rebalancing, shard lifecycle, local/global secondary indexes",
+        "decision_fa": "mapping versioned و epoch؛ migration topic با drain؛ retrieval cross-shard fan-out هزینه دارد.",
+        "decision_en": "Versioned mapping/epochs, drained topic migrations, explicit cross-shard retrieval cost."
+      }
+    ],
+    "evidence_fa": "tenant پرمصرف و تغییر partition mapping را بدون شکست ترتیب اجرا کن.",
+    "evidence_en": "Exercise a noisy tenant and partition remapping without broken ordering."
+  },
+  {
+    "chapter": 8,
+    "source": "../ch8-transactions/index.html",
+    "concepts": [
+      {
+        "topic_fa": "ACID/MVCC، read committed/SI، lost update/write skew/phantom",
+        "topic_en": "ACID/MVCC, read committed/SI, lost update/write skew/phantoms",
+        "decision_fa": "budget reservation و claim با شرط اتمی؛ snapshot isolation به‌تنهایی سقف مجموع را حفظ نمی‌کند.",
+        "decision_en": "Atomic budget reservations/claims; snapshot isolation alone does not protect aggregate caps."
+      },
+      {
+        "topic_fa": "serial execution/2PL/SSI، retry، 2PC، idempotency",
+        "topic_en": "Serial execution/2PL/SSI, retries, 2PC, idempotency",
+        "decision_fa": "constraint و قفل یا serializable با retry؛ SQL inbox+effect اتمی؛ sink بیرونی قرارداد جدا.",
+        "decision_en": "Constraints/locks or serializable retries; atomic SQL inbox/effects; separate external-sink contracts."
+      }
+    ],
+    "evidence_fa": "دو درخواست هم‌زمان بودجه و crash بین effect/offset را تست کن.",
+    "evidence_en": "Test concurrent budget requests and effect/offset crashes."
+  },
+  {
+    "chapter": 9,
+    "source": "../ch9-distributed-trouble/index.html",
+    "concepts": [
+      {
+        "topic_fa": "partial failure، timeout/TCP/queue، clocks/skew/pause",
+        "topic_en": "Partial failures, timeouts/TCP/queues, clocks/skew/pauses",
+        "decision_fa": "deadline و outcome نامعلوم؛ event/observed/ingested جدا؛ pause worker و GC در تست.",
+        "decision_en": "Deadlines/unknown outcomes, distinct timestamps, worker/GC pauses in tests."
+      },
+      {
+        "topic_fa": "lease/fencing، majority، Byzantine، safety/liveness/system model",
+        "topic_en": "Leases/fencing, majority, Byzantine faults, safety/liveness/system models",
+        "decision_fa": "epoch در sink enforce؛ model output ورودی نامطمئن؛ crash-fault baseline و توقف امن در partition.",
+        "decision_en": "Sink-enforced epochs, untrusted model outputs, crash-fault baseline, safe partition behavior."
+      }
+    ],
+    "evidence_fa": "worker زامبی و پاسخ دیررس را بساز و stale commit را رد کن.",
+    "evidence_en": "Create zombie workers/late replies and reject stale commits."
+  },
+  {
+    "chapter": 10,
+    "source": "../ch10-consensus/index.html",
+    "concepts": [
+      {
+        "topic_fa": "linearizability/serializability، CAP/PACELC، ID/Lamport/HLC",
+        "topic_en": "Linearizability/serializability, CAP/PACELC, IDs/Lamport/HLC",
+        "decision_fa": "promotion و ownership نیازمند CAS معتبر؛ UUID ترتیب global نمی‌سازد؛ ساعت منطقی causal label است.",
+        "decision_en": "Promotion/ownership need authoritative CAS; UUIDs do not create global order; logical clocks label causality."
+      },
+      {
+        "topic_fa": "consensus log/epoch/quorum، coordination/discovery",
+        "topic_en": "Consensus logs/epochs/quorums, coordination/discovery",
+        "decision_fa": "به هماهنگی ابزار HA اتکا می‌کنیم؛ الگوریتم consensus تازه نمی‌نویسیم؛ minority حق dispatch حساس ندارد.",
+        "decision_en": "Use existing HA coordination; do not write a new consensus algorithm; minority cannot authorize sensitive dispatch."
+      }
+    ],
+    "evidence_fa": "تاریخچهٔ claim/promotion را با oracle محدود خطی‌سنجی کن.",
+    "evidence_en": "Check claim/promotion histories against a bounded linearizability oracle."
+  },
+  {
+    "chapter": 11,
+    "source": "../ch11-batch-processing/index.html",
+    "concepts": [
+      {
+        "topic_fa": "bounded/unbounded، UNIX pipeline، external sort، object store، DAG",
+        "topic_en": "Bounded/unbounded inputs, UNIX pipelines, external sort, object storage, DAGs",
+        "decision_fa": "rebuild از manifest immutable؛ pipeline extraction/chunk/embed/eval؛ spill برای data بزرگ.",
+        "decision_en": "Rebuild immutable manifests; extraction/chunk/embed/eval pipelines; spill large inputs."
+      },
+      {
+        "topic_fa": "MapReduce/dataflow، shuffle/join، skew/straggler، attempts، atomic publish",
+        "topic_en": "MapReduce/dataflow, shuffle/joins, skew/stragglers, attempts, atomic publication",
+        "decision_fa": "attempt output جدا؛ manifest فقط برنده؛ همهٔ chunkها پیش از pointer نسل؛ backfill/analytics.",
+        "decision_en": "Separate attempt outputs, winner manifests, complete chunks before pointer publication, backfill/analytics."
+      }
+    ],
+    "evidence_fa": "mapper/embedding attempt را kill و خروجی ناقص را نامرئی نگه دار.",
+    "evidence_en": "Kill attempts and keep incomplete outputs invisible."
+  },
+  {
+    "chapter": 12,
+    "source": "../ch12-stream-processing/index.html",
+    "concepts": [
+      {
+        "topic_fa": "broker/log، offset، partition، backpressure، DLQ، retention",
+        "topic_en": "Brokers/logs, offsets, partitions, backpressure, DLQ, retention",
+        "decision_fa": "entity ordering؛ poison event degraded؛ WAL+Kafka horizon؛ مصرف‌کنندهٔ مستقل.",
+        "decision_en": "Entity ordering, degraded poison events, WAL/Kafka horizons, independent consumers."
+      },
+      {
+        "topic_fa": "dual write/outbox، snapshot/compaction، state-stream، joins/windows/watermark، exactly-once",
+        "topic_en": "Dual writes/outbox, snapshot/compaction, state-stream, joins/windows/watermarks, exactly-once",
+        "decision_fa": "seed+delta؛ deletion guard؛ window correction؛ effectively-once تنها داخل مرزِ اثبات‌شده.",
+        "decision_en": "Seed/deltas, deletion guards, window corrections, effectively-once only within proven boundaries."
+      }
+    ],
+    "evidence_fa": "overlap، reorder، delete و outage خارج از retention را آزمایش کن.",
+    "evidence_en": "Test overlap, reordering, deletes, and outages beyond retention."
+  },
+  {
+    "chapter": 13,
+    "source": "../ch13-streaming-philosophy/index.html",
+    "concepts": [
+      {
+        "topic_fa": "derived/unbundled، dataflow/RPC، causality، migration، lambda/kappa",
+        "topic_en": "Derived/unbundled systems, dataflow/RPC, causality, migration, lambda/kappa",
+        "decision_fa": "context از log مشتق؛ query sync؛ shadow generation و reprocessing با یک mapper نسخه‌دار.",
+        "decision_en": "Log-derived context, sync queries, shadow generations, versioned reprocessing mapper."
+      },
+      {
+        "topic_fa": "timeliness/integrity، constraint/coordination، async apology، audit/checker",
+        "topic_en": "Timeliness/integrity, constraints/coordination, async apologies, audits/checkers",
+        "decision_fa": "freshness جدا از صحت؛ budget sync guard؛ reconciliation بیرونی؛ checksum در cut مشترک.",
+        "decision_en": "Freshness differs from integrity; synchronous budget guards, external reconciliation, same-cut checksums."
+      }
+    ],
+    "evidence_fa": "checker مرجع/مشتق را در cut یکسان اجرا و اصلاح drift را ثبت کن.",
+    "evidence_en": "Run same-cut record/projection checks and record drift repair."
+  },
+  {
+    "chapter": 14,
+    "source": "../ch14-doing-right/index.html",
+    "concepts": [
+      {
+        "topic_fa": "bias/proxy/feedback loop، explainability، algorithmic exclusion",
+        "topic_en": "Bias/proxies/feedback loops, explainability, algorithmic exclusion",
+        "decision_fa": "گزارش agent امتیاز کارکنان نیست؛ عدم‌قطعیت و حق اعتراض؛ eval per-family برای کورشدن نسبت به رخدادهای کم‌تکرار.",
+        "decision_en": "No automatic employee scores; uncertainty/challenge; per-family evals for rare failures."
+      },
+      {
+        "topic_fa": "surveillance/consent/power، minimization، retention، erasure",
+        "topic_en": "Surveillance/consent/power, minimization, retention, erasure",
+        "decision_fa": "synthetic lab؛ purpose limitation؛ redact trace؛ حذف متن/vector/cache/backup و restore guard.",
+        "decision_en": "Synthetic lab, purpose limits, redacted traces, text/vector/cache/backup deletion and restore guards."
+      }
+    ],
+    "evidence_fa": "دادهٔ حذف‌شده و دسترسی لغوشده را در replay/restore و citation امتحان کن.",
+    "evidence_en": "Test erased/revoked data in replay, restore, and citations."
+  }
+]

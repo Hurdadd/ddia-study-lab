@@ -1,0 +1,257 @@
+{
+  "answer_en": "Observed removals converge under an <span class=\"ltr\">OR-Set</span>: adds minus removes is empty whichever device removed what, because every remove filed only tags it saw. <span class=\"ltr\">LWW</span> keeps one whole cart and silently drops the other edit (device clocks skew, so the survivor is arbitrary), and sibling union keeps both carts and bills a human. A concurrent fresh add — a tag minted offline that never saw the remove — splits the semantics: add-wins keeps it, remove-wins drops it, and that choice is a product contract, not math. Tombstones retire only on causal stability, never on a timer.",
+  "answer_fa": "حذف‌های مشاهده‌شده زیر <span class=\"ltr\">OR-Set</span> همگرا می‌شوند: adds منهای removes خالی است هر دستگاهی هرچه را حذف کرده باشد، چون هر حذف فقط tagهایی که دیده را بایگانی کرده. <span class=\"ltr\">LWW</span> یک سبد کامل را نگه می‌دارد و ویرایش دیگر را بی‌صدا می‌اندازد (ساعت دستگاه‌ها skew دارد پس بازمانده دلبخواهی است) و union siblingها هر دو سبد را نگه می‌دارد و صورت‌حسابش را به انسان می‌دهد. add تازه هم‌زمان — tagای آفلاین که حذف را ندیده — semantics را دوشقه می‌کند: add-wins نگهش می‌دارد و remove-wins می‌اندازدش و آن انتخاب قرارداد محصول است نه ریاضی. tombstoneها فقط با causal stability بازنشسته می‌شوند، هرگز با تایمر.",
+  "assumptions": [
+    {
+      "en": "Two devices share one cart, both saw <code>{milk:t1, bread:t2}</code>, then go offline; no fresh adds in phase one.",
+      "fa": "دو دستگاه یک سبد مشترک دارند، هر دو <code>{milk:t1, bread:t2}</code> را دیده‌اند و بعد آفلاین می‌شوند؛ در فاز یک هیچ add تازه‌ای نیست."
+    },
+    {
+      "en": "No synchronized clocks: timestamps order nothing across devices, tags are unique per add.",
+      "fa": "بدون ساعت هم‌زمان: timestampها بین دستگاه‌ها هیچ ترتیبی نمی‌دهند و tagها per-add یکتا هستند."
+    },
+    {
+      "en": "Phase two adds exactly one concurrent fresh add (<code>milk@t3</code> minted offline); teaching scenario, neutral cart items.",
+      "fa": "فاز دو دقیقاً یک add تازه هم‌زمان اضافه می‌کند (<code>milk@t3</code> آفلاین ساخته شده)؛ سناریوی آموزشی با آیتم‌های خنثی."
+    }
+  ],
+  "interview_q_en": "Start with two offline devices removing different known cart items and no new adds. Compare LWW, sibling union and an OR-Set with tagged adds/removals. Then introduce concurrent add/remove and choose product semantics.",
+  "interview_q_fa": "دو دستگاه سبد مشترک را آفلاین ویرایش می‌کنند: هر کدام یک آیتم شناخته‌شده را حذف می‌کند و هیچ add تازه‌ای وجود ندارد. LWW، union سادهٔ siblings و OR-Set با tag/tombstone را مقایسه کن. سپس add هم‌زمان با remove را اضافه کن و semantics مطلوب محصول را انتخاب کن.",
+  "mental_en": "Give every add a name tag, and let a remove cross out only the tags it actually saw. Two devices crossing out different seen tags always agree afterwards — the only quarrel is the stranger who walked in wearing a fresh tag nobody saw.",
+  "mental_fa": "به هر add یک tag نام بده و بگذار remove فقط tagهایی را خط بزند که واقعاً دیده. دو دستگاه که tagهای دیده متفاوت را خط زده‌اند همیشه بعدش توافق دارند — تنها دعوا غریبه‌ای است که با tag تازه‌ای که هیچ‌کس ندیده وارد شده.",
+  "number": 2,
+  "steps": [
+    {
+      "t_en": "Observed removals must converge",
+      "t_fa": "حذف‌های مشاهده‌شده باید همگرا شوند",
+      "en": "A removes milk having seen <code>t1</code>, B removes bread having seen <code>t2</code>. Union of adds is <code>{milk:t1, bread:t2}</code>, union of removes is the same set, so live is empty on both devices after sync. Nothing resurrects — this is the convergence bar every strategy must clear.",
+      "fa": "A شیر را با دیدن <code>t1</code> حذف می‌کند و B نان را با دیدن <code>t2</code>. union adds برابر <code>{milk:t1, bread:t2}</code> و union removes هم همان مجموعه است پس live بعد از sync روی هر دو دستگاه خالی است. هیچ‌چیز زنده نمی‌شود — این میله همگرایی است که هر راهبرد باید از آن بپرد."
+    },
+    {
+      "t_en": "LWW votes whole carts",
+      "t_fa": "LWW به سبد کامل رأی می‌دهد",
+      "en": "Last-write-wins compares one timestamp per cart and keeps the whole winner: if B's clock runs ahead, A's milk removal vanishes and milk is back on the shelf. One lost update per conflict, silent by design, and device clocks skew — the survivor is arbitrary, not correct.",
+      "fa": "last-write-wins یک timestamp per-cart مقایسه می‌کند و برنده کامل را نگه می‌دارد: اگر ساعت B جلو باشد، حذف شیرِ A ناپدید می‌شود و شیر به قفسه برمی‌گردد. یک lost update per-conflict، بی‌صدا طبق طراحی، و ساعت دستگاه‌ها skew دارد — بازمانده دلبخواهی است نه درست."
+    },
+    {
+      "t_en": "Siblings bill a human",
+      "t_fa": "siblingها صورت‌حساب را به انسان می‌دهند",
+      "en": "Sibling union keeps both carts side by side and asks someone to merge them. Nothing is lost, but nothing converges either: right for rare conflicts a person should inspect, wrong for a cart that must check out while offline.",
+      "fa": "union siblingها هر دو سبد را کنار هم نگه می‌دارد و از کسی می‌خواهد ادغامشان کند. هیچ‌چیز گم نمی‌شود ولی هیچ‌چیز همگرا هم نمی‌شود: برای تعارض‌های نادری که انسان باید ببیند درست است و برای سبدی که باید آفلاین تسویه شود غلط."
+    },
+    {
+      "t_en": "OR-Set: tags, then the product call",
+      "t_fa": "OR-Set: اول tagها، بعد قرارداد محصول",
+      "en": "The <span class=\"ltr\">OR-Set</span> files adds and removes separately and computes live as adds minus removes: observed removals converge exactly. Then B's fresh <code>milk@t3</code> — minted offline, never saw the remove — survives the subtraction. Add-wins keeps milk, remove-wins cancels even the unseen tag. Same history, two defensible carts: write the rule in the spec.",
+      "fa": "<span class=\"ltr\">OR-Set</span> adds و removes را جدا بایگانی می‌کند و live را adds منهای removes حساب می‌کند: حذف‌های مشاهده‌شده دقیقاً همگرا می‌شوند. بعد <code>milk@t3</code> تازه B — آفلاین ساخته شده و حذف را ندیده — از تفریق جان سالم به در می‌برد. add-wins شیر را نگه می‌دارد و remove-wins حتی tag ندیده را هم لغو می‌کند. یک history، دو سبد دفاع‌پذیر: قاعده را در spec بنویس."
+    },
+    {
+      "t_en": "Forget only on stability",
+      "t_fa": "فقط با stability فراموش کن",
+      "en": "Bread's <code>t2</code> tombstone may be forgotten only once every live replica has seen the removal — causal stability. A device offline for a year has not seen it, so it vetoes collection; a lone timer would resurrect bread the day that device syncs.",
+      "fa": "tombstone <code>t2</code> نان فقط وقتی فراموش می‌شود که هر replica زنده‌ای حذف را دیده باشد — causal stability. دستگاهی که یک سال آفلاین بوده آن را ندیده پس collection را وتو می‌کند؛ یک تایمر تنها روزی که آن دستگاه sync کند نان را زنده می‌کند."
+    }
+  ],
+  "design_fa": "<p>حالت <span class=\"ltr\">OR-Set</span> دو نگاشت است: <code>adds</code> از آیتم به مجموعه tagها و <code>removed</code> از آیتم به tagهای دیده‌شده حذف‌شده. <code>add</code> یک tag تازه می‌سازد، <code>remove</code> فقط tagهای دیده را بایگانی می‌کند، و <code>merge</code> اجتماع هر دو نگاشت را می‌گیرد؛ <code>live</code> تفاضل آن‌هاست. قاعده add-wins/remove-wins یک پرچم پیکربندی در کنار merge است نه جزئی از ریاضی.</p>",
+  "design_en": "<p>The <span class=\"ltr\">OR-Set</span> state is two maps: <code>adds</code> from item to tag sets and <code>removed</code> from item to seen removed tags. <code>add</code> mints a fresh tag, <code>remove</code> files only seen tags, and <code>merge</code> unions both maps; <code>live</code> is their difference. The add-wins/remove-wins rule is a configuration flag beside the merge, not part of the math.</p>",
+  "worked_fa": "<p>شروع <code>{milk:t1, bread:t2}</code> روی هر دو دستگاه. فاز یک: A حذف شیر و B حذف نان — union adds و union removes برابرند پس سبد <code>{}</code>. فاز دو: <code>milk@t3</code> تازه B به adds اضافه می‌شود ولی در removes نیست پس live در add-wins برابر <code>{milk:t3}</code> و در remove-wins برابر <code>{}</code>. tombstone <code>t2</code> تا stability علّی می‌ماند.</p>",
+  "worked_en": "<p>Start <code>{milk:t1, bread:t2}</code> on both devices. Phase one: A removes milk, B removes bread — union of adds equals union of removes, so the cart is <code>{}</code>. Phase two: B's fresh <code>milk@t3</code> joins adds but not removes, so live is <code>{milk:t3}</code> under add-wins and <code>{}</code> under remove-wins. The <code>t2</code> tombstone stays until causal stability.</p>",
+  "alternatives": [
+    {
+      "en": "LWW when conflicts are rare and loss is acceptable: one timestamp, no tombstones, no GC problem — but never for carts, where every conflict carries user intent.",
+      "fa": "LWW وقتی تعارض‌ها نادر و loss قابل‌قبول است: یک timestamp، بدون tombstone و بدون مسئله GC — ولی هرگز برای سبد، که هر تعارضش نیت کاربر را حمل می‌کند."
+    },
+    {
+      "en": "Central arbiter per cart (one writer orders all edits): perfect agreement, zero offline writes — contradicts the offline-first premise of the exercise.",
+      "fa": "داور مرکزی per-cart (یک نویسنده همه ویرایش‌ها را مرتب کند): توافق کامل و صفر نوشتن آفلاین — با فرض offline-first تمرین در تضاد است."
+    }
+  ],
+  "failures": [
+    {
+      "en": "Year-offline device returns after premature GC: its converged state still carries bread@t2 as live, and the merge resurrects bread everywhere. Guard: collect a tombstone only past causal stability, or block the straggler's sync until it catches up.",
+      "fa": "بازگشت دستگاه یک‌سال‌آفلاین بعد از GC زودهنگام: حالت همگراشده‌اش هنوز bread@t2 را live دارد و merge نان را همه‌جا زنده می‌کند. نگهبان: tombstone را فقط بعد از causal stability جمع کن یا sync عقب‌مانده را تا جبران عقب‌ماندگی ببند."
+    },
+    {
+      "en": "Reused tag across two adds: the remove files one tag and kills both items' presence. Guard: tags must be unique per add (device ID plus counter is the teaching form).",
+      "fa": "استفاده مجدد tag در دو add: حذف یک tag را بایگانی می‌کند و حضور هر دو را می‌کشد. نگهبان: tag باید per-add یکتا باشد (شناسه دستگاه به‌علاوه شمارنده شکل آموزشی است)."
+    }
+  ],
+  "code": {
+    "lang": "java",
+    "code": "import java.util.*;\n\n// Teaching demo: observed removals vs concurrent fresh adds in a shopping cart.\n// OR-Set done right: state = (adds, tombstones); live = adds minus tombstones.\n// A remove only files the tags it SAW; a concurrent fresh tag survives (add-wins)\n// unless the product rule says removes cancel even unseen tags (remove-wins).\npublic class ORSetDemo {\n    record Cart(Map<String, Set<String>> adds, Map<String, Set<String>> removed) {\n        Cart() { this(new HashMap<>(), new HashMap<>()); }\n    }\n\n    static void add(Cart c, String item, String tag) {\n        c.adds().computeIfAbsent(item, k -> new HashSet<>()).add(tag);\n    }\n\n    static void removeSeen(Cart c, String item) {\n        Set<String> seen = c.adds().getOrDefault(item, Set.of());\n        c.removed().computeIfAbsent(item, k -> new HashSet<>()).addAll(seen);\n    }\n\n    static Cart merge(Cart x, Cart y) {\n        Cart m = new Cart();\n        for (Cart s : List.of(x, y))\n            for (var e : s.adds().entrySet())\n                m.adds().computeIfAbsent(e.getKey(), k -> new HashSet<>()).addAll(e.getValue());\n        for (Cart s : List.of(x, y))\n            for (var e : s.removed().entrySet())\n                m.removed().computeIfAbsent(e.getKey(), k -> new HashSet<>()).addAll(e.getValue());\n        return m;\n    }\n\n    static Set<String> live(Cart m, String item) {\n        Set<String> s = new HashSet<>(m.adds().getOrDefault(item, Set.of()));\n        s.removeAll(m.removed().getOrDefault(item, Set.of()));\n        return new TreeSet<>(s);\n    }\n\n    static Set<String> liveItems(Cart m) {\n        Set<String> items = new TreeSet<>(m.adds().keySet());\n        items.removeIf(k -> live(m, k).isEmpty());\n        return items;\n    }\n\n    public static void main(String[] a) {\n        // Phase 1 (book fig 6-10): both saw {milk:t1, bread:t2}; A removes milk,\n        // B removes bread; NO fresh adds. Tombstones cover every tag -> empty cart.\n        Cart devA = new Cart(), devB = new Cart();\n        for (Cart c : List.of(devA, devB)) { add(c, \"milk\", \"t1\"); add(c, \"bread\", \"t2\"); }\n        removeSeen(devA, \"milk\");\n        removeSeen(devB, \"bread\");\n        System.out.println(\"observed-removes only -> merged cart = \" + liveItems(merge(devA, devB))\n                + \" (nothing resurrected)\");\n\n        // Phase 2: A removes milk having seen only t1; B CONCURRENTLY re-adds milk\n        // with a fresh tag t3 it minted offline (never saw the remove).\n        Cart a2 = new Cart(), b2 = new Cart();\n        for (Cart c : List.of(a2, b2)) { add(c, \"milk\", \"t1\"); add(c, \"bread\", \"t2\"); }\n        removeSeen(a2, \"milk\");\n        add(b2, \"milk\", \"t3\");\n        Cart m2 = merge(a2, b2);\n        System.out.println(\"concurrent add-vs-remove, add-wins    -> milk tags = \" + live(m2, \"milk\"));\n        System.out.println(\"concurrent add-vs-remove, remove-wins -> milk tags = [] \"\n                + \"(product rule cancels even the unseen t3)\");\n\n        // Phase 3: the t2 tombstone for bread may be forgotten only once every live\n        // replica has seen it (causal stability); a device offline for a year vetoes GC.\n        System.out.println(\"tombstone-GC safe when every live replica saw the remove; \"\n                + \"a year-offline device vetoes collection\");\n        System.out.println(\"OK: observed-removal converges; fresh-add rule must be an explicit product call\");\n    }\n}\n",
+    "run_fa": "javac ORSetDemo.java && java ORSetDemo — فقط استاندارد جاوا، فوری.",
+    "run_en": "javac ORSetDemo.java && java ORSetDemo — stdlib Java only, instant.",
+    "expected_fa": "فاز یک سبد خالی بدون زنده شدن؛ فاز دو در add-wins برابر [t3] و در remove-wins برابر []؛ قانون GC و OK پایانی. (خروجی واقعی همین محیط)",
+    "expected_en": "phase one merges to an empty cart with no resurrection; phase two gives [t3] under add-wins and [] under remove-wins; GC rule and closing OK. (actual output of this environment)",
+    "status": "verified"
+  },
+  "tests_fa": "سناریوی شکل ۶-۱۰ کتاب را اجرا کن و خالی بودن سبد را assert کن؛ add هم‌زمان را زیر هر دو قاعده assert کن؛ یک عقب‌مانده یک‌ساله را شبیه‌سازی کن و نشان بده GC زودهنگام نان را زنده می‌کند.",
+  "tests_en": "Run the book figure 6-10 scenario and assert the empty cart; assert the concurrent add under both rules; simulate a year-long straggler and show early GC resurrecting bread.",
+  "followups": [
+    {
+      "q_en": "A device has been offline for a year. When is it safe to collect tombstones?",
+      "q_fa": "دستگاهی یک سال آفلاین بوده؛ tombstone را چه زمانی می‌توان پاک کرد؟",
+      "a_en": "Only when every live replica has seen the removal — causal stability — because collection means forgetting, and a replica that never saw the remove will reintroduce its live tags at the next sync. The year-offline device vetoes collection until it syncs (or is declared dead by an explicit membership change, which is itself a product-level call with its own risks). Never collect on a lone timer: elapsed time is not evidence of delivery.",
+      "a_fa": "فقط وقتی هر replica زنده‌ای حذف را دیده باشد — causal stability — چون collection یعنی فراموشی و replicaای که حذف را ندیده در sync بعدی tagهای liveاش را برمی‌گرداند. دستگاه یک‌سال‌آفلاین تا sync نکرده (یا با تغییر membership صریح مرده اعلام نشده که خودش قرارداد سطح محصول با ریسک خودش است) collection را وتو می‌کند. هرگز با تایمر تنها جمع نکن: گذر زمان مدرک تحویل نیست.",
+      "level": "senior"
+    },
+    {
+      "q_en": "Under add-wins the cart shows milk the user explicitly deleted. How do you defend that in review?",
+      "q_fa": "زیر add-wins سبد شیری را نشان می‌دهد که کاربر صریح حذف کرده. در review چطور دفاع می‌کنی؟",
+      "a_en": "By separating mechanism from intent: some device re-added milk concurrently without seeing the deletion, and silently dropping a user's add is also wrong. The defense is the explicit product contract — add-wins means a concurrent re-add beats a remove — plus UX that surfaces it (show milk as re-added, offer one-tap remove-all). If the product cannot tolerate resurrection, choose remove-wins and say so, with its own cost: concurrent adds vanish.",
+      "a_fa": "با جدا کردن سازوکار از نیت: دستگاهی هم‌زمان بدون دیدن حذف شیر را دوباره اضافه کرده و انداختن بی‌صدا add کاربر هم غلط است. دفاع قرارداد صریح محصول است — add-wins یعنی add هم‌زمان حذف را می‌برد — به‌علاوه UX که آن را نشان دهد (شیر به‌عنوان دوباره‌اضافه‌شده با حذف یک‌ضربه‌ای). اگر محصول زنده شدن را تحمل نکند remove-wins را انتخاب کن و بگو، با قیمت خودش: addهای هم‌زمان ناپدید می‌شوند.",
+      "level": "staff"
+    }
+  ],
+  "mistakes": [
+    {
+      "en": "Deleting the key and calling it a remove. Without filing the seen tags, the next sync with a replica that still holds them resurrects the item.",
+      "fa": "حذف کلید و اسمش را remove گذاشتن. بدون بایگانی tagهای دیده‌شده، sync بعدی با replicaای که هنوز آن‌ها را دارد آیتم را زنده می‌کند."
+    },
+    {
+      "en": "Reading the biggest timestamp as the correct value. LWW orders writes by skewed clocks; it never detects concurrency, it just picks a survivor.",
+      "fa": "خواندن بزرگ‌ترین timestamp به‌عنوان مقدار درست. LWW نوشته‌ها را با ساعت‌های skewدار مرتب می‌کند؛ هم‌زمانی را تشخیص نمی‌دهد فقط بازمانده انتخاب می‌کند."
+    },
+    {
+      "en": "Expiring tombstones by age. Time does not prove delivery; only causal stability lets a tombstone retire without resurrection.",
+      "fa": "منقضی کردن tombstoneها با سن. زمان تحویل را ثابت نمی‌کند؛ فقط causal stability می‌گذارد tombstone بدون زنده شدن بازنشسته شود."
+    }
+  ],
+  "lab_fa": "<p>دو دستگاه سبد {milk:t1, bread:t2} را دیده‌اند و آفلاین می‌شوند: A شیر و B نان را حذف می‌کند و هیچ add جدیدی نداریم. LWW کل سبد، نگه‌داشتن sibling با سیاست union صریح، و OR-Set با tag یکتای هر add و حذف tagهای مشاهده‌شده را مقایسه کن. نتیجه را در هر ترتیب ادغام و با پیام تکراری بررسی کن. سپس milk:t3 را هم‌زمان با حذف روی دستگاه دیگر اضافه کن: برای add-wins و remove-wins قرارداد جدا بنویس. برای tombstone GC، causal stability یا محدودیت معتبر عضویت/آفلاین‌بودن را مشخص کن و ورود دوبارهٔ replica قدیمی را بیازما؛ صرف انقضای تایمر دلیل امنی برای GC نیست.</p>",
+  "lab_en": "<p>Both devices observe {milk:t1, bread:t2}, then go offline: A removes milk and B removes bread, with no new adds. Compare whole-cart LWW, siblings with an explicit union policy, and an OR-Set with unique add tags and observed-tag removals. Check every merge order and duplicate delivery. Then add milk:t3 concurrently with another device's remove; specify separate add-wins and remove-wins contracts. Justify tombstone GC using causal stability or an enforced membership/offline bound, and test an old replica rejoining; a timer alone does not establish safe GC.</p>",
+  "slug": "concurrent-cart",
+  "diagrams": [
+    {
+      "file": "diagrams/sol2-step1-offline-sync.html",
+      "made": "archify",
+      "source": ".archify/sequence-ch6-sol2-sync-20261014-190200",
+      "kind_fa": "توالی",
+      "kind_en": "sequence",
+      "caption_fa": "دو حذف آفلاین، یک sync",
+      "caption_en": "Two offline removes, one sync",
+      "height": 640,
+      "narration": {
+        "scenario_fa": "دو دستگاه آفلاین‌اند: A شیر را و B نان را حذف کرده و حالا هر دو sync می‌کنند. بالا‌به‌پایین در دو پرده بخوان: اول حذف‌های مشاهده‌شده، بعد add تازه هم‌زمان.",
+        "scenario_en": "Two devices are offline: A removed milk, B removed bread, and now both sync. Read top to bottom in two acts: observed removes first, then the concurrent fresh add.",
+        "steps": [
+          {
+            "fa": "پیام‌های ۱ و ۲: هر دستگاه حذفش را با tagهای دیده‌شده push می‌کند — حذف شیر با t1 و حذف نان با t2.",
+            "en": "Messages 1 and 2: each device pushes its remove with the tags it saw — milk gone with t1, bread gone with t2."
+          },
+          {
+            "fa": "پیام‌های ۳ و ۴: تبادل سبد خالی را برمی‌گرداند — union adds منهای union removes؛ هیچ حذف‌شده‌ای زنده نشده.",
+            "en": "Messages 3 and 4: the exchange returns the empty cart — union of adds minus union of removes; no deleted item came back."
+          },
+          {
+            "fa": "پیام‌های ۵ تا ۷: B شیر با tag تازه t3 را اضافه می‌کند که حذف را ندیده؛ همان history زیر add-wins شیر را زنده نگه می‌دارد و زیر remove-wins می‌اندازد.",
+            "en": "Messages 5 to 7: B adds milk with fresh tag t3 that never saw the remove; the same history keeps milk under add-wins and drops it under remove-wins."
+          }
+        ],
+        "point_fa": "نقطه تصمیم tag است: حذف فقط tag دیده‌شده را می‌بندد و tag تازه هم‌زمان بیرون قاعده است تا محصول تصمیم بگیرد.",
+        "point_en": "The decision point is the tag: a remove closes only seen tags, and the concurrent fresh tag stays outside the rule until the product decides.",
+        "failure_fa": "اگر tagها یکتا نبودند، حذف یک tag هر دو حضور را می‌کشت؛ اگر t3 دیده‌شده بود، هیچ دوشقه‌ای پیش نمی‌آمد.",
+        "failure_en": "Had tags not been unique, removing one tag would kill both presences; had t3 been seen, no split would arise.",
+        "guarantee_fa": "شکل نشان می‌دهد حذف‌های مشاهده‌شده کجا همگرا می‌شوند و add تازه کجا دوشقه می‌شود. قاعده محصول را انتخاب نمی‌کند.",
+        "guarantee_en": "The figure shows where observed removes converge and where the fresh add splits. It does not choose the product rule.",
+        "nonguarantee_fa": "درباره LWW و siblingها و GC ساکت است — آن‌ها مال نمودار دوم و چرخه‌اند.",
+        "nonguarantee_en": "It is silent on LWW, siblings and GC — those belong to the second diagram and the lifecycle."
+      },
+      "selfcheck": {
+        "q_fa": "چرا پیام‌های ۳ و ۴ سبد خالی می‌دهند ولی پیام ۶ شیر را برمی‌گرداند؟",
+        "q_en": "Why do messages 3 and 4 give an empty cart while message 6 brings milk back?",
+        "a_fa": "چون حذف‌های پیام ۱ و ۲ همه tagهای دیده‌شده را پوشش می‌دهند ولی t3 تازه هیچ‌وقت دیده نشده و از تفریق جان سالم به در می‌برد.",
+        "a_en": "Because the removes in messages 1 and 2 cover every seen tag, while fresh t3 was never seen and survives the subtraction."
+      }
+    },
+    {
+      "file": "diagrams/sol2-step2-three-strategies.html",
+      "made": "archify",
+      "source": ".archify/dataflow-ch6-sol2-strategies-20261014-190300",
+      "kind_fa": "جریان داده",
+      "kind_en": "dataflow",
+      "caption_fa": "سه راهبرد، سه سرنوشت",
+      "caption_en": "Three strategies, three fates",
+      "height": 640,
+      "narration": {
+        "scenario_fa": "همان ویرایش‌های آفلاین وارد sync می‌شوند و سه راهبرد جدا قضاوت می‌کنند. چپ‌به‌راست بخوان: ویرایش‌ها، ورودی sync، قضاوت، سه سبد.",
+        "scenario_en": "The same offline edits enter sync, and three strategies judge separately. Read left to right: edits, sync input, judgment, three carts.",
+        "steps": [
+          {
+            "fa": "سه فلش چپ: حذف شیر با t1، حذف نان با t2، و add تازه شیر با t3 ندیده — مشاهده‌شده از تازه جداست.",
+            "en": "Three arrows on the left: milk removed with t1, bread removed with t2, and the fresh unseen milk add with t3 — observed stays apart from fresh."
+          },
+          {
+            "fa": "گره sync اجتماع adds و removes را می‌گیرد و هر سه راهبرد همان ورودی را می‌گیرند — مقایسه منصفانه است.",
+            "en": "The sync node takes the union of adds and removes, and all three strategies take the same input — a fair comparison."
+          },
+          {
+            "fa": "سه نتیجه: LWW یک برنده، siblingها هر دو نسخه، و OR-Set سبد خالی به‌علاوه قاعده t3 — با برچسب قیمت هرکدام.",
+            "en": "Three results: LWW keeps one winner, siblings keep both versions, and OR-Set gives the empty cart plus the t3 rule — each labelled with its price."
+          }
+        ],
+        "point_fa": "نقطه تصمیم ورودی یکسان است: تفاوت سرنوشت‌ها از داده نیست، از قاعده قضاوت است.",
+        "point_en": "The decision point is the identical input: the fates differ because of the judgment rule, not the data.",
+        "failure_fa": "اگر ساعت‌ها معتبر بودند LWW هم همگرا می‌شد — ولی ساعت دستگاه‌ها skew دارد و همان‌جا LWW می‌بازد.",
+        "failure_en": "Had clocks been trustworthy, LWW would converge too — but device clocks skew, and that is exactly where LWW loses.",
+        "guarantee_fa": "شکل هر سه سرنوشت را کنار هم می‌گذارد؛ انتخاب محصول را نمی‌کند.",
+        "guarantee_en": "The figure lays the three fates side by side; it does not make the product choice.",
+        "nonguarantee_fa": "درباره طول عمر tombstone ساکت است — آن مال چرخه پایانی است.",
+        "nonguarantee_en": "It is silent on tombstone lifetime — that belongs to the closing lifecycle."
+      },
+      "selfcheck": {
+        "q_fa": "کدام راهبرد بدون دخالت انسان همگرا می‌شود و به چه قیمتی؟",
+        "q_en": "Which strategy converges with no human involved, and at what price?",
+        "a_fa": "<span class=\"ltr\">OR-Set</span> با tag و tombstone؛ قیمتش حالت tombstone و قرارداد صریح add-wins/remove-wins برای tag تازه است.",
+        "a_en": "The OR-Set with tags and tombstones; its price is tombstone state plus an explicit add-wins/remove-wins contract for the fresh tag."
+      }
+    },
+    {
+      "file": "diagrams/sol2-tombstone-lifecycle.html",
+      "made": "archify",
+      "source": ".archify/lifecycle-ch6-sol2-tombstone-20261014-190400",
+      "kind_fa": "چرخه",
+      "kind_en": "lifecycle",
+      "caption_fa": "چرخه tombstone تا فراموشی امن",
+      "caption_en": "Tombstone lifecycle to safe forgetting",
+      "height": 640,
+      "narration": {
+        "scenario_fa": "عمر یک آیتم از add تا فراموشی tombstone: مسیر اصلی بالا، add هم‌زمان در لاین انتظار، و خروج‌های پایانی پایین. ستون‌ها را به‌ترتیب بخوان.",
+        "scenario_en": "One item's life from add to tombstone forgetting: the main path on top, the concurrent add in the waiting lane, terminal exits below. Read the columns in order.",
+        "steps": [
+          {
+            "fa": "ستون‌های ۰ و ۱: add با tag تازه، بعد حذف با بایگانی tagهای دیده‌شده — تولد و مرگ عادی آیتم.",
+            "en": "Columns 0 and 1: add with a fresh tag, then remove filing the seen tags — the item's ordinary birth and death."
+          },
+          {
+            "fa": "ستون ۲: اگر tag تازه t3 از راه برسد، تصمیم add-wins یا remove-wins در همان‌جا دوشقه می‌شود و هر شاخه پایانه خودش را دارد.",
+            "en": "Column 2: if fresh tag t3 arrives, the add-wins or remove-wins decision forks right there, each branch with its own terminal."
+          },
+          {
+            "fa": "ستون‌های ۳ و ۴: وقتی هر replica زنده حذف را دید، حالت پایدار علّی می‌شود و فقط آن‌وقت tombstone جمع می‌شود و فراموش می‌شود.",
+            "en": "Columns 3 and 4: once every live replica saw the remove, the state is causally stable, and only then is the tombstone collected and forgotten."
+          }
+        ],
+        "point_fa": "دو نقطه تصمیم جدا: قاعده add تازه قرارداد محصول است و جمع‌آوری tombstone پایداری علّی — هیچ‌کدام تایمر نیستند.",
+        "point_en": "Two separate decision points: the fresh-add rule is a product contract, and tombstone collection is causal stability — neither is a timer.",
+        "failure_fa": "اگر دستگاه یک‌سال‌آفلاین قبل از sync بمیرد و مرده اعلام شود، وتویش با تغییر membership لغو می‌شود — ولی آن خودش قرارداد پرریسک دیگری است.",
+        "failure_en": "If the year-offline device dies before syncing and is declared dead, its veto lifts with the membership change — but that is itself another risky contract.",
+        "guarantee_fa": "شکل هر دو قرارداد (قاعده تازه و GC امن) را در یک چرخه جمع می‌کند؛ زمان واقعی sync را نمی‌گوید.",
+        "guarantee_en": "The figure gathers both contracts (fresh rule and safe GC) into one lifecycle; it says nothing about real sync times.",
+        "nonguarantee_fa": "درباره هزینه نگه‌داشتن tombstoneها و UX نمایش ساکت است.",
+        "nonguarantee_en": "It is silent on the cost of holding tombstones and on display UX."
+      },
+      "selfcheck": {
+        "q_fa": "tombstone نان دقیقاً چه زمانی جمع می‌شود؟",
+        "q_en": "Exactly when is the bread tombstone collected?",
+        "a_fa": "وقتی هر replica زنده حذف t2 را دیده باشد — پایداری علّی؛ دستگاه یک‌سال‌آفلاین تا sync آن را وتو می‌کند.",
+        "a_en": "Once every live replica has seen the t2 removal — causal stability; the year-offline device vetoes it until it syncs."
+      }
+    }
+  ],
+  "sources": [
+    "crdt",
+    "atlassian"
+  ],
+  "reasoning_fa": "<p>tag یکتای هر add هویت عمل را حفظ می‌کند؛ remove فقط tagهای دیده‌شده را حذف می‌کند، پس اجتماع مجموعهٔ حذف‌ها هر دو حذف آفلاین را حفظ می‌کند. add تازهٔ ندیده tag دیگری دارد و در add-wins باقی می‌ماند. union سادهٔ مقدارهای sibling این history را ندارد و می‌تواند هر دو کالا را برگرداند. برای GC باید ثابت کنیم replica یا پیامی با tag قدیمی بازنمی‌گردد؛ گذشتن زمان بدون قرارداد عضویت چنین اثباتی نیست.</p>",
+  "reasoning_en": "<p>Unique add tags preserve operation identity. Removes record observed tags, so merging removal sets preserves both offline deletions. An unseen fresh add has another tag and survives add-wins semantics. Plain sibling value union lacks this history and can resurrect both items. GC requires evidence that old tags cannot return through replicas or messages; elapsed time without membership rules is insufficient.</p>"
+}

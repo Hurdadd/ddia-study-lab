@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Local versus global index measured — DDIA Chapter 7 Solution 3 assembly</title>
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 490" role="img" aria-label="RPC and shard counts for local versus global secondary index operations">
+<title>RPC and shard counts per operation, plus the two staleness cases</title>
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0 0L10 5L0 10z" fill="#302828"/>
+</marker>
+</defs>
+<text x="620" y="52" font-size="30" font-weight="900" text-anchor="middle">Count shards, not milliseconds</text>
+<text x="620" y="86" font-size="16" text-anchor="middle">4 base shards, 2 index shards; every count below comes from the Java run</text>
+<rect x="24" y="150" width="1192" height="40" rx="12" fill="#fffdf7"/>
+<rect x="24" y="230" width="1192" height="40" rx="12" fill="#fffdf7"/>
+<rect x="24" y="310" width="1192" height="40" rx="12" fill="#fffdf7"/>
+<line x1="24" y1="145" x2="1216" y2="145" stroke="#302828" stroke-width="2"/>
+<text x="40" y="130" font-size="15" font-weight="800">operation</text>
+<text x="640" y="130" font-size="15" font-weight="800" text-anchor="middle">local index</text>
+<text x="1010" y="130" font-size="15" font-weight="800" text-anchor="middle">global index</text>
+<text x="40" y="177" font-size="15" font-weight="800">write, 2 terms</text>
+<text x="640" y="177" font-size="15" text-anchor="middle">1 shard</text>
+<text x="1010" y="177" font-size="15" text-anchor="middle">1 base + 2 index</text>
+<text x="40" y="217" font-size="15" font-weight="800">read, 1 term</text>
+<text x="640" y="217" font-size="15" text-anchor="middle">4 shards, scatter</text>
+<text x="1010" y="217" font-size="15" text-anchor="middle">1 index + fetch</text>
+<text x="40" y="257" font-size="15" font-weight="800">read, 2 terms</text>
+<text x="640" y="257" font-size="15" text-anchor="middle">4 shards, scatter</text>
+<text x="1010" y="257" font-size="15" text-anchor="middle">2 index + fetch</text>
+<text x="40" y="297" font-size="15" font-weight="800">partial index write</text>
+<text x="640" y="297" font-size="15" text-anchor="middle">same-shard txn</text>
+<rect x="935" y="274" width="150" height="30" rx="10" fill="#ffcfb8"/>
+<text x="1010" y="297" font-size="15" font-weight="800" text-anchor="middle">AND misses row</text>
+<text x="40" y="337" font-size="15" font-weight="800">stale index entry</text>
+<text x="640" y="337" font-size="15" text-anchor="middle">revalidate ids</text>
+<text x="1010" y="337" font-size="15" text-anchor="middle">delete wins</text>
+<line x1="24" y1="362" x2="1216" y2="362" stroke="#302828" stroke-width="2"/>
+<text x="620" y="404" font-size="14" text-anchor="middle">counts are RPCs, never latency: local timing cannot predict networked p99 — say so in review</text>
+<text x="620" y="434" font-size="14" text-anchor="middle">the reader revalidates every id against its base shard; tripwire on fan-out equal to shard count</text>
+<text x="620" y="464" font-size="14" text-anchor="middle">legend: local pays on reads, global pays on writes — pick the side your workload forgives</text>
+</svg>
+</div>
+</body>
+</html>

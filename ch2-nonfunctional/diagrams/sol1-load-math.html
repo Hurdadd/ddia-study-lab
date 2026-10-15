@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Load math and materialization — DDIA Chapter 2 Solution 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Load math bars and the materialization break-even rule">
+<title>Load math and the materialization decision</title>
+<text x="620" y="56" font-size="30" font-weight="900" text-anchor="middle">2M orders/day: rates, fan-out, and the break-even rule</text>
+<text x="620" y="92" font-size="16" text-anchor="middle">teaching numbers: avg 23.1/s, peak 231.5/s, 3 notifications per order</text>
+<text x="60" y="140" font-size="16" font-weight="800">rates per second (bars illustrative, values labelled)</text>
+<g>
+<rect x="60" y="156" width="90" height="40" rx="10" fill="#c3ceff"/>
+<text x="70" y="182" font-size="14">avg orders 23.1/s</text>
+<rect x="60" y="206" width="420" height="40" rx="10" fill="#9278ef"/>
+<text x="70" y="232" font-size="14" font-weight="700">peak orders 231.5/s (10x)</text>
+<rect x="60" y="256" width="160" height="40" rx="10" fill="#bfe6c9"/>
+<text x="70" y="282" font-size="14">avg notifications 69.4/s</text>
+<rect x="60" y="306" width="560" height="40" rx="10" fill="#7f9a7a"/>
+<text x="70" y="332" font-size="14" font-weight="700">peak notifications 694.4/s</text>
+<text x="60" y="372" font-size="14">payload approx 1 KB: peak approx 0.7 MB/s, one queue is enough</text>
+</g>
+<g>
+<rect x="770" y="130" width="410" height="260" rx="20" fill="#ffcfb8"/>
+<text x="975" y="168" font-size="20" font-weight="800" text-anchor="middle">the view you define</text>
+<text x="975" y="208" font-size="15" text-anchor="middle">1 order in, k writes out</text>
+<text x="975" y="242" font-size="15" text-anchor="middle">example: k = 4 (2 regions x 2 replicas)</text>
+<text x="975" y="276" font-size="15" text-anchor="middle">payload approx 1 KB, lag budget stated</text>
+<text x="975" y="310" font-size="15" text-anchor="middle">3 notifications are NOT 3 cache writes</text>
+<rect x="810" y="328" width="330" height="40" rx="20" fill="#f7f2e8"/>
+<text x="975" y="354" font-size="14" text-anchor="middle">peak extra writes: 4 x 231.5 = 926/s</text>
+</g>
+<g>
+<rect x="60" y="440" width="1120" height="150" rx="20" fill="#ffe08a"/>
+<text x="620" y="482" font-size="20" font-weight="800" text-anchor="middle">break-even: materialize iff reads/s x saved-read value is greater than orders/s x k x write cost</text>
+<text x="620" y="520" font-size="15" text-anchor="middle">wins: 5000 reads/s saving an 8 ms DB read each vs 926 extra writes/s</text>
+<text x="620" y="552" font-size="15" text-anchor="middle">loses: 5 reads/s vs the same 926 writes/s, serve read-through with short TTL</text>
+</g>
+<text x="620" y="628" font-size="14" text-anchor="middle">legend: blue bars = order rates, green bars = notification fan-out, peach = your view, yellow = decision rule</text>
+</svg>
+</div>
+</body>
+</html>

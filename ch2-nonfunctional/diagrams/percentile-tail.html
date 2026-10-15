@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mean vs percentiles — DDIA Chapter 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Latency distribution with mean, median and tail percentiles">
+<title>Latency distribution: mean versus percentiles</title>
+<text x="620" y="55" font-size="28" font-weight="900" text-anchor="middle">Latency distribution: mean vs percentiles</text>
+<g fill="#c3ceff" stroke="#302828" stroke-width="2">
+<rect x="110" y="460" width="52" height="50" rx="8"/>
+<rect x="176" y="390" width="52" height="120" rx="8"/>
+<rect x="242" y="310" width="52" height="200" rx="8"/>
+<rect x="308" y="230" width="52" height="280" rx="8"/>
+<rect x="374" y="180" width="52" height="330" rx="8"/>
+<rect x="440" y="200" width="52" height="310" rx="8"/>
+<rect x="506" y="260" width="52" height="250" rx="8"/>
+<rect x="572" y="315" width="52" height="195" rx="8"/>
+<rect x="638" y="360" width="52" height="150" rx="8"/>
+<rect x="704" y="398" width="52" height="112" rx="8"/>
+<rect x="770" y="424" width="52" height="86" rx="8"/>
+<rect x="836" y="444" width="52" height="66" rx="8"/>
+<rect x="902" y="460" width="52" height="50" rx="8"/>
+<rect x="968" y="472" width="52" height="38" rx="8"/>
+<rect x="1034" y="480" width="52" height="30" rx="8"/>
+<rect x="1100" y="486" width="52" height="24" rx="8"/>
+</g>
+<line x1="100" y1="510" x2="1160" y2="510" stroke="#302828" stroke-width="3"/>
+<line x1="360" y1="150" x2="360" y2="510" stroke="#2e7d54" stroke-width="3" stroke-dasharray="9 6"/>
+<line x1="470" y1="120" x2="470" y2="510" stroke="#d95f33" stroke-width="3" stroke-dasharray="9 6"/>
+<line x1="800" y1="150" x2="800" y2="510" stroke="#3b5fc0" stroke-width="3" stroke-dasharray="9 6"/>
+<line x1="970" y1="190" x2="970" y2="510" stroke="#c2437f" stroke-width="3" stroke-dasharray="9 6"/>
+<text x="360" y="168" font-size="16" font-weight="800" text-anchor="middle">p50 median</text>
+<text x="470" y="140" font-size="16" font-weight="800" text-anchor="middle">mean</text>
+<text x="800" y="168" font-size="16" font-weight="800" text-anchor="middle">p95</text>
+<text x="970" y="208" font-size="16" font-weight="800" text-anchor="middle">p99 tail</text>
+<text x="1060" y="300" font-size="14" text-anchor="middle">tail: rare but real</text>
+<text x="36" y="330" font-size="15" text-anchor="middle" transform="rotate(-90 36 330)">requests</text>
+<text x="300" y="548" font-size="15" text-anchor="middle">most users</text>
+<text x="1150" y="548" font-size="15" text-anchor="end">slower</text>
+<text x="620" y="612" font-size="16" text-anchor="middle">5 requests in 100 are slower than p95: averages hide them</text>
+</svg>
+</div>
+</body>
+</html>

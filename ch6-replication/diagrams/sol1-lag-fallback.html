@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lag has no bound: barrier below, fallback above — DDIA Chapter 6 Solution 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Replication lag timeline: stale window, version barrier admits and refuses, unbounded stall falls back to the leader">
+<title>Lag timeline with barrier and fallback</title>
+<text x="620" y="50" font-size="30" font-weight="900" text-anchor="middle">Lag has no bound: barrier below, fallback above</text>
+<text x="620" y="84" font-size="16" text-anchor="middle">one write, one lagging follower, three routed reads, and the stall zone with no upper bound</text>
+<rect x="950" y="112" width="250" height="380" rx="16" fill="#f6d9d2"/>
+<text x="1075" y="142" font-size="15" font-weight="800" text-anchor="middle">stall zone</text>
+<text x="1075" y="166" font-size="14" text-anchor="middle">no upper bound</text>
+<text x="40" y="156" font-size="15" font-weight="800">leader</text>
+<rect x="220" y="128" width="980" height="44" rx="12" fill="#bfe6c9"/>
+<text x="250" y="156" font-size="15">v7 applied at t0, LSN 7</text>
+<text x="40" y="296" font-size="15" font-weight="800">follower B</text>
+<rect x="220" y="268" width="480" height="44" rx="12" fill="#ffcfb8"/>
+<rect x="700" y="268" width="500" height="44" rx="12" fill="#bfe6c9"/>
+<text x="460" y="296" font-size="15" text-anchor="middle">stale: serves v5</text>
+<text x="950" y="296" font-size="15" text-anchor="middle">caught up: serves v7</text>
+<text x="40" y="436" font-size="15" font-weight="800">router</text>
+<rect x="240" y="408" width="220" height="44" rx="12" fill="#fffdf7" stroke="#9278ef" stroke-width="2"/>
+<rect x="540" y="408" width="220" height="44" rx="12" fill="#fffdf7" stroke="#9278ef" stroke-width="2"/>
+<rect x="840" y="408" width="340" height="44" rx="12" fill="#ffe08a" stroke="#9278ef" stroke-width="2"/>
+<text x="350" y="436" font-size="14" text-anchor="middle">r1 refused: 5 &lt; 7</text>
+<text x="650" y="436" font-size="14" text-anchor="middle">r2 admitted: 7 &gt;= 7</text>
+<text x="1010" y="436" font-size="14" text-anchor="middle">r3 unbounded: leader fallback</text>
+<line x1="300" y1="112" x2="300" y2="520" stroke="#302828" stroke-width="2" stroke-dasharray="8 6"/>
+<line x1="700" y1="112" x2="700" y2="520" stroke="#302828" stroke-width="2" stroke-dasharray="8 6"/>
+<line x1="950" y1="112" x2="950" y2="520" stroke="#302828" stroke-width="2" stroke-dasharray="8 6"/>
+<line x1="220" y1="520" x2="1200" y2="520" stroke="#302828" stroke-width="2"/>
+<text x="300" y="545" font-size="14" text-anchor="middle">t0 write v7</text>
+<text x="700" y="545" font-size="14" text-anchor="middle">t1 B applies LSN 7</text>
+<text x="950" y="545" font-size="14" text-anchor="middle">t2 stall begins</text>
+<text x="620" y="576" font-size="14" text-anchor="middle">barrier rule: serve only replicas at LSN 7 or more, and every read names its version</text>
+<text x="620" y="602" font-size="14" text-anchor="middle">fallback rule: no fresh follower means read from the leader, never a fixed sleep</text>
+<text x="620" y="628" font-size="14" text-anchor="middle">primary routing covers own-writes, stickiness covers repeats, durability covers failover</text>
+</svg>
+</div>
+</body>
+</html>

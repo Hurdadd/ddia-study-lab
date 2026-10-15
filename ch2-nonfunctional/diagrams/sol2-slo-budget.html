@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLO budget and burn alerts — DDIA Chapter 2 Solution 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="SLI fractions, error budget strip and two burn-rate alerts">
+<title>From SLI fractions to budget burn and alerts</title>
+<text x="620" y="56" font-size="30" font-weight="900" text-anchor="middle">Two fractions, one budget, two alert speeds</text>
+<text x="620" y="92" font-size="16" text-anchor="middle">teaching thresholds: latency 99 percent under 300 ms, availability 99.9 percent, 30-day window</text>
+<g>
+<rect x="40" y="130" width="360" height="330" rx="20" fill="#c3ceff"/>
+<text x="220" y="170" font-size="20" font-weight="800" text-anchor="middle">SLI fractions</text>
+<text x="220" y="212" font-size="15" text-anchor="middle">latency: fast reads / good reads</text>
+<text x="220" y="248" font-size="15" text-anchor="middle">availability: non-error / all</text>
+<text x="220" y="284" font-size="15" text-anchor="middle">timeout = failure in both</text>
+<text x="220" y="320" font-size="15" text-anchor="middle">dependency error hits availability</text>
+<rect x="80" y="348" width="280" height="72" rx="14" fill="#f7f2e8"/>
+<text x="220" y="378" font-size="14" text-anchor="middle">independent numerators:</text>
+<text x="220" y="402" font-size="14" text-anchor="middle">a fast error is still an error</text>
+</g>
+<g>
+<rect x="430" y="130" width="380" height="330" rx="20" fill="#bfe6c9"/>
+<text x="620" y="170" font-size="20" font-weight="800" text-anchor="middle">30-day error budget</text>
+<rect x="470" y="200" width="300" height="44" rx="12" fill="#f7f2e8"/>
+<rect x="470" y="200" width="180" height="44" rx="12" fill="#7f9a7a"/>
+<rect x="650" y="200" width="60" height="44" fill="#ffe08a"/>
+<rect x="710" y="200" width="60" height="44" rx="12" fill="#ff7e49"/>
+<text x="620" y="276" font-size="14" text-anchor="middle">teaching volume: 50M reads, budget 50,000</text>
+<text x="620" y="308" font-size="14" text-anchor="middle">green: safe, amber: warn, red: spent</text>
+<rect x="470" y="330" width="300" height="90" rx="14" fill="#f7f2e8"/>
+<text x="620" y="360" font-size="14" text-anchor="middle">budget at zero means:</text>
+<text x="620" y="386" font-size="14" text-anchor="middle">freeze releases, reliability only</text>
+</g>
+<g>
+<rect x="840" y="130" width="360" height="330" rx="20" fill="#ffcfb8"/>
+<text x="1020" y="170" font-size="20" font-weight="800" text-anchor="middle">burn alerts</text>
+<rect x="870" y="196" width="300" height="104" rx="14" fill="#f7f2e8"/>
+<text x="1020" y="226" font-size="15" font-weight="700" text-anchor="middle">fast-burn: page</text>
+<text x="1020" y="252" font-size="14" text-anchor="middle">2 percent of budget in 1 hour</text>
+<text x="1020" y="274" font-size="14" text-anchor="middle">action: rollback now</text>
+<rect x="870" y="316" width="300" height="104" rx="14" fill="#f7f2e8"/>
+<text x="1020" y="346" font-size="15" font-weight="700" text-anchor="middle">slow-burn: ticket</text>
+<text x="1020" y="372" font-size="14" text-anchor="middle">10 percent of budget in 6 hours</text>
+<text x="1020" y="394" font-size="14" text-anchor="middle">action: investigate this shift</text>
+</g>
+<g>
+<rect x="40" y="490" width="1160" height="100" rx="20" fill="#ffe08a"/>
+<text x="620" y="532" font-size="19" font-weight="800" text-anchor="middle">SLO is the internal objective, SLA is the customer contract with remedies</text>
+<text x="620" y="566" font-size="15" text-anchor="middle">example SLA: 99.5 percent monthly with 10 percent credit, deliberately looser than the SLO</text>
+</g>
+<text x="620" y="628" font-size="14" text-anchor="middle">legend: blue = measure, green = budget, peach = alert, yellow = contract split</text>
+</svg>
+</div>
+</body>
+</html>

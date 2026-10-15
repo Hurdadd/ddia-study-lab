@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clock Skew and Ordering — Last-Write-Wins Loses a Write (Figure 9-3)</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .pill-t{font:700 13px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .edge-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .band-h{font:700 14px system-ui,sans-serif; fill:#93c5fd}
+  .tick-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .warn-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#fda4af}
+  .win-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#fbbf24}
+  .note{font:12.5px system-ui,sans-serif; fill:#cfe3ff}
+  .note-h{font:700 13px system-ui,sans-serif; fill:#fbbf24}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="Clock skew makes a causally later write carry a smaller timestamp, so last-write-wins drops it">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+    <marker id="arrb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#93c5fd"/>
+    </marker>
+    <marker id="arrw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="30" text-anchor="middle">When Timestamps Disagree with Causality — Clock Skew Loses a Write</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">Figure 9-3: client B's increment happens after client A's write, yet carries a smaller timestamp, so last-write-wins throws it away</text>
+
+  <!-- ============ three node cards ============ -->
+  <g>
+    <rect x="60" y="80" width="300" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="pill-t" x="210" y="100" text-anchor="middle">Node 1 · clock 42.004</text>
+    <rect x="60" y="110" width="300" height="86" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="76" y="134">client A writes x = 1</text>
+    <text class="attr" x="76" y="156">timestamp = 42.004 s</text>
+    <text class="attr" x="76" y="178">replicates to node 3 + 2</text>
+
+    <rect x="470" y="80" width="300" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="pill-t" x="620" y="100" text-anchor="middle">Node 3 · clock 42.003</text>
+    <rect x="470" y="110" width="300" height="86" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="486" y="134">client B increments x = 2</text>
+    <text class="attr" x="486" y="156">timestamp = 42.003 s</text>
+    <text class="attr" x="486" y="178">skew under 3 ms — still wrong</text>
+
+    <rect x="880" y="80" width="300" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="pill-t" x="1030" y="100" text-anchor="middle">Node 2 · receives both</text>
+    <rect x="880" y="110" width="300" height="86" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="896" y="134">keeps the greatest timestamp</text>
+    <text class="attr" x="896" y="156">x = 1 (42.004) wins</text>
+    <text class="attr" x="896" y="178">x = 2 (42.003) is discarded</text>
+
+    <line x1="360" y1="152" x2="464" y2="152" stroke="#86efac" stroke-width="1.6" marker-end="url(#arr)"/>
+    <text class="edge-lbl" x="412" y="142" text-anchor="middle">x=1</text>
+    <line x1="770" y1="152" x2="874" y2="152" stroke="#86efac" stroke-width="1.6" marker-end="url(#arr)"/>
+    <text class="edge-lbl" x="822" y="142" text-anchor="middle">x=2</text>
+
+    <path d="M210 196 L210 232 L1030 232 L1030 200" fill="none" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+    <text class="edge-lbl" x="620" y="226" text-anchor="middle">x=1 also replicates directly to node 2</text>
+  </g>
+
+  <!-- ============ band 1 : real time ============ -->
+  <g>
+    <text class="band-h" x="60" y="288">① Real time — the causal order</text>
+    <line x1="180" y1="332" x2="1120" y2="332" stroke="#2a3652" stroke-width="2"/>
+    <circle cx="420" cy="332" r="7" fill="#93c5fd"/>
+    <circle cx="820" cy="332" r="7" fill="#86efac"/>
+    <text class="tick-lbl" x="420" y="356" text-anchor="middle">A writes x=1</text>
+    <text class="tick-lbl" x="820" y="356" text-anchor="middle">B increments to x=2</text>
+    <line x1="436" y1="316" x2="806" y2="316" stroke="#93c5fd" stroke-width="1.8" marker-end="url(#arrb)"/>
+    <text class="edge-lbl" x="620" y="308" text-anchor="middle">B reads A's value first, so B is causally later</text>
+    <text class="small" x="180" y="356">time flows right</text>
+  </g>
+
+  <!-- ============ band 2 : timestamp order ============ -->
+  <g>
+    <text class="band-h" x="60" y="416">② Timestamp order — what last-write-wins actually sees</text>
+    <line x1="180" y1="460" x2="1120" y2="460" stroke="#2a3652" stroke-width="2"/>
+    <circle cx="420" cy="460" r="7" fill="#86efac"/>
+    <circle cx="820" cy="460" r="9" fill="#fbbf24"/>
+    <text class="tick-lbl" x="420" y="484" text-anchor="middle">x=2 stamped 42.003</text>
+    <text class="tick-lbl" x="820" y="484" text-anchor="middle">x=1 stamped 42.004</text>
+    <text class="win-lbl" x="820" y="440" text-anchor="middle">LWW keeps this one</text>
+    <text class="warn-lbl" x="420" y="440" text-anchor="middle">LWW drops this one</text>
+    <text class="small" x="180" y="484">the two orders disagree</text>
+  </g>
+
+  <!-- ============ outcome ============ -->
+  <rect x="180" y="508" width="940" height="52" rx="10" fill="#1b2438" stroke="#fda4af" stroke-width="1.4"/>
+  <text class="warn-lbl" x="196" y="530">Result at node 2: x = 1 survives, x = 2 is discarded — the increment is lost.</text>
+  <text class="note" x="196" y="550">No error is raised. The data silently disappears, and a node with a lagging clock cannot overwrite a faster node's value until the skew has elapsed.</text>
+
+  <!-- ============ note ============ -->
+  <rect x="180" y="576" width="940" height="70" rx="10" fill="#1b2438" stroke="#fbbf24" stroke-width="1.3" stroke-dasharray="6 4"/>
+  <text class="note-h" x="196" y="598">Safer ways to order writes</text>
+  <text class="note" x="196" y="618">• read the current timestamp first and stamp strictly above it (one extra round trip) — Cassandra/Scylla instead use the client clock and accept the risk</text>
+  <text class="note" x="196" y="636">• logical clocks (Lamport, version vectors) record ordering without reading any clock; Spanner instead waits out the clock's uncertainty interval</text>
+</svg>
+</div>
+</body>
+</html>

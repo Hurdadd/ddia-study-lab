@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-hue="mint" data-title-fa="DDIA فصل ۳: مدل‌های داده و زبان‌های کوئری" data-title-en="DDIA Chapter 3: Data Models and Query Languages">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DDIA Chapter 3: Data Models and Query Languages</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/ddia.css">
+<link rel="stylesheet" href="../assets/exercise-audit.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="wordmark" href="../index.html">DDIA<em>·</em><span class="fa">مطالعه</span><span class="en">STUDY</span></a>
+  <nav class="topnav">
+    <a href="../index.html"><span class="fa">نقشه راه</span><span class="en">Roadmap</span></a>
+    <a href="index.html" aria-current="page"><span class="fa">فصل ۳</span><span class="en">Chapter 3</span></a>
+    <a href="../ch4-storage-retrieval/index.html"><span class="fa">فصل بعد</span><span class="en">Next chapter</span></a>
+  </nav>
+  <button class="langbtn" data-lang-toggle><span class="fa">EN</span><span class="en">فارسی</span></button>
+  <button class="iconbtn" data-theme-toggle aria-label="theme">
+    <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  </button>
+</header>
+
+<section class="doc-hero">
+  <div class="blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+  <p class="crumb"><a href="../index.html"><span class="fa">نقشه راه</span><span class="en">Roadmap</span></a>/ <span class="fa">فصل ۳</span><span class="en">Chapter 3</span></p>
+  <h1 class="reveal"><span class="fa">مدل‌های داده و زبان‌های کوئری</span><span class="en">Data models and query languages</span></h1>
+  <p class="lede reveal">
+    <span class="fa">هر لایه بخشی از جزئیاتِ لایهٔ زیر را پنهان می‌کند. مدلِ داده زبانِ بیانِ مسئله است؛ شکلِ روی دیسک لزوماً همان شکلِ دیده‌شده در برنامه نیست.</span>
+    <span class="en">A focused distillation: relational vs document models, normalization, graph models, event sourcing and DataFrames — with interactive Archify diagrams, a teacher narration for each, and an interview question pack.</span>
+  </p>
+  <div class="meta-row reveal">
+    <span><b><span class="fa">۱۱</span><span class="en">11</span></b> <span class="fa">نمودار تعاملی</span><span class="en">interactive diagrams</span></span><span class="dot">·</span>
+    <span><span class="fa">محور: relational · document · graph · events</span><span class="en">Theme: relational · document · graph · events</span></span><span class="dot">·</span>
+    <span><span class="fa">زمان مطالعه: حدود ۶۰ دقیقه</span><span class="en">Reading time: ~60 min</span></span>
+  </div>
+</section>
+
+<div class="doc-wrap">
+<nav class="toc">
+<a class="fa" href="#chapter-examples">مثال‌های فنی این فصل</a>
+
+  <h3><span class="fa">فهرست موضوع‌ها</span><span class="en">Contents</span></h3>
+  <a href="#s0"><span class="fa">۰. داده‌ها لایه‌لایه‌اند</span><span class="en">0. Data comes in layers</span></a>
+  <a href="#s1"><span class="fa">۱. رابطه‌ای در برابر سندی</span><span class="en">1. Relational vs document</span></a>
+  <a class="lvl2" href="#s1-1"><span class="fa">۱.۱. ناهماهنگی شیء-رابطه‌ای</span><span class="en">1.1. Object-relational mismatch</span></a>
+  <a class="lvl2" href="#s1-2"><span class="fa">۱.۲. نرمال‌سازی در برابر نرمال‌زدایی</span><span class="en">1.2. Normalization vs denormalization</span></a>
+  <a class="lvl2" href="#s1-3"><span class="fa">۱.۳. اسکیمای تحلیلی: Star و Snowflake</span><span class="en">1.3. Analytic schemas: star and snowflake</span></a>
+  <a class="lvl2" href="#s1-4"><span class="fa">۱.۴. نمودار ۱ + روایت مدرس</span><span class="en">1.4. Diagram 1 + narration</span></a>
+  <a class="lvl2" href="#s1-5"><span class="fa">۱.۵. نمودار ER: اسکیمای رابطه‌ای رزومه</span><span class="en">1.5. ER diagram: resume relational schema</span></a>
+  <a class="lvl2" href="#s1-6"><span class="fa">۱.۶. نمودار کلاس/ER: یک رزومه، سه شکل</span><span class="en">1.6. Class/ER diagram: one resume, three shapes</span></a>
+  <a href="#s2"><span class="fa">۲. مدل‌های گرافی</span><span class="en">2. Graph models</span></a>
+  <a class="lvl2" href="#s2-1"><span class="fa">۲.۱. نمودار ۲ + روایت مدرس</span><span class="en">2.1. Diagram 2 + narration</span></a>
+  <a class="lvl2" href="#s2-3"><span class="fa">۲.۲. نمودار ساختاری: ساختار داخلی گراف</span><span class="en">2.2. Structural diagram: graph internals</span></a>
+  <a class="lvl2" href="#s2-2"><span class="fa">۲.۳. Cypher، SPARQL، Datalog، GraphQL</span><span class="en">2.3. Cypher, SPARQL, Datalog, GraphQL</span></a>
+  <a href="#s3"><span class="fa">۳. Event Sourcing و CQRS</span><span class="en">3. Event sourcing and CQRS</span></a>
+  <a class="lvl2" href="#s3-1"><span class="fa">۳.۱. نمودار ۳ + روایت مدرس</span><span class="en">3.1. Diagram 3 + narration</span></a>
+  <a class="lvl2" href="#s3-2"><span class="fa">۳.۲. نمودار وضعیت: چرخهٔ عمر رزرو</span><span class="en">3.2. State diagram: booking lifecycle</span></a>
+  <a href="#s4"><span class="fa">۴. DataFrame، ماتریس و آرایه</span><span class="en">4. DataFrames, matrices and arrays</span></a>
+  <a href="#s5"><span class="fa">۵. کدام مدل را انتخاب کنیم؟</span><span class="en">5. Which model to choose?</span></a>
+  <a class="lvl2" href="#s5-1"><span class="fa">۵.۱. نمودار ۴ + روایت مدرس</span><span class="en">5.1. Diagram 4 + narration</span></a>
+  <a href="#s6"><span class="fa">۶. بستهٔ مصاحبه</span><span class="en">6. Interview pack</span></a>
+  <a class="lvl2" href="#s6-1"><span class="fa">۶.۱. همه‌چیز در یک نگاه</span><span class="en">6.1. Everything at a glance</span></a>
+  <a class="lvl2" href="#s6-2"><span class="fa">۶.۲. سوالات پرتکرار</span><span class="en">6.2. Frequent questions</span></a>
+  <a class="lvl2" href="#s6-3"><span class="fa">۶.۳. اشتباهات رایج</span><span class="en">6.3. Common mistakes</span></a>
+  <a class="lvl2" href="#s6-4"><span class="fa">۶.۴. چک‌لیست ۵ دقیقه‌ای</span><span class="en">6.4. Five-minute checklist</span></a>
+  <a href="#s7"><span class="fa">۷. تمرین‌های عملی</span><span class="en">7. Hands-on exercises</span></a>
+</nav>
+
+<main class="doc">
+<!-- ============ SECTION 0 ============ -->
+<section id="s0">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۰</span><span class="en">0</span></span> <span class="fa">داده‌ها لایه‌لایه‌اند</span><span class="en">Data comes in layers</span></h2>
+<aside class="callout fa example-index" id="chapter-examples" aria-label="مثال‌های فنی فصل ۳">
+<div class="tag">مثال‌های فنی فصل ۳</div>
+<p>هر مثال، وضعیت اولیه، ترتیبِ عملیات و نتیجه را نشان می‌دهد. عددها و داده‌ها فرض آموزشی‌اند؛ نام ابزارها فقط جایی آمده که رفتار مشخصِ آن ابزار موضوع بحث است.</p>
+<details><summary>فهرستِ مثال‌ها؛ رفتن مستقیم به هر موضوع</summary><ul>
+<li><a href="#example-ch3-0">یک رزومه در چهار لایه</a></li>
+<li><a href="#example-ch3-1">انتخاب مدل با سؤال شروع می‌شود</a></li>
+<li><a href="#example-ch3-2">SQL نتیجه را می‌خواهد، نه حلقه را</a></li>
+<li><a href="#example-ch3-3">دو نمایش یک سابقهٔ شغلی</a></li>
+<li><a href="#example-ch3-4">N+1 در صفحهٔ رزومه‌ها</a></li>
+<li><a href="#example-ch3-5">Embedding تا کجا مناسب است؟</a></li>
+<li><a href="#example-ch3-6">نشانیِ فعلی و نشانیِ تاریخی</a></li>
+<li><a href="#example-ch3-7">کلید خارجی و جدول واسط</a></li>
+<li><a href="#example-ch3-8">Fact و dimension روی یک فروش</a></li>
+<li><a href="#example-ch3-9">اعتبارسنجی در نوشتن یا خواندن</a></li>
+<li><a href="#example-ch3-10">پیمایشِ دو رابطه</a></li>
+<li><a href="#example-ch3-11">ویژگی روی گره یا یال</a></li>
+<li><a href="#example-ch3-12">همان مسیر با زبان گراف</a></li>
+<li><a href="#example-ch3-13">رویداد و نمای خواندن</a></li>
+<li><a href="#example-ch3-14">بازسازی یک گزارش تازه</a></li>
+<li><a href="#example-ch3-15">Replay نباید پیامک تاریخی بفرستد</a></li>
+<li><a href="#example-ch3-16">جدول در برابر آرایه</a></li>
+<li><a href="#example-ch3-17">مدل تابع الگوی دسترسی است</a></li>
+</ul></details>
+</aside>
+
+
+<div class="fa"><p>هر لایه بخشی از جزئیاتِ لایهٔ زیر را پنهان می‌کند. مدلِ داده زبانِ بیانِ مسئله است؛ شکلِ روی دیسک لزوماً همان شکلِ دیده‌شده در برنامه نیست.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-0">
+<p class="example-title"><b>مثال فنی: یک رزومه در چهار لایه</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> کاربر سابقهٔ «مهندس در شرکت ۷» را در فرم می‌بیند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> برنامه آن را شیء می‌کند؛ جدول <code dir="ltr">jobs(person_id, company_id)</code> رابطه را نگه می‌دارد؛ موتور پایگاه داده آن را در صفحه‌های دیسک می‌نویسد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هر لایه مدل خودش را دارد؛ تغییر مدل نمایشی الزاماً به تغییر همانند در چیدمان دیسک نیاز ندارد.</p>
+</div></div>
+
+
+  <div class="callout">
+    <div class="tag"><span class="fa">ایدهٔ کلیدی فصل</span><span class="en">Chapter thesis</span></div>
+    <div class="fa">
+    <p>
+      مدل‌های داده شاید مهم‌ترین بخش توسعهٔ نرم‌افزار باشند، چون فقط شکلِ کدنویسی را تعیین نمی‌کنند؛
+      <b>شکلِ فکر کردن ما دربارهٔ مسئله</b> را هم تعیین می‌کنند. هر برنامه‌ای از لایه‌بندیِ چند مدل داده ساخته شده:
+    </p>
+    <ol>
+      <li>لایهٔ برنامه: دنیای واقعی (افراد، سازمان‌ها، پول، سنسورها) را با اشیا و APIهای خاصِ خودت مدل می‌کنی.</li>
+      <li>لایهٔ ذخیره‌سازی: آن ساختارها را با یک مدل عمومی بیان می‌کنی: JSON/XML، جدول‌های رابطه‌ای، یا رأس و یالِ گراف. <b>موضوع این فصل همین لایه است.</b></li>
+      <li>لایهٔ موتور ذخیره‌سازی: آن مدل چطور به بایت‌های روی دیسک/حافظه/شبکه تبدیل شود (فصل ۴).</li>
+      <li>لایهٔ سخت‌افزار: بایت‌ها چطور با جریان الکتریکی و نور و مغناطیس نمایش داده شوند.</li>
+    </ol>
+    <p>هر لایه، پیچیدگیِ لایهٔ زیرین را با یک مدل تمیز پنهان می‌کند و همین، همکاری گروه‌های مختلف را ممکن می‌سازد.</p>
+    </div>
+    <div class="en">
+    <p>
+      Data models may be the most important part of software development, because they determine not just how we write code;
+      they determine <b>how we think about the problem</b>. Every application is built from layers of data models:
+    </p>
+    <ol>
+      <li>Application layer: you model the real world (people, organizations, money, sensors) with your own objects and APIs.</li>
+      <li>Storage layer: you express those structures in a general-purpose model: JSON/XML, relational tables, or graph nodes and edges. <b>This chapter is about this layer.</b></li>
+      <li>Storage-engine layer: how that model turns into bytes on disk/memory/network (Chapter 4).</li>
+      <li>Hardware layer: how bytes are represented with electric current, light and magnetism.</li>
+    </ol>
+    <p>Each layer hides the complexity below behind a clean model, and that is what lets different teams collaborate.</p>
+    </div>
+  </div>
+
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">لایه‌های داده — هر لایه زیرین را پنهان می‌کند</span><span class="en">Data layers — each layer hides the one below</span></b>
+      <a class="open" href="diagrams/data-layers.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/data-layers.html" title="Four layers of data" loading="lazy"></iframe>
+  </div>
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: یک رزومه در چهار لایه</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> کاربر سابقهٔ «مهندس در شرکت ۷» را در فرم می‌بیند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> برنامه آن را شیء می‌کند؛ جدول <code dir="ltr">jobs(person_id, company_id)</code> رابطه را نگه می‌دارد؛ موتور پایگاه داده آن را در صفحه‌های دیسک می‌نویسد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هر لایه مدل خودش را دارد؛ تغییر مدل نمایشی الزاماً به تغییر همانند در چیدمان دیسک نیاز ندارد.</p>
+</div>
+<p>مدلِ داده مشخص می‌کند اطلاعات را با چه شکلی نگه داریم و چه رابطه‌هایی را آسان‌تر ببینیم. جدول، سند، گراف و رویداد، چهار نگاه متفاوت‌اند؛ انتخاب از روی سؤال‌های برنامه شروع می‌شود.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-1">
+<p class="example-title"><b>مثال فنی: انتخاب مدل با سؤال شروع می‌شود</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> داده شامل افراد، شرکت‌ها و سابقهٔ کار است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نمایش کل رزومه یک خواندنِ تو‌در‌تو می‌خواهد؛ جست‌وجوی «همکارِ دوستِ من» پیمایش چند رابطه می‌خواهد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> یک سند برای اولی طبیعی‌تر و یک گراف برای دومی مناسب‌تر است؛ شکل پرسش بخشی از انتخاب مدل است.</p>
+</div>
+<p>مثال‌های این فصل سناریوهای آموزشیِ برگرفته از کارهای روزمره‌اند. عددهای انتخاب‌شده برای توضیح‌اند؛ معماریِ داخلیِ یک شرکت مشخص را توصیف نمی‌کنند.</p></div>
+    <div class="en"><p>Read the four bars top to bottom: <span class="ltr">L1 App objects</span> (people and orders in code), <span class="ltr">L2 Storage model</span> (JSON, tables or graph — this chapter’s subject), <span class="ltr">L3 Storage engine</span> (bytes on disk and memory — Chapter 4), and <span class="ltr">L4 Hardware</span> (current, light, magnetism). The three right-hand tags (<span class="ltr">abstracts / encodes / embodies</span>) say what each layer does to the one below: hide it, encode it, embody it.</p></div>
+  </div>
+
+  <h3><span class="fa">زبان کوئری اعلانی (Declarative) در برابر دستوری (Imperative)</span><span class="en">Declarative vs imperative query languages</span></h3>
+<div class="fa">
+<p>زبان اعلانی می‌گوید چه نتیجه‌ای می‌خواهیم؛ زبان دستوری مراحل رسیدن به نتیجه را مشخص می‌کند. در SQL معمولاً انتخاب روش اجرا را به موتور پایگاه داده می‌سپاریم.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-2">
+<p class="example-title"><b>مثال فنی: SQL نتیجه را می‌خواهد، نه حلقه را</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> هدف مشتریانی است که بیش از سه سفارش دارند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> <code dir="ltr">GROUP BY customer_id HAVING COUNT(*) &gt; 3</code> شرط نتیجه را می‌گوید؛ optimizer می‌تواند نوع اسکن و تجمیع را انتخاب کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> در حلقهٔ دستوری ترتیب اجرا را خودمان تعیین می‌کنیم؛ اعلانی بودن آزادی انتخاب طرح اجرا را به موتور می‌دهد.</p>
+</div>
+</div>
+
+  <div class="fa"><ul>
+    <li><b>اعلانی</b> (مثل SQL، Cypher، SPARQL، Datalog): می‌گویی <b>چه</b> می‌خواهی — چه الگویی از داده، چه شرط‌هایی، چه مرتب‌سازی و تجمیعی — اما نمی‌گویی «چطور».</li>
+    <li><b>دستوری</b> (مثل Python و Java): باید الگوریتم و ترتیب عملیات را خودت بنویسی.</li>
+    <li>مزیت بزرگ اعلانی: مخفی ماندنِ جزئیات موتور کوئری، پس بهینه‌سازِ پایگاه داده می‌تواند ایندکس و الگوریتم join را عوض کند — حتی کوئری را موازی کند — بدون تغییرِ حتی یک خط از کدِ تو.</li>
+  </ul></div>
+  <div class="en"><ul>
+    <li><b>Declarative</b> (SQL, Cypher, SPARQL, Datalog): you say <b>what</b> you want — which data pattern, which conditions, which sort and aggregation — but never “how”.</li>
+    <li><b>Imperative</b> (Python, Java): you must write the algorithm and operation order yourself.</li>
+    <li>The big declarative win: the query engine’s internals stay hidden, so the database optimizer can swap indexes and join algorithms — even parallelize the query — without changing a line of your code.</li>
+  </ul></div>
+</section>
+
+<!-- ============ SECTION 1 ============ -->
+<section id="s1">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۱</span><span class="en">1</span></span> <span class="fa">مدل رابطه‌ای در برابر مدل سندی</span><span class="en">Relational vs document model</span></h2>
+
+  <div class="fa">
+<p>در مدل رابطه‌ای، داده در جدول‌ها و ارتباط میان آن‌ها نگه داشته می‌شود. در مدل سندی، اطلاعات مرتبط می‌تواند داخل یک سندِ تو‌در‌تو قرار بگیرد.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-3">
+<p class="example-title"><b>مثال فنی: دو نمایش یک سابقهٔ شغلی</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> مریم با <code dir="ltr">person_id=17</code> در شرکت <code dir="ltr">7</code> کار کرده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> رابطه‌ای: ردیف در <code dir="ltr">people</code> و ردیف در <code dir="ltr">jobs</code> با کلید خارجی؛ سندی: آرایهٔ <code dir="ltr">jobs</code> داخل سند مریم.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> سند خواندن یکجای رزومه را ساده می‌کند؛ گزارش همهٔ کارمندان شرکت ممکن است ایندکس و پردازش متفاوتی بخواهد.</p>
+</div>
+</div>
+  <div class="en"><p>
+    The relational model (Codd, 1970) keeps data in <b>relations</b> (in SQL: tables) with unordered rows. It dominated by the mid-80s
+    and still rules business analytics. Challengers came and went: network and hierarchical models, object databases, XML databases;
+    each made noise and never stuck. Instead SQL absorbed them (XML, JSON, graph).
+    The 2010s <span class="ltr">NoSQL</span> wave popularized document models, schema flexibility and scale-out, while
+    <span class="ltr">NewSQL</span> chased NoSQL scalability with relational transactional guarantees.
+  </p></div>
+
+  <h3 id="s1-1"><span class="fa">ناهماهنگی شیء-رابطه‌ای (Impedance Mismatch) و ORM</span><span class="en">Object-relational impedance mismatch and ORMs</span></h3>
+  <div class="fa">
+<p>ORM واسطه‌ای است که اشیای برنامه را به جدول‌ها و ردیف‌ها تبدیل می‌کند. این واسطه نوشتن کد را آسان‌تر می‌کند، اما تفاوتِ شکل اشیا و جدول‌ها را از بین نمی‌برد.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-4">
+<p class="example-title"><b>مثال فنی: N+1 در صفحهٔ رزومه‌ها</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> ORM ابتدا ۱۰۰ متقاضی را با یک SQL می‌خواند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> دسترسی lazy به <code dir="ltr">person.jobs</code> برای هر متقاضی یک SQL جدا می‌زند: مجموعاً ۱۰۱ پرس‌وجو؛ preload می‌تواند رابطه‌ها را دسته‌ای بخواند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> کد کوتاه لزوماً مسیر کم‌هزینه نیست؛ تعداد query و دادهٔ برگردانده‌شده باید دیده شود.</p>
+</div>
+</div>
+  <div class="en"><p>
+    Since most development is object-oriented, storing data in tables needs an awkward translation layer; the gap is called
+    <b>impedance mismatch</b> (a term borrowed from electronics). <span class="ltr">ORM</span> frameworks
+    (like Hibernate and ActiveRecord) slim this layer down, but the criticisms are serious:
+  </p></div>
+  <div class="fa"><ul>
+    <li>پیچیده‌اند و نمی‌توانند تفاوت دو مدل را کامل پنهان کنند.</li>
+    <li>فقط برای OLTP‌اند؛ مهندس داده همچنان با نمایش رابطه‌ایِ زیرین کار دارد، پس طراحی اسکیما مهم می‌ماند.</li>
+    <li>در سیستم‌های متنوع (موتور جست‌وجو، گراف، NoSQL) معمولاً پشتیبانی ندارند.</li>
+    <li>اسکیمای تولیدشان می‌تواند هم برای کاربرِ مستقیمِ داده ناخوشایند باشد و هم ناکارآمد.</li>
+    <li>به‌سادگی کوئری ناکارآمد می‌سازند؛ مثال معروف: <b>مسئلهٔ N+1</b> — یک کوئری برای N نظر، و بعد N کوئری جدا برای نویسندهٔ هر نظر،
+      در حالی که یک JOIN این کار را یک‌جا می‌کرد.</li>
+  </ul></div>
+  <div class="en"><ul>
+    <li>They are complex and cannot fully hide the two models’ differences.</li>
+    <li>They serve OLTP only; the data engineer still works with the underlying relational representation, so schema design stays important.</li>
+    <li>They usually lack support across diverse systems (search engines, graphs, NoSQL).</li>
+    <li>Their generated schemas can be both unpleasant for direct data users and inefficient.</li>
+    <li>They easily generate inefficient queries; the famous case: the <b>N+1 problem</b> — one query for N comments, then N separate queries for each comment’s author,
+      where one JOIN would have done it at once.</li>
+  </ul></div>
+
+  <h3><span class="fa">مدل سندی: رزومه به‌صورت یک درخت</span><span class="en">The document model: a resume as a tree</span></h3>
+  <div class="fa">
+<p>یک سند برای داده‌ای مناسب است که به‌شکل یک مجموعهٔ تو‌در‌تو خوانده می‌شود. این سادگی زمانی کمتر می‌شود که بخش‌های سند میان افراد زیادی مشترک باشند.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-5">
+<p class="example-title"><b>مثال فنی: Embedding تا کجا مناسب است؟</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> رزومه دو سابقهٔ شغلی دارد و هر دو در آرایهٔ <code dir="ltr">jobs</code> ذخیره‌اند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> خواندن سند همهٔ رزومه را می‌آورد؛ اگر نام شرکت در ۱۰ هزار رزومه کپی شده باشد، تغییر نام به اصلاح همان ۱۰ هزار نسخه نیاز دارد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> بخش‌های متعلق به یک رزومه برای embedding مناسب‌اند؛ هویت مشترک شرکت معمولاً مرجع مستقل می‌خواهد.</p>
+</div>
+</div>
+  <div class="en"><p>
+    Not all data is relational. The book’s example: a resume (a career-network profile). Fields like name appear once,
+    but “job history”, “education” and “contact info” each hold several items. Two fixes:
+  </p></div>
+  <div class="fa"><ul>
+    <li><b>Shredding (تکه‌تکه کردن):</b> هر بخش در جدول جدا با کلید خارجی به جدول <code>users</code>.</li>
+    <li><b>Embedding (توکار کردن):</b> همه در یک سند JSON — یک درختِ یک‌به‌چند که دقیقاً با ساختار شیء در کد یکی است.</li>
+  </ul></div>
+  <div class="en"><ul>
+    <li><b>Shredding:</b> each section in its own table with a foreign key to <code>users</code>.</li>
+    <li><b>Embedding:</b> everything in one JSON document — a one-to-many tree identical to the in-code object structure.</li>
+  </ul></div>
+  <pre>{
+  "user_id": 251,
+  "first_name": "Barack",
+  "last_name": "Obama",
+  "positions": [
+    {"job_title": "President", "organization": "United States of America"},
+    {"job_title": "US Senator (D-IL)", "organization": "United States Senate"}
+  ],
+  "education": [
+    {"school_name": "Harvard University", "start": 1988, "end": 1991}
+  ],
+  "contact_info": {"website": "https://barackobama.com"}
+}</pre>
+  <div class="fa"><p>
+    مزیت سند: <b>locality</b> — هرچه برای نمایش یک پروفایل لازم است یک‌جاست و یک خواندن کافی است؛
+    در مدل رابطه‌ای یا باید چند کوئری بزنی یا یک join چندطرفهٔ درهم‌وبرهم.
+    اما اگر واقعاً آیتم‌های مرتبط «تعدادشان زیاد» باشد (مثلاً هزاران نظر زیر یک پست)، توکار کردن در سند ناخوشایند می‌شود.
+  </p></div>
+  <div class="en"><p>
+    The document’s edge: <b>locality</b> — everything a profile page needs sits together, so one read suffices;
+    in the relational model you either issue several queries or one tangled multi-way join.
+    But when related items truly run “large” (e.g. thousands of comments under a post), embedding in a document turns unpleasant.
+  </p></div>
+
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">مقایسه — تکه‌تکه کردن در برابر توکار کردن</span><span class="en">Comparison — shredding vs embedding</span></b>
+      <a class="open" href="diagrams/shredding-embedding.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/shredding-embedding.html" title="Shredding versus embedding" loading="lazy"></iframe>
+  </div>
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: Embedding تا کجا مناسب است؟</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> رزومه دو سابقهٔ شغلی دارد و هر دو در آرایهٔ <code dir="ltr">jobs</code> ذخیره‌اند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> خواندن سند همهٔ رزومه را می‌آورد؛ اگر نام شرکت در ۱۰ هزار رزومه کپی شده باشد، تغییر نام به اصلاح همان ۱۰ هزار نسخه نیاز دارد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> بخش‌های متعلق به یک رزومه برای embedding مناسب‌اند؛ هویت مشترک شرکت معمولاً مرجع مستقل می‌خواهد.</p>
+</div>
+<p>دو کارت را کنار هم بخوانید. چپ (<span class="ltr">Shredding</span>): سه جدولِ کوچکِ <span class="ltr">users</span> و <span class="ltr">positions</span> و <span class="ltr">education</span> که با کلید خارجی به هم گره خورده‌اند؛ خواندن یعنی <span class="ltr">JOIN</span> در هر بار، نوشتن یعنی یک ردیف در هر بار. راست (<span class="ltr">Embedding</span>): یک سند JSON که همه‌چیز را در خود دارد؛ خواندن یعنی یک جست‌وجو، نوشتن یعنی بازنویسی و کپی‌ها. جملهٔ پایین حکم انتخاب است: درختِ یک‌به‌چند را توکار کن، وبِ چند‌به‌چند را ارجاع بده.</p></div>
+    <div class="en"><p>Read the two cards side by side. Left (<span class="ltr">Shredding</span>): three small tables — <span class="ltr">users</span>, <span class="ltr">positions</span>, <span class="ltr">education</span> — tied by foreign keys; reading means a <span class="ltr">JOIN</span> every time, writing means one row at a time. Right (<span class="ltr">Embedding</span>): one JSON document holding everything; reading means a single lookup, writing means rewrites and copies. The bottom line is the selection rule: embed a one-to-few tree, reference a many-to-many web.</p></div>
+  </div>
+
+  <h3 id="s1-2"><span class="fa">نرمال‌سازی در برابر نرمال‌زدایی</span><span class="en">Normalization vs denormalization</span></h3>
+  <div class="callout">
+    <div class="tag"><span class="fa">ایدهٔ کلیدی</span><span class="en">Key idea</span></div>
+    <div class="fa">
+<p>نرمال‌سازی یعنی اطلاعات مشترک را یک‌جا نگه داریم و با شناسه به آن ارجاع بدهیم. نرمال‌زدایی یعنی برای آسان‌تر شدن خواندن، بخشی از داده را تکرار کنیم.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-6">
+<p class="example-title"><b>مثال فنی: نشانیِ فعلی و نشانیِ تاریخی</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> نشانی فعلی مشتری در جدول <code dir="ltr">customers</code> است؛ سفارش ۴۲ به نشانی زمان خرید نیاز دارد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> سفارش یک snapshot از نشانی ارسال نگه می‌دارد؛ تغییر نشانی فعلی، سفارش تحویل‌شدهٔ قدیمی را بازنویسی نمی‌کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> این تکرار داده عمدی است؛ هر کپی معنای زمانی جدا دارد و نباید بی‌فکر با مرجع فعلی همگام شود.</p>
+</div>
+</div>
+    <div class="en"><p>
+      If you keep <code>region_id</code> (not the text “Washington, DC”), your data is <b>normalized</b>:
+      human-meaningful information is stored exactly once, and everything else references it by ID.
+      Copying the text everywhere is <b>denormalized</b>. An ID means nothing to humans, so it never changes;
+      but anything meaningful may change tomorrow — and then every copy must be updated.
+    </p></div>
+  </div>
+  <div class="fa"><table>
+    <thead><tr><th></th><th>نرمال‌شده (ID + join)</th><th>دنرمال‌شده (کپی متن)</th></tr></thead>
+    <tbody>
+      <tr><td>نوشتن</td><td>ارزان‌تر: فقط یک نسخه</td><td>گران‌تر: چند نسخه برای به‌روزرسانی</td></tr>
+      <tr><td>خواندن</td><td>کندتر: نیاز به join</td><td>سریع‌تر: join کمتر</td></tr>
+      <tr><td>سازگاری</td><td>خودکار با تراکنش اتمی</td><td>خطر ناسازگاری اگر فرآیند وسط کار بمیرد</td></tr>
+      <tr><td>نمونه</td><td>OLTP (هر دو سریع باشند)</td><td>سیستم‌های تحلیلی (به‌روزرسانی دسته‌ای)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="en"><table>
+    <thead><tr><th></th><th>Normalized (ID + join)</th><th>Denormalized (copied text)</th></tr></thead>
+    <tbody>
+      <tr><td>Writes</td><td>Cheaper: a single copy</td><td>Pricier: several copies to update</td></tr>
+      <tr><td>Reads</td><td>Slower: needs a join</td><td>Faster: fewer joins</td></tr>
+      <tr><td>Consistency</td><td>Automatic with atomic transactions</td><td>Inconsistency risk if a process dies mid-way</td></tr>
+      <tr><td>Example</td><td>OLTP (both stay fast)</td><td>Analytical systems (batch updates)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout">
+    <div class="tag"><span class="fa">نکته‌های ظریف</span><span class="en">Subtleties</span></div>
+    <div class="fa"><ul>
+      <li>نرمال‌زدایی را مثل <b>دادهٔ مشتق‌شده</b> ببین (مثل فصل ۱): یعنی باید فرآیندی برای به‌روزرسانیِ کپی‌های اضافی بسازی.</li>
+      <li>درسِ شبکهٔ اجتماعی (فصل ۲): تایم‌لاینِ متریالایزشده در X فقط <b>ID</b> پست و فرستنده را نگه می‌دارد، نه متن و تعداد لایک را —
+        چون آن‌ها سریع عوض می‌شوند. هنگام خواندن، این IDها را «آبرسانی» می‌کنند (<span class="ltr">hydrating IDs</span>) که عملاً یک join در کد برنامه است.</li>
+      <li>نتیجهٔ مهم: «join هنگام خواندن» ذاتاً مانع مقیاس‌پذیری نیست؛ آبرسانیِ IDها به‌خوبی موازی می‌شود.</li>
+      <li>تصمیمِ نرمال‌زدایی همیشه بدیهی نیست: بعضی چیزها را دنرمال کن و بعضی را نرمال نگه دار؛ بستگی به تناوبِ تغییر و هزینهٔ خواندن/نوشتن دارد.</li>
+    </ul></div>
+    <div class="en"><ul>
+      <li>See denormalization as <b>derived data</b> (like Chapter 1): you must build a process that updates the extra copies.</li>
+      <li>The social-network lesson (Chapter 2): X’s materialized timeline keeps only post and sender <b>IDs</b>, not text or like counts —
+        because those change fast. At read time these IDs get “hydrated” (<span class="ltr">hydrating IDs</span>), effectively a join in application code.</li>
+      <li>Key result: “join at read time” is not inherently a scalability blocker; hydrating IDs parallelizes well.</li>
+      <li>The denormalization call is rarely obvious: denormalize some things, keep others normalized; it depends on change frequency and read/write cost.</li>
+    </ul></div>
+  </div>
+
+  <h3><span class="fa">یک‌به‌چند، چند‌به‌یک و چند‌به‌چند</span><span class="en">One-to-many, many-to-one and many-to-many</span></h3>
+<div class="fa">
+<p>نوع رابطه مشخص می‌کند چند رکورد به چند رکورد دیگر وصل می‌شوند. بهتر است آن را با نیاز واقعی بشناسیم، نه فقط با شکل نمودار.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-7">
+<p class="example-title"><b>مثال فنی: کلید خارجی و جدول واسط</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> مشتری <code dir="ltr">17</code> دو سفارش <code dir="ltr">42</code> و <code dir="ltr">43</code> دارد؛ هر سفارش چند کالا دارد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> <code dir="ltr">orders.customer_id</code> رابطهٔ چند‌به‌یک را می‌سازد؛ <code dir="ltr">order_items(order_id, product_id, qty)</code> سفارش و کالا را چند‌به‌چند می‌کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هر قلم می‌تواند <code dir="ltr">qty</code> مخصوص همان رابطه داشته باشد؛ گذاشتن آن فقط روی مشتری یا کالا معنای درستی ندارد.</p>
+</div>
+</div>
+
+  <div class="fa"><ul>
+    <li><b>یک‌به‌چند (one-to-few):</b> رزومه چند موقعیت شغلی دارد — درختِ مناسبِ مدل سندی.</li>
+    <li><b>چند‌به‌یک:</b> افراد زیادی در یک منطقه زندگی می‌کنند → منطقه را با ID ارجاع بده.</li>
+    <li><b>چند‌به‌چند:</b> یک نفر در چند سازمان کار کرده و هر سازمان چند نفر دارد → در رابطه‌ای با <b>جدول انجمنی</b> (join table)؛
+      در مدل سندی یا ارجاع به سند دیگر یا نگه‌داشتن ID در هر دو طرف (که خودش دنرمال‌شده و ناسازگاری‌ساز است).</li>
+    <li>راه‌حل نرمال: رابطه را یک‌جا نگه دار و با <b>ایندکس ثانویه</b> روی هر دو ستون، جست‌وجو در هر دو جهت را سریع کن.</li>
+    <li>محدودیت سند: نمی‌توانی به یک آیتمِ توکار مستقیماً ارجاع بدهی (باید بگویی «آیتم دومِ لیستِ positions کاربر ۲۵۱»)؛
+      و برای لیست‌هایی که کاربر جابه‌جاشان می‌کند (مثل to-do)، آرایهٔ JSON بسیار طبیعی‌تر از ترفندهای رابطه‌ای است.</li>
+  </ul></div>
+  <div class="en"><ul>
+    <li><b>One-to-few:</b> a resume holds a few jobs — a tree fit for the document model.</li>
+    <li><b>Many-to-one:</b> many people live in one region → reference the region by ID.</li>
+    <li><b>Many-to-many:</b> one person worked at several organizations and each organization has many people → in relational, an <b>association table</b> (join table);
+      in documents, either reference another document or keep IDs on both sides (itself denormalized and inconsistency-prone).</li>
+    <li>The normalized fix: keep the relationship in one place and speed up both directions with a <b>secondary index</b> on each column.</li>
+    <li>Document limits: you cannot reference an embedded item directly (you must say “second item of user 251’s positions list”);
+      and for lists users reorder (like to-dos), a JSON array is far more natural than relational tricks.</li>
+  </ul></div>
+  <h3 id="s1-5"><span class="fa">نمودار ER — اسکیمای رابطه‌ای رزومه</span><span class="en">ER diagram — the resume's relational schema</span></h3>
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار ER — موجودیت‌ها، کلیدهای خارجی و جدولِ انجمنی</span><span class="en">ER diagram — entities, foreign keys and the association table</span></b>
+      <a class="open" href="diagrams/resume-schema.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/resume-schema.html" title="Resume ER schema" loading="lazy"></iframe>
+  </div>
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: کلید خارجی و جدول واسط</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> مشتری <code dir="ltr">17</code> دو سفارش <code dir="ltr">42</code> و <code dir="ltr">43</code> دارد؛ هر سفارش چند کالا دارد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> <code dir="ltr">orders.customer_id</code> رابطهٔ چند‌به‌یک را می‌سازد؛ <code dir="ltr">order_items(order_id, product_id, qty)</code> سفارش و کالا را چند‌به‌چند می‌کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هر قلم می‌تواند <code dir="ltr">qty</code> مخصوص همان رابطه داشته باشد؛ گذاشتن آن فقط روی مشتری یا کالا معنای درستی ندارد.</p>
+</div>
+
+    <p>
+      این نمودار ER، همان رزومهٔ نمودار قبلی را در مدل رابطه‌ای نشان می‌دهد. از جعبهٔ وسطِ سمت چپ شروع کنید:
+      <span class="ltr">«users»</span> با زیرنویسِ «PK user_id, name, FK region_id». سه فلشِ «1..N» از آن بیرون می‌آید:
+      به <span class="ltr">«positions»</span> بالا، <span class="ltr">«education»</span> وسط و
+      <span class="ltr">«contact_info»</span> پایین. یعنی هر کاربر در هرکدام چند ردیف دارد — همان درختِ یک‌به‌چند که در JSON توکار می‌شد.
+    </p>
+    <p>
+      حالا فلشِ چین‌چینِ «N..1» را از users دنبال کنید که به <span class="ltr">«regions»</span> می‌رود (برچسبِ «normalized»):
+      بسیاری از افراد در یک منطقه‌اند، اما نامِ منطقه فقط یک‌جا ذخیره می‌شود. به‌جای متنِ تکراری، ID می‌گذاریم و هنگام نمایش،
+      یک lookup یا join اضافه می‌پردازیم.
+    </p>
+    <p>
+      سمت راست، <span class="ltr">«positions»</span> با فلشِ «N..1» به <span class="ltr">«organizations»</span> وصل است
+      (برچسبِ «entity»، زیرنویسِ «PK org_id, name, logo_url»). این همان تصمیمِ نرمال‌سازی است: اگر لوگوی سازمان عوض شود،
+      فقط یک ردیف تغییر می‌کند. و اگر دقیق‌تر نگاه کنید، بین users و organizations عملاً رابطهٔ <b>چند‌به‌چند</b> داریم
+      که همان جدولِ positions آن را می‌سازد: هر ردیفِ positions یک user_id را به یک org_id گره می‌زند.
+    </p>
+    </div>
+    <div class="en">
+    <p>
+      This ER diagram shows the previous diagram’s resume in the relational model. Start from the mid-left box:
+      <span class="ltr">“users”</span> (“PK user_id, name, FK region_id”). Three “1..N” arrows leave it:
+      to <span class="ltr">“positions”</span> above, <span class="ltr">“education”</span> in the middle and
+      <span class="ltr">“contact_info”</span> below. Each user owns several rows in each — the same one-to-many tree that JSON would embed.
+    </p>
+    <p>
+      Now follow the dashed “N..1” arrow from users to <span class="ltr">“regions”</span> (tagged “normalized”):
+      many people share one region, but the region’s name is stored exactly once. Instead of repeated text we keep an ID,
+      paying one extra lookup or join at display time.
+    </p>
+    <p>
+      On the right, <span class="ltr">“positions”</span> connects with “N..1” to <span class="ltr">“organizations”</span>
+      (“entity”, “PK org_id, name, logo_url”). That is the normalization call: if an organization’s logo changes,
+      only one row changes. And look closer: users and organizations effectively hold a <b>many-to-many</b> relationship,
+      built by that same positions table: each positions row ties one user_id to one org_id.
+    </p>
+    </div>
+  </div>
+
+  <h3 id="s1-3"><span class="fa">اسکیمای تحلیلی: Star، Snowflake و OBT</span><span class="en">Analytic schemas: star, snowflake and OBT</span></h3>
+  <div class="fa">
+<p>در مدل تحلیلی، جدول واقعیت رویدادها و مقدارها را نگه می‌دارد و جدول‌های بُعد ویژگی‌های توصیفی را. میزان جدا کردن یا کنار هم گذاشتن این اطلاعات، شکل اسکیما را تعیین می‌کند.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-8">
+<p class="example-title"><b>مثال فنی: Fact و dimension روی یک فروش</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> قلم فروش شامل <code dir="ltr">product_id=7, store_id=3, amount=200</code> است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> جدول fact مبلغ و کلیدها را دارد؛ dimension محصول نام و دسته‌بندی را می‌دهد؛ join برای جمع فروش به تفکیک دسته اجرا می‌شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> در OBT نام دسته در ردیف‌های فروش تکرار می‌شود؛ خواندن ساده‌تر می‌شود، ولی تغییر و معنای تاریخچه باید مدیریت شود.</p>
+</div>
+</div>
+  <div class="en"><p>
+    Warehouses are usually relational with well-known conventions. In a <b>star schema</b>, the center holds a
+    <b>fact table</b> (e.g. <code>fact_sales</code>) where each row is one event at a point in time (a purchase).
+    Its columns are either attributes (sale price, cost) or foreign keys to <b>dimension tables</b>:
+    the who/what/where/when/how/why dimensions. E.g. <code>dim_product</code> (SKU, brand, category), <code>dim_store</code>, even <code>dim_date</code>
+    (so public holidays stay analyzable). The “star” name comes from the rays around the central table.
+  </p></div>
+  <div class="fa"><ul>
+    <li><b>Snowflake:</b> بعد‌ها به زیربعد شکسته می‌شوند (برند و دسته جدول جدا) — نرمال‌تر، ولی برای تحلیلگر کار با star ساده‌تر است.</li>
+    <li><b>OBT (One Big Table):</b> حذف کامل جدول‌های بعد و تا کردن اطلاعاتشان در ستون‌های دنرمال‌شده — فضای بیشتر، گاهی کوئری سریع‌تر.</li>
+    <li>دنرمال‌سازی در تحلیل بی‌دردسر است: داده تاریخچهٔ تغییرناپذیر است و نگرانیِ سازگاریِ نوشتنِ OLTP را ندارد.</li>
+    <li>جدول واقعیه می‌تواند پتابایتی شود؛ چون هر رویداد را جدا نگه می‌دارند، بعداً انعطاف تحلیلی بیشتر است.</li>
+  </ul></div>
+  <div class="en"><ul>
+    <li><b>Snowflake:</b> dimensions split into sub-dimensions (brand and category in separate tables) — more normalized, but analysts find star simpler.</li>
+    <li><b>OBT (One Big Table):</b> dimension tables dropped entirely, their data folded into denormalized columns — more space, sometimes faster queries.</li>
+    <li>Denormalization is painless in analytics: data is immutable history with none of OLTP’s write-consistency worries.</li>
+    <li>Fact tables can reach petabytes; keeping each event separate preserves future analytical flexibility.</li>
+  </ul></div>
+
+  <h3 id="s1-4"><span class="fa">Schema-on-Read در برابر Schema-on-Write + نمودار ۱</span><span class="en">Schema-on-read vs schema-on-write + Diagram 1</span></h3>
+<div class="fa">
+<p>در schema-on-write، داده پیش از ذخیره با ساختار موردانتظار بررسی می‌شود. در schema-on-read، بخش بیشتری از تفسیر و بررسی ساختار هنگام خواندن انجام می‌شود؛ دادهٔ سندی هم الزاماً بی‌ساختار نیست.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-9">
+<p class="example-title"><b>مثال فنی: اعتبارسنجی در نوشتن یا خواندن</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> منبعی <code dir="ltr">age=&quot;unknown&quot;</code> می‌فرستد، اما گزارش میانگین سن عدد می‌خواهد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> schema-on-write می‌تواند رکورد نامعتبر را همان ورود رد کند؛ schema-on-read فایل خام را می‌پذیرد و هنگام تحلیل خطا یا مقدار نامعلوم را مدیریت می‌کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> نبود schema در ذخیره، نیاز به تفسیر و اعتبارسنجی را حذف نمی‌کند؛ فقط محل آن جابه‌جا می‌شود.</p>
+</div>
+</div>
+
+  <div class="fa"><ul>
+    <li><b>schema-on-write</b> (روابطه‌ای سنتی): اسکیما صریح است و پایگاه داده هنگام نوشتن تضمین می‌کند داده مطابق آن باشد — مثل type checking ایستا.</li>
+    <li><b>schema-on-read</b> (سند): هیچ اسکیمایی اجرا نمی‌شود و ساختار فقط هنگام خواندن تفسیر می‌شود — مثل type checking پویا. واژهٔ «schemaless» گمراه‌کننده است چون کدِ خواننده همیشه ساختاری را فرض می‌کند.</li>
+    <li>هنگام تغییر قالب (مثلاً جدا کردن نام کامل به نام و نام خانوادگی): در سند، کدِ برنامه باید با اسناد قدیمی کنار بیاید؛
+      در رابطه‌ای، مهاجرت (<span class="ltr">ALTER TABLE</span> + <span class="ltr">UPDATE</span>) که روی جدول بزرگ کند است.</li>
+    <li>schema-on-read وقتی مفید است که ساختار داده ناهمگون باشد یا سیستم‌های بیرونی آن را تعیین کنند.</li>
+  </ul></div>
+  <div class="en"><ul>
+    <li><b>Schema-on-write</b> (traditional relational): the schema is explicit and the database enforces it at write time — like static type checking.</li>
+    <li><b>Schema-on-read</b> (documents): no schema is enforced and structure is only interpreted at read time — like dynamic type checking. “Schemaless” misleads, since reader code always assumes some structure.</li>
+    <li>When the format changes (e.g. splitting a full name into first and last): in documents, application code must cope with old documents;
+      in relational, a migration (<span class="ltr">ALTER TABLE</span> + <span class="ltr">UPDATE</span>) that runs slowly on big tables.</li>
+    <li>Schema-on-read pays off when data structure is heterogeneous or dictated by outside systems.</li>
+  </ul></div>
+
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار ۱ · Architecture — یک رزومه، دو مدل داده</span><span class="en">Diagram 1 · Architecture — one resume, two data models</span></b>
+      <a class="open" href="diagrams/resume-models.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/resume-models.html" title="One resume, two data models" loading="lazy"></iframe>
+  </div>
+
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار ۱</span><span class="en">Teacher narration of Diagram 1</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: دو نمایش یک سابقهٔ شغلی</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> مریم با <code dir="ltr">person_id=17</code> در شرکت <code dir="ltr">7</code> کار کرده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> رابطه‌ای: ردیف در <code dir="ltr">people</code> و ردیف در <code dir="ltr">jobs</code> با کلید خارجی؛ سندی: آرایهٔ <code dir="ltr">jobs</code> داخل سند مریم.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> سند خواندن یکجای رزومه را ساده می‌کند؛ گزارش همهٔ کارمندان شرکت ممکن است ایندکس و پردازش متفاوتی بخواهد.</p>
+</div>
+
+    <p>
+      بیایید این نمودار را با هم، قدم‌به‌قدم، بخوانیم. اول چشمتان به نیمهٔ بالای شکل می‌افتد:
+      جعبهٔ <span class="ltr">«Profile Page (SQL)»</span> با توضیحِ «fetch full resume». از کنارهٔ راست همین جعبه سه فلش بیرون آمده است.
+    </p>
+    <p>
+      فلش اول، پررنگ، با برچسب <span class="ltr">«query + join»</span> به جدول <span class="ltr">users</span> می‌رسد؛
+      دو فلش بعدی هر دو برچسب یکسان <span class="ltr">«join on user_id»</span> دارند و به جدول‌های
+      <span class="ltr">positions</span> و <span class="ltr">education</span> می‌روند. یعنی برای ساختنِ یک صفحهٔ رزومه باید سه جدول را کنار هم بیاوریم.
+    </p>
+    <p>
+      حالا فلش چین‌چینِ <span class="ltr">«resolve ID»</span> را دنبال کنید: از جدول <span class="ltr">users</span> به جدولِ
+      <span class="ltr">regions</span> می‌رود که برچسبِ کنارش <span class="ltr">normalized</span> است.
+      این همان نرمال‌سازی است: مقدار <code>region_id</code> که برای انسان بی‌معنی است، این‌جا به نامِ قابل‌خواندن تبدیل می‌شود.
+    </p>
+    <p>
+      به نیمهٔ پایینِ شکل بروید. این‌جا جعبهٔ <span class="ltr">«Profile Page (JSON)»</span> فقط یک فلش پررنگ دارد:
+      <span class="ltr">«single read»</span> که مستقیم به <span class="ltr">«Profile Document»</span> می‌رسد؛
+      سندی که زیرنویسش <span class="ltr">«positions + education inside»</span> است و برچسبش <span class="ltr">«one read»</span>.
+      تنها فلش چین‌چینِ این نیمه، <span class="ltr">«by region_id»</span> است که به <span class="ltr">regions collection</span> می‌رود.
+    </p>
+    <p>
+      درسِ شکل در همین تضاد است: بالا چند پرس‌وجو و join برای بازسازی یک درخت، پایین یک خواندن —
+      اما بهای پایین، تکرار داده و مسئلهٔ به‌روزرسانیِ کپی‌هاست.
+    </p>
+    </div>
+    <div class="en">
+    <p>
+      Let’s read this diagram together, step by step. First your eye lands on the top half:
+      the <span class="ltr">“Profile Page (SQL)”</span> box (“fetch full resume”). Three arrows leave its right edge.
+    </p>
+    <p>
+      The first, bold arrow, labelled <span class="ltr">“query + join”</span>, reaches the <span class="ltr">users</span> table;
+      the next two share one label, <span class="ltr">“join on user_id”</span>, and reach the
+      <span class="ltr">positions</span> and <span class="ltr">education</span> tables. Building one resume page means joining three tables.
+    </p>
+    <p>
+      Now follow the dashed <span class="ltr">“resolve ID”</span> arrow: from the <span class="ltr">users</span> table to the
+      <span class="ltr">regions</span> table, tagged <span class="ltr">normalized</span>.
+      That is normalization: the human-meaningless <code>region_id</code> becomes a readable name here.
+    </p>
+    <p>
+      Move to the bottom half. Here the <span class="ltr">“Profile Page (JSON)”</span> box has a single bold arrow:
+      <span class="ltr">“single read”</span>, straight into the <span class="ltr">“Profile Document”</span>;
+      a document subtitled <span class="ltr">“positions + education inside”</span> and tagged <span class="ltr">“one read”</span>.
+      This half’s only dashed arrow, <span class="ltr">“by region_id”</span>, goes to the <span class="ltr">regions collection</span>.
+    </p>
+    <p>
+      The lesson is in this contrast: above, several queries and joins to rebuild one tree; below, a single read —
+      but the price below is data duplication and the copy-update problem.
+    </p>
+    </div>
+  </div>
+
+  <h3 id="s1-6"><span class="fa">نمودار کلاس/ER — یک رزومه، سه شکل</span><span class="en">Class/ER diagram — one resume, three shapes</span></h3>
+  <div class="fa"><p>
+    تا اینجا هر مدل را جدا دیدیم. حالا هر سه را با زبانِ نمودارِ کلاس/ER کنار هم بگذار تا تفاوتِ <b>شکلِ داده</b>
+    یک‌جا معلوم شود: در مدلِ رابطه‌ای با «موجودیت + کلید خارجی + کاردینالیتی» طرفیم، در مدلِ سندی با «یک درختِ تو در تو»،
+    و در مدلِ گرافی با «رأس + یالِ دارای خاصیت». همان اطلاعات، سه شکل — و هر شکل، دسته‌ای از پرس‌وجوها را ارزان می‌کند.
+  </p></div>
+  <div class="en"><p>
+    So far we saw each model alone. Now put all three side by side in class/ER notation so the <b>shape of data</b>
+    shows at once: in relational, “entity + foreign key + cardinality”; in documents, “one nested tree”;
+    in graphs, “node + attributed edge”. Same information, three shapes — and each shape cheapens one family of queries.
+  </p></div>
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار کلاس/ER — یک رزومه، سه شکل: Relational · Document · Graph</span><span class="en">Class/ER diagram — one resume, three shapes: Relational · Document · Graph</span></b>
+      <a class="open" href="diagrams/three-data-models-uml.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/three-data-models-uml.html" title="One resume, three data models, class and ER notation" loading="lazy"></iframe>
+  </div>
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: دو نمایش یک سابقهٔ شغلی</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> مریم با <code dir="ltr">person_id=17</code> در شرکت <code dir="ltr">7</code> کار کرده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> رابطه‌ای: ردیف در <code dir="ltr">people</code> و ردیف در <code dir="ltr">jobs</code> با کلید خارجی؛ سندی: آرایهٔ <code dir="ltr">jobs</code> داخل سند مریم.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> سند خواندن یکجای رزومه را ساده می‌کند؛ گزارش همهٔ کارمندان شرکت ممکن است ایندکس و پردازش متفاوتی بخواهد.</p>
+</div>
+
+    <p>
+      شکل سه پنل دارد و عنوانِ هر پنل بالایش آمده. در پنلِ چپ — <span class="ltr">«A · Relational: tables + foreign keys»</span> —
+      دو جعبهٔ کلاس‌مانند می‌بینی. جعبهٔ بالا <span class="ltr">«person»</span> است با سه ویژگی:
+      <span class="ltr">«person_id      PK»</span>، <span class="ltr">«first_name»</span> و <span class="ltr">«last_name»</span>.
+      جعبهٔ پایین <span class="ltr">«job»</span> است با <span class="ltr">«job_id         PK»</span>،
+      <span class="ltr">«person_id      FK»</span>، <span class="ltr">«title»</span> و <span class="ltr">«start_date»</span>.
+      بین این دو، خطی عمودی با لوزیِ ترکیب در سرِ آن می‌بینی و دو برچسبِ کاردینالیتی:
+      <span class="ltr">«1»</span> کنارِ person و <span class="ltr">«0..*»</span> کنارِ job — یعنی هر شخص صفر یا چند شغل دارد و هر شغل مالِ یک شخص است؛
+      برچسبِ <span class="ltr">«person_id»</span> روی خط، همان کلیدِ خارجی است.
+    </p>
+    <p>
+      پنلِ وسط — <span class="ltr">«B · Document: one self-contained tree»</span> — یک جعبهٔ بزرگ دارد:
+      <span class="ltr">«resume  (one JSON document)»</span> با ویژگی‌های <span class="ltr">«_id»</span>،
+      <span class="ltr">«name»</span> و سپس آرایه‌های تو در تو: <span class="ltr">«jobs: [ { title, start_date }, … ]»</span>،
+      <span class="ltr">«education: [ ... ]»</span> و <span class="ltr">«skills: [ ... ]»</span>.
+      زیر آن، جعبهٔ کوچکِ <span class="ltr">«job (embedded, not a table)»</span> با ویژگی‌های
+      <span class="ltr">«title»</span> و <span class="ltr">«start_date»</span> نشسته و لوزیِ ترکیب با برچسبِ
+      <span class="ltr">«1»</span> و <span class="ltr">«0..* embedded»</span> آن را به سند وصل می‌کند.
+      یعنی این‌جا job جدولِ جدا نیست؛ داخلِ همان سند جا گرفته و خواندنِ رزومه فقط یک خواندن است.
+    </p>
+    <p>
+      پنلِ راست — <span class="ltr">«C · Graph: nodes and relationships are first-class»</span> — سه جعبهٔ رأس داری:
+      <span class="ltr">«(:Person)»</span> با ویژگی‌های <span class="ltr">«name»</span> و <span class="ltr">«born»</span>،
+      <span class="ltr">«(:Company)»</span> با <span class="ltr">«name»</span> و <span class="ltr">«industry»</span>،
+      و <span class="ltr">«(:City)»</span> با <span class="ltr">«name»</span> و <span class="ltr">«country»</span>.
+      سه فلشِ سبز بین‌شان هست: از Person به Company با برچسبِ <span class="ltr">«[:WORKS_AT {since}]»</span>،
+      از Person به City با <span class="ltr">«[:LIVES_IN]»</span> و از Company به City با <span class="ltr">«[:LOCATED_IN]»</span>.
+      دقت کن برچسبِ اول یک ویژگی هم دارد: <span class="ltr">«{since}»</span> — یال خودش می‌تواند داده داشته باشد،
+      چیزی که در کلیدِ خارجیِ ساده جایی ندارد.
+    </p>
+    <p>
+      حالا زیرِ هر پنل، سه خط توضیحِ کوتاه را بخوان. پنلِ A: «هر ردیف یک چیز است؛ ارجاع‌ها باید معتبر بمانند» و
+      «نمایشِ رزومه یعنی JOIN در لحظهٔ خواندن». پنلِ B: «همهٔ فیلدهای یک کاربر کنار هم‌اند — بدونِ join» اما
+      «denormalization یعنی تکرارِ داده در چند جا». پنلِ C: «روابط دادهٔ خودشان را دارند» و
+      «هزینهٔ پرس‌وجو به جست‌وجو بستگی دارد، نه به schema». و خطِ پایینِ کلِ شکل نتیجه را می‌گیرد:
+      همان اطلاعات، سه شکل — مدل تعیین می‌کند کدام دسترسی ارزان است و کدام‌یک به تراکنش یا تکرارِ داده نیاز دارد.
+    </p>
+    <p>
+      درسِ شکل: «ناهماهنگی شیء-رابطه‌ای» دقیقاً همین شکافِ بین جعبه‌های پنلِ A و شیءِ درونِ کدِ برنامه است.
+      مدلِ سندی آن را با جا دادنِ کلِ درخت در یک سند حل می‌کند — اما بهایش را هنگامِ به‌روزرسانیِ داده‌های تکرارشده می‌پردازی.
+      مدلِ گرافی هم وقتی برنده است که سوالِ تو اساساً دربارهٔ «چه کسی به چه چیزی وصل است» باشد.
+    </p>
+    </div>
+    <div class="en">
+    <p>
+      The figure has three panels, each titled above. In the left panel — <span class="ltr">“A · Relational: tables + foreign keys”</span> —
+      you see two class-like boxes. The top box is <span class="ltr">“person”</span> with three attributes:
+      <span class="ltr">“person_id      PK”</span>, <span class="ltr">“first_name”</span> and <span class="ltr">“last_name”</span>.
+      The bottom box is <span class="ltr">“job”</span> with <span class="ltr">“job_id         PK”</span>,
+      <span class="ltr">“person_id      FK”</span>, <span class="ltr">“title”</span> and <span class="ltr">“start_date”</span>.
+      Between them a vertical line with a composition diamond carries two cardinality labels:
+      <span class="ltr">“1”</span> by person and <span class="ltr">“0..*”</span> by job — each person has zero or more jobs, each job belongs to one person;
+      the <span class="ltr">“person_id”</span> label on the line is the foreign key.
+    </p>
+    <p>
+      The middle panel — <span class="ltr">“B · Document: one self-contained tree”</span> — holds one big box:
+      <span class="ltr">“resume  (one JSON document)”</span> with <span class="ltr">“_id”</span>,
+      <span class="ltr">“name”</span> and nested arrays: <span class="ltr">“jobs: [ { title, start_date }, … ]”</span>,
+      <span class="ltr">“education: [ ... ]”</span> and <span class="ltr">“skills: [ ... ]”</span>.
+      Below sits the small <span class="ltr">“job (embedded, not a table)”</span> box with
+      <span class="ltr">“title”</span> and <span class="ltr">“start_date”</span>, joined to the document by a composition diamond labelled
+      <span class="ltr">“1”</span> and <span class="ltr">“0..* embedded”</span>.
+      Here job is no separate table; it lives inside the same document, so reading the resume is a single read.
+    </p>
+    <p>
+      The right panel — <span class="ltr">“C · Graph: nodes and relationships are first-class”</span> — has three node boxes:
+      <span class="ltr">“(:Person)”</span> with <span class="ltr">“name”</span> and <span class="ltr">“born”</span>,
+      <span class="ltr">“(:Company)”</span> with <span class="ltr">“name”</span> and <span class="ltr">“industry”</span>,
+      and <span class="ltr">“(:City)”</span> with <span class="ltr">“name”</span> and <span class="ltr">“country”</span>.
+      Three green arrows run between them: Person to Company labelled <span class="ltr">“[:WORKS_AT {since}]”</span>,
+      Person to City <span class="ltr">“[:LIVES_IN]”</span>, Company to City <span class="ltr">“[:LOCATED_IN]”</span>.
+      Note the first label carries an attribute: <span class="ltr">“{since}”</span> — an edge can hold data itself,
+      something a plain foreign key has no room for.
+    </p>
+    <p>
+      Now read the three short notes under each panel. Panel A: “each row is one thing; references must stay valid” and
+      “showing the resume means JOIN at read time”. Panel B: “all of one user’s fields sit together — no join” but
+      “denormalization means duplicated data in several places”. Panel C: “relationships carry their own data” and
+      “query cost depends on traversal, not schema”. The bottom line of the whole figure concludes:
+      same information, three shapes — the model decides which access is cheap and which needs transactions or duplicated data.
+    </p>
+    <p>
+      The lesson: “object-relational mismatch” is exactly this gap between panel A’s boxes and the in-code object.
+      The document model closes it by fitting the whole tree in one document — but pays at duplicated-data update time.
+      And the graph model wins when your question is fundamentally “who connects to what”.
+    </p>
+    </div>
+  </div>
+</section>
+<!-- ============ SECTION 2 ============ -->
+<section id="s2">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۲</span><span class="en">2</span></span> <span class="fa">مدل‌های گرافی</span><span class="en">Graph models</span></h2>
+
+  <div class="callout">
+    <div class="tag"><span class="fa">ایدهٔ کلیدی</span><span class="en">Key idea</span></div>
+    <div class="fa">
+<p>مدل گرافی داده را به گره‌ها و رابطه‌ها تبدیل می‌کند. وقتی سؤال اصلی دربارهٔ مسیر و ارتباط چندمرحله‌ای است، این شکل بیان مسئله طبیعی‌تر می‌شود.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-10">
+<p class="example-title"><b>مثال فنی: پیمایشِ دو رابطه</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> مریم به علی با رابطهٔ <code dir="ltr">KNOWS</code> وصل است و علی در شرکت <code dir="ltr">C7</code> کار می‌کند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پرسش «دوستان مریم در کدام شرکت‌اند؟» ابتدا یال دوستی و سپس یال اشتغال را طی می‌کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> وقتی عمق و نوع رابطه‌ها متغیر است، مدل گراف این مسیر را مستقیم بیان می‌کند؛ برای یک lookup ساده لزوماً لازم نیست.</p>
+</div>
+</div>
+    <div class="en"><p>
+      If your data is a <b>one-to-many tree</b>, the document model is excellent. But when many-to-many relationships multiply and queries
+      must hop several steps, the most natural model is the <b>graph</b>: <b>vertices</b> (nodes) and <b>edges</b> (relationships).
+      Examples: the social graph (people and acquaintances), the web graph (pages and links), road networks (intersections and routes — shortest paths, PageRank).
+    </p></div>
+  </div>
+
+  <h3><span class="fa">Property Graph در برابر Triple Store</span><span class="en">Property graphs vs triple stores</span></h3>
+<div class="fa">
+<p>در property graph، گره و یال می‌توانند ویژگی داشته باشند. در triple store، اطلاعات با سه‌تاییِ موضوع، رابطه و مقدار یا مقصد بیان می‌شود.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-11">
+<p class="example-title"><b>مثال فنی: ویژگی روی گره یا یال</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> گره‌های <code dir="ltr">Person:17</code> و <code dir="ltr">Company:7</code> داریم و شروع همکاری سال <code dir="ltr">2020</code> است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> در property graph، یال <code dir="ltr">WORKS_AT</code> ویژگی <code dir="ltr">since=2020</code> دارد؛ در triple store رابطه‌ها به subject، predicate و object بیان می‌شوند و مشخصات رابطه مدل‌سازی اضافه می‌خواهد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> زمان شروع به رابطه تعلق دارد، نه به همهٔ شغل‌های شخص یا همهٔ کارکنان شرکت.</p>
+</div>
+</div>
+
+  <div class="fa"><ul>
+    <li><b>Property graph</b> (Neo4j، Memgraph، KùzuDB): هر رأس = شناسهٔ یکتا + برچسب (نوع شیء) + مجموعه‌ای از ویژگی‌ها + یال‌های ورودی/خروجی.
+      هر یال = شناسه + رأس دُم + رأس سر + برچسب رابطه + ویژگی‌ها. عملاً معادل دو جدول رابطه‌ای (vertices و edges) با ایندکس روی هر دو سمت.</li>
+    <li>هیچ اسکیمایی جلوی اتصالِ رأس‌ها را نمی‌گیرد؛ با برچسب‌های متفاوت می‌توانی چند نوع اطلاعات را در یک گراف نگه داری (مثل گرافِ فیس‌بوک یا knowledge graph موتورهای جست‌وجو).</li>
+    <li><b>Triple store</b> (Datomic، AllegroGraph، Blazegraph): همه‌چیز به‌صورت سه‌تایی <span class="ltr">(subject, predicate, object)</span> —
+      مثلاً <span class="ltr">(lucy, bornIn, idaho)</span> یا <span class="ltr">(lucy, birthYear, 1989)</span>. مدل <span class="ltr">RDF</span> و فرمت‌هایی مثل Turtle از همین‌جا می‌آیند.</li>
+    <li>محدودیت: یک یال فقط دو رأس را به هم وصل می‌کند؛ رابطهٔ سه‌طرفه را باید با یک رأسِ اضافه یا hypergraph مدل کنی.</li>
+  </ul></div>
+  <div class="en"><ul>
+    <li><b>Property graph</b> (Neo4j, Memgraph, KùzuDB): each vertex = unique id + label (object type) + property set + in/out edges.
+      Each edge = id + tail vertex + head vertex + relationship label + properties. Effectively two relational tables (vertices and edges) with indexes on both ends.</li>
+    <li>No schema blocks vertices from connecting; with different labels you can hold several kinds of information in one graph (like Facebook’s graph or search-engine knowledge graphs).</li>
+    <li><b>Triple store</b> (Datomic, AllegroGraph, Blazegraph): everything as <span class="ltr">(subject, predicate, object)</span> triples —
+      e.g. <span class="ltr">(lucy, bornIn, idaho)</span> or <span class="ltr">(lucy, birthYear, 1989)</span>. The <span class="ltr">RDF</span> model and formats like Turtle come from here.</li>
+    <li>Limitation: one edge joins only two vertices; a three-way relationship needs an extra vertex or a hypergraph.</li>
+  </ul></div>
+
+  <h3 id="s2-1"><span class="fa">نمودار ۲ + روایت مدرس</span><span class="en">Diagram 2 + narration</span></h3>
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار ۲ · Architecture — مدل گرافی: افراد و مکان‌ها</span><span class="en">Diagram 2 · Architecture — graph model: people and places</span></b>
+      <a class="open" href="diagrams/graph-model.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/graph-model.html" title="Graph data model" loading="lazy"></iframe>
+  </div>
+
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار ۲</span><span class="en">Teacher narration of Diagram 2</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: پیمایشِ دو رابطه</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> مریم به علی با رابطهٔ <code dir="ltr">KNOWS</code> وصل است و علی در شرکت <code dir="ltr">C7</code> کار می‌کند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پرسش «دوستان مریم در کدام شرکت‌اند؟» ابتدا یال دوستی و سپس یال اشتغال را طی می‌کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> وقتی عمق و نوع رابطه‌ها متغیر است، مدل گراف این مسیر را مستقیم بیان می‌کند؛ برای یک lookup ساده لزوماً لازم نیست.</p>
+</div>
+
+    <p>
+      این شکل را مثل یک نقشهٔ ساده بخوانید. سمت چپ، سه جعبه یک زنجیرهٔ جغرافیایی ساخته‌اند:
+      پایین <span class="ltr">«Idaho»</span> ایستاده، بالایش <span class="ltr">«United States»</span> و بالاتر <span class="ltr">«North America»</span>.
+      دو فلش عمودی با برچسب <code>WITHIN</code> این زنجیره را به هم دوخته‌اند: آیداهو «در» آمریکاست و آمریکا «در» آمریکای شمالی.
+    </p>
+    <p>
+      حالا جعبهٔ <span class="ltr">«Lucy»</span> را پیدا کنید که زیرنویسش <span class="ltr">Person</span> است.
+      از آن دو فلش پررنگ بیرون می‌آید: یکی با برچسب <code>BORN_IN</code> به آیداهو می‌رود، دیگری با برچسب <code>LIVES_IN</code> به
+      <span class="ltr">«London»</span> که وسط شکل نشسته است.
+    </p>
+    <p>
+      سمت راست، همان الگو تکرار شده: <span class="ltr">«Saint-Lo»</span> با <code>WITHIN</code> به <span class="ltr">«France»</span>،
+      و فرانسه با <code>WITHIN</code> به <span class="ltr">«Europe»</span>. زیر آن‌ها <span class="ltr">«Alain»</span> را می‌بینید
+      که هم <code>BORN_IN</code> به سن-لو دارد و هم <code>LIVES_IN</code> به لندن. و یک فلش افقی با برچسب <code>MARRIED_TO</code>
+      این دو نفر را به هم وصل می‌کند.
+    </p>
+    <p>
+      حالا سوال کتاب را روی همین شکل اجرا کنیم: «کسانی که در ایالات متحده متولد شده‌اند و اکنون در اروپا زندگی می‌کنند».
+      یک رأسِ person را بردارید، با <code>BORN_IN</code> به مکان تولدش بروید، بعد با زنجیرهٔ <code>WITHIN*0..</code>
+      (صفر یا چند پرشِ «درِ») تا جعبهٔ United States بالا بروید؛ همان person باید با <code>LIVES_IN</code> به مکانی برسد
+      که با <code>WITHIN*0..</code> به Europe می‌رسد. Lucy دقیقاً همین الگو را پر می‌کند.
+    </p>
+    <p>
+      و نکتهٔ طلاییِ مصاحبه: همین چهار خطِ الگو را در SQL باید با <code>WITH RECURSIVE</code> و حدود ۳۱ خط بنویسی —
+      چون تعداد joinها در گراف از پیش معلوم نیست.
+    </p>
+    </div>
+    <div class="en">
+    <p>
+      Read this figure like a simple map. On the left, three boxes form a geographic chain:
+      <span class="ltr">“Idaho”</span> at the bottom, <span class="ltr">“United States”</span> above it, <span class="ltr">“North America”</span> higher still.
+      Two vertical arrows labelled <code>WITHIN</code> stitch the chain: Idaho is “within” the US, the US “within” North America.
+    </p>
+    <p>
+      Now find the <span class="ltr">“Lucy”</span> box, subtitled <span class="ltr">Person</span>.
+      Two bold arrows leave it: one labelled <code>BORN_IN</code> to Idaho, another labelled <code>LIVES_IN</code> to
+      <span class="ltr">“London”</span>, sitting mid-figure.
+    </p>
+    <p>
+      On the right the same pattern repeats: <span class="ltr">“Saint-Lo”</span> <code>WITHIN</code> <span class="ltr">“France”</span>,
+      France <code>WITHIN</code> <span class="ltr">“Europe”</span>. Below them sits <span class="ltr">“Alain”</span>,
+      with both <code>BORN_IN</code> to Saint-Lo and <code>LIVES_IN</code> to London. And a horizontal <code>MARRIED_TO</code> arrow
+      joins the two people.
+    </p>
+    <p>
+      Now run the book’s question on this figure: “people born in the United States who now live in Europe”.
+      Take a person node, follow <code>BORN_IN</code> to their birthplace, then climb the <code>WITHIN*0..</code> chain
+      (zero or more “within” hops) up to the United States box; that same person must reach, via <code>LIVES_IN</code>, a place
+      that reaches Europe via <code>WITHIN*0..</code>. Lucy fills exactly this pattern.
+    </p>
+    <p>
+      And the golden interview point: the same four-line pattern costs ~31 lines of SQL with <code>WITH RECURSIVE</code> —
+      because the number of joins in a graph is unknown upfront.
+    </p>
+    </div>
+  </div>
+
+  <h3 id="s2-3"><span class="fa">نمودار ساختاری — ساختار داخلی مدل گراف</span><span class="en">Structural diagram — graph model internals</span></h3>
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار ساختاری (کلاس‌مانند) — رأس، یال و ایندکس‌ها</span><span class="en">Structural (class-like) diagram — vertices, edges and indexes</span></b>
+      <a class="open" href="diagrams/graph-internals.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/graph-internals.html" title="Property graph internals" loading="lazy"></iframe>
+  </div>
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: ویژگی روی گره یا یال</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> گره‌های <code dir="ltr">Person:17</code> و <code dir="ltr">Company:7</code> داریم و شروع همکاری سال <code dir="ltr">2020</code> است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> در property graph، یال <code dir="ltr">WORKS_AT</code> ویژگی <code dir="ltr">since=2020</code> دارد؛ در triple store رابطه‌ها به subject، predicate و object بیان می‌شوند و مشخصات رابطه مدل‌سازی اضافه می‌خواهد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> زمان شروع به رابطه تعلق دارد، نه به همهٔ شغل‌های شخص یا همهٔ کارکنان شرکت.</p>
+</div>
+
+    <p>
+      این نمودار، برخلاف نمودارهای قبلی، «جریان» نشان نمی‌دهد؛ <b>ساختار</b> نشان می‌دهد —
+      درست مثل یک نمودار کلاس در UML. سمت چپ دو «کلاس» داریم: <span class="ltr">«Vertex»</span>
+      با فیلدهای «id, label, properties» و برچسبِ «entity»، و پایین‌تر <span class="ltr">«Edge»</span>
+      با فیلدهای «id, tail, head, label, props» و برچسبِ «relationship».
+      فلشِ چین‌چینِ «tail + head» از Edge به Vertex می‌گوید هر یال به دو رأس اشاره می‌کند.
+    </p>
+    <p>
+      حالا سمت راست ببینید همین دو «کلاس» چطور در یک پایگاه داده رابطه‌ای پیاده می‌شوند:
+      فلشِ پررنگِ «maps to» از Vertex به <span class="ltr">«vertices table»</span> می‌رود
+      («PK vertex_id, label, jsonb») و از Edge به <span class="ltr">«edges table»</span>
+      («PK edge_id, FK tail, FK head»). فلشِ چین‌چینِ «FK references» بین دو جدول، همان کلیدهای خارجی است.
+    </p>
+    <p>
+      و آخرین جعبه، <span class="ltr">«Indexes»</span> با برچسبِ «both directions»: ایندکس روی tail_vertex
+      برای یال‌های خروجی و روی head_vertex برای یال‌های ورودی. بدون این دو ایندکس، هر پیمایشِ گراف
+      باید کل جدولِ edges را بگردد؛ با آن‌ها، گام زدن در گراف سریع می‌ماند.
+    </p>
+    </div>
+    <div class="en">
+    <p>
+      Unlike previous diagrams, this one shows no “flow”; it shows <b>structure</b> —
+      just like a UML class diagram. On the left sit two “classes”: <span class="ltr">“Vertex”</span>
+      with fields “id, label, properties” tagged “entity”, and below it <span class="ltr">“Edge”</span>
+      with “id, tail, head, label, props” tagged “relationship”.
+      The dashed “tail + head” arrow from Edge to Vertex says each edge points at two vertices.
+    </p>
+    <p>
+      Now see how these same two “classes” map onto a relational database on the right:
+      the bold “maps to” arrow runs from Vertex to the <span class="ltr">“vertices table”</span>
+      (“PK vertex_id, label, jsonb”) and from Edge to the <span class="ltr">“edges table”</span>
+      (“PK edge_id, FK tail, FK head”). The dashed “FK references” arrow between the tables is the foreign keys.
+    </p>
+    <p>
+      And the last box, <span class="ltr">“Indexes”</span>, tagged “both directions”: an index on tail_vertex
+      for outgoing edges and on head_vertex for incoming ones. Without these two indexes every graph traversal
+      must scan the whole edges table; with them, walking the graph stays fast.
+    </p>
+    </div>
+  </div>
+
+  <h3 id="s2-2"><span class="fa">زبان‌های کوئری گراف</span><span class="en">Graph query languages</span></h3>
+<div class="fa">
+<p>زبان پرس‌وجوی گراف، الگوی رابطه‌ای را که می‌خواهیم پیدا کنیم توصیف می‌کند. بعضی زبان‌ها الگو را اعلام می‌کنند و بعضی مسیر پیمایش را مرحله‌به‌مرحله می‌سازند.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-12">
+<p class="example-title"><b>مثال فنی: همان مسیر با زبان گراف</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> گراف شامل مریم، دوستانش و شرکت‌های آن‌هاست.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> Cypher می‌تواند الگویی مانند <code dir="ltr">(p)-[:KNOWS]-&gt;(f)-[:WORKS_AT]-&gt;(c)</code> را match کند و نام شرکت را برگرداند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> موتور نحوهٔ پیمایش را انتخاب می‌کند؛ SPARQL روی الگوی triple و Datalog با قواعد رابطه‌ای همین نوع مسئله را صورت‌بندی می‌کنند.</p>
+</div>
+</div>
+
+  <pre>// Cypher (Neo4j / openCypher): the pattern from Diagram 2
+MATCH (person) -[:BORN_IN]-&gt; () -[:WITHIN*0..]-&gt; (:Location {name:'United States'}),
+      (person) -[:LIVES_IN]-&gt; () -[:WITHIN*0..]-&gt; (:Location {name:'Europe'})
+RETURN person.name</pre>
+  <div class="fa"><ul>
+    <li><b>Cypher:</b> تطبیق الگو با فلش‌ها؛ از Neo4j آمد و اکنون استاندارد باز (openCypher) است. نامش از شخصیت فیلم ماتریکس است، نه رمزنگاری!</li>
+    <li><b>SPARQL:</b> برای triple storeهای RDF؛ الگویش تقریباً مثل Cypher است (<span class="ltr">?person :bornIn / :within* / :name "United States"</span>) و چون RDF فرقِ صفت و یال نمی‌گذارد، همان سینتکس برای صفت‌ها هم کار می‌کند.</li>
+    <li><b>Datalog:</b> قدیمی‌تر و ریشه‌دار در پژوهش‌های دههٔ ۸۰؛ به‌جای SELECT، <b>قاعده</b> تعریف می‌کنی و جدول‌های مجازی می‌سازی (مثل view)، و قاعده‌ها می‌توانند بازگشتی باشند → پیمایش گراف.</li>
+    <li><b>GraphQL:</b> متفاوت از بقیه — برای OLTP و رابط کاربری؛ کلاینت شکل دقیق JSON پاسخ را تعیین می‌کند. عمداً محدود است: نه کوئری بازگشتی، نه شرط دل‌خواه (چون از منبع غیرقابل‌اعتماد می‌آید و می‌تواند DoS بسازد). روی هر پایگاه‌داده‌ای قابل پیاده‌سازی است.</li>
+    <li><b>GQL:</b> استاندارد ISO در ۲۰۲۴ بر پایهٔ Cypher — امید به یکدستیِ بیشتر.</li>
+  </ul></div>
+  <div class="en"><ul>
+    <li><b>Cypher:</b> pattern matching with arrows; from Neo4j, now the openCypher open standard. Named after the Matrix character, not cryptography!</li>
+    <li><b>SPARQL:</b> for RDF triple stores; its pattern is nearly Cypher-like (<span class="ltr">?person :bornIn / :within* / :name "United States"</span>), and since RDF doesn’t separate attributes from edges, the same syntax works for attributes.</li>
+    <li><b>Datalog:</b> older, rooted in 80s research; instead of SELECT you define <b>rules</b> and build virtual tables (like views), and rules can recurse → graph traversal.</li>
+    <li><b>GraphQL:</b> unlike the rest — for OLTP and UIs; the client dictates the exact JSON response shape. Deliberately limited: no recursive queries, no arbitrary conditions (requests come from untrusted sources and could DoS). Implementable over any database.</li>
+    <li><b>GQL:</b> the 2024 ISO standard on Cypher foundations — hoping for more uniformity.</li>
+  </ul></div>
+</section>
+
+<!-- ============ SECTION 3 ============ -->
+<section id="s3">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۳</span><span class="en">3</span></span> <span class="fa">Event Sourcing و CQRS</span><span class="en">Event sourcing and CQRS</span></h2>
+
+  <div class="callout">
+    <div class="tag"><span class="fa">ایدهٔ کلیدی</span><span class="en">Key idea</span></div>
+    <div class="fa">
+<p>در Event Sourcing، تغییرات را به‌صورت رویداد نگه می‌داریم و وضعیت فعلی را از آن‌ها می‌سازیم. CQRS یعنی مدلِ ثبت تغییر و مدلِ پاسخ به خواندن می‌توانند جدا باشند؛ این دو مفهوم یکی نیستند.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-13">
+<p class="example-title"><b>مثال فنی: رویداد و نمای خواندن</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> برای سفارش ۴۲ رویدادهای <code dir="ltr">OrderPlaced</code> و سپس <code dir="ltr">OrderCancelled</code> با شمارهٔ ترتیب ثبت می‌شوند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> projector آن‌ها را به‌ترتیب اعمال می‌کند و ردیف خواندنی <code dir="ltr">status=cancelled</code> می‌سازد؛ command مسیر اعتبارسنجی و ثبت رویداد را دارد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> Event Sourcing تاریخچه را مرجع می‌گیرد؛ CQRS مسیر ثبت فرمان و نمایش نتیجه را جدا می‌کند و الزاماً نیازمند هم نیستند.</p>
+</div>
+</div>
+    <div class="en"><p>
+      In all previous models, data is read in the shape it was written. But sometimes one shape cannot serve every query.
+      So store data optimized for <b>writing</b> and <b>derive</b> read-optimized views from it.
+      The simplest write shape: an <b>append-only event log</b> of immutable events.
+    </p></div>
+  </div>
+
+  <div class="fa"><ul>
+    <li><b>Event Sourcing:</b> هر تغییر وضعیت اول به‌صورت رویداد در لاگ ثبت می‌شود؛ رویدادها تغییرناپذیرند و فقط اضافه می‌شوند.
+      رویدادها را به زمان گذشته نام‌گذاری کن (<span class="ltr">seats were booked</span>) چون گزارشِ واقعه‌ای‌اند که افتاده.</li>
+    <li><b>CQRS:</b> جداسازی مسئولیتِ فرمان و کوئری — نمایش‌های فقط‌خواندنی (projection / read model / materialized view)
+      از روی لاگ ساخته و به‌روز می‌شوند.</li>
+    <li><b>Command → اعتبارسنجی → fact:</b> درخواست کاربر اول باید معتبر شود (مثلاً صندلی خالی باشد)؛ بعد رویدادش در لاگ می‌نشیند.
+      پس لاگ فقط رویدادِ معتبر دارد و مصرف‌کنندهٔ نما حق رد کردن رویداد ندارد.</li>
+  </ul></div>
+  <div class="en"><ul>
+    <li><b>Event sourcing:</b> every state change is first recorded as an event in the log; events are immutable and only appended.
+      Name events in the past tense (<span class="ltr">seats were booked</span>) because they report something that happened.</li>
+    <li><b>CQRS:</b> separating command and query responsibility — read-only views (projection / read model / materialized view)
+      are built and refreshed from the log.</li>
+    <li><b>Command → validation → fact:</b> the user’s request must first validate (e.g. the seat is free); then its event lands in the log.
+      So the log holds only valid events, and view consumers may never reject an event.</li>
+  </ul></div>
+
+  <h3 id="s3-1"><span class="fa">نمودار ۳ + روایت مدرس</span><span class="en">Diagram 3 + narration</span></h3>
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار ۳ · Dataflow — اول لاگ رویداد، بعد نماهای مشتق‌شده</span><span class="en">Diagram 3 · Dataflow — event log first, derived views after</span></b>
+      <a class="open" href="diagrams/event-sourcing.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/event-sourcing.html" title="Event sourcing and CQRS" loading="lazy"></iframe>
+  </div>
+
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار ۳</span><span class="en">Teacher narration of Diagram 3</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: رویداد و نمای خواندن</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> برای سفارش ۴۲ رویدادهای <code dir="ltr">OrderPlaced</code> و سپس <code dir="ltr">OrderCancelled</code> با شمارهٔ ترتیب ثبت می‌شوند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> projector آن‌ها را به‌ترتیب اعمال می‌کند و ردیف خواندنی <code dir="ltr">status=cancelled</code> می‌سازد؛ command مسیر اعتبارسنجی و ثبت رویداد را دارد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> Event Sourcing تاریخچه را مرجع می‌گیرد؛ CQRS مسیر ثبت فرمان و نمایش نتیجه را جدا می‌کند و الزاماً نیازمند هم نیستند.</p>
+</div>
+
+    <p>
+      جریان این شکل از چپ به راست است و ستون‌های بالای آن مراحل را نام‌گذاری کرده‌اند:
+      <span class="ltr">Commands ← Validate ← Event Log ← Materialized Views ← Reads</span>.
+    </p>
+    <p>
+      در ردیف میانی، جعبهٔ <span class="ltr">«Client App»</span> با زیرنویسِ «book, cancel» شروع می‌کند.
+      فلش پررنگِ <span class="ltr">«command»</span> به <span class="ltr">«Command Handler»</span> می‌رسد؛
+      جعبه‌ای که زیرنویسش گویاست: «validate, then emit» — اول اعتبارسنجی، بعد صدور رویداد.
+    </p>
+    <p>
+      فلش پررنگِ بعدی، <span class="ltr">«append event»</span>، به قلبِ سیستم می‌رسد: جعبهٔ
+      <span class="ltr">«Event Log»</span> با برچسبِ <span class="ltr">«source of truth»</span> و زیرنویسِ
+      «append-only, immutable». یعنی هیچ‌چیز عوض نمی‌شود؛ فقط نوشته می‌شود.
+    </p>
+    <p>
+      حالا از راستِ این جعبه سه فلش چین‌چین بیرون می‌آید که هرکدام یک projection هستند:
+      <span class="ltr">«booking view»</span> بالا می‌رود به <span class="ltr">«Booking View»</span>،
+      <span class="ltr">«chart data»</span> راست می‌رود به <span class="ltr">«Dashboard Charts»</span>،
+      و <span class="ltr">«badge files»</span> پایین می‌رود به <span class="ltr">«Badge Files»</span>.
+      هر سه برچسبِ <span class="ltr">projection</span> دارند؛ یعنی قابل بازسازی از روی لاگ‌اند.
+    </p>
+    <p>
+      در آخرین ستون، هر نما به مصرف‌کنندهٔ خودش وصل است: فلش‌های «query view» به
+      <span class="ltr">«Support UI»</span> و <span class="ltr">«Organizer View»</span>، و «render badges» به
+      <span class="ltr">«Badge Printer»</span>. یک نکته را خوب نگاه کنید: <b>هیچ فلشی از راست به چپ برنمی‌گردد</b>؛
+      تغییر فقط از راهِ افزودنِ رویدادِ تازه اتفاق می‌افتد، و اگر رویدادی اشتباه بود، یک رویدادِ اصلاحیِ تازه می‌نویسی.
+    </p>
+    </div>
+    <div class="en">
+    <p>
+      This figure flows left to right, its top columns naming the stages:
+      <span class="ltr">Commands → Validate → Event Log → Materialized Views → Reads</span>.
+    </p>
+    <p>
+      In the middle row, the <span class="ltr">“Client App”</span> box (“book, cancel”) starts it off.
+      The bold <span class="ltr">“command”</span> arrow reaches the <span class="ltr">“Command Handler”</span>;
+      a box whose subtitle says it all: “validate, then emit” — validate first, then emit the event.
+    </p>
+    <p>
+      The next bold arrow, <span class="ltr">“append event”</span>, reaches the system’s heart: the
+      <span class="ltr">“Event Log”</span> box, tagged <span class="ltr">“source of truth”</span> and subtitled
+      “append-only, immutable”. Nothing ever changes; things only get written.
+    </p>
+    <p>
+      Now three dashed arrows leave this box’s right edge, each a projection:
+      <span class="ltr">“booking view”</span> climbs to <span class="ltr">“Booking View”</span>,
+      <span class="ltr">“chart data”</span> runs right to <span class="ltr">“Dashboard Charts”</span>,
+      and <span class="ltr">“badge files”</span> drops to <span class="ltr">“Badge Files”</span>.
+      All three carry the <span class="ltr">projection</span> tag; all are rebuildable from the log.
+    </p>
+    <p>
+      In the last column, each view connects to its consumer: “query view” arrows to
+      <span class="ltr">“Support UI”</span> and <span class="ltr">“Organizer View”</span>, “render badges” to
+      <span class="ltr">“Badge Printer”</span>. Note one thing well: <b>no arrow ever points right-to-left</b>;
+      change happens only by appending a fresh event — and a mistaken event is fixed by writing a fresh corrective event.
+    </p>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="cardmini">
+      <h4><span class="fa">مزیت‌ها</span><span class="en">Advantages</span></h4>
+<div class="fa"><p>رویدادها امکانِ پیگیریِ تغییر و ساختِ نمایش‌های تازه را می‌دهند، اگر تاریخچه و قواعدِ بازپخش کافی و معتبر باشند.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-14">
+<p class="example-title"><b>مثال فنی: بازسازی یک گزارش تازه</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> تاریخچهٔ سفارش شامل زمان ثبت، پرداخت و ارسال است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> projector جدید فاصلهٔ پرداخت تا ارسال را محاسبه می‌کند؛ رویدادهای قدیمی بدون تغییر منبع دوباره پردازش می‌شوند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> می‌توان نمای تازه ساخت، به‌شرط حفظ داده و معنای رویدادها؛ snapshotِ وضعیت نهایی به‌تنهایی این فاصله‌ها را نمی‌دهد.</p>
+</div></div>
+
+      <div class="fa"><ul>
+        <li>رویداد، نیت را می‌گوید: «رزرو لغو شد» بهتر از «ستون active ردیف ۴۰۰۱ false شد».</li>
+        <li>نماها قابل بازتولیدند: حذف و پخش دوبارهٔ همان رویدادها با همان ترتیب و کد.</li>
+        <li>هر تعداد نمای بهینه‌شده، حتی فقط در حافظه؛ نمای جدید از روی لاگ قدیمی هم ساخته می‌شود.</li>
+        <li>کارهای بازگشت‌ناپذیر کمتر می‌شود؛ لاگ، حسابرسی (audit) هم هست.</li>
+        <li>نوشتنِ ترتیبی، throughput بالایی می‌دهد و جهشِ رویداد را جذب می‌کند.</li>
+      </ul></div>
+      <div class="en"><ul>
+        <li>Events state intent: “booking canceled” beats “row 4001’s active column set to false”.</li>
+        <li>Views are reproducible: drop and replay the same events in the same order with the same code.</li>
+        <li>As many optimized views as you like, even memory-only; new views build from the old log too.</li>
+        <li>Fewer irreversible actions; the log doubles as an audit trail.</li>
+        <li>Sequential writes give high throughput and absorb event bursts.</li>
+      </ul></div>
+    </div>
+    <div class="cardmini">
+      <h4><span class="fa">هشدارها</span><span class="en">Cautions</span></h4>
+<div class="fa"><p>رویدادِ قدیمی با تغییرِ کد ناپدید نمی‌شود. باید نسخهٔ رویداد، بازپخش و اثرهای جانبی را آگاهانه مدیریت کنیم.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-15">
+<p class="example-title"><b>مثال فنی: Replay نباید پیامک تاریخی بفرستد</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> projector گزارش، رویداد <code dir="ltr">OrderPlaced</code> سال گذشته را دوباره می‌خواند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> مسیر بازسازی فقط جدول گزارش را می‌نویسد؛ ارسال پیامک مسیرِ اثر جانبی جدا با شناسهٔ یکتا و سیاست جلوگیری از تکرار دارد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> بازپخش محاسبه با تکرارِ اثر بیرونی فرق دارد؛ کپی کردن همهٔ handlerهای زنده در replay خطرناک است.</p>
+</div></div>
+
+      <div class="fa"><ul>
+        <li>پردازش باید قطعی (deterministic) باشد: نرخ ارز را داخل رویداد بگذار، نه از بیرون بگیر.</li>
+        <li>تغییرناپذیری با «حق حذف» قوانین حریم خصوصی تضاد دارد: راه‌حل‌هایی مثل crypto-shredding.</li>
+        <li>پردازش دوباره نباید اثر جانبی تکرار کند (مثلاً دوباره ایمیل تأیید نرود).</li>
+        <li>الزام فنی: همهٔ نماها باید رویدادها را دقیقاً با همان ترتیبِ لاگ ببینند.</li>
+      </ul></div>
+      <div class="en"><ul>
+        <li>Processing must be deterministic: put the exchange rate inside the event, don’t fetch it from outside.</li>
+        <li>Immutability clashes with privacy law’s “right to erasure”: fixes like crypto-shredding.</li>
+        <li>Replays must not repeat side effects (e.g. no second confirmation email).</li>
+        <li>Technical must: every view must see events in exactly the log’s order.</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <h3 id="s3-2"><span class="fa">نمودار وضعیت — چرخهٔ عمر رزرو</span><span class="en">State diagram — the booking lifecycle</span></h3>
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار وضعیت (State Machine) — رویدادها به‌جای ویرایش</span><span class="en">State machine — events instead of edits</span></b>
+      <a class="open" href="diagrams/booking-lifecycle.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/booking-lifecycle.html" title="Booking lifecycle" loading="lazy"></iframe>
+  </div>
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: رزرو و رویدادِ دیررس</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> رزرو R7 با نسخهٔ ۱ ساخته و با نسخهٔ ۲ لغو شده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پیام تأییدِ متعلق به نسخهٔ قدیمی دیر می‌رسد؛ handler باید وضعیت و نسخه را بررسی کند و رزروِ لغوشده را بدون فرمان مجاز به confirmed برنگرداند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هر پیکانِ ماشین وضعیت، شرط و نتیجه دارد؛ تحویلِ یک پیام به‌تنهایی مجوز هر تغییر وضعیت نیست.</p>
+</div>
+
+    <p>
+      این ماشین وضعیت، زندگیِ یک صندلیِ رزرو را در مدلِ event sourcing نشان می‌دهد.
+      از لینِ بالا شروع کنید، <span class="ltr">«Booking states»</span>: جعبهٔ آغازِ
+      <span class="ltr">«Open»</span> («registration starts») با فلشِ «capacity set» به
+      <span class="ltr">«Available»</span> می‌رود. بعد فلشِ پررنگِ <code>SEAT_BOOKED</code> به
+      <span class="ltr">«Reserved»</span> و فلشِ پررنگِ <code>PAYMENT_RECEIVED</code> به
+      <span class="ltr">«Confirmed»</span>. دقت کنید: نامِ گذارها به‌صورتِ <b>رویدادِ زمان گذشته</b> است، نه دستور.
+    </p>
+    <p>
+      از «Reserved» یک فلشِ امنیتی با برچسبِ <code>SEAT_CANCELED</code> به لینِ پایین می‌رود:
+      جعبهٔ <span class="ltr">«Canceled»</span> در <span class="ltr">«Terminal states»</span>.
+      و بعد فلشِ چین‌چینِ «seat released» آن را دوباره به «Available» برمی‌گرداند — صندلی آزاد می‌شود،
+      اما تاریخچه‌اش پاک نمی‌شود.
+    </p>
+    <p>
+      آموزنده‌ترین بخشِ شکل، گوشهٔ راست است. اگر از «Confirmed» اشتباهی پیدا شود، فلشِ چین‌چینِ «mistake found»
+      به جعبهٔ <span class="ltr">«Correction Event»</span> در لینِ <span class="ltr">«Corrections»</span> می‌رود؛
+      زیرنویسش همه‌چیز را می‌گوید: «new event, never edit». و «compensating event» وضعیت را دوباره به «Available» می‌برد.
+      هیچ‌جا داده ویرایش نمی‌شود؛ فقط رویدادِ تازه اضافه می‌شود — و این، همان قابلیتِ حسابرسی و بازتولیدپذیری است.
+    </p>
+    </div>
+    <div class="en">
+    <p>
+      This state machine shows one bookable seat’s life under event sourcing.
+      Start from the top lane, <span class="ltr">“Booking states”</span>: the
+      <span class="ltr">“Open”</span> start box (“registration starts”) moves via “capacity set” to
+      <span class="ltr">“Available”</span>. Then the bold <code>SEAT_BOOKED</code> transition to
+      <span class="ltr">“Reserved”</span> and bold <code>PAYMENT_RECEIVED</code> to
+      <span class="ltr">“Confirmed”</span>. Note: transition names are <b>past-tense events</b>, not commands.
+    </p>
+    <p>
+      From “Reserved” a guard arrow labelled <code>SEAT_CANCELED</code> drops to the lower lane:
+      the <span class="ltr">“Canceled”</span> box in <span class="ltr">“Terminal states”</span>.
+      Then the dashed “seat released” arrow returns it to “Available” — the seat frees up,
+      but its history is never erased.
+    </p>
+    <p>
+      The most instructive corner is the right one. If a mistake surfaces from “Confirmed”, the dashed “mistake found” arrow
+      goes to the <span class="ltr">“Correction Event”</span> box in the <span class="ltr">“Corrections”</span> lane;
+      its subtitle says everything: “new event, never edit”. And a “compensating event” carries the state back to “Available”.
+      Data is never edited anywhere; only fresh events append — and that is auditability and reproducibility.
+    </p>
+    </div>
+  </div>
+</section>
+<!-- ============ SECTION 4 ============ -->
+<section id="s4">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۴</span><span class="en">4</span></span> <span class="fa">DataFrame، ماتریس و آرایه</span><span class="en">DataFrames, matrices and arrays</span></h2>
+  <div class="fa">
+<p>DataFrame داده را شبیه جدول برای تبدیل و تحلیل نمایش می‌دهد. ماتریس و آرایه برای محاسبات عددی و داده‌های چندبُعدی مناسب‌اند؛ شکل داده باید با عملیات هماهنگ باشد.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-16">
+<p class="example-title"><b>مثال فنی: جدول در برابر آرایه</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فروش روزانه ستون‌های <code dir="ltr">day, amount</code> دارد؛ تصویر رنگی اندازهٔ <code dir="ltr">256×256×3</code> دارد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> روی DataFrame، فیلتر روز و جمع مبلغ اجرا می‌شود؛ روی تصویر، محاسبه با اندیس محورهای ارتفاع، عرض و رنگ انجام می‌شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هر دو دادهٔ ساخت‌یافته‌اند، اما عملیات و معنای محورهایشان متفاوت است؛ تبدیل کورکورانه مدل را نامفهوم می‌کند.</p>
+</div>
+</div>
+  <div class="en"><p>
+    These models belong more to analytics and data science than to OLTP:
+  </p></div>
+  <div class="fa"><ul>
+    <li><b>DataFrame</b> (R، Pandas، Spark، Dask): در نگاه اول شبیه جدول است و عملگرهای رابطه‌ای (فیلتر، گروه‌بندی، ادغام که معادل join است) دارد،
+      اما به‌جای زبان اعلانی، با سلسله‌مراتبی از دستورها دستکاری می‌شود — دقیقاً متناسبِ کارِ تدریجیِ دانشمند داده روی نسخهٔ خصوصیِ داده.</li>
+    <li>کاربرد مهم: تبدیلِ دادهٔ رابطه‌ای به <b>ماتریسِ تنک (sparse)</b> برای الگوریتم‌های ML — مثلاً ماتریسِ امتیازِ کاربران به فیلم‌ها. ستون‌ها می‌توانند هزاران عدد باشند که در پایگاه داده رابطه‌ای جا نمی‌شوند.</li>
+    <li>داده‌های غیرعددی باید عددی شوند: تاریخ‌ها را مقیاس‌بندی، مقادیر دسته‌ای با <b>one-hot encoding</b>.</li>
+    <li><b>پایگاه داده آرایه‌ای</b> (مثل TileDB) برای آرایه‌های چندبُعدیِ بزرگ: داده‌های ژئومکانیکی، تصاویر پزشکی، رصدخانه‌ها؛ و در مالی برای سری‌های زمانی قیمت‌ها.</li>
+  </ul></div>
+  <div class="en"><ul>
+    <li><b>DataFrame</b> (R, Pandas, Spark, Dask): looks like a table at first and has relational operators (filter, group-by, merge as join),
+      but is manipulated through a sequence of commands instead of a declarative language — exactly matching a data scientist’s incremental work on a private data copy.</li>
+    <li>Key use: turning relational data into a <b>sparse matrix</b> for ML algorithms — e.g. the user–movie ratings matrix. Columns can run to thousands of numbers that don’t fit a relational database.</li>
+    <li>Non-numeric data must become numeric: scale dates, encode categories with <b>one-hot encoding</b>.</li>
+    <li><b>Array databases</b> (like TileDB) for large multidimensional arrays: geomechanics data, medical images, observatories; in finance, for price time series.</li>
+  </ul></div>
+</section>
+
+<!-- ============ SECTION 5 ============ -->
+<section id="s5">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۵</span><span class="en">5</span></span> <span class="fa">کدام مدل را انتخاب کنیم؟</span><span class="en">Which model to choose?</span></h2>
+
+  <div class="callout">
+    <div class="tag"><span class="fa">قاعدهٔ کلی</span><span class="en">Rule of thumb</span></div>
+    <div class="fa">
+<p>مدل داده را از روی سؤال‌هایی انتخاب کنیم که برنامه باید پاسخ دهد. وجود چند نوع سؤال ممکن است به چند نمایش از یک داده نیاز داشته باشد.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-17">
+<p class="example-title"><b>مثال فنی: مدل تابع الگوی دسترسی است</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> محصول هم رزومهٔ کامل، هم ارتباط افراد و هم جمع حقوق ماهانه می‌خواهد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> سند برای نمایش رزومه، گراف برای مسیر ارتباط و جدول تحلیلی برای تجمیع می‌تواند به‌کار رود؛ هر نمای مشتق مسیر به‌روزشدن مشخص می‌خواهد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> چند مدل هزینهٔ همگامی دارد؛ وقتی همان مدل رابطه‌ای نیاز را جواب می‌دهد، افزودن سه مخزن الزام نیست.</p>
+</div>
+</div>
+    <div class="en"><p>
+      First pin down the <b>shape of relationships</b> and the <b>access pattern</b>, then pick the model. No model is absolutely better;
+      you can even simulate one model atop another (graphs in SQL!) — but the result turns clumsy.
+    </p></div>
+  </div>
+
+  <div class="fa"><table>
+    <thead><tr><th>اگر داده‌ات این‌طور است</th><th>انتخاب معمول</th><th>دلیل</th></tr></thead>
+    <tbody>
+      <tr><td>درختِ یک‌به‌چند (one-to-few) که یک‌جا بارگذاری می‌شود</td><td>سند (JSON)</td><td>locality، نزدیکی به شیء برنامه، انعطاف اسکیما</td></tr>
+      <tr><td>چند‌به‌چندِ فراوان با پیمایشِ چندپله</td><td>گراف</td><td>الگوی‌محور، پیمایش متغیر، تکامل‌پذیر</td></tr>
+      <tr><td>ترکیب روابط + join + تحلیل</td><td>رابطه‌ای / star schema</td><td>join قوی، اسکیمای صریح، ابزار BI</td></tr>
+      <tr><td>نوشتنِ زیاد + شکل‌های مختلف خواندن</td><td>لاگ رویداد + CQRS</td><td>نوشتنِ سریع، نماهای بازسازی‌پذیر</td></tr>
+      <tr><td>داده‌های عددیِ شبکه‌ای/آرایه‌ای برای ML</td><td>DataFrame / ماتریس</td><td>جبر خطی، آرایه‌های تنک</td></tr>
+    </tbody>
+  </table></div>
+  <div class="en"><table>
+    <thead><tr><th>If your data looks like</th><th>Usual pick</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>One-to-few tree loaded all at once</td><td>Document (JSON)</td><td>Locality, closeness to app objects, schema flexibility</td></tr>
+      <tr><td>Abundant many-to-many with multi-hop traversal</td><td>Graph</td><td>Pattern-oriented, variable traversal, evolvable</td></tr>
+      <tr><td>Mixed relationships + joins + analytics</td><td>Relational / star schema</td><td>Strong joins, explicit schema, BI tooling</td></tr>
+      <tr><td>Heavy writes + varied read shapes</td><td>Event log + CQRS</td><td>Fast writes, rebuildable views</td></tr>
+      <tr><td>Grid/array numeric data for ML</td><td>DataFrame / matrix</td><td>Linear algebra, sparse arrays</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="callout">
+    <div class="tag"><span class="fa">جمع‌بندیِ تریدآف‌ها</span><span class="en">Trade-off summary</span></div>
+    <div class="fa"><ul>
+      <li>اگر کل سند را یک‌جا می‌خواهی ← سند. اگر به آیتمِ توکار باید ارجاع بدهی ← رابطه‌ای.</li>
+      <li>نرمال‌شده: نوشتن ارزان، خواندن با join. دنرمال‌شده: خواندن سریع، نوشتن پرهزینه و حساس به سازگاری.</li>
+      <li>در مقیاس کوچک و متوسط، نرمال‌سازی معمولاً بهتر است؛ در مقیاس بسیار بزرگ، هزینهٔ join مسئله‌ساز می‌شود.</li>
+      <li>روند روز: همگرایی — رابطه‌ای JSON گرفت، سندی join گرفت؛ ترکیبشان قدرتمند است.</li>
+    </ul></div>
+    <div class="en"><ul>
+      <li>Want the whole document at once → document. Must reference an embedded item → relational.</li>
+      <li>Normalized: cheap writes, join reads. Denormalized: fast reads, costly writes, consistency-sensitive.</li>
+      <li>At small and medium scale normalization usually wins; at very large scale join cost bites.</li>
+      <li>The current trend: convergence — relational gained JSON, documents gained joins; combined they are powerful.</li>
+    </ul></div>
+  </div>
+
+  <h3 id="s5-1"><span class="fa">نمودار ۴ + روایت مدرس</span><span class="en">Diagram 4 + narration</span></h3>
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار ۴ · Workflow — مسیر انتخاب مدل داده</span><span class="en">Diagram 4 · Workflow — the data-model selection path</span></b>
+      <a class="open" href="diagrams/data-model-choice.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/data-model-choice.html" title="Choosing a data model" loading="lazy"></iframe>
+  </div>
+
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار ۴</span><span class="en">Teacher narration of Diagram 4</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: مدل تابع الگوی دسترسی است</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> محصول هم رزومهٔ کامل، هم ارتباط افراد و هم جمع حقوق ماهانه می‌خواهد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> سند برای نمایش رزومه، گراف برای مسیر ارتباط و جدول تحلیلی برای تجمیع می‌تواند به‌کار رود؛ هر نمای مشتق مسیر به‌روزشدن مشخص می‌خواهد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> چند مدل هزینهٔ همگامی دارد؛ وقتی همان مدل رابطه‌ای نیاز را جواب می‌دهد، افزودن سه مخزن الزام نیست.</p>
+</div>
+
+    <p>
+      این شکل را مثل یک مسیر تصمیم بخوانید. در ردیفِ بالا با عنوانِ <span class="ltr">«Classify»</span>، دو جعبه کنار هم نشسته‌اند:
+      <span class="ltr">«Data Shape»</span> با زیرنویسِ «tree, web, or events» و کنارش <span class="ltr">«Access Pattern»</span>
+      با زیرنویسِ «tree, hops, scans». فلشِ پررنگِ میانِ آن‌ها برچسبِ «classify» دارد: اول شکل داده، بعد الگوی دسترسی.
+    </p>
+    <p>
+      حالا از <span class="ltr">«Access Pattern»</span> چهار فلش به سمت گزینه‌ها باز می‌شود. در لینِ
+      <span class="ltr">«Flexible Shapes»</span> دو گزینه نشسته‌اند: <span class="ltr">«Document»</span> که برچسبِ
+      <span class="ltr">«one-to-few»</span> دارد و فلشِ «tree, one-to-few» به سمتش می‌رود، و <span class="ltr">«Graph»</span>
+      با برچسبِ <span class="ltr">«many-to-many»</span> و فلشِ کوتاهِ «hops».
+    </p>
+    <p>
+      در لینِ پایینی، <span class="ltr">«Structured History»</span>، دو گزینهٔ دیگر جا گرفته‌اند:
+      <span class="ltr">«Relational / Star»</span> که فلشِ پررنگِ «joins, analytics» به آن می‌رسد — و این پررنگ‌بودن یعنی مسیر اصلیِ تصمیم‌های معمول —
+      و <span class="ltr">«Event Log + CQRS»</span> که فلشِ چین‌چینِ «writes, many reads» به سمتش می‌رود.
+    </p>
+    <p>
+      درسِ مسیر همین است: جعبه‌های چپِ شکل را که پر کنید، انتخابِ جعبه‌های راست تقریباً خودکار می‌شود.
+    </p>
+    </div>
+    <div class="en">
+    <p>
+      Read this figure as a decision path. In the top lane, <span class="ltr">“Classify”</span>, two boxes sit side by side:
+      <span class="ltr">“Data Shape”</span> (“tree, web, or events”) and <span class="ltr">“Access Pattern”</span>
+      (“tree, hops, scans”). The bold arrow between them is labelled “classify”: data shape first, access pattern second.
+    </p>
+    <p>
+      From <span class="ltr">“Access Pattern”</span> four arrows fan out to the options. In the
+      <span class="ltr">“Flexible Shapes”</span> lane sit two: <span class="ltr">“Document”</span>, tagged
+      <span class="ltr">“one-to-few”</span> with the “tree, one-to-few” arrow heading to it, and <span class="ltr">“Graph”</span>
+      tagged <span class="ltr">“many-to-many”</span> with the short “hops” arrow.
+    </p>
+    <p>
+      In the lower lane, <span class="ltr">“Structured History”</span>, sit the other two:
+      <span class="ltr">“Relational / Star”</span>, reached by the bold “joins, analytics” arrow — its boldness marks the default path of typical decisions —
+      and <span class="ltr">“Event Log + CQRS”</span>, reached by the dashed “writes, many reads” arrow.
+    </p>
+    <p>
+      The path’s lesson: once you fill in the left-hand boxes, the right-hand choice is nearly automatic.
+    </p>
+    </div>
+  </div>
+
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نقشهٔ فصل — همهٔ مفاهیم کلیدی در یک نگاه</span><span class="en">Chapter map — all key concepts at a glance</span></b>
+      <a class="open" href="diagrams/ch3-map.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/ch3-map.html" title="Chapter 3 concept map" loading="lazy"></iframe>
+  </div>
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: مدل تابع الگوی دسترسی است</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> محصول هم رزومهٔ کامل، هم ارتباط افراد و هم جمع حقوق ماهانه می‌خواهد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> سند برای نمایش رزومه، گراف برای مسیر ارتباط و جدول تحلیلی برای تجمیع می‌تواند به‌کار رود؛ هر نمای مشتق مسیر به‌روزشدن مشخص می‌خواهد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> چند مدل هزینهٔ همگامی دارد؛ وقتی همان مدل رابطه‌ای نیاز را جواب می‌دهد، افزودن سه مخزن الزام نیست.</p>
+</div>
+<p>گرهٔ مرکزی (<span class="ltr">Data models and query languages</span>) را بخوانید و شش یال را دنبال کنید: <span class="ltr">normalize</span> به رابطه‌ای با جدول و JOIN، <span class="ltr">embed</span> به سندی با یک درخت JSON، <span class="ltr">traverse</span> به گراف با رأس و یال، <span class="ltr">derive</span> به لاگ رویداد به‌عنوان حقیقتِ فقط‌افزودنی، <span class="ltr">optimize</span> به اعلانی‌بودن (بگو چه می‌خواهی، چطورش را پنهان کن)، و <span class="ltr">decide</span> به قاعدهٔ انتخاب: اول شکل رابطه‌ها، بعد الگوی دسترسی.</p></div>
+    <div class="en"><p>Read the central node (<span class="ltr">Data models and query languages</span>) and follow the six edges: <span class="ltr">normalize</span> to relational with tables and JOIN, <span class="ltr">embed</span> to documents with one JSON tree, <span class="ltr">traverse</span> to graphs with nodes and edges, <span class="ltr">derive</span> to the event log as append-only truth, <span class="ltr">optimize</span> to declarativeness (say WHAT, hide the how), and <span class="ltr">decide</span> to the selection rule: relationship shape first, access pattern second.</p></div>
+  </div>
+</section>
+<!-- ============ SECTION 6 ============ -->
+<section id="s6">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۶</span><span class="en">6</span></span> <span class="fa">بستهٔ مصاحبه</span><span class="en">Interview pack</span></h2>
+
+  <h3 id="s6-1"><span class="fa">۶.۱ همه‌چیز در یک نگاه</span><span class="en">6.1 Everything at a glance</span></h3>
+  <div class="fa"><table>
+    <thead><tr><th>اصطلاح</th><th>تعریف یک‌خطی</th><th>کلیدواژهٔ مصاحبه</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ltr">Declarative</span></td><td>بگو چه می‌خواهی، نه چطور</td><td>بهینه‌ساز کوئری آزاد است</td></tr>
+      <tr><td><span class="ltr">Impedance Mismatch</span></td><td>فاصلهٔ شیءِ برنامه و جدول‌ها</td><td>لایهٔ ترجمه، ORM، مسئلهٔ N+1</td></tr>
+      <tr><td><span class="ltr">Shredding / Embedding</span></td><td>تکه‌تکه کردن درخت در جدول‌ها / توکار کردن در سند</td><td>locality در برابر join</td></tr>
+      <tr><td><span class="ltr">Normalization</span></td><td>هر fact یک‌جا، بقیه با ID ارجاع دهند</td><td>نوشتن ارزان، خواندن با join</td></tr>
+      <tr><td><span class="ltr">Denormalization</span></td><td>کپیِ اطلاعات برای خواندنِ سریع</td><td>دادهٔ مشتق‌شده، سازگاری</td></tr>
+      <tr><td><span class="ltr">Hydrating IDs</span></td><td>تبدیل ID به اطلاعات قابل‌خواندن هنگام خواندن</td><td>join در کد برنامه</td></tr>
+      <tr><td><span class="ltr">Star / Snowflake / OBT</span></td><td>قالب‌های جدول واقعیه + بعد‌ها در انبارداده</td><td>fact در مرکز، بعد‌ها دور آن</td></tr>
+      <tr><td><span class="ltr">Schema-on-Read/Write</span></td><td>اسکیمای ضمنی هنگام خواندن / صریح هنگام نوشتن</td><td>تایپ‌چکینگ پویا در برابر ایستا</td></tr>
+      <tr><td><span class="ltr">Property Graph</span></td><td>رأس با ویژگی و یال‌های برچسب‌دار</td><td>معادل دو جدول vertices/edges</td></tr>
+      <tr><td><span class="ltr">Triple Store / RDF</span></td><td>سه‌تایی subject, predicate, object</td><td>Turtle، SPARQL</td></tr>
+      <tr><td><span class="ltr">Cypher / SPARQL / Datalog</span></td><td>الگوی گراف / سه‌تایی / قاعدهٔ بازگشتی</td><td>۴ خط در برابر ۳۱ خط SQL</td></tr>
+      <tr><td><span class="ltr">GraphQL</span></td><td>کلاینت شکل پاسخ JSON را تعیین می‌کند</td><td>محدودِ آگاهانه، بدون بازگشت</td></tr>
+      <tr><td><span class="ltr">Event Sourcing</span></td><td>لاگ رویدادِ تغییرناپذیر = منبع حقیقت</td><td>رویداد به زمان گذشته</td></tr>
+      <tr><td><span class="ltr">CQRS / Projection</span></td><td>نماهای خواندنیِ مشتق‌شده از لاگ</td><td>قابل بازتولید</td></tr>
+      <tr><td><span class="ltr">DataFrame</span></td><td>جدولِ دستکاری‌شده با دستورها، پلِ به ماتریس</td><td>ML، آرایهٔ تنک</td></tr>
+    </tbody>
+  </table></div>
+  <div class="en"><table>
+    <thead><tr><th>Term</th><th>One-line definition</th><th>Interview keyword</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ltr">Declarative</span></td><td>Say what you want, not how</td><td>Query optimizer is free</td></tr>
+      <tr><td><span class="ltr">Impedance Mismatch</span></td><td>Gap between app objects and tables</td><td>Translation layer, ORM, N+1</td></tr>
+      <tr><td><span class="ltr">Shredding / Embedding</span></td><td>Splitting a tree across tables / nesting it in a document</td><td>Locality vs join</td></tr>
+      <tr><td><span class="ltr">Normalization</span></td><td>Each fact once, everything else by ID</td><td>Cheap writes, join reads</td></tr>
+      <tr><td><span class="ltr">Denormalization</span></td><td>Copying data for fast reads</td><td>Derived data, consistency</td></tr>
+      <tr><td><span class="ltr">Hydrating IDs</span></td><td>Resolving IDs to readable data at read time</td><td>Join in application code</td></tr>
+      <tr><td><span class="ltr">Star / Snowflake / OBT</span></td><td>Fact + dimension layouts in warehouses</td><td>Fact at center, dimensions around</td></tr>
+      <tr><td><span class="ltr">Schema-on-Read/Write</span></td><td>Implicit schema at read / explicit at write</td><td>Dynamic vs static type checking</td></tr>
+      <tr><td><span class="ltr">Property Graph</span></td><td>Attributed vertices with labelled edges</td><td>Equals two vertices/edges tables</td></tr>
+      <tr><td><span class="ltr">Triple Store / RDF</span></td><td>Subject, predicate, object triples</td><td>Turtle, SPARQL</td></tr>
+      <tr><td><span class="ltr">Cypher / SPARQL / Datalog</span></td><td>Graph pattern / triple / recursive rule</td><td>4 lines vs 31 lines of SQL</td></tr>
+      <tr><td><span class="ltr">GraphQL</span></td><td>Client dictates the JSON response shape</td><td>Deliberately limited, no recursion</td></tr>
+      <tr><td><span class="ltr">Event Sourcing</span></td><td>Immutable event log = source of truth</td><td>Past-tense events</td></tr>
+      <tr><td><span class="ltr">CQRS / Projection</span></td><td>Read views derived from the log</td><td>Reproducible</td></tr>
+      <tr><td><span class="ltr">DataFrame</span></td><td>Command-manipulated table, bridge to matrices</td><td>ML, sparse arrays</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 id="s6-2"><span class="fa">۶.۲ سوالات پرتکرار مصاحبه (برای دیدن جواب کلیک کن)</span><span class="en">6.2 Frequent interview questions (click for answers)</span></h3>
+
+  <details><summary><span class="fa">۱. چرا مدل داده این‌قدر مهم است؟</span><span class="en">1. Why does the data model matter so much?</span></summary>
+    <div class="fa"><p>مدلِ داده تعیین می‌کند چه چیزهایی را موجودیت و رابطه بدانیم و چه سؤال‌هایی را آسان‌تر بیان کنیم. این انتخاب بر کد و فکرِ ما دربارهٔ مسئله اثر دارد.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: انتخاب مدل با سؤال شروع می‌شود</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> داده شامل افراد، شرکت‌ها و سابقهٔ کار است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نمایش کل رزومه یک خواندنِ تو‌در‌تو می‌خواهد؛ جست‌وجوی «همکارِ دوستِ من» پیمایش چند رابطه می‌خواهد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> یک سند برای اولی طبیعی‌تر و یک گراف برای دومی مناسب‌تر است؛ شکل پرسش بخشی از انتخاب مدل است.</p>
+</div></div>
+    <div class="en"><p>Because it shapes not just code but how we think about the problem. Every application stacks several model layers, each hiding the complexity below.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۲. declarative یعنی چه و چه فایده‌ای دارد؟</span><span class="en">2. What does declarative mean, and why is it useful?</span></summary>
+    <div class="fa"><p>در زبانِ اعلانی نتیجه را می‌گوییم و روشِ اجرا را به موتور می‌سپاریم. این آزادی به بهینه‌ساز اجازه می‌دهد طرحِ اجرا را با وضعیتِ داده و منابع تغییر دهد.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: SQL نتیجه را می‌خواهد، نه حلقه را</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> هدف مشتریانی است که بیش از سه سفارش دارند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> <code dir="ltr">GROUP BY customer_id HAVING COUNT(*) &gt; 3</code> شرط نتیجه را می‌گوید؛ optimizer می‌تواند نوع اسکن و تجمیع را انتخاب کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> در حلقهٔ دستوری ترتیب اجرا را خودمان تعیین می‌کنیم؛ اعلانی بودن آزادی انتخاب طرح اجرا را به موتور می‌دهد.</p>
+</div></div>
+    <div class="en"><p>It means stating the desired data pattern, not the route to it. Payoff: the database optimizer can swap indexes, algorithms, even parallel execution without touching the query.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۳. ORM چه کمکی می‌کند و مسئلهٔ N+1 چیست؟</span><span class="en">3. How do ORMs help, and what is the N+1 problem?</span></summary>
+    <div class="fa"><p><span class="ltr">ORM</span> ترجمهٔ اشیا و جدول‌ها را آسان می‌کند، اما هزینهٔ پرس‌وجو را حذف نمی‌کند. در <span class="ltr">N</span>+1، یک پرس‌وجوی اولیه و سپس یک پرس‌وجوی جدا برای هر نتیجه اجرا می‌شود.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: N+1 در صفحهٔ رزومه‌ها</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> ORM ابتدا ۱۰۰ متقاضی را با یک SQL می‌خواند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> دسترسی lazy به <code dir="ltr">person.jobs</code> برای هر متقاضی یک SQL جدا می‌زند: مجموعاً ۱۰۱ پرس‌وجو؛ preload می‌تواند رابطه‌ها را دسته‌ای بخواند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> کد کوتاه لزوماً مسیر کم‌هزینه نیست؛ تعداد query و دادهٔ برگردانده‌شده باید دیده شود.</p>
+</div></div>
+    <div class="en"><p>ORMs cut object↔table translation boilerplate but never fully hide the differences. N+1: one query for N records, then N separate queries for their dependents; fix: join or eager loading.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۴. تفاوت shredding و embedding؟</span><span class="en">4. Shredding vs embedding?</span></summary>
+    <div class="fa"><p><span class="ltr">Shredding</span> یعنی شکستنِ دادهٔ تو‌در‌تو به رکوردهای مرتبط؛ <span class="ltr">embedding</span> یعنی نگه داشتنِ بخش‌های مرتبط داخلِ یک سند. خواندنِ یک مجموعه و تغییرِ روابط میان مجموعه‌ها نیازهای متفاوتی دارند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: Embedding تا کجا مناسب است؟</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> رزومه دو سابقهٔ شغلی دارد و هر دو در آرایهٔ <code dir="ltr">jobs</code> ذخیره‌اند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> خواندن سند همهٔ رزومه را می‌آورد؛ اگر نام شرکت در ۱۰ هزار رزومه کپی شده باشد، تغییر نام به اصلاح همان ۱۰ هزار نسخه نیاز دارد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> بخش‌های متعلق به یک رزومه برای embedding مناسب‌اند؛ هویت مشترک شرکت معمولاً مرجع مستقل می‌خواهد.</p>
+</div></div>
+    <div class="en"><p>Shredding: splitting a tree across tables with foreign keys (relational flexibility, needs joins). Embedding: all in one document (locality, one read) — good for one-to-few, bad for large counts or referencing embedded items.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۵. کی نرمال‌سازی و کی نرمال‌زدایی؟</span><span class="en">5. When to normalize, when to denormalize?</span></summary>
+    <div class="fa"><p>نرمال‌سازی تکرار را کم و تغییرِ اطلاعاتِ مشترک را آسان می‌کند؛ نرمال‌زدایی بعضی خواندن‌ها را ساده‌تر می‌کند، ولی هماهنگ نگه داشتنِ نسخه‌های تکراری هزینه دارد.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: نشانیِ فعلی و نشانیِ تاریخی</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> نشانی فعلی مشتری در جدول <code dir="ltr">customers</code> است؛ سفارش ۴۲ به نشانی زمان خرید نیاز دارد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> سفارش یک snapshot از نشانی ارسال نگه می‌دارد؛ تغییر نشانی فعلی، سفارش تحویل‌شدهٔ قدیمی را بازنویسی نمی‌کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> این تکرار داده عمدی است؛ هر کپی معنای زمانی جدا دارد و نباید بی‌فکر با مرجع فعلی همگام شود.</p>
+</div></div>
+    <div class="en"><p>Normalized: cheap writes, join reads, easy consistency — for OLTP and medium scale. Denormalized: fast reads, costly writes, inconsistency-prone — for analytics and when joins get expensive. Denormalization = derived data needing an update process.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۶. در مثالِ تایم‌لاینِ فصل، چرا شناسهٔ پست ذخیره می‌شود؟</span><span class="en">6. Why does X’s timeline store only IDs?</span></summary>
+    <div class="fa"><p>در سناریوی تایم‌لاینِ فصل، شناسهٔ پست در فهرست قرار می‌گیرد و محتوای قابل‌تغییر جدا خوانده می‌شود. این کار حجمِ کپی و هزینهٔ اصلاحِ داده را کم می‌کند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: چرا timeline شناسه نگه می‌دارد؟</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> پست <code dir="ltr">p9</code> به timeline هزار دنبال‌کننده وارد شده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> فهرست‌ها فقط <code dir="ltr">post_id</code> دارند؛ متن از مخزن پست خوانده می‌شود، پس ویرایش متن به تغییر هزار کپی متن نیاز ندارد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هنوز باید حذف پست و کش مدیریت شود؛ کاهش تکرار متن همهٔ هزینهٔ نگهداری timeline را حذف نمی‌کند.</p>
+</div></div>
+    <div class="en"><p>Because text, likes and profile pictures change fast and must always show the latest value; denormalizing them costs space. At read time IDs are hydrated; that parallelizes well and blocks no scale.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۷. star schema چیست و fact/dimension یعنی چه؟</span><span class="en">7. What is a star schema? What are facts and dimensions?</span></summary>
+    <div class="fa"><p>در طرحِ ستاره‌ای، جدولِ واقعیت رویداد و مقدارهای قابل‌محاسبه را نگه می‌دارد؛ جدول‌های بُعد اطلاعاتِ توصیفیِ آن‌ها را دارند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: Fact و dimension روی یک فروش</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> قلم فروش شامل <code dir="ltr">product_id=7, store_id=3, amount=200</code> است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> جدول fact مبلغ و کلیدها را دارد؛ dimension محصول نام و دسته‌بندی را می‌دهد؛ join برای جمع فروش به تفکیک دسته اجرا می‌شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> در OBT نام دسته در ردیف‌های فروش تکرار می‌شود؛ خواندن ساده‌تر می‌شود، ولی تغییر و معنای تاریخچه باید مدیریت شود.</p>
+</div></div>
+    <div class="en"><p>A fact table at the center, each row one timestamped event (e.g. a purchase); dimension tables explain the who/what/where/when. “Star” comes from the rays around the central table; snowflake splits dimensions into sub-dimensions, OBT denormalizes everything into one big table.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۸. schema-on-read در برابر schema-on-write؟</span><span class="en">8. Schema-on-read vs schema-on-write?</span></summary>
+    <div class="fa"><p>در <span class="ltr">schema-on-write</span>، ساختار پیش از ثبت بررسی می‌شود؛ در <span class="ltr">schema-on-read</span>، خواننده ساختار را هنگامِ استفاده تفسیر می‌کند. روشِ دوم هم به قراردادِ داده نیاز دارد.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: اعتبارسنجی در نوشتن یا خواندن</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> منبعی <code dir="ltr">age=&quot;unknown&quot;</code> می‌فرستد، اما گزارش میانگین سن عدد می‌خواهد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> schema-on-write می‌تواند رکورد نامعتبر را همان ورود رد کند؛ schema-on-read فایل خام را می‌پذیرد و هنگام تحلیل خطا یا مقدار نامعلوم را مدیریت می‌کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> نبود schema در ذخیره، نیاز به تفسیر و اعتبارسنجی را حذف نمی‌کند؛ فقط محل آن جابه‌جا می‌شود.</p>
+</div></div>
+    <div class="en"><p>The former is like dynamic type checking: implicit structure interpreted at read time; fits heterogeneous data. The latter is like static type checking: explicit schema enforced at write time. Format change reveals the difference: code coping with old documents vs heavy table migrations.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۹. کی سراغ مدل گراف برویم؟</span><span class="en">9. When should we reach for the graph model?</span></summary>
+    <div class="fa"><p>وقتی روابطِ متنوع و چندمرحله‌ای موضوعِ اصلیِ سؤال باشند، گراف نمایشِ طبیعی‌تری می‌شود. صرفِ وجودِ یک رابطه دلیلِ استفاده از گراف نیست.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: پیمایشِ دو رابطه</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> مریم به علی با رابطهٔ <code dir="ltr">KNOWS</code> وصل است و علی در شرکت <code dir="ltr">C7</code> کار می‌کند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پرسش «دوستان مریم در کدام شرکت‌اند؟» ابتدا یال دوستی و سپس یال اشتغال را طی می‌کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> وقتی عمق و نوع رابطه‌ها متغیر است، مدل گراف این مسیر را مستقیم بیان می‌کند؛ برای یک lookup ساده لزوماً لازم نیست.</p>
+</div></div>
+    <div class="en"><p>When many-to-many relationships abound and queries must traverse multiple hops, or when varied object types must share one model. Being pattern-oriented makes graphs highly evolvable.</p></div>
+  </details>
+  <details><summary><span class="fa">۱۰. property graph از چه ساخته شده؟</span><span class="en">10. What is a property graph made of?</span></summary>
+    <div class="fa"><p><span class="ltr">Property</span> <span class="ltr">graph</span> گره‌های دارای شناسه، برچسب و ویژگی و یال‌های دارای مقصد، نوع و ویژگی دارد. جهتِ یال و مشخصاتِ مدل در معنای رابطه اثر دارند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: ویژگی روی گره یا یال</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> گره‌های <code dir="ltr">Person:17</code> و <code dir="ltr">Company:7</code> داریم و شروع همکاری سال <code dir="ltr">2020</code> است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> در property graph، یال <code dir="ltr">WORKS_AT</code> ویژگی <code dir="ltr">since=2020</code> دارد؛ در triple store رابطه‌ها به subject، predicate و object بیان می‌شوند و مشخصات رابطه مدل‌سازی اضافه می‌خواهد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> زمان شروع به رابطه تعلق دارد، نه به همهٔ شغل‌های شخص یا همهٔ کارکنان شرکت.</p>
+</div></div>
+    <div class="en"><p>Vertex: id, label, properties, in/out edges. Edge: id, tail and head vertices, relationship label, properties. Equivalent to two relational tables with indexes on both ends.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۱. چرا همان گراف را در SQL نگه نداریم؟</span><span class="en">11. Why not keep the same graph in SQL?</span></summary>
+    <div class="fa"><p>گراف را می‌توان در جدول هم نگه داشت. مسئله، راحتیِ بیان و اجرای پیمایشِ چندمرحله‌ای و متغیر است؛ <span class="ltr">SQL</span> بازگشتی نیز راهی برای این کار دارد.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: گراف در جدول هم ممکن است</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> جدول <code dir="ltr">edges(from_id,to_id,type)</code> یال‌های دوستی را نگه می‌دارد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> برای دو گام می‌توان جدول را به خودش join کرد؛ برای عمق متغیر از query بازگشتی یا موتور گراف استفاده می‌شود و هزینه با دادهٔ واقعی سنجیده می‌شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> رابطه‌ای بودن مانع ذخیرهٔ گراف نیست؛ تفاوت در راحتی بیان مسیر، ایندکس و طرح اجرای پیمایش است.</p>
+</div></div>
+    <div class="en"><p>We can, but each edge means a join and traversal needs a variable number of joins; that is why a 4-line Cypher query becomes ~31 lines of SQL with WITH RECURSIVE.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۲. SPARQL و Datalog چه فرقی با Cypher دارند؟</span><span class="en">12. How do SPARQL and Datalog differ from Cypher?</span></summary>
+    <div class="fa"><p><span class="ltr">Cypher</span> الگوی گرافِ ویژگی‌دار را بیان می‌کند؛ <span class="ltr">SPARQL</span> الگوی سه‌تایی‌های <span class="ltr">RDF</span> را؛ <span class="ltr">Datalog</span> نتیجه را با قواعدِ منطقی، از جمله قواعدِ بازگشتی، تعریف می‌کند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: همان مسیر با زبان گراف</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> گراف شامل مریم، دوستانش و شرکت‌های آن‌هاست.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> Cypher می‌تواند الگویی مانند <code dir="ltr">(p)-[:KNOWS]-&gt;(f)-[:WORKS_AT]-&gt;(c)</code> را match کند و نام شرکت را برگرداند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> موتور نحوهٔ پیمایش را انتخاب می‌کند؛ SPARQL روی الگوی triple و Datalog با قواعد رابطه‌ای همین نوع مسئله را صورت‌بندی می‌کنند.</p>
+</div></div>
+    <div class="en"><p>SPARQL works over RDF triples, and since attributes and edges are one, its pattern is uniform. Datalog defines rules instead of patterns and builds virtual tables; rules can recurse, making it very powerful for complex queries.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۳. GraphQL دقیقاً چه می‌کند و چرا محدود است؟</span><span class="en">13. What exactly does GraphQL do, and why is it limited?</span></summary>
+    <div class="fa"><p><span class="ltr">GraphQL</span> قراردادِ <span class="ltr">API</span> است که کلاینت با آن فیلدهای موردنیازِ پاسخ را انتخاب می‌کند. اسمش به‌معنی موتورِ پایگاهِ گراف نیست؛ قابلیتِ پرسش به اسکیمای <span class="ltr">API</span> و <span class="ltr">resolver</span>ها محدود است.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: GraphQL و N+1 پشت API</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> کلاینت <code dir="ltr">people { name jobs { title } }</code> می‌خواهد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> GraphQL شکل پاسخ API را مشخص می‌کند؛ resolver بد ممکن است برای هر فرد یک query بزند و resolver دسته‌ای این تعداد را کم کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> GraphQL نوع پایگاه داده یا بهینه بودن join را تعیین نمی‌کند؛ رفتار واقعی به اجرای resolver بستگی دارد.</p>
+</div></div>
+    <div class="en"><p>The client dictates the exact JSON response shape (only the UI’s needed fields). It is limited because requests come from untrusted sources: no recursive queries or arbitrary conditions, so no DoS. Joins only follow the declared schema, and it runs over any database.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۴. event sourcing یعنی چه و چرا رویدادها را به زمان گذشته نام‌گذاری می‌کنیم؟</span><span class="en">14. What is event sourcing, and why past-tense event names?</span></summary>
+    <div class="fa"><p>در <span class="ltr">Event</span> <span class="ltr">Sourcing</span>، تغییرِ پذیرفته‌شده به‌شکل رویداد ذخیره می‌شود و وضعیت از آن ساخته می‌شود. نامِ گذشته نشان می‌دهد اتفاق رخ داده، نه اینکه درخواستِ انجامِ آن ارسال شده است.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: رویداد و نمای خواندن</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> برای سفارش ۴۲ رویدادهای <code dir="ltr">OrderPlaced</code> و سپس <code dir="ltr">OrderCancelled</code> با شمارهٔ ترتیب ثبت می‌شوند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> projector آن‌ها را به‌ترتیب اعمال می‌کند و ردیف خواندنی <code dir="ltr">status=cancelled</code> می‌سازد؛ command مسیر اعتبارسنجی و ثبت رویداد را دارد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> Event Sourcing تاریخچه را مرجع می‌گیرد؛ CQRS مسیر ثبت فرمان و نمایش نتیجه را جدا می‌کند و الزاماً نیازمند هم نیستند.</p>
+</div></div>
+    <div class="en"><p>Every state change is recorded as an immutable event in an append-only log. Past tense because an event reports something that happened; canceling a booking doesn’t void the earlier event — it is a new event.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۵. CQRS چه چیزی را جدا می‌کند؟</span><span class="en">15. What does CQRS separate?</span></summary>
+    <div class="fa"><p><span class="ltr">CQRS</span> مدلِ ثبتِ تغییر و مدلِ خواندن را جدا می‌کند. مدلِ خواندن می‌تواند برای پرس‌وجو آماده شود؛ استفاده از لاگِ رویداد شرطِ الزامیِ همهٔ پیاده‌سازی‌های <span class="ltr">CQRS</span> نیست.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: رویداد و نمای خواندن</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> برای سفارش ۴۲ رویدادهای <code dir="ltr">OrderPlaced</code> و سپس <code dir="ltr">OrderCancelled</code> با شمارهٔ ترتیب ثبت می‌شوند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> projector آن‌ها را به‌ترتیب اعمال می‌کند و ردیف خواندنی <code dir="ltr">status=cancelled</code> می‌سازد؛ command مسیر اعتبارسنجی و ثبت رویداد را دارد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> Event Sourcing تاریخچه را مرجع می‌گیرد؛ CQRS مسیر ثبت فرمان و نمایش نتیجه را جدا می‌کند و الزاماً نیازمند هم نیستند.</p>
+</div></div>
+    <div class="en"><p>It separates the write path (the optimized log) from the read path (materialized views). Views are reproducible: replaying the same events rebuilds them.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۶. بزرگ‌ترین چالش‌های event sourcing؟</span><span class="en">16. The biggest event-sourcing challenges?</span></summary>
+    <div class="fa"><p>بازتولیدِ نتیجه به نسخهٔ رویداد و منطقِ پردازش وابسته است. ورودیِ بیرونی، حذفِ داده و اثرهای جانبیِ تکرارشونده هم باید جدا مدیریت شوند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: Replay نباید پیامک تاریخی بفرستد</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> projector گزارش، رویداد <code dir="ltr">OrderPlaced</code> سال گذشته را دوباره می‌خواند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> مسیر بازسازی فقط جدول گزارش را می‌نویسد؛ ارسال پیامک مسیرِ اثر جانبی جدا با شناسهٔ یکتا و سیاست جلوگیری از تکرار دارد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> بازپخش محاسبه با تکرارِ اثر بیرونی فرق دارد؛ کپی کردن همهٔ handlerهای زنده در replay خطرناک است.</p>
+</div></div>
+    <div class="en"><p>Deterministic processing (outside data like exchange rates must live inside events), immutability vs personal-data erasure rights (crypto-shredding), and never repeating side effects on replay.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۷. DataFrame چه جایگاهی دارد؟</span><span class="en">17. Where do DataFrames fit?</span></summary>
+    <div class="fa"><p><span class="ltr">DataFrame</span> نمایشِ جدولی برای تبدیل و تحلیل است و با مدل‌های عددیِ یادگیریِ ماشین هم ترکیب می‌شود. عملیاتِ مشابه در اجرای محلی و توزیع‌شده هزینه و رفتارِ یکسانی ندارند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: جدول در برابر آرایه</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فروش روزانه ستون‌های <code dir="ltr">day, amount</code> دارد؛ تصویر رنگی اندازهٔ <code dir="ltr">256×256×3</code> دارد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> روی DataFrame، فیلتر روز و جمع مبلغ اجرا می‌شود؛ روی تصویر، محاسبه با اندیس محورهای ارتفاع، عرض و رنگ انجام می‌شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هر دو دادهٔ ساخت‌یافته‌اند، اما عملیات و معنای محورهایشان متفاوت است؛ تبدیل کورکورانه مدل را نامفهوم می‌کند.</p>
+</div></div>
+    <div class="en"><p>A bridge between the relational world and ML matrices: join-like and group-by operators, manipulated via commands, able to turn data into numeric sparse matrices (one-hot for categorical data).</p></div>
+  </details>
+
+  <h3 id="s6-3"><span class="fa">۶.۳ اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">6.3 Common interview mistakes</span></h3>
+  <div class="fa"><ul>
+    <li>گفتن «SQL قدیمی شده» یا «NoSQL بهتر است» بدون بحثِ شکلِ رابطه‌ها و الگوی دسترسی.</li>
+    <li>فراموش کردن اینکه دنرمال‌سازی = دادهٔ مشتق‌شده و نیازمند به‌روزرسانیِ کپی‌ها.</li>
+    <li>ادعای «join ذاتاً کند است» — مثال تایم‌لاین خلافش را نشان می‌دهد.</li>
+    <li>درک نکردن تفاوت schema-on-read و schema-on-write در تکامل اسکیما.</li>
+    <li>یکی دانستن GraphQL با گراف، یا ندانستن محدودیت‌های آگاهانهٔ آن.</li>
+    <li>توصیف event sourcing بدون اشاره به قطعیت (determinism) و بازتولیدپذیری نماها.</li>
+  </ul></div>
+  <div class="en"><ul>
+    <li>Saying “SQL is outdated” or “NoSQL is better” without discussing relationship shape and access pattern.</li>
+    <li>Forgetting that denormalization = derived data needing copy updates.</li>
+    <li>Claiming “joins are inherently slow” — the timeline example disproves it.</li>
+    <li>Missing the schema-on-read vs schema-on-write difference in schema evolution.</li>
+    <li>Confusing GraphQL with graphs, or missing its deliberate limits.</li>
+    <li>Describing event sourcing without determinism and view reproducibility.</li>
+  </ul></div>
+
+  <h3 id="s6-4"><span class="fa">۶.۴ چک‌لیست مرور ۵ دقیقه‌ای قبل از مصاحبه</span><span class="en">6.4 Five-minute pre-interview checklist</span></h3>
+  <div class="fa"><ol>
+    <li>سه تفاوت کلیدی مدل سندی و رابطه‌ای + کی کدام را انتخاب کنیم.</li>
+    <li>جدول نرمال‌شده در برابر دنرمال‌شده (نوشتن/خواندن/سازگاری).</li>
+    <li>تعریف star schema: fact و dimension.</li>
+    <li>ساختار property graph + یک جمله دربارهٔ Cypher در برابر SQL بازگشتی.</li>
+    <li>سه جمله دربارهٔ event sourcing، CQRS و بازتولیدپذیری.</li>
+    <li>قاعدهٔ انتخاب مدل: اول شکل رابطه‌ها و الگوی دسترسی.</li>
+  </ol></div>
+  <div class="en"><ol>
+    <li>Three key document-vs-relational differences + when to pick each.</li>
+    <li>Normalized vs denormalized table (writes/reads/consistency).</li>
+    <li>Star schema definition: fact and dimension.</li>
+    <li>Property-graph structure + one sentence on Cypher vs recursive SQL.</li>
+    <li>Three sentences on event sourcing, CQRS and reproducibility.</li>
+    <li>Model-selection rule: relationship shape and access pattern first.</li>
+  </ol></div>
+</section>
+
+<!-- ============ SECTION 7 ============ -->
+<section id="s7">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۷</span><span class="en">7</span></span> <span class="fa">تمرین‌های مصاحبه و آزمایشگاه</span><span class="en">Interview exercises and hands-on labs</span></h2>
+<p class="exercise-section-note"><span class="fa">این تمرین‌ها برای مسیر Backend / Distributed Systems در ۱۴ اکتبر ۲۰۲۶ بازبینی شدند. سطح مربوط به نسخهٔ مصاحبه‌ای است؛ زمان آزمایشگاه جداست.</span><span class="en">Reviewed on 14 October 2026 for Backend / Distributed Systems. Level refers to the interview brief; full-lab time is separate.</span> <a href="../exercise-audit.html"><span class="fa">روش ارزیابی و مسیر مطالعه</span><span class="en">Method and study path</span></a></p>
+  <article class="exercise-block" id="exercise-1" data-reviewed-exercise="1">
+<h3><span class="fa">تمرین ۱ — مدل‌سازی کاتالوگ فروشگاه</span><span class="en">Exercise 1 — modelling a shop catalog</span></h3>
+<div class="exercise-labels"><span class="exercise-label level-senior"><span class="fa">L2 · Senior</span><span class="en">L2 · Senior</span></span><span class="exercise-label priority-core"><span class="fa">اولویت اصلی</span><span class="en">Core priority</span></span><span class="exercise-label"><span class="fa">40 دقیقه بحث</span><span class="en">40 min discussion</span></span></div>
+<p class="exercise-verdict"><span class="fa">مدل‌سازی بر اساس query و constraint ارزشمند است؛ پاسخ «SQL یا NoSQL» بدون workload ضعیف است.</span><span class="en">Model choices should follow queries, cardinality and constraints.</span></p>
+<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">کاتالوگ محصول، برند، دسته‌بندی چندگانه و نظر کاربران را با مدل رابطه‌ای و سندی طراحی کن. سه query پرتکرار، pagination، رشد نظرات، uniqueness و تغییر برند را مشخص کن. schema و index را رسم کن و یک انتخاب متناسب با بار داشته باش.</span><span class="en">Model products, brands, multiple categories and unbounded reviews in relational and document forms. Specify three queries, pagination, indexes and uniqueness; justify a workload-specific choice.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">cardinality، FK و index روشن‌اند</span><span class="en">Cardinality, keys and indexes</span></li><li><span class="fa">آرایهٔ بی‌حد نظرات را در سند جا نمی‌دهد</span><span class="en">Bounded document growth</span></li><li><span class="fa">انتخاب را با query و consistency توجیه می‌کند</span><span class="en">Query-driven consistency choices</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">اگر محصول در چند دسته باشد و نظرات میلیون‌تایی شوند مدل چگونه تغییر می‌کند؟</span><span class="en">How does the model change when a product has multiple categories and millions of reviews?</span></p></details>
+<details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۱–۲ ساعت</span><span class="en">Extended hands-on laboratory · estimated 1–2 hours</span></summary><div class="fa"><p>
+      یک فروشگاه اینترنتی با محصول، دسته‌بندی، برند و نظر کاربران را در نظر بگیر. دو مدل‌سازی بنویس: یکی رابطه‌ای (با جدول‌های لازم و کلیدها)
+      و یکی سندی (JSON). برای هرکدام بگو: چه کوئری‌هایی ساده‌اند، چه کوئری‌هایی نیاز به join یا کد اضافه دارند، و کدام را انتخاب می‌کنی — چرا؟
+    </p></div><div class="en"><p>
+      Take an online shop with products, categories, brands and user reviews. Write two modellings: one relational (with tables and keys)
+      and one document-based (JSON). For each, say: which queries are simple, which need joins or extra code, and which you would pick — why?
+    </p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
+<p class="exercise-evidence"><a href="../exercise-audit.html#ch3-ex1"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-1"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://www.amazon.jobs/content/en/how-we-hire/sde-iii-interview-prep" target="_blank" rel="noopener">Amazon · SDE III interview preparation</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+</article>
+  <article class="exercise-block" id="exercise-2" data-reviewed-exercise="2">
+<h3><span class="fa">تمرین ۲ — تصمیم نرمال‌سازی</span><span class="en">Exercise 2 — the normalization call</span></h3>
+<div class="exercise-labels"><span class="exercise-label level-foundation"><span class="fa">L1 · پایه</span><span class="en">L1 · Foundations</span></span><span class="exercise-label priority-core"><span class="fa">اولویت اصلی</span><span class="en">Core priority</span></span><span class="exercise-label"><span class="fa">20 دقیقه بحث</span><span class="en">20 min discussion</span></span></div>
+<p class="exercise-verdict"><span class="fa">نمونهٔ خوبی برای normalization است؛ نسخهٔ فعلی برای لول بالا باید به update propagation و cache invalidation برسد.</span><span class="en">Useful foundations; propagation failures provide the senior follow-up.</span></p>
+<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">لوگوی یک برند روی صد هزار محصول دیده می‌شود. reference، embedding و read model مشتق را مقایسه کن. هزینهٔ خواندن، fan-out تغییر، stale data و failure میان batch update را بیان کن؛ انتخابت را با حد تازگی قابل قبول توجیه کن.</span><span class="en">Compare references, embedding and a derived read model for one brand logo across 100,000 products. Analyze read cost, update fan-out, partial failure, staleness and versioning.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">کپی را بدون مسیر update پیشنهاد نمی‌دهد</span><span class="en">Copy propagation</span></li><li><span class="fa">خواندن سریع را با هزینه نوشتن مبادله می‌کند</span><span class="en">Read/write cost trade-off</span></li><li><span class="fa">منبع حقیقت و نسخهٔ logo را مشخص می‌کند</span><span class="en">Authority and versioning</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">با شکست به‌روزرسانی در نیمهٔ محصولات چه چیزی را retry می‌کنی؟</span><span class="en">What do you retry when a logo update fails halfway through the products?</span></p></details>
+<details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳۰–۶۰ دقیقه</span><span class="en">Extended hands-on laboratory · estimated 30–60 minutes</span></summary><div class="fa"><p>
+      در همان فروشگاه، لوگوی برند در صفحهٔ محصول نمایش داده می‌شود. اگر لوگو عوض شود چه اتفاقی می‌افتد؟
+      دو طرح بده (کپی لوگو در هر محصول، در برابر جدول برند با ارجاع) و هر کدام را با هزینهٔ خواندن/نوشتن و ریسک ناسازگاری بسنج.
+    </p></div><div class="en"><p>
+      In the same shop, the brand logo shows on the product page. What happens if the logo changes?
+      Sketch two designs (logo copied into each product vs a referenced brand table) and weigh each by read/write cost and inconsistency risk.
+    </p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
+<p class="exercise-evidence"><a href="../exercise-audit.html#ch3-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a> · <a href="https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html" target="_blank" rel="noopener">Debezium · outbox event router</a></p>
+</article>
+  <article class="exercise-block" id="exercise-3" data-reviewed-exercise="3">
+<h3><span class="fa">تمرین ۳ — event sourcing برای رزرو سینما</span><span class="en">Exercise 3 — event sourcing for cinema booking</span></h3>
+<div class="exercise-labels"><span class="exercise-label level-senior"><span class="fa">L2 · Senior</span><span class="en">L2 · Senior</span></span><span class="exercise-label priority-core"><span class="fa">اولویت اصلی</span><span class="en">Core priority</span></span><span class="exercise-label"><span class="fa">40 دقیقه بحث</span><span class="en">40 min discussion</span></span></div>
+<p class="exercise-verdict"><span class="fa">رزرو و replay سناریوی قوی‌ای است؛ نام‌گذاری event به‌تنهایی کافی نیست و concurrency قید صندلی مهم‌تر است.</span><span class="en">Reservation invariants matter more than naming events.</span></p>
+<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">رزرو سینما را با event log و سه projection وضعیت صندلی، فروش و بلیت طراحی کن. دو درخواست هم‌زمان برای یک صندلی، انقضای hold، لغو و اصلاح رزرو را توضیح بده. invariant را در write path اعمال کن و replay را از ارسال دوبارهٔ بلیت جدا کن.</span><span class="en">Design cinema reservations with a log and seat, sales and ticket projections. Handle concurrent requests, hold expiry, cancellation and corrections. Enforce seat exclusivity at the write boundary and prevent replayed external effects.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">یک صندلی دو رزرو تأییدشده ندارد</span><span class="en">Seat exclusivity</span></li><li><span class="fa">command و event و compensating event را جدا می‌کند</span><span class="en">Commands versus events</span></li><li><span class="fa">projection و اثر بیرونی idempotent هستند</span><span class="en">Idempotent projections and side effects</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">رویداد SeatHeld دیر برسد ولی SeatReleased قبلاً پردازش شده باشد چه می‌کنی؟</span><span class="en">What happens if SeatHeld arrives after SeatReleased has already been processed?</span></p></details>
+<details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۲–۴ ساعت</span><span class="en">Extended hands-on laboratory · estimated 2–4 hours</span></summary><div class="fa"><p>
+      برای سیستم رزرو صندلی سینما: فهرست رویدادها را بنویس (نام‌ها به زمان گذشته)، سه projection تعریف کن (وضعیت صندلی‌ها، گزارش فروش، چاپ بلیت)،
+      و بگو اگر کاربری اشتباه رزرو کرد چطور با یک رویداد تازه اصلاحش می‌کنی. یک حالت هم پیدا کن که پردازشِ دوباره در آن خطرناک باشد.
+    </p></div><div class="en"><p>
+      For a cinema seat-booking system: list the events (past-tense names), define three projections (seat status, sales report, ticket printing),
+      and say how a mistaken booking is fixed with a fresh event. Also find one case where replaying is dangerous.
+    </p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
+<p class="exercise-evidence"><a href="../exercise-audit.html#ch3-ex3"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-3"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/" target="_blank" rel="noopener">AWS · safe retries with idempotent APIs</a> · <a href="https://www.amazon.jobs/content/en/how-we-hire/sde-iii-interview-prep" target="_blank" rel="noopener">Amazon · SDE III interview preparation</a></p>
+</article>
+  <div class="doc-nav">
+    <a href="../ch2-nonfunctional/index.html"><span class="fa">→ فصل ۲: تعریف نیازمندی‌های غیرعملکردی</span><span class="en">→ Chapter 2: Defining nonfunctional requirements</span></a>
+    <a href="../ch4-storage-retrieval/index.html"><span class="fa">فصل ۴: ذخیره‌سازی و بازیابی ←</span><span class="en">Chapter 4: Storage and retrieval →</span></a>
+  </div>
+</section>
+
+</main>
+</div>
+
+<footer class="footer">
+  <div class="giant">DDIA<em>·</em>03</div>
+  <p class="small">
+    <span class="fa">بر پایه «Designing Data-Intensive Applications، ویرایش ۲» · فصل ۳ · نمودارها با Archify</span>
+    <span class="en">Based on “Designing Data-Intensive Applications, 2nd Edition” · Chapter 3 · Diagrams with Archify</span>
+  </p>
+</footer>
+
+<script src="../assets/site.js"></script>
+</body>
+</html>

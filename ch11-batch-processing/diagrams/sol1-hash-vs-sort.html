@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hash vs sort vs sketch: pick by working set — DDIA Chapter 11 Solution 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Decision table: hash aggregation versus external sort versus approximate sketch across three regimes">
+<title>Same top-K, three regimes</title>
+<text x="620" y="50" font-size="30" font-weight="900" text-anchor="middle">Same top-K, three regimes</text>
+<text x="620" y="84" font-size="16" text-anchor="middle">pick by working set and exactness, never by habit or a universal threshold</text>
+<g font-size="15" font-weight="700" text-anchor="middle">
+<rect x="40" y="110" width="250" height="48" fill="#c3ceff"/><text text-anchor="middle" x="165" y="140">regime</text>
+<rect x="290" y="110" width="310" height="48" fill="#c3ceff"/><text text-anchor="middle" x="445" y="140">hash aggregation</text>
+<rect x="600" y="110" width="300" height="48" fill="#c3ceff"/><text text-anchor="middle" x="750" y="140">external sort</text>
+<rect x="900" y="110" width="300" height="48" fill="#c3ceff"/><text text-anchor="middle" x="1050" y="140">sketch: approximate</text>
+</g>
+<g font-size="14" text-anchor="middle">
+<rect x="40" y="166" width="250" height="120" fill="#fffdf7"/>
+<text text-anchor="middle" x="165" y="214" font-weight="800">working set fits</text>
+<text text-anchor="middle" x="165" y="240">distinct keys in RAM</text>
+<rect x="290" y="166" width="310" height="120" fill="#bfe6c9"/>
+<text text-anchor="middle" x="445" y="214" font-weight="800">WINS: one pass</text>
+<text text-anchor="middle" x="445" y="240">exact, fastest here</text>
+<rect x="600" y="166" width="300" height="120" fill="#fffdf7"/>
+<text text-anchor="middle" x="750" y="214" font-weight="800">works</text>
+<text text-anchor="middle" x="750" y="240">pays extra I/O</text>
+<rect x="900" y="166" width="300" height="120" fill="#fffdf7"/>
+<text text-anchor="middle" x="1050" y="214" font-weight="800">overkill</text>
+<text text-anchor="middle" x="1050" y="240">exactness is cheap here</text>
+<rect x="40" y="294" width="250" height="120" fill="#fffdf7"/>
+<text text-anchor="middle" x="165" y="342" font-weight="800">working set exceeds</text>
+<text text-anchor="middle" x="165" y="368">RAM: must spill</text>
+<rect x="290" y="294" width="310" height="120" fill="#ffcfb8"/>
+<text text-anchor="middle" x="445" y="342" font-weight="800">spills, or OOMs</text>
+<text text-anchor="middle" x="445" y="368">death is not slowness</text>
+<rect x="600" y="294" width="300" height="120" fill="#bfe6c9"/>
+<text text-anchor="middle" x="750" y="342" font-weight="800">WINS: finishes</text>
+<text text-anchor="middle" x="750" y="368">degrades with I/O</text>
+<rect x="900" y="294" width="300" height="120" fill="#fffdf7"/>
+<text text-anchor="middle" x="1050" y="342" font-weight="800">option</text>
+<text text-anchor="middle" x="1050" y="368">if error is allowed</text>
+<rect x="40" y="422" width="250" height="120" fill="#fffdf7"/>
+<text text-anchor="middle" x="165" y="470" font-weight="800">top-100 approx</text>
+<text text-anchor="middle" x="165" y="496">error budget given</text>
+<rect x="290" y="422" width="310" height="120" fill="#fffdf7"/>
+<text text-anchor="middle" x="445" y="470" font-weight="800">sample first</text>
+<text text-anchor="middle" x="445" y="496">then count exactly</text>
+<rect x="600" y="422" width="300" height="120" fill="#fffdf7"/>
+<text text-anchor="middle" x="750" y="470" font-weight="800">possible</text>
+<text text-anchor="middle" x="750" y="496">stop after top-K</text>
+<rect x="900" y="422" width="300" height="120" fill="#bfe6c9"/>
+<text text-anchor="middle" x="1050" y="470" font-weight="800">WINS: tiny memory</text>
+<text text-anchor="middle" x="1050" y="496">bounded error only</text>
+</g>
+<text x="620" y="584" font-size="14" text-anchor="middle">teaching demo: 200k lines, 19,782 distinct, 10 spilled runs, identical top-5 on both paths</text>
+<text x="620" y="612" font-size="14" text-anchor="middle">rule: measure your cap, your disk, your cardinality, then choose; no universal URL count exists</text>
+<text x="620" y="640" font-size="14" text-anchor="middle">legend: green wins the row, pink fails or risks failing, white merely works</text>
+</svg>
+</div>
+</body>
+</html>

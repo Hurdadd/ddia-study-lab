@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>State and Streams Are Two Sides of the Same Coin — Duality and Log Compaction</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .cls-t{font:700 14px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .edge-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .edge-lbl-c{font:700 12px ui-monospace,Menlo,monospace; fill:#93c5fd}
+  .quote{font:italic 13px system-ui,sans-serif; fill:#cfe3ff}
+  .qattr{font:11.5px system-ui,sans-serif; fill:#a7b3cc}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="A changelog column on the left integrates over time into the application state table on the right, and the state differentiates over time back into a changelog; below, log compaction keeps only the latest value per key">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+    <marker id="arrb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#93c5fd"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="32" text-anchor="middle">State and Streams Are Two Sides of the Same Coin (Figure 12-7)</text>
+  <text class="sub" x="620" y="54" text-anchor="middle">Chapter 12 — the changelog and the table are the same data, viewed at different points in time</text>
+
+  <!-- ======================= LEFT : event stream / changelog ======================= -->
+  <g>
+    <rect x="40" y="76" width="390" height="28" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="235" y="95" text-anchor="middle">event stream / changelog</text>
+    <rect x="40" y="104" width="390" height="236" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <rect x="56" y="114" width="358" height="26" rx="6" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+    <text class="attr" x="68" y="132">offset 0 · (mew, 12)</text>
+    <rect x="56" y="148" width="358" height="26" rx="6" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+    <text class="attr" x="68" y="166">offset 1 · (purr, 3)</text>
+    <rect x="56" y="182" width="358" height="26" rx="6" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+    <text class="attr" x="68" y="200">offset 2 · (mew, 17)</text>
+    <rect x="56" y="216" width="358" height="26" rx="6" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+    <text class="attr" x="68" y="234">offset 3 · (scratch, 5)</text>
+    <rect x="56" y="250" width="358" height="26" rx="6" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+    <text class="attr" x="68" y="268">offset 4 · (mew, 21)</text>
+    <rect x="56" y="284" width="358" height="26" rx="6" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+    <text class="attr" x="68" y="302">offset 5 · …</text>
+    <text class="small" x="56" y="330">«append-only · immutable · replayable»</text>
+  </g>
+
+  <!-- ======================= RIGHT : application state ======================= -->
+  <g>
+    <rect x="810" y="76" width="390" height="28" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="1005" y="95" text-anchor="middle">application state</text>
+    <rect x="810" y="104" width="390" height="236" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <rect x="826" y="114" width="358" height="26" rx="6" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+    <text class="attr" x="838" y="132">key · latest value</text>
+    <rect x="826" y="148" width="358" height="26" rx="6" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+    <text class="attr" x="838" y="166">mew · 21</text>
+    <rect x="826" y="182" width="358" height="26" rx="6" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+    <text class="attr" x="838" y="200">purr · 3</text>
+    <rect x="826" y="216" width="358" height="26" rx="6" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+    <text class="attr" x="838" y="234">scratch · 5</text>
+    <rect x="826" y="250" width="358" height="26" rx="6" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+    <text class="attr" x="838" y="268">reads: O(1) lookup by key</text>
+    <text class="small" x="826" y="330">«mutable · read-optimized · keyed lookup»</text>
+  </g>
+
+  <!-- ======================= duality arrows ======================= -->
+  <line x1="442" y1="170" x2="798" y2="170" stroke="#86efac" stroke-width="2.2" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="620" y="138" text-anchor="middle">integrate over time</text>
+  <text class="edge-lbl" x="620" y="155" text-anchor="middle">(apply events)</text>
+
+  <line x1="798" y1="282" x2="442" y2="282" stroke="#93c5fd" stroke-width="2.2" marker-end="url(#arrb)"/>
+  <text class="edge-lbl-c" x="620" y="252" text-anchor="middle">differentiate by time</text>
+  <text class="edge-lbl-c" x="620" y="269" text-anchor="middle">(change data capture)</text>
+
+  <!-- ======================= quoted note ======================= -->
+  <rect x="180" y="356" width="880" height="64" rx="10" fill="#1b2438" stroke="#2a3652" stroke-width="1.3"/>
+  <text class="quote" x="620" y="386" text-anchor="middle">“The log contains all the information there is; the database is just the end of the log.”</text>
+  <text class="qattr" x="620" y="408" text-anchor="middle">— after J. Gray &amp; A. Reuter, Transaction Processing: Concepts and Techniques (1992)</text>
+
+  <!-- ======================= log compaction strip ======================= -->
+  <rect x="40" y="436" width="1160" height="28" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="cls-t" x="620" y="455" text-anchor="middle">log compaction — keep only the latest value per key</text>
+  <rect x="40" y="464" width="1160" height="166" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+
+  <text class="edge-lbl" x="70" y="490">before — full history</text>
+  <rect x="70" y="498" width="250" height="18" rx="5" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+  <text class="small" x="82" y="511">offset 0 · (mew, 12)</text>
+  <rect x="70" y="519" width="250" height="18" rx="5" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+  <text class="small" x="82" y="532">offset 1 · (purr, 3)</text>
+  <rect x="70" y="540" width="250" height="18" rx="5" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+  <text class="small" x="82" y="553">offset 2 · (mew, 17)</text>
+  <rect x="70" y="561" width="250" height="18" rx="5" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+  <text class="small" x="82" y="574">offset 3 · (scratch, 5)</text>
+  <rect x="70" y="582" width="250" height="18" rx="5" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+  <text class="small" x="82" y="595">offset 4 · (mew, 21)</text>
+  <rect x="70" y="603" width="250" height="18" rx="5" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+  <text class="small" x="82" y="616">offset 5 · (purr, ⊥)</text>
+
+  <line x1="332" y1="528" x2="468" y2="528" stroke="#86efac" stroke-width="2" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="400" y="500" text-anchor="middle">compact</text>
+  <text class="edge-lbl" x="400" y="517" text-anchor="middle">keep latest per key</text>
+
+  <text class="edge-lbl" x="480" y="490">after — compaction</text>
+  <rect x="480" y="498" width="250" height="18" rx="5" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+  <text class="small" x="492" y="511">offset 0 · (mew, 21)</text>
+  <rect x="480" y="519" width="250" height="18" rx="5" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+  <text class="small" x="492" y="532">offset 1 · (scratch, 5)</text>
+  <rect x="480" y="540" width="250" height="18" rx="5" fill="#1b2438" stroke="#2a3652" stroke-width="1.1"/>
+  <text class="small" x="492" y="553">offset 2 · (purr, ⊥) tombstone</text>
+  <line x1="488" y1="549" x2="712" y2="549" stroke="#fda4af" stroke-width="1.6"/>
+
+  <text class="edge-lbl" x="770" y="490">why it matters</text>
+  <text class="attr" x="770" y="514">compacted log ≈ full copy of the database;</text>
+  <text class="attr" x="770" y="536">new derived systems can replay from offset 0</text>
+  <text class="attr" x="770" y="558">tombstones age out after a retention period</text>
+</svg>
+</div>
+</body>
+</html>

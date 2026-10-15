@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crash points x dedup outcome — DDIA Chapter 8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Crash point by dedup outcome matrix with the four guarantee boundaries">
+<title>Crash points x dedup outcome</title>
+<text x="620" y="56" font-size="30" font-weight="900" text-anchor="middle">Exactly-once effect: crash matrix + boundaries</text>
+<text x="620" y="90" font-size="16" text-anchor="middle">same three crashes with and without the idempotency table; ledger must apply each message once</text>
+<g>
+<rect x="30" y="112" width="330" height="44" rx="12" fill="#e8dfc9"/>
+<text x="52" y="140" font-size="16" font-weight="800">scenario</text>
+<rect x="370" y="112" width="400" height="44" rx="12" fill="#e8dfc9"/>
+<text x="570" y="140" font-size="16" font-weight="800" text-anchor="middle">WITHOUT dedup table</text>
+<rect x="780" y="112" width="430" height="44" rx="12" fill="#e8dfc9"/>
+<text x="995" y="140" font-size="16" font-weight="800" text-anchor="middle">WITH dedup table + commit-then-ACK</text>
+</g>
+<g>
+<rect x="30" y="164" width="330" height="50" rx="12" fill="#fffdf7"/>
+<text x="52" y="194" font-size="15" font-weight="800">crash 1: before commit</text>
+<rect x="370" y="164" width="400" height="50" rx="12" fill="#ffcfb8"/>
+<text x="570" y="194" font-size="15" font-weight="800" text-anchor="middle">RE-APPLIES, wasted work</text>
+<rect x="780" y="164" width="430" height="50" rx="12" fill="#bfe6c9"/>
+<text x="995" y="194" font-size="15" font-weight="800" text-anchor="middle">APPLIES ONCE on redelivery</text>
+</g>
+<g>
+<rect x="30" y="220" width="330" height="50" rx="12" fill="#fffdf7"/>
+<text x="52" y="250" font-size="15" font-weight="800">crash 2: commit, no ACK</text>
+<rect x="370" y="220" width="400" height="50" rx="12" fill="#ffcfb8"/>
+<text x="570" y="250" font-size="15" font-weight="800" text-anchor="middle">APPLIES TWICE</text>
+<rect x="780" y="220" width="430" height="50" rx="12" fill="#bfe6c9"/>
+<text x="995" y="250" font-size="15" font-weight="800" text-anchor="middle">DEDUP HIT, safe ACK</text>
+</g>
+<g>
+<rect x="30" y="276" width="330" height="50" rx="12" fill="#fffdf7"/>
+<text x="52" y="306" font-size="15" font-weight="800">crash 3: ACK, no cleanup</text>
+<rect x="370" y="276" width="400" height="50" rx="12" fill="#ffcfb8"/>
+<text x="570" y="306" font-size="15" font-weight="800" text-anchor="middle">APPLIES TWICE</text>
+<rect x="780" y="276" width="430" height="50" rx="12" fill="#bfe6c9"/>
+<text x="995" y="306" font-size="15" font-weight="800" text-anchor="middle">KEY STILL LIVE, dedup hit</text>
+</g>
+<g>
+<rect x="30" y="332" width="330" height="50" rx="12" fill="#fffdf7"/>
+<text x="52" y="362" font-size="15" font-weight="800">same key, new payload</text>
+<rect x="370" y="332" width="400" height="50" rx="12" fill="#ffcfb8"/>
+<text x="570" y="362" font-size="15" font-weight="800" text-anchor="middle">APPLIES EVIL 9999</text>
+<rect x="780" y="332" width="430" height="50" rx="12" fill="#bfe6c9"/>
+<text x="995" y="362" font-size="15" font-weight="800" text-anchor="middle">REJECT + alert, ledger safe</text>
+</g>
+<g>
+<rect x="30" y="388" width="330" height="50" rx="12" fill="#fffdf7"/>
+<text x="52" y="418" font-size="15" font-weight="800">replay past horizon</text>
+<rect x="370" y="388" width="400" height="50" rx="12" fill="#ffcfb8"/>
+<text x="570" y="418" font-size="15" font-weight="800" text-anchor="middle">RE-APPLIES</text>
+<rect x="780" y="388" width="430" height="50" rx="12" fill="#ffcfb8"/>
+<text x="995" y="418" font-size="15" font-weight="800" text-anchor="middle">RE-APPLIES: promise ended</text>
+</g>
+<g>
+<rect x="30" y="444" width="330" height="50" rx="12" fill="#fffdf7"/>
+<text x="52" y="474" font-size="15" font-weight="800">mail send + crash 2</text>
+<rect x="370" y="444" width="400" height="50" rx="12" fill="#ffcfb8"/>
+<text x="570" y="474" font-size="15" font-weight="800" text-anchor="middle">SENT TWICE</text>
+<rect x="780" y="444" width="430" height="50" rx="12" fill="#ffcfb8"/>
+<text x="995" y="474" font-size="15" font-weight="800" text-anchor="middle">SENT TWICE: at-least-once</text>
+</g>
+<g>
+<rect x="30" y="508" width="280" height="62" rx="12" fill="#d7e5f5"/>
+<text x="52" y="532" font-size="14" font-weight="800">LOCAL: ledger in txn</text>
+<text x="52" y="554" font-size="13">rolls back with it</text>
+<rect x="320" y="508" width="280" height="62" rx="12" fill="#d7e5f5"/>
+<text x="342" y="532" font-size="14" font-weight="800">TXN: key + effect atomic</text>
+<text x="342" y="554" font-size="13">UNIQUE on the key</text>
+<rect x="610" y="508" width="280" height="62" rx="12" fill="#f3e3c2"/>
+<text x="632" y="532" font-size="14" font-weight="800">EXTERNAL: mail outside</text>
+<text x="632" y="554" font-size="13">no rollback possible</text>
+<rect x="900" y="508" width="310" height="62" rx="12" fill="#f3e3c2"/>
+<text x="922" y="532" font-size="14" font-weight="800">HORIZON: keys expire 30d</text>
+<text x="922" y="554" font-size="13">ACK never deletes a key</text>
+</g>
+<text x="620" y="610" font-size="15" text-anchor="middle">6 applications for 3 messages without dedup (175 vs 350): luck is not safety</text>
+<text x="620" y="636" font-size="15" text-anchor="middle">make external receivers idempotent too, or the boundary leaks exactly-once</text>
+</svg>
+</div>
+</body>
+</html>

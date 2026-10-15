@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where the Time Goes — MapReduce vs a Dataflow Engine</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .band-h{font:700 14px system-ui,sans-serif; fill:#93c5fd}
+  .pill-t{font:700 13px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .bar-lbl{font:700 11.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .io-lbl{font:700 11.5px ui-monospace,Menlo,monospace; fill:#f1f5f9}
+  .barrier-lbl{font:700 11.5px ui-monospace,Menlo,monospace; fill:#fbbf24}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .callout{font:11.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .lgd{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="Two-band Gantt timeline comparing a MapReduce job, which writes intermediate files to the distributed filesystem between every stage, with a dataflow engine job, which pipelines operators and writes to storage only once at the end">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#a7b3cc"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="30" text-anchor="middle">Where the Time Goes — MapReduce vs a Dataflow Engine</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">one shared time axis · green bars are compute tasks · grey bars are durable writes to the filesystem</text>
+
+  <!-- legend -->
+  <g>
+    <rect x="330" y="68" width="22" height="14" rx="4" fill="#1b2438" stroke="#86efac" stroke-width="1.4"/>
+    <text class="lgd" x="360" y="80">compute task</text>
+    <rect x="483" y="68" width="22" height="14" rx="4" fill="#3a4459" stroke="#94a3b8" stroke-width="1.4"/>
+    <text class="lgd" x="513" y="80">durable write to DFS / object store</text>
+    <line x1="795" y1="64" x2="795" y2="86" stroke="#fbbf24" stroke-width="2" stroke-dasharray="7 6"/>
+    <text class="lgd" x="806" y="80">stage barrier</text>
+  </g>
+
+  <!-- time axis -->
+  <line x1="230" y1="104" x2="1192" y2="104" stroke="#a7b3cc" stroke-width="2" marker-end="url(#arr)"/>
+  <text class="small" x="1190" y="122" text-anchor="end">time &#8594;</text>
+  <text class="small" x="230" y="122">not to scale</text>
+
+  <!-- ============ BAND 1 : MapReduce ============ -->
+  <text class="band-h" x="60" y="148">&#9312; MapReduce — every stage finishes by writing files to the distributed filesystem</text>
+
+  <!-- map rows -->
+  <rect id="p-m1" x="60" y="158" width="150" height="24" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-m1" x="135" y="174" text-anchor="middle">map 1</text>
+  <rect id="b-m1" x="240" y="158" width="200" height="24" rx="8" fill="#1b2438" stroke="#86efac" stroke-width="1.6"/>
+  <text class="bar-lbl" data-bar="b-m1" x="340" y="174" text-anchor="middle">read shard &#8594; map()</text>
+
+  <rect id="p-m2" x="60" y="186" width="150" height="24" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-m2" x="135" y="202" text-anchor="middle">map 2</text>
+  <rect id="b-m2" x="240" y="186" width="200" height="24" rx="8" fill="#1b2438" stroke="#86efac" stroke-width="1.6"/>
+  <text class="bar-lbl" data-bar="b-m2" x="340" y="202" text-anchor="middle">read shard &#8594; map()</text>
+
+  <rect id="p-m3" x="60" y="214" width="150" height="24" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-m3" x="135" y="230" text-anchor="middle">map 3</text>
+  <rect id="b-m3" x="240" y="214" width="200" height="24" rx="8" fill="#1b2438" stroke="#86efac" stroke-width="1.6"/>
+  <text class="bar-lbl" data-bar="b-m3" x="340" y="230" text-anchor="middle">read shard &#8594; map()</text>
+
+  <!-- barrier 1 -->
+  <line x1="466" y1="150" x2="466" y2="386" stroke="#fbbf24" stroke-width="2" stroke-dasharray="7 6"/>
+  <text class="barrier-lbl" x="466" y="330" text-anchor="middle" transform="rotate(-90 466 330)">stage barrier</text>
+
+  <!-- intermediate DFS write -->
+  <rect id="p-dfs" x="60" y="242" width="150" height="24" rx="8" fill="#64748b" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-dfs" x="135" y="258" text-anchor="middle">DFS write</text>
+  <rect id="b-dfs" x="486" y="242" width="340" height="24" rx="8" fill="#3a4459" stroke="#94a3b8" stroke-width="1.6"/>
+  <text class="io-lbl" data-bar="b-dfs" x="656" y="258" text-anchor="middle">write intermediate to DFS (replicated, durable)</text>
+
+  <!-- barrier 2 -->
+  <line x1="852" y1="150" x2="852" y2="386" stroke="#fbbf24" stroke-width="2" stroke-dasharray="7 6"/>
+  <text class="barrier-lbl" x="852" y="330" text-anchor="middle" transform="rotate(-90 852 330)">stage barrier</text>
+
+  <!-- reduce rows -->
+  <rect id="p-r1" x="60" y="270" width="150" height="24" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-r1" x="135" y="286" text-anchor="middle">reduce 1</text>
+  <rect id="b-r1" x="872" y="270" width="140" height="24" rx="8" fill="#1b2438" stroke="#86efac" stroke-width="1.6"/>
+  <text class="bar-lbl" data-bar="b-r1" x="942" y="286" text-anchor="middle">reduce 1</text>
+
+  <rect id="p-r2" x="60" y="298" width="150" height="24" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-r2" x="135" y="314" text-anchor="middle">reduce 2</text>
+  <rect id="b-r2" x="872" y="298" width="140" height="24" rx="8" fill="#1b2438" stroke="#86efac" stroke-width="1.6"/>
+  <text class="bar-lbl" data-bar="b-r2" x="942" y="314" text-anchor="middle">reduce 2</text>
+
+  <rect id="p-r3" x="60" y="326" width="150" height="24" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-r3" x="135" y="342" text-anchor="middle">reduce 3</text>
+  <rect id="b-r3" x="872" y="326" width="140" height="24" rx="8" fill="#1b2438" stroke="#86efac" stroke-width="1.6"/>
+  <text class="bar-lbl" data-bar="b-r3" x="942" y="342" text-anchor="middle">reduce 3</text>
+
+  <!-- barrier 3 -->
+  <line x1="1038" y1="150" x2="1038" y2="386" stroke="#fbbf24" stroke-width="2" stroke-dasharray="7 6"/>
+  <text class="barrier-lbl" x="1038" y="330" text-anchor="middle" transform="rotate(-90 1038 330)">stage barrier</text>
+
+  <!-- final output -->
+  <rect id="p-out" x="60" y="354" width="150" height="24" rx="8" fill="#64748b" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-out" x="135" y="370" text-anchor="middle">output</text>
+  <rect id="b-out" x="1058" y="354" width="122" height="24" rx="8" fill="#3a4459" stroke="#94a3b8" stroke-width="1.6"/>
+  <text class="io-lbl" data-bar="b-out" x="1119" y="370" text-anchor="middle">write output</text>
+
+  <text class="callout" x="60" y="398">file-based I/O between every stage &#183; no pipelining &#183; new JVM per task &#183; sort happens between every map and reduce</text>
+
+  <!-- ============ BAND 2 : dataflow engine ============ -->
+  <text class="band-h" x="60" y="428">&#9313; Dataflow engine (Spark / Flink) — one job, one DAG: operators start as soon as their input is ready</text>
+
+  <!-- fused map+filter -->
+  <rect id="p-fus" x="60" y="438" width="150" height="24" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-fus" x="135" y="454" text-anchor="middle">map + filter</text>
+  <rect id="b-fus" x="240" y="438" width="330" height="24" rx="8" fill="#1b2438" stroke="#86efac" stroke-width="1.6"/>
+  <text class="bar-lbl" data-bar="b-fus" x="405" y="454" text-anchor="middle">map+filter fused into one task</text>
+
+  <!-- second map -->
+  <rect id="p-m2b" x="60" y="466" width="150" height="24" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-m2b" x="135" y="482" text-anchor="middle">map 2</text>
+  <rect id="b-m2b" x="240" y="466" width="330" height="24" rx="8" fill="#1b2438" stroke="#86efac" stroke-width="1.6"/>
+  <text class="bar-lbl" data-bar="b-m2b" x="405" y="482" text-anchor="middle">read shard &#8594; map()</text>
+
+  <!-- reducers overlap the map stage: no barrier -->
+  <rect id="p-d1" x="60" y="494" width="150" height="24" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-d1" x="135" y="510" text-anchor="middle">reduce 1</text>
+  <rect id="b-d1" x="430" y="494" width="400" height="24" rx="8" fill="#1b2438" stroke="#86efac" stroke-width="1.6"/>
+  <text class="bar-lbl" data-bar="b-d1" x="630" y="510" text-anchor="middle">reduce 1 &#183; starts as soon as input is ready</text>
+
+  <rect id="p-d2" x="60" y="522" width="150" height="24" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-d2" x="135" y="538" text-anchor="middle">reduce 2</text>
+  <rect id="b-d2" x="470" y="522" width="400" height="24" rx="8" fill="#1b2438" stroke="#86efac" stroke-width="1.6"/>
+  <text class="bar-lbl" data-bar="b-d2" x="670" y="538" text-anchor="middle">reduce 2</text>
+
+  <!-- intermediate state: thin bar, not a durable write -->
+  <rect id="p-int" x="60" y="550" width="150" height="24" rx="8" fill="#7c3aed" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-int" x="135" y="566" text-anchor="middle">intermediate</text>
+  <rect id="b-int" x="240" y="554" width="630" height="16" rx="6" fill="#161d2e" stroke="#86efac" stroke-width="1.4" stroke-dasharray="5 3"/>
+  <text class="bar-lbl" data-bar="b-int" x="555" y="565.5" text-anchor="middle">intermediate state: memory / local disk</text>
+
+  <!-- single durable write at the end -->
+  <rect id="p-out2" x="60" y="578" width="150" height="24" rx="8" fill="#64748b" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" data-bar="p-out2" x="135" y="594" text-anchor="middle">output</text>
+  <rect id="b-out2" x="900" y="578" width="280" height="24" rx="8" fill="#3a4459" stroke="#94a3b8" stroke-width="1.6"/>
+  <text class="io-lbl" data-bar="b-out2" x="1040" y="594" text-anchor="middle">final output &#8594; DFS / object store</text>
+
+  <text class="callout" x="60" y="626">sort only where needed &#183; whole DAG visible to the scheduler &#8594; data locality</text>
+  <text class="callout" x="60" y="646">reuse worker processes &#183; lineage recompute / checkpoints instead of DFS writes</text>
+</svg>
+</div>
+</body>
+</html>

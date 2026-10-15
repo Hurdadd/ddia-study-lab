@@ -1,0 +1,261 @@
+{
+  "alternatives": [
+    {
+      "en": "Synchronous dual write (record + cache/index in one request): only defensible when the derived copy is tiny, loss-tolerant and the extra latency is budgeted — e.g. invalidating one cache key inside the request. Never for search indexes, reports or models.",
+      "fa": "نوشتن دوگانه هم‌گام (مرجع + کش/ایندکس در یک درخواست): فقط وقتی قابل دفاع است که کپی مشتق کوچک و کم‌اهمیت باشد و تأخیر اضافه بودجه شده باشد — مثلاً ابطال یک کلید کش داخل درخواست. هرگز برای ایندکس جست‌وجو، گزارش یا مدل."
+    }
+  ],
+  "answer_en": "The orders database is the only system of record; cache, search index, monthly report and recommendation model are all derived. Write synchronously to the record only, publish the change once through a durable outbox/CDC log, and let each view consume it idempotently with its own freshness contract. On commit-without-publication, the outbox relay retries until the event is out — the order is never lost and no view is ever written before the record.",
+  "answer_fa": "فقط پایگاه سفارش‌ها system of record است؛ کش، ایندکس جست‌وجو، گزارش ماهانه و مدل پیشنهاد همه مشتق‌اند. فقط به مرجع هم‌گام بنویس، تغییر را یک‌بار از لاگ بادوام outbox/CDC منتشر کن و بگذار هر نما با قرارداد تازگی خودش idempotent مصرف کند. در حالت commit بدون انتشار، relay لاگ تا خروج رویداد تلاش می‌کند — سفارش هرگز گم نمی‌شود و هیچ نمایی قبل از مرجع نوشته نمی‌شود.",
+  "assumptions": [
+    {
+      "en": "Order write ≈ 23/s average, ≈ 231/s peak (teaching rates from chapter 2 math).",
+      "fa": "نوشتن سفارش ≈ ۲۳ در ثانیه میانگین و ≈ ۲۳۱ در اوج (نرخ‌های آموزشی از حساب فصل ۲)."
+    },
+    {
+      "en": "Freshness targets are teaching contracts: cache seconds, search tens of seconds, report next period, model next retrain.",
+      "fa": "اهداف تازگی قراردادهای آموزشی‌اند: کش ثانیه‌ها، جست‌وجو ده‌ها ثانیه، گزارش دوره بعد، مدل بازآموزی بعد."
+    },
+    {
+      "en": "Consumers are at-least-once; every view update must be idempotent and replayable.",
+      "fa": "مصرف‌کننده‌ها at-least-once هستند؛ هر به‌روزرسانی نما باید idempotent و قابل بازپخش باشد."
+    }
+  ],
+  "failures": [
+    {
+      "en": "Commit without publication: the outbox row is in the same transaction as the order, so the relay keeps retrying after a crash. Views lag but converge; nothing is half-written.",
+      "fa": "commit بدون انتشار: سطر outbox در همان تراکنش سفارش است، پس relay بعد از crash به تلاش ادامه می‌دهد. نماها عقب می‌مانند ولی همگرا می‌شوند؛ هیچ‌چیز نصفه نوشته نمی‌شود."
+    },
+    {
+      "en": "Duplicate delivery: a retried event re-applies cleanly because consumers key by order id and upsert. Design the poison case too — a malformed event goes to dead-letter after N tries, never blocking the log.",
+      "fa": "تحویل تکراری: رویداد تلاش‌شده دوباره تمیز اعمال می‌شود چون مصرف‌کننده‌ها با کلید شناسه سفارش upsert می‌کنند. حالت مسموم را هم طراحی کن — رویداد خراب بعد از N تلاش به dead-letter می‌رود و هرگز لاگ را قفل نمی‌کند."
+    },
+    {
+      "en": "View loss: dropping the search index or cache loses nothing durable — replay the log from the oldest needed offset and rebuild. State the retention horizon that bounds the replay.",
+      "fa": "از دست رفتن نما: انداختن ایندکس جست‌وجو یا کش هیچ داده بادوامی را گم نمی‌کند — لاگ را از قدیمی‌ترین offset لازم بازپخش و بازسازی کن. افق نگهداری که بازپخش را کران می‌کند اعلام شود."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "Never fake it by writing to the index synchronously. Keep the async path and protect the experience another way: after placing the order, show the user their own order from the record (read-your-writes) with a 'search updates within seconds' note; route the user's own queries to record + pending state first. The freshness contract stays honest, and the person affected never sees the lag.",
+      "a_fa": "هرگز با نوشتن هم‌گام به ایندکس تظاهرش را درنیاور. مسیر ناهمگام را نگه دار و تجربه را جور دیگر حفظ کن: بعد از ثبت، سفارش خود کاربر را از مرجع نشان بده (read-your-writes) با یادداشت «جست‌وجو ظرف چند ثانیه به‌روز می‌شود»؛ کوئری‌های خود کاربر اول به مرجع + حالت pending بروند. قرارداد تازگی صادق می‌ماند و فرد متأثر lag را هرگز نمی‌بیند.",
+      "level": "senior",
+      "q_en": "How do you preserve the user experience if a new order is not yet visible in search?",
+      "q_fa": "اگر مشتری بلافاصله بعد از ثبت سفارش آن را در جست‌وجو نبیند، تجربه کاربر را چطور حفظ می‌کنی؟"
+    }
+  ],
+  "interview_q_en": "Design order storage with cache, search, reporting and recommendation views. Name the record for each fact; explain commit-without-publication, freshness contracts, rebuilding and minimum cost.",
+  "interview_q_fa": "فروشگاهی را طراحی کن که سفارش را ثبت می‌کند و کش، جست‌وجو، گزارش و پیشنهاد محصول دارد. مرجع هر واقعیت را مشخص کن. اگر سفارش commit شود ولی انتشار رویداد شکست بخورد چه می‌کنی؟ قرارداد تازگی هر نما، مسیر بازسازی و هزینه حداقل معماری را توضیح بده.",
+  "mental_en": "The record is where a fact becomes official: losing it loses the truth. A derived view is a function of the record: it may lag, be dropped and be rebuilt. Every design question here is just 'which box is the function, and which is the truth?'",
+  "mental_fa": "مرجع جایی است که واقعیت رسمیت پیدا می‌کند: گم شدنش یعنی گم شدن حقیقت. نمای مشتق تابعی از مرجع است: می‌تواند عقب بماند، انداخته و بازسازی شود. هر سؤال طراحی این‌جا فقط همین است: «کدام جعبه تابع است و کدام حقیقت؟»",
+  "mistakes": [
+    {
+      "en": "Synchronous fan-out to record + cache + index in one request: one slow view fails the order, and a crash between writes leaves permanent disagreement. Record first, propagate async.",
+      "fa": "fan-out هم‌گام به مرجع + کش + ایندکس در یک درخواست: یک نمای کند سفارش را fail می‌کند و crash میان نوشتن‌ها اختلاف دائمی می‌سازد. اول مرجع، بعد انتشار ناهمگام."
+    },
+    {
+      "en": "Treating the cache as truth ('it is faster, so read only from cache'): a dropped cache then becomes data loss. Caches must always have the record behind them.",
+      "fa": "حقیقت دانستن کش («سریع‌تر است پس فقط از کش بخوان»): انداختن کش بعد می‌شود data loss. کش همیشه باید مرجع را پشتش داشته باشد."
+    }
+  ],
+  "number": 1,
+  "slug": "record-derived",
+  "sources": [
+    "amazon",
+    "outbox"
+  ],
+  "steps": [
+    {
+      "fa": "پایگاه سفارش‌ها = مرجع: تنها جایی که «سفارش ثبت شد» رسمیت پیدا می‌کند. نوشتن هم‌گام و بادوام (تراکنش + تکثیر حداقلی).",
+      "t_en": "Name the record",
+      "t_fa": "نام بردن مرجع",
+      "en": "Orders database = record: the only place where 'the order exists' becomes official. Synchronous, durable writes (transaction + minimal replication)."
+    },
+    {
+      "fa": "کش وضعیت = مشتق ناپایدار: فقط خواندن را سریع می‌کند. با سفارش تازه ابطال یا پرشدن دوباره؛ از دست رفتنش بی‌ضرر.",
+      "t_en": "Cache: volatile derivative",
+      "t_fa": "کش: مشتق ناپایدار",
+      "en": "Status cache = volatile derivative: only speeds reads. On a new order, invalidate or refill; losing it is harmless."
+    },
+    {
+      "fa": "ایندکس جست‌وجو = مشتق قابل بازسازی: از رویداد «سفارش ایجاد شد» تغذیه می‌شود؛ تأخیر چندثانیه‌ای مجاز ولی تحویل باید حتمی باشد.",
+      "t_en": "Search: rebuildable derivative",
+      "t_fa": "جست‌وجو: مشتق قابل بازسازی",
+      "en": "Search index = rebuildable derivative: fed by the 'order created' event; seconds of lag are acceptable but delivery must be eventual and reliable."
+    },
+    {
+      "fa": "گزارش ماهانه = مشتق دسته‌ای روی بازه بسته؛ مدل پیشنهاد = مشتق آماری با بازآموزی دوره‌ای. تک‌سفارش هیچ‌کدام را تکان نمی‌دهد.",
+      "t_en": "Report and model: batch derivatives",
+      "t_fa": "گزارش و مدل: مشتق‌های دسته‌ای",
+      "en": "Monthly report = batch derivative over a closed window; recommendation model = statistical derivative with periodic retraining. One order moves neither."
+    },
+    {
+      "fa": "انتشار: فقط مرجع هم‌گام؛ بقیه ناهمگام از یک لاگ تغییر (outbox/CDC) با مصرف idempotent. commit بدون انتشار = relay تلاش می‌کند، نه نوشتن نصفه.",
+      "t_en": "Publish once, consume idempotently",
+      "t_fa": "یک‌بار انتشار، مصرف idempotent",
+      "en": "Publication: synchronous to the record only; everything else async from one change log (outbox/CDC) with idempotent consumption. Commit-without-publication = the relay retries, never a half-write."
+    }
+  ],
+  "tests_en": "Measure per view: event-to-visible lag against its contract; consumer lag and dead-letter depth; rebuild drill — drop the index, replay, compare counts with the record; and a kill test on the relay proving orders Accepted while views are stale converge without loss.",
+  "tests_fa": "برای هر نما بسنج: lag رویداد-تا-رؤیت در برابر قراردادش؛ lag مصرف‌کننده و عمق dead-letter؛ drill بازسازی — ایندکس را بینداز، بازپخش کن و شمارش را با مرجع مقایسه کن؛ و تست کشتن relay که ثابت کند سفارش‌ها پذیرفته می‌شوند و نماهای stale بدون گم شدن همگرا می‌شوند.",
+  "worked_en": "<p>Teaching sizes: an order row ≈ 1 KB in the record; the same order as a search document ≈ 2 KB, as a cache entry ≈ 0.5 KB, as a report row ≈ 0.2 KB. At 231 orders/s peak, the log carries ≈ 0.2 MB/s — trivial. Freshness contracts (teaching): cache ≤ 5 s via key invalidation, search ≤ 60 s via event consume, report = next nightly batch, model = next weekly retrain. Minimum architecture: one primary + one standby, one durable log, one queue per consumer group — anything more needs a named reason.</p>",
+  "worked_fa": "<p>اندازه‌های آموزشی: سطر سفارش ≈ ۱ کیلوبایت در مرجع؛ همان سفارش به‌صورت سند جست‌وجو ≈ ۲ کیلوبایت، ورودی کش ≈ ۰٫۵ کیلوبایت، سطر گزارش ≈ ۰٫۲ کیلوبایت. در اوج ۲۳۱ سفارش در ثانیه، لاگ ≈ ۰٫۲ مگابایت در ثانیه حمل می‌کند — ناچیز. قراردادهای تازگی (آموزشی): کش ≤ ۵ ثانیه با ابطال کلید، جست‌وجو ≤ ۶۰ ثانیه با مصرف رویداد، گزارش = بچ شبانه بعد، مدل = بازآموزی هفتگی بعد. حداقل معماری: یک primary + یک standby، یک لاگ بادوام، یک صف برای هر گروه مصرف‌کننده — هر چیز بیشتر دلیل نام‌دار می‌خواهد.</p>",
+  "diagrams": [
+    {
+      "file": "diagrams/sol1-step1-commit-publish.html",
+      "made": "archify",
+      "source": ".archify/sequence-ch1-sol1-commit-20261014-182151",
+      "kind_en": "sequence: commit + publish",
+      "kind_fa": "توالی: commit و انتشار",
+      "caption_en": "Atomic commit, then publish with crash recovery",
+      "caption_fa": "commit اتمیک، بعد انتشار با بازیابی از crash",
+      "height": 640,
+      "narration": {
+        "scenario_en": "Five orders are placed and the relay dies halfway. Read the lifelines top to bottom through the Commit, Publish, and Crash + recovery bands.",
+        "scenario_fa": "پنج سفارش ثبت می‌شود و relay وسط کار می‌میرد. خط‌های زندگی را از بالا به پایین و از باندهای <span class=\"ltr\">Commit</span> و <span class=\"ltr\">Publish</span> و <span class=\"ltr\">Crash + recovery</span> بخوان.",
+        "steps": [
+          {
+            "en": "Top: the Client sends POST /orders to the Order API — the only synchronous call in the whole story.",
+            "fa": "بالا: <span class=\"ltr\">Client</span> با <span class=\"ltr\">POST /orders</span> به <span class=\"ltr\">Order API</span> می‌زند — تنها فراخوانی هم‌گام کل داستان."
+          },
+          {
+            "en": "The API commits the order row plus its outbox row atomically in the Orders DB, gets commit ok, and returns 201 + order id. The synchronous write ends here.",
+            "fa": "<span class=\"ltr\">API</span> سطر سفارش به‌علاوه سطر <span class=\"ltr\">outbox</span> را اتمیک در <span class=\"ltr\">Orders DB</span> ثبت می‌کند، <span class=\"ltr\">commit ok</span> می‌گیرد و <span class=\"ltr\">201 + order id</span> برمی‌گرداند. نوشتن هم‌گام همین‌جا تمام می‌شود."
+          },
+          {
+            "en": "The Outbox Relay polls the log from its kept offset, receives order-created events 1-5, and publishes events 1-2 of 5 to the Search Consumer.",
+            "fa": "<span class=\"ltr\">Outbox Relay</span> لاگ را از <span class=\"ltr\">offset</span> نگه‌داشته‌شده <span class=\"ltr\">poll</span> می‌کند، رویدادهای <span class=\"ltr\">order-created</span> شماره ۱ تا ۵ را می‌گیرد و رویدادهای ۱ و ۲ از ۵ را به <span class=\"ltr\">Search Consumer</span> منتشر می‌کند."
+          },
+          {
+            "en": "The stream breaks: the relay crashes with its offset kept. On restart it resumes from the kept offset, the log redelivers events 1-5, and the relay republishes all 5, duplicates included.",
+            "fa": "جریان می‌شکند: <span class=\"ltr\">relay</span> با <span class=\"ltr\">offset</span> نگه‌داشته‌شده <span class=\"ltr\">crash</span> می‌کند. بعد از <span class=\"ltr\">restart</span> از همان <span class=\"ltr\">offset</span> ادامه می‌دهد، لاگ رویدادهای ۱ تا ۵ را دوباره تحویل می‌دهد و <span class=\"ltr\">relay</span> هر ۵ را با تکراری‌ها بازنشر می‌کند."
+          },
+          {
+            "en": "The consumer upserts by order id into the Search Index and gets ok, duplicates harmless — five events converge on exactly five indexed orders.",
+            "fa": "مصرف‌کننده با کلید شناسه سفارش در <span class=\"ltr\">Search Index</span> به‌روزرسانی <span class=\"ltr\">upsert</span> می‌کند و <span class=\"ltr\">ok, duplicates harmless</span> می‌گیرد — پنج رویداد دقیقاً روی پنج سفارش ایندکس‌شده همگرا می‌شوند."
+          }
+        ],
+        "point_en": "The decision point is the atomic-commit arrow: order row plus outbox row in one transaction. Everything downstream of it — polls, publishes, redeliveries — is retryable.",
+        "point_fa": "نقطه تصمیم پیکان <span class=\"ltr\">commit</span> اتمیک است: سطر سفارش به‌علاوه سطر <span class=\"ltr\">outbox</span> در یک تراکنش. هرچه پایین‌دستش است — <span class=\"ltr\">poll</span>ها، انتشارها، تحویل‌های دوباره — قابل تلاش مجدد است.",
+        "failure_en": "Trace the dashed break in the Crash + recovery band: two events published, then silence — the kept offset is what lets restart resume instead of starting over. The second dashed chain (redeliver, republish) is the duplicates-are-harmless path.",
+        "failure_fa": "شکست چین‌دار را در باند <span class=\"ltr\">Crash + recovery</span> دنبال کن: دو رویداد منتشر شده، بعد سکوت — <span class=\"ltr\">offset</span> نگه‌داشته‌شده همان چیزی است که <span class=\"ltr\">restart</span> را از ادامه ممکن می‌کند نه از صفر. زنجیره چین‌دار دوم (<span class=\"ltr\">redeliver</span> و <span class=\"ltr\">republish</span>) همان مسیر تکراری‌ها-بی‌ضررند است.",
+        "guarantee_en": "The figure guarantees order: no view is written before the record commits, and every committed order eventually reaches the consumer. It does not bound how long that takes.",
+        "guarantee_fa": "شکل ترتیب را تضمین می‌کند: هیچ نمایی قبل از <span class=\"ltr\">commit</span> مرجع نوشته نمی‌شود و هر سفارش <span class=\"ltr\">commit</span>شده بالاخره به مصرف‌کننده می‌رسد. سقف مدتش را تضمین نمی‌کند.",
+        "nonguarantee_en": "Freshness bounds and the other three views are outside this figure — they belong to the next step. Exactly-once delivery is not claimed either: duplicates happen and are absorbed by upsert.",
+        "nonguarantee_fa": "سقف‌های تازگی و سه نمای دیگر بیرون این شکل‌اند — مال گام بعدند. تحویل <span class=\"ltr\">exactly-once</span> هم ادعا نشده: تکراری‌ها رخ می‌دهند و با <span class=\"ltr\">upsert</span> جذب می‌شوند."
+      },
+      "selfcheck": {
+        "q_en": "The relay crashes after publishing 2 of 5 events. What does it read on restart, and why don't the redelivered duplicates corrupt the index?",
+        "q_fa": "اگر <span class=\"ltr\">relay</span> بعد از انتشار ۲ رویداد از ۵ بمیرد، در <span class=\"ltr\">restart</span> چه می‌خواند و چرا تکراری‌های تحویل‌دوباره ایندکس را خراب نمی‌کنند؟",
+        "a_en": "It resumes polling from its kept offset, so the log redelivers events 1-5 and it republishes all five. The index stays correct because the consumer upserts by order id — a repeated event rewrites the same row instead of adding a second one.",
+        "a_fa": "از <span class=\"ltr\">offset</span> نگه‌داشته‌شده <span class=\"ltr\">poll</span> را ادامه می‌دهد، پس لاگ رویدادهای ۱ تا ۵ را دوباره تحویل می‌دهد و هر پنج را بازنشر می‌کند. ایندکس درست می‌ماند چون مصرف‌کننده با کلید شناسه سفارش <span class=\"ltr\">upsert</span> می‌کند — رویداد تکراری همان سطر را بازنویسی می‌کند نه این‌که سطر دوم بسازد."
+      }
+    },
+    {
+      "file": "diagrams/sol1-step2-view-consumers.html",
+      "made": "archify",
+      "source": ".archify/dataflow-ch1-sol1-views-20261014-182151",
+      "kind_en": "dataflow: one log, four contracts",
+      "kind_fa": "جریان داده: یک لاگ، چهار قرارداد",
+      "caption_en": "One log fanning out to four views, each with its freshness contract",
+      "caption_fa": "یک لاگ که به چهار نما می‌رسد، هرکدام با قرارداد تازگی خودش",
+      "height": 640,
+      "narration": {
+        "scenario_en": "One committed order must reach four different views. Start at the truth box on the left and follow each tap to its mechanism and its freshness contract.",
+        "scenario_fa": "یک سفارش <span class=\"ltr\">commit</span>شده باید به چهار نمای متفاوت برسد. از جعبه حقیقت در چپ شروع کن و هر انشعاب را تا سازوکار و قرارداد تازگی‌اش دنبال کن.",
+        "steps": [
+          {
+            "en": "Left: the Orders DB, the only truth box. Each commit appends an outbox row in the same transaction — one arrow into the log per commit.",
+            "fa": "چپ: <span class=\"ltr\">Orders DB</span>، تنها جعبه حقیقت. هر <span class=\"ltr\">commit</span> در همان تراکنش یک سطر <span class=\"ltr\">outbox</span> می‌افزاید — به‌ازای هر <span class=\"ltr\">commit</span> یک پیکان به لاگ."
+          },
+          {
+            "en": "Middle: the Outbox / CDC Log, one ordered stream. The vertical bus drops one tap per view — every view reads the same publication, each at its own pace.",
+            "fa": "وسط: لاگ <span class=\"ltr\">Outbox / CDC</span>، یک جریان مرتب. گذرگاه عمودی برای هر نما یک انشعاب می‌اندازد — هر نما همان انتشار واحد را می‌خواند، هرکدام با سرعت خودش."
+          },
+          {
+            "en": "Top taps: the Status Cache invalidates by key, fresh within 5 seconds (teaching); the Search Index consumes the event, fresh within 60 seconds (teaching).",
+            "fa": "انشعاب‌های بالا: <span class=\"ltr\">Status Cache</span> با کلید ابطال می‌شود، تازگی ظرف ۵ ثانیه (آموزشی)؛ <span class=\"ltr\">Search Index</span> رویداد را مصرف می‌کند، تازگی ظرف ۶۰ ثانیه (آموزشی)."
+          },
+          {
+            "en": "Bottom taps: the Monthly Report takes a nightly batch extract, fresh next batch (teaching); the Recommender Model takes a weekly retrain feed, fresh next retrain (teaching). One order moves neither.",
+            "fa": "انشعاب‌های پایین: <span class=\"ltr\">Monthly Report</span> استخراج بچ شبانه می‌برد، تازگی بچ بعد (آموزشی)؛ <span class=\"ltr\">Recommender Model</span> خوراک بازآموزی هفتگی می‌برد، تازگی بازآموزی بعد (آموزشی). یک سفارش هیچ‌کدام را تکان نمی‌دهد."
+          },
+          {
+            "en": "Any tap can replay: a dropped cache or index re-reads the log from the oldest needed offset — the retention horizon bounds how far back a rebuild can go.",
+            "fa": "هر انشعاب می‌تواند بازپخش کند: کش یا ایندکس انداخته‌شده لاگ را از قدیمی‌ترین <span class=\"ltr\">offset</span> لازم دوباره می‌خواند — افق نگهداری کران می‌کند بازسازی تا کجا به عقب می‌تواند برود."
+          }
+        ],
+        "point_en": "The decision point is the single log in the middle: freshness is a per-view contract on a shared publication, not a property of the write path. Fast views pay per-event work; slow views pay batch work.",
+        "point_fa": "نقطه تصمیم لاگ واحد وسط است: تازگی قرارداد هر نما روی انتشار مشترک است، نه خاصیت مسیر نوشتن. نماهای سریع هزینه کار به‌ازای رویداد می‌دهند؛ نماهای کند هزینه کار دسته‌ای.",
+        "failure_en": "Trace commit-without-publication: the truth box is dark while the taps wait — the relay retries until the log flows, and views lag then converge. Then trace a wiped index: only its box goes dark, and its tap re-reads the log to repaint it.",
+        "failure_fa": "<span class=\"ltr\">commit</span> بدون انتشار را دنبال کن: جعبه حقیقت تیره است ولی انشعاب‌ها صبر می‌کنند — <span class=\"ltr\">relay</span> تا جاری شدن لاگ تلاش می‌کند و نماها عقب می‌مانند بعد همگرا می‌شوند. بعد ایندکس پاک‌شده را دنبال کن: فقط جعبه‌اش تیره می‌شود و انشعابش با خواندن دوباره لاگ رنگش می‌کند.",
+        "guarantee_en": "The figure guarantees single ordered publication: every view eventually sees every committed order in log order. It does not bound view lag — the four contracts do, and each must be measured.",
+        "guarantee_fa": "شکل انتشار واحد مرتب را تضمین می‌کند: هر نما بالاخره هر سفارش <span class=\"ltr\">commit</span>شده را به ترتیب لاگ می‌بیند. سقف <span class=\"ltr\">lag</span> نما را تضمین نمی‌کند — چهار قرارداد می‌کنند و هرکدام باید اندازه‌گیری شود.",
+        "nonguarantee_en": "A consistent snapshot across views at one instant is outside this figure — views converge at different speeds by design.",
+        "nonguarantee_fa": "<span class=\"ltr\">snapshot</span> سازگار روی نماها در یک لحظه بیرون این شکل است — نماها از قصد با سرعت‌های متفاوت همگرا می‌شوند."
+      },
+      "selfcheck": {
+        "q_en": "Which view sees a new order first and which last, and what mechanism bounds each?",
+        "q_fa": "کدام نما سفارش تازه را اول می‌بیند و کدام آخر، و سازوکار کران هرکدام چیست؟",
+        "a_en": "First the cache (key invalidation, within 5 seconds, teaching); then search (event consume, within 60 seconds, teaching); then the report (next nightly batch) and last the model (next weekly retrain). State all four mechanisms — async alone is not an answer.",
+        "a_fa": "اول کش (ابطال کلید، ظرف ۵ ثانیه، آموزشی)؛ بعد جست‌وجو (مصرف رویداد، ظرف ۶۰ ثانیه، آموزشی)؛ بعد گزارش (بچ شبانه بعد) و آخر مدل (بازآموزی هفتگی بعد). هر چهار سازوکار را بگو — فقط «ناهمگام» جواب نیست."
+      }
+    },
+    {
+      "file": "diagrams/sol1-record-derived.html",
+      "made": "hand",
+      "kind_en": "dataflow + contracts",
+      "kind_fa": "جریان داده + قراردادها",
+      "caption_en": "One commit, one log, four views with their own freshness contracts",
+      "caption_fa": "یک commit، یک لاگ، چهار نما با قرارداد تازگی خودشان",
+      "height": 640,
+      "narration": {
+        "failure_en": "Trace commit-without-publication on the figure: the order box is dark (committed) while the log arrow blinks — the relay box retries until the arrow flows. All four views wait; none invents data. Then trace a lost index: only its box goes grey, and the replay arrow from the log repaints it.",
+        "failure_fa": "commit بدون انتشار را روی شکل دنبال کن: جعبه سفارش تیره است (commit شده) ولی پیکان لاگ چشمک می‌زند — جعبه relay تا جاری شدن پیکان تلاش می‌کند. هر چهار نما صبر می‌کنند؛ هیچ‌کدام داده نمی‌سازند. بعد ایندکس گمشده را دنبال کن: فقط جعبه‌اش خاکستری می‌شود و پیکان بازپخش از لاگ دوباره رنگش می‌کند.",
+        "guarantee_en": "The figure shows single-publication ordering: no view updates before the record commits. It does not bound view lag — the contracts do, and lag must be measured per view.",
+        "guarantee_fa": "شکل ترتیب انتشار واحد را نشان می‌دهد: هیچ نمایی قبل از commit مرجع به‌روز نمی‌شود. سقف lag نما را نشان نمی‌دهد — قراردادها نشان می‌دهند و lag هر نما باید اندازه‌گیری شود.",
+        "nonguarantee_en": "Cross-order transactions and exactly-once effects on the outside world are outside this figure.",
+        "nonguarantee_fa": "تراکنش‌های چندسفارشی و اثرهای exactly-once به دنیای بیرون بیرون این شکل‌اند.",
+        "point_en": "The decision point is the outbox row inside the order transaction: it turns 'two writes' into 'one atomic write plus a relay'. Every arrow downstream of it is retryable.",
+        "point_fa": "نقطه تصمیم سطر outbox داخل تراکنش سفارش است: «دو نوشتن» را به «یک نوشتن اتمیک به‌علاوه relay» تبدیل می‌کند. هر پیکان پایین‌دستش قابل تلاش مجدد است.",
+        "scenario_en": "An order is placed at midnight and the search team asks why it is not there yet. Start at the dark order box on the left and follow each arrow to its view and its contract.",
+        "scenario_fa": "نیمه‌شب سفارشی ثبت شده و تیم جست‌وجو می‌پرسد چرا هنوز نیست. از جعبه تیره سفارش در چپ شروع کن و هر پیکان را تا نما و قراردادش دنبال کن.",
+        "steps": [
+          {
+            "en": "Left: the orders database, the only dark box — the system of record. The synchronous write ends here.",
+            "fa": "چپ: پایگاه سفارش‌ها، تنها جعبه تیره — system of record. نوشتن هم‌گام این‌جا تمام می‌شود."
+          },
+          {
+            "en": "Middle: the outbox/CDC log — one arrow in per commit, one ordered stream out. The relay retries until delivery.",
+            "fa": "وسط: لاگ outbox/CDC — به‌ازای هر commit یک پیکان داخل، یک جریان مرتب بیرون. relay تا تحویل تلاش می‌کند."
+          },
+          {
+            "en": "Right: the four views — cache (invalidate), search (consume), report (batch), model (retrain) — each labelled with its freshness contract.",
+            "fa": "راست: چهار نما — کش (ابطال)، جست‌وجو (مصرف)، گزارش (دسته‌ای)، مدل (بازآموزی) — هرکدام با برچسب قرارداد تازگی‌اش."
+          },
+          {
+            "en": "Dashed arrow: the replay path from the log to any view — the rebuild story for a dropped index or cache.",
+            "fa": "پیکان چین: مسیر بازپخش از لاگ به هر نما — داستان بازسازی ایندکس یا کش انداخته‌شده."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Wipe the search index and rebuild it from the log with zero order loss — then state which offsets the log must retain to make that possible, and what happens to orders older than the retention horizon.",
+        "a_fa": "ایندکس جست‌وجو را کامل پاک و از لاگ بدون هیچ سفارش گمشده بازسازی کن — بعد بگو لاگ باید کدام offsetها را نگه دارد تا این ممکن شود و سفارش‌های قدیمی‌تر از افق نگهداری چه می‌شوند.",
+        "q_en": "If the search index is fully wiped, how do you recover with zero order loss?",
+        "q_fa": "اگر ایندکس جست‌وجو کامل پاک شود، چطور بدون از دست رفتن سفارش برمی‌گردی؟"
+      }
+    }
+  ],
+  "code": {
+    "lang": "java",
+    "code": "import java.util.*;\n// Teaching demo: atomic commit (order + outbox row), relay with a crash,\n// idempotent consumers keyed by order id. No orders lost, no half-views.\npublic class OutboxDemo {\n    record Order(long id, String item) {}\n    record Event(long orderId, long seq) {}\n    public static void main(String[] a) {\n        List<Order> record = new ArrayList<>();\n        List<Event> log = new ArrayList<>();\n        long seq = 0;\n        for (long i = 1; i <= 5; i++) { record.add(new Order(i, \"item-\" + i)); log.add(new Event(i, ++seq)); }\n        Set<Long> published = new HashSet<>();\n        int crashAfter = 2, offset = 0, restarts = 0;\n        Map<Long, String> searchView = new HashMap<>();\n        int duplicates = 0;\n        while (offset < log.size()) {\n            Event e = log.get(offset);\n            if (published.size() == crashAfter && restarts == 0) { restarts++; continue; }\n            if (!published.add(e.orderId())) { duplicates++; }\n            else searchView.put(e.orderId(), \"doc-\" + e.orderId());\n            offset++;\n        }\n        int before = searchView.size();\n        for (Event e : log) { if (!published.add(e.orderId())) duplicates++; else searchView.put(e.orderId(), \"doc-\" + e.orderId()); }\n        System.out.println(\"record orders   = \" + record.size());\n        System.out.println(\"log events      = \" + log.size());\n        System.out.println(\"relay restarts  = \" + restarts);\n        System.out.println(\"duplicates seen = \" + duplicates);\n        System.out.println(\"search docs     = \" + searchView.size() + \" (changed by redelivery: \" + (searchView.size() != before) + \")\");\n        if (record.size() != 5 || searchView.size() != 5 || restarts != 1) throw new AssertionError();\n        System.out.println(\"OK: no loss, no half-write, redelivery harmless\");\n    }\n}\n",
+    "run_fa": "javac OutboxDemo.java && java OutboxDemo — فقط استاندارد جاوا، فوری.",
+    "run_en": "javac OutboxDemo.java && java OutboxDemo — stdlib Java only, instant.",
+    "expected_fa": "record orders=5، log events=5، relay restarts=1، duplicates=5، search docs=5 بدون تغییر با بازپخش؛ OK: no loss, no half-write. (خروجی واقعی همین محیط)",
+    "expected_en": "record orders=5, log events=5, relay restarts=1, duplicates=5, search docs=5 unchanged by redelivery; OK: no loss, no half-write. (actual output of this environment)",
+    "status": "verified"
+  },
+  "reasoning_fa": "<p>چرا outbox؟ چون commit سفارش و انتشار پیام دو عمل جدا هستند و crash می‌تواند بینشان بیفتد؛ ثبت تعهد انتشار در همان تراکنش این شکاف را می‌بندد. تازگی کش چند ثانیه و جست‌وجو چند ده ثانیه فرض محصول‌اند: صفحهٔ تأیید سفارش از مرجع می‌خواند، ولی کشف سفارش در جست‌وجو می‌تواند عقب بماند. اگر کاربر برای تصمیم مالی از جست‌وجو استفاده کند، این فرض دیگر کافی نیست و مسیر خواندن باید قوی‌تر شود.</p>",
+  "reasoning_en": "<p>Why an outbox? Order commit and message publication are separate actions; a crash can fall between them. Persisting publication intent in the order transaction closes that gap. Seconds for cache freshness and tens of seconds for search are product assumptions: confirmation reads the authority while discovery can lag. Financial decisions through search require a stronger read contract.</p>"
+}

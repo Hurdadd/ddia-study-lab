@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Load math at 2M/day — DDIA Chapter 1 Solution 2, step 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Bar plot of order and notification rates plus the disk horizon at 2M rows per day">
+<title>Load math at 2M per day</title>
+<text x="620" y="52" font-size="30" font-weight="900" text-anchor="middle">2M orders/day: rates you can feel, then the disk horizon</text>
+<text x="620" y="86" font-size="16" text-anchor="middle">teaching numbers: 2M rows/day, 23.1/s avg, 231.5/s peak, 3 notifications per order</text>
+<text x="60" y="130" font-size="16" font-weight="800">rates per second (bars illustrative, values labelled)</text>
+<g>
+<rect x="60" y="146" width="90" height="40" rx="10" fill="#c3ceff"/>
+<text x="70" y="172" font-size="14">avg orders 23.1/s</text>
+<rect x="60" y="196" width="420" height="40" rx="10" fill="#9278ef"/>
+<text x="70" y="222" font-size="14" font-weight="700">peak orders 231.5/s (10x)</text>
+<rect x="60" y="246" width="160" height="40" rx="10" fill="#bfe6c9"/>
+<text x="70" y="272" font-size="14">avg notifications 69.4/s</text>
+<rect x="60" y="296" width="560" height="40" rx="10" fill="#7f9a7a"/>
+<text x="70" y="322" font-size="14" font-weight="700">peak notifications 694.4/s</text>
+<text x="60" y="362" font-size="14">payload approx 1 KB: peak approx 0.7 MB/s, one queue is enough</text>
+</g>
+<g>
+<rect x="770" y="130" width="410" height="260" rx="20" fill="#ffcfb8"/>
+<text x="975" y="168" font-size="20" font-weight="800" text-anchor="middle">one box, years of headroom</text>
+<text x="975" y="208" font-size="15" text-anchor="middle">2M rows/day x 1 KB = 2 GB/day</text>
+<text x="975" y="242" font-size="15" text-anchor="middle">0.75 TB/year incl. indexes (teaching)</text>
+<text x="975" y="276" font-size="15" text-anchor="middle">4 TB disk holds approx 5.4 years</text>
+<text x="975" y="310" font-size="15" text-anchor="middle">peak 231.5/s vs 5k/s tripwire: 20x headroom</text>
+<rect x="810" y="328" width="330" height="40" rx="20" fill="#f7f2e8"/>
+<text x="975" y="354" font-size="14" text-anchor="middle">writes 20x below tripwire: stay single</text>
+</g>
+<g>
+<text x="60" y="452" font-size="16" font-weight="800">disk horizon: one 4 TB box at 0.75 TB/year (teaching)</text>
+<rect x="60" y="468" width="1120" height="44" rx="12" fill="#e9dcc0"/>
+<rect x="60" y="468" width="1050" height="44" rx="12" fill="#bfe6c9"/>
+<rect x="1110" y="468" width="70" height="44" rx="12" fill="#ffe08a"/>
+<text x="165" y="495" font-size="14" text-anchor="middle">yr1</text>
+<text x="375" y="495" font-size="14" text-anchor="middle">yr2</text>
+<text x="585" y="495" font-size="14" text-anchor="middle">yr3</text>
+<text x="795" y="495" font-size="14" text-anchor="middle">yr4</text>
+<text x="1005" y="495" font-size="14" text-anchor="middle">yr5</text>
+<text x="270" y="540" font-size="14" text-anchor="middle">1 yr</text>
+<text x="480" y="540" font-size="14" text-anchor="middle">2 yr</text>
+<text x="690" y="540" font-size="14" text-anchor="middle">3 yr</text>
+<text x="900" y="540" font-size="14" text-anchor="middle">4 yr</text>
+<text x="1110" y="540" font-size="14" text-anchor="middle">5 yr</text>
+<text x="1180" y="540" font-size="14" text-anchor="middle" font-weight="700">full 5.4 yr</text>
+</g>
+<text x="620" y="580" font-size="15" text-anchor="middle">4 TB / 0.75 TB per year = 5.4 years: the disk-horizon tripwire, decided in step 2</text>
+<text x="620" y="628" font-size="14" text-anchor="middle">legend: blue = order rates, green = notification fan-out, peach = headroom, yellow = disk horizon</text>
+</svg>
+</div>
+</body>
+</html>

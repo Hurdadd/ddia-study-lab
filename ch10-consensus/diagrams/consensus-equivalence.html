@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Many Faces of Consensus — Equivalent Formulations and Their Properties</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .card-t{font:700 13px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .hub-t{font:700 22px system-ui,sans-serif; fill:#e8edf7}
+  .hub-s{font:12.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .edge-lbl{font:700 12.5px ui-monospace,Menlo,monospace; fill:#fbbf24}
+  .note{font:12.5px system-ui,sans-serif; fill:#cfe3ff}
+  .note-h{font:700 13px system-ui,sans-serif; fill:#fbbf24}
+  .mono-s{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="Hub and spoke diagram: single-value consensus, shared log, CAS, atomic commit and fetch-and-add are all equivalent to consensus">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="30" text-anchor="middle">The Many Faces of Consensus — All Equivalent</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">solve any one of these problems and the solution can be converted into a solution for all the others</text>
+
+  <!-- ================= top row : equivalents ================= -->
+  <rect x="60" y="84" width="340" height="24" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="230" y="101" text-anchor="middle">Single-value consensus</text>
+  <rect x="60" y="108" width="340" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="74" y="130">nodes propose values → one is decided</text>
+  <text class="attr" x="74" y="150">elects a leader · claims a lease, a</text>
+  <text class="attr" x="74" y="168">username, or the last seat</text>
+
+  <rect x="450" y="84" width="340" height="24" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="620" y="101" text-anchor="middle">Shared log / total order broadcast</text>
+  <rect x="450" y="108" width="340" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="464" y="130">append entries in one agreed order</text>
+  <text class="attr" x="464" y="150">consensus number ∞ · anyone may append</text>
+  <text class="attr" x="464" y="168">the form most systems actually ship</text>
+
+  <rect x="850" y="84" width="330" height="24" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="1015" y="101" text-anchor="middle">Linearizable CAS</text>
+  <rect x="850" y="108" width="330" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="864" y="130">compare-and-set on one register</text>
+  <text class="attr" x="864" y="150">consensus number ∞</text>
+  <text class="attr" x="864" y="168">locks · leases · uniqueness constraints</text>
+
+  <!-- ================= middle row ================= -->
+  <rect x="60" y="240" width="340" height="24" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="230" y="257" text-anchor="middle">Atomic commitment</text>
+  <rect x="60" y="264" width="340" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="74" y="286">all participants commit, or all abort</text>
+  <text class="attr" x="74" y="306">consensus with a veto: one abort vote</text>
+  <text class="attr" x="74" y="324">forces abort · 2PC coordinator = this</text>
+
+  <!-- hub -->
+  <rect x="450" y="230" width="340" height="120" rx="16" fill="#12263f" stroke="#5eead4" stroke-width="2"/>
+  <text class="hub-t" x="620" y="272" text-anchor="middle">CONSENSUS</text>
+  <text class="hub-s" x="620" y="298" text-anchor="middle">one agreed value · one agreed order</text>
+  <text class="hub-s" x="620" y="318" text-anchor="middle">safety always · liveness with a majority</text>
+
+  <rect x="850" y="240" width="330" height="24" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="1015" y="257" text-anchor="middle">Fetch-and-add</text>
+  <rect x="850" y="264" width="330" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="864" y="286">atomic increment, return the old value</text>
+  <text class="attr" x="864" y="306">consensus number 2 — the odd one out:</text>
+  <text class="attr" x="864" y="324">decides only between two proposers</text>
+
+  <!-- equivalence arrows -->
+  <path d="M230 184 L230 210 L446 210 L446 258" fill="none" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="242" y="228">≡ equivalent</text>
+  <line x1="620" y1="184" x2="620" y2="226" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="632" y="210">≡ equivalent</text>
+  <path d="M1015 184 L1015 210 L794 210 L794 258" fill="none" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="880" y="228">≡ equivalent</text>
+  <line x1="404" y1="302" x2="446" y2="302" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="410" y="292">≡</text>
+  <line x1="794" y1="302" x2="846" y2="302" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="806" y="292">≡</text>
+
+  <!-- ================= bottom row : what it yields ================= -->
+  <rect x="60" y="386" width="340" height="24" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="230" y="403" text-anchor="middle">State machine replication</text>
+  <rect x="60" y="410" width="340" height="60" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="74" y="432">same log + deterministic apply</text>
+  <text class="attr" x="74" y="452">= identical replicas · serializable txns</text>
+
+  <rect x="450" y="386" width="340" height="24" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="620" y="403" text-anchor="middle">Fencing tokens</text>
+  <rect x="450" y="410" width="340" height="60" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="464" y="432">every log entry gets a monotonic index</text>
+  <text class="attr" x="464" y="452">zxid / revision — kills zombie writers</text>
+
+  <rect x="850" y="386" width="330" height="24" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="1015" y="403" text-anchor="middle">Leader election &amp; leases</text>
+  <rect x="850" y="410" width="330" height="60" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="864" y="432">decide once per epoch (term / ballot)</text>
+  <text class="attr" x="864" y="452">no split brain · automatic failover</text>
+
+  <path d="M450 350 L300 350 L300 382" fill="none" stroke="#93c5fd" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text class="mono-s" x="236" y="372">yields</text>
+  <line x1="620" y1="354" x2="620" y2="382" stroke="#93c5fd" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text class="mono-s" x="632" y="372">yields</text>
+  <path d="M790 350 L940 350 L940 382" fill="none" stroke="#93c5fd" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text class="mono-s" x="876" y="372">yields</text>
+
+  <!-- ================= properties band ================= -->
+  <rect x="60" y="500" width="560" height="140" rx="12" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="note-h" x="76" y="526">What every consensus algorithm must guarantee</text>
+  <text class="note" x="76" y="550">Uniform agreement — no two nodes decide differently.</text>
+  <text class="note" x="76" y="570">Integrity — once decided, a node never changes its mind.</text>
+  <text class="note" x="76" y="590">Validity — a decided value was proposed by some node.</text>
+  <text class="note" x="76" y="610">Termination — every non-crashed node eventually decides</text>
+  <text class="note" x="230" y="630">(the only liveness property; needs a majority alive)</text>
+
+  <rect x="640" y="500" width="540" height="140" rx="12" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="note-h" x="656" y="526">The catch</text>
+  <text class="note" x="656" y="550">FLP: deterministic + asynchronous + one crash risk ⇒</text>
+  <text class="note" x="656" y="570">termination cannot be guaranteed. Timeouts or randomness</text>
+  <text class="note" x="656" y="590">make consensus solvable in practice.</text>
+  <text class="note" x="656" y="610">Raft / Paxos / Viewstamped Replication / Zab = shared log</text>
+  <text class="note" x="656" y="630">with automatic leader election and failover.</text>
+</svg>
+</div>
+</body>
+</html>

@@ -1,0 +1,229 @@
+{
+  "alternatives": [
+    {
+      "en": "Row store with a B-tree index when the workload is point lookups (one order by id), not scans. Cost: every analytical query pays full-row reads and no pruning applies.",
+      "fa": "وقتی بارکاری lookup نقطه‌ای است (یک سفارش با شناسه) row store با ایندکس B-tree. هزینه: هر کوئری تحلیلی خواندن سطر کامل می‌پردازد و pruningای در کار نیست."
+    },
+    {
+      "en": "Pre-aggregated cube when the same category-by-weekday report runs unchanged every morning. Cost: storage per slice plus a refresh contract; ad-hoc questions still need the base facts.",
+      "fa": "وقتی همان گزارش دسته‌به‌روزهفته هر صبح بدون تغییر اجرا می‌شود cube ازپیش‌جمع‌شده. هزینه: ذخیره‌سازی هر برش به‌علاوه قرارداد refresh؛ سؤال‌های ad-hoc هنوز factهای پایه را می‌خواهند."
+    }
+  ],
+  "answer_en": "Star schema: one <span class=\"ltr\">fact_sales</span> row per sale (day, product id, quantity, amount) plus small <span class=\"ltr\">dim_date</span> and <span class=\"ltr\">dim_product</span> tables. Partition by year and month, sort by day then category, and the query reads only 3 narrow columns from only last year's blocks — column pruning plus partition pruning. Low-cardinality category filters run as bitmap ANDs; history reports the category at sale time, not today's label.",
+  "answer_fa": "استار اسکما: یک سطر <span class=\"ltr\">fact_sales</span> به‌ازای هر فروش (روز، شناسه محصول، تعداد، مبلغ) به‌علاوه دو جدول کوچک <span class=\"ltr\">dim_date</span> و <span class=\"ltr\">dim_product</span>. پارتیشن بر اساس سال و ماه، مرتب‌سازی بر اساس روز بعد دسته‌بندی، و کوئری فقط ۳ ستون باریک را فقط از بلوک‌های سال گذشته می‌خواند — column pruning به‌علاوه partition pruning. فیلتر دسته‌بندی کم‌مقدار با AND بیتی اجرا می‌شود؛ گزارش تاریخی دسته‌بندیِ زمان فروش را می‌دهد، نه برچسب امروز.",
+  "assumptions": [
+    {
+      "en": "Teaching scale: a 14-row demo you can run here; imagine the same shape at millions of rows. Ratios below are teaching numbers, not benchmarks.",
+      "fa": "مقیاس آموزشی: دموی ۱۴ سطری که این‌جا اجرا می‌شود؛ همان شکل را در میلیون‌ها سطر تصور کن. نسبت‌ها آموزشی‌اند، نه بنچ‌مارک."
+    },
+    {
+      "en": "Five product categories, weekday derived from the date dimension, amounts in one currency with no tax or returns logic.",
+      "fa": "پنج دسته‌بندی محصول، روز هفته مشتق از بعد تاریخ، مبلغ‌ها با یک ارز و بدون منطق مالیات یا مرجوعی."
+    },
+    {
+      "en": "One nightly load: facts are complete for past days, and late corrections arrive as restatements, not silent edits.",
+      "fa": "یک بارگذاری شبانه: factهای روزهای گذشته کامل‌اند و اصلاح‌های دیررس به‌صورت بازنویسی اعلام‌شده می‌آیند، نه ویرایش خاموش."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n\npublic class ColumnarToy {\n    public static void main(String[] a) {\n        Map<String, Integer> dimDate = new LinkedHashMap<>();\n        for (int d = 1; d <= 14; d++) dimDate.put(\"2025-01-\" + d, (d - 1) % 7);\n        Map<Integer, String> dimProduct = Map.of(1, \"A\", 2, \"A\", 3, \"B\", 4, \"C\");\n        List<String[]> facts = new ArrayList<>(); // (day, pid, qty, amount)\n        for (int d = 1; d <= 14; d++)\n            facts.add(new String[]{\"2025-01-\" + d, String.valueOf(d % 4 + 1),\n                    String.valueOf(d), String.valueOf(d * 10.0)});\n        Map<String, Double> agg = new TreeMap<>();\n        for (String[] f : facts) {\n            if (!f[0].startsWith(\"2025\")) continue; // partition prune\n            String key = dimProduct.get(Integer.parseInt(f[1])) + \"|\" + dimDate.get(f[0]);\n            agg.merge(key, Double.parseDouble(f[3]), Double::sum);\n        }\n        agg.entrySet().stream().limit(5)\n                .forEach(e -> System.out.println(e.getKey() + \" -> \" + e.getValue()));\n        int bmCat = 0, bmWd = 0; // bitmap filter: category B AND weekday 2\n        for (int i = 0; i < facts.size(); i++) {\n            if (dimProduct.get(Integer.parseInt(facts.get(i)[1])).equals(\"B\")) bmCat |= 1 << i;\n            if (dimDate.get(facts.get(i)[0]) == 2) bmWd |= 1 << i;\n        }\n        int both = bmCat & bmWd;\n        List<Integer> rows = new ArrayList<>();\n        for (int i = 0; i < facts.size(); i++) if ((both >> i & 1) == 1) rows.add(i);\n        System.out.println(\"bitmap AND rows = \" + rows);\n        List<Double> amounts = new ArrayList<>();\n        for (int i : rows) amounts.add(Double.parseDouble(facts.get(i)[3]));\n        System.out.println(\"amounts read for those rows = \" + amounts);\n    }\n}",
+    "expected_en": "A|0 -> 90.0, A|1 -> 90.0, A|3 -> 40.0, A|4 -> 170.0, A|5 -> 130.0; bitmap AND rows = [9]; amounts read for those rows = [100.0].",
+    "expected_fa": "خروجی واقعی همین محیط (JDK 27): پنج سطر اول group-by، بعد bitmap AND rows = [9] و amounts = [100.0]. فقط سطر ۹ از ۱۴ سطر باقی ماند.",
+    "lang": "java",
+    "run_en": "javac ColumnarToy.java && java ColumnarToy — stdlib only, instant. Add a 2024 block to watch partition pruning skip it.",
+    "run_fa": "javac ColumnarToy.java && java ColumnarToy — فقط کتابخانه استاندارد، فوری. یک بلوک ۲۰۲۴ اضافه کن تا ببینی prune پارتیشن ردش می‌کند.",
+    "status": "verified"
+  },
+  "design_en": "<p>Tables: <span class=\"ltr\">fact_sales(day, pid, qty, amount)</span>, <span class=\"ltr\">dim_date(day, weekday, year)</span>, <span class=\"ltr\">dim_product(pid, category)</span>. Partition key: year and month on the fact files. Sort key inside each file: day, then category. Read path: open only last-year partitions, only the day, pid and amount lanes, filter <code>year = last year</code>, join the two small dimensions, <code>GROUP BY category, weekday</code> with <code>SUM(amount)</code>. The full SQL is <code>SELECT p.category, d.weekday, SUM(f.amount) FROM fact_sales f JOIN dim_date d ON f.day = d.day JOIN dim_product p ON f.pid = p.pid WHERE d.year = last_year GROUP BY p.category, d.weekday</code>.</p>",
+  "design_fa": "<p>جدول‌ها: <span class=\"ltr\">fact_sales(day, pid, qty, amount)</span> و <span class=\"ltr\">dim_date(day, weekday, year)</span> و <span class=\"ltr\">dim_product(pid, category)</span>. کلید پارتیشن: سال و ماه روی فایل‌های fact. کلید مرتب‌سازی داخل هر فایل: روز، بعد دسته. مسیر خواندن: فقط پارتیشن‌های سال گذشته، فقط خط‌های روز و شناسه و مبلغ، فیلتر <code>year = سال گذشته</code>، join دو بعد کوچک، <code>GROUP BY دسته و روز هفته</code> با <code>SUM(مبلغ)</code>. شکل کامل SQL: <code>SELECT p.category, d.weekday, SUM(f.amount) FROM fact_sales f JOIN dim_date d ON f.day = d.day JOIN dim_product p ON f.pid = p.pid WHERE d.year = سال_گذشته GROUP BY p.category, d.weekday</code>.</p>",
+  "failures": [
+    {
+      "en": "Late-arriving fact: a correction for March lands in April's load. Before: March partition already reported. After: restate the March partition with a visible correction note and re-run affected reports — never silently edit history.",
+      "fa": "fact دیررس: اصلاح مارس در بارگذاری آوریل می‌نشیند. قبل: پارتیشن مارس گزارش شده. بعد: بازنویسی اعلام‌شدهٔ پارتیشن مارس با یادداشت اصلاح و اجرای دوبارهٔ گزارش‌های مرتبط — هرگز ویرایش خاموش تاریخ."
+    },
+    {
+      "en": "Mid-year category move without a slowly changing dimension: January sales silently take June's label and year-over-year comparisons lie. Rule: keep both labels, report category-at-sale-time by default.",
+      "fa": "جابه‌جایی دسته وسط سال بدون بعد کندتغییر: فروش‌های ژانویه خاموش برچسب ژوئن را می‌گیرند و مقایسهٔ سال‌به‌سال دروغ می‌شود. قاعده: هر دو برچسب را نگه دار و پیش‌فرض دستهٔ زمان فروش را گزارش بده."
+    },
+    {
+      "en": "Hot-product skew plus high-cardinality ids: one product crowds a sort block so range pruning degrades, and raw bitmaps on millions of ids explode. Mitigation: isolate or re-sort the hot key, dictionary-encode ids, reserve bitmaps for low-cardinality lanes.",
+      "fa": "skew محصول داغ به‌علاوه شناسه‌های پرمقدار: یک محصول بلوک مرتب را شلوغ می‌کند و prune بازه‌ای می‌افتد و bitmap خام روی میلیون‌ها شناسه منفجر می‌شود. چاره: ایزوله یا مرتب‌سازی دوبارهٔ کلید داغ، dictionary برای شناسه‌ها و bitmap فقط برای خط‌های کم‌مقدار."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "At sale time, by default. Last year's money was earned under last year's labels; restating it under today's taxonomy answers a different question ('what would history look like under today's categories') and must be labelled as a restated view, with both labels kept in a slowly changing dimension.",
+      "a_fa": "پیش‌فرض زمان فروش. پول سال گذشته با برچسب‌های همان موقع به دست آمده؛ گزارش با طبقه‌بندی امروز سؤال دیگری است («تاریخ با دسته‌های امروز چه شکلی بود») و باید به‌عنوان نمای بازنویسی‌شده برچسب بخورد و هر دو برچسب در بعد کندتغییر بمانند.",
+      "level": "senior",
+      "q_en": "Should last year's sales use today's category or the category at the time of sale?",
+      "q_fa": "آیا فروش سال گذشته باید با دسته‌بندی امروز گزارش شود یا دسته‌بندی زمان فروش؟"
+    },
+    {
+      "a_en": "Detect it in the sort key distribution: one pid owns a whole block, so range pruning on that block degrades to a full read. Isolate the hot key (own partition or salted shards for the fact, single view at query time) and re-check the blocks-read ratio after the fix.",
+      "a_fa": "در توزیع کلید مرتب پیدایش کن: یک شناسه کل بلوک را گرفته و prune بازه‌ای روی آن بلوک به خواندن کامل تنزل می‌کند. کلید داغ را ایزوله کن (پارتیشن جدا یا شارد نمکی برای fact و نمای یکتا موقع کوئری) و بعد از چاره نسبت بلوک‌های خوانده‌شده را دوباره چک کن.",
+      "level": "senior",
+      "q_en": "One product explodes in popularity mid-year. What breaks in this design?",
+      "q_fa": "یک محصول وسط سال منفجر می‌شود. در این طراحی چه می‌شکند؟"
+    },
+    {
+      "a_en": "Design the restatement path before the incident: versioned partitions, an append-only correction log, idempotent re-runs keyed by partition version, and a data-quality check comparing restated totals against the correction log. Backfill cost is measured in partitions rewritten, so keep partitions small enough to restate cheaply.",
+      "a_fa": "مسیر بازنویسی را پیش از حادثه طراحی کن: پارتیشن‌های نسخه‌دار، لاگ اصلاح append-only، اجرای دوبارهٔ idempotent با کلید نسخهٔ پارتیشن، و چک کیفیت که جمع‌های بازنویسی‌شده را با لاگ اصلاح می‌سنجد. هزینهٔ backfill با پارتیشن‌های بازنویسی‌شده سنجیده می‌شود، پس پارتیشن‌ها را به‌اندازه‌ای کوچک نگه دار که بازنویسی ارزان بماند.",
+      "level": "staff",
+      "q_en": "How do you handle corrections and backfills without corrupting published reports?",
+      "q_fa": "اصلاح‌ها و backfillها را چطور مدیریت می‌کنی بدون این‌که گزارش‌های منتشرشده خراب شوند؟"
+    }
+  ],
+  "interview_q_en": "Design last year's total sales per category by weekday: fact and dimension tables, the SQL, partition and sort keys, and exactly which columns and blocks get read. Then explain skew, bitmap compression under stated cardinality, and what a product category change mid-history means for the report.",
+  "interview_q_fa": "مجموع فروش سال گذشته به تفکیک دسته‌بندی و روز هفته را طراحی کن: جدول‌های fact و dimension، کوئری SQL، کلیدهای پارتیشن و مرتب‌سازی، و دقیقاً کدام ستون‌ها و بلوک‌ها خوانده می‌شوند. بعد اثر skew، فشرده‌سازی bitmap با cardinality اعلام‌شده، و معنای تغییر دسته‌بندی محصول وسط تاریخ برای گزارش را توضیح بده.",
+  "lab_en": "<p>Extended lab (3-6 hours): build the sales fact plus two dimensions, write the report SQL, and state exactly which columns and blocks get read; then hand-encode the category lane (5 values) with bitmaps and run-length compression and run <span class=\"ltr\">WHERE category = B AND weekday = 2</span> with bitwise ops. This solution is the interview-sized decision map of that same path.</p>",
+  "lab_fa": "<p>آزمایشگاه تکمیلی (۳ تا ۶ ساعت): جدول فروش و دو بعد را بساز، SQL گزارش را بنویس و دقیق بگو کدام ستون‌ها و بلوک‌ها خوانده می‌شوند؛ بعد ستون دسته (۵ مقدار) را دستی bitmap و run-length کن و فیلتر <span class=\"ltr\">WHERE category = B AND weekday = 2</span> را با عملیات بیتی اجرا کن. این حل، نقشهٔ تصمیم مصاحبه‌ای همان مسیر است.</p>",
+  "mental_en": "A row store reads whole rows even when the question needs two columns; a columnar file reads whole columns but only the ones asked for. Sorting puts equal values next to each other so they compress, and partitioning lets the engine skip entire blocks without opening them.",
+  "mental_fa": "row store کل سطر را می‌خواند حتی وقتی سؤال دو ستون می‌خواهد؛ فایل ستونی کل ستون را می‌خواند ولی فقط ستون‌های خواسته‌شده را. مرتب‌سازی مقادیر مساوی را کنار هم می‌گذارد تا فشرده شوند، و پارتیشن‌بندی می‌گذارد موتور بلوک‌های کامل را بدون باز کردن رد کند.",
+  "mistakes": [
+    {
+      "en": "Writing SELECT star and reading every lane. Column pruning only works when the query names its columns — the SELECT list is the contract.",
+      "fa": "نوشتن SELECT ستاره‌ای و خواندن همهٔ خط‌ها. prune ستونی فقط وقتی کار می‌کند که کوئری ستون‌هایش را نام ببرد — فهرست SELECT همان قرارداد است."
+    },
+    {
+      "en": "Bitmap-indexing a high-cardinality id lane. One bit per row per value explodes; dictionary plus run-length encoding is the stated alternative.",
+      "fa": "ایندکس bitmap روی خط شناسهٔ پرمقدار. یک بیت به‌ازای هر سطر و مقدار منفجر می‌شود؛ جایگزین اعلام‌شده dictionary به‌علاوه run-length است."
+    },
+    {
+      "en": "Restating history under today's labels without saying so. The numbers look clean and the year-over-year story is quietly false.",
+      "fa": "بازنویسی تاریخ با برچسب‌های امروز بدون اعلام. عددها تمیز به نظر می‌رسند و قصهٔ سال‌به‌سال بی‌سروصدا دروغ می‌شود."
+    }
+  ],
+  "number": 2,
+  "slug": "columnar-pruning",
+  "sources": [
+    "microsoft",
+    "atlassian"
+  ],
+  "steps": [
+    {
+      "en": "<span class=\"ltr\">fact_sales(day, pid, qty, amount)</span> holds one row per sale; <span class=\"ltr\">dim_date(day, weekday, year)</span> and <span class=\"ltr\">dim_product(pid, category)</span> stay small and joined by key. Facts stay narrow so scans stay cheap.",
+      "fa": "<span class=\"ltr\">fact_sales(day, pid, qty, amount)</span> به‌ازای هر فروش یک سطر دارد؛ <span class=\"ltr\">dim_date(day, weekday, year)</span> و <span class=\"ltr\">dim_product(pid, category)</span> کوچک می‌مانند و با کلید join می‌شوند. factها باریک می‌مانند تا اسکن ارزان بماند.",
+      "t_en": "Shape the star first",
+      "t_fa": "اول ستاره را بکش"
+    },
+    {
+      "en": "Join facts to both dimensions, filter year = last year, group by category and weekday, sum the amount. The SELECT list names only the columns the report needs — that list is the pruning contract.",
+      "fa": "factها را به هر دو بعد join کن، سال گذشته را فیلتر کن، بر اساس دسته و روز هفته group کن و مبلغ را جمع بزن. فهرست SELECT فقط ستون‌های لازم گزارش را نام می‌برد — همان فهرست قرارداد pruning است.",
+      "t_en": "Write the SQL",
+      "t_fa": "SQL را بنویس"
+    },
+    {
+      "en": "Partition by year and month so last year's predicate discards all older blocks unopened; sort each file by day then category so equal categories sit together for run-length compression and weekday ranges prune. The demo reads day, pid and amount lanes only.",
+      "fa": "پارتیشن سال و ماه تا شرط سال گذشته بلوک‌های قدیمی را بازنکرده دور بریزد؛ مرتب‌سازی هر فایل بر اساس روز بعد دسته تا دسته‌های مساوی کنار هم برای فشرده‌سازی run-length بنشینند و بازه‌های روز هفته prune شوند. دمو فقط خط‌های روز، شناسه و مبلغ را می‌خواند.",
+      "t_en": "Keys decide what is skipped",
+      "t_fa": "کلیدها معلوم می‌کنند چه رد می‌شود"
+    },
+    {
+      "en": "Five categories fit a bitmap: one bit per row per value, AND the category and weekday bitmaps, then fetch amounts only for surviving rows. High-cardinality ids get dictionary plus run-length encoding instead — raw bitmaps would explode. A hot product crowds one sort block and weakens range pruning; isolate or re-sort it.",
+      "fa": "پنج دسته در bitmap جا می‌شود: یک بیت به‌ازای هر سطر و مقدار، AND بیت‌مپ دسته و روز هفته، بعد خواندن مبلغ فقط برای سطرهای باقی‌مانده. شناسه‌های پرمقدار dictionary به‌علاوه run-length می‌گیرند — bitmap خام منفجر می‌شود. محصول داغ یک بلوک مرتب را شلوغ می‌کند و prune بازه‌ای را ضعیف می‌کند؛ ایزوله یا دوباره مرتبش کن.",
+      "t_en": "Compress by cardinality, watch skew",
+      "t_fa": "با cardinality فشرده کن، skew را بپا"
+    },
+    {
+      "en": "A June category move must not rewrite January: keep both labels as a slowly changing dimension and report the category at sale time unless the brief explicitly asks for a restated view — and then say so on the report.",
+      "fa": "جابه‌جایی دسته در ژوئن نباید ژانویه را بازنویسی کند: هر دو برچسب را به‌صورت بعدِ کندتغییر نگه دار و دستهٔ زمان فروش را گزارش بده، مگر صورت سؤال صریح بازنویسی بخواهد — و آن‌وقت روی گزارش بنویس.",
+      "t_en": "History keeps both labels",
+      "t_fa": "تاریخ هر دو برچسب را نگه می‌دارد"
+    }
+  ],
+  "tests_en": "Verify: the group-by totals equal a direct sum over the raw facts; the bitmap AND equals a row-wise <code>category = B AND weekday = 2</code> filter. Measure: blocks read over total blocks (the pruning effect) and amount-lane fetches. Re-run both after every partition restatement.",
+  "tests_fa": "راستی‌آزمایی: جمع group-by برابر جمع مستقیم روی factهای خام است؛ نتیجهٔ AND بیتی برابر فیلتر سطری <code>category = B AND weekday = 2</code> است. اندازه بگیر: نسبت بلوک‌های خوانده‌شده به کل بلوک‌ها (اثر prune) و تعداد fetchهای خط مبلغ. بعد از هر بازنویسی پارتیشن، هر دو را دوباره اجرا کن.",
+  "worked_en": "<p>Java demo from this environment (JDK 27, 14 teaching rows): the group-by prints <code>A|0 -&gt; 90.0</code>, <code>A|1 -&gt; 90.0</code>, <code>A|3 -&gt; 40.0</code>, <code>A|4 -&gt; 170.0</code>, <code>A|5 -&gt; 130.0</code>; the bitmap filter for category B and weekday 2 gives <code>rows = [9]</code> and reads a single amount, <code>[100.0]</code>. Interpretation: one row in fourteen survives, so the amount lane pays one fetch instead of fourteen — that ratio is the whole argument for pruning, at teaching scale.</p>",
+  "worked_fa": "<p>دموی جاوا همین محیط (JDK 27، چهارده سطر آموزشی): group-by چاپ می‌کند <code>A|0 -&gt; 90.0</code> و چهار سطر مشابه؛ فیلتر بیتی دستهٔ B و روز هفتهٔ ۲ می‌دهد <code>rows = [9]</code> و فقط یک مبلغ می‌خواند: <code>[100.0]</code>. تفسیر: از چهارده سطر یکی می‌ماند، پس خط مبلغ یک خواندن می‌پردازد نه چهارده‌تا — همین نسبت کل استدلال pruning است، در مقیاس آموزشی.</p>",
+  "diagrams": [
+    {
+      "file": "diagrams/sol2-s1-query-pipeline.html",
+      "made": "archify",
+      "source": ".archify/dataflow-sales-pipeline-20261014-182412",
+      "kind_fa": "گذر داده خط کوئری",
+      "kind_en": "query-pipeline dataflow",
+      "caption_fa": "اول رد کن بعد بخوان: پارتیشن، ستون، فیلتر بیتی",
+      "caption_en": "Skip first, then read little: partition, column, bitmap filter",
+      "height": 640,
+      "narration": {
+        "failure_en": "Trace a late fact: it lands in an old partition, so the pipeline restates that partition and the totals change with a note, instead of silently editing history.",
+        "failure_fa": "fact دیررس را دنبال کن: در پارتیشن قدیمی می‌نشیند، پس خط آن پارتیشن را بازنویسی اعلام‌شده می‌کند و جمع‌ها با یادداشت عوض می‌شوند، نه ویرایش خاموش تاریخ.",
+        "guarantee_en": "The figure guarantees the skip order: partitions first, columns second, rows last. It does not fix your keys.",
+        "guarantee_fa": "شکل ترتیب رد کردن را تضمین می‌کند: اول پارتیشن‌ها، بعد ستون‌ها، آخر سطرها. کلیدهای تو را تعیین نمی‌کند.",
+        "nonguarantee_en": "It says nothing about history semantics, skew handling, or compression codecs.",
+        "nonguarantee_fa": "درباره معنای تاریخ، چارهٔ skew یا codecهای فشرده‌سازی چیزی نمی‌گوید.",
+        "point_en": "The bitmap AND is the filter point: only surviving rows pay for an amount fetch.",
+        "point_fa": "نقطهٔ فیلتر همان AND بیتی است: فقط سطرهای باقی‌مانده هزینهٔ خواندن مبلغ را می‌پردازند.",
+        "scenario_en": "Last year's report is due. Start at the partitioned fact files on the left and follow only what the query needs.",
+        "scenario_fa": "گزارش سال گذشته باید آماده شود. از فایل‌های fact پارتیشن‌بندی‌شده در چپ شروع کن و فقط چیزی را دنبال کن که کوئری لازم دارد.",
+        "steps": [
+          {
+            "en": "Fact files fan into partition prune: the year predicate keeps only last year's blocks, older ones stay unopened.",
+            "fa": "فایل‌های fact به prune پارتیشن می‌رسند: شرط سال فقط بلوک‌های سال گذشته را نگه می‌دارد و قدیمی‌ها بازنمی‌شوند."
+          },
+          {
+            "en": "Dimensions resolve at filter time: category bits from dim_product, weekday bits from dim_date, ANDed in the bitmap filter.",
+            "fa": "بعدها موقع فیلتر حل می‌شوند: بیت‌های دسته از dim_product و بیت‌های روز هفته از dim_date که در فیلتر بیتی AND می‌شوند."
+          },
+          {
+            "en": "Only surviving rows reach group-by: category by weekday sums over the amount lane alone.",
+            "fa": "فقط سطرهای باقی‌مانده به group-by می‌رسند: جمع دسته‌به‌روزهفته فقط روی خط مبلغ."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Partition prune: the year predicate discards whole blocks before any column is touched.",
+        "a_fa": "prune پارتیشن: شرط سال بلوک‌های کامل را پیش از لمس هر ستونی دور می‌ریزد.",
+        "q_en": "Which stage skips the most bytes for a last-year report, and why?",
+        "q_fa": "کدام مرحله برای گزارش سال گذشته بیشترین بایت را رد می‌کند و چرا?"
+      }
+    },
+    {
+      "file": "diagrams/sol2-columnar-pruning.html",
+      "made": "hand",
+      "kind_fa": "پنل خوانده در برابر ردشده",
+      "kind_en": "read-vs-skipped panel",
+      "caption_fa": "کدام ستون‌ها و بلوک‌ها خوانده می‌شوند و کدام رد (اعداد آموزشی)",
+      "caption_en": "Which columns and blocks are read and which are skipped (teaching numbers)",
+      "height": 640,
+      "narration": {
+        "failure_en": "Trace the late fact: it lands in an old block, so that block flips from skipped back to read, and the restated totals carry a correction note.",
+        "failure_fa": "fact دیررس را دنبال کن: در بلوک قدیمی می‌نشیند، پس آن بلوک از ردشده به خوانده برمی‌گردد و جمع‌های بازنویسی‌شده یادداشت اصلاح دارند.",
+        "guarantee_en": "The figure guarantees what is read versus skipped for this query shape. It does not set your keys or codecs.",
+        "guarantee_fa": "شکل تضمین می‌کند برای این شکل کوئری چه خوانده و چه رد می‌شود. کلیدها و codecهای تو را تعیین نمی‌کند.",
+        "nonguarantee_en": "It says nothing about history semantics, skew handling, or refresh contracts.",
+        "nonguarantee_fa": "درباره معنای تاریخ، چارهٔ skew یا قرارداد refresh چیزی نمی‌گوید.",
+        "point_en": "The decision point is the bitmap AND: only rows passing both bits pay for an amount fetch.",
+        "point_fa": "نقطهٔ تصمیم همان AND بیتی است: فقط سطرهای گذرنده از هر دو بیت هزینهٔ خواندن مبلغ می‌پردازند.",
+        "scenario_en": "The query planner faces last year's facts. Read left to right: lanes first, then blocks, then the filter math.",
+        "scenario_fa": "پلنر کوئری روبه‌روی factهای سال گذشته است. چپ‌به‌راست بخوان: اول خط‌ها، بعد بلوک‌ها، بعد حساب فیلتر.",
+        "steps": [
+          {
+            "en": "Top row: five lanes, three green READ (day, pid, amount) and two grey SKIP — column pruning before anything opens.",
+            "fa": "ردیف بالا: پنج خط، سه‌تای سبز READ (روز، شناسه، مبلغ) و دو خاکستری SKIP — prune ستونی پیش از باز شدن هرچیز."
+          },
+          {
+            "en": "Second row: year blocks — 2025 green, 2024 grey and unopened — partition pruning by the year predicate.",
+            "fa": "ردیف دوم: بلوک‌های سال — ۲۰۲۵ سبز و ۲۰۲۴ خاکستری و بازنکرده — prune پارتیشن با شرط سال."
+          },
+          {
+            "en": "Right panel: category bits AND weekday bits give the surviving rows; only their amounts are fetched.",
+            "fa": "پنل راست: بیت‌های دسته AND بیت‌های روز هفته سطرهای باقی‌مانده را می‌دهند؛ فقط مبلغ همان‌ها خوانده می‌شود."
+          },
+          {
+            "en": "Bottom panel: skew crowds a sort block, ids take dictionary encoding, and category moves keep both labels.",
+            "fa": "پنل پایین: skew بلوک مرتب را شلوغ می‌کند، شناسه‌ها dictionary می‌گیرند و جابه‌جایی دسته هر دو برچسب را نگه می‌دارد."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "The quantity lane: the SELECT list names only day, pid and amount, so qty blocks are never opened.",
+        "a_fa": "خط تعداد: فهرست SELECT فقط روز و شناسه و مبلغ را نام می‌برد، پس بلوک‌های تعداد هرگز باز نمی‌شوند.",
+        "q_en": "The report needs no quantities. Which lane from the diagram stays unopened, and what enforces that?",
+        "q_fa": "گزارش تعدادی لازم ندارد. کدام خط شکل بازنمی‌ماند و چه چیزی آن را تضمین می‌کند?"
+      }
+    }
+  ],
+  "reasoning_fa": "<p>ستونی‌بودن زمانی سود دارد که query فقط چند ستون را بخواند؛ حجم خواندن تقریباً تعداد ردیف‌های انتخاب‌شده × مجموع اندازهٔ ستون‌های لازم است، به‌علاوهٔ metadata. RLE از تکرار پشت‌سرهم سود می‌برد؛ shuffle کردن همان مقدارها فشرده‌سازی را بدتر می‌کند و نشان می‌دهد توزیع و ترتیب هر دو مهم‌اند. ۱۴ ردیف برای دیدن نتیجه با چشم است؛ نسبت آن، پیش‌بینی میلیون‌ها ردیف نیست. دادهٔ دیررس باید گزارش دورهٔ قبلی را طبق قرارداد تصحیح کند.</p>",
+  "reasoning_en": "<p>Column storage helps when queries read only a few columns: approximate bytes as selected rows × needed column widths, plus metadata. RLE benefits from consecutive repetition; shuffling identical values demonstrates why order matters. Fourteen rows make the result inspectable, not predictive at millions of rows. Late data must restate earlier reports under an explicit contract.</p>"
+}

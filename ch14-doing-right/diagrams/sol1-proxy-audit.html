@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proxy audit: delete the column, keep the correlation — DDIA Chapter 14</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Proxy audit: deleted protected column, correlated proxies, and the resulting acceptance gap">
+<title>Proxy audit assembly</title>
+<text x="620" y="54" font-size="28" font-weight="900" text-anchor="middle">Proxy audit: delete the column, keep the correlation</text>
+<text x="620" y="84" font-size="15" text-anchor="middle">SYNTHETIC demo n=2000 seed 14 - inputs zone + device - group column never read</text>
+<g>
+<rect x="30" y="104" width="350" height="276" rx="12" fill="#fffdf7"/>
+<rect x="30" y="104" width="350" height="40" rx="12" fill="#ffcfb8"/>
+<text x="50" y="131" font-size="17" font-weight="800">1 - protected column: DELETED</text>
+<text x="50" y="172" font-size="15">group A - group B (hidden)</text>
+<text x="50" y="208" font-size="15">never an input to the model</text>
+<text x="50" y="244" font-size="15" font-weight="800">law says: do not use</text>
+<rect x="50" y="262" width="310" height="98" rx="12" fill="#f7f2e8"/>
+<text x="70" y="296" font-size="15" font-weight="800">LOCKED</text>
+<text x="70" y="324" font-size="14">dropping it changes nothing:</text>
+<text x="70" y="346" font-size="14">the model never read it</text>
+</g>
+<line x1="380" y1="242" x2="420" y2="242" stroke="#b3552e" stroke-width="3"/>
+<text x="400" y="252" font-size="22" font-weight="900" text-anchor="middle" fill="#b3552e">X</text>
+<g>
+<rect x="420" y="104" width="380" height="276" rx="12" fill="#fffdf7"/>
+<rect x="420" y="104" width="380" height="40" rx="12" fill="#f3e3c2"/>
+<text x="440" y="131" font-size="17" font-weight="800">2 - proxies the model DOES read</text>
+<rect x="440" y="154" width="340" height="76" rx="12" fill="#f7f2e8"/>
+<text x="458" y="184" font-size="16" font-weight="800">postcode zone</text>
+<text x="458" y="210" font-size="14">P(high|A)=0.756  P(high|B)=0.245</text>
+<rect x="440" y="240" width="340" height="76" rx="12" fill="#f7f2e8"/>
+<text x="458" y="270" font-size="16" font-weight="800">device tier</text>
+<text x="458" y="296" font-size="14">correlated with group (synthetic)</text>
+<text x="440" y="352" font-size="14">each innocent alone - together a rebuild</text>
+</g>
+<line x1="800" y1="242" x2="840" y2="242" stroke="#1d6b3c" stroke-width="3"/>
+<text x="820" y="230" font-size="14" font-weight="800" text-anchor="middle">rebuilds</text>
+<g>
+<rect x="840" y="104" width="370" height="276" rx="12" fill="#fffdf7"/>
+<rect x="840" y="104" width="370" height="40" rx="12" fill="#bfe6c9"/>
+<text x="860" y="131" font-size="17" font-weight="800">3 - opaque model decides</text>
+<text x="860" y="172" font-size="15">score = 2*zone + device</text>
+<text x="860" y="208" font-size="15">accept if score &gt;= 2</text>
+<text x="860" y="248" font-size="16" font-weight="800">accept A 0.756 - B 0.245</text>
+<text x="860" y="284" font-size="16" font-weight="800">gap A-B = 0.511</text>
+<text x="860" y="330" font-size="14">no reason code - audit in/out only</text>
+<text x="860" y="356" font-size="14">appeal needs a human + a record</text>
+</g>
+<g>
+<rect x="30" y="396" width="285" height="104" rx="12" fill="#fffdf7"/>
+<text x="46" y="428" font-size="14">P(zone=high | A)</text>
+<text x="46" y="472" font-size="24" font-weight="900">0.756</text>
+<rect x="325" y="396" width="285" height="104" rx="12" fill="#fffdf7"/>
+<text x="341" y="428" font-size="14">P(zone=high | B)</text>
+<text x="341" y="472" font-size="24" font-weight="900">0.245</text>
+<rect x="620" y="396" width="285" height="104" rx="12" fill="#fffdf7"/>
+<text x="636" y="428" font-size="14">accept rate A / B</text>
+<text x="636" y="472" font-size="24" font-weight="900">0.756 / 0.245</text>
+<rect x="915" y="396" width="295" height="104" rx="12" fill="#bfe6c9"/>
+<text x="931" y="428" font-size="14">acceptance gap A-B</text>
+<text x="931" y="472" font-size="24" font-weight="900">0.511</text>
+</g>
+<g>
+<rect x="30" y="516" width="1180" height="114" rx="12" fill="#d7e5f5"/>
+<text x="620" y="556" font-size="17" font-weight="800" text-anchor="middle">verdict: gap 0.511 with the column deleted - proxies rebuilt it</text>
+<text x="620" y="588" font-size="14" text-anchor="middle">SYNTHETIC mechanism demo - correlation is not intent - never social evidence</text>
+<text x="620" y="612" font-size="14" text-anchor="middle">rejected loans have no outcome label: equal-opportunity needs care, see follow-up</text>
+</svg>
+</div>
+</body>
+</html>

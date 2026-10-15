@@ -1,0 +1,286 @@
+{
+  "alternatives": [
+    {
+      "en": "Processing-time windows: close by the processor clock. Wins only when produce-to-process lag is guaranteed negligible; under any real lag it manufactures the artificial spike of Figure 12-8, so this exercise rejects it with evidence.",
+      "fa": "پنجره‌های processing-time: بستن با ساعت پردازشگر. فقط وقتی می‌برد که lag تولید-تا-پردازش تضمین‌شده ناچیز باشد؛ زیر هر lag واقعی جهش مصنوعی شکل ۱۲-۸ را می‌سازد، پس این تمرین با مدرک ردش می‌کند."
+    },
+    {
+      "en": "Embedding search details inside the click event instead of joining: tells you everything about clicked searches and nothing about unclicked ones, so the rate's denominator is gone. Wins for attribution, loses for CTR.",
+      "fa": "جاسازی جزئیات جستجو درون رویداد کلیک به‌جای join: درباره جستجوهای کلیک‌شده همه‌چیز می‌گوید و درباره کلیک‌نشده‌ها هیچ‌چیز، پس مخرج نرخ از دست می‌رود. برای attribution می‌برد و برای CTR می‌بازد."
+    },
+    {
+      "en": "Stream–table join against a session table with an infinite window: wins when sessions carry rich slowly-changing profile state; costs unbounded table state and the nondeterminism of cross-stream order, where this exercise's bounded two-sided buffer stays honest.",
+      "fa": "join استریم–جدول با جدول session و پنجره نامتناهی: وقتی sessionها state غنی کندتغییر دارند می‌برد؛ قیمتش state نامتناهی جدول و ناقطعی‌بودن ترتیب میان‌استریمی است، جایی که بافر دوسویه کران‌دار این تمرین صادق می‌ماند."
+    }
+  ],
+  "answer_en": "Buffer both sides keyed by session id in event time inside a one-hour window, so either arrival order joins; close windows by watermark — the minimum over partitions with idle ones parked — never by the wall clock; take allowed lateness from the measured lateness distribution and either drop latecomers with a meter or correct them with a retracting update; define CTR as clicked searches over all searches with first-click-wins dedup. Trade-off: longer lateness buys a truer rate for more state and longer incompleteness.",
+  "answer_fa": "هر دو سو را با کلید session id در زمان رویداد و درون پنجره یک‌ساعته بافر کن تا هر ترتیب رسیدنی join شود؛ پنجره‌ها را با watermark ببند — کمینه روی پارتیشن‌ها با پارک کردن بیکارها — هرگز با ساعت دیواری؛ lateness مجاز را از توزیع اندازه‌گیری‌شده lateness بگیر و دیررس‌ها را یا با متریک بی‌خیال شو یا با update پس‌گیرنده اصلاح کن؛ CTR را کلیک‌شده‌ها بر همه جستجوها با dedupِ اول‌کلیک-می‌برد تعریف کن. بده‌بستان: lateness بیشتر نرخ درست‌تر می‌خرد به قیمت state بیشتر و ناتمامی طولانی‌تر.",
+  "assumptions": [
+    {
+      "en": "Search and click streams are co-partitioned by session id (same key, same partition count), so each session's two sides meet on one machine. Teaching load: 1M searches/hour with 200k clicks; average lateness 40s, p99 6 minutes — teaching numbers, not benchmarks.",
+      "fa": "استریم‌های جستجو و کلیک با session id هم‌پارتیشن‌اند (کلید یکسان، تعداد پارتیشن یکسان)، پس دو سوی هر session روی یک ماشین به هم می‌رسند. بار آموزشی: ۱M جستجو در ساعت با ۲۰۰k کلیک؛ میانگین lateness چهل ثانیه و p99 شش دقیقه — اعداد آموزشی‌اند نه بنچمارک."
+    },
+    {
+      "en": "Event time comes from the device interaction timestamp, corrected for device skew; duplicates arrive by redelivery and carry stable event ids.",
+      "fa": "زمان رویداد از timestamp تعامل دستگاه می‌آید با اصلاح انحراف ساعت دستگاه؛ تکراری‌ها با تحویل مجدد می‌آیند و event id پایدار دارند."
+    },
+    {
+      "en": "Corrections are acceptable downstream: the CTR consumer understands versioned values (v1 then v2 with retraction).",
+      "fa": "اصلاحیه‌ها پایین‌دست پذیرفتنی‌اند: مصرف‌کننده CTR مقادیر نسخه‌دار را می‌فهمد (اول v1 بعد v2 با پس‌گیری)."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n\n// Teaching demo: search-click windowed join on EVENT time with watermarks,\n// idle-partition handling, allowed lateness and corrections. Both arrival\n// orders work (two-sided per-session buffers + dedup sets). Stdlib only.\npublic class WindowedJoin {\n    record Ev(String kind, String session, String id, long eventTime) {}\n    static final long WINDOW = 60, ALLOWED = 10; // 1-hour window, 10-min allowed lateness (teaching)\n    Map<String, List<Ev>> searches = new HashMap<>(), clicks = new HashMap<>();\n    Set<String> seen = new HashSet<>(), matchedClick = new HashSet<>();\n    long watermark = 0;\n    int emitted = 0, unclicked = 0, droppedLate = 0, corrections = 0;\n\n    void watermarkTo(long t, Set<Integer> idle) {\n        watermark = t;\n        if (!idle.isEmpty()) System.out.println(\"  watermark=\" + t + \" (idle partitions excluded: \" + idle + \")\");\n    }\n\n    void on(Ev e) {\n        if (!seen.add(e.kind + \":\" + e.id)) { System.out.println(\"  dedup: skip \" + e.id); return; }\n        long windowEnd = (e.eventTime / WINDOW + 1) * WINDOW;\n        if (e.eventTime < watermark - ALLOWED && watermark > windowEnd) {\n            droppedLate++;\n            System.out.println(\"  late beyond horizon: DROP \" + e.id + \" (counted in late_dropped_total)\");\n            return;\n        }\n        (e.kind.equals(\"search\") ? searches : clicks)\n            .computeIfAbsent(e.session, k -> new ArrayList<>()).add(e);\n        tryMatch(e.session, windowEnd);\n    }\n\n    void tryMatch(String s, long windowEnd) {\n        List<Ev> ss = searches.getOrDefault(s, List.of());\n        List<Ev> cs = clicks.getOrDefault(s, List.of());\n        for (Ev c : cs) {\n            if (matchedClick.contains(c.id)) continue;\n            Optional<Ev> base = ss.stream()\n                .filter(x -> c.eventTime >= x.eventTime && c.eventTime - x.eventTime <= WINDOW)\n                .findFirst();\n            if (base.isPresent()) {\n                matchedClick.add(c.id);\n                emitted++;\n                System.out.println(\"  JOIN \" + base.get().id + \" x \" + c.id + \" (session \" + s + \")\");\n            }\n        }\n    }\n\n    // Watermark passes window end: searches with no click expire as \"unclicked\".\n    void closeWindow(long windowEnd) {\n        for (var en : searches.entrySet())\n            for (Ev s : en.getValue())\n                if (s.eventTime < windowEnd && clicks.getOrDefault(en.getKey(), List.of()).stream()\n                        .noneMatch(c -> matchedClick.contains(c.id) && c.eventTime - s.eventTime <= WINDOW)) {\n                    unclicked++;\n                    System.out.println(\"  EXPIRE \" + s.id + \" -> unclicked\");\n                }\n    }\n\n    // Correction path: a laggard inside allowed lateness revises the metric.\n    void correct(Ev lateClick, String searchId) {\n        matchedClick.add(lateClick.id); corrections++; unclicked--; emitted++;\n        System.out.println(\"  CORRECTION \" + searchId + \" x \" + lateClick.id + \" (retract unclicked, republish clicked)\");\n    }\n\n    public static void main(String[] a) {\n        WindowedJoin j = new WindowedJoin();\n        System.out.println(\"== 1. both arrival orders ==\");\n        j.on(new Ev(\"search\", \"s1\", \"q1\", 5));   // search first\n        j.on(new Ev(\"click\", \"s1\", \"c1\", 12));\n        j.on(new Ev(\"click\", \"s2\", \"c2\", 20));   // click BEFORE its search\n        j.on(new Ev(\"search\", \"s2\", \"q2\", 18));\n        System.out.println(\"== 2. watermark with an idle partition ==\");\n        j.watermarkTo(60, Set.of(2));            // partition 2 idle -> excluded, windows still close\n        j.closeWindow(60);\n        System.out.println(\"== 3. laggard inside lateness -> correction; outside -> drop ==\");\n        j.on(new Ev(\"search\", \"s3\", \"q3\", 61));\n        j.watermarkTo(125, Set.of());\n        j.closeWindow(120);\n        j.correct(new Ev(\"click\", \"s3\", \"c3\", 70), \"q3\"); // inside lateness: revises q3 from unclicked to clicked\n        j.on(new Ev(\"click\", \"s4\", \"c9\", 3));            // far too late -> drop\n        long denom = j.emitted + j.unclicked;\n        System.out.println(\"emitted=\" + j.emitted + \" unclicked=\" + j.unclicked\n            + \" corrections=\" + j.corrections + \" droppedLate=\" + j.droppedLate);\n        System.out.println(\"CTR(clicked searches / all searches) = \" + j.emitted + \"/\" + denom);\n        System.out.println(\"OK\");\n    }\n}\n",
+    "expected_en": "Both orders join (q1×c1, q2×c2 even though c2 arrived first); the watermark advances with partition 2 parked; q3 expires unclicked then is corrected to clicked; c9 is dropped and counted. Totals: emitted=3, unclicked=0, corrections=1, droppedLate=1, CTR 3/3. Ends with OK. (Actual output of this environment.)",
+    "expected_fa": "هر دو ترتیب join می‌شوند (q1×c1 و q2×c2 با این‌که c2 اول رسیده)؛ watermark با پارک پارتیشن ۲ جلو می‌رود؛ q3 اول unclicked منقضی و بعد به clicked اصلاح می‌شود؛ c9 انداخته و شمرده می‌شود. جمع: emitted=3 و unclicked=0 و corrections=1 و droppedLate=1 و CTR سه‌سوم. با OK تمام می‌شود. (خروجی واقعی همین محیط.)",
+    "lang": "java",
+    "run_en": "javac WindowedJoin.java && java WindowedJoin — stdlib Java only, instant. Watermarks and partitions are simulated values: this proves the join/watermark logic, not a Flink/Kafka deployment.",
+    "run_fa": "javac WindowedJoin.java && java WindowedJoin — فقط استاندارد جاوا و فوری. watermarkها و پارتیشن‌ها مقادیر شبیه‌سازی‌شده‌اند: این منطق join/watermark را اثبات می‌کند نه استقرار Flink/Kafka را.",
+    "status": "verified"
+  },
+  "design_en": "<p>Key both streams by session id with the same partitioner, so every session is processed on one machine with both sides local. State per session: the search list and click list inside the one-hour window, plus a seen-set of event ids on each side. On any arrival, buffer it and probe the other side; on a match emit clicked once (first click wins, later clicks in the same session are evidence, not new joins); when the watermark passes the window end plus allowed lateness, emit unclicked for the unmatched remainder.</p><p>CTR is defined as clicked searches over all searches in closed windows, versioned: a correction retracts v1 and publishes v2, and the denominator never changes under a correction. Watermark = minimum of per-partition watermarks; a partition silent past the idle timeout is parked (excluded with a meter) until data resumes.</p>",
+  "design_fa": "<p>هر دو استریم را با session id و همان پارتیشنر کلید بزن تا هر session روی یک ماشین با هر دو سوی محلی پردازش شود. state هر session: لیست جستجو و لیست کلیک درون پنجره یک‌ساعته به‌علاوه مجموعه دیده‌شده event idها در هر سو. با هر رسیدن، بافر کن و سوی دیگر را probe کن؛ با match فقط یک‌بار clicked منتشر کن (اول‌کلیک می‌برد و کلیک‌های بعدی همان session مدرک‌اند نه join تازه)؛ وقتی watermark از پایان پنجره به‌علاوه lateness مجاز گذشت، برای باقی‌مانده بی‌همتا unclicked منتشر کن.</p><p>CTR عبارت است از جستجوهای کلیک‌شده بر همه جستجوهای پنجره‌های بسته، نسخه‌دار: اصلاحیه v1 را پس می‌گیرد و v2 منتشر می‌کند و مخرج زیر اصلاحیه عوض نمی‌شود. watermark = کمینه watermarkهای per-partition؛ پارتیشنی که بیشتر از مهلت بیکاری ساکت مانده پارک می‌شود (با متریک کنار گذاشته می‌شود) تا داده برگردد.</p>",
+  "diagrams": [
+    {
+      "caption_en": "Join state: two-sided buffers keyed by session",
+      "caption_fa": "state اتصال: بافرهای دوسویه با کلید session",
+      "file": "diagrams/sol2-join-state.html",
+      "height": 640,
+      "kind_en": "UML class sketch",
+      "kind_fa": "نمودار کلاس UML",
+      "made": "hand",
+      "narration": {
+        "failure_en": "Read the failure out of the boxes: a click arriving before its search waits in the buffer instead of being dropped; an idle partition is parked instead of holding every window; a duplicate event id dies in the seen-set instead of inflating CTR.",
+        "failure_fa": "خرابی را از جعبه‌ها بخوان: کلیکی که قبل از جستجوش می‌رسد به‌جای انداخته شدن در بافر می‌ماند؛ پارتیشن بیکار به‌جای نگه داشتن همه پنجره‌ها پارک می‌شود؛ event id تکراری در مجموعه دیده‌شده می‌میرد به‌جای باد کردن CTR.",
+        "guarantee_en": "The figure shows the state that makes either arrival order safe. It does not show when windows close — that is the lifecycle's job, next.",
+        "guarantee_fa": "شکل stateای را نشان می‌دهد که هر ترتیب رسیدن را امن می‌کند. نشان نمی‌دهد پنجره‌ها کی بسته می‌شوند — آن کار چرخه حیات است، بعدی.",
+        "nonguarantee_en": "It says nothing about watermark sources, lateness budgets, or tenfold growth — all deliberately deferred to the next two figures.",
+        "nonguarantee_fa": "درباره منبع watermark، بودجه lateness و رشد ده‌برابری چیزی نمی‌گوید — همه عامدانه به دو شکل بعد موکول شده‌اند.",
+        "point_en": "The decision point is the buffer shape: two sides plus a dedup set, so arrival order stops mattering.",
+        "point_fa": "نقطه تصمیم شکل بافر است: دو سو به‌علاوه مجموعه dedup، پس ترتیب رسیدن بی‌اثر می‌شود.",
+        "scenario_en": "One CTR metric needs searches and clicks that travel separately. Read the three boxes left to right: what is kept, what the operator does with it, and what the metric counts.",
+        "scenario_fa": "یک متریک CTR به جستجوها و کلیک‌هایی نیاز دارد که جدا سفر می‌کنند. سه جعبه را چپ‌به‌راست بخوان: چه چیزی نگه داشته می‌شود، عملگر با آن چه می‌کند و متریک چه چیزی را می‌شمارد.",
+        "steps": [
+          {
+            "en": "SessionBuffer keeps both sides by event time plus a dedup set: the waiting room where a click may arrive before its search.",
+            "fa": "SessionBuffer هر دو سو را با زمان رویداد نگه می‌دارد به‌علاوه مجموعه dedup: اتاق انتظاری که کلیک ممکن است قبل از جستجوش برسد."
+          },
+          {
+            "en": "JoinOperator buffers every arrival and probes the other side: matches emit clicked once, expiries emit unclicked, laggards correct or drop.",
+            "fa": "JoinOperator هر رسیدن را بافر می‌کند و سوی دیگر را probe می‌کند: matchها یک‌بار clicked می‌دهند، انقضاها unclicked، دیررس‌ها اصلاح یا drop."
+          },
+          {
+            "en": "The CTR sink counts each search once with versioned values, meters the dropped late share, and alerts when that share grows.",
+            "fa": "sink ـه CTR هر جستجو را یک‌بار با مقادیر نسخه‌دار می‌شمارد، سهم دیررس انداخته‌شده را متریک می‌کند و با رشد آن هشدار می‌دهد."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "The two-sided buffer plus the seen-set: whichever arrives first waits, the match emits once, and a replayed event id is skipped.",
+        "a_fa": "بافر دوسویه به‌علاوه مجموعه دیده‌شده: هرکدام اول برسد می‌ماند، match یک‌بار منتشر می‌شود و event id بازپخش‌شده skip می‌شود.",
+        "q_en": "A click arrives before its search, then the same click is redelivered. What emits, and how many times?",
+        "q_fa": "کلیکی قبل از جستجوش می‌رسد و بعد همان کلیک دوباره تحویل می‌شود. چه چیزی و چند بار منتشر می‌شود؟"
+      }
+    },
+    {
+      "caption_en": "Window lifecycle: buffer, close by watermark, correct or drop",
+      "caption_fa": "چرخه حیات پنجره: بافر، بستن با watermark، اصلاح یا drop",
+      "file": "diagrams/sol2-window-lifecycle.html",
+      "height": 780,
+      "kind_en": "lifecycle",
+      "kind_fa": "چرخه حیات",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Walk the waiting lane: an idle partition parks on timeout and rejoins on data, so one quiet stream cannot hold every window hostage. Walk the recovery lane: a restart replays the input log by event time and rebuilds the identical window.",
+        "failure_fa": "لاین انتظار را برو: پارتیشن بیکار با timeout پارک می‌شود و با داده برمی‌گردد، پس یک استریم ساکت نمی‌تواند همه پنجره‌ها را گروگان بگیرد. لاین بازیابی را برو: restart لاگ ورودی را با زمان رویداد بازپخش می‌کند و همان پنجره را می‌سازد.",
+        "guarantee_en": "The figure shows every window state and the two late policies. It does not fix the lateness budget — that number comes from measured data, in the timeline next.",
+        "guarantee_fa": "شکل همه حالت‌های پنجره و دو سیاست دیررس را نشان می‌دهد. بودجه lateness را ثابت نمی‌کند — آن عدد از داده اندازه‌گیری‌شده می‌آید، در خط زمانی بعدی.",
+        "nonguarantee_en": "It assumes corrections are acceptable downstream; where they are not (billing), the drop branch is closed and lateness must grow instead.",
+        "nonguarantee_fa": "فرض می‌کند اصلاحیه‌ها پایین‌دست پذیرفتنی‌اند؛ جایی که نیستند (صورت‌حساب)، شاخه drop بسته است و lateness باید بزرگ شود.",
+        "point_en": "The decision point is the watermark diamond: the threshold has passed, so close — while remembering the threshold is not a promise.",
+        "point_fa": "نقطه تصمیم لوزی watermark است: آستانه گذشته پس ببند — با یادآوری این‌که آستانه قول نیست.",
+        "scenario_en": "One window's life from open to terminal. Read the main spine first, then the waiting lane that keeps it moving and the recovery lane that rebuilds it.",
+        "scenario_fa": "زندگی یک پنجره از باز تا پایانی. اول ستون فقرات اصلی، بعد لاین انتظاری که آن را جلو می‌برد و لاین بازیابی که بازمی‌سازدش.",
+        "steps": [
+          {
+            "en": "Open and buffering: the fixed event-time range accumulates timestamped searches and clicks on both sides.",
+            "fa": "باز و بافرینگ: بازه ثابت زمان‌رویداد جستجوها و کلیک‌های timestampدار هر دو سو را جمع می‌کند."
+          },
+          {
+            "en": "Watermark and emit: when the threshold passes the window end, close and publish the first value — clicked or unclicked.",
+            "fa": "watermark و انتشار: وقتی آستانه از پایان پنجره گذشت، ببند و اولین مقدار را منتشر کن — clicked یا unclicked."
+          },
+          {
+            "en": "Grace and terminals: inside allowed lateness publish a retracting correction; beyond the horizon drop, count, and alert.",
+            "fa": "مهلت و پایانی‌ها: درون lateness مجاز اصلاحیه پس‌گیرنده بده؛ آن‌ور افق بینداز، بشمار و هشدار بده."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Neither: the watermark is a threshold that says no more pre-t1 messages are expected, not a proof none will come — hence allowed lateness plus drop-or-correct.",
+        "a_fa": "هیچ‌کدام: watermark آستانه‌ای است که می‌گوید پیامی قبل از t1 انتظار نمی‌رود نه اثبات این‌که هیچ‌کدام نمی‌آید — از این رو lateness مجاز به‌علاوه drop-یا-اصلاح.",
+        "q_en": "The watermark has passed: are you certain no more events for this window will arrive?",
+        "q_fa": "watermark گذشته: مطمئنی دیگر هیچ رویدادی برای این پنجره نمی‌آید؟"
+      },
+      "source": ".archify/lifecycle-ch12-sol2-window-20261014-222300"
+    },
+    {
+      "caption_en": "Watermark timeline: idle partitions, closing windows, laggards",
+      "caption_fa": "خط زمانی watermark: پارتیشن‌های بیکار، پنجره‌های در حال بستن، دیررس‌ها",
+      "file": "diagrams/sol2-watermark-timeline.html",
+      "height": 640,
+      "kind_en": "timeline",
+      "kind_fa": "خط زمانی",
+      "made": "hand",
+      "narration": {
+        "failure_en": "Trace partition 1: quiet after t=20, parked by timeout, the watermark advancing without it — windows close on time because parking is explicit. Then trace the two arrows: the t=50 laggard lands a correction, the t=10 one is dropped and counted.",
+        "failure_fa": "پارتیشن ۱ را دنبال کن: بعد از t=20 ساکت، با timeout پارک شده و watermark بدون آن جلو می‌رود — پنجره‌ها سر وقت بسته می‌شوند چون پارک صریح است. بعد دو پیکان را دنبال کن: دیررس t=50 اصلاحیه می‌نشاند و t=10 انداخته و شمرده می‌شود.",
+        "guarantee_en": "The figure assembles the whole argument: two-sided state, watermark discipline, and measured lateness in one timeline. It does not size the tenfold state — that arithmetic lives in the worked example.",
+        "guarantee_fa": "شکل کل استدلال را سوار می‌کند: state دوسویه، انضباط watermark و lateness اندازه‌گیری‌شده در یک خط زمانی. state ده‌برابری را اندازه نمی‌کند — آن حساب در مثال محاسبه‌شده است.",
+        "nonguarantee_en": "It fixes no lateness number: 10 minutes here is a teaching budget from a p99 of 6, and the reader must re-measure on their own data.",
+        "nonguarantee_fa": "هیچ عدد latenessای را ثابت نمی‌کند: ۱۰ دقیقه این‌جا بودجه آموزشی از روی p99 شش‌دقیقه‌ای است و خواننده باید روی داده خودش دوباره بسنجد.",
+        "point_en": "The decision points are the two laggard arrows: same mechanism, different verdicts, decided by one measured horizon.",
+        "point_fa": "نقطه‌های تصمیم دو پیکان دیررس‌اند: سازوکار یکسان و حکم متفاوت با یک افق اندازه‌گیری‌شده.",
+        "scenario_en": "The assembly on one event-time axis. Read the two partition lanes, then the watermark guillotine, then the two laggard arrows that prove the horizon.",
+        "scenario_fa": "اسمبل نهایی روی یک محور زمان‌رویداد. اول دو لاین پارتیشن، بعد گیوتین watermark، بعد دو پیکان دیررس که افق را اثبات می‌کنند.",
+        "steps": [
+          {
+            "en": "Partition lanes: session events accumulate on partition 0 while partition 1 goes quiet after t=20 and is parked, not obeyed.",
+            "fa": "لاین‌های پارتیشن: رویدادهای session روی پارتیشن ۰ جمع می‌شوند و پارتیشن ۱ بعد از t=20 ساکت و پارک می‌شود نه اطاعت."
+          },
+          {
+            "en": "Watermark close: the dashed threshold reaches 60 and window [0,60) closes with its clicked and unclicked verdicts.",
+            "fa": "بستن با watermark: آستانه خط‌چین به ۶۰ می‌رسد و پنجره [0,60) با حکم‌های clicked و unclickedاش بسته می‌شود."
+          },
+          {
+            "en": "Laggard verdicts: the t=50 arrival corrects with a retraction while the t=10 arrival is dropped, counted, and alerts in aggregate.",
+            "fa": "حکم‌های دیررس: رسیدن t=50 با پس‌گیری اصلاح می‌کند و رسیدن t=10 انداخته و شمرده می‌شود و در مجموع هشدار می‌دهد."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Park it after a bounded idle timeout: exclude it from the watermark minimum with a meter, keep closing windows, and readmit it on data — never wait silently.",
+        "a_fa": "بعد از timeout بیکاری کران‌دار پارکش کن: با متریک از کمینه watermark کنارش بگذار، به بستن پنجره‌ها ادامه بده و با داده برگردانش — هرگز بی‌صدا صبر نکن.",
+        "q_en": "One partition goes quiet for an hour while the rest stream on. How do windows ever close?",
+        "q_fa": "یک پارتیشن یک ساعت ساکت می‌ماند و بقیه جاری‌اند. پنجره‌ها اصلاً چطور بسته می‌شوند؟"
+      }
+    }
+  ],
+  "failures": [
+    {
+      "en": "Click before search: the click waits in the session buffer and joins when the search lands — order-free by construction, shown live in the demo (c2 before q2).",
+      "fa": "کلیک قبل از جستجو: کلیک در بافر session می‌ماند و با رسیدن جستجو join می‌شود — ذاتاً بی‌نیاز از ترتیب، در دمو زنده نشان داده شده (c2 قبل از q2)."
+    },
+    {
+      "en": "Idle partition holds the watermark: after the idle timeout it is parked and excluded from the minimum with a meter, so windows close; on data it is readmitted and its backlog replays by event time.",
+      "fa": "پارتیشن بیکار watermark را نگه داشته: بعد از timeout بیکاری پارک و با متریک از کمینه کنار گذاشته می‌شود تا پنجره‌ها بسته شوند؛ با داده برمی‌گردد و backlog آن با زمان رویداد بازپخش می‌شود."
+    },
+    {
+      "en": "Device clock skew: occurrence time is corrected with the send/receive pair, so a lying phone clock cannot file an event into the wrong window.",
+      "fa": "انحراف ساعت دستگاه: زمان وقوع با جفت ارسال/دریافت اصلاح می‌شود تا ساعت دروغگوی گوشی رویداد را در پنجره اشتباه بایگانی نکند."
+    },
+    {
+      "en": "Duplicate delivery on both sides: stable event ids make the second arrival a skip, so a redelivered click cannot join twice or inflate CTR.",
+      "fa": "تحویل تکراری در هر دو سو: event idهای پایدار رسیدن دوم را skip می‌کنند تا کلیک بازتحویل‌شده دوبار join نشود و CTR را باد نکند."
+    },
+    {
+      "en": "Rebalance moves a session mid-window: its buffer restores from the changelog on the new owner and replay converges, because window contents are a pure function of event time.",
+      "fa": "rebalance وسط پنجره یک session را جابه‌جا می‌کند: بافر آن از changelog روی مالک تازه برمی‌گردد و بازپخش همگرا می‌شود چون محتویات پنجره تابع خالص زمان رویداد است."
+    },
+    {
+      "en": "Tenfold throughput: buffer state grows ~10x with the window (rate × window × bytes), so cold sessions spill to local disk and bounded buffers apply backpressure with lag alerts instead of dropping silently.",
+      "fa": "throughput ده‌برابری: state بافر با پنجره حدود ۱۰ برابر می‌شود (نرخ × پنجره × بایت)، پس sessionهای سرد به دیسک محلی سرریز می‌شوند و بافرهای کران‌دار به‌جای drop بی‌صدا backpressure با هشدار lag اعمال می‌کنند."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "Park it after a bounded idle timeout: exclude it from the watermark minimum, meter the exclusion, keep closing windows, and readmit on data. Never wait silently and never drop the parked backlog without replaying it by event time.",
+      "a_fa": "بعد از timeout بیکاری کران‌دار پارکش کن: از کمینه watermark کنارش بگذار، کنارگذاری را متریک کن، به بستن پنجره‌ها ادامه بده و با داده برگردانش. هرگز بی‌صدا صبر نکن و backlog پارک‌شده را بدون بازپخش با زمان رویداد نینداز.",
+      "level": "senior",
+      "q_en": "An idle partition holds back the watermark. How do you close windows safely?",
+      "q_fa": "یک partition بیکار watermark را نگه دارد؛ پنجره‌ها را چطور می‌بندی؟"
+    },
+    {
+      "a_en": "Both: the click waits in the session's click list and the search probes it on arrival — the buffer is two-sided precisely so neither order is special. The demo joins q2×c2 although c2 arrived first.",
+      "a_fa": "هر دو: کلیک در لیست کلیک session می‌ماند و جستجو با رسیدن probeاش می‌کند — بافر دقیقاً دوسویه است تا هیچ ترتیبی خاص نباشد. دمو q2×c2 را join می‌کند با این‌که c2 اول رسیده.",
+      "level": "senior",
+      "q_en": "If the click arrives before the search, which side waits, and where?",
+      "q_fa": "اگر کلیک قبل از جستجو برسد کدام سو کجا صبر می‌کند؟"
+    },
+    {
+      "a_en": "Corrections are idempotent versioned writes keyed by (session, window, version): a replayed correction carries the same version and converges, and the denominator is frozen at close so replays cannot inflate it. Exactly-once of the metric reduces to idempotent sink writes plus deterministic replay — the same two guards as Exercise 1.",
+      "a_fa": "اصلاحیه‌ها writeهای نسخه‌دار idempotent با کلید (session, window, version)اند: اصلاحیه بازپخش‌شده همان نسخه را حمل می‌کند و همگرا می‌شود و مخرج سر بستن منجمد است تا بازپخش‌ها بادش نکنند. exactly-once متریک به writeهای idempotent sink به‌علاوه بازپخش قطعی فروکاسته می‌شود — همان دو نگهبان تمرین ۱.",
+      "level": "staff",
+      "q_en": "A correction is redelivered after a crash. How does the metric stay exactly-once?",
+      "q_fa": "اصلاحیه‌ای بعد از crash دوباره تحویل می‌شود. متریک چطور exactly-once می‌ماند؟"
+    }
+  ],
+  "interview_q_en": "Join the search and click streams by session id in a one-hour event-time window. Handle either arrival order with dedup, define CTR without inflating it, and choose the watermark, idle-partition policy, allowed lateness and correction policy from measured lateness — then estimate tenfold state growth and backpressure.",
+  "interview_q_fa": "استریم‌های جستجو و کلیک را با session id در پنجره یک‌ساعته زمان‌رویداد join کن. هر دو ترتیب رسیدن را با dedup پوشش بده، CTR را بدون باد کردن تعریف کن و watermark، سیاست پارتیشن بیکار، lateness مجاز و سیاست اصلاحیه را از lateness اندازه‌گیری‌شده انتخاب کن — بعد رشد ده‌برابری state و backpressure را برآورد کن.",
+  "lab_en": "<p>Extended lab (3–6 hours): replay a day of search/click logs through this join, plot the lateness distribution, and set allowed lateness from its p99 instead of a guess; then kill a partition for an hour and watch windows keep closing. Watermark tuning needs real traffic and was not executed here.</p>",
+  "lab_fa": "<p>آزمایشگاه تکمیلی (۳–۶ ساعت): یک روز لاگ جستجو/کلیک را از این join بگذران، توزیع lateness را رسم کن و lateness مجاز را از p99 آن بگذار نه از حدس؛ بعد یک پارتیشن را یک ساعت بکش و ببین پنجره‌ها به بستن ادامه می‌دهند. تنظیم watermark ترافیک واقعی می‌خواهد و این‌جا اجرا نشده.</p>",
+  "mental_en": "A click and its search are two letters mailed separately: either can arrive first. Keep a drawer per session until the postman — the watermark — says no more letters with old dates are coming, and decide upfront what a late letter is worth: a correction, or the bin with a receipt.",
+  "mental_fa": "کلیک و جستجوش دو نامه‌اند که جدا پست شده‌اند: هرکدام ممکن است اول برسد. به‌ازای هر session یک کشو نگه دار تا پستچی — watermark — بگوید دیگر نامه‌ای با تاریخ قدیم نمی‌آید و از اول مشخص کن نامه دیررس چه می‌ارزد: اصلاحیه یا سطل با رسید.",
+  "mistakes": [
+    {
+      "en": "Closing by processing time or by a fixed few minutes picked without measuring: the timeout in the lab brief is only a stand-in until the lateness distribution replaces it.",
+      "fa": "بستن با processing time یا چند دقیقه ثابت بدون اندازه‌گیری: timeout صورت آزمایشگاه تا وقتی توزیع lateness جایگزینش شود فقط نگهدارنده جاست."
+    },
+    {
+      "en": "A many-to-many join that counts every click-search pair: CTR explodes because one search with three clicks counts three times. First-click-wins (or an explicit stated rule) keeps the metric honest.",
+      "fa": "join چندبه‌چند که هر جفت کلیک-جستجو را می‌شمارد: CTR می‌ترکد چون یک جستجو با سه کلیک سه بار شمرده می‌شود. اول‌کلیک-می‌برد (یا قاعده صریح اعلام‌شده) متریک را صادق نگه می‌دارد."
+    },
+    {
+      "en": "Dropping laggards silently: the dropped share is a metric with an alert, because a growing late fraction means the lateness budget — not the data — was wrong.",
+      "fa": "بی‌خیال شدن بی‌صدا از دیررس‌ها: سهم انداخته‌شده یک متریک با هشدار است چون رشد آن یعنی بودجه lateness اشتباه بوده نه داده."
+    },
+    {
+      "en": "Treating the watermark as a guarantee that nothing late will come: it is a threshold for closing, and the whole drop-or-correct machinery exists because the threshold can be wrong.",
+      "fa": "پنداشتن watermark به‌عنوان تضمین نیامدن دیررس: آن آستانه بستن است و کل ماشین drop-یا-اصلاح هست چون آستانه می‌تواند اشتباه باشد."
+    }
+  ],
+  "number": 2,
+  "slug": "search-click-join",
+  "sources": [
+    "kafka",
+    "atlassian"
+  ],
+  "steps": [
+    {
+      "en": "Keep a two-sided buffer per session: searches and clicks each wait for the other, so click-before-search joins exactly like search-before-click, and a seen-set on each side drops redeliveries.",
+      "fa": "به‌ازای هر session بافر دوسویه نگه دار: جستجوها و کلیک‌ها هرکدام منتظر دیگری می‌مانند تا کلیک-قبل-از-جستجو دقیقاً مثل جستجو-قبل-از-کلیک join شود و مجموعه دیده‌شده هر سو بازتحویل‌ها را بیندازد.",
+      "t_en": "Buffer both arrival orders",
+      "t_fa": "بافر هر دو ترتیب رسیدن"
+    },
+    {
+      "en": "Run on event time and watermark the minimum over partitions: a partition quiet past the idle timeout is parked and excluded with a meter, so one silent stream cannot hold every window hostage.",
+      "fa": "با زمان رویداد کار کن و کمینه روی پارتیشن‌ها را watermark کن: پارتیشن ساکتِ گذشته از timeout بیکاری پارک و با متریک کنار گذاشته می‌شود تا یک استریم ساکت همه پنجره‌ها را گروگان نگیرد.",
+      "t_en": "Watermark the minimum, park idle",
+      "t_fa": "کمینه watermark و پارک بیکار"
+    },
+    {
+      "en": "Set allowed lateness from the measured lateness distribution (teaching: 10 minutes over a p99 of 6): close at watermark past end-plus-lateness, because an unmeasured timeout is a guess wearing a number.",
+      "fa": "lateness مجاز را از توزیع اندازه‌گیری‌شده بگذار (آموزشی: ۱۰ دقیقه روی p99 شش‌دقیقه‌ای): سر گذر watermark از پایان-به‌علاوه-lateness ببند چون timeout اندازه‌گیری‌نشده حدسی است با نقاب عدد.",
+      "t_en": "Budget lateness from data",
+      "t_fa": "بودجه lateness از داده"
+    },
+    {
+      "en": "Give laggards two explicit fates: inside lateness, publish a retracting correction (v1 out, v2 in); beyond the horizon, drop, count in late_dropped_total, and alert when the share grows.",
+      "fa": "به دیررس‌ها دو سرنوشت صریح بده: درون lateness اصلاحیه پس‌گیرنده منتشر کن (v1 بیرون و v2 درون)؛ آن‌ور افق بینداز، در late_dropped_total بشمار و با رشد سهم هشدار بده.",
+      "t_en": "Correct or drop, explicitly",
+      "t_fa": "اصلاح یا drop، صریح"
+    },
+    {
+      "en": "Price tenfold growth before it arrives: buffer state scales with rate × window × bytes, so spill cold sessions to local disk and let bounded buffers push backpressure with lag alerts instead of silent drops.",
+      "fa": "رشد ده‌برابری را قبل از آمدن قیمت بگذار: state بافر با نرخ × پنجره × بایت مقیاس می‌گیرد، پس sessionهای سرد را به دیسک محلی سرریز کن و بگذار بافرهای کران‌دار با هشدار lag به‌جای drop بی‌صدا backpressure بدهند.",
+      "t_en": "Estimate 10x honestly",
+      "t_fa": "برآورد صادقانه ۱۰ برابری"
+    }
+  ],
+  "tests_en": "<p>Replay determinism: the same input log rebuilds byte-identical windows. Metrics: late_dropped_total, correction rate, watermark lag per partition, idle-park events. Method: plot the lateness CDF from a day of traffic and re-derive allowed lateness monthly; load-test at 10x with disk spill on and verify lag alerts fire before drops. A real Flink/Kafka deployment guide is out of scope here.</p>",
+  "tests_fa": "<p>قطعی‌بودن بازپخش: لاگ ورودی یکسان پنجره‌های بایت‌یکسان بازمی‌سازد. متریک‌ها: late_dropped_total، نرخ اصلاحیه، lag watermark هر پارتیشن و رویدادهای پارک بیکاری. روش: CDF lateness را از یک روز ترافیک رسم و lateness مجاز را ماهانه بازمشتق کن؛ با ۱۰ برابر بار و spill دیسک روشن تست بار بگیر و راستی‌آزمایی کن هشدارهای lag قبل از dropها شلیک می‌شوند. راهنمای استقرار واقعی Flink/Kafka این‌جا خارج قلمروست.</p>",
+  "worked_en": "<p>Teaching numbers: 1M searches/hour ≈ 278/s; each buffered session holds ~200 bytes × 2 sides × 1 hour ≈ a few GB per hour of window — at 10x, tens of GB, so cold sessions spill to local disk while hot ones stay in memory. Lateness p99 of 6 minutes sets allowed lateness to 10; the 0.3% arriving later are dropped and counted, biasing CTR down by at most that share — stated on the dashboard next to the rate, never hidden. Corrections revise fewer than 1 in 300 windows, each retracting exactly one v1.</p>",
+  "worked_fa": "<p>اعداد آموزشی: ۱M جستجو در ساعت ≈ ۲۷۸ در ثانیه؛ هر session بافرشده حدود ۲۰۰ بایت × ۲ سو × ۱ ساعت ≈ چند گیگابایت به‌ازای هر ساعت پنجره نگه می‌دارد — در ۱۰ برابر، ده‌ها گیگابایت، پس sessionهای سرد به دیسک محلی سرریز می‌شوند و داغ‌ها در حافظه می‌مانند. p99 شش‌دقیقه‌ای lateness، مجاز را ۱۰ می‌کند؛ ۰.۳٪ دیرتررسیده انداخته و شمرده می‌شوند و CTR را حداکثر به همان سهم به پایین بایاس می‌کنند — کنار نرخ روی داشبورد اعلام می‌شود، هرگز پنهان نه. اصلاحیه‌ها کمتر از ۱ در ۳۰۰ پنجره را بازبینی می‌کنند و هرکدام دقیقاً یک v1 را پس می‌گیرند.</p>",
+  "reasoning_fa": "<p>window از توزیع lateness انتخاب می‌شود، نه یک عدد رند: با p99 شش دقیقه، پنجرهٔ کوتاه‌تر تقریباً بیشتر از یک درصد lateها را خارج می‌گذارد، اما رفتار واقعی به تعریف توزیع مربوط است. state تقریباً نرخ ورود × مدت نگهداری × بایت هر ورودی است؛ افزایش window هزینهٔ RAM و recovery را بالا می‌برد. watermark ادعای پیشرفت event-time با فرض منبع است، نه اثبات رسیدن همهٔ رویدادها. retraction برای اصلاح نتیجه‌ای لازم است که قبلاً منتشر شده است.</p>",
+  "reasoning_en": "<p>Choose windows from lateness distributions. A six-minute p99 suggests shorter retention excludes more late events, subject to what population that percentile describes. State scales roughly as arrival rate × retention duration × bytes/entry, so wider windows cost RAM and recovery time. Watermarks express event-time progress assumptions, not proof all events arrived. Retractions correct previously published results.</p>"
+}

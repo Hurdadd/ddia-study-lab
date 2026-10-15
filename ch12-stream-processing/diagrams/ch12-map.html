@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 12 Map — Stream Processing at a Glance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#f7f2e8;color:#302828;
+    font-family:'Nunito','Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%;display:flex;justify-content:center;padding:10px 0;}
+  svg{width:100%;height:auto;max-width:1240px;background:#f7f2e8;}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828;}
+  .ttl{font-size:22px;font-weight:900;}
+  .cn{font-size:20px;font-weight:900;}
+  .cs{font-size:12px;font-weight:700;fill:#6e665c;}
+  .nn{font-size:14px;font-weight:900;}
+  .ns{font-size:12px;font-weight:400;}
+  .el{font-size:12px;font-weight:800;fill:#6e665c;}
+  .ft{font-size:13px;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 740" role="img" aria-label="Overview map of chapter 12: stream processing connects events, brokers, fan-out, logs, CDC, state duality, windows and exactly-once">
+<title>Chapter 12 concept map</title>
+
+  <text class="ttl" x="620" y="40" text-anchor="middle">Chapter 12 Map — Stream Processing at a Glance</text>
+
+  <g stroke="#9b9184" stroke-width="2">
+    <line x1="620" y1="313" x2="180" y2="146"/>
+    <line x1="620" y1="313" x2="620" y2="146"/>
+    <line x1="620" y1="313" x2="1060" y2="146"/>
+    <line x1="488" y1="358" x2="262" y2="358"/>
+    <line x1="752" y1="358" x2="978" y2="358"/>
+    <line x1="620" y1="403" x2="180" y2="588"/>
+    <line x1="620" y1="403" x2="620" y2="588"/>
+    <line x1="620" y1="403" x2="1060" y2="588"/>
+  </g>
+  <text class="el" x="392" y="222" text-anchor="middle">units</text>
+  <text class="el" x="662" y="222" text-anchor="middle">carry</text>
+  <text class="el" x="848" y="222" text-anchor="middle">split</text>
+  <text class="el" x="375" y="348" text-anchor="middle">order</text>
+  <text class="el" x="865" y="348" text-anchor="middle">follow</text>
+  <text class="el" x="392" y="500" text-anchor="middle">derive</text>
+  <text class="el" x="620" y="500" text-anchor="middle">bound</text>
+  <text class="el" x="848" y="500" text-anchor="middle">survive</text>
+
+  <rect x="490" y="313" width="260" height="90" rx="18" fill="#ffe08a"/>
+  <text class="cn" x="620" y="350" text-anchor="middle">STREAM PROCESSING</text>
+  <text class="cs" x="620" y="376" text-anchor="middle">unbounded events, always on</text>
+
+  <rect x="70" y="78" width="220" height="68" rx="16" fill="#ffcfb8"/>
+  <text class="nn" x="180" y="106" text-anchor="middle">Events, Topics</text>
+  <text class="ns" x="180" y="128" text-anchor="middle">immutable + timestamp</text>
+
+  <rect x="510" y="78" width="220" height="68" rx="16" fill="#bfe6c9"/>
+  <text class="nn" x="620" y="106" text-anchor="middle">Brokers</text>
+  <text class="ns" x="620" y="128" text-anchor="middle">direct vs queued vs log</text>
+
+  <rect x="950" y="78" width="220" height="68" rx="16" fill="#c3ceff"/>
+  <text class="nn" x="1060" y="106" text-anchor="middle">Balance, Fan-out</text>
+  <text class="ns" x="1060" y="128" text-anchor="middle">one of them vs all</text>
+
+  <rect x="42" y="324" width="220" height="68" rx="16" fill="#ffc2da"/>
+  <text class="nn" x="152" y="352" text-anchor="middle">Log + Offsets</text>
+  <text class="ns" x="152" y="374" text-anchor="middle">order inside, replayable</text>
+
+  <rect x="978" y="324" width="220" height="68" rx="16" fill="#d3c3f2"/>
+  <text class="nn" x="1088" y="352" text-anchor="middle">CDC</text>
+  <text class="ns" x="1088" y="374" text-anchor="middle">one leader, followers</text>
+
+  <rect x="70" y="588" width="220" height="68" rx="16" fill="#ffcfb8"/>
+  <text class="nn" x="180" y="616" text-anchor="middle">State / Stream</text>
+  <text class="ns" x="180" y="638" text-anchor="middle">integrate, derive, compact</text>
+
+  <rect x="510" y="588" width="220" height="68" rx="16" fill="#c3ceff"/>
+  <text class="nn" x="620" y="616" text-anchor="middle">Windows, Time</text>
+  <text class="ns" x="620" y="638" text-anchor="middle">event time + watermarks</text>
+
+  <rect x="950" y="588" width="220" height="68" rx="16" fill="#bfe6c9"/>
+  <text class="nn" x="1060" y="616" text-anchor="middle">Exactly-Once</text>
+  <text class="ns" x="1060" y="638" text-anchor="middle">atomic or idempotent</text>
+
+  <text class="ft" x="620" y="706" text-anchor="middle">Events ride brokers into state; windows and joins shape them; exactly-once keeps them honest.</text>
+</svg>
+</div>
+</body>
+</html>

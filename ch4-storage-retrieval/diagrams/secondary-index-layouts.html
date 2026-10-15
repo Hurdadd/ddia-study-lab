@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concept: secondary index layouts compared</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#f7f2e8;display:flex;justify-content:center;padding:24px;font-family:'Nunito','Vazirmatn',system-ui,sans-serif}
+  .stage{width:100%;max-width:1240px;background:#f7f2e8}
+  svg{display:block;width:100%;height:auto;background:#f7f2e8}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Three columns comparing clustered, heap and covering index layouts for the same query">
+<title>Secondary indexes: where does the row live?</title>
+<text x="620" y="52" text-anchor="middle" font-size="20" font-weight="800">Secondary indexes: where does the row live?</text>
+<rect x="60" y="100" width="340" height="430" rx="20" fill="#ffe08a" stroke="#302828" stroke-width="2.5"/>
+<text x="230" y="145" text-anchor="middle" font-size="18" font-weight="800">Clustered index</text>
+<line x1="80" y1="170" x2="380" y2="170" stroke="#302828" stroke-width="2"/>
+<text x="230" y="210" text-anchor="middle" font-size="15">row stored in the leaf</text>
+<text x="230" y="242" text-anchor="middle" font-size="15">e.g. InnoDB primary key</text>
+<text x="230" y="274" text-anchor="middle" font-size="15">reads: one lookup</text>
+<rect x="110" y="310" width="240" height="64" rx="18" fill="#fffdf7" stroke="#302828" stroke-width="2.5"/>
+<text x="230" y="349" text-anchor="middle" font-size="15" font-weight="800">move = costly rewrite</text>
+<rect x="450" y="100" width="340" height="430" rx="20" fill="#bfe6c9" stroke="#302828" stroke-width="2.5"/>
+<text x="620" y="145" text-anchor="middle" font-size="18" font-weight="800">Heap file + index</text>
+<line x1="470" y1="170" x2="770" y2="170" stroke="#302828" stroke-width="2"/>
+<text x="620" y="210" text-anchor="middle" font-size="15">index holds only pointers</text>
+<text x="620" y="242" text-anchor="middle" font-size="15">rows unordered in heap</text>
+<text x="620" y="274" text-anchor="middle" font-size="15">e.g. PostgreSQL</text>
+<rect x="500" y="310" width="240" height="64" rx="18" fill="#fffdf7" stroke="#302828" stroke-width="2.5"/>
+<text x="620" y="349" text-anchor="middle" font-size="15" font-weight="800">update may relocate</text>
+<rect x="840" y="100" width="340" height="430" rx="20" fill="#d3c3f2" stroke="#302828" stroke-width="2.5"/>
+<text x="1010" y="145" text-anchor="middle" font-size="18" font-weight="800">Covering index</text>
+<line x1="860" y1="170" x2="1160" y2="170" stroke="#302828" stroke-width="2"/>
+<text x="1010" y="210" text-anchor="middle" font-size="15">columns copied inside</text>
+<text x="1010" y="242" text-anchor="middle" font-size="15">answer without the heap</text>
+<text x="1010" y="274" text-anchor="middle" font-size="15">more space, more writes</text>
+<rect x="890" y="310" width="240" height="64" rx="18" fill="#fffdf7" stroke="#302828" stroke-width="2.5"/>
+<text x="1010" y="349" text-anchor="middle" font-size="15" font-weight="800">no heap visit</text>
+<rect x="60" y="560" width="1120" height="56" rx="18" fill="#ffc2da" stroke="#302828" stroke-width="2.5"/>
+<text x="620" y="596" text-anchor="middle" font-size="15" font-weight="800">Layout decides: read speed vs write cost</text>
+</svg>
+</div>
+</body>
+</html>

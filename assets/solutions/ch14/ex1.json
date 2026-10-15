@@ -1,0 +1,133 @@
+{
+  "answer_en": "Audit a lending model that never saw the group column: measure proxy correlation, delete the column and rerun — a surviving acceptance gap means the model rebuilt the group from proxies. Pick one operational fairness definition, price its accuracy cost, and keep a human appeal path. Synthetic data shows the mechanism only, never a real society.",
+  "answer_fa": "مدل وامی را ممیزی کن که ستون گروه را هیچ‌وقت ندیده: همبستگی پروکسی‌ها را بسنج، ستون را حذف و دوباره اجرا کن — شکاف پذیرشِ مانده یعنی مدل گروه را از پروکسی‌ها بازسازی کرده. یک تعریف عملیاتی از عدالت انتخاب و اثرش روی دقت را قیمت بزن و مسیر اعتراض انسانی نگه دار. داده مصنوعی فقط سازوکار را نشان می‌دهد، نه جامعه واقعی را.",
+  "assumptions": [
+    {
+      "en": "A SYNTHETIC population (seed 14, n=2000): proxy correlation is an input assumption, not a finding.",
+      "fa": "جمعیت SYNTHETIC با بذر ثابت ۱۴ و ۲۰۰۰ نفر: همبستگی پروکسی‌ها فرض ورودی است، نه یافته."
+    },
+    {
+      "en": "The model sees only zone and device; it never read the group column.",
+      "fa": "مدل فقط <span class=\"ltr\">zone</span> و <span class=\"ltr\">device</span> را می‌بیند؛ ستون گروه را هیچ‌وقت نخوانده."
+    },
+    {
+      "en": "All numbers are teaching numbers; no claim about any real population, lender, or model.",
+      "fa": "همه عددها آموزشی‌اند؛ هیچ ادعایی درباره جمعیت، وام‌دهنده یا مدل واقعی نیست."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n\n/**\n * SYNTHETIC teaching demo: a lending model that never sees the protected\n * attribute still rebuilds it from proxies. Fixed seed -> deterministic.\n * This illustrates a mechanism (proxy reconstruction). It is NOT evidence\n * about any real population, lender, or model.\n */\npublic class ProxyCorrelationDemo {\n    public static void main(String[] a) {\n        Random rnd = new Random(14);\n        int n = 2000;\n        int nA = 0, nB = 0, accA = 0, accB = 0;\n        int zoneHighA = 0, zoneHighB = 0;\n        for (int i = 0; i < n; i++) {\n            boolean groupA = rnd.nextDouble() < 0.5; // protected attribute: HIDDEN from model\n            // Proxies correlate with group (synthetic assumption, stated up front):\n            boolean zoneHigh = rnd.nextDouble() < (groupA ? 0.75 : 0.25);   // postcode zone\n            boolean deviceNew = rnd.nextDouble() < (groupA ? 0.65 : 0.35);  // device tier\n            // Model sees ONLY proxies. Dropping the group column changes nothing:\n            // the model never read it.\n            int score = (zoneHigh ? 2 : 0) + (deviceNew ? 1 : 0);\n            boolean accept = score >= 2;\n            if (groupA) {\n                nA++;\n                if (zoneHigh) zoneHighA++;\n                if (accept) accA++;\n            } else {\n                nB++;\n                if (zoneHigh) zoneHighB++;\n                if (accept) accB++;\n            }\n        }\n        double rateA = (double) accA / nA, rateB = (double) accB / nB;\n        System.out.println(\"SYNTHETIC population, n=\" + n + \" (seed 14). Model inputs: zone, device. Group column: never read.\");\n        System.out.println(\"P(zone=high | group A) = \" + String.format(\"%.3f\", (double) zoneHighA / nA));\n        System.out.println(\"P(zone=high | group B) = \" + String.format(\"%.3f\", (double) zoneHighB / nB));\n        System.out.println(\"acceptance rate group A = \" + String.format(\"%.3f\", rateA));\n        System.out.println(\"acceptance rate group B = \" + String.format(\"%.3f\", rateB));\n        System.out.println(\"acceptance gap (A-B)    = \" + String.format(\"%.3f\", rateA - rateB));\n        System.out.println(\"VERDICT: gap persists with the protected column deleted -> proxies rebuilt it (mechanism demo, not social evidence).\");\n    }\n}\n",
+    "expected_en": "P(zone=high|A)=0.756 vs P(zone=high|B)=0.245; acceptance 0.756 vs 0.245, gap 0.511 — with the protected column never read. (actual output of this environment)",
+    "expected_fa": "۰٫۷۵۶ در برابر ۰٫۲۴۵ برای پروکسی و پذیرش، با شکاف ۰٫۵۱۱ — با ستونی که هیچ‌وقت خوانده نشد. (خروجی واقعی همین محیط)",
+    "lang": "java",
+    "run_en": "javac ProxyCorrelationDemo.java && java ProxyCorrelationDemo — stdlib Java only, instant, deterministic (seed 14).",
+    "run_fa": "javac ProxyCorrelationDemo.java && java ProxyCorrelationDemo — فقط استاندارد جاوا، فوری و قطعی (بذر ۱۴).",
+    "status": "verified"
+  },
+  "diagram": {
+    "caption_en": "Deleted column, surviving gap: proxies rebuilt the group",
+    "caption_fa": "ستون حذف‌شده، شکاف مانده: پروکسی‌ها گروه را بازسازی کردند",
+    "file": "diagrams/sol1-proxy-audit.html",
+    "kind_en": "assembly",
+    "kind_fa": "مونتاژ",
+    "made": "hand"
+  },
+  "followups": [
+    {
+      "a_en": "Equal opportunity needs true outcomes (who would actually have repaid), but we only observe outcomes for approved loans — label bias. The honest answer: report acceptance-rate parity alongside the gap, keep human review of borderline bands, state the limitation explicitly, and never claim a simulation fills it.",
+      "a_fa": "برابری فرصت به نتیجه واقعی نیاز دارد (چه کسی واقعاً پس می‌داد) ولی ما فقط نتیجه وام‌های پذیرفته‌شده را می‌بینیم — سوگیری برچسب. جواب صادق: گزارش برابری نرخ پذیرش کنار شکاف، بازبینی انسانی باندهای مرزی و گفتن صریح محدودیت؛ و هرگز ادعا نکردن که شبیه‌سازی این شکاف را پر می‌کند.",
+      "level": "senior",
+      "q_en": "There is no outcome label for rejected loans. What problem does this cause for equal-opportunity evaluation?",
+      "q_fa": "وام‌های ردشده برچسب نتیجه ندارند؛ ارزیابی برابری فرصت چه مشکلی پیدا می‌کند؟"
+    },
+    {
+      "a_en": "Neither alone: choose the definition from the product's error costs (a rejected loan vs a rejected livelihood weigh differently), report both definitions' accuracy and subgroup effects, and record the choice with its evidence — fairness is a recorded contract, not a number.",
+      "a_fa": "هیچکدام به‌تنهایی: تعریف را از هزینه خطای محصول انتخاب کن (وام ردشده با نانِ بریده‌شده یکی نیست)، اثر هر دو تعریف را روی دقت و گروه‌ها گزارش کن و تصمیم را با مدرکش ثبت کن — عدالت یک قرارداد ثبت‌شده است نه یک عدد.",
+      "level": "staff",
+      "q_en": "Two fairness definitions conflict. Which one do you ship?",
+      "q_fa": "دو تعریف عدالت با هم در تضادند؛ کدام را منتشر می‌کنی؟"
+    }
+  ],
+  "interview_q_en": "Analyze protected-group proxies and unequal acceptance in a lending model. Choose an operational fairness objective, address label bias and evaluate subgroup outcomes, utility, appeals and synthetic-data limitations.",
+  "interview_q_fa": "پروکسی‌های گروه محافظت‌شده و پذیرش نابرابر را در مدل وام تحلیل کن. هدف عدالت عملیاتی را انتخاب کن؛ سوگیری برچسب را پوشش بده و نتیجه per-group، مطلوبیت، اعتراض و محدودیت داده مصنوعی را ارزیابی کن.",
+  "mental_en": "Deleting the column removes the label, not the information: if two permitted features jointly reveal the group, the model learns the same discrimination with a clean appearance — bias laundering. Auditing means measuring that reconstruction, not guessing the model's intent.",
+  "mental_fa": "حذف ستون یعنی پاک کردن برچسب، نه پاک کردن اطلاعات: اگر دو ویژگی مجاز ترکیب‌شان همان گروه را لو بدهد، مدل همان تبعیض را با ظاهر تمیز یاد می‌گیرد — پول‌شویی سوگیری. ممیزی یعنی همین بازسازی را اندازه گرفتن، نه حدس زدن نیت مدل.",
+  "mistakes": [
+    {
+      "en": "Deleting the protected column means the model is now fair. Reconstruction from proxies is exactly what the demo measures — removing the label is not removing the information.",
+      "fa": "حذف ستون محافظت‌شده یعنی مدل حالا عادل است. بازسازی از پروکسی دقیقاً همان چیزی است که دمو اندازه می‌گیرد — حذف برچسب حذف اطلاعات نیست."
+    },
+    {
+      "en": "One fairness metric (or one synthetic run) settles the matter. Metrics conflict with each other, and synthetic data shows only the mechanism — it is never social evidence.",
+      "fa": "یک معیار عدالت (یا یک اجرای مصنوعی) حکم نهایی است. معیارها با هم در تضادند و داده مصنوعی فقط سازوکار را نشان می‌دهد — هرگز مدرک اجتماعی نیست."
+    }
+  ],
+  "narration": {
+    "failure_en": "Reading correlation as intent fights a malice that is not there; calling the gap settled with one metric lets tomorrow's discrimination ride the same model.",
+    "failure_fa": "خواندن همبستگی به‌جای نیت، جنگ با سوءنیتی است که نیست؛ تمام‌شده دانستن شکاف با یک معیار، تبعیض فردا را با همان مدل برمی‌گرداند.",
+    "guarantee_en": "The figure shows the reconstruction mechanism and its numbers — on labelled synthetic data.",
+    "guarantee_fa": "شکل سازوکار بازسازی و عددهایش را نشان می‌دهد — روی داده مصنوعیِ برچسب‌خورده.",
+    "nonguarantee_en": "It says nothing about any real population, lender, or model; equal opportunity without rejected-loan labels is outside this figure too.",
+    "nonguarantee_fa": "درباره هیچ جمعیت، وام‌دهنده یا مدل واقعی چیزی نمی‌گوید؛ برابری فرصت بدون برچسب وام‌های ردشده هم بیرون این شکل است.",
+    "point_en": "The decision point is each panel's label: locked (do not read), proxy (read and measure), decision (demand an explanation). A panel with no mechanism is the finding.",
+    "point_fa": "نقطه تصمیم برچسب هر پنل است: قفل (نخوان)، پروکسی (بخوان و بسنج)، تصمیم (توضیح بخواه). پنل بدون سازوکار همان یافته است.",
+    "scenario_en": "A lending model that never saw the group column accepts one group at half the other's rate. Read left to right: the locked column, the proxies actually read, the decision — then the numbers table.",
+    "scenario_fa": "مدل وامی که ستون گروه را هیچ‌وقت ندیده، یک گروه را نصف گروه دیگر قبول می‌کند. چپ‌به‌راست بخوان: ستون قفل، پروکسی‌های خوانده‌شده، تصمیم — بعد جدول عددها.",
+    "steps": [
+      {
+        "en": "First panel: the group column is locked — deleted before training, never read. The label is gone here, and so is the temptation to call it done.",
+        "fa": "پنل اول: ستون گروه قفل است — قبل از آموزش حذف شده و هیچ‌وقت خوانده نشده. برچسب این‌جا رفته و وسوسه تمام‌شده دانستن هم."
+      },
+      {
+        "en": "Second panel: the two proxies actually read — postcode at 0.756 vs 0.245 is effectively the group itself; device tier correlates too. Innocent alone, a clean rebuild together.",
+        "fa": "پنل دوم: دو پروکسی خوانده‌شده — کدپستی با ۰٫۷۵۶ در برابر ۰٫۲۴۵ عملاً خود گروه است؛ مدل دستگاه هم همبسته است. به‌تنهایی بی‌گناه و کنار هم بازسازی تمیز."
+      },
+      {
+        "en": "Third panel: the opaque model scores from those two inputs and out comes the 0.511 gap — with no reason code. The auditor sees inputs and outputs only.",
+        "fa": "پنل سوم: مدل opaque از همان دو ورودی نمره می‌دهد و شکاف ۰٫۵۱۱ بیرون می‌آید — بدون هیچ کد دلیلی. حسابرس فقط ورودی و خروجی را می‌بیند."
+      },
+      {
+        "en": "Bottom table: the demo's four real numbers (seed 14) and the verdict strip — the gap survived the deleted column, so reconstruction happened. The last line is the honesty clause: synthetic, not social.",
+        "fa": "جدول پایین: چهار عدد واقعی دمو (بذر ۱۴) و نوار حکم — شکاف با ستون حذف‌شده ماند، پس بازسازی رخ داده. خط آخر بند صداقت است: مصنوعی، نه اجتماعی."
+      }
+    ]
+  },
+  "number": 1,
+  "selfcheck": {
+    "a_en": "It proves the proxies carry the group information and the model reconstructed it (mechanism, on synthetic data). It proves nothing about any real model discriminating, nor any intent — correlation is not intent.",
+    "a_fa": "ثابت می‌کند پروکسی‌ها اطلاعات گروه را حمل کردند و مدل بازسازی‌اش کرده (سازوکار، روی داده مصنوعی). درباره تبعیض هیچ مدل واقعی یا نیت بدی چیزی ثابت نمی‌کند — همبستگی نیت نیست.",
+    "q_en": "The group column is deleted yet the gap is 0.511. What exactly does that prove, and what does it not?",
+    "q_fa": "ستون گروه حذف شده ولی شکاف ۰٫۵۱۱ است؛ دقیقاً چه چیزی را ثابت می‌کند و چه چیزی را نه؟"
+  },
+  "slug": "proxy-audit",
+  "sources": [
+    "microsoft",
+    "atlassian"
+  ],
+  "steps": [
+    {
+      "en": "Per proxy compute P(proxy|group): zone=high at 0.756 vs 0.245 is effectively the group label. High correlation means reconstructability, not proof of deliberate discrimination.",
+      "fa": "برای هر پروکسی <span class=\"ltr\">P(proxy|group)</span> را حساب کن: <span class=\"ltr\">zone=high</span> با ۰٫۷۵۶ در برابر ۰٫۲۴۵ عملاً برچسب گروه است. همبستگی بالا یعنی قابلیت بازسازی، نه proof تبعیض عمدی.",
+      "t_en": "Measure correlation, not intent",
+      "t_fa": "همبستگی را بسنج، نیت را نه"
+    },
+    {
+      "en": "Proxies alone accept at 0.756 vs 0.245 — gap 0.511 — with a column never read. That is the reconstruction, and the demo prints exactly this.",
+      "fa": "پروکسی‌ها به‌تنهایی ۰٫۷۵۶ در برابر ۰٫۲۴۵ قبول می‌کنند — شکاف ۰٫۵۱۱ — با ستونی که هیچ‌وقت خوانده نشد. این همان بازسازی است و دمو دقیقاً همین را چاپ می‌کند.",
+      "t_en": "Delete the column and rerun",
+      "t_fa": "ستون را حذف و دوباره اجرا کن"
+    },
+    {
+      "en": "Pick one operational definition (e.g. acceptance-rate parity), measure its accuracy cost, and admit no single metric suffices; rejected loans carry no outcome label, so keep human monitoring and a real appeal path.",
+      "fa": "یک تعریف عملیاتی انتخاب کن (مثلاً برابری نرخ پذیرش)، اثرش روی دقت را بسنج و بپذیر هیچ معیاری به‌تنهایی کافی نیست؛ وام‌های ردشده برچسب نتیجه ندارند، پس پایش انسانی و مسیر اعتراض واقعی نگه دار.",
+      "t_en": "Operational fairness, price, appeal",
+      "t_fa": "عدالت عملیاتی، قیمت، اعتراض"
+    }
+  ],
+  "tests_en": "<p>Weekly per-subgroup acceptance rates and the gap; a column-deletion rerun (a surviving gap means reconstruction); one invariant: no decision is final without a human appeal path. Metrics: per-group score distributions and appeal rates.</p>",
+  "tests_fa": "<p>نرخ پذیرش per-subgroup و شکافش هر هفته؛ اجرای دوباره با حذف ستون (شکاف مانده یعنی بازسازی)؛ یک invariant: هیچ تصمیمی بدون مسیر اعتراض انسانی نهایی نیست. معیار: توزیع نمره per-group و نرخ اعتراض.</p>",
+  "worked_en": "<p>Synthetic data (seed 14, 2000 people): <span class=\"ltr\">P(zone=high|A)=0.756</span> vs <span class=\"ltr\">P(zone=high|B)=0.245</span>; acceptance 0.756 vs 0.245, gap 0.511. Reading: the gap survived the deleted column, so the proxies rebuilt it. Units: rates (unitless). These numbers belong to this synthetic population only.</p>",
+  "worked_fa": "<p>داده مصنوعی (بذر ۱۴، ۲۰۰۰ نفر): <span class=\"ltr\">P(zone=high|A)=0.756</span> در برابر <span class=\"ltr\">P(zone=high|B)=0.245</span>؛ پذیرش ۰٫۷۵۶ در برابر ۰٫۲۴۵ و شکاف ۰٫۵۱۱. تفسیر: شکاف با حذف ستون نرفت، پس پروکسی‌ها بازسازی‌اش کردند. واحد: نرخ (بدون واحد). این عددها فقط مال همین جمعیت مصنوعی‌اند.</p>",
+  "reasoning_fa": "<p>دادهٔ مصنوعی correlation را از پیش می‌سازد؛ بنابراین اختلاف نتیجه نشان می‌دهد مدل می‌تواند proxy را یاد بگیرد، نه اینکه چنین تبعیضی در جامعه اندازه‌گیری شده است. حذف ستون گروه کافی نیست چون zone/device می‌توانند اطلاعات آن را حمل کنند. نرخ انتخاب هر گروه را بر شمار همان گروه تقسیم می‌کنیم تا تفاوت اندازهٔ گروه‌ها نتیجه را منحرف نکند؛ هیچ metric واحدی به‌تنهایی حکم عادلانه‌بودن نمی‌دهد.</p>",
+  "reasoning_en": "<p>Synthetic data builds correlation into the inputs, demonstrating proxy learning rather than measuring real discrimination. Removing group labels is insufficient when zone/device carry correlated information. Divide selections by each group’s population to avoid group-size distortion. No single metric establishes fairness by itself.</p>"
+}

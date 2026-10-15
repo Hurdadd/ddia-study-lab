@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timeout Ambiguity — Three Failures, One Symptom (Figure 9-1)</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .row-lbl{font:700 13.5px system-ui,sans-serif; fill:#fbbf24}
+  .pill-t{font:700 13px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .edge-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .warn-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#fda4af}
+  .badge-t{font:700 12px ui-monospace,Menlo,monospace; fill:#fbbf24}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .note{font:12.5px system-ui,sans-serif; fill:#cfe3ff}
+  .note-h{font:700 13px system-ui,sans-serif; fill:#fbbf24}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="Three ways a request can fail so that the client only sees silence">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#93c5fd"/>
+    </marker>
+    <marker id="arrg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="30" text-anchor="middle">If You Send a Request and Get No Response, You Cannot Tell Why</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">Figure 9-1 in three timelines: (a) the request is lost · (b) the node is down · (c) the response is lost — the client cannot tell them apart</text>
+
+  <!-- ================= ROW A : request lost ================= -->
+  <g>
+    <text class="row-lbl" x="60" y="98">(a) The request is lost on the network</text>
+
+    <rect x="230" y="112" width="140" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="pill-t" x="300" y="132" text-anchor="middle">Client</text>
+    <rect x="810" y="112" width="140" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="pill-t" x="880" y="132" text-anchor="middle">Remote Node</text>
+
+    <line x1="300" y1="142" x2="300" y2="228" stroke="#2a3652" stroke-width="1.4" stroke-dasharray="4 5"/>
+    <line x1="880" y1="142" x2="880" y2="228" stroke="#2a3652" stroke-width="1.4" stroke-dasharray="4 5"/>
+
+    <line x1="300" y1="168" x2="536" y2="168" stroke="#93c5fd" stroke-width="2" marker-end="url(#arr)"/>
+    <text class="edge-lbl" x="410" y="158" text-anchor="middle">request</text>
+    <line x1="546" y1="158" x2="566" y2="178" stroke="#fda4af" stroke-width="3"/>
+    <line x1="566" y1="158" x2="546" y2="178" stroke="#fda4af" stroke-width="3"/>
+    <text class="warn-lbl" x="556" y="198" text-anchor="middle">dropped</text>
+    <line x1="578" y1="168" x2="874" y2="168" stroke="#93c5fd" stroke-width="1.4" stroke-dasharray="3 6" opacity="0.35"/>
+    <text class="small" x="726" y="198" text-anchor="middle">never arrives — the node is healthy and waiting</text>
+
+    <text class="warn-lbl" x="312" y="222">timeout fires: still no reply</text>
+
+    <rect x="980" y="150" width="230" height="58" rx="10" fill="#1b2438" stroke="#2a3652" stroke-width="1.3"/>
+    <text class="small" x="1095" y="172" text-anchor="middle">the client only observes</text>
+    <text class="badge-t" x="1095" y="194" text-anchor="middle">"no response yet"</text>
+  </g>
+
+  <!-- ================= ROW B : node down ================= -->
+  <g>
+    <text class="row-lbl" x="60" y="278">(b) The remote node has crashed</text>
+
+    <rect x="230" y="292" width="140" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="pill-t" x="300" y="312" text-anchor="middle">Client</text>
+    <rect x="810" y="292" width="140" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="pill-t" x="880" y="312" text-anchor="middle">Remote Node</text>
+
+    <line x1="300" y1="322" x2="300" y2="408" stroke="#2a3652" stroke-width="1.4" stroke-dasharray="4 5"/>
+    <line x1="880" y1="322" x2="880" y2="408" stroke="#2a3652" stroke-width="1.4" stroke-dasharray="4 5"/>
+
+    <line x1="300" y1="348" x2="838" y2="348" stroke="#93c5fd" stroke-width="2" marker-end="url(#arr)"/>
+    <text class="edge-lbl" x="560" y="338" text-anchor="middle">request</text>
+    <line x1="852" y1="338" x2="872" y2="358" stroke="#fda4af" stroke-width="3"/>
+    <line x1="872" y1="338" x2="852" y2="358" stroke="#fda4af" stroke-width="3"/>
+    <text class="warn-lbl" x="880" y="382" text-anchor="middle">crashed / powered off</text>
+    <text class="small" x="620" y="382" text-anchor="middle">the request may be lost, queued, or delivered to nobody</text>
+
+    <text class="warn-lbl" x="312" y="402">timeout fires: still no reply</text>
+
+    <rect x="980" y="330" width="230" height="58" rx="10" fill="#1b2438" stroke="#2a3652" stroke-width="1.3"/>
+    <text class="small" x="1095" y="352" text-anchor="middle">the client only observes</text>
+    <text class="badge-t" x="1095" y="374" text-anchor="middle">"no response yet"</text>
+  </g>
+
+  <!-- ================= ROW C : response lost ================= -->
+  <g>
+    <text class="row-lbl" x="60" y="458">(c) The node works, but the response is lost</text>
+
+    <rect x="230" y="472" width="140" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="pill-t" x="300" y="492" text-anchor="middle">Client</text>
+    <rect x="810" y="472" width="140" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="pill-t" x="880" y="492" text-anchor="middle">Remote Node</text>
+
+    <line x1="300" y1="502" x2="300" y2="588" stroke="#2a3652" stroke-width="1.4" stroke-dasharray="4 5"/>
+    <line x1="880" y1="502" x2="880" y2="588" stroke="#2a3652" stroke-width="1.4" stroke-dasharray="4 5"/>
+
+    <line x1="300" y1="522" x2="838" y2="522" stroke="#93c5fd" stroke-width="2" marker-end="url(#arr)"/>
+    <text class="edge-lbl" x="560" y="512" text-anchor="middle">request — applied successfully</text>
+
+    <line x1="880" y1="556" x2="578" y2="556" stroke="#86efac" stroke-width="2" marker-end="url(#arrg)"/>
+    <text class="edge-lbl" x="720" y="546" text-anchor="middle">response</text>
+    <line x1="546" y1="546" x2="566" y2="566" stroke="#fda4af" stroke-width="3"/>
+    <line x1="566" y1="546" x2="546" y2="566" stroke="#fda4af" stroke-width="3"/>
+    <text class="warn-lbl" x="556" y="586" text-anchor="middle">lost</text>
+    <text class="small" x="400" y="546" text-anchor="middle">the write already happened</text>
+
+    <text class="warn-lbl" x="312" y="582">timeout fires: still no reply</text>
+
+    <rect x="980" y="510" width="230" height="58" rx="10" fill="#1b2438" stroke="#2a3652" stroke-width="1.3"/>
+    <text class="small" x="1095" y="532" text-anchor="middle">the client only observes</text>
+    <text class="badge-t" x="1095" y="554" text-anchor="middle">"no response yet"</text>
+  </g>
+
+  <!-- ================= note ================= -->
+  <rect x="60" y="600" width="1150" height="50" rx="10" fill="#1b2438" stroke="#fbbf24" stroke-width="1.3" stroke-dasharray="6 4"/>
+  <text class="note-h" x="76" y="622">The only fact the client has</text>
+  <text class="note" x="76" y="642">"No reply has arrived yet." A timeout is a guess, not proof of failure — and in case (c) the effect is already applied, so a blind retry can do the work twice.</text>
+</svg>
+</div>
+</body>
+</html>

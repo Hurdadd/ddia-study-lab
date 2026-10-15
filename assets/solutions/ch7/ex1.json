@@ -1,0 +1,263 @@
+{
+  "alternatives": [
+    {
+      "en": "If one-sensor-month reads are rare and writes flood in, take full-key hashing: perfectly even writes, 8-shard reads. Accept the merge price openly instead of discovering it in review.",
+      "fa": "اگر خواندن «یک ماهِ یک سنسور» نادر و نوشتن سیل‌آسا باشد، <span class=\"ltr\">hash</span> کلید کامل را ببر: نوشتن کاملاً یکنواخت و خواندن ۸ شاردی. بهای ادغام را علنی بپذیر نه اینکه در ریویو کشفش کنی."
+    },
+    {
+      "en": "If the dominant query is 'all sensors in one day', timestamp ranges win: one day lives on one shard. Price: today's shard is always hot — roster capacity for it.",
+      "fa": "اگر کوئری غالب «همهٔ سنسورها در یک روز» باشد، بازهٔ <span class=\"ltr\">timestamp</span> برنده است: یک روز روی یک شارد. بها: شارد امروز همیشه داغ است — برایش ظرفیت کنار بگذار."
+    }
+  ],
+  "answer_en": "Pick sensor:timestamp keys because the dominant query ('one sensor, one month') resolves with a single-shard range scan (fan-out 1); split the hot sensor with a 00..99 suffix and drop old months whole-shard by retention. Price: the 40% sensor owns about half a shard, and multi-sensor reads need several separate queries.",
+  "answer_fa": "کلید <span class=\"ltr\">sensor:timestamp</span> را انتخاب کن چون کوئری غالب («یک ماهِ یک سنسور») با یک <span class=\"ltr\">range scan</span> تک‌شاردی جواب می‌گیرد (<span class=\"ltr\">fan-out</span> یک)؛ سنسور داغ را با پسوند ۰۰ تا ۹۹ می‌شکنی و ماه‌های قدیم را با <span class=\"ltr\">retention</span> whole-shard می‌اندازی. بها: سنسور ۴۰٪ حدود نیمی از یک شارد را می‌گیرد و خواندن چندسنسوری چند کوئری جدا می‌خواهد.",
+  "assumptions": [
+    {
+      "en": "8 shards and 120k teaching writes over 30 days from 51 sensors; sensor-0 holds 40% of writes (fixed seed 7).",
+      "fa": "۸ شارد و ۱۲۰هزار نوشتن آموزشی روی ۳۰ روز از ۵۱ سنسور؛ سنسور صفر ۴۰٪ نوشتن‌ها را دارد (seed ثابت ۷)."
+    },
+    {
+      "en": "Instantaneous load is one shard's share of one day's writes; monthly load is its share of the whole month. Fan-out is the shards touched by one query.",
+      "fa": "بار لحظه‌ای یعنی سهم یک شارد از نوشتن‌های یک روز؛ بار ماهانه یعنی سهمش از کل ماه. <span class=\"ltr\">fan-out</span> یعنی تعداد شاردهای درگیر در یک کوئری."
+    },
+    {
+      "en": "Numbers are teaching aids, never benchmarks; the pattern (which shard heats) matters, not the exact figure.",
+      "fa": "عددها آموزشی‌اند، هرگز بنچمارک نیستند؛ الگو (کدام شارد داغ می‌شود) مهم است نه رقم دقیق."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n// Teaching demo: 4 sharding schemes over one synthetic month of sensor writes.\n// 8 shards, 51 sensors (sensor-0 is hot: 40% of all writes), 30 days.\npublic class ShardSim {\n    static int fnv(String s) {\n        int h = 0x811c9dc5;\n        for (int i = 0; i < s.length(); i++) { h ^= s.charAt(i); h *= 0x01000193; }\n        return h & 0x7fffffff;\n    }\n    public static void main(String[] a) {\n        int SH = 8, DAYS = 30, N = 120000;\n        Random r = new Random(7);\n        int[] sen = new int[N]; int[] day = new int[N];\n        for (int i = 0; i < N; i++) {\n            sen[i] = (r.nextInt(100) < 40) ? 0 : 1 + r.nextInt(50); // hot sensor = 40%\n            day[i] = 1 + r.nextInt(DAYS);\n        }\n        int[][] cnt = new int[4][SH];\n        int[][] day15 = new int[4][SH];\n        for (int i = 0; i < N; i++) {\n            int s = sen[i], d = day[i];\n            int A = (d - 1) * SH / DAYS;          // timestamp-range\n            int B = s % SH;                        // sensor:timestamp range\n            int C = fnv(\"s\" + s) % SH;             // hash(sensor_id)\n            int D = fnv(\"s\" + s + \":\" + d + \":\" + i) % SH; // hash(full key)\n            cnt[0][A]++; cnt[1][B]++; cnt[2][C]++; cnt[3][D]++;\n            if (d == 15) { day15[0][A]++; day15[1][B]++; day15[2][C]++; day15[3][D]++; }\n        }\n        String[] names = {\"ts-range      \", \"sensor:ts     \", \"hash(sensor)  \", \"hash(full key)\"};\n        // query fan-out for \"all of sensor-5 in one month\": shards touched\n        int[] fan = new int[4];\n        Set<Integer> t = new HashSet<>();\n        for (int d = 1; d <= DAYS; d++) t.add((d - 1) * SH / DAYS);\n        fan[0] = t.size(); fan[1] = 1; fan[2] = 1; fan[3] = SH;\n        System.out.println(\"scheme        | monthly max-shard% | day15 max-shard% | one-sensor-month fan-out\");\n        for (int k = 0; k < 4; k++) {\n            int mx = 0, dx = 0;\n            for (int j = 0; j < SH; j++) { mx = Math.max(mx, cnt[k][j]); dx = Math.max(dx, day15[k][j]); }\n            int dtot = 0; for (int j = 0; j < SH; j++) dtot += day15[k][j];\n            System.out.printf(\"%s | %6.1f%% (%6d) | %6.1f%% (%5d) | %d shards%n\",\n                names[k], 100.0 * mx / N, mx, 100.0 * dx / dtot, dx, fan[k]);\n        }\n        System.out.println(\"hot sensor-0 share of all writes = 40.0% (by construction)\");\n        System.out.println(\"OK\");\n    }\n}\n",
+    "expected_en": "Monthly max shares 13.5 / 47.2 / 48.5 / 12.6% and day-15 max shares 100 / 47.0 / 48.1 / 13.1% for ts-range, sensor:ts, hash(sensor), hash(full); one-sensor-month fan-out 8 / 1 / 1 / 8; OK. (actual output of this environment)",
+    "expected_fa": "بیشینهٔ ماهانه ۱۳٫۵ / ۴۷٫۲ / ۴۸٫۵ / ۱۲٫۶٪ و بیشینهٔ روز پانزدهم ۱۰۰ / ۴۷٫۰ / ۴۸٫۱ / ۱۳٫۱٪ برای چهار طرح؛ <span class=\"ltr\">fan-out</span> کوئری تک‌سنسور: ۸ / ۱ / ۱ / ۸؛ OK. (خروجی واقعی همین محیط)",
+    "lang": "java",
+    "run_en": "javac ShardSim.java && java ShardSim — stdlib Java only, instant.",
+    "run_fa": "javac ShardSim.java && java ShardSim — فقط استاندارد جاوا، فوری.",
+    "status": "verified"
+  },
+  "design_en": "<p>Key <code>sensor_id:timestamp</code>; owner = <code>sensor_id % 8</code> (teaching mapping). Write path: append to the owning shard. Read path for 'one sensor, one month': a single range scan on that shard. A hot-sensor registry adds the 00..99 suffix to sensors above 10%. Retention drops whole old-month shards, never row by row.</p>",
+  "design_fa": "<p>کلید <code>sensor_id:timestamp</code>؛ مالک = <code>sensor_id % 8</code> (نگاشت آموزشی). مسیر نوشتن: الصاق به شارد مالک. مسیر خواندن «یک ماهِ یک سنسور»: یک <span class=\"ltr\">range scan</span> روی همان شارد. رجیستری سنسور داغ برای سنسورهای بالای ۱۰٪ پسوند ۰۰ تا ۹۹ می‌گذارد. <span class=\"ltr\">retention</span> شاردهای whole-shard ماه قدیم را می‌اندازد، هرگز سطر‌به‌سطر نه.</p>",
+  "diagrams": [
+    {
+      "caption_en": "Time-series scheme choice: four candidates, one guarded winner",
+      "caption_fa": "انتخاب طرح سری‌زمانی: چهار نامزد، یک برندهٔ نگهبان‌دار",
+      "file": "diagrams/sol1-step1-scheme-choice.html",
+      "height": 700,
+      "kind_en": "workflow",
+      "kind_fa": "گردش‌کار",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Skip the hot-sensor question and the split leaf is never chosen: the hot sensor's shard silently saturates while the month totals still look fine.",
+        "failure_fa": "اگر پرسش سنسور داغ را رد کنی، برگ <span class=\"ltr\">split</span> هرگز انتخاب نمی‌شود: شارد سنسور داغ بی‌صدا اشباع می‌شود درحالی‌که مجموع ماه هنوز قشنگ است.",
+        "guarantee_en": "The figure shows the decision order and each scheme's priced trade-off. It does not prove the demo numbers — those live in the assembly table.",
+        "guarantee_fa": "شکل ترتیب تصمیم و بهای هر طرح را نشان می‌دهد؛ عددهای دمو را ثابت نمی‌کند — آن‌ها در جدول اسمبل‌اند.",
+        "nonguarantee_en": "It says nothing about shard failure and replication — that is Chapter 6, not this choice.",
+        "nonguarantee_fa": "دربارهٔ خرابی شارد و تکثیر چیزی نمی‌گوید — آن فصل ۶ است نه این انتخاب.",
+        "point_en": "The decision point is each leaf's tag: fan-out and hotspot behavior are written on the leaf itself, not in a footnote.",
+        "point_fa": "نقطهٔ تصمیم برچسب هر برگ است: <span class=\"ltr\">fan-out</span> و رفتار hotspot روی خود برگ نوشته شده نه در پانوشت.",
+        "scenario_en": "You hold one month of sensor data and must pick the partition key. Read the tree from the start box: each question measures one load property, each leaf is one scheme with its price tag.",
+        "scenario_fa": "یک ماه دادهٔ سنسور داری و باید کلید تقسیم را انتخاب کنی. درخت را از جعبهٔ شروع بخوان: هر پرسش یک ویژگی بار را می‌سنجد و هر برگ یک طرح با برچسب قیمتش است.",
+        "steps": [
+          {
+            "en": "Start to the first question: 'One-sensor month scans?' — a yes drops straight to the sensor:timestamp ranges leaf (one sensor, one shard, 1-shard range scan).",
+            "fa": "از شروع تا پرسش اول: «اسکن یک ماهِ یک سنسور؟» — جواب بله مستقیم به برگ بازه‌های <span class=\"ltr\">sensor:timestamp</span> می‌رسد (یک سنسور، یک شارد، <span class=\"ltr\">range scan</span> تک‌شاردی)."
+          },
+          {
+            "en": "A no reaches 'One sensor above 10%?': a yes lands on the guard lane — split the hot sensor with a 00..99 suffix, knowing reads must merge 100 pieces.",
+            "fa": "جواب نه به «یک سنسور بالای ۱۰٪؟» می‌رسد: بله روی خط نگهبان می‌نشیند — سنسور داغ را با پسوند ۰۰ تا ۹۹ بشکن و بدان خواندن باید ۱۰۰ تکه را جمع کند."
+          },
+          {
+            "en": "A no reaches 'Scatter reads OK?': yes means hash(full key) with fan-out 8 and even writes; no means hash(sensor_id) with single-shard reads and a full-shard scan.",
+            "fa": "جواب نه به «خواندن پراکنده قابل‌قبول است؟» می‌رسد: بله یعنی <span class=\"ltr\">hash</span> کلید کامل با <span class=\"ltr\">fan-out</span> هشت و نوشتن یکنواخت؛ نه یعنی <span class=\"ltr\">hash(sensor_id)</span> با خواندن تک‌شاردی و اسکن کامل شارد."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "sensor:timestamp ranges: the whole month sits on one shard, so the query is one range scan with fan-out 1 — at the price of the hot sensor owning half that shard.",
+        "a_fa": "بازه‌های <span class=\"ltr\">sensor:timestamp</span>: کل ماه روی یک شارد است پس کوئری یک <span class=\"ltr\">range scan</span> با <span class=\"ltr\">fan-out</span> یک است — به قیمت اینکه سنسور داغ نیمی از همان شارد را می‌گیرد.",
+        "q_en": "Which leaf does the 'one sensor, one month' query pick, and why?",
+        "q_fa": "کوئری «یک ماهِ یک سنسور» کدام برگ را انتخاب می‌کند و چرا؟"
+      },
+      "source": ".archify/workflow-ch7-sol1-scheme-20261014-184700"
+    },
+    {
+      "caption_en": "One sensor, one month: fan-out 1 on the chosen path, 8 on the scattered one",
+      "caption_fa": "یک سنسور، یک ماه: fan-out یک در مسیر منتخب و هشت در مسیر پراکنده",
+      "file": "diagrams/sol1-step2-routing-fanout.html",
+      "height": 640,
+      "kind_en": "dataflow",
+      "kind_fa": "جریان داده",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Read only the monthly column and timestamp-range looks like the winner — until today's shard melts under 100% of this second's writes.",
+        "failure_fa": "فقط ستون ماهانه را بخوان و بازهٔ <span class=\"ltr\">timestamp</span> برنده به نظر می‌رسد — تا شارد امروز زیر ۱۰۰٪ نوشتن‌های همین ثانیه آب شود.",
+        "guarantee_en": "The figure shows both write and read paths per scheme and where each pays. It does not set the suffix width or the retention window — those are operational calls.",
+        "guarantee_fa": "شکل مسیر نوشتن و خواندن هر طرح و محل پرداختش را نشان می‌دهد؛ عرض پسوند و پنجرهٔ نگهداری را تعیین نمی‌کند — آن‌ها تصمیم عملیاتی‌اند.",
+        "nonguarantee_en": "It is silent on replication and on multi-sensor queries spanning many shards.",
+        "nonguarantee_fa": "دربارهٔ تکثیر و کوئری‌های چندسنسوریِ چندشاردی ساکت است.",
+        "point_en": "The decision point is the Map stage: what the key keeps (sensor locality) decides the Query stage's fan-out.",
+        "point_fa": "نقطهٔ تصمیم مرحلهٔ نگاشت است: آنچه کلید نگه می‌دارد (همسایگی سنسور) <span class=\"ltr\">fan-out</span> مرحلهٔ کوئری را تعیین می‌کند.",
+        "scenario_en": "Read the two lines top to bottom: the upper line is the chosen sensor:timestamp path, the lower line the scattered hash(full key) alternative for the same writes.",
+        "scenario_fa": "دو خط را بالا‌به‌پایین بخوان: خط بالا مسیر منتخب <span class=\"ltr\">sensor:timestamp</span> است و خط پایین جایگزین پراکندهٔ <span class=\"ltr\">hash</span> کلید کامل برای همان نوشتن‌ها.",
+        "steps": [
+          {
+            "en": "Upper line: each reading appends with its sensor key, the map assigns owner = sensor % 8, and the month lands whole on one shard.",
+            "fa": "خط بالا: هر خوانش با کلید سنسورش الصاق می‌شود، نگاشت مالک را <span class=\"ltr\">sensor % 8</span> می‌دهد و ماه whole روی یک شارد می‌نشیند."
+          },
+          {
+            "en": "Its query is one range scan with fan-out 1 — but the hot sensor's 40% rides along into the same shard.",
+            "fa": "کوئری‌اش یک <span class=\"ltr\">range scan</span> با <span class=\"ltr\">fan-out</span> یک است — ولی ۴۰٪ سنسور داغ هم سوار همان شارد می‌شود."
+          },
+          {
+            "en": "Lower line: hashing the full key scatters every write evenly, order is lost, and the same month becomes 8 point-lookup batches to merge.",
+            "fa": "خط پایین: هش کلید کامل هر نوشتن را یکنواخت می‌پاشاند، ترتیب گم می‌شود و همان ماه ۸ دسته <span class=\"ltr\">lookup</span> می‌شود که باید ادغام شوند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Even writes, fan-out 8: the month must be gathered from all shards and merged, so the dominant query pays on every read.",
+        "a_fa": "نوشتن یکنواخت و <span class=\"ltr\">fan-out</span> هشت: ماه باید از همهٔ شاردها جمع و ادغام شود پس کوئری غالب سر هر خواندن پول می‌دهد.",
+        "q_en": "Why is hash(full key) bad for this query despite its perfect write spread?",
+        "q_fa": "چرا <span class=\"ltr\">hash</span> کلید کامل با وجود پخش عالی نوشتن، برای این کوئری بد است؟"
+      },
+      "source": ".archify/dataflow-ch7-sol1-fanout-20261014-184700"
+    },
+    {
+      "caption_en": "Four schemes measured: monthly share, day-15 share, one-sensor fan-out",
+      "caption_fa": "چهار طرح اندازه‌گیری‌شده: سهم ماهانه، سهم روز پانزدهم، fan-out تک‌سنسور",
+      "file": "diagrams/sol1-timeseries-sharding.html",
+      "height": 640,
+      "kind_en": "measurement table",
+      "kind_fa": "جدول اندازه‌گیری",
+      "made": "hand",
+      "narration": {
+        "failure_en": "Trace the pink cell's row left to right: an even-looking month, a 100% day, fan-out 8. Any scheme choice that reads only the first column repeats this exact failure.",
+        "failure_fa": "سطر سلول صورتی را چپ‌به‌راست دنبال کن: ماهِ قشنگ، روز ۱۰۰٪ و <span class=\"ltr\">fan-out</span> هشت. هر انتخاب طرحی که فقط ستون اول را بخواند دقیقاً همین شکست را تکرار می‌کند.",
+        "guarantee_en": "The figure reports the simulation's counts for all four schemes on both clocks. It does not generalize beyond this workload — change the hot sensor, rerun.",
+        "guarantee_fa": "شکل شمارش‌های شبیه‌سازی هر چهار طرح در هر دو ساعت را گزارش می‌کند؛ فراتر از همین بار تعمیم نمی‌دهد — سنسور داغ را عوض کن و دوباره اجرا کن.",
+        "nonguarantee_en": "It says nothing about latency or durability — counts only.",
+        "nonguarantee_fa": "دربارهٔ تاخیر و دوام چیزی نمی‌گوید — فقط شمارش.",
+        "point_en": "The pink cell is the chapter's lesson: monthly totals hide instantaneous heat — always read both columns before picking.",
+        "point_fa": "سلول صورتی درس فصل است: مجموع ماه گرمای لحظه‌ای را پنهان می‌کند — پیش از انتخاب همیشه هر دو ستون را بخوان.",
+        "scenario_en": "Read the table row by row: each row is one scheme, each column is one clock — or the one query that matters.",
+        "scenario_fa": "جدول را سطر‌به‌سطر بخوان: هر سطر یک طرح است و هر ستون یک ساعت — یا همان یک کوئری که مهم است.",
+        "steps": [
+          {
+            "en": "Monthly column: timestamp-range and hash(full) look even near 13%; sensor:ts and hash(sensor) carry the hot sensor near 48%.",
+            "fa": "ستون ماهانه: بازهٔ زمانی و <span class=\"ltr\">hash</span> کامل نزدیک ۱۳٪ متعادل‌اند؛ <span class=\"ltr\">sensor:ts</span> و <span class=\"ltr\">hash(sensor)</span> سنسور داغ را نزدیک ۴۸٪ حمل می‌کنند."
+          },
+          {
+            "en": "Day-15 column: timestamp-range collapses to 100% on today's shard — the pink cell — while the others repeat their monthly shape.",
+            "fa": "ستون روز پانزدهم: بازهٔ زمانی روی شارد امروز به ۱۰۰٪ فرومی‌ریزد — همان سلول صورتی — و بقیه شکل ماهانه‌شان را تکرار می‌کنند."
+          },
+          {
+            "en": "Fan-out column: the two range-local schemes answer in 1 shard; the two scattered schemes knock on all 8.",
+            "fa": "ستون <span class=\"ltr\">fan-out</span>: دو طرح همسایه‌دار در ۱ شارد جواب می‌دهند و دو طرح پراکنده به هر ۸ شارد سر می‌زنند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Timestamp ranges: 13.5% monthly, 100% on day 15 — the even month hides today's meltdown.",
+        "a_fa": "بازهٔ <span class=\"ltr\">timestamp</span>: ماهانه ۱۳٫۵٪ ولی روز پانزدهم ۱۰۰٪ — ماهِ متعادل، ذوب امروز را پنهان می‌کند.",
+        "q_en": "Which scheme looks even monthly and melts daily?",
+        "q_fa": "کدام طرح در ماه متعادل و در روز فاجعه است؟"
+      }
+    }
+  ],
+  "failures": [
+    {
+      "en": "The sensor grows from 40% to 70% and 100 sub-keys still fill one shard. Guard: a dedicated shard for that sensor (hot key, lonely shard) or a write quota. Without a guard the whole shard sleeps.",
+      "fa": "سنسور از ۴۰٪ به ۷۰٪ می‌رسد و ۱۰۰ زیرکلید هم یک شارد را پر می‌کند. نگهبان: شارد اختصاصی برای همان سنسور (کلید داغ، شارد تنها) یا سهمیهٔ نوشتن. بدون نگهبان کل شارد می‌خوابد."
+    },
+    {
+      "en": "A sensor's late data arrives after its month closed. Guard: last month's shard stays writable for a short grace window (teaching: a few days), then read-only; later data is dropped and counted, never silently lost.",
+      "fa": "دادهٔ دیررس سنسور بعد از بسته شدن ماهش می‌رسد. نگهبان: شارد ماه قبل در پنجرهٔ کوتاه (آموزشی: چند روز) باز می‌ماند و بعد فقط خواندنی می‌شود؛ دادهٔ دیرتر دور انداخته و شمرده می‌شود، هرگز بی‌صدا گم نه."
+    },
+    {
+      "en": "Losing a shard hides its sensors' months. This scheme needs replication separately (Chapter 6): each shard keeps several copies and reads go to a healthy one.",
+      "fa": "افتادن یک شارد ماهِ سنسورهایش را ناپدید می‌کند. این طرح تکثیر را جدا می‌خواهد (فصل ۶): هر شارد چند نسخه نگه می‌دارد و خواندن به نسخهٔ سالم می‌رود."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "Change the partition key for that sensor only: append a 00..99 suffix so its writes spread over 100 sub-keys across all shards. Reads of that sensor now fetch all 100 and merge them (a sum for counters). Run a hot-sensor registry: detect past 10%, convert the key format, and retire the suffix when the sensor cools — because only writes spread, reads pay forever.",
+      "a_fa": "کلید تقسیم را فقط برای همان سنسور عوض کن: پسوند ۰۰ تا ۹۹ بچسبان تا نوشتن‌هایش روی ۱۰۰ زیرکلید در همهٔ شاردها پخش شود. خواندن آن سنسور حالا هر ۱۰۰ تا را می‌خواند و ادغام می‌کند (جمع برای شمارنده‌ها). رجیستری سنسور داغ بچرخان: بالای ۱۰٪ شناسایی، تبدیل قالب کلید، و بازنشستگی پسوند وقتی سنسور خنک شد — چون فقط نوشتن پخش می‌شود و خواندن برای همیشه پول می‌دهد.",
+      "level": "senior",
+      "q_en": "One sensor generates 40% of all writes. How do you change the partition key?",
+      "q_fa": "یک سنسور ۴۰٪ نوشتن‌ها را تولید کند؛ چه تغییری در کلید می‌دهی؟"
+    },
+    {
+      "a_en": "Never row-by-row deletes: keep shards month-aligned (or time-partitioned files inside them) and drop the whole old shard by retention. Then drill it: retire one month on staging and verify its readings vanish from every query path before trusting the runbook.",
+      "a_fa": "هرگز حذف سطر‌به‌سطر نه: شاردها را هم‌تراز ماه نگه دار (یا فایل‌های time-partitioned داخلشان) و شارد whole ماه قدیم را با <span class=\"ltr\">retention</span> بینداز. بعد تمرینش کن: یک ماه را در staging بازنشست کن و پیش از اعتماد به ران‌بوک، ناپدید شدنش از همهٔ مسیرهای خواندن را راستی‌آزمایی کن.",
+      "level": "senior",
+      "q_en": "How exactly do you retire an old month without an expensive delete?",
+      "q_fa": "ماه قدیم را دقیقاً چطور بازنشست می‌کنی که <span class=\"ltr\">delete</span> گران نشود؟"
+    },
+    {
+      "a_en": "Split the live range without downtime: pre-create the target shards, copy the range (bulk, then catch-up on fresh writes until lag is near zero), flip the shard map atomically, forward in-flight requests from the old owner, and delete the source copy only after the new owner confirms serving. A failed split aborts back to the old map — nothing is lost because the map never flipped.",
+      "a_fa": "بازهٔ داغ را بدون قطعی <span class=\"ltr\">split</span> کن: شاردهای مقصد را از پیش بساز، بازه را کپی کن (اول bulk بعد جبران نوشتن‌های تازه تا lag نزدیک صفر)، نگاشت شارد را اتمی بچرخان، درخواست‌های در پرواز را از مالک قدیم <span class=\"ltr\">forward</span> کن و کپی مبدأ را فقط بعد از تأیید سرویس مالک تازه پاک کن. <span class=\"ltr\">split</span> ناموفق به نگاشت قدیم برمی‌گردد — چیزی گم نمی‌شود چون نگاشت هرگز نچرخیده بود.",
+      "level": "staff",
+      "q_en": "How do you split a hot range mid-traffic with no downtime?",
+      "q_fa": "بازهٔ داغ را وسط ترافیک چطور بدون قطعی <span class=\"ltr\">split</span> می‌کنی؟"
+    }
+  ],
+  "interview_q_en": "Compare four schemes (timestamp ranges, sensor:timestamp ranges, hash(sensor_id), hash(full key)) for one month of sensor data. Measure instantaneous and monthly load separately, pin down the 'one sensor, one month' query path and its fan-out, and explain the hot-sensor effect and repartitioning.",
+  "interview_q_fa": "برای دادهٔ یک ماههٔ سنسورها چهار طرح (بازهٔ <span class=\"ltr\">timestamp</span>، بازهٔ <span class=\"ltr\">sensor:timestamp</span>، <span class=\"ltr\">hash(sensor_id)</span> و <span class=\"ltr\">hash</span> کلید کامل) را مقایسه کن. بار لحظه‌ای و مجموع ماه را جدا بسنج، مسیر کوئری «یک ماهِ یک سنسور» و <span class=\"ltr\">fan-out</span> آن را مشخص کن و اثر سنسور پرنرخ و راه <span class=\"ltr\">repartitioning</span> را توضیح بده.",
+  "mental_en": "You own two clocks: the month clock (totals) and the this-second clock (instantaneous). A scheme that spreads the month beautifully may dump this very second onto one shard. Then one question: 'whose month do you read?' That answer picks the partition key.",
+  "mental_fa": "دو ساعت داری: ساعتِ ماه (مجموع) و ساعتِ همین ثانیه (لحظه‌ای). طرحی که ماه را قشنگ پخش می‌کند ممکن است همین ثانیه همه‌چیز را روی یک شارد بریزد. بعد یک سؤال داری: «ماهِ کدام سنسور را می‌خوانی؟» جواب همین سؤال کلید تقسیم را انتخاب می‌کند.",
+  "mistakes": [
+    {
+      "en": "Monthly totals suffice for sizing. Day 15 at 100% on one shard disproves it — always measure the instantaneous clock too.",
+      "fa": "مجموع ماهانه برای ظرفیت کافی است. روز پانزدهم با ۱۰۰٪ روی یک شارد ردش می‌کند — ساعت لحظه‌ای را هم همیشه بسنج."
+    },
+    {
+      "en": "hash(sensor) equals hash(full key). Fan-out 1 versus 8 says otherwise: the hash input, not the hash itself, decides the query.",
+      "fa": "<span class=\"ltr\">hash(sensor)</span> با <span class=\"ltr\">hash</span> کلید کامل یکی است. <span class=\"ltr\">fan-out</span> یک در برابر هشت خلافش را می‌گوید: ورودی هش سرنوشت کوئری را تعیین می‌کند نه خود هش."
+    },
+    {
+      "en": "A random prefix spreads reads too. It spreads writes only; reads must fetch and merge all 100 sub-keys — say both halves.",
+      "fa": "پیشوند تصادفی خواندن را هم پخش می‌کند. فقط نوشتن را پخش می‌کند؛ خواندن باید هر ۱۰۰ زیرکلید را بخواند و ادغام کند — هر دو نیمه را بگو."
+    },
+    {
+      "en": "Retention means deleting rows from the table. It means dropping whole old shards — row deletes at this scale are the expensive path.",
+      "fa": "<span class=\"ltr\">retention</span> یعنی حذف سطر از جدول. یعنی انداختن whole شاردهای قدیم — حذف سطری در این مقیاس همان مسیر گران است."
+    }
+  ],
+  "number": 1,
+  "slug": "timeseries-sharding",
+  "sources": [
+    "microsoft",
+    "amazon"
+  ],
+  "steps": [
+    {
+      "en": "The dominant query is 'one sensor, one month', so we want the range family: key closeness must survive for a range scan to work. That single call removes full-key hashing from the table unless writes outweigh reads.",
+      "fa": "کوئری غالب «یک ماهِ یک سنسور» است، پس خانوادهٔ بازه‌ای می‌خواهیم: نزدیکی کلیدها باید بماند تا <span class=\"ltr\">range scan</span> ممکن شود. همین یک تصمیم، <span class=\"ltr\">hash</span> کلید کامل را از میز حذف می‌کند مگر نوشتن بر خواندن بچربد.",
+      "t_en": "Name the query first",
+      "t_fa": "اول کوئری را نام ببر"
+    },
+    {
+      "en": "Timestamp ranges look even monthly (max 13.5%) yet 100% of day 15 lands on one shard — today's shard is always hot. sensor:timestamp sits near 47% on the hot sensor's shard on both clocks: honestly hot, but predictable.",
+      "fa": "بازهٔ <span class=\"ltr\">timestamp</span> در ماه متعادل است (بیشینه ۱۳٫۵٪) ولی ۱۰۰٪ روز پانزدهم روی یک شارد می‌نشیند — شارد امروز همیشه داغ است. <span class=\"ltr\">sensor:timestamp</span> در هر دو ساعت حدود ۴۷٪ روی شارد سنسور داغ می‌نشیند: صادقانه داغ ولی قابل‌پیش‌بینی.",
+      "t_en": "Measure both clocks",
+      "t_fa": "هر دو ساعت را بسنج"
+    },
+    {
+      "en": "hash(sensor_id) keeps reads single-shard but burns time order into a full-shard scan. Full-key hashing spreads writes perfectly (max 12.6%) but drags the same query across 8 shards. Neither cures one hot key's load.",
+      "fa": "<span class=\"ltr\">hash(sensor_id)</span> خواندن را تک‌شاردی نگه می‌دارد ولی ترتیب زمانی را به اسکن کامل شارد می‌سوزاند. <span class=\"ltr\">hash</span> کلید کامل نوشتن را کاملاً پخش می‌کند (بیشینه ۱۲٫۶٪) ولی همان کوئری را به ۸ شارد می‌کشاند. هیچ‌کدام بار یک کلید داغ را درمان نمی‌کند.",
+      "t_en": "Price the hash options",
+      "t_fa": "بهای هش را بشمار"
+    },
+    {
+      "en": "Split the 40% sensor with a 00..99 suffix into 100 sub-keys: writes spread, reads merge 100 pieces. Split the hot range (never rehash the world) and drop old months whole-shard by retention. Tripwire: alert when one shard's instantaneous share passes 3x the mean.",
+      "fa": "سنسور ۴۰٪ را با پسوند ۰۰ تا ۹۹ به ۱۰۰ زیرکلید بشکن: نوشتن پخش می‌شود و خواندن ۱۰۰ تکه را جمع می‌کند. بازهٔ داغ را <span class=\"ltr\">split</span> کن (هرگز <span class=\"ltr\">rehash</span> کل دنیا نه) و ماه‌های قدیم را whole-shard با <span class=\"ltr\">retention</span> بینداز. سیم‌خاردار: هشدار وقتی سهم لحظه‌ای یک شارد از ۳ برابر میانگین گذشت.",
+      "t_en": "Guard and retire",
+      "t_fa": "نگهبان و بازنشستگی"
+    }
+  ],
+  "tests_en": "<p>Per-shard write counters; alert past 3x-mean instantaneous share; assert fan-out per query type (single-sensor must be 1); periodic drill: drop one month and verify it vanishes from every read path.</p>",
+  "tests_fa": "<p>شمارندهٔ <span class=\"ltr\">per-shard</span> برای نوشتن؛ هشدار وقتی سهم لحظه‌ای از ۳ برابر میانگین گذشت؛ بررسی <span class=\"ltr\">fan-out</span> برای هر نوع کوئری (تک‌سنسور باید ۱ باشد)؛ تمرین دوره‌ای: انداختن یک ماه و راستی‌آزمایی ناپدید شدنش از همهٔ مسیرهای خواندن.</p>",
+  "worked_en": "<p>Actual demo output (<code>ShardSim</code>): monthly maxima 13.5 / 47.2 / 48.5 / 12.6% and day-15 maxima 100 / 47.0 / 48.1 / 13.1% across the four schemes; 'one sensor, one month' fan-out 8 / 1 / 1 / 8. Timestamp ranges spread the month beautifully and the second terribly.</p>",
+  "worked_fa": "<p>خروجی واقعی دمو (<code>ShardSim</code>): بیشینهٔ ماهانه ۱۳٫۵ / ۴۷٫۲ / ۴۸٫۵ / ۱۲٫۶٪ و بیشینهٔ روز پانزدهم ۱۰۰ / ۴۷٫۰ / ۴۸٫۱ / ۱۳٫۱٪ در چهار طرح؛ <span class=\"ltr\">fan-out</span> «یک ماهِ یک سنسور»: ۸ / ۱ / ۱ / ۸. بازهٔ زمانی ماه را قشنگ و ثانیه را خراب پخش می‌کند.</p>",
+  "reasoning_fa": "<p>کلید partition مسیر query و hotspot را تعیین می‌کند: hash(sensor_id) همهٔ writeهای sensor داغ را روی یک shard نگه می‌دارد، پس ۴۰٪ سهم یک حسگر با اضافه‌کردن shard خودبه‌خود پخش نمی‌شود. ترکیب sensor و time bucket قابلیت تقسیم می‌دهد ولی خواندن بازهٔ بلند fan-out بیشتری دارد. هشت shard و seed=7 برای تکرار آزمایش‌اند. سهم بار را از تعداد writeهای shard÷کل writeها می‌گیریم تا مقایسه از اندازهٔ مطلق نمونه مستقل باشد.</p>",
+  "reasoning_en": "<p>Partition keys determine query fan-out and hotspots. Hash(sensor_id) keeps a hot sensor’s writes together, so a 40% sensor does not spread merely by adding shards. Sensor/time buckets permit splitting at the cost of long-range fan-out. Eight shards and seed 7 make the experiment repeatable. Load share is shard writes / total writes, normalizing comparisons across sample sizes.</p>"
+}

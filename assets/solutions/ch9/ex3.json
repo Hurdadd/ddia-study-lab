@@ -1,0 +1,223 @@
+{
+  "alternatives": [
+    {
+      "en": "Lease expiry alone ('A's lease ended, so A cannot write'): works only if every participant obeys the lease clock — a paused process never got the memo. Cheaper (no token plumbing), but it trusts the very node that is, by hypothesis, unreachable. Use only where pauses are bounded and measured, never across GC or VM pauses.",
+      "fa": "انقضای lease به‌تنهایی («lease هفت تمام شد پس A نمی‌تواند بنویسد»): فقط وقتی کار می‌کند که هر شرکت‌کننده به ساعت lease احترام بگذارد — فرایند pauseشده اصلاً پیام را نگرفته. ارزان‌تر است (لوله‌کشی token ندارد) ولی به همان نودی اعتماد می‌کند که بنابر فرض unreachable است. فقط جایی که pauseها کران‌دار و اندازه‌گیری‌شده‌اند، هرگز برای pauseهای GC یا VM."
+    },
+    {
+      "en": "Single-writer fencing via consensus (Raft/ZAB term as the epoch): same shape, stronger issuer — the epoch comes from an elected leader term instead of a lock service counter. Right when the lock service itself must survive failures; heavier than a counter, and still enforced at the storage check.",
+      "fa": "fencing تک‌نویسنده با consensus (term در Raft/ZAB به‌عنوان epoch): همان شکل با صادرکنندهٔ قوی‌تر — epoch از term لیدر منتخب می‌آید نه شمارندهٔ lock service. درست وقتی خود lock service باید خرابی را تحمل کند؛ سنگین‌تر از شمارنده و همچنان با بررسی storage اجرا می‌شود."
+    }
+  ],
+  "answer_en": "A fencing token names the lease epoch — 7, then 8 — not each write. When B takes over at epoch 8 and writes, storage records highest=8; when paused A wakes with epoch 7, storage atomically rejects the stale epoch beside the data. Legitimate same-epoch writes (B's op-b1 and op-b2) are told apart by operation ID, and a repeated op is deduped without a second effect. The highest-seen epoch must be durable: a restart that forgets it accepts stale epochs again.",
+  "answer_fa": "توکن fencing نام epoch در lease است — ۷ و بعد ۸ — نه هر نوشته. وقتی B در epoch هشت تحویل می‌گیرد و می‌نویسد، storage مقدار highest=8 را ثبت می‌کند؛ وقتی Aی pauseشده با epoch هفت بیدار می‌شود، storage کنار داده epoch کهنه را اتمیک رد می‌کند. نوشته‌های مجاز هم‌epoch (مثل op-b1 و op-b2 برای B) با شناسهٔ عملیات از هم جدا می‌شوند و op تکراری بدون اثر دوم dedup می‌شود. بزرگ‌ترین epoch دیده‌شده باید بادوام باشد: restartای که فراموشش کند دوباره epochهای کهنه را می‌پذیرد.",
+  "assumptions": [
+    {
+      "en": "Epochs 7 then 8, one paused holder A and one successor B (teaching scenario from the brief).",
+      "fa": "epochهای ۷ و بعد ۸ با یک نگهدارندهٔ pauseشدهٔ A و یک جانشین B (سناریوی آموزشی از brief)."
+    },
+    {
+      "en": "The lock service issues durable, monotonic epochs; storage compares and writes atomically (single synchronized step in the demo).",
+      "fa": "lock serviceepochهای بادوام و صعودی صادر می‌کند؛ storage اتمیک مقایسه و نوشتن می‌کند (در دمو یک گام synchronized)."
+    },
+    {
+      "fa": "op_id برای هر عملیات منطقی یکتاست و در تمام retryهای همان عملیات ثابت می‌ماند؛ dedup تا وقتی بازتحویل معتبر ممکن است حفظ می‌شود.",
+      "en": "An op_id uniquely identifies a logical operation and remains unchanged across its retries; retain dedup while valid redelivery remains possible."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n// Teaching demo: fencing tokens are ownership EPOCHS, not per-write IDs.\n// Storage atomically rejects stale epochs; legitimate same-epoch writes are\n// told apart by operation ID (dedup), not by the epoch. Forgetting the\n// highest token across a restart reopens the split brain.\npublic class FencingDemo {\n    static class LockService {\n        int epoch = 6;                                                 // teaching: A gets 7, B gets 8\n        int issue() { return ++epoch; }                                // durable, monotonic\n    }\n    static class Storage {\n        int highest = 0;                                               // durable highest-seen epoch\n        Map<String, String> data = new HashMap<>();\n        Set<String> appliedOps = new HashSet<>();                      // operation dedup, separate concern\n        synchronized String write(int token, String opId, String k, String v) {\n            if (token < highest) return \"REJECT stale-epoch token=\" + token + \" highest=\" + highest;\n            highest = token;\n            if (!appliedOps.add(opId)) return \"DEDUP op=\" + opId + \" (same-epoch repeat, no second effect)\";\n            data.put(k, v);\n            return \"ACCEPT token=\" + token + \" op=\" + opId + \" \" + k + \"=\" + v;\n        }\n    }\n    public static void main(String[] a) {\n        LockService lock = new LockService();\n        Storage store = new Storage();\n        int tokenA = lock.issue();                                     // A holds epoch 7\n        System.out.println(\"A lease epoch=\" + tokenA + \" then A pauses (GC pause, teaching)\");\n        int tokenB = lock.issue();                                     // B holds epoch 8\n        System.out.println(\"B lease epoch=\" + tokenB);\n        System.out.println(\"B write -> \" + store.write(tokenB, \"op-b1\", \"leader\", \"B\"));\n        System.out.println(\"A wakes, stale write -> \" + store.write(tokenA, \"op-a1\", \"leader\", \"A\"));\n        System.out.println(\"B second write same epoch -> \" + store.write(tokenB, \"op-b2\", \"x\", \"1\"));\n        System.out.println(\"B retry of op-b2 -> \" + store.write(tokenB, \"op-b2\", \"x\", \"1\"));\n        System.out.println(\"final leader=\" + store.data.get(\"leader\") + \" x=\" + store.data.get(\"x\"));\n        Storage noFence = new Storage() {\n            @Override synchronized String write(int token, String opId, String k, String v) {\n                data.put(k, v);                                        // lease-expiry only: NO token check\n                return \"APPLIED without check \" + k + \"=\" + v;\n            }\n        };\n        noFence.write(2, \"op-b1\", \"leader\", \"B\");\n        System.out.println(\"no-fence A overwrite -> \" + noFence.write(1, \"op-a1\", \"leader\", \"A\"));\n        Storage restarted = new Storage();                             // amnesia: highest forgotten\n        restarted.write(tokenB, \"op-b1\", \"leader\", \"B\");\n        restarted.highest = 0;                                         // crash lost durable state\n        System.out.println(\"restart-amnesia A write -> \" + restarted.write(tokenA, \"op-a9\", \"leader\", \"A\")\n            + \" HAZARD: stale epoch accepted\");\n        System.out.println(\"OK: epoch rejects, op-id dedups, durability required\");\n    }\n}\n",
+    "expected_en": "Nine lines: B's epoch-8 write ACCEPTs, A's epoch-7 write REJECTs as stale, B's second same-epoch write ACCEPTs, its retry DEDUPs, final leader=B; then the no-fence overwrite (leader=A) and the restart-amnesia HAZARD (stale 7 accepted); OK line. (actual output of this environment)",
+    "expected_fa": "نه خط: نوشتهٔ epoch-8 برای B با ACCEPT، نوشتهٔ epoch-7 برای A با REJECT کهنه، دومین نوشتهٔ هم‌epoch برای B با ACCEPT، تکرارش با DEDUP و leader نهایی=B؛ بعد بازنویسی بدون-fence (با leader=A) و HAZARD فراموشی restart (پذیرش ۷ کهنه)؛ خط OK. (خروجی واقعی همین محیط)",
+    "lang": "java",
+    "run_en": "javac FencingDemo.java && java FencingDemo — stdlib Java only, instant.",
+    "run_fa": "javac FencingDemo.java && java FencingDemo — فقط استاندارد جاوا، فوری.",
+    "status": "verified"
+  },
+  "design_en": "<p>Lock service: <code>issue()</code> returns a durable, strictly monotonic epoch per lease grant (one per epoch, not per write) and persists the counter before answering. Storage write path, one atomic step: <code>if token &lt; highest: reject; highest = token; if opId seen: dedup; else apply</code>. The highest-seen epoch and the applied-op set both live on durable storage, replicated with the data — memory alone reopens the split brain on restart. Token allocation rule: exactly one live epoch per resource; a new grant always exceeds every earlier one, even across lock-service failover.</p>",
+  "design_fa": "<p>lock service: تابع <code>issue()</code> برای هر اعطای lease یک epoch بادوام و اکیداً صعودی برمی‌گرداند (یکی برای هر epoch نه هر نوشته) و شمارنده را قبل از جواب persist می‌کند. مسیر نوشتن storage در یک گام اتمیک: <code>اگر token از highest کمتر بود: رد کن؛ highest را برابر token کن؛ اگر opId دیده شده: dedup؛ وگرنه اعمال کن</code>. بزرگ‌ترین epoch دیده‌شده و مجموعهٔ opهای اعمال‌شده هر دو روی ذخیرهٔ بادوام و تکثیرشده با داده زندگی می‌کنند — فقط حافظه با restart شکاف مغزی را دوباره باز می‌کند. قاعدهٔ تخصیص token: دقیقاً یک epoch زنده برای هر منبع؛ اعطای تازه همیشه از همهٔ قبلی‌ها بزرگ‌تر است، حتی بعد از failover خود lock service.</p>",
+  "diagrams": [
+    {
+      "caption_en": "Pause at 7, write at 8, stale dies in storage",
+      "caption_fa": "pause در ۷، نوشتن در ۸ و مرگ کهنه در storage",
+      "file": "diagrams/sol3-step1-stale-reject.html",
+      "height": 720,
+      "kind_en": "sequence: fencing reject",
+      "kind_fa": "توالی: رد fencing",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Trace the dashed stale write: A attaches token 7 and storage answers REJECT — the paused writer is disarmed without anyone telling it. Now picture the same arrow without the check (the no-fence line in the code): storage applies leader=A over leader=B, and the cluster has two truths. The check is the only difference between the two histories.",
+        "failure_fa": "نوشتهٔ کهنهٔ چین‌دار را دنبال کن: A توکن ۷ را می‌چسباند و storage جواب REJECT می‌دهد — نویسندهٔ pauseشده بدون این‌که کسی خبرش کند خلع‌سلاح می‌شود. حالا همان پیکان را بدون بررسی تصور کن (خط no-fence در کد): storage مقدار leader=A را روی leader=B اعمال می‌کند و کلاستر دو حقیقت دارد. بررسی تنها فرق دو history است.",
+        "guarantee_en": "The figure shows the stale reject, the legitimate same-epoch accept, and the duplicate absorb. It does not show what happens when the highest-seen itself is lost — that is the assembly's amnesia state.",
+        "guarantee_fa": "شکل رد کهنه و پذیرش هم‌epoch مجاز و جذب تکراری را نشان می‌دهد. نشان نمی‌دهد وقتی خود highest-seen گم شود چه می‌شود — آن حالت amnesia در اسمبل است.",
+        "nonguarantee_en": "It assumes the lock service issues honest monotonic epochs; a forked issuer (two lock services, split brain upstairs) is outside this figure.",
+        "nonguarantee_fa": "فرض می‌کند lock serviceepochهای صعودی صادق صادر می‌کند؛ صادرکنندهٔ دوشاخه (دو lock service با شکاف مغزی در بالا) بیرون این شکل است.",
+        "point_en": "The decision point is the atomic check inside storage: token against highest-seen, beside the data, in one step. A check anywhere else (client-side, lease-clock-side) races the paused writer and loses.",
+        "point_fa": "نقطهٔ تصمیم بررسی اتمیک داخل storage است: توکن در برابر بزرگ‌ترین دیده‌شده، کنار داده و در یک گام. بررسی هر جای دیگر (سمت کلاینت یا ساعت lease) با نویسندهٔ pauseشده مسابقه می‌دهد و می‌بازد.",
+        "scenario_en": "Worker A holds epoch 7 and pauses mid-thought; B takes epoch 8 and writes; A wakes and tries to overwrite. Follow the four lifelines through the four bands and watch where the stale write dies.",
+        "scenario_fa": "ورکر A epoch هفت را دارد و وسط فکر pause می‌شود؛ B epoch هشت را می‌گیرد و می‌نویسد؛ A بیدار می‌شود و می‌خواهد بازنویسی کند. چهار خط زندگی را در چهار باند دنبال کن و ببین نوشتهٔ کهنه کجا می‌میرد.",
+        "steps": [
+          {
+            "en": "Lease 7 pauses: A takes epoch 7 from the lock service, then stops — GC pause, teaching case.",
+            "fa": "باند lease هفت و pause: Aepoch هفت را از lock service می‌گیرد و بعد می‌ایستد — pause در GC و حالت آموزشی."
+          },
+          {
+            "en": "Lease 8 writes: B takes epoch 8 after expiry, writes leader=B with op-b1, and storage records highest=8.",
+            "fa": "باند lease هشت و نوشتن: B بعد از انقضا epoch هشت را می‌گیرد و leader=B را با op-b1 می‌نویسد و storage مقدار highest=8 را ثبت می‌کند."
+          },
+          {
+            "en": "Stale wakes, dies: A's epoch-7 write arrives late and storage rejects it atomically — 7 below 8.",
+            "fa": "باند بیداری کهنه و مرگ: نوشتهٔ epoch-7 برای A دیر می‌رسد و storage اتمیک ردش می‌کند — ۷ زیر ۸ است."
+          },
+          {
+            "en": "Same-epoch writes: B's op-b2 at epoch 8 is accepted (new op, legitimate), and its retry is deduped with no second effect.",
+            "fa": "باند نوشته‌های هم‌epoch: op-b2 برای B در epoch هشت پذیرفته می‌شود (op تازه و مجاز) و تکرارش بدون اثر دوم dedup می‌شود."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Same epoch (8) but different operation IDs: op-b2 is a new intent the server has never seen, so it applies; the retry carries a seen ID, so it absorbs. Epoch decides whose turn, op ID decides which attempt.",
+        "a_fa": "چون epoch یکسان است (۸) ولی شناسهٔ عملیات فرق دارد: op-b2 قصد تازه‌ای است که سرور هرگز ندیده، پس اعمال می‌شود؛ تکرار شناسهٔ دیده‌شده دارد، پس جذب می‌شود. epoch می‌گوید نوبت کیست و شناسهٔ op می‌گوید کدام تلاش.",
+        "q_en": "B's op-b2 is accepted but its retry is not. What differs between the two arrivals?",
+        "q_fa": "چرا op-b2 برای B پذیرفته می‌شود ولی تکرارش نه؟ بین دو رسیدن چه فرقی است؟"
+      },
+      "source": ".archify/sequence-ch9-sol3-fencing-20261014-210104"
+    },
+    {
+      "caption_en": "Hold, pause, re-grant, reject — and the amnesia that undoes it",
+      "caption_fa": "نگه داشتن و pause و اعطای دوباره و رد — و فراموشی که خنثی‌اش می‌کند",
+      "file": "diagrams/sol3-fencing-tokens.html",
+      "height": 640,
+      "kind_en": "lifecycle: lease epochs",
+      "kind_fa": "چرخه حیات: epochهای lease",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Trace the Confirmed-to-Amnesia arrow: a restart wipes the durable highest-seen, and the terminal Amnesia state reads 'stale wins: split brain' — the epoch-7 write the sequence rejected now applies. The failure needs no network fault and no second bug: forgetting is enough.",
+        "failure_fa": "پیکان Confirmed به Amnesia را دنبال کن: یک restart مقدار highest-seen بادوام را پاک می‌کند و حالت پایانی Amnesia می‌گوید «کهنه می‌برد: شکاف مغزی» — نوشتهٔ epoch-7 که توالی ردش کرده بود حالا اعمال می‌شود. خرابی نه خطای شبکه می‌خواهد نه باگ دوم: فراموشی کافی است.",
+        "guarantee_en": "The figure shows every lease outcome plus the durability hazard in one machine. It does not show a forked token issuer — one lock service, honestly monotonic, is assumed throughout.",
+        "guarantee_fa": "شکل هر سرنوشت lease را به‌علاوهٔ خطر دوام در یک ماشین نشان می‌دهد. صادرکنندهٔ دوشاخهٔ توکن را نشان نمی‌دهد — در کل شکل یک lock service صادق‌صعودی فرض شده.",
+        "nonguarantee_en": "It does not cover how the lock service itself survives (consensus terms) or how long dedup state must live.",
+        "nonguarantee_fa": "دربارهٔ این‌که خود lock service چطور زنده می‌ماند (termهای consensus) یا حالت dedup چقدر باید زنده بماند چیزی نمی‌گوید.",
+        "point_en": "The decision points are the two exits from Writing: below-highest goes to Stale Rejected, same-epoch-same-op goes to Duplicate Absorbed. Same column as the write for the reject — exits sit in the column of the state they leave.",
+        "point_fa": "نقطه‌های تصمیم دو خروجی Writingاند: کمتر از highest به Stale Rejected می‌رود و هم‌epoch و هم‌op به Duplicate Absorbed. رد در همان ستون نوشته است — خروجی‌ها در ستون حالتی می‌نشینند که ترک می‌کنند.",
+        "scenario_en": "One lease, two holders, one restart. Walk the main rail from No Lease to Confirmed, detour through the pause and the re-grant, then read the three terminal exits and the amnesia trap at the end.",
+        "scenario_fa": "یک lease و دو نگهدارنده و یک restart. ریل اصلی را از No Lease تا Confirmed برو، از pause و اعطای دوباره میان‌بر بزن و بعد سه خروجی پایانی و تلهٔ فراموشی آخر را بخوان.",
+        "steps": [
+          {
+            "en": "Main rail: No Lease grants epoch N (Held), the holder writes with N (Writing), and storage confirms one effect (Confirmed).",
+            "fa": "ریل اصلی: No Leaseepoch برابر N اعطا می‌کند (Held) و نگهدارنده با N می‌نویسد (Writing) و storage یک اثر را تأیید می‌کند (Confirmed)."
+          },
+          {
+            "en": "Pause detour: the holder pauses (Paused Holder, the zombie) and wakes writing stale — or expiry re-grants N+1 to the successor first.",
+            "fa": "میان‌بر pause: نگهدارنده pause می‌شود (نگهدارندهٔ pauseشده یعنی زامبی) و کهنه بیدار می‌شود و می‌نویسد — یا انقضا اول N+1 را به جانشین اعطا می‌کند."
+          },
+          {
+            "en": "Two exits from Writing: a below-highest token lands in Stale Rejected; a same-epoch same-op retry lands in Duplicate Absorbed.",
+            "fa": "دو خروجی از Writing: توکن کمتر از highest در Stale Rejected می‌نشیند؛ تکرار هم‌epoch و هم‌op در Duplicate Absorbed."
+          },
+          {
+            "en": "The trap: restart wipes the highest-seen and lands in Highest Forgotten, where the stale write wins — durability is the contract.",
+            "fa": "تله: restart مقدار highest-seen را پاک می‌کند و در Highest Forgotten می‌نشیند، جایی که نوشتهٔ کهنه می‌برد — دوام همان قرارداد است."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Highest-seen must live on durable storage, replicated with the data — memory alone forgets on restart, and forgetting reopens the split brain with no other fault needed.",
+        "a_fa": "بزرگ‌ترین دیده‌شده باید روی ذخیرهٔ بادوام و تکثیرشده با داده زندگی کند — فقط حافظه با restart فراموش می‌کند و فراموشی بدون هیچ خطای دیگر شکاف مغزی را دوباره باز می‌کند.",
+        "q_en": "Where must the highest-seen epoch live, and what single fault breaks it?",
+        "q_fa": "بزرگ‌ترین epoch دیده‌شده کجا باید زندگی کند و کدام تک‌خطا می‌شکندش؟"
+      },
+      "source": ".archify/lifecycle-ch9-sol3-epochs-20261014-210105"
+    }
+  ],
+  "failures": [
+    {
+      "en": "Lease-expiry-only fencing (the no-fence line): A's stale write overwrites leader=B with leader=A — no error, two truths. Guard with the storage-side token check; expiry moves ownership, only the check enforces it.",
+      "fa": "fencing فقط با انقضای lease (خط no-fence): نوشتهٔ کهنهٔ A مقدار leader=B را با leader=A بازنویسی می‌کند — بدون خطا و با دو حقیقت. نگهبان: بررسی توکن سمت storage؛ انقضا مالکیت را جابه‌جا می‌کند و فقط بررسی اجرایش می‌کند."
+    },
+    {
+      "en": "Restart amnesia: highest-seen kept in memory is forgotten on crash, and the next stale write applies — the HAZARD line in the demo. Guard by persisting highest-seen (and the op set) on every accept, before acknowledging.",
+      "fa": "فراموشی restart: مقدار highest-seen داخل حافظه با crash فراموش می‌شود و نوشتهٔ کهنهٔ بعدی اعمال می‌شود — همان خط HAZARD در دمو. نگهبان: persist کردن highest-seen (و مجموعهٔ op) با هر پذیرش، قبل از تأیید."
+    },
+    {
+      "en": "Same-epoch duplicate without op dedup: B's retried op-b2 would apply twice (x=1 written twice — harmless here, a double charge elsewhere). Guard with the applied-op set as a separate concern from the epoch compare.",
+      "fa": "تکراری هم‌epoch بدون dedup در op: op-b2 تکرارشدهٔ B دو بار اعمال می‌شد (اینجا نوشتن دوبارهٔ x=1 بی‌ضرر است و جای دیگر شارژ دوباره). نگهبان: مجموعهٔ op اعمال‌شده به‌عنوان دغدغه‌ای جدا از مقایسهٔ epoch."
+    },
+    {
+      "en": "Forked token issuer: two lock services (or a failover that resets the counter) hand out the same epoch twice, and fencing compares equal against equal. Guard with a single issuer per resource — consensus term or fenced counter — so epochs never fork.",
+      "fa": "صادرکنندهٔ دوشاخهٔ توکن: دو lock service (یا failoverای که شمارنده را صفر می‌کند) یک epoch را دو بار می‌دهند و fencing مساوی را با مساوی مقایسه می‌کند. نگهبان: یک صادرکنندهٔ واحد برای هر منبع — term در consensus یا شمارندهٔ فنس‌دار — تا epochها هرگز دوشاخه نشوند."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "A stale-epoch write can apply again — the split brain reopens with no other fault. Concretely: storage restarts with highest=0 while B's epoch-8 value sits in the data; paused A wakes with epoch 7, and 7 is no longer below any remembered highest, so it overwrites B. The demo's HAZARD line is exactly this: stale 7 accepted, leader flips to A. The guard is durability: persist highest-seen (and the op set) on disk, replicated with the data, before acknowledging any write — memory alone is a fencing bug.",
+      "a_fa": "نوشتهٔ epochکهنه دوباره می‌تواند اعمال شود — شکاف مغزی بدون هیچ خطای دیگر دوباره باز می‌شود. مشخصاً: storage با highest=0 ری‌استارت می‌شود ولی مقدار epoch-8 برای B داخل داده نشسته؛ Aی pauseشده با epoch هفت بیدار می‌شود و ۷ دیگر زیر هیچ highest به‌یادمانده‌ای نیست، پس روی B بازنویسی می‌کند. خط HAZARD در دمو دقیقاً همین است: ۷ کهنه پذیرفته می‌شود و leader به A برمی‌گردد. نگهبان دوام است: highest-seen (و مجموعهٔ op) را روی دیسک و تکثیرشده با داده persist کن، قبل از تأیید هر نوشته — فقط حافظه باگ fencing است.",
+      "level": "staff",
+      "q_en": "Storage restarts and forgets the highest fencing token. What failure becomes possible?",
+      "q_fa": "storage restart شود و highest token را فراموش کند، چه خطایی ممکن است؟"
+    },
+    {
+      "a_en": "By operation ID, the separate identity. Both carry epoch 8, so the epoch check passes both — correctly, because both arrive under the live epoch. Then the op set decides: op-b2 is new, so it applies (second legitimate write of the epoch); the retry carries op-b2 again, the set already holds it, so it absorbs with no second effect. Epoch answers 'whose turn', op ID answers 'which attempt' — conflating them either rejects legitimate writes or double-applies retries.",
+      "a_fa": "با شناسهٔ عملیات، هویت جدا. هر دو epoch هشت را دارند، پس بررسی epoch هر دو را قبول می‌کند — درست، چون هر دو زیر epoch زنده می‌رسند. بعد مجموعهٔ op تصمیم می‌گیرد: op-b2 تازه است، پس اعمال می‌شود (دومین نوشتهٔ مجاز epoch)؛ تکرار دوباره op-b2 را دارد و مجموعه از قبل داردش، پس بدون اثر دوم جذب می‌شود. epoch جواب می‌دهد «نوبت کیست» و شناسهٔ op جواب می‌دهد «کدام تلاش» — قاطی کردنشان یا نوشته‌های مجاز را رد می‌کند یا retryها را دو بار اعمال می‌کند.",
+      "level": "senior",
+      "q_en": "Two legitimate writes share epoch 8, then one is retried. How do you accept two but not three effects?",
+      "q_fa": "دو نوشتهٔ مجاز epoch هشت را شریک‌اند و بعد یکی retry می‌شود. چطور دو اثر را قبول می‌کنی ولی سه‌تا نه؟"
+    }
+  ],
+  "interview_q_en": "Pause owner A at token 7, let B obtain token 8 and write, then resume A. Enforce atomic stale-epoch rejection in storage. Distinguish multiple legitimate same-epoch writes from duplicate operations and persist the highest token.",
+  "interview_q_fa": "کارگر A lease با token=7 دارد، pause می‌شود و B با token=8 می‌نویسد؛ A سپس بیدار می‌شود. storage باید stale epoch را اتمیک رد کند. چند write معتبر در یک epoch را از duplicate operation جدا کن و برای token allocation و دوام highest-seen شرط تعریف کن.",
+  "mental_en": "A lease is a promise about the future ('nobody else writes until T'), and a pause breaks promises — the holder cannot hear that its time is over. Fencing stops trusting the holder's clock and trusts arithmetic instead: every write carries its epoch number, and storage, which never pauses mid-compare, rejects the smaller one. The token is not a password (A knows its own 7) — it is a generation counter, and old generations simply do not write.",
+  "mental_fa": "lease قولی دربارهٔ آینده است («تا زمان T هیچ‌کس دیگر نمی‌نویسد») و pause قول‌ها را می‌شکند — نگهدارنده نمی‌تواند بشنود که وقتش تمام شده. fencing دست از اعتماد به ساعت نگهدارنده می‌کشد و به حساب اعتماد می‌کند: هر نوشته شمارهٔ epoch خودش را دارد و storage که وسط مقایسه pause نمی‌شود، کوچک‌تر را رد می‌کند. توکن رمز نیست (A همان ۷ خودش را می‌داند) — شمارندهٔ نسل است و نسل‌های قدیم فقط نمی‌نویسند.",
+  "mistakes": [
+    {
+      "en": "Trusting lease expiry to stop a paused writer: expiry is a clock reading, and the paused process cannot read clocks. The stale write arrives after expiry with full confidence — only the storage check stops it.",
+      "fa": "اعتماد به انقضای lease برای متوقف کردن نویسندهٔ pauseشده: انقضا خوانش ساعت است و فرایند pauseشده نمی‌تواند ساعت بخواند. نوشتهٔ کهنه بعد از انقضا با اعتماد کامل می‌رسد — فقط بررسی storage جلویش را می‌گیرد."
+    },
+    {
+      "en": "Minting one token per write instead of per epoch: then 'stale' has no meaning — every token is fresh, the compare passes everything, and the paused writer sails through. The token must name the ownership generation, shared by all its writes.",
+      "fa": "ساختن یک توکن برای هر نوشته به‌جای هر epoch: آن‌وقت «کهنه» معنایی ندارد — هر توکن تازه است و مقایسه همه‌چیز را قبول می‌کند و نویسندهٔ pauseشده رد می‌شود. توکن باید نام نسل مالکیت باشد که همهٔ نوشته‌هایش شریک‌اند."
+    },
+    {
+      "en": "Keeping highest-seen in memory only: it works until the first restart, then every old epoch is young again. Durability is not an optimization here — it is the fence.",
+      "fa": "نگه داشتن highest-seen فقط در حافظه: تا اولین restart کار می‌کند و بعد هر epoch قدیمی دوباره جوان است. دوام اینجا بهینه‌سازی نیست — خود نرده است."
+    }
+  ],
+  "number": 3,
+  "slug": "fencing-tokens",
+  "sources": [
+    "fencing",
+    "atlassian"
+  ],
+  "steps": [
+    {
+      "en": "See why expiry is not safety: A's lease ends, B is granted epoch 8, but paused A never learns this — its epoch-7 write arrives later in full confidence. Any guard that lives in A's head (timers, lease clocks) cannot guard a sleeper.",
+      "fa": "ببین چرا انقضا امنیت نیست: lease هفت تمام می‌شود و Bepoch هشت را می‌گیرد ولی Aی pauseشده هرگز نمی‌فهمد — نوشتهٔ epoch-7 او بعداً با اعتماد کامل می‌رسد. هر نگهبانی که در ذهن A زندگی کند (تایمرها و ساعت‌های lease) نگهبانی خواب‌آلود است.",
+      "t_en": "Expiry cannot stop a sleeper",
+      "t_fa": "انقضا خواب‌آلود را متوقف نمی‌کند"
+    },
+    {
+      "en": "Move the verdict into storage: every write carries (token, opId); storage atomically rejects token below highest-seen, records the new highest, and only then applies. The paused writer is disarmed at the data, not at its own clock.",
+      "fa": "رأی را به storage منتقل کن: هر نوشته (توکن و شناسهٔ op) را دارد؛ storage اتمیک توکن کمتر از بزرگ‌ترین دیده‌شده را رد می‌کند و بالاترین تازه را ثبت می‌کند و فقط بعد اعمال می‌کند. نویسندهٔ pauseشده کنار داده خلع‌سلاح می‌شود نه کنار ساعت خودش.",
+      "t_en": "Reject stale epochs in storage",
+      "t_fa": "رد epoch کهنه در storage"
+    },
+    {
+      "en": "Split the two identities: the epoch says whose turn it is (one live epoch per resource), the operation ID says which attempt this is. Same epoch plus new op is a second legitimate write; same epoch plus seen op is a retry to absorb.",
+      "fa": "دو هویت را جدا کن: epoch می‌گوید نوبت کیست (یک epoch زنده برای هر منبع) و شناسهٔ عملیات می‌گوید این کدام تلاش است. هم‌epoch با op تازه دومین نوشتهٔ مجاز است؛ هم‌epoch با op دیده‌شده تکرار برای جذب است.",
+      "t_en": "Epoch for turn, op for attempt",
+      "t_fa": "epoch برای نوبت و op برای تلاش"
+    },
+    {
+      "en": "Persist the verdict: highest-seen and the applied-op set live on durable storage with the data, written before the ack. A restart that forgets them accepts stale epochs — the demo's HAZARD line — so memory alone is a fencing bug.",
+      "fa": "رأی را persist کن: بزرگ‌ترین دیده‌شده و مجموعهٔ op اعمال‌شده روی ذخیرهٔ بادوام با داده زندگی می‌کنند و قبل از تأیید نوشته می‌شوند. restartای که فراموششان کند epochهای کهنه را می‌پذیرد — همان خط HAZARD در دمو — پس فقط حافظه باگ fencing است.",
+      "t_en": "Durability is the fence",
+      "t_fa": "دوام همان نرده است"
+    }
+  ],
+  "tests_en": "Invariants: any write with token below highest-seen is rejected and changes nothing; N legitimate same-epoch writes with distinct ops yield N effects; any op retried M times still yields one effect; after a storage restart, a stale epoch is still rejected. Measure with: a pause-injection test (sleep holder past expiry, wake, assert reject), a restart test (kill storage after accepts, replay stale, assert reject), and a counter of rejects per epoch as the fencing-health metric.",
+  "tests_fa": "ناورداها: هر نوشته با توکن کمتر از بزرگ‌ترین دیده‌شده رد می‌شود و هیچ‌چیز را عوض نمی‌کند؛ N نوشتهٔ مجاز هم‌epoch با opهای متمایز N اثر می‌دهند؛ هر op بعد از M تکرار هنوز یک اثر دارد؛ بعد از restart در storage، epoch کهنه هنوز رد می‌شود. بسنج با: تست تزریق pause (نگهدارنده را بعد از انقضا بخوابان و بیدار کن و reject را assert کن)، تست restart (بعد از پذیرش‌ها storage را بکش و کهنه را بازپخش کن و reject را assert کن) و شمارش rejectهای هر epoch به‌عنوان معیار سلامت fencing.",
+  "lab_fa": "<p>lock service با lease و epoch افزایشی و storage بادوام بساز. در یک تراکنش، epoch کمتر از highest_epoch را رد کن و برای epoch تازه high-water mark و اثر را با هم پایدار کن. در یک epoch، op_id تازه باید مجاز و retry همان op_id باید بی‌اثر باشد. A با epoch=7 متوقف می‌شود؛ B با epoch=8 در storage fence را ثبت می‌کند و دو write متفاوت انجام می‌دهد؛ سپس A برمی‌گردد و رد می‌شود. تأکید کن صرف صدور lease جدید تا قبل از رؤیت epoch در storage، fence را فعال نمی‌کند. restart storage، تکرار عملیات و جابه‌جایی پیام‌ها را با assertion مستقل بسنج.</p>",
+  "lab_en": "<p>Build a lease/epoch service and durable storage. In one transaction reject epoch below highest_epoch and persist a newer epoch with the effect. A new op_id in the same epoch is valid; retrying an old op_id is a no-op. Pause A at epoch 7; B installs epoch 8 at storage and performs two distinct writes; resume A and reject it. Issuing the lease alone does not activate the storage fence until storage observes it. Assert behavior across storage restart, operation retries and reordered messages.</p>",
+  "reasoning_fa": "<p>عدد epoch فقط ترتیب مالکیت است؛ ۷ و ۸ را می‌توان با هر دو عدد افزایشی جایگزین کرد. شرط token&lt;highest رد می‌کند تا مالک تازه بتواند چند write هم‌epoch انجام دهد؛ شرط سخت token>highest برای هر write، عملیات دوم همان مالک را اشتباه رد می‌کند. op_id برای هویت همان عملیات و retry آن است و باید در retry ثابت بماند. ذخیرهٔ highest و dedup کنار داده ضروری است چون restart حافظهٔ فرایند را پاک می‌کند.</p>",
+  "reasoning_en": "<p>Epoch numbers order ownership; any increasing pair can replace 7 and 8. Reject token&lt;highest so the current owner can perform multiple same-epoch writes; requiring token>highest for every write wrongly rejects its second operation. Keep op_id stable across retries of one operation. Persist highest and dedup with data because restart erases process memory.</p>"
+}

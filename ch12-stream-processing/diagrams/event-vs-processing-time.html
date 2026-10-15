@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Processing-Time Windowing Artifacts — Figure 12-8</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .band-h{font:700 14px system-ui,sans-serif; fill:#93c5fd}
+  .lbl{font:11.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .tick{font:11px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .lgd{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .warn{font:700 11.5px ui-monospace,Menlo,monospace; fill:#fbbf24}
+  .danger{font:700 11.5px ui-monospace,Menlo,monospace; fill:#fda4af}
+  .note{font:700 11.5px ui-monospace,Menlo,monospace; fill:#86efac}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="Two stacked panels: an event-time timeline where events keep arriving at a steady rate while the stream processor is down for a one-minute deploy, and a processing-time bar chart where the same events produce a spurious spike when the backlog is flushed into a single one-minute processing-time window, while ghosted event-time bars stay steady">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#a7b3cc"/>
+    </marker>
+    <marker id="arrw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/>
+    </marker>
+    <marker id="arrd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#fda4af"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="28" text-anchor="middle">Processing-Time Windowing Artifacts (Figure 12-8)</text>
+  <text class="sub" x="620" y="50" text-anchor="middle">a 1-minute deploy pauses the stream processor &#8212; event-time windows stay honest, processing-time windows invent a spike</text>
+
+  <!-- ============ PANEL 1 : event time ============ -->
+  <g>
+    <rect x="40" y="100" width="920" height="210" rx="10" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="band-h" x="60" y="126">&#9312; event time &#8212; the true timeline</text>
+
+    <!-- downtime band -->
+    <rect x="426" y="150" width="84" height="122" fill="#fbbf24" fill-opacity="0.12" stroke="#fbbf24" stroke-width="1.4" stroke-dasharray="6 5"/>
+    <text class="warn" x="468" y="126" text-anchor="middle">deploy / restart</text>
+    <text class="warn" x="468" y="142" text-anchor="middle">processor down &#8776; 1 min</text>
+
+    <text class="lbl" x="60" y="258">each event keeps its event-time timestamp</text>
+
+    <!-- event-time axis -->
+    <line x1="90" y1="272" x2="930" y2="272" stroke="#2a3652" stroke-width="1.8"/>
+    <g stroke="#a7b3cc" stroke-width="1.2">
+      <line x1="90" y1="272" x2="90" y2="278"/>
+      <line x1="174" y1="272" x2="174" y2="278"/>
+      <line x1="258" y1="272" x2="258" y2="278"/>
+      <line x1="342" y1="272" x2="342" y2="278"/>
+      <line x1="426" y1="272" x2="426" y2="278"/>
+      <line x1="510" y1="272" x2="510" y2="278"/>
+      <line x1="594" y1="272" x2="594" y2="278"/>
+      <line x1="678" y1="272" x2="678" y2="278"/>
+      <line x1="762" y1="272" x2="762" y2="278"/>
+      <line x1="846" y1="272" x2="846" y2="278"/>
+      <line x1="930" y1="272" x2="930" y2="278"/>
+    </g>
+    <g class="tick" text-anchor="middle">
+      <text class="tick" x="90" y="292">0</text>
+      <text class="tick" x="174" y="292">1</text>
+      <text class="tick" x="258" y="292">2</text>
+      <text class="tick" x="342" y="292">3</text>
+      <text class="tick" x="426" y="292">4</text>
+      <text class="tick" x="510" y="292">5</text>
+      <text class="tick" x="594" y="292">6</text>
+      <text class="tick" x="678" y="292">7</text>
+      <text class="tick" x="762" y="292">8</text>
+      <text class="tick" x="846" y="292">9</text>
+      <text class="tick" x="930" y="292">10</text>
+    </g>
+    <text class="tick" x="930" y="306" text-anchor="end">event time (minutes) &#8594;</text>
+
+    <!-- steady event dots, including while the processor is down -->
+    <g fill="#93c5fd">
+      <circle cx="111" cy="272" r="3.5"/><circle cx="153" cy="272" r="3.5"/>
+      <circle cx="195" cy="272" r="3.5"/><circle cx="237" cy="272" r="3.5"/>
+      <circle cx="279" cy="272" r="3.5"/><circle cx="321" cy="272" r="3.5"/>
+      <circle cx="363" cy="272" r="3.5"/><circle cx="405" cy="272" r="3.5"/>
+      <circle cx="447" cy="272" r="3.5"/><circle cx="489" cy="272" r="3.5"/>
+      <circle cx="531" cy="272" r="3.5"/><circle cx="573" cy="272" r="3.5"/>
+      <circle cx="615" cy="272" r="3.5"/><circle cx="657" cy="272" r="3.5"/>
+      <circle cx="699" cy="272" r="3.5"/><circle cx="741" cy="272" r="3.5"/>
+      <circle cx="783" cy="272" r="3.5"/><circle cx="825" cy="272" r="3.5"/>
+      <circle cx="867" cy="272" r="3.5"/><circle cx="909" cy="272" r="3.5"/>
+    </g>
+  </g>
+
+  <!-- backlog connector -->
+  <path d="M468,276 C 468,360 520,420 545,455" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-dasharray="7 6" marker-end="url(#arrw)"/>
+  <text class="warn" x="480" y="322">backlog flushed into one window</text>
+
+  <!-- ============ PANEL 2 : processing time ============ -->
+  <g>
+    <rect x="40" y="330" width="920" height="280" rx="10" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="band-h" x="60" y="356">&#9312; processing time &#8212; grouped by the processor's clock</text>
+
+    <!-- legend -->
+    <rect x="560" y="338" width="20" height="14" rx="4" fill="#3a4459" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="5 4"/>
+    <text class="lgd" x="586" y="349">event-time counts (steady)</text>
+    <rect x="560" y="358" width="20" height="14" rx="4" fill="#93c5fd" stroke="#93c5fd" stroke-width="1.3"/>
+    <text class="lgd" x="586" y="369">processing-time counts</text>
+
+    <!-- ghosted event-time bars (steady rate) -->
+    <g fill="#3a4459" fill-opacity="0.45" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="5 4">
+      <rect x="104" y="506" width="56" height="54"/>
+      <rect x="188" y="506" width="56" height="54"/>
+      <rect x="272" y="506" width="56" height="54"/>
+      <rect x="356" y="506" width="56" height="54"/>
+      <rect x="440" y="506" width="56" height="54"/>
+      <rect x="524" y="506" width="56" height="54"/>
+      <rect x="608" y="506" width="56" height="54"/>
+      <rect x="692" y="506" width="56" height="54"/>
+      <rect x="776" y="506" width="56" height="54"/>
+      <rect x="860" y="506" width="56" height="54"/>
+    </g>
+
+    <!-- processing-time bars: steady 3/min, window 4 empty (down), window 5 = backlog burst -->
+    <g fill="#93c5fd" fill-opacity="0.85" stroke="#93c5fd" stroke-width="1.4">
+      <rect x="104" y="506" width="56" height="54"/>
+      <rect x="188" y="506" width="56" height="54"/>
+      <rect x="272" y="506" width="56" height="54"/>
+      <rect x="356" y="506" width="56" height="54"/>
+      <rect x="608" y="506" width="56" height="54"/>
+      <rect x="692" y="506" width="56" height="54"/>
+      <rect x="776" y="506" width="56" height="54"/>
+      <rect x="860" y="506" width="56" height="54"/>
+    </g>
+    <rect x="524" y="452" width="56" height="108" fill="#fda4af" fill-opacity="0.85" stroke="#fda4af" stroke-width="1.6"/>
+
+    <!-- count labels -->
+    <g class="lbl" text-anchor="middle">
+      <text class="lbl" x="132" y="500">3</text>
+      <text class="lbl" x="216" y="500">3</text>
+      <text class="lbl" x="300" y="500">3</text>
+      <text class="lbl" x="384" y="500">3</text>
+      <text class="lbl" x="636" y="500">3</text>
+      <text class="lbl" x="720" y="500">3</text>
+      <text class="lbl" x="804" y="500">3</text>
+      <text class="lbl" x="888" y="500">3</text>
+    </g>
+    <text class="warn" x="468" y="546" text-anchor="middle">down</text>
+    <text class="danger" x="552" y="446" text-anchor="middle">6</text>
+
+    <!-- spurious spike annotation -->
+    <path d="M612,470 L568,458" fill="none" stroke="#fda4af" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#arrd)"/>
+    <text class="danger" x="616" y="466">spurious spike &#8212; artifact of</text>
+    <text class="danger" x="616" y="482">processing-time windowing</text>
+
+    <!-- window axis -->
+    <line x1="90" y1="560" x2="930" y2="560" stroke="#2a3652" stroke-width="1.8" marker-end="url(#arr)"/>
+    <g class="tick" text-anchor="middle">
+      <text class="tick" x="132" y="580">0</text>
+      <text class="tick" x="216" y="580">1</text>
+      <text class="tick" x="300" y="580">2</text>
+      <text class="tick" x="384" y="580">3</text>
+      <text class="tick" x="468" y="580">4</text>
+      <text class="tick" x="552" y="580">5</text>
+      <text class="tick" x="636" y="580">6</text>
+      <text class="tick" x="720" y="580">7</text>
+      <text class="tick" x="804" y="580">8</text>
+      <text class="tick" x="888" y="580">9</text>
+    </g>
+    <text class="tick" x="90" y="600">processing-time windows (1 min each)</text>
+    <text class="tick" x="930" y="600" text-anchor="end">processing time &#8594;</text>
+  </g>
+
+  <!-- ============ side annotation box ============ -->
+  <g>
+    <rect x="985" y="110" width="230" height="250" rx="10" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="note" x="999" y="138">Use event timestamps</text>
+    <text class="note" x="999" y="156">+ watermarks, not the</text>
+    <text class="note" x="999" y="174">processor's clock</text>
+    <line x1="999" y1="190" x2="1201" y2="190" stroke="#2a3652" stroke-width="1.2"/>
+    <text class="lbl" x="999" y="212">The same applies to</text>
+    <text class="lbl" x="999" y="230">batch jobs: a batch's</text>
+    <text class="lbl" x="999" y="248">output must depend on</text>
+    <text class="lbl" x="999" y="266">the input data, not on</text>
+    <text class="lbl" x="999" y="284">when the job happened.</text>
+  </g>
+</svg>
+</div>
+</body>
+</html>

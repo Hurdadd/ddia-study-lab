@@ -1,0 +1,263 @@
+{
+  "alternatives": [
+    {
+      "en": "In-place overwrite of the live output: no old version, no time travel, and readers mid-job see a mix of old and new rows. Cheaper storage, weaker everything else — acceptable only when nobody reads during the job and history never matters.",
+      "fa": "بازنویسی درجا روی خروجی زنده: بدون نسخه قدیم، بدون سفر در زمان و خواننده‌های وسط job مخلوط سطرهای قدیم و جدید را می‌بینند. فضای ارزان‌تر و همه‌چیز دیگر ضعیف‌تر — فقط وقتی قابل‌قبول است که حین job کسی نخواند و تاریخچه هرگز مهم نباشد."
+    },
+    {
+      "en": "Staging directory plus rename on a local filesystem: tasks land in a versioned staging dir, one atomic rename publishes it. Simple and correct locally — but the rename is the atom, and that atom does not transfer to object storage.",
+      "fa": "دایرکتوری staging به‌علاوه rename روی فایل‌سیستم محلی: taskها در staging نسخه‌دار می‌نشینند و یک rename اتمی منتشرش می‌کند. محلی ساده و درست است — ولی rename همان اتم است و آن اتم به object storage منتقل نمی‌شود."
+    }
+  ],
+  "answer_en": "Write each task to its own checksummed attempt file, retry by deleting partials and rerunning under fresh ids, wait for every task at a barrier, then publish with one atomic pointer swap — a versioned manifest readers pin. Match the atom to the storage: local rename locally, conditional write or versioned pointer on object stores. The top trade-off is storage versus safety: old versions cost bytes until garbage collection, and that rent buys readers that never see half a job.",
+  "answer_fa": "هر task را در فایل attempt checksummed خودش بنویس، با حذف ناقص‌ها و اجرای دوباره با id تازه retry کن، پشت barrier منتظر همه taskها بمان و بعد با یک تعویض اتمی pointer منتشر کن — manifest نسخه‌داری که خواننده‌ها pin می‌کنند. اتم را با storage جور کن: محلی rename محلی و روی object store نوشتن شرطی یا pointer نسخه‌دار. تریدآف اصلی فضا در برابر ایمنی است: نسخه‌های قدیم تا garbage collection بایت می‌خورند و آن اجاره خواننده‌هایی می‌خرد که هرگز نصف job را نمی‌بینند.",
+  "assumptions": [
+    {
+      "en": "Teaching job: 4 tasks × 500 rows from immutable shards; a seeded killer dies mid-write with probability 0.5 per task attempt — failures are injected, not hoped for.",
+      "fa": "job آموزشی: ۴ task و ۵۰۰ سطر از shardهای immutable؛ killer با seed با احتمال ۰٫۵ به‌ازای هر attempt وسط نوشتن می‌میرد — خرابی‌ها تزریق می‌شوند نه آرزو."
+    },
+    {
+      "en": "Local temp filesystem where pointer swap stands in for the atomic step; the object-store atom (conditional write) is designed in text, with its different cost.",
+      "fa": "فایل‌سیستم موقت محلی که تعویض pointer جانشین گام اتمی است؛ اتم object store (نوشتن شرطی) در متن طراحی شده با هزینه متفاوتش."
+    },
+    {
+      "en": "Readers resolve the pointer once per read session and pin that manifest; single-writer publishing unless the CAS follow-up applies.",
+      "fa": "خواننده‌ها pointer را یک‌بار به‌ازای هر نشست خواندن حل و همان manifest را pin می‌کنند؛ انتشار تک‌نویسنده مگر قاعده CAS پیگیری بیاید."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n\n// Teaching demo: retry + all-or-nothing publication. A job of T tasks turns\n// immutable input shards into output shards. A killer dies mid-write with\n// probability P (seeded); retry DELETES the partial attempt output and reruns\n// with a fresh attempt id. The manifest (versioned output pointer) is written\n// only after EVERY task succeeds, so a reader pinning one manifest sees the\n// whole result or nothing — never a mix of versions.\npublic class RetryPublishDemo {\n    static final int TASKS = 4, ROWS = 500;\n    static final double KILL_P = 0.5;\n\n    public static void main(String[] a) throws Exception {\n        Random killer = new Random(14);\n        java.nio.file.Path dir = java.nio.file.Files.createTempDirectory(\"job\");\n        int[] attempts = new int[TASKS];\n        boolean done = false;\n        while (!done) {\n            done = true;\n            for (int t = 0; t < TASKS; t++) {\n                java.nio.file.Path out = dir.resolve(\"task-\" + t + \"-attempt-\" + attempts[t] + \".txt\");\n                List<String> rows = new ArrayList<>(ROWS);\n                boolean died = false;\n                for (int r = 0; r < ROWS; r++) {\n                    rows.add(\"shard\" + t + \":row\" + r);\n                    if (killer.nextDouble() < KILL_P / ROWS) { died = true; break; }\n                }\n                if (died) {\n                    java.nio.file.Files.write(out, rows); // partial file left behind\n                    java.nio.file.Files.delete(out);      // retry deletes it first\n                    attempts[t]++;\n                    done = false;                         // whole job waits: no publish yet\n                } else if (java.nio.file.Files.notExists(out)) {\n                    java.nio.file.Files.write(out, rows); // committed attempt output\n                }\n            }\n        }\n        // All-or-nothing publish: one manifest naming the committed attempts.\n        var manifest = new ArrayList<String>();\n        manifest.add(\"version=v1 tasks=\" + TASKS);\n        for (int t = 0; t < TASKS; t++)\n            manifest.add(\"task-\" + t + \"-attempt-\" + attempts[t] + \".txt\");\n        java.nio.file.Path ptr = dir.resolve(\"CURRENT\");\n        java.nio.file.Files.write(dir.resolve(\"manifest-v1.txt\"), manifest);\n        java.nio.file.Files.writeString(ptr, \"manifest-v1.txt\"); // atomic pointer swap\n        // Reader pins ONE manifest and counts only its files.\n        String pinned = java.nio.file.Files.readString(ptr).trim();\n        long visible = 0;\n        for (String line : java.nio.file.Files.readAllLines(dir.resolve(pinned)))\n            if (line.endsWith(\".txt\"))\n                visible += java.nio.file.Files.readAllLines(dir.resolve(line)).size();\n        System.out.println(\"attempts_per_task=\" + Arrays.toString(attempts));\n        System.out.println(\"published \" + pinned + \" via atomic pointer \" + ptr.getFileName());\n        System.out.println(\"reader sees rows=\" + visible + \" expected=\" + (TASKS * ROWS)\n            + \" all_or_nothing=\" + (visible == TASKS * ROWS));\n        System.out.println(\"OK\");\n    }\n}\n",
+    "expected_en": "attempts_per_task=[2, 0, 1, 0]; published manifest-v1.txt via atomic pointer CURRENT; reader sees rows=2000 expected=2000 all_or_nothing=true; OK. (actual output of this environment)",
+    "expected_fa": "attempts_per_task=[2, 0, 1, 0]؛ انتشار manifest-v1.txt با pointer اتمی CURRENT؛ خواننده rows=2000 می‌بیند برابر expected=2000 با all_or_nothing=true؛ OK. (خروجی واقعی همین محیط)",
+    "lang": "java",
+    "run_en": "javac RetryPublishDemo.java && java RetryPublishDemo — stdlib Java only.",
+    "run_fa": "javac RetryPublishDemo.java && java RetryPublishDemo — فقط استاندارد جاوا.",
+    "status": "verified"
+  },
+  "design_en": "<p><b>Attempts:</b> <code>task-{t}-attempt-{n}.txt</code> with checksums; a retry deletes the partial first and runs <code>n+1</code>; fetch and readers never see attempt names, only manifests.</p><p><b>Manifest:</b> <code>manifest-v3.txt</code> lists exactly the committed attempt files plus a version; <code>CURRENT</code> holds one manifest name and moves atomically.</p><p><b>Publish atom per storage:</b> local filesystem — atomic rename of <code>CURRENT</code>; object store — conditional write (CAS) on the pointer key, loser retries the whole publish; concurrent publishers resolved by exactly one CAS winner.</p><p><b>Cleanup:</b> partial attempts deleted on retry; superseded versions kept through a grace period for pinned readers, then garbage-collected.</p>",
+  "design_fa": "<p><b>attemptها:</b> <code>task-{t}-attempt-{n}.txt</code> با checksum؛ retry اول ناقص را حذف و <code>n+1</code> را اجرا می‌کند؛ fetch و خواننده‌ها هرگز نام attempt نمی‌بینند، فقط manifest.</p><p><b>manifest:</b> <code>manifest-v3.txt</code> دقیقاً فایل‌های attemptِ committed به‌علاوه نسخه را فهرست می‌کند؛ <code>CURRENT</code> یک نام manifest نگه می‌دارد و اتمی جابه‌جا می‌شود.</p><p><b>اتم انتشار به‌ازای هر storage:</b> فایل‌سیستم محلی — rename اتمی <code>CURRENT</code>؛ object store — نوشتن شرطی (CAS) روی کلید pointer و بازنده کل انتشار را retry می‌کند؛ ناشرهای هم‌زمان با دقیقاً یک برنده CAS فیصله می‌یابند.</p><p><b>پاک‌سازی:</b> attemptهای ناقص موقع retry حذف می‌شوند؛ نسخه‌های پشت‌سرگذاشته‌شده دوره grace برای خواننده‌های pinشده می‌مانند و بعد garbage-collect می‌شوند.</p>",
+  "diagrams": [
+    {
+      "caption_en": "One task attempt: crash, delete partial, fresh id, commit",
+      "caption_fa": "یک attemptِ task: کرش، حذف ناقص، id تازه و commit",
+      "file": "diagrams/sol4-step1-task-retry.html",
+      "height": 640,
+      "kind_en": "sequence",
+      "kind_fa": "توالی",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Appending to the corpse file instead of deleting it interleaves two generations of rows: the checksum may even pass on garbage. The security-colored delete is the step interviewers ask about — name it before they do.",
+        "failure_fa": "الصاق به فایل مرده به‌جای حذفش دو نسل سطر را درهم می‌کند: checksum حتی ممکن است روی زباله پاس شود. حذف امنیتی‌رنگ همان گامی است که مصاحبه‌گرها می‌پرسند — قبل از آن‌ها نامش ببر.",
+        "guarantee_en": "The figure shows crash, clean retry, barrier-gated publish and pinned reading in one trace. It shows one task; the barrier over all tasks lives in the assembly.",
+        "guarantee_fa": "شکل کرش، retry تمیز، انتشار پشت-barrier و خواندن pinشده را در یک ردیابی نشان می‌دهد. یک task را نشان می‌دهد؛ barrier روی همه taskها در اسمبلی است.",
+        "nonguarantee_en": "Concurrent publishers and object-store atoms are outside this trace — the lifecycle and runbook take them.",
+        "nonguarantee_fa": "ناشرهای هم‌زمان و اتم‌های object store بیرون این ردیابی‌اند — چرخه‌حالت و ران‌بوک آن‌ها را می‌گیرند.",
+        "point_en": "The decision point is the delete-before-retry message: partials die before any new byte is written, always.",
+        "point_fa": "نقطه تصمیم پیام حذف-قبل-از-retry است: ناقص‌ها همیشه قبل از نوشتن هر بایت تازه می‌میرند.",
+        "scenario_en": "Task 2 dies mid-write, retries cleanly, commits; the manifest publishes only after all tasks; a reader pins and reads.",
+        "scenario_fa": "task شماره ۲ وسط نوشتن می‌میرد، تمیز retry می‌کند و commit می‌شود؛ manifest فقط بعد از همه taskها منتشر می‌شود و خواننده pin می‌کند و می‌خواند.",
+        "steps": [
+          {
+            "en": "Attempt plus crash: partial bytes land, the killer reports, nothing is published.",
+            "fa": "attempt به‌علاوه کرش: بایت‌های ناقص می‌نشینند، killer گزارش می‌دهد و هیچ‌چیز منتشر نمی‌شود."
+          },
+          {
+            "en": "Clean retry: the partial is deleted first, a fresh id reruns the same input, checksum verifies the commit.",
+            "fa": "retry تمیز: اول ناقص حذف می‌شود، id تازه همان ورودی را دوباره اجرا می‌کند و checksum commit را تأیید می‌کند."
+          },
+          {
+            "en": "Publish plus pin: one manifest after all tasks, one pointer read, the whole result.",
+            "fa": "انتشار به‌علاوه pin: یک manifest بعد از همه taskها، یک خواندن pointer و کل نتیجه."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Delete the partial, rerun with a fresh id, commit on checksum, publish after all tasks, read pinned.",
+        "a_fa": "ناقص را حذف کن، با id تازه دوباره اجرا کن، با checksum commit کن، بعد از همه taskها منتشر کن و pinشده بخوان.",
+        "q_en": "What must happen between the crash report and the rerun?",
+        "q_fa": "بین گزارش کرش و اجرای دوباره چه چیزی باید رخ دهد؟"
+      },
+      "source": ".archify/sequence-ch11-sol4-retry-20261014-222108"
+    },
+    {
+      "caption_en": "Output states: committed is invisible until the pointer swap",
+      "caption_fa": "حالت‌های خروجی: committed تا تعویض pointer نامرئی است",
+      "file": "diagrams/sol4-step2-publication.html",
+      "height": 640,
+      "kind_en": "lifecycle",
+      "kind_fa": "چرخه‌حالت",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Publishing from staged before every task commits shows readers half a job: the barrier transition is the guard, and skipping it is the classic all-or-nothing violation. Early GC of the old version breaks pinned readers the same way.",
+        "failure_fa": "انتشار از staged قبل از commit همه taskها نصف job را به خواننده‌ها نشان می‌دهد: گذار barrier نگهبان است و رد کردنش نقض کلاسیک all-or-nothing است. GC زودهنگام نسخه قدیم هم خواننده‌های pinشده را همان‌طور می‌شکند.",
+        "guarantee_en": "The figure separates the three visible-or-not states every task output passes through, with retry and the two terminal exits. It names the atom but implements it per storage in the runbook.",
+        "guarantee_fa": "شکل سه حالت مرئی-یا-نه را که خروجی هر task می‌گذرد جدا می‌کند با retry و دو خروج terminal. اتم را نام می‌برد ولی پیاده‌سازی per-storage آن در ران‌بوک است.",
+        "nonguarantee_en": "CAS contention rates and grace-period tuning are operational numbers, not states.",
+        "nonguarantee_fa": "نرخ رقابت CAS و تنظیم دوره grace عددهای عملیاتی‌اند نه حالت.",
+        "point_en": "The decision point is the staged state: everything before it is invisible by construction, everything after it is one atomic swap.",
+        "point_fa": "نقطه تصمیم حالت staged است: همه‌چیز قبلش ذاتاً نامرئی است و همه‌چیز بعدش یک تعویض اتمی واحد.",
+        "scenario_en": "One task output travels the main lane; crashes detour to retry; the job ends published, aborted, or retired.",
+        "scenario_fa": "خروجی یک task لاین اصلی را می‌رود؛ کرش‌ها به retry می‌روند و job با published یا aborted یا retired تمام می‌شود.",
+        "steps": [
+          {
+            "en": "Attempt to committed: bytes plus checksum, finished but hidden — debugging may look, serving may not.",
+            "fa": "از attempt به committed: بایت به‌علاوه checksum، تمام‌شده ولی پنهان — دیباگ می‌تواند نگاه کند و سرو نه."
+          },
+          {
+            "en": "Committed to staged to published: all tasks done, then one atomic pointer swap makes them visible together.",
+            "fa": "از committed به staged به published: همه taskها تمام شدند و بعد یک تعویض اتمی pointer آن‌ها را با هم مرئی می‌کند."
+          },
+          {
+            "en": "Retrying on crash with fresh ids; aborted cleans staged output; retired GCs old versions after grace.",
+            "fa": "retry روی کرش با id تازه؛ aborted خروجی staged را تمیز می‌کند؛ retired نسخه‌های قدیم را بعد از grace جمع می‌کند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Committed is finished-but-hidden; staged waits for all tasks; published is one atomic swap; old versions retire after grace.",
+        "a_fa": "committed تمام‌شده-ولی-پنهان است؛ staged منتظر همه taskهاست؛ published یک تعویض اتمی است و نسخه‌های قدیم بعد از grace بازنشسته می‌شوند.",
+        "q_en": "Which state is finished yet invisible, and what makes it visible?",
+        "q_fa": "کدام حالت تمام‌شده ولی نامرئی است و چه چیزی مرئیش می‌کند؟"
+      },
+      "source": ".archify/lifecycle-ch11-sol4-pub-20261014-222109"
+    },
+    {
+      "caption_en": "All-or-nothing publish runbook: barrier, atomic swap, pinned reads",
+      "caption_fa": "ران‌بوک انتشار all-or-nothing: barrier، تعویض اتمی و خواندن pinشده",
+      "file": "diagrams/sol4-publish-assembly.html",
+      "height": 640,
+      "kind_en": "workflow",
+      "kind_fa": "گردش‌کار",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Read the runbook backwards from a torn read: no pinned manifest means the reader resolved the pointer twice; half a job means the barrier was skipped; a lost update between publishers means last-writer-wins without CAS. Each symptom names its missing box.",
+        "failure_fa": "ران‌بوک را از خواندن پاره به عقب بخوان: manifest pinنشده یعنی خواننده pointer را دو بار حل کرده؛ نصف job یعنی barrier رد شده؛ update گمشده بین ناشرها یعنی last-writer-wins بدون CAS. هر علامت جعبه گمشده خودش را نام می‌برد.",
+        "guarantee_en": "The runbook composes both steps into one operable page: same attempts, same states, plus the storage-matched atom and the loser-retries rule. The demo proves the local case; object stores follow the CAS design.",
+        "guarantee_fa": "ران‌بوک هر دو گام را در یک صفحه قابل‌اجرا ترکیب می‌کند: همان attemptها و همان حالت‌ها به‌علاوه اتم جور با storage و قاعده بازنده-retry-می‌کند. دمو حالت محلی را اثبات می‌کند؛ object storeها از طراحی CAS پیروی می‌کنند.",
+        "nonguarantee_en": "It fixes no CAS timeouts, grace periods, or storage bills — those are tuned per deployment.",
+        "nonguarantee_fa": "timeoutهای CAS، دوره‌های grace یا صورت‌حساب storage را فیکس نمی‌کند — آن‌ها per-deployment تنظیم می‌شوند.",
+        "point_en": "The decision points are the barrier (nothing publishes early) and the pointer swap (exactly one atom, matched to the store).",
+        "point_fa": "نقطه‌های تصمیم barrier (هیچ‌چیز زود منتشر نمی‌شود) و تعویض pointer (دقیقاً یک اتم جور با store) هستند.",
+        "scenario_en": "Start at frozen shards, loop attempts until all commit, cross the barrier once, swap the pointer, serve pinned readers.",
+        "scenario_fa": "از shardهای منجمد شروع کن، attemptها را تا commit همه حلقه بزن، یک‌بار از barrier بگذر، pointer را عوض کن و به خواننده‌های pinشده سرو بده.",
+        "steps": [
+          {
+            "en": "Execute: frozen shards into checksummed attempt files, checksum failures back to a fresh-id retry.",
+            "fa": "اجرا: shardهای منجمد به فایل‌های attempt checksummed و شکست‌های checksum به retry با id تازه برمی‌گردند."
+          },
+          {
+            "en": "Publish: the barrier admits only complete task sets, then one storage-matched atomic swap moves CURRENT.",
+            "fa": "انتشار: barrier فقط مجموعه task کامل را می‌پذیرد و بعد یک تعویض اتمی جور با storage، CURRENT را جابه‌جا می‌کند."
+          },
+          {
+            "en": "Serve and retire: pinned readers see one version whole; losers of the CAS race retry; old versions GC after grace.",
+            "fa": "سرو و بازنشستگی: خواننده‌های pinشده یک نسخه را کامل می‌بینند؛ بازنده‌های مسابقه CAS retry می‌کنند و نسخه‌های قدیم بعد از grace جمع می‌شوند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Barrier all tasks, one atomic storage-matched swap, pinned reads, CAS loser retries, grace-then-GC.",
+        "a_fa": "همه taskها پشت barrier، یک تعویض اتمی جور با storage، خواندن pinشده، retry بازنده CAS و grace-بعد-GC.",
+        "q_en": "What are the two gates between task bytes and reader eyes?",
+        "q_fa": "دو دروازه بین بایت‌های task و چشم خواننده چیست؟"
+      },
+      "source": ".archify/workflow-ch11-sol4-runbook-20261014-222110"
+    }
+  ],
+  "failures": [
+    {
+      "en": "Keeping the partial and appending on retry: two generations interleave and checksums may pass on garbage. Guard by deleting before writing — the demo's commented lines show the corpse and its deletion.",
+      "fa": "نگه‌داشتن ناقص و الصاق موقع retry: دو نسل درهم می‌شوند و checksum ممکن است روی زباله پاس شود. نگهبان حذف قبل از نوشتن است — خط‌های کامنت دمو جنازه و حذفش را نشان می‌دهند."
+    },
+    {
+      "en": "Publishing before the barrier: readers see half the job and cache it downstream. Guard with the barrier as code (count committed tasks, refuse early publish), not as convention.",
+      "fa": "انتشار قبل از barrier: خواننده‌ها نصف job را می‌بینند و پایین‌دست کش می‌کنند. نگهبان barrier به‌عنوان کد است (taskهای committed را بشمار و انتشار زود را رد کن) نه عرف."
+    },
+    {
+      "en": "Torn reader: resolving CURRENT twice in one session can straddle a swap. Guard by pinning once per session and reading only the pinned manifest.",
+      "fa": "خواننده پاره: حل دو باره CURRENT در یک نشست می‌تواند روی تعویض سوار شود. نگهبان pin کردن یک‌بار به‌ازای هر نشست و خواندن فقط manifest pinشده است."
+    },
+    {
+      "en": "Local rename assumed on object storage: renames may be copy-plus-delete — visible, slow, non-atomic. Guard by choosing the store's own atom (conditional write, versioned pointer) and testing torn reads explicitly.",
+      "fa": "فرض rename محلی روی object storage: rename ممکن است copy-plus-delete باشد — مرئی، کُند و غیراتمی. نگهبان انتخاب اتم خود store (نوشتن شرطی، pointer نسخه‌دار) و تست صریح خواندن پاره است."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "Exactly one CAS winner: both jobs race conditional writes on the pointer key with their manifest version; the store orders them, one succeeds, the loser observes the winner's version, re-validates (or re-runs) against it, and retries the publish — never overwrites blindly. Readers are undisturbed throughout because every manifest, old and new, stays complete and pinned reads never straddle.",
+      "a_fa": "دقیقاً یک برنده CAS: هر دو job نوشتن‌های شرطی روی کلید pointer با نسخه manifest خودشان مسابقه می‌دهند؛ store مرتبشان می‌کند، یکی موفق می‌شود و بازنده نسخه برنده را می‌بیند، در برابرش دوباره اعتبارسنجی (یا دوباره اجرا) می‌کند و انتشار را retry می‌کند — هرگز کورکورانه بازنویسی نه. خواننده‌ها تمام مدت دست‌نخورده‌اند چون هر manifest قدیم و جدید کامل می‌ماند و خواندن‌های pinشده هرگز سوار نمی‌شوند.",
+      "level": "staff",
+      "q_en": "Two jobs concurrently publish to the same output name. Which version wins?",
+      "q_fa": "دو job هم‌زمان روی یک نام خروجی publish کنند؛ کدام نسخه برنده می‌شود؟"
+    },
+    {
+      "a_en": "Use a versioned pointer plus CAS: write the new manifest under a fresh versioned key, then conditionally flip the pointer from the expected old version to the new one. If the store offers no CAS at all, narrow the writer to a single publisher (lease or queue) and say so — a claimed atom you do not have is worse than a documented bottleneck.",
+      "a_fa": "از pointer نسخه‌دار به‌علاوه CAS استفاده کن: manifest تازه را زیر کلید نسخه‌دار تازه بنویس و بعد pointer را شرطی از نسخه قدیم موردانتظار به تازه بچرخان. اگر store اصلاً CAS ندارد، نویسنده را به یک ناشر تکی محدود کن (lease یا صف) و بگو — اتم ادعایی که نداری بدتر از گلوگاه مستند است.",
+      "level": "senior",
+      "q_en": "The object store has no atomic rename. What is the publish atom?",
+      "q_fa": "object store هیچ rename اتمی ندارد. اتم انتشار چیست؟"
+    }
+  ],
+  "interview_q_en": "Design versioned attempt outputs and a job manifest for a multi-task job on immutable input. Inject mid-write and pre-publication crashes. Readers must see one complete pinned version; choose a storage-appropriate atomic pointer or CAS with safe cleanup and retry.",
+  "interview_q_fa": "خروجی attempt نسخه‌دار و manifest job را برای job چندtaskی روی ورودی immutable طراحی کن. کرش وسط نوشتن و قبل از انتشار تزریق کن. خواننده باید یک نسخه کامل pinشده ببیند؛ pointer اتمی یا CAS متناسب با storage با پاک‌سازی و retry امن انتخاب کن.",
+  "mental_en": "Commit is not publish: tasks finish invisibly like votes in a sealed box, and one pointer flip opens the box. Everything before the flip can be retried and cleaned; everything after it must already be whole.",
+  "mental_fa": "commit یعنی انتشار نیست: taskها نامرئی تمام می‌شوند مثل رأی‌ها در صندوق مهرشده و یک چرخش pointer صندوق را باز می‌کند. همه‌چیز قبل از چرخش قابل retry و تمیزکاری است؛ همه‌چیز بعدش باید از قبل کامل باشد.",
+  "mistakes": [
+    {
+      "en": "Generalizing local rename atomicity to object storage. A POSIX rename is atomic; an object-store 'rename' is often copy plus delete. Choose and test the store's own atom instead of assuming the familiar one travels.",
+      "fa": "تعمیم اتمی بودن rename محلی به object storage. rename روی POSIX اتمی است؛ «rename» روی object store اغلب copy به‌علاوه delete است. به‌جای فرض سفر اتم آشنا، اتم خود store را انتخاب و تست کن."
+    },
+    {
+      "en": "Confusing task commit with job publication. A committed attempt is finished but hidden; only the barrier plus the pointer swap makes anything visible. Debugging reads attempts, serving reads manifests.",
+      "fa": "خلط commit task با انتشار job. attemptِ committed تمام‌شده ولی پنهان است؛ فقط barrier به‌علاوه تعویض pointer چیزی را مرئی می‌کند. دیباگ attemptها را می‌خواند و سرو manifestها را."
+    },
+    {
+      "en": "Garbage-collecting versions that pinned readers still hold. The old version is a live contract until its grace expires — GC after grace, with pin counts, never by age alone.",
+      "fa": "جمع کردن نسخه‌هایی که خواننده‌های pinشده هنوز نگه داشته‌اند. نسخه قدیم تا پایان grace قرارداد زنده است — بعد از grace با شمارش pin جمع کن، هرگز فقط با سن نه."
+    }
+  ],
+  "number": 4,
+  "slug": "retry-publish",
+  "sources": [
+    "atlassian",
+    "jepsen"
+  ],
+  "steps": [
+    {
+      "en": "Freeze immutable input shards and let each task write exactly one checksummed attempt file per attempt id — attempts are invisible by construction.",
+      "fa": "shardهای ورودی immutable را منجمد کن و بگذار هر task دقیقاً یک فایل attempt checksummed به‌ازای هر attempt id بنویسد — attemptها ذاتاً نامرئی‌اند.",
+      "t_en": "Invisible attempt outputs",
+      "t_fa": "خروجی attempt نامرئی"
+    },
+    {
+      "en": "On crash, delete the partial file first, then rerun the same input under a fresh id; commit only on checksum.",
+      "fa": "روی کرش اول فایل ناقص را حذف کن، بعد همان ورودی را با id تازه دوباره اجرا کن؛ فقط با checksum commit کن.",
+      "t_en": "Delete partial, fresh id",
+      "t_fa": "حذف ناقص و id تازه"
+    },
+    {
+      "en": "Hold every publish behind a barrier that counts committed tasks: all-or-nothing is enforced in code, not promised in prose.",
+      "fa": "هر انتشار را پشت barrier نگه دار که taskهای committed را می‌شمارد: all-or-nothing در کد اعمال می‌شود نه در نثر وعده داده.",
+      "t_en": "Barrier before publish",
+      "t_fa": "barrier قبل از انتشار"
+    },
+    {
+      "en": "Swap one pointer atomically — local rename on filesystems, conditional write on object stores — so readers move between complete versions only.",
+      "fa": "یک pointer را اتمی عوض کن — rename محلی روی فایل‌سیستم و نوشتن شرطی روی object store — تا خواننده‌ها فقط بین نسخه‌های کامل جابه‌جا شوند.",
+      "t_en": "One atomic pointer swap",
+      "t_fa": "یک تعویض اتمی pointer"
+    },
+    {
+      "en": "Readers pin one manifest per session; old versions serve out their grace, then garbage-collect with pin counts.",
+      "fa": "خواننده‌ها به‌ازای هر نشست یک manifest را pin می‌کنند؛ نسخه‌های قدیم grace خود را سرو می‌دهند و بعد با شمارش pin جمع می‌شوند.",
+      "t_en": "Pin, serve, retire",
+      "t_fa": "pin و سرو و بازنشستگی"
+    }
+  ],
+  "tests_en": "Kill tasks mid-write on every run and assert reader row counts are all-or-nothing (0 or all rows, never partial); assert no partial files survive retries; assert the manifest names exactly the committed attempts; race two publishers and assert exactly one CAS winner with the loser retrying; resolve-then-read torn-read tests across a swap.",
+  "tests_fa": "هر اجرا taskها را وسط نوشتن بکش و assert کن شمارش سطر خواننده all-or-nothing است (صفر یا همه سطرها، هرگز ناقص)؛ assert کن هیچ فایل ناقصی از retryها نماند؛ assert کن manifest دقیقاً attemptهای committed را نام می‌برد؛ دو ناشر را مسابقه بده و assert کن دقیقاً یک برنده CAS با retry بازنده داری؛ تست خواندن پاره با حل-بعد-خواندن روی تعویض.",
+  "worked_en": "<p>Demo numbers (teaching, this environment): 4 tasks × 500 rows with kill probability 0.5 per attempt. Attempts per task <code>[2, 0, 1, 0]</code>; <code>manifest-v1.txt</code> published via pointer <code>CURRENT</code>; reader sees 2,000 of 2,000 rows with <code>all_or_nothing=true</code>.</p><p>Interpretation: failures happened (three retries) yet the reader observes exactly one complete version — retries are invisible by design.</p>",
+  "worked_fa": "<p>عددهای دمو (آموزشی، همین محیط): ۴ task و ۵۰۰ سطر با احتمال کشتن ۰٫۵ به‌ازای هر attempt. attempt به‌ازای هر task <code>[2, 0, 1, 0]</code>؛ <code>manifest-v1.txt</code> با pointer <code>CURRENT</code> منتشر شد و خواننده ۲٬۰۰۰ از ۲٬۰۰۰ سطر را با <code>all_or_nothing=true</code> دید.</p><p>تفسیر: خرابی‌ها رخ دادند (سه retry) ولی خواننده دقیقاً یک نسخه کامل می‌بیند — retryها طبق طراحی نامرئی‌اند.</p>",
+  "reasoning_fa": "<p>فایل نیمه‌نوشته را منتشر نمی‌کنیم چون خواننده ممکن است خروجی ناقص را کامل تصور کند. هر attempt خروجی immutable دارد و manifest فقط attempt برندهٔ همهٔ taskها را معرفی می‌کند؛ تعویض pointer لحظهٔ رؤیت است. احتمال crash برابر ۰٫۵ برای تزریق پرتکرار خرابی است، نه نرخ خرابی واقعی. rename اتمیک فرض همان filesystem است؛ روی object store باید شرط نسخه/CAS همان سرویس بررسی شود و نمی‌توان از نام مشابه نتیجه گرفت.</p>",
+  "reasoning_en": "<p>Do not expose partial files as complete output. Each attempt writes immutable output; a manifest selects one winning attempt per task, and switching the pointer changes visibility. A 0.5 crash probability injects frequent failures, not a real failure rate. Atomic rename assumes one supporting filesystem; object storage needs its own documented conditional-write/CAS semantics.</p>"
+}

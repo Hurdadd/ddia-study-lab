@@ -1,0 +1,28 @@
+name: Site checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: python3 assets/build_final_project.py
+      - run: git diff --exit-code -- index.html final-project
+      - run: python3 assets/check_final_project.py
+      - run: python3 assets/structcheck.py index.html final-project/index.html
+      - run: python3 assets/build_site.py
+      - name: Browser checks
+        run: |
+          python3 -m http.server 8766 --bind 127.0.0.1 > /tmp/site.log 2>&1 &
+          for i in 1 2 3 4 5; do curl -sf http://127.0.0.1:8766/ > /dev/null && break; sleep 1; done
+          PW_CHANNEL=chromium npm run test:browser

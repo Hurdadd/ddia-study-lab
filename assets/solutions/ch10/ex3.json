@@ -1,0 +1,212 @@
+{
+  "alternatives": [
+    {
+      "en": "UUIDs (random, no coordination): uniqueness without any allocator or failover story, at the cost of no order at all and wider keys. Choose when order is never read — request IDs, tracing spans — never when something sorts by ID.",
+      "fa": "<span class=\"ltr\">UUID</span> تصادفی (بدون هماهنگی): یکتایی بدون هیچ allocator یا داستان failover، به قیمت هیچ ترتیبی و کلیدهای پهن‌تر. وقتی ترتیب هرگز خوانده نمی‌شود انتخابش کن — شناسه درخواست و <span class=\"ltr\">span</span> ردیابی — هرگز وقتی چیزی با شناسه مرتب می‌شود."
+    },
+    {
+      "en": "Shard-prefixed IDs (A-*, B-* from disjoint ranges): unique and coordination-free with per-shard order, but no global real-time order. Choose when shards own their rows and cross-shard sorting is display-only.",
+      "fa": "شناسه پیشوند-شاردی (<span class=\"ltr\">A-* و B-*</span> از بازه‌های جدا): یکتا و بدون هماهنگی با ترتیب per-shard، ولی بدون ترتیب real-time سراسری. وقتی شاردها مالک سطرهایشان‌اند و مرتب‌سازی میان‌شاردی فقط نمایشی است انتخابش کن."
+    }
+  ],
+  "answer_en": "Reserve the range high-water mark durably before issuing IDs; restart above it after a crash. Issuing 1,2,3 from 1..5 then restarting at 6 preserves uniqueness with gaps. Disjoint ranges or namespaces support sharded uniqueness. Global numeric ordering of non-overlapping responses is stronger: fencing reservations alone does not stop an old allocator serving RAM IDs, so the issuance path also needs a valid-owner check.",
+  "answer_fa": "پیش از تحویل هر شناسه، انتهای بازه را بادوام رزرو کن؛ پس از crash از بعدِ mark ادامه بده. صدور ۱،۲،۳ از دستهٔ ۱ تا ۵ و سپس بازیابی از ۶ تکرار ندارد ولی gap دارد. یکتایی با بازه‌های جدا یا namespace جدا قابل شارد است. ترتیب عددیِ جهانیِ پاسخ‌های غیرهم‌پوشان قرارداد قوی‌تری است؛ fence روی reserve، پاسخ‌دادن رهبر قدیم از RAM را متوقف نمی‌کند و مسیر صدور هم باید مالک معتبر را بررسی کند.",
+  "assumptions": [
+    {
+      "en": "One oracle allocator serves batches of 5 (teaching size); the high-water mark is durable, the handout pointer is volatile.",
+      "fa": "یک allocator oracle دسته‌های ‎۵تایی (اندازه آموزشی) تحویل می‌دهد؛ <span class=\"ltr\">high-water mark</span> بادوام و اشاره‌گر تحویل ناپایدار است."
+    },
+    {
+      "en": "Crash loses all volatile state and nothing durable; the standby (if any) starts from the same durable mark.",
+      "fa": "crash همه حالت ناپایدار را می‌برد و هیچ بادوامی را نه؛ standby (اگر باشد) از همان mark بادوام شروع می‌کند."
+    },
+    {
+      "en": "Uniqueness, gap-free, allocation order and real-time observation order are four separate guarantees — define which the product needs before choosing.",
+      "fa": "یکتایی و بدون-gap و ترتیب تخصیص و ترتیب مشاهده real-time چهار تضمین جدا هستند — قبل از انتخاب بگو محصول کدام را می‌خواهد."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n// Teaching demo: oracle allocator. Persist the batch high-water mark\n// BEFORE issuing; crash mid-batch loses only the unissued tail.\npublic class OracleDemo {\n    static class Allocator {\n        long persistedHwm = 0, next = 1;\n        final long batch = 5;\n        final List<Long> issued = new ArrayList<>();\n        void reserve() { persistedHwm += batch; }\n        long issue() {\n            if (next > persistedHwm) reserve();\n            issued.add(next);\n            return next++;\n        }\n        void crash() { next = persistedHwm + 1; } // volatile lost, mark survives\n    }\n    public static void main(String[] a) {\n        Allocator al = new Allocator();\n        System.out.println(\"issue \" + al.issue() + \", \" + al.issue() + \", \" + al.issue());\n        al.crash();\n        System.out.println(\"CRASH -> recover from hwm=\" + al.persistedHwm);\n        System.out.println(\"next: \" + al.issue() + \", \" + al.issue());\n        Set<Long> uniq = new HashSet<>(al.issued);\n        System.out.println(\"issued=\" + al.issued + \" dups=\" + (uniq.size() != al.issued.size()));\n        if (uniq.size() != al.issued.size()) throw new AssertionError(\"duplicate ID!\");\n        System.out.println(\"OK: no duplicates, gaps allowed\");\n    }\n}\n",
+    "expected_en": "issues 1,2,3 then crash, recovery from hwm=5, next issues 6,7; issued=[1,2,3,6,7], no duplicates; OK. (actual output of this environment)",
+    "expected_fa": "صدور ‎۱و۲و۳‎ بعد crash و بازیابی از <span class=\"ltr\">hwm=5</span> و صدور ‎۶و۷‎؛ <span class=\"ltr\">issued=[1,2,3,6,7]</span> بدون تکراری؛ <span class=\"ltr\">OK</span>. (خروجی واقعی همین محیط)",
+    "lang": "java",
+    "run_en": "javac OracleDemo.java && java OracleDemo — stdlib Java only, instant.",
+    "run_fa": "javac OracleDemo.java && java OracleDemo — فقط استاندارد جاوا، فوری.",
+    "status": "verified"
+  },
+  "design_en": "<p>Components: one allocator (volatile handout pointer + batch cache), one durable store for the high-water mark, one standby replaying the mark log. API: <code>reserve(batch)</code> persists the mark and returns nothing servable yet; <code>nextID()</code> serves from RAM. Read path: serve from memory, no I/O. Write path: mark-first, then serve — a crash between them only skips IDs. Partition key: none — the oracle is one logical decider; scale it by batching, not by splitting the mark.</p>",
+  "design_fa": "<p>اجزا: یک allocator (اشاره‌گر تحویل ناپایدار + کش دسته)، یک فروشگاه بادوام برای <span class=\"ltr\">high-water mark</span> و یک standby که لاگ mark را بازپخش می‌کند. <span class=\"ltr\">API</span>: <code>reserve(batch)</code> اول mark را پایدار می‌کند و هنوز هیچ‌چیز قابل تحویل برنمی‌گرداند؛ <code>nextID()</code> از <span class=\"ltr\">RAM</span> تحویل می‌دهد. مسیر خواندن: تحویل از حافظه بدون <span class=\"ltr\">I/O</span>. مسیر نوشتن: اول mark بعد تحویل — crash میانشان فقط شناسه جا می‌اندازد. کلید پارتیشن: هیچی — oracle یک تصمیم‌گیر منطقی است؛ با دسته‌بندی مقیاس بده نه با تکه کردن mark.</p>",
+  "diagrams": [
+    {
+      "caption_en": "Reserve durable, serve volatile, crash, recover fenced",
+      "caption_fa": "رزرو بادوام، تحویل ناپایدار، crash و بازیابی fenced",
+      "file": "diagrams/sol3-step1-oracle-allocator.html",
+      "height": 640,
+      "kind_en": "workflow: allocator + failover",
+      "kind_fa": "گردش‌کار: allocator و failover",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Trace the crash node: 4 and 5 never left, yet the mark already covers them — the gap is the honest price of mark-first. Then trace an unfenced failover: a revived allocator re-issuing 1,2,3 beside the standby's 1,2,3 — duplicates, the one outcome the design forbids.",
+        "failure_fa": "گره crash را دنبال کن: ‎۴و۵‎ هرگز بیرون نرفتند ولی mark قبلاً پوشششان داده — gap قیمت صادقانه mark-first است. بعد failover بدون fence را دنبال کن: allocator زنده‌شده ‎۱و۲و۳‎ را کنار ‎۱و۲و۳‎ standby دوباره صادر می‌کند — تکراری، همان یک نتیجه‌ای که طرح ممنوع می‌کند.",
+        "guarantee_en": "The figure shows the mark-first pipeline and the fenced failover. It does not show UUID or shard-range alternatives as branches — the taxonomy assembly compares all three.",
+        "guarantee_fa": "شکل خط لوله mark-first و failover fenced را نشان می‌دهد. گزینه‌های <span class=\"ltr\">UUID</span> و بازه-شاردی را به‌عنوان شاخه نشان نمی‌دهد — اسمبلی taxonomy هر سه را مقایسه می‌کند.",
+        "nonguarantee_en": "Real-time global ordering across shards is not promised by anything here — the taxonomy marks that cell honestly.",
+        "nonguarantee_fa": "ترتیب real-time سراسری میان شاردها را هیچ‌چیز این‌جا وعده نمی‌دهد — taxonomy آن خانه را صادقانه علامت می‌زند.",
+        "point_en": "The decision point is the reserve node: the mark is durable before anything is servable. Every arrow after it is allowed to crash.",
+        "point_fa": "نقطه تصمیم گره رزرو است: mark قبل از قابل‌تحویل شدن هرچیز بادوام است. هر پیکان بعدش اجازه crash دارد.",
+        "scenario_en": "One ID client walks the spine left to right: request, reserve, hand out, crash, recover, fence, verify. Read along the main path.",
+        "scenario_fa": "یک مشتری شناسه ستون فقرات را چپ‌به‌راست می‌رود: درخواست و رزرو و تحویل و crash و بازیابی و fence و راستی‌آزمایی. روی مسیر اصلی بخوان.",
+        "steps": [
+          {
+            "en": "Request, then reserve: the batch mark 1..5 is persisted before ID 1 is servable.",
+            "fa": "درخواست بعد رزرو: mark دسته ‎۱ تا ۵‎ قبل از قابل‌تحویل شدن شناسه ‎۱‎ پایدار می‌شود."
+          },
+          {
+            "en": "Hand out in RAM: 1,2,3 leave; 4,5 never do — the crash lands mid-batch.",
+            "fa": "تحویل در <span class=\"ltr\">RAM</span>: ‎۱و۲و۳‎ بیرون می‌روند و ‎۴و۵‎ هرگز — crash وسط دسته می‌نشیند."
+          },
+          {
+            "en": "Recover from the mark, fence the old epoch with a durable token, then verify: 1,2,3,6,7 — gaps allowed, duplicates never.",
+            "fa": "بازیابی از mark و fence کردن epoch قدیم با token بادوام، بعد راستی‌آزمایی: ‎۱و۲و۳و۶و۷‎ — gap مجاز و تکراری هرگز."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Persisting after issuing lets a crash lose track of handed-out IDs, so recovery re-issues them: duplicates. Mark-first inverts the risk: a crash can only skip IDs that never left, which is a gap, never a duplicate.",
+        "a_fa": "پایدار کردن بعد از صدور می‌گذارد crash رد شناسه‌های تحویل‌شده را گم کند پس بازیابی دوباره صادرشان می‌کند: تکراری. mark-first ریسک را برعکس می‌کند: crash فقط می‌تواند شناسه‌های هرگزبیرون‌نرفته را جا بیندازد که gap است، هرگز تکراری.",
+        "q_en": "Why must the mark persist before the first ID leaves, not after?",
+        "q_fa": "چرا mark باید قبل از بیرون رفتن اولین شناسه پایدار شود نه بعدش؟"
+      },
+      "source": ".archify/workflow-ch10-sol3-oracle-20261014-221512"
+    },
+    {
+      "caption_en": "Which scheme holds which guarantee: uniqueness, gap-free, allocation and real-time order",
+      "caption_fa": "کدام طرح کدام تضمین را دارد: یکتایی و بدون-gap و ترتیب تخصیص و real-time",
+      "file": "diagrams/sol3-id-taxonomy.html",
+      "height": 640,
+      "kind_en": "guarantee taxonomy",
+      "kind_fa": "رده‌بندی تضمین",
+      "made": "hand",
+      "narration": {
+        "failure_en": "Trace the 'oracle can never shard' claim across the uniqueness row: all three cells are green. The claim dies right there. Then trace a real-time sorting requirement down the bottom row: only the fenced oracle cell is yellow, the rest rose — sharding uniqueness never bought ordering.",
+        "failure_fa": "ادعای «oracle هرگز shard نمی‌شود» را روی سطر یکتایی دنبال کن: هر سه خانه سبزند. ادعا همان‌جا می‌میرد. بعد نیاز مرتب‌سازی real-time را روی سطر پایین دنبال کن: فقط خانه oracle fenced زرد است و بقیه صورتی — shard کردن یکتایی هرگز ترتیب نخرید.",
+        "guarantee_en": "The figure compares the three schemes on four guarantees in one table. It does not size batches or set failover timeouts — those are deployment numbers, not guarantees.",
+        "guarantee_fa": "شکل سه طرح را روی چهار تضمین در یک جدول مقایسه می‌کند. نه اندازه دسته را تعیین می‌کند نه timeout failover را — آن‌ها اعداد استقرارند نه تضمین.",
+        "nonguarantee_en": "Clock-synchronization schemes (TrueTime-style) are outside this table — they buy real-time order with hardware, a different price.",
+        "nonguarantee_fa": "طرح‌های هم‌گام‌سازی ساعت (سبک <span class=\"ltr\">TrueTime</span>) بیرون این جدول‌اند — آن‌ها ترتیب real-time را با سخت‌افزار می‌خرند، قیمتی دیگر.",
+        "point_en": "The decision point is the column the product actually needs: read down one column and pay only for it. Most products need the first row only.",
+        "point_fa": "نقطه تصمیم ستونی است که محصول واقعاً می‌خواهد: یک ستون را پایین بخوان و فقط همان را بپرداز. بیشتر محصول‌ها فقط سطر اول را می‌خواهند.",
+        "scenario_en": "Four guarantee rows against three scheme columns: oracle, UUID, shard-prefixed. Read the uniqueness row first — all green — then descend into ordering, where the colors diverge.",
+        "scenario_fa": "چهار سطر تضمین در برابر سه ستون طرح: oracle و <span class=\"ltr\">UUID</span> و پیشوند-شاردی. اول سطر یکتایی را بخوان — همه سبز — بعد به ترتیب پایین برو که رنگ‌ها جدا می‌شوند.",
+        "steps": [
+          {
+            "en": "Uniqueness row: green across — oracle, UUID and disjoint ranges all guarantee it. Sharding uniqueness was never the problem.",
+            "fa": "سطر یکتایی: سراسر سبز — oracle و <span class=\"ltr\">UUID</span> و بازه‌های جدا همه تضمینش می‌کنند. shard کردن یکتایی هرگز مسئله نبود."
+          },
+          {
+            "en": "Gap-free and allocation order: only the single decider holds them; UUID and shard ranges go rose.",
+            "fa": "بدون-gap و ترتیب تخصیص: فقط تصمیم‌گیر واحد داردشان؛ <span class=\"ltr\">UUID</span> و بازه‌های شارد صورتی می‌شوند."
+          },
+          {
+            "en": "Real-time order: only the fenced oracle is yellow (conditional); the rest rose. Ordering needs coordination — always.",
+            "fa": "ترتیب real-time: فقط oracle fenced زرد است (مشروط) و بقیه صورتی. ترتیب هماهنگی می‌خواهد — همیشه."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "No — only uniqueness. A-2 may be issued before B-100 in wall-clock time yet sort smaller; disjoint ranges give per-shard order at most. Global real-time order needs the fenced oracle column.",
+        "a_fa": "نه — فقط یکتایی. <span class=\"ltr\">A-2</span> ممکن است در زمان دیواری قبل از <span class=\"ltr\">B-100</span> صادر شود ولی کوچک‌تر مرتب شود؛ بازه‌های جدا حداکثر ترتیب per-shard می‌دهند. ترتیب real-time سراسری ستون oracle fenced را می‌خواهد.",
+        "q_en": "Do disjoint shard ranges give global real-time order?",
+        "q_fa": "آیا بازه‌های جدای شارد ترتیب real-time سراسری می‌دهند؟"
+      }
+    }
+  ],
+  "failures": [
+    {
+      "en": "Failover without fencing: the old allocator revives and re-issues 1,2,3 beside the standby's 1,2,3 — duplicates, the one forbidden outcome. Guard: the standby takes a fresh epoch token and storage durably rejects the smaller epoch — the fencing rule from chapter 9, applied to allocator epochs, not per-write tokens.",
+      "fa": "failover بدون fencing: allocator قدیم زنده می‌شود و ‎۱و۲و۳‎ را کنار ‎۱و۲و۳‎ standby دوباره صادر می‌کند — تکراری، همان یک نتیجه ممنوع. نگهبان: standby یک token epoch تازه می‌گیرد و storage epoch کوچک‌تر را بادوام رد می‌کند — قاعده fencing فصل ۹، اعمال‌شده روی epochهای allocator نه tokenهای per-write."
+    },
+    {
+      "en": "Mark persisted after serving: a crash between serving and persisting loses track of issued IDs — recovery re-issues them. Guard: mark-first ordering in code, asserted by a test that kills mid-batch (the demo).",
+      "fa": "پایدار کردن mark بعد از تحویل: crash میان تحویل و پایداری رد شناسه‌های صادرشده را گم می‌کند — بازیابی دوباره صادرشان می‌کند. نگهبان: ترتیب mark-first در کد که با تست کشتن وسط دسته <span class=\"ltr\">assert</span> می‌شود (همان دمو)."
+    },
+    {
+      "en": "Two allocators on overlapping ranges (mis-sharding): disjointness assumed but never enforced gives duplicates across shards. Guard: ranges assigned from one config version, and each issuer stamps its shard prefix so overlap is detectable, not silent.",
+      "fa": "دو allocator روی بازه‌های هم‌پوشان (shardبندی غلط): جدایی فرض شده ولی هرگز اعمال‌نشده میان شاردها تکراری می‌دهد. نگهبان: بازه‌ها از یک نسخه کانفیگ تخصیص یابند و هر صادرکننده پیشوند شاردش را مهر بزند تا هم‌پوشانی قابل تشخیص باشد نه بی‌صدا."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "No. Disjoint ranges guarantee uniqueness and per-shard order only. A-2 can be issued at noon and B-100 at 11:59 yet sort after it — wall-clock issue order and numeric order are unrelated across shards. If the product sorts globally by ID in real time, it needs the fenced oracle, not ranges.",
+      "a_fa": "نه. بازه‌های جدا فقط یکتایی و ترتیب per-shard را تضمین می‌کنند. <span class=\"ltr\">A-2</span> می‌تواند ظهر صادر شود و <span class=\"ltr\">B-100</span> ساعت ‎۱۱:۵۹‎ ولی بعدش مرتب شود — ترتیب صدور دیواری و ترتیب عددی میان شاردها ربطی ندارند. اگر محصول سراسری با شناسه در real-time مرتب می‌کند، oracle fenced می‌خواهد نه بازه.",
+      "level": "senior",
+      "q_en": "Two nodes issue IDs from disjoint ranges. Do the IDs increase in global real-time order?",
+      "q_fa": "دو node بازه‌های جدا دارند؛ آیا IDهای صادرشده به ترتیب زمان جهانی افزایش می‌یابند؟"
+    },
+    {
+      "a_en": "The standby skips all durably reserved ranges and reserves new ones under an epoch fence. Never reassign an old range. An old leader may still issue unique but smaller RAM IDs; if global order is required, validate ownership on the response path too.",
+      "a_fa": "standby همهٔ بازه‌های رزروشده را از mark بادوام رد می‌کند و فقط بازهٔ تازه می‌گیرد؛ epoch قدیمی در reserve رد می‌شود. بازهٔ قبلی را دوباره واگذار نکن. رهبر قدیمی ممکن است از RAM شناسهٔ یکتا ولی کوچک‌تر بدهد؛ اگر ترتیب جهانی لازم است، مسیر پاسخ هم باید مالک فعلی را بررسی کند.",
+      "level": "staff",
+      "q_en": "The oracle leader fails over mid-batch. How do you avoid double-issue?",
+      "q_fa": "رهبر oracle وسط دسته failover می‌کند؛ صدور دوباره را چطور ممنوع می‌کنی؟"
+    }
+  ],
+  "interview_q_en": "Persist ID-range reservations before issuing IDs and crash mid-range. Separate uniqueness, gaplessness, allocation order and real-time observation. Compare a centralized allocator, UUIDs and shard-prefixed IDs; fence failover.",
+  "interview_q_fa": "مولد ID با رزرو پایدار بازه طراحی کن و crash وسط دسته را تحلیل کن. uniqueness، gap-free، ترتیب تخصیص و ترتیب مشاهدهٔ real-time را جدا تعریف کن. طرح مرکزی، UUID و shard-prefixed ID را مقایسه کن؛ برای failover، allocator را fence کن.",
+  "mental_en": "An ID allocator sells certainty about the past (never twice) and charges extra for certainty about order. Uniqueness is cheap and shardable; every ordering word after it — gap-free, sorted, real-time — raises the price until only a fenced oracle can pay.",
+  "mental_fa": "allocator شناسه اطمینان درباره گذشته می‌فروشد (هرگز دو بار) و برای اطمینان درباره ترتیب اضافه می‌گیرد. یکتایی ارزان و shardشدنی است؛ هر قید ترتیبی بعدش — بدون-gap و مرتب و real-time — قیمت را بالا می‌برد تا فقط oracle fenced بتواند بپردازد.",
+  "mistakes": [
+    {
+      "en": "'This oracle can never be sharded.' Wrong per guarantee: uniqueness shards freely with disjoint ranges; only gap-free and global real-time order resist sharding. Say which guarantee, or say nothing.",
+      "fa": "«این oracle هرگز shard نمی‌شود.» غلطِ per-guarantee: یکتایی با بازه‌های جدا آزادانه shard می‌شود؛ فقط بدون-gap و ترتیب real-time سراسری مقاومت می‌کنند. بگو کدام تضمین، یا هیچی نگو."
+    },
+    {
+      "en": "Persisting the mark after serving ('batch the writes for speed'). A crash in between re-issues IDs — the one forbidden outcome bought for one fewer fsync. Mark first, always.",
+      "fa": "پایدار کردن mark بعد از تحویل («برای سرعت نوشتن‌ها را بچ کن»). crash میانشان شناسه‌ها را دوباره صادر می‌کند — همان یک نتیجه ممنوع خریده‌شده به قیمت یک <span class=\"ltr\">fsync</span> کمتر. اول mark، همیشه."
+    },
+    {
+      "en": "Fencing per ID instead of per allocator epoch. Tokens must identify the allocator's lease epoch (one fencing check per failover), not each issued ID — per-ID tokens add a check to every issue for no extra safety.",
+      "fa": "fencing per-ID به‌جای per-epoch allocator. token باید epoch lease allocator را مشخص کند (یک بررسی fencing per-failover) نه هر شناسه صادرشده را — token per-ID به هر صدور یک بررسی بدون امنیت اضافه تحمیل می‌کند."
+    }
+  ],
+  "number": 3,
+  "slug": "oracle-allocator",
+  "sources": [
+    "amazon",
+    "atlassian"
+  ],
+  "steps": [
+    {
+      "en": "Persist the reservation before serving: reserve batch 1..5 durably, then hand out 1,2,3 from RAM. The mark-first order is the whole trick.",
+      "fa": "رزرو را قبل از تحویل پایدار کن: دسته ‎۱ تا ۵‎ را بادوام رزرو کن بعد ‎۱و۲و۳‎ را از <span class=\"ltr\">RAM</span> تحویل بده. ترتیب mark-first کل ترفند است.",
+      "t_en": "Mark first, serve second",
+      "t_fa": "اول mark بعد تحویل"
+    },
+    {
+      "en": "Crash mid-batch and recover from the mark: 4,5 were never issued, so next issues are 6,7. Gaps appear, duplicates never do — issued=[1,2,3,6,7].",
+      "fa": "وسط دسته crash کن و از mark بالا بیا: ‎۴و۵‎ هرگز صادر نشدند پس صدورهای بعد ‎۶و۷‎ هستند. gap می‌آید و تکراری هرگز — <span class=\"ltr\">issued=[1,2,3,6,7]</span>.",
+      "t_en": "Crash the batch",
+      "t_fa": "کشتن وسط دسته"
+    },
+    {
+      "en": "Separate uniqueness, gap-free allocation, allocation order and real-time response order. This batched design deliberately allows gaps; disjoint ranges provide uniqueness. Global ordering requires every issuance path to follow one ordering protocol.",
+      "fa": "چهار قرارداد را جدا کن: یکتایی، gap-free، ترتیب تخصیص و ترتیب real-time پاسخ‌ها. طرح دسته‌ای همین پاسخ عمداً gap دارد؛ بازه‌های جدا فقط یکتایی را می‌دهند. برای ترتیب جهانی، همهٔ مسیرهای تحویل باید پروتکل ترتیب واحد را رعایت کنند.",
+      "t_en": "Split the guarantees",
+      "t_fa": "جدا کردن تضمین‌ها"
+    },
+    {
+      "en": "The standby skips all durably reserved ranges and reserves new ones under an epoch fence. Never reassign an old range. An old leader may still issue unique but smaller RAM IDs; if global order is required, validate ownership on the response path too.",
+      "fa": "standby همهٔ بازه‌های رزروشده را از mark بادوام رد می‌کند و فقط بازهٔ تازه می‌گیرد؛ epoch قدیمی در reserve رد می‌شود. بازهٔ قبلی را دوباره واگذار نکن. رهبر قدیمی ممکن است از RAM شناسهٔ یکتا ولی کوچک‌تر بدهد؛ اگر ترتیب جهانی لازم است، مسیر پاسخ هم باید مالک فعلی را بررسی کند.",
+      "t_en": "Fence the failover",
+      "t_fa": "fence کردن failover"
+    }
+  ],
+  "tests_en": "The code models volatile-state loss with a surviving high-water mark and asserts uniqueness with gaps. A real deployment additionally needs two-allocator, durable-store and issuance-owner tests; this demo does not prove those properties.",
+  "tests_fa": "نمونهٔ کد فقط از دست‌رفتن حالت volatile و حفظ mark را مدل می‌کند. نبود تکرار و وجود gap را assert می‌کند. برای اعتبارسنجی deployment واقعی، دو allocator و ذخیرهٔ بادوام و کنترل مالکیت مسیر پاسخ را جدا آزمایش کن؛ خروجی این دمو اثبات آن تست‌ها نیست.",
+  "worked_en": "<p>Teaching run: batch 1..5 reserved (hwm=5); issues 1,2,3; crash; recover from hwm=5; issues 6,7. Issued=[1,2,3,6,7]: gaps {4,5}, duplicates none. Shard demo: A issues A-1,A-2 while B issues B-1,B-2 — all four unique, yet A-2 may predate B-1 in real time.</p>",
+  "worked_fa": "<p>اجرای آموزشی: دسته ‎۱ تا ۵‎ رزرو شد (<span class=\"ltr\">hwm=5</span>)؛ صدور ‎۱و۲و۳‎؛ crash؛ بازیابی از <span class=\"ltr\">hwm=5</span>؛ صدور ‎۶و۷‎. <span class=\"ltr\">issued=[1,2,3,6,7]</span>: gapها ‎۴و۵‎ و تکراری هیچی. دموی شارد: <span class=\"ltr\">A</span> صادر می‌کند <span class=\"ltr\">A-1 و A-2</span> و <span class=\"ltr\">B</span> صادر می‌کند <span class=\"ltr\">B-1 و B-2</span> — هر چهار یکتا ولی <span class=\"ltr\">A-2</span> ممکن است در real-time قبل از <span class=\"ltr\">B-1</span> باشد.</p>",
+  "lab_fa": "<p>مولد شناسه، high-water mark دسته را قبل از تحویل اولین ID پایدار می‌کند. دستهٔ ۱ تا ۵ را رزرو کن، ۱ تا ۳ را بده، crash و از ۶ شروع کن؛ نبود تکرار و مجازبودن gap را assert کن. سپس دو allocator با بازهٔ بادوام جدا یا namespace جدا بساز و یکتایی را بیازما. uniqueness، gap-free، ترتیب تخصیص و ترتیب real-time پاسخ‌های غیرهم‌پوشان را جدا تعریف کن؛ batching و چند allocator ممکن است ترتیب جهانی را از بین ببرند. در failover هیچ بازهٔ رزروشده را دوباره واگذار نکن و reserve بعدی را با epoch در storage محافظت کن. fence روی reserve به‌تنهایی پاسخ‌های باقی‌مانده در RAM رهبر قدیم را متوقف نمی‌کند؛ برای ترتیب جهانی، مسیر پاسخ نیز باید مالک معتبر را کنترل کند.</p>",
+  "lab_en": "<p>Persist each batch high-water mark before issuing its first ID. Reserve 1..5, issue 1..3, crash and restart at 6; assert no duplicates with allowed gaps. Then implement two allocators with durably disjoint ranges or namespaces and test uniqueness. Define uniqueness, gap-free allocation, allocation order and real-time ordering of non-overlapping responses separately; batching across allocators can break global order. Never reassign reserved ranges after failover, and epoch-fence future reservations at storage. A reserve fence alone cannot stop an old leader serving its remaining RAM IDs; global ordering also needs a valid-owner check on the response path.</p>",
+  "reasoning_fa": "<p>پایدارکردن high-water mark یعنی همهٔ شناسه‌های زیر آن رزروشده‌اند، حتی اگر هنوز تحویل نشده باشند؛ restart بعد از آن، تکرار را به gap تبدیل می‌کند. هزینهٔ write بادوام با دستهٔ b تقریباً بر b شناسه تقسیم می‌شود ولی تا b−1 شناسه در crash می‌تواند جا بیفتد. b=5 برای دیدن دستی این بده‌بستان است. یکتایی با بازهٔ جدا قابل شارد است؛ ترتیب پاسخ جهانی نیازمند کنترل مسیر صدور است و از fence روی ذخیرهٔ mark به‌تنهایی نتیجه نمی‌شود.</p>",
+  "reasoning_en": "<p>Persisted high-water marks reserve every ID below them, including unissued ones; restarting above the mark exchanges duplication for gaps. A batch of b amortizes a durable write across b IDs but can lose up to b−1 unissued IDs on crash. Five makes the trade-off inspectable. Disjoint ranges support sharded uniqueness; global response order needs issuance-path control beyond fencing mark storage.</p>"
+}

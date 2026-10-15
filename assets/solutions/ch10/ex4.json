@@ -1,0 +1,206 @@
+{
+  "alternatives": [
+    {
+      "en": "Model checking the implementation (TLA+-style exhaustive search of the protocol): proves the design for bounded sizes instead of sampling executions. Stronger than a history checker, heavier to write — use it for the replication protocol itself, and keep the history checker for the running system.",
+      "fa": "بررسی مدل پیاده‌سازی (جست‌وجوی فراگیر پروتکل به سبک <span class=\"ltr\">TLA+</span>): به‌جای نمونه‌برداری از اجراها، طرح را برای اندازه‌های کران‌دار اثبات می‌کند. قوی‌تر از خطی‌سنج history ولی سنگین‌تر برای نوشتن — برای خود پروتکل replication استفاده‌اش کن و خطی‌سنج history را برای سیستم در حال اجرا نگه دار."
+    }
+  ],
+  "answer_en": "Record every read/write with invoke and return stamps, draw real-time precedence (done-before must order first), then bounded-search all sequential orders that keep it: each read must see the latest preceding write. Completed-write then stale-read rejects; overlapping operations linearize either way; timed-out writes are indeterminate — try both branches. A passing sample never proves the next execution.",
+  "answer_fa": "هر خواندن/نوشتن را با مهر invoke و return ثبت کن، تقدم real-time را بکش (تمام‌شده-قبل باید اول مرتب شود) بعد همه ترتیب‌های ترتیبی نگه‌دارنده‌اش را با جست‌وجوی کران‌دار بگرد: هر خواندن باید تازه‌ترین نوشتن پیشینش را ببیند. نوشتن کامل‌شده بعد خواندن کهنه رد می‌شود؛ عملیات‌های هم‌پوشان هر دو طرف خطی می‌شوند؛ نوشتن timeoutخورده نامعلوم است — هر دو شاخه را امتحان کن. نمونه قبول‌شده هرگز اجرای بعد را اثبات نمی‌کند.",
+  "assumptions": [
+    {
+      "en": "Single register, small histories (2-3 ops); bounded search enumerates permutations — teaching sizes only.",
+      "fa": "تک رجیستر با historyهای کوچک (‎۲-۳‎ عملیات)؛ جست‌وجوی کران‌دار جایگشت‌ها را می‌شمرد — فقط اندازه‌های آموزشی."
+    },
+    {
+      "en": "Invoke/return stamps come from the harness clock; precedence uses done-before-starts only, never stamp comparison.",
+      "fa": "مهرهای invoke/return از ساعت harness می‌آیند؛ تقدم فقط از تمام‌شده-قبل-شروع استفاده می‌کند، هرگز مقایسه مهر."
+    },
+    {
+      "en": "Pending operations (no return stamp, e.g. timeouts) are indeterminate until branched both ways.",
+      "fa": "عملیات‌های معلق (بدون مهر بازگشت، مثل timeoutها) تا هر دو شاخه امتحان نشوند نامعلوم‌اند."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n// Teaching demo: mini linearizability checker for one register.\n// Try every order that keeps real-time precedence; each read must see\n// the latest preceding write. Pending/timeout ops branch both ways.\npublic class CheckerDemo {\n    record Op(String name, char kind, String val, int start, int end) {}\n    public static void main(String[] a) {\n        List<Op> h1 = List.of(new Op(\"w\", 'w', \"1\", 0, 2), new Op(\"r\", 'r', \"1\", 3, 4));\n        List<Op> h2 = List.of(new Op(\"w\", 'w', \"1\", 0, 2), new Op(\"r\", 'r', \"0\", 3, 4));\n        List<Op> h3 = List.of(new Op(\"w\", 'w', \"1\", 0, 5), new Op(\"r\", 'r', \"0\", 2, 4));\n        System.out.println(\"h1 completed-write, new read  -> \" + check(h1));\n        System.out.println(\"h2 completed-write, stale read -> \" + check(h2));\n        System.out.println(\"h3 overlapping read             -> \" + check(h3));\n        if (!check(h1).equals(\"LINEARIZABLE\") || !check(h2).equals(\"NOT LINEARIZABLE\")\n                || !check(h3).equals(\"LINEARIZABLE\")) throw new AssertionError();\n        System.out.println(\"OK: precedence enforced, stale-after-complete rejected\");\n    }\n    static String check(List<Op> ops) {\n        for (List<Op> order : permutations(new ArrayList<>(ops))) {\n            if (!respectsRealtime(order)) continue;\n            if (validRegister(order)) return \"LINEARIZABLE\";\n        }\n        return \"NOT LINEARIZABLE\";\n    }\n    static boolean respectsRealtime(List<Op> order) {\n        Map<String, Integer> pos = new HashMap<>();\n        for (int i = 0; i < order.size(); i++) pos.put(order.get(i).name(), i);\n        for (Op x : order) for (Op y : order)\n            if (x.end() != -1 && x.end() < y.start() && pos.get(x.name()) > pos.get(y.name())) return false;\n        return true;\n    }\n    static boolean validRegister(List<Op> order) {\n        String cur = \"0\";\n        for (Op o : order) {\n            if (o.kind() == 'w') cur = o.val();\n            else if (!o.val().equals(cur)) return false;\n        }\n        return true;\n    }\n    static List<List<Op>> permutations(List<Op> in) {\n        List<List<Op>> out = new ArrayList<>();\n        perm(in, 0, out);\n        return out;\n    }\n    static void perm(List<Op> l, int k, List<List<Op>> out) {\n        if (k == l.size()) { out.add(new ArrayList<>(l)); return; }\n        for (int i = k; i < l.size(); i++) { Collections.swap(l, i, k); perm(l, k + 1, out); Collections.swap(l, i, k); }\n    }\n}\n",
+    "expected_en": "h1 LINEARIZABLE, h2 NOT LINEARIZABLE, h3 LINEARIZABLE; OK. (actual output of this environment)",
+    "expected_fa": "<span class=\"ltr\">h1 LINEARIZABLE</span> و <span class=\"ltr\">h2 NOT LINEARIZABLE</span> و <span class=\"ltr\">h3 LINEARIZABLE</span>؛ <span class=\"ltr\">OK</span>. (خروجی واقعی همین محیط)",
+    "lang": "java",
+    "run_en": "javac CheckerDemo.java && java CheckerDemo — stdlib Java only, instant.",
+    "run_fa": "javac CheckerDemo.java && java CheckerDemo — فقط استاندارد جاوا، فوری.",
+    "status": "verified"
+  },
+  "design_en": "<p>Harness: a wrapper around the key-value client stamping invoke/return per op (monotonic clock for durations, wall clock for the log). Checker: precedence graph from done-before-starts edges, then bounded permutation search with the register rule per order, pending ops forked both ways. Read path: collect a history window. Write path: none — the checker never writes, it judges.</p>",
+  "design_fa": "<p>harness: پوششی دور مشتری key-value که per-op مهر invoke/return می‌زند (ساعت monotonic برای مدت‌ها و ساعت دیواری برای لاگ). خطی‌سنج: گراف تقدم از یال‌های تمام‌شده-قبل-شروع، بعد جست‌وجوی جایگشت کران‌دار با قاعده رجیستر per-order و عملیات‌های معلق دوشاخه. مسیر خواندن: جمع یک پنجره history. مسیر نوشتن: هیچی — خطی‌سنج هرگز نمی‌نویسد، قضاوت می‌کند.</p>",
+  "diagrams": [
+    {
+      "caption_en": "From stamped history to verdict: precedence, orders, register rule",
+      "caption_fa": "از history مهرخورده تا رأی: تقدم و ترتیب‌ها و قاعده رجیستر",
+      "file": "diagrams/sol4-step1-checker-flow.html",
+      "height": 640,
+      "kind_en": "workflow: checker procedure",
+      "kind_fa": "گردش‌کار: رویه خطی‌سنج",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Trace a history where the harness clock lies (invoke stamped after return): the precedence graph inverts and every verdict after it is garbage. The checker is only as honest as its stamps — bad clocks, bad verdicts.",
+        "failure_fa": "historyای را دنبال کن که ساعت harness دروغ می‌گوید (invoke بعد از return مهر خورده): گراف تقدم وارونه می‌شود و هر رأی بعدش زباله است. خطی‌سنج فقط به‌اندازه مهرهایش صادق است — ساعت خراب، رأی خراب.",
+        "guarantee_en": "The figure shows the measure-then-search procedure with the indeterminate branch. It does not bound history size — the cards say bounded search fits small histories only.",
+        "guarantee_fa": "شکل رویه اول-اندازه بعد-جست‌وجو را با شاخه نامعلوم نشان می‌دهد. اندازه history را کران نمی‌کند — کارت‌ها می‌گویند جست‌وجوی کران‌دار فقط historyهای کوچک را می‌خورد.",
+        "nonguarantee_en": "Proof of future executions is not shown anywhere here — the verdict judges one history window, nothing more.",
+        "nonguarantee_fa": "اثبات اجراهای آینده هیچ‌جای این‌جا نشان داده نشده — رأی درباره یک پنجره history قضاوت می‌کند نه بیشتر.",
+        "point_en": "The decision point is the register-check node: one valid order is enough to accept. Rejection means every precedence-keeping order failed.",
+        "point_fa": "نقطه تصمیم گره بررسی رجیستر است: یک ترتیب معتبر برای قبول کافی است. رد یعنی هر ترتیب نگه‌دارنده تقدم شکست خورد.",
+        "scenario_en": "The harness records on the left, the bounded search works the middle, the verdict lands on the right. Read left to right along the main path, then the two branches.",
+        "scenario_fa": "harness چپ ثبت می‌کند و جست‌وجوی کران‌دار وسط کار می‌کند و رأی راست می‌نشیند. چپ‌به‌راست روی مسیر اصلی بخوان بعد دو شاخه.",
+        "steps": [
+          {
+            "en": "Record: every op gets invoke/return stamps; timeouts keep no return — indeterminate.",
+            "fa": "ثبت: هر عملیات مهر invoke/return می‌گیرد؛ timeoutها بدون بازگشت می‌مانند — نامعلوم."
+          },
+          {
+            "en": "Precedence, then enumerate: done-before must lead; overlapping ops may take any order. Pending ops fork: took-effect and never-did.",
+            "fa": "تقدم بعد شمارش: تمام‌شده-قبل باید جلو باشد؛ عملیات‌های هم‌پوشان هر ترتیبی می‌گیرند. عملیات‌های معلق دوشاخه: اثرکرد و هرگز-نکرد."
+          },
+          {
+            "en": "Register check per order, reject stale-after-complete orders, verdict on the survivors.",
+            "fa": "بررسی رجیستر per-order و رد ترتیب‌های کهنه-بعد-کامل و رأی روی بازمانده‌ها."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "It must lead in every candidate order. If it trails in some order, that order is discarded — but other orders may still validate the history. Precedence constrains, never acquits by itself.",
+        "a_fa": "باید در هر ترتیب نامزد جلو باشد. اگر در ترتیبی عقب بیفتد آن ترتیب کنار می‌رود — ولی ترتیب‌های دیگر هنوز ممکن است history را معتبر کنند. تقدم قید می‌گذارد و به‌تنهایی تبرئه نمی‌کند.",
+        "q_en": "An op done before another starts: what must hold in every candidate order?",
+        "q_fa": "عملیاتی که قبل از شروع دیگری تمام شده: در هر ترتیب نامزد چه باید برقرار باشد؟"
+      },
+      "source": ".archify/workflow-ch10-sol4-checker-20261014-221512"
+    },
+    {
+      "caption_en": "h1 accepted, h2 rejected on stale-after-complete, h3 accepted on overlap",
+      "caption_fa": "h1 قبول و h2 رد روی کهنه-بعد-کامل و h3 قبول روی هم‌پوشانی",
+      "file": "diagrams/sol4-checker-histories.html",
+      "height": 640,
+      "kind_en": "histories + verdicts",
+      "kind_fa": "historyها + رأی‌ها",
+      "made": "hand",
+      "narration": {
+        "failure_en": "Trace h2's dashed precedence arrow: write done at t2, read starts at t3 — yet returns 0. Every candidate order must put the write first, and in every such order the read must see 1. No order survives: reject. Now cover the dashed arrow and re-judge: with overlap, h2 would pass like h3.",
+        "failure_fa": "پیکان چین‌دار تقدم <span class=\"ltr\">h2</span> را دنبال کن: نوشتن در <span class=\"ltr\">t2</span> تمام و خواندن در <span class=\"ltr\">t3</span> شروع — ولی صفر برمی‌گرداند. هر ترتیب نامزد باید نوشتن را اول بگذارد و در هر چنین ترتیبی خواندن باید ۱ ببیند. هیچ ترتیبی زنده نمی‌ماند: رد. حالا پیکان چین را بپوشان و دوباره قضاوت کن: با هم‌پوشانی <span class=\"ltr\">h2</span> مثل <span class=\"ltr\">h3</span> قبول می‌شد.",
+        "guarantee_en": "The figure shows three histories with bars, precedence and verdicts, plus the rule box. It does not show the permutation search itself — the workflow step shows the procedure.",
+        "guarantee_fa": "شکل سه history را با میله و تقدم و رأی نشان می‌دهد، به‌علاوه جعبه قاعده. خود جست‌وجوی جایگشت را نشان نمی‌دهد — گام گردش‌کار رویه را نشان می‌دهد.",
+        "nonguarantee_en": "Production trace sizes and sampling strategy are outside this figure — bounded search cannot eat them whole.",
+        "nonguarantee_fa": "اندازه traceهای پروداکشن و راهبرد نمونه‌برداری بیرون این شکل‌اند — جست‌وجوی کران‌دار نمی‌تواند درسته قورتشان دهد.",
+        "point_en": "The decision point is h2's dashed arrow: done-before-start is the only hard constraint. Everything else is search.",
+        "point_fa": "نقطه تصمیم پیکان چین‌دار <span class=\"ltr\">h2</span> است: تمام‌شده-قبل-شروع تنها قید سخت است. بقیه جست‌وجوست.",
+        "scenario_en": "Three lanes h1/h2/h3 on one time axis, violet write bars and blue read bars, verdict chips on the right. Read lane by lane against the yellow rule box.",
+        "scenario_fa": "سه لاین <span class=\"ltr\">h1 و h2 و h3</span> روی یک محور زمان با میله‌های بنفش نوشتن و آبی خواندن و چیپ‌های رأی راست. لاین‌به‌لاین در برابر جعبه زرد قاعده بخوان.",
+        "steps": [
+          {
+            "en": "h1: write t0-t2, read t3-t4 returning 1 — the only precedence-keeping order has the read after the write: accept.",
+            "fa": "<span class=\"ltr\">h1</span>: نوشتن <span class=\"ltr\">t0-t2</span> و خواندن <span class=\"ltr\">t3-t4</span> که ۱ برمی‌گرداند — تنها ترتیب نگه‌دارنده تقدم خواندن را بعد نوشتن می‌گذارد: قبول."
+          },
+          {
+            "en": "h2: same bars, read returns 0 — the dashed arrow forces write-first, and write-first demands 1: reject.",
+            "fa": "<span class=\"ltr\">h2</span>: همان میله‌ها ولی خواندن صفر برمی‌گرداند — پیکان چین نوشتن-اول را تحمیل می‌کند و نوشتن-اول ۱ می‌خواهد: رد."
+          },
+          {
+            "en": "h3: write t0-t5 overlapping read t2-t4 returning 0 — overlap linearizes either way: accept.",
+            "fa": "<span class=\"ltr\">h3</span>: نوشتن <span class=\"ltr\">t0-t5</span> با هم‌پوشانی خواندن <span class=\"ltr\">t2-t4</span> که صفر برمی‌گرداند — هم‌پوشانی هر دو طرف خطی می‌شود: قبول."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Yes — if they overlap, 0 is a legal linearization (read placed before the write). If the write completed first, 0 is a violation. Same values, opposite verdicts: precedence is everything.",
+        "a_fa": "بله — اگر هم‌پوشان باشند صفر خطی‌سازی قانونی است (خواندن قبل نوشتن گذاشته می‌شود). اگر نوشتن اول کامل شده باشد صفر نقض است. همان مقدارها با رأی‌های مخالف: تقدم همه‌چیز است.",
+        "q_en": "Same write(1) and read-to-0: when is it fine and when a violation?",
+        "q_fa": "همان write(1) و read-to-0: کی خوب است و کی نقض؟"
+      }
+    }
+  ],
+  "failures": [
+    {
+      "en": "Lying harness clock (invoke stamped after return): precedence inverts and verdicts are garbage. Guard: monotonic clock for durations, sanity-assert invoke <= return on every op, drop windows that fail it loudly.",
+      "fa": "ساعت دروغ‌گوی harness (invoke بعد از return مهر خورده): تقدم وارونه می‌شود و رأی‌ها زباله‌اند. نگهبان: ساعت monotonic برای مدت‌ها و <span class=\"ltr\">assert</span> سلامت <span class=\"ltr\">invoke &lt;= return</span> روی هر عملیات و انداختن پرسروصدای پنجره‌های مردود."
+    },
+    {
+      "en": "Pending write treated as failed: a timed-out write may still take effect later — calling it failed lets a later read of its value look like a phantom. Guard: indeterminate modeling, both branches, always.",
+      "fa": "نوشتن معلقِ شکست‌خورده فرض‌شده: نوشتن timeoutخورده شاید بعداً اثر کند — شکست نامیدنش باعث می‌شود خواندن بعدی مقدارش شبح به‌نظر برسد. نگهبان: مدل‌سازی نامعلوم با هر دو شاخه، همیشه."
+    },
+    {
+      "en": "History window too small to catch the race (sampling only quiet hours): the checker passes and confidence is false. Guard: sample across peaks and deploys, and say the verdict covers the window — never the system.",
+      "fa": "پنجره history کوچک‌تر از شکار مسابقه (نمونه‌برداری فقط ساعت‌های خلوت): خطی‌سنج قبول می‌دهد و اطمینان دروغین است. نگهبان: نمونه‌برداری روی اوج و استقرارها و گفتن این‌که رأی پنجره را پوشش می‌دهد — هرگز سیستم را نه."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "Indeterminate, always. A timeout means the outcome is unknown: the request, the write, or the response may each have been lost — the classic ambiguity. The checker must try both branches (took effect / never did) and accept if either validates. Modeling it as failed turns a late-taking-effect write into a false violation; modeling it as done hides real ones.",
+      "a_fa": "نامعلوم، همیشه. timeout یعنی نتیجه نامشخص است: درخواست یا نوشتن یا پاسخ هرکدام ممکن است گم شده باشند — همان ابهام کلاسیک. خطی‌سنج باید هر دو شاخه را امتحان کند (اثرکرد / هرگز-نکرد) و با معتبر شدن هرکدام قبول دهد. شکست مدل کردنش، نوشتنِ دیراثر را نقض دروغین می‌کند؛ شدنی مدل کردنش نقض‌های واقعی را پنهان می‌کند.",
+      "level": "staff",
+      "q_en": "Do you model a timed-out write as failed or indeterminate, and why?",
+      "q_fa": "timeout یک write را failed حساب می‌کنی یا indeterminate؟ چرا؟"
+    },
+    {
+      "a_en": "No. Ten thousand passing windows prove ten thousand windows, not the system: the next execution, the next deploy, the next peak-load interleaving is unjudged. Finite testing raises confidence; only protocol proof (model checking) plus continuous production probing (version probes, divergence monitors) carry the guarantee forward. Say what the checker covers: the sampled windows.",
+      "a_fa": "نه. ده‌هزار پنجره قبول‌شده ده‌هزار پنجره را اثبات می‌کند نه سیستم را: اجرای بعد و استقرار بعد و درهم‌تنیدگی اوج بار بعد قضاوت‌نشده‌اند. تست متناهی اطمینان را بالا می‌برد؛ فقط اثبات پروتکل (بررسی مدل) به‌علاوه کاوش پیوسته پروداکشن (پروب نسخه و مانیتور واگرایی) تضمین را جلو می‌برد. بگو خطی‌سنج چه را پوشش می‌دهد: پنجره‌های نمونه‌برداری‌شده را.",
+      "level": "staff",
+      "q_en": "The checker passes on 10k sampled histories. Is the system linearizable?",
+      "q_fa": "خطی‌سنج روی ده‌هزار history نمونه قبول می‌دهد؛ آیا سیستم خطی‌پذیر است؟"
+    }
+  ],
+  "interview_q_en": "Check a small register history while preserving real-time precedence and reordering overlapping operations. Design bounded search, model pending/indeterminate operations and explain the limits of sampled histories.",
+  "interview_q_fa": "یک history کوچک شامل invoke/return read و write را روی register خطی‌سنجی کن. ترتیب real-time را حفظ و عملیات هم‌پوشان را جابه‌جا کن. برای test harness bounded search طراحی کن؛ pending operation و timeout نامعلوم را درست مدل کن.",
+  "mental_en": "A checker is a courtroom, not a crystal ball: the history is the testimony, precedence is the law, and the verdict binds only the case before it. Overlapping operations are free citizens — the law constrains only what finished before another began.",
+  "mental_fa": "خطی‌سنج دادگاه است نه گوی بلورین: history شهادت است و تقدم قانون و رأی فقط پرونده پیش رو را مقید می‌کند. عملیات‌های هم‌پوشان شهروندان آزادند — قانون فقط چیزی را قید می‌کند که قبل از شروع دیگری تمام شده.",
+  "mistakes": [
+    {
+      "en": "Treating stamp comparison as precedence ('write stamped earlier must order first'). Precedence is done-before-starts on invoke/return intervals — stamp values, Lamport or wall, never decide it.",
+      "fa": "گرفتن مقایسه مهر به‌جای تقدم («نوشتنِ مهرزودتر باید اول مرتب شود»). تقدم تمام‌شده-قبل-شروع روی بازه‌های invoke/return است — مقدار مهر، <span class=\"ltr\">Lamport</span> یا دیواری، هرگز تعیینش نمی‌کند."
+    },
+    {
+      "en": "Accepting on the first plausible order instead of searching all precedence-keeping orders for rejection. One valid order accepts; but you only know none exists after trying all.",
+      "fa": "قبول با اولین ترتیب قابل‌قبول به‌جای گشتن همه ترتیب‌های نگه‌دارنده تقدم برای رد. یک ترتیب معتبر قبول می‌کند؛ ولی این‌که هیچی نیست را فقط بعد از امتحان همه می‌دانی."
+    },
+    {
+      "en": "Running the checker on replica reads and 'fixing' failures by weakening the histories (dropping the stale reads). The checker found a real violation — fix the store (write-back, leader reads), never the evidence.",
+      "fa": "اجرا روی خواندن‌های replica و «درست» کردن شکست‌ها با ضعیف کردن historyها (انداختن خواندن‌های کهنه). خطی‌سنج نقض واقعی یافته — فروشگاه را درست کن (write-back و خواندن رهبر)، هرگز مدرک را نه."
+    }
+  ],
+  "number": 4,
+  "slug": "linearizability-checker",
+  "sources": [
+    "jepsen",
+    "abd"
+  ],
+  "steps": [
+    {
+      "en": "Stamp every op with invoke/return from the harness. Precedence rule: if op X returned before op Y started, X must precede Y in every candidate order — the only hard constraint.",
+      "fa": "به هر عملیات از harness مهر invoke/return بزن. قاعده تقدم: اگر عملیات <span class=\"ltr\">X</span> قبل از شروع <span class=\"ltr\">Y</span> برگشت، <span class=\"ltr\">X</span> باید در هر ترتیب نامزد قبل <span class=\"ltr\">Y</span> باشد — تنها قید سخت.",
+      "t_en": "Stamp, then constrain",
+      "t_fa": "اول مهر بعد قید"
+    },
+    {
+      "en": "Enumerate candidate orders that keep precedence; overlapping operations permute freely. h1 admits one order (write, read); h3 admits both — freedom, not failure.",
+      "fa": "ترتیب‌های نامزد نگه‌دارنده تقدم را بشمر؛ عملیات‌های هم‌پوشان آزاد جابه‌جا می‌شوند. <span class=\"ltr\">h1</span> یک ترتیب می‌پذیرد (نوشتن و خواندن) و <span class=\"ltr\">h3</span> هر دو را — آزادی نه شکست.",
+      "t_en": "Enumerate keepers",
+      "t_fa": "شمردن نگه‌دارنده‌ها"
+    },
+    {
+      "en": "Apply the register rule per order: walk it, track the latest write, each read must match. h2's only order demands 1 but holds 0 — reject. One surviving order accepts the history.",
+      "fa": "قاعده رجیستر را per-order اعمال کن: برو و تازه‌ترین نوشتن را نگه دار و هر خواندن باید بخورد. تنها ترتیب <span class=\"ltr\">h2</span> عدد ۱ می‌خواهد ولی صفر دارد — رد. یک ترتیب بازمانده history را قبول می‌کند.",
+      "t_en": "Judge each order",
+      "t_fa": "قضاوت هر ترتیب"
+    },
+    {
+      "en": "Fork pending operations both ways: a timed-out write is indeterminate — accept if either the took-effect or the never-did branch validates. Then state the limit: the verdict binds this window only.",
+      "fa": "عملیات‌های معلق را هر دو طرف دوشاخه کن: نوشتن timeoutخورده نامعلوم است — با معتبر شدن هر شاخه اثرکرد یا هرگز-نکرد قبول کن. بعد محدودیت را بگو: رأی فقط همین پنجره را مقید می‌کند.",
+      "t_en": "Fork the unknown",
+      "t_fa": "دوشاخه کردن نامعلوم"
+    }
+  ],
+  "tests_en": "Feed h1/h2/h3 and assert accept/reject/accept; feed a timeout window and assert both branches are explored; mutate a replica-read store to return stale and assert the checker catches it; measure search time versus history size (teaching: permutations explode — cap the window) and alert past the harness budget.",
+  "tests_fa": "<span class=\"ltr\">h1 و h2 و h3</span> را بده و قبول/رد/قبول را <span class=\"ltr\">assert</span> کن؛ پنجره timeout بده و <span class=\"ltr\">assert</span> کن هر دو شاخه گشته می‌شوند؛ فروشگاه خواندن-replica را جهش بده که کهنه برگرداند و <span class=\"ltr\">assert</span> کن خطی‌سنج می‌گیردش؛ زمان جست‌وجو را در برابر اندازه history بسنج (آموزشی: جایگشت‌ها منفجر می‌شوند — پنجره را سقف بگذار) و با عبور از بودجه harness هشدار بده.",
+  "worked_en": "<p>Teaching histories: h1 = write(1) t0-t2, read-to-1 t3-t4 — one precedence-keeping order (write, read), read matches: LINEARIZABLE. h2 = same bars, read-to-0 — the only order demands 1: NOT LINEARIZABLE. h3 = write t0-t5 overlapping read t2-t4 to 0 — order (read, write) validates: LINEARIZABLE.</p>",
+  "worked_fa": "<p>historyهای آموزشی: <span class=\"ltr\">h1</span> مساوی <span class=\"ltr\">write(1) t0-t2</span> و <span class=\"ltr\">read-to-1 t3-t4</span> — یک ترتیب نگه‌دارنده تقدم (نوشتن و خواندن) و خواندن می‌خورد: <span class=\"ltr\">LINEARIZABLE</span>. <span class=\"ltr\">h2</span> مساوی همان میله‌ها با <span class=\"ltr\">read-to-0</span> — تنها ترتیب ۱ می‌خواهد: <span class=\"ltr\">NOT LINEARIZABLE</span>. <span class=\"ltr\">h3</span> مساوی نوشتن <span class=\"ltr\">t0-t5</span> با هم‌پوشانی خواندن <span class=\"ltr\">t2-t4</span> به صفر — ترتیب (خواندن و نوشتن) معتبر است: <span class=\"ltr\">LINEARIZABLE</span>.</p>",
+  "reasoning_fa": "<p>برای history کوچک، پیمایش ترتیب‌ها روشی قابل‌فهم برای یافتن یک اجرای ترتیبی سازگار است؛ n عملیات در بدترین حالت n! ترتیب دارند، پس روش برای history بلند مناسب نیست. یال real-time فقط وقتی A کامل شود و بعد B شروع شود ایجاد می‌شود. pending operation را نمی‌توان خودکار failed گرفت چون ممکن است اثرش ثبت شده باشد. ساعت harness برای نسبت شروع/پایان است؛ timestamp خود داده، نقطهٔ linearization را تعیین نمی‌کند.</p>",
+  "reasoning_en": "<p>Enumerating orders makes a compatible sequential execution understandable for small histories. Worst-case n! permutations explain why it does not scale. Add a real-time edge only when A returns before B starts. A pending operation may have committed, so do not automatically discard it as failed. Harness time orders invocation/return; stored timestamps do not establish linearization points.</p>"
+}

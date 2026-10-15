@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clock Types — UML Class Diagram of What Each Clock Can Do</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .cls-t{font:700 14px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .attr-m{font:12.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .edge-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .note{font:12.5px system-ui,sans-serif; fill:#cfe3ff}
+  .note-h{font:700 13px system-ui,sans-serif; fill:#fbbf24}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="UML class diagram of clock types: time-of-day, monotonic, logical and uncertainty clocks">
+  <defs>
+    <marker id="gen" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" orient="auto">
+      <path d="M1,1 L11,6 L1,11 z" fill="#1b2438" stroke="#93c5fd" stroke-width="1.4"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="30" text-anchor="middle">Clocks Are Not Interchangeable — a Class Model of Four Kinds of Clock</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">generalization arrows point at the shared abstraction; each subclass answers a different question about time</text>
+
+  <!-- ===================== abstract base ===================== -->
+  <g>
+    <rect x="470" y="82" width="300" height="30" rx="8" fill="#475569" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="620" y="102" text-anchor="middle">«abstract» Clock</text>
+    <rect x="470" y="112" width="300" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr-m" x="486" y="136">read()        : TimeValue</text>
+    <text class="attr-m" x="486" y="158">kind          : instant | duration</text>
+    <text class="attr-m" x="486" y="180">uncertainty   : known | hidden</text>
+  </g>
+
+  <!-- generalization bus -->
+  <path d="M620 248 L620 200" fill="none" stroke="#93c5fd" stroke-width="1.6" marker-end="url(#gen)"/>
+  <line x1="195" y1="248" x2="1065" y2="248" stroke="#93c5fd" stroke-width="1.6"/>
+  <line x1="195" y1="248" x2="195" y2="272" stroke="#93c5fd" stroke-width="1.6"/>
+  <line x1="485" y1="248" x2="485" y2="272" stroke="#93c5fd" stroke-width="1.6"/>
+  <line x1="775" y1="248" x2="775" y2="272" stroke="#93c5fd" stroke-width="1.6"/>
+  <line x1="1065" y1="248" x2="1065" y2="272" stroke="#93c5fd" stroke-width="1.6"/>
+  <text class="edge-lbl" x="632" y="236">generalization</text>
+
+  <!-- ===================== subclass 1 ===================== -->
+  <g>
+    <rect x="60" y="272" width="270" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="195" y="292" text-anchor="middle">TimeOfDayClock</text>
+    <rect x="60" y="302" width="270" height="132" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="76" y="326">CLOCK_REALTIME / ms</text>
+    <text class="attr" x="76" y="348">synchronized via NTP</text>
+    <text class="attr" x="76" y="370">can jump back or forward</text>
+    <text class="attr" x="76" y="392">comparable across nodes</text>
+    <text class="attr" x="76" y="414">use: timestamps, deadlines</text>
+    <text class="small" x="76" y="428"> </text>
+  </g>
+
+  <!-- ===================== subclass 2 ===================== -->
+  <g>
+    <rect x="350" y="272" width="270" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="485" y="292" text-anchor="middle">MonotonicClock</text>
+    <rect x="350" y="302" width="270" height="132" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="366" y="326">CLOCK_MONOTONIC / ns</text>
+    <text class="attr" x="366" y="348">never jumps, only slewed</text>
+    <text class="attr" x="366" y="370">rate adjusted up to 0.05%</text>
+    <text class="attr" x="366" y="392">NOT comparable across nodes</text>
+    <text class="attr" x="366" y="414">use: timeouts, durations</text>
+  </g>
+
+  <!-- ===================== subclass 3 ===================== -->
+  <g>
+    <rect x="640" y="272" width="270" height="30" rx="8" fill="#7c3aed" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="775" y="292" text-anchor="middle">LogicalClock</text>
+    <rect x="640" y="302" width="270" height="132" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="656" y="326">counter, no oscillator</text>
+    <text class="attr" x="656" y="348">Lamport / version vector</text>
+    <text class="attr" x="656" y="370">measures order only</text>
+    <text class="attr" x="656" y="392">no notion of seconds</text>
+    <text class="attr" x="656" y="414">use: causal ordering</text>
+  </g>
+
+  <!-- ===================== subclass 4 ===================== -->
+  <g>
+    <rect x="930" y="272" width="270" height="30" rx="8" fill="#b45309" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="1065" y="292" text-anchor="middle">UncertaintyClock</text>
+    <rect x="930" y="302" width="270" height="132" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="946" y="326">TrueTime / ClockBound</text>
+    <text class="attr" x="946" y="348">returns [earliest, latest]</text>
+    <text class="attr" x="946" y="370">width = uncertainty bound</text>
+    <text class="attr" x="946" y="392">narrow bound costs hardware</text>
+    <text class="attr" x="946" y="414">use: commit wait, snapshots</text>
+  </g>
+
+  <!-- ===================== notes ===================== -->
+  <rect x="60" y="462" width="570" height="114" rx="10" fill="#1b2438" stroke="#fbbf24" stroke-width="1.3" stroke-dasharray="6 4"/>
+  <text class="note-h" x="76" y="486">A reading is not a point in time</text>
+  <text class="note" x="76" y="510">The value is really an interval: the machine is 95% sure that now is</text>
+  <text class="note" x="76" y="530">between 10.3 and 10.5. Microsecond digits on a ±100 ms clock are noise.</text>
+  <text class="note" x="76" y="550">Most APIs hide the interval; TrueTime and ClockBound report it openly.</text>
+
+  <rect x="650" y="462" width="570" height="114" rx="10" fill="#1b2438" stroke="#86efac" stroke-width="1.3" stroke-dasharray="6 4"/>
+  <text class="note-h" x="666" y="486">Which clock for which job</text>
+  <text class="note" x="666" y="510">timeout or elapsed time ......... monotonic clock</text>
+  <text class="note" x="666" y="530">deadline or calendar time ....... time-of-day clock</text>
+  <text class="note" x="666" y="550">ordering across machines ........ logical clock · snapshot stamp ... uncertainty clock</text>
+
+  <rect x="60" y="596" width="1150" height="50" rx="10" fill="#1b2438" stroke="#2a3652" stroke-width="1.3"/>
+  <text class="note-h" x="76" y="618">Inheritance is about guarantees, not implementation</text>
+  <text class="note" x="76" y="638">A monotonic clock measures how long something took on one machine. Only a logical clock or an uncertainty interval can order events that happen on different machines.</text>
+</svg>
+</div>
+</body>
+</html>

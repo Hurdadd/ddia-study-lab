@@ -1,0 +1,216 @@
+{
+  "number": 1,
+  "slug": "catalog-models",
+  "interview_q_fa": "کاتالوگ یک فروشگاه (محصول، برند، دسته‌بندی چندگانه، نظر کاربران) را هم رابطه‌ای و هم سندی مدل کن. سه کوئری پرتکرار (صفحه محصول، صفحه دسته، نظرهای یک محصول) را با <span class=\"ltr\">pagination</span>، ایندکس‌ها، یکتایی نظر هر کاربر و اثر تغییر نام یا لوگوی برند مشخص کن، و انتخابت را با بار کاری توجیه کن.",
+  "interview_q_en": "Model a shop catalog (product, brand, multi-category, user reviews) in both relational and document form. Pin down three hot queries (product page, category page, one product's reviews) with <span class=\"ltr\">pagination</span>, indexes, one-review-per-user uniqueness and the cost of a brand rename, then justify your pick from the workload.",
+  "answer_fa": "رابطه‌ای سند مرجع است: <span class=\"ltr\">products</span> با <span class=\"ltr\">FK</span> به <span class=\"ltr\">brands</span>، دسته‌بندی چندگانه با جدول واسط، و نظرها در جدول جدا با کلید یکتای <span class=\"ltr\">(product_id, user_id)</span>. نظرها را هرگز در سند محصول <span class=\"ltr\">embed</span> نکن چون رشدشان بی‌کران است. صفحه‌بندی با کلید (<span class=\"ltr\">keyset</span>) نه <span class=\"ltr\">offset</span>؛ تغییر برند فقط یک سطر است. سند فقط وقتی می‌برد که صفحه محصول تقریباً همه بار باشد و گزارش میان‌محصولی نداشته باشیم.",
+  "answer_en": "Relational is the record: <span class=\"ltr\">products</span> with an <span class=\"ltr\">FK</span> to <span class=\"ltr\">brands</span>, multi-category via a join table, reviews in their own table under a <span class=\"ltr\">(product_id, user_id)</span> unique key. Never <span class=\"ltr\">embed</span> reviews in the product document — they grow without bound. Paginate by key (<span class=\"ltr\">keyset</span>), not <span class=\"ltr\">offset</span>; a brand rename touches one row. Documents win only when the product page is nearly all the load and cross-product reports don't exist.",
+  "assumptions": [
+    {
+      "fa": "مقیاس آموزشی: ۲۰۰هزار محصول، ۵هزار برند، میانگین ۴۰ نظر به‌ازای محصول — فرض آموزشی، نه بنچمارک.",
+      "en": "Teaching scale: 200K products, 5K brands, ~40 reviews per product on average — a teaching assumption, not a benchmark."
+    },
+    {
+      "fa": "بار آموزشی: خواندن سنگین (۸۰۰ صفحه محصول در ثانیه) و نوشتن سبک (چند نظر در ثانیه).",
+      "en": "Teaching load: read-heavy (800 product pages/s) with light review writes (a few/s)."
+    },
+    {
+      "fa": "نظرها بی‌کران رشد می‌کنند؛ تغییر برند نادر است ولی باید اتمیک و فوری دیده شود.",
+      "en": "Reviews grow without bound; brand changes are rare but must apply atomically and read-your-write."
+    }
+  ],
+  "mental_fa": "اول کوئری‌ها را بنویس، بعد شکل داده را. هر رابطه‌ای که جواب «چندتا؟» آن «نامشخص» است (نظرها، دسته‌ها) در سند جا نمی‌شود و ارجاع می‌خواهد. چیزهایی که با هم خوانده و با هم عوض می‌شوند کنار هم می‌مانند.",
+  "mental_en": "Write the queries first, then the shape. Any relationship whose 'how many?' answer is 'unbounded' (reviews, categories) does not fit inside a document; it wants a reference. Things read together and changed together stay together.",
+  "steps": [
+    {
+      "t_fa": "سه کوئری اول",
+      "t_en": "The three queries first",
+      "fa": "صفحه محصول (مشخصات + برند + دسته‌ها)، صفحه دسته (فهرست محصولات)، و نظرهای یک محصول. هر تصمیم مدل را با همین سه‌تا می‌سنجیم؛ بقیه کوئری‌ها مشتق‌اند.",
+      "en": "Product page (details + brand + categories), category listing, and one product's reviews. Every modelling call is judged against these three; the rest are derived."
+    },
+    {
+      "t_fa": "اسکیمای رابطه‌ای",
+      "t_en": "The relational schema",
+      "fa": "<span class=\"ltr\">brands(id, name UNIQUE, logo_url, logo_v)</span>، <span class=\"ltr\">products(id, brand_id FK, name, price)</span>، <span class=\"ltr\">categories</span> و جدول واسط <span class=\"ltr\">product_categories(product_id, category_id)</span> برای چندبه‌چند، و <span class=\"ltr\">reviews(id, product_id FK, user_id, stars)</span> با <span class=\"ltr\">UNIQUE(product_id, user_id)</span>. ایندکس‌ها: <span class=\"ltr\">reviews(product_id, id)</span>، <span class=\"ltr\">product_categories(category_id, product_id)</span>، <span class=\"ltr\">products(brand_id, id)</span>.",
+      "en": "<span class=\"ltr\">brands(id, name UNIQUE, logo_url, logo_v)</span>, <span class=\"ltr\">products(id, brand_id FK, name, price)</span>, <span class=\"ltr\">categories</span> plus a <span class=\"ltr\">product_categories(product_id, category_id)</span> join table for many-to-many, and <span class=\"ltr\">reviews(id, product_id FK, user_id, stars)</span> with <span class=\"ltr\">UNIQUE(product_id, user_id)</span>. Indexes: <span class=\"ltr\">reviews(product_id, id)</span>, <span class=\"ltr\">product_categories(category_id, product_id)</span>, <span class=\"ltr\">products(brand_id, id)</span>."
+    },
+    {
+      "t_fa": "سند و مرز آن",
+      "t_en": "The document and its boundary",
+      "fa": "سند محصول می‌تواند عکس کوچک برند و نام دسته‌ها را (کران‌دار و کوچک) <span class=\"ltr\">embed</span> کند، ولی نظرها فقط ارجاع + کوئری دوم می‌خواهند. آرایه میلیونی یعنی هر نظر تازه یک بازنویسی <span class=\"ltr\">O(n)</span> و سند داغ.",
+      "en": "A product document may <span class=\"ltr\">embed</span> a brand thumbnail and category names (bounded, tiny), but reviews need a reference plus a second query. A million-long array turns every new review into an <span class=\"ltr\">O(n)</span> rewrite and a hot document."
+    },
+    {
+      "t_fa": "صفحه‌بندی و یکتایی",
+      "t_en": "Pagination and uniqueness",
+      "fa": "فهرست‌ها با <span class=\"ltr\">keyset</span> روی کلید یکتا: <span class=\"ltr\">WHERE (id &gt; last) ORDER BY id LIMIT n</span>. <span class=\"ltr\">offset</span> زیر درج هم‌زمان سطر گم یا تکراری می‌دهد. یکتایی را قید پایگاه (<span class=\"ltr\">UNIQUE</span> + <span class=\"ltr\">upsert</span>) تضمین می‌کند، نه چک برنامه.",
+      "en": "List with <span class=\"ltr\">keyset</span> on a unique key: <span class=\"ltr\">WHERE (id &gt; last) ORDER BY id LIMIT n</span>. <span class=\"ltr\">Offset</span> drops or duplicates rows under concurrent inserts. Uniqueness is a database constraint (<span class=\"ltr\">UNIQUE</span> + <span class=\"ltr\">upsert</span>), never an app-side check."
+    },
+    {
+      "t_fa": "تصمیم و تغییر برند",
+      "t_en": "Decision and brand change",
+      "fa": "پیش‌فرض رابطه‌ای است: تغییر نام یا لوگو یک <span class=\"ltr\">UPDATE</span> اتمیک روی یک سطر است و خواننده‌ها تازه‌ترین را <span class=\"ltr\">join/hydrate</span> می‌کنند. سند فقط به‌عنوان <span class=\"ltr\">read model</span> مشتق از همین جدول‌ها، وقتی صفحه محصول چیره است.",
+      "en": "Default to relational: a brand rename is one atomic <span class=\"ltr\">UPDATE</span> on one row, and readers <span class=\"ltr\">join/hydrate</span> the freshest value. Documents only as a derived <span class=\"ltr\">read model</span> over the same tables, when the product page dominates."
+    }
+  ],
+  "design_fa": "<p>جدول‌ها و کلیدها همان گام ۲. مسیر خواندن: صفحه محصول = یک <span class=\"ltr\">JOIN</span> محصول+برند + یک <span class=\"ltr\">lookup</span> دسته‌ها + یک کوئری نظر با <span class=\"ltr\">keyset</span>. مسیر نوشتن: ثبت نظر = <span class=\"ltr\">INSERT … ON CONFLICT(product_id, user_id) DO UPDATE</span>؛ تغییر برند = یک <span class=\"ltr\">UPDATE</span> اتمیک روی <span class=\"ltr\">brands</span> با bump نسخه <span class=\"ltr\">logo_v</span>.</p>",
+  "design_en": "<p>Tables and keys are step 2. Read path: product page = one product+brand <span class=\"ltr\">JOIN</span> + one category <span class=\"ltr\">lookup</span> + one keyset review query. Write path: review insert = <span class=\"ltr\">INSERT … ON CONFLICT(product_id, user_id) DO UPDATE</span>; brand change = one atomic <span class=\"ltr\">UPDATE</span> on <span class=\"ltr\">brands</span> bumping <span class=\"ltr\">logo_v</span>.</p>",
+  "worked_fa": "<p>با داده آموزشی اسکریپت: صفحه محصول «Desk lamp A» با یک <span class=\"ltr\">JOIN</span> برمی‌گردد؛ دسته <span class=\"ltr\">lamps</span> با <span class=\"ltr\">keyset</span> ردیف‌های ۱ و ۲؛ دو نظر اول محصول ۱. درج تکراری <span class=\"ltr\">(1,101)</span> با خطای یکتایی رد شد. تغییر برند = ۱ سطر، در برابر بازنویسی همه سندهای محصول.</p>",
+  "worked_en": "<p>With the script's teaching rows: product page 'Desk lamp A' returns via one <span class=\"ltr\">JOIN</span>; category <span class=\"ltr\">lamps</span> keysets rows 1 and 2; first two reviews of product 1. Duplicate insert <span class=\"ltr\">(1,101)</span> fails the unique check. Brand change = 1 row versus rewriting every product document.</p>",
+  "alternatives": [
+    {
+      "fa": "سند-اول با باکت نظر (هر باکت ≤۱۰۰ نظر، باکت‌های سرریز با کلید محصول): وقتی ۹۹٪ بار صفحه محصول است و گزارش میان‌محصولی نداریم. هزینه: منطق باکت + سازگاری نسخه برند کپی‌شده.",
+      "en": "Document-first with review buckets (≤100 reviews each, overflow buckets keyed by product): when 99% of load is the product page with no cross-product reports. Cost: bucket logic + versioning the copied brand data."
+    }
+  ],
+  "failures": [
+    {
+      "fa": "مسابقه ثبت نظر: دو درخواست هم‌زمان یک کاربر → هر دو <span class=\"ltr\">INSERT</span>؛ یکی با <span class=\"ltr\">UNIQUE</span> می‌خورد و با <span class=\"ltr\">upsert</span> بازیابی می‌شود. بدون قید، نظر تکراری می‌ماند.",
+      "en": "Review race: two concurrent inserts by one user → both <span class=\"ltr\">INSERT</span>; one hits <span class=\"ltr\">UNIQUE</span> and recovers via <span class=\"ltr\">upsert</span>. Without the constraint the duplicate persists."
+    },
+    {
+      "fa": "ساخت <span class=\"ltr\">read model</span> سندی که وسط کار می‌میرد: خواننده‌ها به جدول‌ها برمی‌گردند و بازسازی باید <span class=\"ltr\">idempotent</span> باشد، وگرنه سندهای نصفه می‌مانند.",
+      "en": "A document <span class=\"ltr\">read-model</span> build that dies halfway: readers fall back to the tables and the rebuild must be <span class=\"ltr\">idempotent</span>, or half-built documents linger."
+    }
+  ],
+  "code": {
+    "lang": "java",
+    "code": "import java.util.*;\n\n// Teaching demo: catalog over in-memory rows — keyset pagination + UNIQUE guard.\n// Mirrors the relational schema: brands, products, product_categories, reviews\n// with UNIQUE(product_id, user_id). DDL lives in prose; this is runnable logic.\npublic class CatalogDemo {\n    record Brand(int id, String name, String logoUrl, int logoV) {}\n    record Product(int id, int brandId, String name, long price) {}\n    record Review(int id, int productId, int userId, int stars) {}\n\n    public static void main(String[] a) {\n        List<Brand> brands = List.of(\n            new Brand(1, \"Acme\", \"acme-v3.png\", 3),\n            new Brand(2, \"Globex\", \"globex-v1.png\", 1));\n        List<Product> products = List.of(\n            new Product(1, 1, \"Desk lamp A\", 2900),\n            new Product(2, 1, \"Desk lamp B\", 3400),\n            new Product(3, 2, \"Chair C\", 9900),\n            new Product(4, 2, \"Floor lamp D\", 4500));\n        // product -> categories (join table rows)\n        Map<Integer, List<String>> prodCats = Map.of(\n            1, List.of(\"lamps\", \"desk\"), 2, List.of(\"lamps\"), 3, List.of(\"chairs\"), 4, List.of(\"lamps\"));\n        List<Review> reviews = new ArrayList<>(List.of(\n            new Review(1, 1, 101, 5), new Review(2, 1, 102, 4),\n            new Review(3, 1, 103, 5), new Review(4, 2, 101, 3)));\n\n        // 1) product page: one JOIN-equivalent (product + brand)\n        Product p = products.get(0);\n        Brand b = brands.stream().filter(x -> x.id() == p.brandId()).findFirst().orElseThrow();\n        System.out.println(\"product page = \" + p.name() + \" / \" + b.name()\n            + \" / cats=\" + prodCats.get(p.id()));\n\n        // 2) category page via keyset: WHERE (id > last) ORDER BY id LIMIT 2\n        Map<String, List<Integer>> catIndex = new HashMap<>();\n        for (Product x : products)\n            for (String c : prodCats.getOrDefault(x.id(), List.of()))\n                catIndex.computeIfAbsent(c, k -> new ArrayList<>()).add(x.id());\n        catIndex.values().forEach(Collections::sort);\n        List<Integer> page1 = keyset(catIndex.get(\"lamps\"), 0, 2);\n        List<Integer> page2 = keyset(catIndex.get(\"lamps\"), page1.get(page1.size() - 1), 2);\n        System.out.println(\"category lamps page1 = \" + page1);\n        System.out.println(\"category lamps page2 = \" + page2);\n\n        // 3) reviews of product 1, first two via keyset on (product_id, id)\n        List<Review> r1 = reviews.stream()\n            .filter(r -> r.productId() == 1).sorted(Comparator.comparingInt(Review::id))\n            .limit(2).toList();\n        System.out.println(\"reviews p1 first2 = \" + r1.stream()\n            .map(r -> \"u\" + r.userId() + \":\" + r.stars()).toList());\n\n        // 4) UNIQUE(product_id, user_id) guard: dup (1,101) rejected\n        Set<String> uniq = new HashSet<>();\n        for (Review r : reviews) uniq.add(r.productId() + \":\" + r.userId());\n        Review dup = new Review(9, 1, 101, 5);\n        String key = dup.productId() + \":\" + dup.userId();\n        if (!uniq.add(key)) {\n            System.out.println(\"UNIQUE holds: dup (1,101) rejected\");\n        } else {\n            System.out.println(\"UNIQUE BROKEN: dup accepted\");\n        }\n\n        // 5) brand change cost: 1 row vs rewriting every product doc\n        System.out.println(\"brand rename cost = 1 row (relational) vs \"\n            + products.stream().filter(x -> x.brandId() == 1).count()\n            + \" doc rewrites (embedded)\");\n        System.out.println(\"OK\");\n    }\n\n    static List<Integer> keyset(List<Integer> sorted, int last, int n) {\n        List<Integer> out = new ArrayList<>();\n        for (int id : sorted) if (id > last && out.size() < n) out.add(id);\n        return out;\n    }\n}\n",
+    "run_fa": "javac CatalogDemo.java && java CatalogDemo — فقط استاندارد جاوا، فوری.",
+    "run_en": "javac CatalogDemo.java && java CatalogDemo — stdlib Java only, instant.",
+    "expected_fa": "صفحه Desk lamp A/Acme؛ lamps صفحه۱ [1,2] و صفحه۲ [4]؛ دو نظر اول u101:5 و u102:4؛ تکراری (1,101) رد شد؛ تغییر برند ۱ سطر در برابر ۲ بازنویسی سند؛ OK. (خروجی واقعی همین محیط)",
+    "expected_en": "Desk lamp A / Acme page; lamps page1 [1,2], page2 [4]; first two reviews u101:5, u102:4; dup (1,101) rejected; brand change 1 row vs 2 doc rewrites; OK. (actual output of this environment)",
+    "status": "verified"
+  },
+  "tests_fa": "بررسی‌ها: درج موازی یک کاربر فقط یک سطر می‌سازد؛ صفحه‌های <span class=\"ltr\">keyset</span> مجزا و مرتب‌اند؛ <span class=\"ltr\">EXPLAIN</span> استفاده از ایندکس‌ها را نشان می‌دهد؛ تغییر برند در خواندن بعدی دیده می‌شود.",
+  "tests_en": "Checks: concurrent inserts by one user leave one row; <span class=\"ltr\">keyset</span> pages are disjoint and ordered; <span class=\"ltr\">EXPLAIN</span> shows index use; a brand change is visible on the next read.",
+  "followups": [
+    {
+      "q_fa": "اگر محصول در چند دسته باشد و نظرات میلیون‌تایی شوند مدل چگونه تغییر می‌کند؟",
+      "q_en": "How does the model change when a product has multiple categories and millions of reviews?",
+      "level": "senior",
+      "a_fa": "دسته‌ها از قبل با جدول واسط حل‌اند. نظرها با <span class=\"ltr\">keyset</span> روی <span class=\"ltr\">(product_id, id)</span> صفحه‌بندی می‌شوند و برای مرتب «برترین» ایندکس <span class=\"ltr\">(product_id, stars, id)</span> اضافه می‌شود. محصول میلیونی را با shard نظر بر اساس محصول + کش صفحه اول سرو کن. <span class=\"ltr\">embed</span> منتفی است: هر نظر یک بازنویسی <span class=\"ltr\">O(n)</span>.",
+      "a_en": "Categories are already solved by the join table. Reviews page by <span class=\"ltr\">keyset</span> on <span class=\"ltr\">(product_id, id)</span>, adding a <span class=\"ltr\">(product_id, stars, id)</span> index for 'top' order. Serve a million-review product with review sharding by product plus a cached first page. <span class=\"ltr\">Embedding</span> is out: every review becomes an <span class=\"ltr\">O(n)</span> rewrite."
+    },
+    {
+      "q_fa": "مرتب‌سازی «برترین نظرها» با <span class=\"ltr\">keyset</span> چه مکان‌نمایی می‌خواهد؟",
+      "q_en": "What cursor does 'top reviews' keyset pagination need?",
+      "level": "senior",
+      "a_fa": "مکان‌نمای مرکب <span class=\"ltr\">(stars, id)</span> با شرط <span class=\"ltr\">stars &lt; last_stars OR (stars = last_stars AND id &gt; last_id)</span> روی ایندکس مرکب. <span class=\"ltr\">offset</span> زیر درج تازه سطر گم می‌کند.",
+      "a_en": "A composite <span class=\"ltr\">(stars, id)</span> cursor with <span class=\"ltr\">stars &lt; last_stars OR (stars = last_stars AND id &gt; last_id)</span> over a composite index. <span class=\"ltr\">Offset</span> loses rows under fresh inserts."
+    }
+  ],
+  "mistakes": [
+    {
+      "fa": "گفتن «SQL یا NoSQL» بدون بار کاری: انتخاب بدون کوئری و کاردینالیتی حدس است.",
+      "en": "Answering 'SQL or NoSQL' with no workload: a choice without queries and cardinality is a guess."
+    },
+    {
+      "fa": "توکار کردن نظرهای بی‌کران در سند: سند داغ و بازنویسی <span class=\"ltr\">O(n)</span> به‌ازای هر نظر.",
+      "en": "Embedding unbounded reviews in a document: a hot document with an <span class=\"ltr\">O(n)</span> rewrite per review."
+    },
+    {
+      "fa": "یکتایی در کد برنامه به‌جای قید پایگاه: زیر مسابقه، تکراری‌ها رد نمی‌شوند.",
+      "en": "Uniqueness in app code instead of a database constraint: duplicates slip through under races."
+    }
+  ],
+  "sources": [
+    "amazon",
+    "atlassian"
+  ],
+  "diagrams": [
+    {
+      "file": "diagrams/sol1-step1-model-choice.html",
+      "made": "archify",
+      "source": ".archify/workflow-ch3-sol1-choice-20261014-184359",
+      "kind_fa": "گردش‌کار",
+      "kind_en": "workflow",
+      "caption_fa": "درخت تصمیم مدل: از سه کوئری تا سه برگ (اعداد آموزشی)",
+      "caption_en": "Model decision tree: three queries to three leaves (teaching numbers)",
+      "height": 700,
+      "narration": {
+        "scenario_fa": "لانچ فروشگاه نزدیک است و سه کوئری داغ باید پیش از نوشتن اسکیما جوابشان معلوم باشد. درخت را چپ‌به‌راست بخوان: اول سؤال‌ها، بعد دو انشعاب، آخر سه برگ.",
+        "scenario_en": "The shop launches soon and three hot queries must be answered before writing any schema. Read the tree left to right: questions first, two forks, then three leaves.",
+        "steps": [
+          {
+            "fa": "گره شروع <span class=\"ltr\">3 hot queries</span>: صفحه محصول، صفحه دسته و نظرها — هر تصمیم مدل با همین سه‌تا سنجیده می‌شود.",
+            "en": "The entry node of 3 hot queries: product page, category page and reviews — every modelling call is judged against these three."
+          },
+          {
+            "fa": "انشعاب اول <span class=\"ltr\">Bounded growth?</span>: رشد بی‌کران (نظرها) به شاخه رابطه‌ای می‌رود — <span class=\"ltr\">Tables + UNIQUE</span> و بعد <span class=\"ltr\">Keyset + upsert</span> با مکان‌نمای <span class=\"ltr\">id &gt; last</span>؛ چیزهای کران‌دار و کوچک (بندانگشتی برند) به شاخه سندی — <span class=\"ltr\">Tiny embeds</span>.",
+            "en": "First fork on bounded growth: unbounded growth (reviews) takes the relational branch — tables plus UNIQUE, then keyset plus upsert with an id &gt; last cursor; bounded tiny things (brand thumbnails) take the document branch — tiny embeds."
+          },
+          {
+            "fa": "انشعاب دوم <span class=\"ltr\">Atomic brand?</span>: تغییر برند با <span class=\"ltr\">1 atomic UPDATE</span> به برگ <span class=\"ltr\">Relational first</span> می‌رسد؛ در شاخه سندی همان تغییر <span class=\"ltr\">N-doc rewrite</span> با پنجره مخلوط می‌شود و فقط به <span class=\"ltr\">Doc read model</span> می‌رسد.",
+            "en": "Second fork on atomic brand change: a brand change lands on the relational leaf with one atomic UPDATE; on the document branch the same change becomes an N-document rewrite with a mixed window, reaching only a document read model."
+          },
+          {
+            "fa": "برگ سوم <span class=\"ltr\">Tables + view</span>: وقتی صفحه محصول داغ است ولی گزارش هم لازم است — با <span class=\"ltr\">derive when hot</span> نمای نسخه‌دار از روی جدول‌ها مشتق می‌شود.",
+            "en": "Third leaf of tables plus view: when the product page is hot but reports are still needed — a versioned view is derived off the tables when hot."
+          }
+        ],
+        "point_fa": "نقطه تصمیم دو انشعاب است: کران‌دار و کوچک را توکار کن، بی‌کران را ارجاع بده؛ بار مخلوط رابطه‌ای می‌ماند و صفحه چیره نمای مشتق می‌گیرد.",
+        "point_en": "The decision point is the two forks: embed what is bounded and tiny, reference what is unbounded; mixed load stays relational, a dominant page earns a derived view.",
+        "failure_fa": "اگر نظرهای بی‌کران را توکار کنی، هر نظر یک بازنویسی <span class=\"ltr\">O(n)</span> و یک سند داغ می‌سازد؛ اگر یکتایی را در برنامه چک کنی، زیر مسابقه تکراری رد می‌شود.",
+        "failure_en": "Embedding unbounded reviews turns every review into an O(n) rewrite of a hot document; checking uniqueness in app code lets duplicates through under races.",
+        "guarantee_fa": "شکل ترتیب استدلال و سه برگ را نشان می‌دهد؛ اندازه واقعی پروداکشن را ثابت نمی‌کند — عددها آموزشی‌اند.",
+        "guarantee_en": "The figure shows the reasoning order and the three leaves; it does not fix production sizing — the numbers are teaching numbers.",
+        "nonguarantee_fa": "درباره sharding نظرها، رتبه‌بندی جست‌وجو و کش صفحه اول چیزی نمی‌گوید.",
+        "nonguarantee_en": "It says nothing about review sharding, search ranking or first-page caching."
+      },
+      "selfcheck": {
+        "q_fa": "صفحه محصول ۹۹٪ بار است ولی گزارش فروش میان‌محصولی هم لازم است؛ کدام برگ و چرا؟",
+        "q_en": "The product page is 99% of load but cross-product sales reports are still needed; which leaf, and why?",
+        "a_fa": "<span class=\"ltr\">Tables + view</span>: جدول‌ها مرجع می‌مانند و نمای مشتق نسخه‌دار صفحه داغ را سرو می‌کند؛ سند خالص گزارش را می‌کشد و رابطه‌ای خالص صفحه داغ را گران می‌کند.",
+        "a_en": "Tables plus view: the tables stay authoritative while the versioned derived view serves the hot page; a pure document kills reporting and pure relational prices the hot page."
+      }
+    },
+    {
+      "file": "diagrams/sol1-catalog-models.html",
+      "made": "hand",
+      "kind_fa": "نمودار کلاس/ER",
+      "kind_en": "UML class/ER diagram",
+      "caption_fa": "کاتالوگ رابطه‌ای در برابر سندی و مرز توکار کردن (اعداد آموزشی)",
+      "caption_en": "Relational vs document catalog and the embedding boundary (teaching numbers)",
+      "height": 640,
+      "narration": {
+        "scenario_fa": "هفته لانچ فروشگاه است: صفحه محصول، صفحه دسته و نظرها باید هم‌زمان درست کار کنند. از پنل چپ شروع کن.",
+        "scenario_en": "It is the shop's launch week: product page, category page and reviews must all work at once. Start from the left panel.",
+        "steps": [
+          {
+            "fa": "پنل چپ: پنج جدول با کلیدها — واسط چندبه‌چند و قید یکتای نظر.",
+            "en": "Left panel: five tables with keys — the many-to-many join table and the review uniqueness constraint."
+          },
+          {
+            "fa": "پنل راست: درخت سند — برند و دسته‌ها داخل، نظرها بیرون با خط ارجاع.",
+            "en": "Right panel: the document tree — brand and categories inside, reviews outside behind a reference line."
+          },
+          {
+            "fa": "نوار پایین: مکان‌نمای keyset که زیر درج هم‌زمان پایدار می‌ماند.",
+            "en": "Bottom strip: the keyset cursor that stays stable under concurrent inserts."
+          },
+          {
+            "fa": "سطر تصمیم: تغییر برند — یک سطر در برابر بازنویسی همه سندها.",
+            "en": "Decision row: brand change — one row versus rewriting every document."
+          }
+        ],
+        "point_fa": "نقطه تصمیم مرز کران است: کران‌دار و کوچک را توکار کن، بی‌کران را ارجاع بده.",
+        "point_en": "The decision point is the boundedness boundary: embed what is bounded and tiny, reference what is unbounded.",
+        "failure_fa": "رد خرابی: دو ثبت هم‌زمان یک کاربر — خط یکتایی دومی را می‌گیرد و upsert نجاتش می‌دهد.",
+        "failure_en": "Failure trace: two concurrent submits by one user — the unique line catches the second, upsert rescues it.",
+        "guarantee_fa": "شکل کلیدها و ایندکس‌ها را تضمین می‌کند، نه اندازه واقعی پروداکشن را.",
+        "guarantee_en": "The figure guarantees keys and indexes, not production sizing.",
+        "nonguarantee_fa": "درباره sharding، رتبه‌بندی جست‌وجو و کش صفحه اول چیزی نمی‌گوید.",
+        "nonguarantee_en": "It says nothing about sharding, search ranking or first-page caching."
+      },
+      "selfcheck": {
+        "q_fa": "محصولی به ۲ میلیون نظر می‌رسد. چرا توکار کردن جواب نیست و جایگزین چیست؟",
+        "q_en": "A product reaches 2M reviews. Why is embedding wrong, and what replaces it?",
+        "a_fa": "چون هر نظر بازنویسی O(n) و سند داغ می‌سازد. جایگزین: جدول جدا + keyset روی (product_id, id) و کش صفحه اول.",
+        "a_en": "Because every review becomes an O(n) rewrite of a hot document. Replacement: separate table + keyset on (product_id, id) with a cached first page."
+      }
+    }
+  ],
+  "reasoning_fa": "<p>مدل را از query و رشد انتخاب می‌کنیم: ۲۰۰هزار محصول × ۴۰ review حدود هشت میلیون review می‌دهد؛ embed نامحدود review سند محصول را پیوسته بزرگ می‌کند. brand کم‌تغییر می‌تواند مرجع جدا داشته باشد تا یک تغییر، یک حقیقت را اصلاح کند. ۸۰۰ خواندن/ثانیه ورودی آموزشی است و با trace جایگزین می‌شود؛ با زیادشدن خواندن می‌توان projection ساخت، ولی هزینهٔ invalidation و تأخیر آن باید در انتخاب حساب شود.</p>",
+  "reasoning_en": "<p>Choose a model from queries and growth: 200k products × 40 reviews gives eight million reviews; unbounded embedding continually expands product documents. A separate brand authority makes one update change one fact. The 800 reads/s load is an input to replace with traces. More reads may justify projections, with invalidation cost and lag counted explicitly.</p>"
+}

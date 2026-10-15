@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three Stream Joins — Stream–Stream, Stream–Table, and Table–Table (UML Structure)</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .cls-t{font:700 14px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .chip{font:700 11.5px ui-monospace,Menlo,monospace; fill:#fbbf24}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="Three side-by-side panels showing stream-stream window join, stream-table enrichment join, and table-table materialized view join, each with two inputs, an operator holding state, an output, and an annotation strip">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+    <marker id="arrb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#93c5fd"/>
+    </marker>
+    <marker id="arrp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c084fc"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="32" text-anchor="middle">Three Stream Joins — Stream–Stream, Stream–Table, Table–Table</text>
+  <text class="sub" x="620" y="54" text-anchor="middle">Chapter 12 — every stream join keeps state; the window decides how much state and when it is released</text>
+
+  <!-- ======================= PANEL 1 : stream–stream window join ======================= -->
+  <g>
+    <rect x="30" y="76" width="376" height="32" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="218" y="97" text-anchor="middle">Stream–Stream Join · Window</text>
+
+    <rect x="42" y="124" width="170" height="24" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="127" y="141" text-anchor="middle">search events</text>
+    <rect x="42" y="148" width="170" height="48" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="small" x="54" y="168">«stream»</text>
+    <text class="small" x="54" y="186">key: session id</text>
+
+    <rect x="224" y="124" width="170" height="24" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="309" y="141" text-anchor="middle">click events</text>
+    <rect x="224" y="148" width="170" height="48" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="small" x="236" y="168">«stream»</text>
+    <text class="small" x="236" y="186">key: session id</text>
+
+    <line x1="127" y1="196" x2="185" y2="300" stroke="#86efac" stroke-width="1.6" marker-end="url(#arr)"/>
+    <line x1="309" y1="196" x2="251" y2="300" stroke="#86efac" stroke-width="1.6" marker-end="url(#arr)"/>
+
+    <rect x="30" y="300" width="376" height="24" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="218" y="317" text-anchor="middle">WindowJoinOperator</text>
+    <rect x="30" y="324" width="376" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="54" y="346">«windowed join on session id»</text>
+    <text class="attr" x="54" y="368">state: buffer of last 1 h, by session id</text>
+    <text class="attr" x="54" y="390">buffer entries evicted when window closes</text>
+
+    <line x1="218" y1="400" x2="218" y2="436" stroke="#86efac" stroke-width="1.6" marker-end="url(#arr)"/>
+
+    <rect x="30" y="436" width="376" height="24" rx="8" fill="#fbbf24" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="218" y="453" text-anchor="middle">join output</text>
+    <rect x="30" y="460" width="376" height="50" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="54" y="480">clicked — the search got a click</text>
+    <text class="attr" x="54" y="498">not clicked — window expired alone</text>
+
+    <rect x="30" y="528" width="376" height="24" rx="8" fill="#1b2438" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="chip" x="218" y="545" text-anchor="middle">annotation</text>
+    <rect x="30" y="552" width="376" height="80" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="small" x="54" y="572">click may arrive before the search event;</text>
+    <text class="small" x="54" y="592">the window bounds how long the join waits</text>
+    <text class="small" x="54" y="612">state is dropped once the window closes</text>
+  </g>
+
+  <!-- ======================= PANEL 2 : stream–table enrichment ======================= -->
+  <g>
+    <rect x="432" y="76" width="376" height="32" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="620" y="97" text-anchor="middle">Stream–Table Join · Enrichment</text>
+
+    <rect x="444" y="124" width="170" height="24" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="529" y="141" text-anchor="middle">activity events</text>
+    <rect x="444" y="148" width="170" height="48" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="small" x="456" y="168">«stream»</text>
+    <text class="small" x="456" y="186">key: user id</text>
+
+    <rect x="626" y="124" width="170" height="24" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="711" y="141" text-anchor="middle">profile changelog</text>
+    <rect x="626" y="148" width="170" height="48" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="small" x="638" y="168">«CDC stream»</text>
+    <text class="small" x="638" y="186">key: user id</text>
+
+    <line x1="529" y1="196" x2="587" y2="300" stroke="#86efac" stroke-width="1.6" marker-end="url(#arr)"/>
+    <line x1="711" y1="196" x2="653" y2="300" stroke="#93c5fd" stroke-width="1.6" marker-end="url(#arrb)"/>
+
+    <rect x="432" y="300" width="376" height="24" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="620" y="317" text-anchor="middle">StreamTableJoin</text>
+    <rect x="432" y="324" width="376" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="456" y="346">«stream ⋈ table · infinite window»</text>
+    <text class="attr" x="456" y="368">state: local copy of profiles (hash join)</text>
+    <text class="attr" x="456" y="390">newer versions overwrite older ones</text>
+
+    <line x1="620" y1="400" x2="620" y2="436" stroke="#86efac" stroke-width="1.6" marker-end="url(#arr)"/>
+
+    <rect x="432" y="436" width="376" height="24" rx="8" fill="#fbbf24" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="620" y="453" text-anchor="middle">enriched activity events</text>
+    <rect x="432" y="460" width="376" height="50" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="456" y="480">activity events enriched with profile</text>
+    <text class="attr" x="456" y="498">as of the latest profile version seen</text>
+
+    <rect x="432" y="528" width="376" height="24" rx="8" fill="#1b2438" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="chip" x="620" y="545" text-anchor="middle">annotation</text>
+    <rect x="432" y="552" width="376" height="80" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="small" x="456" y="572">table side = join with an infinite window;</text>
+    <text class="small" x="456" y="592">the operator keeps the latest profile per key</text>
+    <text class="small" x="456" y="612">output depends on the arrival order of sides</text>
+  </g>
+
+  <!-- ======================= PANEL 3 : table–table materialized view ======================= -->
+  <g>
+    <rect x="834" y="76" width="376" height="32" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="1022" y="97" text-anchor="middle">Table–Table Join · Materialized View</text>
+
+    <rect x="846" y="124" width="170" height="24" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="931" y="141" text-anchor="middle">posts changelog</text>
+    <rect x="846" y="148" width="170" height="48" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="small" x="858" y="168">«CDC stream»</text>
+    <text class="small" x="858" y="186">key: post id</text>
+
+    <rect x="1028" y="124" width="170" height="24" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="1113" y="141" text-anchor="middle">follows changelog</text>
+    <rect x="1028" y="148" width="170" height="48" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="small" x="1040" y="168">«CDC stream»</text>
+    <text class="small" x="1040" y="186">key: user id</text>
+
+    <line x1="931" y1="196" x2="989" y2="300" stroke="#c084fc" stroke-width="1.6" marker-end="url(#arrp)"/>
+    <line x1="1113" y1="196" x2="1055" y2="300" stroke="#c084fc" stroke-width="1.6" marker-end="url(#arrp)"/>
+
+    <rect x="834" y="300" width="376" height="24" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="1022" y="317" text-anchor="middle">ViewMaintenanceOperator</text>
+    <rect x="834" y="324" width="376" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="858" y="346">«equi-join · posts ⋈ follows»</text>
+    <text class="attr" x="858" y="368">state: follower lists + recent posts</text>
+    <text class="attr" x="858" y="390">both sides are changelogs of tables</text>
+
+    <line x1="1022" y1="400" x2="1022" y2="436" stroke="#86efac" stroke-width="1.6" marker-end="url(#arr)"/>
+
+    <rect x="834" y="436" width="376" height="24" rx="8" fill="#fbbf24" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="1022" y="453" text-anchor="middle">timeline changes</text>
+    <rect x="834" y="460" width="376" height="50" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="858" y="480">delta output: rows entering / leaving view</text>
+    <text class="attr" x="858" y="498">materialized view of posts ⋈ follows</text>
+
+    <rect x="834" y="528" width="376" height="24" rx="8" fill="#1b2438" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="chip" x="1022" y="545" text-anchor="middle">annotation</text>
+    <rect x="834" y="552" width="376" height="80" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="small" x="858" y="572">(u · v)′ = u′v + uv′ — the product rule:</text>
+    <text class="small" x="858" y="592">each change joins the other side's latest</text>
+    <text class="small" x="858" y="612">state; the view is maintained incrementally</text>
+  </g>
+</svg>
+</div>
+</body>
+</html>

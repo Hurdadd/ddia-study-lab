@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proving It Correct — Theory Plus Experiment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#f7f2e8;color:#302828;
+    font-family:'Nunito','Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%;display:flex;justify-content:center;padding:10px 0;}
+  svg{width:100%;height:auto;max-width:1240px;background:#f7f2e8;}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828;}
+  .ttl{font-size:22px;font-weight:900;}
+  .sub{font-size:14px;font-weight:700;fill:#6e665c;}
+  .nm{font-size:14px;font-weight:900;}
+  .tl{font-size:12px;font-weight:700;fill:#6e665c;}
+  .ln{font-size:13px;font-weight:400;}
+  .lm{font-size:12px;font-weight:900;}
+  .foot{font-size:14px;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Five ways to gain confidence in distributed algorithms, from formal proof to fuzz testing">
+<title>Five verification methods</title>
+
+  <text class="ttl" x="620" y="44" text-anchor="middle">Proving It Correct — Theory Plus Experiment</text>
+  <text class="sub" x="620" y="70" text-anchor="middle">Neither alone is enough: pair a proof with a fault.</text>
+
+  <!-- 1 -->
+  <g>
+    <rect x="40" y="100" width="216" height="400" rx="16" fill="#ffcfb8"/>
+    <text class="nm" x="148" y="140" text-anchor="middle">Formal proof</text>
+    <text class="tl" x="148" y="164" text-anchor="middle">math on paper</text>
+    <text class="ln" x="58" y="204">writes the algorithm</text>
+    <text class="ln" x="58" y="230">as math, proves the</text>
+    <text class="ln" x="58" y="256">property holds</text>
+    <text class="lm" x="58" y="300">limit:</text>
+    <text class="ln" x="58" y="326">misses the real</text>
+    <text class="ln" x="58" y="352">code entirely</text>
+    <text class="ln" x="58" y="392">finds hidden timing</text>
+    <text class="ln" x="58" y="418">assumptions early</text>
+  </g>
+
+  <!-- 2 -->
+  <g>
+    <rect x="276" y="100" width="216" height="400" rx="16" fill="#ffe08a"/>
+    <text class="nm" x="384" y="140" text-anchor="middle">Model checking</text>
+    <text class="tl" x="384" y="164" text-anchor="middle">TLA+, FizzBee</text>
+    <text class="ln" x="294" y="204">explores every state</text>
+    <text class="ln" x="294" y="230">of the model,</text>
+    <text class="ln" x="294" y="256">systematically</text>
+    <text class="lm" x="294" y="300">limit:</text>
+    <text class="ln" x="294" y="326">state space is infinite:</text>
+    <text class="ln" x="294" y="352">bound it, approximate</text>
+    <text class="ln" x="294" y="392">used by CockroachDB,</text>
+    <text class="ln" x="294" y="418">Kafka, and friends</text>
+  </g>
+
+  <!-- 3 -->
+  <g>
+    <rect x="512" y="100" width="216" height="400" rx="16" fill="#bfe6c9"/>
+    <text class="nm" x="620" y="140" text-anchor="middle">Fault injection</text>
+    <text class="tl" x="620" y="164" text-anchor="middle">Chaos, Jepsen</text>
+    <text class="ln" x="530" y="204">kills real nodes,</text>
+    <text class="ln" x="530" y="230">cuts real networks,</text>
+    <text class="ln" x="530" y="256">drops real disks</text>
+    <text class="lm" x="530" y="300">limit:</text>
+    <text class="ln" x="530" y="326">hard to write well;</text>
+    <text class="ln" x="530" y="352">no fine control</text>
+    <text class="ln" x="530" y="392">found many critical</text>
+    <text class="ln" x="530" y="418">production bugs</text>
+  </g>
+
+  <!-- 4 -->
+  <g>
+    <rect x="748" y="100" width="216" height="400" rx="16" fill="#c3ceff"/>
+    <text class="nm" x="856" y="140" text-anchor="middle">Simulation (DST)</text>
+    <text class="tl" x="856" y="164" text-anchor="middle">FoundationDB style</text>
+    <text class="ln" x="766" y="204">mocks net, disk, clock;</text>
+    <text class="ln" x="766" y="230">replays the exact</text>
+    <text class="ln" x="766" y="256">event order</text>
+    <text class="lm" x="766" y="300">limit:</text>
+    <text class="ln" x="766" y="326">must control every</text>
+    <text class="ln" x="766" y="352">nondeterminism source</text>
+    <text class="ln" x="766" y="392">every failure repeats</text>
+    <text class="ln" x="766" y="418">bit-for-bit</text>
+  </g>
+
+  <!-- 5 -->
+  <g>
+    <rect x="984" y="100" width="216" height="400" rx="16" fill="#d3c3f2"/>
+    <text class="nm" x="1092" y="140" text-anchor="middle">Fuzz, property</text>
+    <text class="tl" x="1092" y="164" text-anchor="middle">random inputs</text>
+    <text class="ln" x="1002" y="204">throws random inputs</text>
+    <text class="ln" x="1002" y="230">at forgotten corners;</text>
+    <text class="ln" x="1002" y="256">checks properties</text>
+    <text class="lm" x="1002" y="300">limit:</text>
+    <text class="ln" x="1002" y="326">no guarantees;</text>
+    <text class="ln" x="1002" y="352">a complement only</text>
+    <text class="ln" x="1002" y="392">pairs well with DST</text>
+    <text class="ln" x="1002" y="418">and model checking</text>
+  </g>
+
+  <rect x="40" y="522" width="1160" height="94" rx="16" fill="#ffe08a"/>
+  <text class="foot" x="64" y="554">Determinism is the thread: replayable logs, durable workflows, simulated time.</text>
+  <text class="ln" x="64" y="586">Control every nondeterminism source — even hash iteration order.</text>
+</svg>
+</div>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timeliness ≠ Integrity: Splitting “consistency” in Two</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .cls-t{font:700 14px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .edge-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .note{font:12.5px system-ui,sans-serif; fill:#cfe3ff}
+  .note-h{font:700 13px system-ui,sans-serif; fill:#fbbf24}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .good{font-weight:700; fill:#86efac}
+  .bad{font-weight:700; fill:#f87171}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="UML-style figure splitting ACID consistency into timeliness and integrity, with how dataflow systems deliver each">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="30" text-anchor="middle">Timeliness ≠ Integrity: Splitting “consistency” in Two</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">ACID “consistency” conflates two things · event-based dataflow systems decouple them</text>
+
+  <!-- ======================= TOP: the overloaded word ======================= -->
+  <rect x="440" y="68" width="360" height="34" rx="8" fill="#fbbf24" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="cls-t" x="620" y="90" text-anchor="middle">ACID consistency (the overloaded word)</text>
+
+  <line x1="520" y1="102" x2="336" y2="128" stroke="#86efac" stroke-width="1.6" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="392" y="118">up-to-date?</text>
+  <line x1="720" y1="102" x2="904" y2="128" stroke="#86efac" stroke-width="1.6" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="824" y="118">uncorrupted?</text>
+
+  <!-- ======================= LEFT: Timeliness ======================= -->
+  <g>
+    <rect x="40" y="130" width="560" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="320" y="150" text-anchor="middle">Timeliness — users see up-to-date state</text>
+    <rect x="40" y="160" width="560" height="140" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="54" y="183">linearizability (CAP sense) = strongest form</text>
+    <text class="attr" x="54" y="203">read-after-write = weaker form</text>
+    <text class="attr" x="54" y="223">violation → <tspan class="good">TEMPORARY</tspan>: wait + retry fixes it</text>
+    <text class="attr" x="54" y="243">stale read heals by itself (eventual consistency)</text>
+    <text class="attr" x="54" y="263">e.g. card tx missing 24h from statement:</text>
+    <text class="attr" x="54" y="283">annoying, but normal</text>
+  </g>
+
+  <!-- ======================= RIGHT: Integrity ======================= -->
+  <g>
+    <rect x="640" y="130" width="560" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="960" y="150" text-anchor="middle">Integrity — no corruption, no loss</text>
+    <rect x="640" y="160" width="560" height="140" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="654" y="185">no loss, no contradictions, derivation correct</text>
+    <text class="attr" x="654" y="207">index must reflect the table (missing = useless)</text>
+    <text class="attr" x="654" y="229">violation → <tspan class="bad">PERMANENT</tspan>: explicit check + repair</text>
+    <text class="attr" x="654" y="251">e.g. balance ≠ sum of txs, money disappearing:</text>
+    <text class="attr" x="654" y="273">catastrophic</text>
+  </g>
+
+  <!-- ======================= MIDDLE: slogan banner ======================= -->
+  <rect x="40" y="312" width="1160" height="46" rx="10" fill="#1b2438" stroke="#fbbf24" stroke-width="1.3" stroke-dasharray="6 4"/>
+  <text class="note-h" x="620" y="331" text-anchor="middle">the slogan</text>
+  <text class="note" x="620" y="349" text-anchor="middle">timeliness violations are allowed under eventual consistency; integrity violations are perpetual inconsistency</text>
+
+  <!-- ======================= BOTTOM LEFT: timeliness in dataflow ======================= -->
+  <g>
+    <rect x="40" y="372" width="560" height="30" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="320" y="392" text-anchor="middle">timeliness in dataflow</text>
+    <rect x="40" y="402" width="560" height="150" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="54" y="426">no guarantee by default (async consumers)</text>
+    <text class="attr" x="54" y="448">a client CAN wait for its own output event</text>
+    <text class="attr" x="54" y="470">e.g. outgoing-payment / declined event</text>
+    <text class="attr" x="54" y="492">…but the balance check never waits on it</text>
+    <text class="attr" x="54" y="514">notification is decoupled from the effect</text>
+  </g>
+
+  <!-- ======================= BOTTOM RIGHT: integrity in dataflow ======================= -->
+  <g>
+    <rect x="640" y="372" width="560" height="30" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="920" y="392" text-anchor="middle">integrity in dataflow — 4 mechanisms</text>
+    <rect x="640" y="402" width="560" height="150" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="654" y="426">① write = ONE atomic message (event sourcing)</text>
+    <text class="attr" x="654" y="448">② deterministic derivation functions</text>
+    <text class="attr" x="654" y="470">③ client request ID thru all stages (e2e dedup)</text>
+    <text class="attr" x="654" y="492">④ immutable msgs + reprocessing (bug recovery)</text>
+    <text class="attr" x="654" y="514">= effectively-once without 2PC / XA</text>
+  </g>
+
+  <!-- ======================= verdict ======================= -->
+  <rect x="40" y="564" width="1160" height="66" rx="12" fill="#161d2e" stroke="#86efac" stroke-width="1.4"/>
+  <text class="note-h" x="56" y="588">Verdict</text>
+  <text class="note" x="56" y="610">preserve integrity without distributed transactions → comparable correctness, better performance + robustness</text>
+
+  <text class="small" x="620" y="650" text-anchor="middle">legend — amber: the overloaded word · teal/blue: the two meanings · banner: the slogan · bottom: how dataflow delivers each</text>
+</svg>
+</div>
+</body>
+</html>

@@ -1,0 +1,262 @@
+{
+  "alternatives": [
+    {
+      "en": "Rendezvous (highest random weight) when you want no ownership map at all: placement is a stateless computation per key, so any node can route. Price: O(nodes) hash computations per lookup and weights need explicit virtual copies.",
+      "fa": "<span class=\"ltr\">rendezvous</span> (بیشترین وزن تصادفی) وقتی هیچ نگاشت مالکیتی نمی‌خواهی: جایابی محاسبه‌ای بدون حالت per-key است پس هر node می‌تواند مسیریابی کند. بها: <span class=\"ltr\">O(nodes)</span> هش per-lookup و وزن‌ها کپی مجازی صریح می‌خواهند."
+    },
+    {
+      "en": "Fixed logical shards (say 64) when operations wants coarse, visible moves: a join takes whole shards, and the ownership table is human-readable. Price: pick the count with many divisors up front — resharding later rewrites everything.",
+      "fa": "شاردهای منطقی ثابت (مثلاً ۶۴ عدد) وقتی عملیات جابه‌جایی درشت و دیدنی می‌خواهد: عضو تازه شاردهای whole را می‌گیرد و جدول مالکیت خواناست. بها: تعداد را از اول با مقسوم‌علیه زیاد انتخاب کن — <span class=\"ltr\">resharding</span> بعدی همه‌چیز را بازنویسی می‌کند."
+    }
+  ],
+  "answer_en": "Build the ring by hand (hash point, clockwise walk, 100 virtual nodes per node) with a versioned ownership map: a join moves ~9% of keys versus ~91% for mod-N, a 2x node takes 2x shares with no global move, and every flip is staged — stream, catch up, flip the map, forward in flight. Price: the map itself needs versioning and clients must refresh it.",
+  "answer_fa": "حلقه را با دست بساز (نقطهٔ هش، قدم ساعت‌گرد، ۱۰۰ <span class=\"ltr\">vnode</span> per-node) با نگاشت مالکیت نسخه‌دار: عضو تازه حدود ۹٪ کلیدها را می‌برد در برابر ۹۱٪ <span class=\"ltr\">mod-N</span>، گره ۲ برابری ۲ برابر سهم می‌گیرد بدون جابه‌جایی سراسری، و هر چرخش مرحله‌ای است — استریم، جبران، چرخش نگاشت و <span class=\"ltr\">forward</span> در پرواز. بها: خود نگاشت نسخه‌بندی می‌خواهد و کلاینت‌ها باید تازه‌اش کنند.",
+  "assumptions": [
+    {
+      "en": "10k keys, cluster 10 to 11 and 10 to 9; a stable FNV hash with an fmix finalizer (teaching choice, tested, not a standard).",
+      "fa": "۱۰هزار کلید، خوشهٔ ۱۰ به ۱۱ و ۱۰ به ۹؛ هش پایدار <span class=\"ltr\">FNV</span> با نهایی‌ساز <span class=\"ltr\">fmix</span> (انتخاب آموزشی، تست‌شده، نه استاندارد)."
+    },
+    {
+      "en": "Ring carries 100 virtual nodes per physical node; fixed scheme uses 64 logical shards with an explicit ownership table.",
+      "fa": "حلقه ۱۰۰ <span class=\"ltr\">vnode</span> per-node دارد؛ طرح ثابت ۶۴ شارد منطقی با جدول مالکیت صریح دارد."
+    },
+    {
+      "en": "Movement percent is measured key by key; skew (min..max load) and weight behavior are reported beside it, never hidden.",
+      "fa": "درصد جابه‌جایی کلید‌به‌کلید شمرده می‌شود؛ کجی (کمینه تا بیشینهٔ بار) و رفتار وزن کنارش گزارش می‌شود، هرگز پنهان نه."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n// Teaching demo: consistent hashing by hand — mod-N vs ring+vnodes vs\n// rendezvous vs fixed logical shards. 10k keys, stable FNV hash.\npublic class HashRing {\n    // NOTE: raw FNV-1a has a weak final avalanche: for structured inputs like\n    // \"key-5@n10\" the trailing chars dominate and node n10 wins ~40% of keys.\n    // The fmix32 finalizer below decorrelates the bits (verified: ~1/11 each).\n    // Lesson: sharding needs a *tested* hash, never an ad-hoc one.\n    static int fnv(String s) {\n        int h = 0x811c9dc5;\n        for (int i = 0; i < s.length(); i++) { h ^= s.charAt(i); h *= 0x01000193; }\n        h ^= h >>> 16; h *= 0x85ebca6b; h ^= h >>> 13; h *= 0xc2b2ae35; h ^= h >>> 16;\n        return h & 0x7fffffff;\n    }\n    static List<String> nodes(int n) {\n        List<String> l = new ArrayList<>();\n        for (int i = 0; i < n; i++) l.add(\"n\" + i);\n        return l;\n    }\n    // ring with V virtual nodes per physical node\n    static Map<Integer, String> ring(List<String> ns, int V) {\n        TreeMap<Integer, String> m = new TreeMap<>();\n        for (String n : ns) for (int v = 0; v < V; v++) m.put(fnv(n + \"#\" + v), n);\n        return m;\n    }\n    static String onRing(Map<Integer, String> m, int h) {\n        Map.Entry<Integer, String> e = ((TreeMap<Integer, String>) m).ceilingEntry(h);\n        return (e != null ? e : ((TreeMap<Integer, String>) m).firstEntry()).getValue();\n    }\n    static String rendezvous(String key, List<String> ns) {\n        String best = null; int bs = -1;\n        for (String n : ns) { int s = fnv(key + \"@\" + n); if (s > bs) { bs = s; best = n; } }\n        return best;\n    }\n    public static void main(String[] a) {\n        int K = 10000, V = 100, LS = 64;\n        String[] keys = new String[K];\n        for (int i = 0; i < K; i++) keys[i] = \"key-\" + i;\n        List<String> n10 = nodes(10), n11 = nodes(11), n9 = nodes(9);\n\n        // --- mod N ---\n        int modJoin = 0, modLeave = 0;\n        for (String k : keys) {\n            if (fnv(k) % 10 != fnv(k) % 11) modJoin++;\n            if (fnv(k) % 10 != fnv(k) % 9) modLeave++;\n        }\n        // --- ring + vnodes ---\n        Map<Integer, String> r10 = ring(n10, V), r11 = ring(n11, V), r9 = ring(n9, V);\n        int ringJoin = 0, ringLeave = 0;\n        Map<String, Integer> load = new HashMap<>();\n        for (String k : keys) {\n            int h = fnv(k);\n            String o = onRing(r10, h);\n            load.merge(o, 1, Integer::sum);\n            if (!onRing(r11, h).equals(o)) ringJoin++;\n            if (!onRing(r9, h).equals(o)) ringLeave++;\n        }\n        int mn = Collections.min(load.values()), mx = Collections.max(load.values());\n        // --- rendezvous ---\n        int rvJoin = 0, rvLeave = 0;\n        for (String k : keys) {\n            String o = rendezvous(k, n10);\n            if (!rendezvous(k, n11).equals(o)) rvJoin++;\n            if (!rendezvous(k, n9).equals(o)) rvLeave++;\n        }\n        // --- fixed logical shards + ownership map ---\n        int[] own10 = new int[LS], own11 = new int[LS], own9 = new int[LS];\n        for (int s = 0; s < LS; s++) own10[s] = s % 10;\n        // join: new node takes ~LS/11 shards from the most-loaded owners\n        int[] cnt10 = new int[10];\n        for (int s = 0; s < LS; s++) cnt10[own10[s]]++;\n        System.arraycopy(own10, 0, own11, 0, LS);\n        int need = LS / 11 + 1;\n        int moved = 0;\n        outer: for (int n = 0; n < 10; n++)\n            for (int s = 0; s < LS && moved < need; s++)\n                if (own11[s] == n && cnt10[n] > LS / 11) { own11[s] = 10; cnt10[n]--; moved++; }\n        int fxJoin = 0, fxLeave = 0;\n        for (int s = 0; s < LS; s++) { own9[s] = own10[s] == 9 ? s % 9 : own10[s]; }\n        for (String k : keys) {\n            int s = fnv(k) % LS;\n            if (own10[s] != own11[s]) fxJoin++;\n            if (own10[s] != own9[s]) fxLeave++;\n        }\n        // weighted join: new node with 2x capacity takes 2x shards\n        System.out.println(\"method            | load/node@10 (min..max) | moved 10->11 | moved 10->9\");\n        System.out.printf(\"mod-N             | balanced by luck        | %5d (%4.1f%%) | %5d (%4.1f%%)%n\",\n            modJoin, 100.0 * modJoin / K, modLeave, 100.0 * modLeave / K);\n        System.out.printf(\"ring+100vnodes    | %d..%d keys            | %5d (%4.1f%%) | %5d (%4.1f%%)%n\",\n            mn, mx, ringJoin, 100.0 * ringJoin / K, ringLeave, 100.0 * ringLeave / K);\n        System.out.printf(\"rendezvous        | even (max-weight)       | %5d (%4.1f%%) | %5d (%4.1f%%)%n\",\n            rvJoin, 100.0 * rvJoin / K, rvLeave, 100.0 * rvLeave / K);\n        System.out.printf(\"fixed-64-shards   | %d shards/node approx   | %5d (%4.1f%%) | %5d (%4.1f%%)%n\",\n            LS / 10, fxJoin, 100.0 * fxJoin / K, fxLeave, 100.0 * fxLeave / K);\n        System.out.println(\"weighted join (2x node): fixed-shards moves ~2x shards, others keep 1x shares; no full rehash\");\n        System.out.println(\"OK\");\n    }\n}\n",
+    "expected_en": "mod-N moves 90.8 / 89.9%; ring+vnodes 8.8 / 8.7% (load 840..1164), rendezvous 9.2 / 9.9%, fixed-64 8.7 / 9.3% for 10->11 / 10->9; weighted join needs no full rehash; OK. (actual output of this environment)",
+    "expected_fa": "جابه‌جایی <span class=\"ltr\">mod-N</span> نود ممیز هشت / هشتادونه ممیز نه درصد؛ حلقه ۸٫۸ / ۸٫۷٪ (بار ۸۴۰ تا ۱۱۶۴)، <span class=\"ltr\">rendezvous</span> ۹٫۲ / ۹٫۹٪ و شارد ثابت ۸٫۷ / ۹٫۳٪ برای ۱۰ به ۱۱ / ۱۰ به ۹؛ عضو وزین <span class=\"ltr\">rehash</span> سراسری نمی‌خواهد؛ OK. (خروجی واقعی همین محیط)",
+    "lang": "java",
+    "run_en": "javac HashRing.java && java HashRing — stdlib Java only, instant.",
+    "run_fa": "javac HashRing.java && java HashRing — فقط استاندارد جاوا، فوری.",
+    "status": "verified"
+  },
+  "design_en": "<p>Ring with 100 virtual nodes per node; the ownership map is versioned (v41, v42, ...). Join protocol: stream the joining node's ranges, catch up on fresh writes until lag is near zero, flip the map atomically, forward in-flight requests from the old owner. A leave mirrors the join. Each range keeps two replicas that promote locally, so a single dead node never blocks its ranges.</p>",
+  "design_fa": "<p>حلقه با ۱۰۰ <span class=\"ltr\">vnode</span> per-node؛ نگاشت مالکیت نسخه‌دار است (<span class=\"ltr\">v41</span> و <span class=\"ltr\">v42</span> و ...). پروتکل عضویت: استریم بازه‌های گره تازه، جبران نوشتن‌های تازه تا lag نزدیک صفر، چرخش اتمی نگاشت و <span class=\"ltr\">forward</span> درخواست‌های در پرواز از مالک قدیم. ترک خوشه آینهٔ عضویت است. هر بازه دو <span class=\"ltr\">replica</span> دارد که محلی <span class=\"ltr\">promote</span> می‌شوند، پس یک گره مرده هرگز بازه‌هایش را قفل نمی‌کند.</p>",
+  "diagrams": [
+    {
+      "caption_en": "The ring by hand: n10 joins, one arc moves, the rest stays",
+      "caption_fa": "حلقه با دست: n10 می‌آید، یک کمان می‌رود و بقیه می‌مانند",
+      "file": "diagrams/sol2-step1-hash-ring.html",
+      "height": 640,
+      "kind_en": "ring plot",
+      "kind_fa": "نقشهٔ حلقه",
+      "made": "hand",
+      "narration": {
+        "failure_en": "Read the red arc as 'most keys move' and you rebuild mod-N thinking on top of a ring: the whole point — minimal remap — is lost in one misread.",
+        "failure_fa": "کمان قرمز را «بیشتر کلیدها می‌روند» بخوان و تفکر <span class=\"ltr\">mod-N</span> را روی حلقه سوار کرده‌ای: کل نکته — جابه‌جایی کمینه — با یک بدخوانی گم می‌شود.",
+        "guarantee_en": "The figure shows ring placement and the single remapped arc on join. It proves nothing about weights or routing — those are the next steps.",
+        "guarantee_fa": "شکل جایابی حلقه و تک‌کمان جابه‌جاشده در عضویت را نشان می‌دهد؛ دربارهٔ وزن و مسیریابی چیزی ثابت نمی‌کند — آن‌ها گام‌های بعدند.",
+        "nonguarantee_en": "It says nothing about replication of each range or about hot keys — the ring spreads keys, never load.",
+        "nonguarantee_fa": "دربارهٔ تکثیر هر بازه و کلیدهای داغ چیزی نمی‌گوید — حلقه کلید را پخش می‌کند، هرگز بار را نه.",
+        "point_en": "The decision point is the red arc: exactly the keys between n9 and n10 change owners — everything else is untouched by construction.",
+        "point_fa": "نقطهٔ تصمیم کمان قرمز است: دقیقاً کلیدهای میان <span class=\"ltr\">n9</span> و <span class=\"ltr\">n10</span> مالک عوض می‌کنند — بقیه طبق ساختار دست‌نخورده‌اند.",
+        "scenario_en": "Ten nodes hold the ring and n10 joins. Start at the green node, follow the red arc, then check that every other dot kept its color.",
+        "scenario_fa": "ده گره حلقه را نگه داشته‌اند و <span class=\"ltr\">n10</span> می‌آید. از گره سبز شروع کن، کمان قرمز را دنبال کن و بعد بررسی کن بقیهٔ نقطه‌ها رنگشان را نگه داشته‌اند.",
+        "steps": [
+          {
+            "en": "Each key hashes to a point and walks clockwise to the first virtual node: that is the whole lookup rule, in the blue panel.",
+            "fa": "هر کلید به یک نقطه هش می‌شود و ساعت‌گرد تا اولین <span class=\"ltr\">vnode</span> قدم می‌زند: کل قاعدهٔ <span class=\"ltr\">lookup</span> همین است، در پنل آبی."
+          },
+          {
+            "en": "n10 lands between n9 and n0 and takes exactly that arc: the red key-dot moves, its neighbors do not.",
+            "fa": "<span class=\"ltr\">n10</span> میان <span class=\"ltr\">n9</span> و <span class=\"ltr\">n0</span> می‌نشیند و دقیقاً همان کمان را می‌گیرد: نقطه‌کلید قرمز می‌رود و همسایه‌ها نه."
+          },
+          {
+            "en": "The green panel states the join rule: near 9% move, the rest stay — compare the red 91% of mod-N at the bottom.",
+            "fa": "پنل سبز قاعدهٔ عضویت را می‌گوید: حدود ۹٪ می‌رود و بقیه می‌مانند — با ۹۱٪ قرمز <span class=\"ltr\">mod-N</span> در پایین مقایسه کن."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Only the keys on the arc between its neighbors: about one eleventh of the keyspace, ~9% — the ring's entire promise.",
+        "a_fa": "فقط کلیدهای کمان میان همسایه‌ها: حدود یک‌یازدهم فضای کلید، ۹٪ — کل وعدهٔ حلقه.",
+        "q_en": "A new node joins: which keys move, and roughly how many?",
+        "q_fa": "گره تازه می‌آید: کدام کلیدها می‌روند و حدوداً چندتا؟"
+      }
+    },
+    {
+      "caption_en": "Node join: minimal remap on the wire, versioned routing beside it",
+      "caption_fa": "عضویت گره: جابه‌جایی کمینه روی سیم و مسیریابی نسخه‌دار کنارش",
+      "file": "diagrams/sol2-step2-join-handoff.html",
+      "height": 640,
+      "kind_en": "dataflow",
+      "kind_fa": "جریان داده",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Flip the map before the data arrives and reads land on an empty owner: movement and routing are separate events in a fixed order — data first, map second.",
+        "failure_fa": "نگاشت را پیش از رسیدن داده بچرخان و خواندن‌ها روی مالک خالی می‌نشینند: جابه‌جایی و مسیریابی دو رویداد جدایند با ترتیب ثابت — اول داده بعد نگاشت.",
+        "guarantee_en": "The figure shows the staged handoff and the routing/versioning beside it. It does not cover replica promotion inside a range.",
+        "guarantee_fa": "شکل تحویل مرحله‌ای و مسیریابی/نسخه‌بندی کنارش را نشان می‌دهد؛ <span class=\"ltr\">promotion</span> نسخه‌ها داخل بازه را پوشش نمی‌دهد.",
+        "nonguarantee_en": "It promises no bound on catch-up time under heavy writes — that needs throttling and a lag tripwire.",
+        "nonguarantee_fa": "کرانی برای زمان جبران زیر نوشتن سنگین نمی‌دهد — آن محدودسازی سرعت و سیم‌خاردار <span class=\"ltr\">lag</span> می‌خواهد.",
+        "point_en": "The decision point is the Flip ownership node: one atomic map version change, and every arrow after it reads the new world.",
+        "point_fa": "نقطهٔ تصمیم گره چرخش مالکیت است: یک تغییر اتمی نسخهٔ نگاشت و هر پیکان بعدش دنیای تازه را می‌خواند.",
+        "scenario_en": "Read the upper data line left to right for what flies over the wire, and the lower routing line for what the clients believe.",
+        "scenario_fa": "خط دادهٔ بالا را چپ‌به‌راست برای آنچه روی سیم می‌پرد بخوان و خط مسیریابی پایین را برای آنچه کلاینت‌ها باور دارند.",
+        "steps": [
+          {
+            "en": "Upper line: the stable map yields only the new ranges (~9% of keys), which stream over and catch up until lag is near zero.",
+            "fa": "خط بالا: نگاشت پایدار فقط بازه‌های تازه (حدود ۹٪ کلیدها) را می‌دهد که استریم می‌شوند و تا lag نزدیک صفر جبران می‌کنند."
+          },
+          {
+            "en": "The flip is one atomic map version step (v41 to v42); in-flight requests forward from the old owner instead of stranding.",
+            "fa": "چرخش یک گام اتمی نسخهٔ نگاشت است (<span class=\"ltr\">v41</span> به <span class=\"ltr\">v42</span>)؛ درخواست‌های در پرواز از مالک قدیم <span class=\"ltr\">forward</span> می‌شوند به‌جای سرگردانی."
+          },
+          {
+            "en": "Lower line: clients cache the map briefly, stale reads forward, weighted shares give the 2x node 2x ranges, and a leave rehomes only its own ranges.",
+            "fa": "خط پایین: کلاینت‌ها نگاشت را کوتاه کش می‌کنند، خواندن‌های کهنه <span class=\"ltr\">forward</span> می‌شوند، سهم‌های وزنی به گره ۲ برابری ۲ برابر بازه می‌دهند و ترک خوشه فقط بازه‌های خودش را جابه‌جا می‌کند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Give it 2x virtual nodes (or 2x logical shards): only its portion grows, every other key stays — no global move.",
+        "a_fa": "۲ برابر <span class=\"ltr\">vnode</span> (یا ۲ برابر شارد منطقی) به آن بده: فقط سهم خودش رشد می‌کند و بقیهٔ کلیدها می‌مانند — بدون جابه‌جایی سراسری.",
+        "q_en": "The new node has twice the capacity: how do you size its share?",
+        "q_fa": "گره تازه دو برابر ظرفیت دارد: سهمش را چطور می‌دهی؟"
+      },
+      "source": ".archify/dataflow-ch7-sol2-rebalance-20261014-184700"
+    },
+    {
+      "caption_en": "Join and leave moves measured: mod-N near 90%, ring and rendezvous near 9%",
+      "caption_fa": "جابه‌جایی عضویت و ترک اندازه‌گیری‌شده: mod-N نزدیک ۹۰٪ و حلقه نزدیک ۹٪",
+      "file": "diagrams/sol2-consistent-hashing.html",
+      "height": 640,
+      "kind_en": "measurement table",
+      "kind_fa": "جدول اندازه‌گیری",
+      "made": "hand",
+      "narration": {
+        "failure_en": "Read only the movement columns and mod-N's 'balanced by luck' cell is invisible: even placement today says nothing about tomorrow's join.",
+        "failure_fa": "فقط ستون‌های جابه‌جایی را بخوان و سلول «شانسی متعادل» <span class=\"ltr\">mod-N</span> نامرئی می‌شود: جایابی متعادل امروز دربارهٔ عضویت فردا هیچ نمی‌گوید.",
+        "guarantee_en": "The figure reports key-by-key movement counts for all four methods on join and leave. It does not bless any hash — the pink warning row explains why.",
+        "guarantee_fa": "شکل شمارش کلید‌به‌کلید جابه‌جایی هر چهار روش در عضویت و ترک را گزارش می‌کند؛ هیچ هشی را تأیید نمی‌کند — سطر هشدار صورتی چرایی‌اش را می‌گوید.",
+        "nonguarantee_en": "It measures movement, not catch-up time or availability during the move.",
+        "nonguarantee_fa": "جابه‌جایی را می‌سنجد نه زمان جبران و دسترس‌پذیری حین انتقال را.",
+        "point_en": "The pink cell is the trap and the footer is the discipline: test the hash (raw FNV stole 40%), then trust the ~9% rows.",
+        "point_fa": "سلول صورتی تله است و پانوشت انضباط: هش را تست کن (<span class=\"ltr\">FNV</span> خام ۴۰٪ دزدید) بعد به سطرهای ۹٪ اعتماد کن.",
+        "scenario_en": "Read the table row by row: each row is one mapping method, each column is load shape or movement on membership change.",
+        "scenario_fa": "جدول را سطر‌به‌سطر بخوان: هر سطر یک روش نگاشت است و هر ستون شکل بار یا جابه‌جایی در تغییر عضویت.",
+        "steps": [
+          {
+            "en": "Load column: the ring spreads 840..1164 keys per node at 10 nodes; mod-N is 'balanced by luck' — even, but accidental.",
+            "fa": "ستون بار: حلقه در ۱۰ گره ۸۴۰ تا ۱۱۶۴ کلید per-node می‌دهد؛ <span class=\"ltr\">mod-N</span> «شانسی متعادل» است — یکنواخت ولی تصادفی."
+          },
+          {
+            "en": "Join column: ring, rendezvous and fixed shards all move ~9%; mod-N moves 90.8% — the pink cell.",
+            "fa": "ستون عضویت: حلقه و <span class=\"ltr\">rendezvous</span> و شارد ثابت همه حدود ۹٪ می‌برند؛ <span class=\"ltr\">mod-N</span> نود ممیز هشت درصد — همان سلول صورتی."
+          },
+          {
+            "en": "Leave column mirrors join near 9-10% for every sane method; the footer adds weights and the hash-testing discipline.",
+            "fa": "ستون ترک آینهٔ عضویت است نزدیک ۹ تا ۱۰٪ برای هر روش سالم؛ پانوشت وزن‌ها و انضباط تست هش را اضافه می‌کند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "No: its even placement is luck, and the join column proves it — 90.8% of keys move. Evenness without stability is decoration.",
+        "a_fa": "نه: جایابی متعادلش شانسی است و ستون عضویت ثابت می‌کند — ۹۰٫۸٪ کلیدها می‌روند. یکنواختی بدون پایداری تزئین است.",
+        "q_en": "mod-N looks even at 10 nodes — is it acceptable?",
+        "q_fa": "<span class=\"ltr\">mod-N</span> در ۱۰ گره متعادل است — قابل‌قبول است؟"
+      }
+    }
+  ],
+  "failures": [
+    {
+      "en": "The joining node dies mid-copy. Guard: the map never flipped, so the old owner still serves and the partial copy is discarded data — abort is safe by construction.",
+      "fa": "گره تازه وسط کپی می‌میرد. نگهبان: نگاشت هرگز نچرخیده پس مالک قدیم هنوز سرو می‌کند و کپی ناقص دادهٔ دورریختنی است — <span class=\"ltr\">abort</span> طبق ساختار امن است."
+    },
+    {
+      "en": "A client with a stale map writes to the old owner. Guard: the old owner forwards or rejects during the window, and the write is idempotent on retry — never silently lands in the wrong place.",
+      "fa": "کلاینتی با نگاشت کهنه به مالک قدیم می‌نویسد. نگهبان: مالک قدیم در پنجره <span class=\"ltr\">forward</span> یا رد می‌کند و نوشتن در تلاش مجدد <span class=\"ltr\">idempotent</span> است — هرگز بی‌صدا جای اشتباه نمی‌نشیند."
+    },
+    {
+      "en": "All replicas of one range go down together. No mapping trick helps: the range is unavailable until a copy returns — say so instead of inventing a third copy on the spot.",
+      "fa": "همهٔ نسخه‌های یک بازه با هم می‌افتند. هیچ ترفند نگاشتی کمک نمی‌کند: بازه تا برگشتن یک کپی نادسترس است — همین را بگو به‌جای اختراع لحظه‌ای کپی سوم."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "Size by shares, not by rehash: on the ring give it 2x virtual nodes, in fixed shards 2x logical shards, in rendezvous 2x weight entries. Only the new node's portion grows — every existing key stays. Verify with the load column: its key count should land near 2x the mean.",
+      "a_fa": "با سهم اندازه بزن نه <span class=\"ltr\">rehash</span>: روی حلقه ۲ برابر <span class=\"ltr\">vnode</span>، در شارد ثابت ۲ برابر شارد منطقی و در <span class=\"ltr\">rendezvous</span> ۲ برابر ورودی وزنی به آن بده. فقط سهم گره تازه رشد می‌کند — بقیهٔ کلیدها می‌مانند. با ستون بار راستی‌آزمایی کن: شمار کلیدهایش باید نزدیک ۲ برابر میانگین بنشیند.",
+      "level": "senior",
+      "q_en": "A new node has twice the capacity. How do you rebalance without moving every key?",
+      "q_fa": "node جدید دو برابر ظرفیت دارد؛ balancing را بدون جابه‌جایی همهٔ کلیدها چطور انجام می‌دهی؟"
+    },
+    {
+      "a_en": "You don't — the ring spreads keys, never load. Isolate the hot key on its own shard (or a dedicated machine), or split its writes with a suffix and merge on read. Name the price each time: isolation needs hot-key detection, suffixes tax every read.",
+      "a_fa": "نمی‌کنی — حلقه کلید را پخش می‌کند، هرگز بار را نه. کلید داغ را روی شارد خودش تنها بگذار (یا ماشین اختصاصی) یا نوشتن‌هایش را با پسوند بشکن و در خواندن جمع کن. هر بار قیمت را نام ببر: جداسازی آشکارساز کلید داغ می‌خواهد و پسوندها از هر خواندن مالیات می‌گیرند.",
+      "level": "senior",
+      "q_en": "One celebrity key takes 30% of traffic. Does the ring save you?",
+      "q_fa": "یک کلید سلبریتی ۳۰٪ ترافیک را می‌گیرد. حلقه نجاتت می‌دهد؟"
+    },
+    {
+      "a_en": "It can't happen through the versioned map: ownership flips in one atomic version step, so two owners for one range means someone bypassed the map. Fence it: writes carry the map version, and a stale-version write is rejected for retry — the map is the single ownership authority.",
+      "a_fa": "از مسیر نگاشت نسخه‌دار نمی‌تواند پیش بیاید: مالکیت در یک گام اتمی نسخه می‌چرخد، پس دو مالک برای یک بازه یعنی کسی نگاشت را دور زده. فنس بگذار: نوشتن‌ها نسخهٔ نگاشت را حمل می‌کنند و نوشتن با نسخهٔ کهنه برای تلاش مجدد رد می‌شود — نگاشت تنها مرجع مالکیت است.",
+      "level": "staff",
+      "q_en": "Two nodes both claim one range. How does your design rule that out?",
+      "q_fa": "دو گره هم‌زمان مدعی یک بازه‌اند. طرحت چطور این را ناممکن می‌کند؟"
+    }
+  ],
+  "interview_q_en": "Compare modulo, rendezvous and fixed logical shards with an explicit ownership map for node joins and leaves. Compute the moved percentage for a stated mapping and decide on skew, node weights, failure, replication and staged handoff.",
+  "interview_q_fa": "برای اضافه/حذف <span class=\"ltr\">node</span>، <span class=\"ltr\">modulo</span> و <span class=\"ltr\">rendezvous</span> و شاردهای منطقی ثابت با جدول مالکیت صریح را مقایسه کن. درصد جابه‌جایی را برای نگاشت مشخص محاسبه کن و دربارهٔ کجی، وزن گره، خرابی، تکثیر و تحویل مرحله‌ای تصمیم بگیر.",
+  "mental_en": "Three separate jobs: mapping (which key sits where), movement (what flies over the wire on change), routing (who believes the current truth). Mod-N confuses all three; the ring plus a versioned map keeps each job honest.",
+  "mental_fa": "سه کار جدا: نگاشت (کدام کلید کجا می‌نشیند)، جابه‌جایی (در تغییر چه چیزی روی سیم می‌پرد) و مسیریابی (چه کسی حقیقت جاری را باور دارد). <span class=\"ltr\">mod-N</span> هر سه را قاطی می‌کند؛ حلقه به‌علاوهٔ نگاشت نسخه‌دار هر کار را صادق نگه می‌دارد.",
+  "mistakes": [
+    {
+      "en": "'Consistent' means replica consistency or ACID. Here it means a key's tendency to stay in its shard — the name is about stability, not correctness.",
+      "fa": "«سازگار» یعنی <span class=\"ltr\">consistency</span> نسخه‌ها یا <span class=\"ltr\">ACID</span>. اینجا یعنی میل کلید به ماندن در شارد خودش — نام دربارهٔ پایداری است نه درستی."
+    },
+    {
+      "en": "Java's hashCode (or any language hash) is fine for sharding. It may change between processes and versions — sharding needs a frozen, tested function, and the raw-FNV episode proves even a decent hash needs its avalanche checked.",
+      "fa": "<span class=\"ltr\">hashCode</span> جاوا (یا هر هش زبانی) برای sharding خوب است. ممکن است بین پروسه‌ها و نسخه‌ها عوض شود — sharding تابع منجمد و تست‌شده می‌خواهد و ماجرای <span class=\"ltr\">FNV</span> خام ثابت می‌کند حتی هش خوب هم بررسی <span class=\"ltr\">avalanche</span> می‌خواهد."
+    },
+    {
+      "en": "Virtual nodes fix hot keys. They smooth key counts only; one hot key still lands whole on one node — load needs isolation or splitting, not more vnodes.",
+      "fa": "<span class=\"ltr\">vnode</span>ها کلید داغ را درست می‌کنند. فقط شمار کلید را هموار می‌کنند؛ یک کلید داغ whole روی یک گره می‌نشیند — بار جداسازی یا شکستن می‌خواهد نه <span class=\"ltr\">vnode</span> بیشتر."
+    },
+    {
+      "en": "Movement percentage is the only metric. Skew, weight behavior and the routing story decide as much — report all three or the comparison lies.",
+      "fa": "درصد جابه‌جایی تنها معیار است. کجی و رفتار وزن و داستان مسیریابی به همان اندازه تصمیم می‌گیرند — هر سه را گزارش کن وگرنه مقایسه دروغ می‌گوید."
+    }
+  ],
+  "number": 2,
+  "slug": "consistent-hashing",
+  "sources": [
+    "microsoft",
+    "atlassian"
+  ],
+  "steps": [
+    {
+      "en": "Hash each key to a ring point and walk clockwise to the first virtual node — 100 per physical node smooths key counts to 840..1164 at 10 nodes. A join takes exactly the arc between its neighbors.",
+      "fa": "هر کلید را به نقطه‌ای روی حلقه هش کن و ساعت‌گرد تا اولین <span class=\"ltr\">vnode</span> قدم بزن — ۱۰۰ عدد per-node شمار کلید را در ۱۰ گره به ۸۴۰ تا ۱۱۶۴ هموار می‌کند. عضو تازه دقیقاً کمان میان همسایه‌ها را می‌گیرد.",
+      "t_en": "Draw the ring by hand",
+      "t_fa": "حلقه را با دست بکش"
+    },
+    {
+      "en": "Count key by key: mod-N moves 90.8% on 10 to 11 while ring, rendezvous and fixed shards all move ~9%; leaves mirror joins. The pink cell is the whole argument against node-count-inside-mapping.",
+      "fa": "کلید‌به‌کلید بشمار: <span class=\"ltr\">mod-N</span> در ۱۰ به ۱۱ نود ممیز هشت درصد می‌برد درحالی‌که حلقه و <span class=\"ltr\">rendezvous</span> و شارد ثابت حدود ۹٪؛ ترک‌ها آینهٔ عضویت‌اند. سلول صورتی کل استدلال علیه «تعداد گره داخل نگاشت» است.",
+      "t_en": "Count the moves",
+      "t_fa": "جابه‌جایی را بشمار"
+    },
+    {
+      "en": "A 2x node takes 2x virtual nodes (or 2x logical shards): only its portion grows, every existing key stays put. Raw FNV stole 40% for node n10 until an fmix finalizer fixed the avalanche — test the hash, then trust the shares.",
+      "fa": "گره ۲ برابری ۲ برابر <span class=\"ltr\">vnode</span> (یا ۲ برابر شارد منطقی) می‌گیرد: فقط سهم خودش رشد می‌کند و بقیهٔ کلیدها می‌مانند. <span class=\"ltr\">FNV</span> خام ۴۰٪ را برای گره <span class=\"ltr\">n10</span> دزدید تا نهایی‌ساز <span class=\"ltr\">fmix</span> <span class=\"ltr\">avalanche</span> را درست کرد — اول هش را تست کن بعد به سهم‌ها اعتماد کن.",
+      "t_en": "Weigh without rehash",
+      "t_fa": "بدون rehash وزن بده"
+    },
+    {
+      "en": "Movement and routing are separate events: data streams first, the versioned map flips second, stale clients forward through the old owner. A leave rehomes only its own ranges while replicas promote locally.",
+      "fa": "جابه‌جایی و مسیریابی دو رویداد جدایند: اول داده استریم می‌شود بعد نگاشت نسخه‌دار می‌چرخد و کلاینت‌های کهنه از مالک قدیم <span class=\"ltr\">forward</span> می‌شوند. ترک خوشه فقط بازه‌های خودش را جابه‌جا می‌کند و نسخه‌ها محلی <span class=\"ltr\">promote</span> می‌شوند.",
+      "t_en": "Split routing from movement",
+      "t_fa": "مسیریابی را از جابه‌جایی جدا کن"
+    }
+  ],
+  "tests_en": "<p>Bound moved keys on join and leave (~1/N each); bound per-node load (min..max within ~1.5x mean); assert identical mapping across restarts (stable hash); assert a 2x node's share lands near 2x mean.</p>",
+  "tests_fa": "<p>کران جابه‌جایی در عضویت و ترک (هرکدام حدود <span class=\"ltr\">1/N</span>)؛ کران بار per-node (کمینه تا بیشینه در ۱٫۵ برابر میانگین)؛ بررسی یکسانی نگاشت در restartها (هش پایدار)؛ بررسی نشستن سهم گره ۲ برابری نزدیک ۲ برابر میانگین.</p>",
+  "worked_en": "<p>Actual demo output (<code>HashRing</code>): mod-N 90.8 / 89.9%, ring+vnodes 8.8 / 8.7% at load 840..1164, rendezvous 9.2 / 9.9%, fixed-64 8.7 / 9.3% for 10-&gt;11 / 10-&gt;9. Bonus finding: raw FNV let n10 win 40% of keys — the fmix finalizer restored ~1/11 each.</p>",
+  "worked_fa": "<p>خروجی واقعی دمو (<code>HashRing</code>): <span class=\"ltr\">mod-N</span> نود ممیز هشت / هشتادونه ممیز نه درصد، حلقه ۸٫۸ / ۸٫۷٪ با بار ۸۴۰ تا ۱۱۶۴، <span class=\"ltr\">rendezvous</span> ۹٫۲ / ۹٫۹٪ و شارد ثابت ۸٫۷ / ۹٫۳٪ برای ۱۰ به ۱۱ / ۱۰ به ۹. یافتهٔ اضافه: <span class=\"ltr\">FNV</span> خام ۴۰٪ کلیدها را به <span class=\"ltr\">n10</span> داد — نهایی‌ساز <span class=\"ltr\">fmix</span> سهم‌ها را به حدود یک‌یازدهم برگرداند.</p>",
+  "reasoning_fa": "<p>با توزیع ایدئال، اضافه‌شدن node یازدهم تقریباً ۱/۱۱ کلیدها را به عضو تازه می‌دهد؛ این امیدِ توزیع یکنواخت است، نه تضمین ring محدود. صد vnode پراکندگی سهم‌ها را کاهش می‌دهد ولی metadata را زیاد می‌کند؛ عدد بهینه با skew و وزن nodeها سنجیده می‌شود. ۶۴ shard منطقی هویت داده را از مالک فعلی جدا می‌کند؛ جابه‌جایی ownership هنوز انتقال داده، replica و fencing لازم دارد.</p>",
+  "reasoning_en": "<p>Under ideal uniform distribution, an eleventh node takes roughly 1/11 of keys; this is an expectation, not a finite-ring guarantee. One hundred vnodes reduce share variability at metadata cost; choose the count from skew and node weights. Sixty-four logical shards separate data identity from ownership, but moving ownership still needs data transfer, replication and fencing.</p>"
+}

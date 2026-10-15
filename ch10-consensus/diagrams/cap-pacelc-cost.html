@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CAP, PACELC and the latency floor</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#f7f2e8;font-family:'Nunito','Vazirmatn',system-ui,sans-serif}
+  .stage{max-width:1240px;margin:0 auto;padding:16px}
+  svg{display:block;width:100%;height:auto}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="CAP versus PACELC versus the Attiya-Welch latency bound">
+<title>CAP, PACELC and the latency floor</title>
+<rect x="0" y="0" width="1240" height="660" rx="24" fill="#f7f2e8"/>
+<text x="620" y="54" text-anchor="middle" font-size="22" font-weight="800">The price of linearizability</text>
+
+<rect x="40" y="110" width="350" height="300" rx="20" fill="#bfe6c9"/>
+<text x="215" y="170" text-anchor="middle" font-size="17" font-weight="800">Healthy network</text>
+<text x="215" y="212" text-anchor="middle" font-size="15">consistency AND</text>
+<text x="215" y="244" text-anchor="middle" font-size="15">availability</text>
+<text x="215" y="300" text-anchor="middle" font-size="15">both are possible</text>
+<text x="215" y="344" text-anchor="middle" font-size="15">no choice needed</text>
+
+<rect x="445" y="110" width="350" height="300" rx="20" fill="#ffc2da"/>
+<text x="620" y="170" text-anchor="middle" font-size="17" font-weight="800">Partition = fault!</text>
+<text x="620" y="212" text-anchor="middle" font-size="15">CP: stay consistent</text>
+<text x="620" y="244" text-anchor="middle" font-size="15">or AP: stay available</text>
+<text x="620" y="300" text-anchor="middle" font-size="15">a fault, not a choice</text>
+<text x="620" y="344" text-anchor="middle" font-size="15">pick C or A</text>
+
+<rect x="850" y="110" width="350" height="300" rx="20" fill="#ffe08a"/>
+<text x="1025" y="170" text-anchor="middle" font-size="17" font-weight="800">No partition: PACELC</text>
+<text x="1025" y="212" text-anchor="middle" font-size="15">else pick Latency</text>
+<text x="1025" y="244" text-anchor="middle" font-size="15">or Consistency</text>
+<text x="1025" y="300" text-anchor="middle" font-size="15">fast or fresh:</text>
+<text x="1025" y="344" text-anchor="middle" font-size="15">never both</text>
+
+<rect x="40" y="450" width="1160" height="160" rx="20" fill="#c3ceff"/>
+<text x="620" y="508" text-anchor="middle" font-size="17" font-weight="800">Attiya-Welch bound</text>
+<text x="620" y="546" text-anchor="middle" font-size="15">linearizable latency is at least network delay uncertainty</text>
+<text x="620" y="578" text-anchor="middle" font-size="15">no faster linearizable algorithm exists</text>
+</svg>
+</div>
+</body>
+</html>

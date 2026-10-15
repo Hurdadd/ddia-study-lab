@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Batch Processing Models and Their Building Blocks — UML Taxonomy</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .cls-t{font:700 14px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .edge-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .edge-lbl-c{font:700 12px ui-monospace,Menlo,monospace; fill:#c084fc}
+  .chip{font:700 11.5px ui-monospace,Menlo,monospace; fill:#fbbf24}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .lg{font:700 11.5px ui-monospace,Menlo,monospace}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="UML class taxonomy of batch processing models, storage systems, and orchestration schedulers">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+    <marker id="arrp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c084fc"/>
+    </marker>
+    <marker id="gen" viewBox="0 0 12 10" refX="11" refY="5" markerWidth="11" markerHeight="9" orient="auto">
+      <path d="M1,1 L11,5 L1,9 z" fill="#0b111c" stroke="#93c5fd" stroke-width="1.2"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="32" text-anchor="middle">Batch Processing Models and Their Building Blocks</text>
+  <text class="sub" x="620" y="54" text-anchor="middle">Chapter 11 conceptual map — processing models · storage · orchestration, plus the shuffle between stages</text>
+
+  <!-- ======================= cluster chips ======================= -->
+  <rect class="chip-r" x="40" y="82" width="180" height="24" rx="12" fill="#1b2438" stroke="#2a3652" stroke-width="1.3"/>
+  <text class="chip" x="130" y="98" text-anchor="middle">1 · processing models</text>
+  <rect class="chip-r" x="890" y="166" width="130" height="24" rx="12" fill="#1b2438" stroke="#2a3652" stroke-width="1.3"/>
+  <text class="chip" x="955" y="182" text-anchor="middle">2 · storage</text>
+  <rect class="chip-r" x="890" y="492" width="170" height="24" rx="12" fill="#1b2438" stroke="#2a3652" stroke-width="1.3"/>
+  <text class="chip" x="975" y="508" text-anchor="middle">3 · orchestration</text>
+
+  <!-- ======================= CLUSTER A : processing models ======================= -->
+  <g>
+    <rect class="cls-head" x="270" y="76" width="360" height="28" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="450" y="95" text-anchor="middle">ProcessingModel</text>
+    <rect class="cls-body" x="270" y="104" width="360" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="284" y="126">«abstract · bounded input → derived output»</text>
+    <text class="attr" x="284" y="147">input : immutable dataset, read once</text>
+    <text class="attr" x="284" y="168">output : derived dataset · terminates</text>
+  </g>
+
+  <g>
+    <rect class="cls-head" x="40" y="235" width="250" height="28" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="165" y="254" text-anchor="middle">UnixToolPipeline</text>
+    <rect class="cls-body" x="40" y="263" width="250" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="54" y="285">«sort-based · single machine»</text>
+    <text class="attr" x="54" y="306">tools piped over stdin/stdout</text>
+    <text class="attr" x="54" y="327">sort merges records by key</text>
+  </g>
+
+  <g>
+    <rect class="cls-head" x="330" y="235" width="380" height="28" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="520" y="254" text-anchor="middle">DataflowEngine</text>
+    <rect class="cls-body" x="330" y="263" width="380" height="97" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="344" y="285">«whole workflow = one job · operators fused»</text>
+    <text class="attr" x="344" y="306">pipelined · intermediate data stays in memory</text>
+    <text class="attr" x="344" y="327">SQL/DataFrame APIs compile to this layer</text>
+    <text class="attr" x="344" y="348">examples: Spark / Flink style engines</text>
+  </g>
+
+  <g>
+    <rect class="cls-head" x="40" y="400" width="250" height="28" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="165" y="419" text-anchor="middle">MapReduce</text>
+    <rect class="cls-body" x="40" y="428" width="250" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="54" y="450">«map, implicit sort, reduce»</text>
+    <text class="attr" x="54" y="471">file-based I/O between stages</text>
+    <text class="attr" x="54" y="492">per-task retry on failure</text>
+  </g>
+
+  <g>
+    <rect class="cls-head" x="330" y="400" width="250" height="28" rx="8" fill="#7c3aed" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="455" y="419" text-anchor="middle">SqlQueryEngine</text>
+    <rect class="cls-body" x="330" y="428" width="250" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="344" y="450">«SQL → physical plan»</text>
+    <text class="attr" x="344" y="471">cost-based optimizer</text>
+    <text class="attr" x="344" y="492">join order is rearranged</text>
+  </g>
+
+  <g>
+    <rect class="cls-head" x="610" y="400" width="240" height="28" rx="8" fill="#c084fc" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="730" y="419" text-anchor="middle">DataFrameApi</text>
+    <rect class="cls-body" x="610" y="428" width="240" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="624" y="450">«relational ops as methods»</text>
+    <text class="attr" x="624" y="471">Pandas-style API running on</text>
+    <text class="attr" x="624" y="492">a distributed engine</text>
+  </g>
+
+  <!-- ======================= shared helper : Shuffle ======================= -->
+  <g>
+    <rect class="cls-head" x="40" y="545" width="250" height="28" rx="8" fill="#fbbf24" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="165" y="564" text-anchor="middle">Shuffle</text>
+    <rect class="cls-body" x="40" y="573" width="250" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="54" y="595">«shared helper · repartition»</text>
+    <text class="attr" x="54" y="616">hash(key) → one sorted file</text>
+    <text class="attr" x="54" y="637">per reducer · merge-sorted</text>
+  </g>
+
+  <!-- ======================= CLUSTER B : storage ======================= -->
+  <g>
+    <rect class="cls-head" x="890" y="76" width="320" height="28" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="1050" y="95" text-anchor="middle">Storage</text>
+    <rect class="cls-body" x="890" y="104" width="320" height="55" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="904" y="126">«pluggable read/write protocol»</text>
+    <text class="attr" x="904" y="147">S3 API is the de-facto standard</text>
+  </g>
+
+  <g>
+    <rect class="cls-head" x="890" y="196" width="320" height="28" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="1050" y="215" text-anchor="middle">DistributedFS</text>
+    <rect class="cls-body" x="890" y="224" width="320" height="97" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="904" y="246">«HDFS-style distributed FS»</text>
+    <text class="attr" x="904" y="267">large blocks (128 MB) on data nodes</text>
+    <text class="attr" x="904" y="288">metadata service · replication</text>
+    <text class="attr" x="904" y="309">or erasure coding · locality hints</text>
+  </g>
+
+  <g>
+    <rect class="cls-head" x="890" y="356" width="320" height="28" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="1050" y="375" text-anchor="middle">ObjectStore</text>
+    <rect class="cls-body" x="890" y="384" width="320" height="97" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="904" y="406">«S3-style bucket + key»</text>
+    <text class="attr" x="904" y="427">immutable objects · no locks</text>
+    <text class="attr" x="904" y="448">no atomic rename of objects</text>
+    <text class="attr" x="904" y="469">storage and compute separated</text>
+  </g>
+
+  <!-- ======================= CLUSTER C : orchestration ======================= -->
+  <g>
+    <rect class="cls-head" x="330" y="545" width="250" height="28" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="455" y="564" text-anchor="middle">JobScheduler</text>
+    <rect class="cls-body" x="330" y="573" width="250" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="344" y="595">«one job»</text>
+    <text class="attr" x="344" y="616">task executors + resource mgr</text>
+    <text class="attr" x="344" y="637">FIFO / DRF / priority / quotas</text>
+  </g>
+
+  <g>
+    <rect class="cls-head" x="610" y="545" width="240" height="28" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="730" y="564" text-anchor="middle">WorkflowScheduler</text>
+    <rect class="cls-body" x="610" y="573" width="240" height="76" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="624" y="595">«DAG of jobs»</text>
+    <text class="attr" x="624" y="616">waits for upstream outputs</text>
+    <text class="attr" x="624" y="637">Airflow-style orchestration</text>
+  </g>
+
+  <g>
+    <rect class="cls-head" x="890" y="545" width="320" height="28" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="1050" y="564" text-anchor="middle">Orchestrator</text>
+    <rect class="cls-body" x="890" y="573" width="320" height="55" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="904" y="595">«abstract · runs batch jobs»</text>
+    <text class="attr" x="904" y="616">decides where and when jobs run</text>
+  </g>
+
+  <!-- ======================= generalizations ======================= -->
+  <line x1="165" y1="233" x2="338" y2="180" stroke="#93c5fd" stroke-width="1.6" marker-end="url(#gen)"/>
+  <line x1="520" y1="233" x2="520" y2="180" stroke="#93c5fd" stroke-width="1.6" marker-end="url(#gen)"/>
+  <line x1="290" y1="470" x2="345" y2="360" stroke="#93c5fd" stroke-width="1.6" marker-end="url(#gen)"/>
+  <line x1="1050" y1="196" x2="1050" y2="159" stroke="#93c5fd" stroke-width="1.6" marker-end="url(#gen)"/>
+  <polyline points="1210,400 1228,400 1228,110 1211,110" fill="none" stroke="#93c5fd" stroke-width="1.6" marker-end="url(#gen)"/>
+  <polyline points="455,545 455,522 1050,522 1050,545" fill="none" stroke="#93c5fd" stroke-width="1.6" marker-end="url(#gen)"/>
+  <line x1="852" y1="570" x2="889" y2="570" stroke="#93c5fd" stroke-width="1.6" marker-end="url(#gen)"/>
+
+  <!-- ======================= «compile to» relations ======================= -->
+  <line x1="455" y1="400" x2="455" y2="360" stroke="#c084fc" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrp)"/>
+  <text class="edge-lbl-c" x="467" y="385">«compile to»</text>
+  <line x1="730" y1="400" x2="730" y2="360" stroke="#c084fc" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrp)"/>
+  <text class="edge-lbl-c" x="742" y="385">«compile to»</text>
+
+  <!-- ======================= associations ======================= -->
+  <line x1="630" y1="130" x2="889" y2="130" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="642" y="106">reads input / writes output</text>
+  <text class="edge-lbl" x="642" y="122">through pluggable S3 API</text>
+
+  <polyline points="630,165 875,165 875,590 889,590" fill="none" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="700" y="158">runs under</text>
+
+  <line x1="608" y1="620" x2="581" y2="620" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="595" y="537" text-anchor="middle">submits jobs to</text>
+
+  <line x1="165" y1="504" x2="165" y2="545" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="153" y="528" text-anchor="end">always uses</text>
+
+  <polyline points="595,360 595,518 262,518 262,545" fill="none" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="360" y="536" text-anchor="middle">uses only where needed</text>
+
+  <!-- ======================= legend ======================= -->
+  <g>
+    <rect class="cls-head" x="700" y="205" width="160" height="28" rx="8" fill="#fbbf24" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="780" y="224" text-anchor="middle">Legend</text>
+    <rect class="cls-body" x="700" y="233" width="160" height="104" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <line x1="714" y1="252" x2="744" y2="252" stroke="#93c5fd" stroke-width="1.6" marker-end="url(#gen)"/>
+    <text class="lg" x="752" y="256" fill="#93c5fd">inheritance</text>
+    <line x1="714" y1="286" x2="744" y2="286" stroke="#86efac" stroke-width="1.6" marker-end="url(#arr)"/>
+    <text class="lg" x="752" y="290" fill="#86efac">association</text>
+    <line x1="714" y1="320" x2="744" y2="320" stroke="#c084fc" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#arrp)"/>
+    <text class="lg" x="752" y="324" fill="#c084fc">«compile to»</text>
+  </g>
+</svg>
+</div>
+</body>
+</html>

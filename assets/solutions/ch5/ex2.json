@@ -1,0 +1,207 @@
+{
+  "answer_en": "Adding an optional field is safe on both sides: a fresh Protobuf tag (old code skips and preserves, new code defaults old data) and an Avro field with a reader default (extras ignored, missing filled). Renaming is free in Protobuf (names are not on the wire) but backward-only in Avro (the new reader's <span class=\"ltr\">alias</span> reads old data; old readers never learn the new name). Changing one value into many in place is unsafe — it depends on field type, packed-ness and direction — so migrate via a NEW field with a dual-compat period, a registry compatibility test, and a rollback plan. Removal only after the last old consumer is gone.",
+  "answer_fa": "افزودن فیلد اختیاری در هر دو سمت امن است: تگ تازه <span class=\"ltr\">Protobuf</span> (کد قدیمی رد می‌کند و نگه می‌دارد، کد جدید به داده قدیمی مقدار پیش‌فرض می‌دهد) و فیلد <span class=\"ltr\">Avro</span> با <span class=\"ltr\">default</span> خواننده (اضافه نادیده گرفته می‌شود، غایب پر می‌شود). تغییر نام در <span class=\"ltr\">Protobuf</span> آزاد است (نام روی سیم نیست) ولی در <span class=\"ltr\">Avro</span> فقط <span class=\"ltr\">backward</span> است (<span class=\"ltr\">alias</span> خواننده جدید داده قدیمی را می‌خواند؛ خواننده‌های قدیمی نام تازه را هیچ‌وقت نمی‌آموزند). تبدیل یک مقدار به چند مقدار درجا ناامن است — به نوع فیلد، <span class=\"ltr\">packed</span> بودن و جهت وابسته است — پس با فیلد <b>تازه</b>، دوره سازگاری دوگانه، تست سازگاری <span class=\"ltr\">registry</span> و نقشه <span class=\"ltr\">rollback</span> مهاجرت کن. حذف فقط وقتی آخرین مصرف‌کننده قدیمی رفت.",
+  "assumptions": [
+    {
+      "en": "Teaching user-profile record with a name, an age and one phone/email contact; every direction below names its writer and reader explicitly.",
+      "fa": "رکورد آموزشی پروفایل کاربر با نام، سن و یک راه تماس (تلفن/<span class=\"ltr\">email</span>)؛ هر جهت پایین نویسنده و خواننده‌اش را صریح می‌گوید."
+    },
+    {
+      "en": "Binary paths unless noted; JSON rendering of Protobuf (repeated as arrays) follows different, lossier rules and is called out where it bites.",
+      "fa": "مگر خلافش گفته شود مسیرها باینری‌اند؛ رندر <span class=\"ltr\">JSON</span>ای <span class=\"ltr\">Protobuf</span> (تکراری‌ها به‌صورت آرایه) قواعد متفاوت و پراتلاف‌تری دارد و هرجا که گاز می‌گیرد گفته می‌شود."
+    },
+    {
+      "en": "Registry compatibility checks and rollout windows below are teaching policy numbers, not measured traces.",
+      "fa": "بررسی‌های سازگاری <span class=\"ltr\">registry</span> و پنجره‌های انتشار پایین اعداد سیاستی آموزشی‌اند، نه ردپای اندازه‌گیری‌شده."
+    }
+  ],
+  "interview_q_en": "Compare Avro and Protobuf field addition, rename and cardinality changes. Specify writer/reader direction, aliases, defaults and tags. Migrate cardinality with a new field and compatibility tests; distinguish parseability from lossless semantics.",
+  "interview_q_fa": "برای Avro و Protobuf افزودن فیلد، rename و تغییر cardinality را بررسی کن. جهت writer→reader، default، alias، tag و binary/JSON را دقیق مشخص کن. scalar-to-array را با فیلد جدید و دورهٔ dual compatibility منتشر کن؛ compatibility test و rollback داشته باش.",
+  "mental_en": "Always ask 'who wrote this, who reads it?' before 'is it compatible?'. Backward means the NEW reader understands the OLD writer; forward means the OLD reader survives the NEW writer. And parsing without an error is not the same as keeping the meaning: a repeated string reader can 'read' old packed bytes into garbage just as happily as into values.",
+  "mental_fa": "قبل از «سازگار است؟» همیشه بپرس «کی نوشت، کی می‌خواند؟». ‏<span class=\"ltr\">backward</span> یعنی خواننده <b>جدید</b> نویسنده <b>قدیمی</b> را می‌فهمد؛ ‏<span class=\"ltr\">forward</span> یعنی خواننده <b>قدیمی</b> از نویسنده <b>جدید</b> جان سالم به در می‌برد. و <span class=\"ltr\">parse</span> شدن بدون خطا با حفظ معنا یکی نیست: خواننده رشته تکراری می‌تواند بایت‌های <span class=\"ltr\">packed</span> قدیمی را هم به‌اندازه مقدارها، خوشحال به آشغال تبدیل کند.",
+  "number": 2,
+  "slug": "compat-matrix",
+  "sources": [
+    "protobuf",
+    "avro"
+  ],
+  "steps": [
+    {
+      "en": "Add optional, both formats: Protobuf assigns a <b>fresh tag</b> — old readers skip and preserve its bytes (forward), new readers default it on old data (backward). Avro adds a field <b>with a reader default</b> — new readers fill old records, old readers ignore the extra. Remove retired tags to a <code>reserved</code> list and never reuse them.",
+      "fa": "افزودن اختیاری در هر دو قالب: ‏<span class=\"ltr\">Protobuf</span> <b>تگ تازه</b> می‌دهد — خواننده‌های قدیمی بایت‌هایش را رد می‌کنند و نگه می‌دارند (<span class=\"ltr\">forward</span>)، خواننده‌های جدید روی داده قدیمی پیش‌فرض می‌گذارند (<span class=\"ltr\">backward</span>). ‏<span class=\"ltr\">Avro</span> فیلدی <b>با <span class=\"ltr\">default</span> خواننده</b> اضافه می‌کند — خواننده‌های جدید رکوردهای قدیمی را پر می‌کنند، قدیمی‌ها اضافه را نادیده می‌گیرند. تگ‌های بازنشسته را در فهرست <code>reserved</code> بگذار و هرگز دوباره استفاده نکن.",
+      "t_en": "Add: safe on both sides",
+      "t_fa": "افزودن: امن در هر دو سمت"
+    },
+    {
+      "en": "Rename, asymmetric: Protobuf renames cost nothing because names never reach the wire — same tag, both directions fine. Avro matches <b>by name</b>, so the new reader needs an <code>alias</code> of the old name: new-reads-old works (backward), but old readers facing new-written data never pair the fresh name (forward fails). Never assume the alias works both ways.",
+      "fa": "تغییرنام، نامتقارن: تغییرنام در <span class=\"ltr\">Protobuf</span> هیچ هزینه‌ای ندارد چون نام‌ها هرگز به سیم نمی‌رسند — همان تگ، هر دو جهت سالم. ‏<span class=\"ltr\">Avro</span> <b>با نام</b> جفت می‌کند، پس خواننده جدید به <code>alias</code> نام قدیمی نیاز دارد: جدید-قدیمی‌خوان کار می‌کند (<span class=\"ltr\">backward</span>)، ولی خواننده‌های قدیمی روبه‌روی داده تازه‌نوشته نام تازه را جفت نمی‌کنند (<span class=\"ltr\">forward</span> می‌شکند). هرگز فرض نکن <span class=\"ltr\">alias</span> هر دو جهت کار می‌کند.",
+      "t_en": "Rename: free vs backward-only",
+      "t_fa": "تغییرنام: آزاد در برابر فقط-backward"
+    },
+    {
+      "en": "Cardinality in place, unsafe: Protobuf singular-to-<code>repeated</code> depends on the field type, whether the wire form is packed, and which direction crosses versions — numeric unpacked upgrades can limp along while strings and packed forms lose or garble; Avro has no resolution rule that turns one value into many. Parsing without error here proves nothing about the values.",
+      "fa": "تغییر تعداد درجا، ناامن: تبدیل تکی به <code>repeated</code> در <span class=\"ltr\">Protobuf</span> به نوع فیلد، <span class=\"ltr\">packed</span> بودن فرم سیمی و جهتی که از مرز نسخه‌ها می‌گذرد وابسته است — ارتقای عددی <span class=\"ltr\">unpack</span>شده ممکن است لنگ‌لنگان کار کند ولی رشته‌ها و فرم‌های <span class=\"ltr\">packed</span> گم می‌کنند یا به‌هم می‌ریزند؛ <span class=\"ltr\">Avro</span> هیچ قاعده <span class=\"ltr\">resolution</span>ای ندارد که یک مقدار را به چند مقدار تبدیل کند. <span class=\"ltr\">parse</span> شدن بی‌خطا این‌جا هیچ‌چیز را درباره مقدارها ثابت نمی‌کند.",
+      "t_en": "Cardinality: never retype",
+      "t_fa": "تعداد: هرگز بازنوع نکن"
+    },
+    {
+      "en": "Migrate with a NEW field: add <code>emails</code> alongside <code>email</code>, dual-write both during the compat window, move readers to the new field one cohort at a time, then deprecate and — only after the last old consumer is gone — remove the old field. Readers-first, writers-second, drop-last.",
+      "fa": "با فیلد <b>تازه</b> مهاجرت کن: <code>emails</code> را کنار <code>email</code> اضافه کن، در پنجره سازگاری هر دو را بنویس، خواننده‌ها را گروه‌به‌گروه به فیلد تازه ببر، بعد قدیمی را <span class=\"ltr\">deprecated</span> کن و — فقط وقتی آخرین مصرف‌کننده قدیمی رفت — حذفش کن. اول خواننده‌ها، بعد نویسنده‌ها، حذف آخر.",
+      "t_en": "The safe migration",
+      "t_fa": "مهاجرت امن"
+    },
+    {
+      "en": "Gate every step with a registry compatibility check before deploy and a rollback that restores the previous schema version plus the previous binary; monitor per-version read errors and unknown-field-drop counters during the window.",
+      "fa": "هر گام را پیش از <span class=\"ltr\">deploy</span> با بررسی سازگاری <span class=\"ltr\">registry</span> دروازه‌بانی کن و <span class=\"ltr\">rollback</span>ای داشته باش که نسخه قبلی <span class=\"ltr\">schema</span> به‌علاوه باینری قبلی را برمی‌گرداند؛ در طول پنجره خطاهای خواندن هر نسخه و شمارنده‌های حذف فیلد ناشناخته را بپا.",
+      "t_en": "Test and rollback",
+      "t_fa": "تست و rollback"
+    }
+  ],
+  "design_en": "<p><b>Proto:</b> <code>message Profile { string name = 1; int32 age = 2; string email = 3; }</code> — rename <code>name</code> freely, add <code>repeated string emails = 4</code> (fresh tag), reserve retired tags. <b>Avro:</b> record with <code>name</code>, <code>age</code> with defaults, and the new union field <code>emails</code> defaulting empty; rename via <code>aliases: [\"oldName\"]</code> on the new reader only. <b>Rollout:</b> registry check → deploy tolerant readers → dual-write old+new → migrate reader cohorts → deprecate → remove after the lagging-consumer deadline.</p>",
+  "design_fa": "<p><b>پروتو:</b> <code>message Profile { string name = 1; int32 age = 2; string email = 3; }</code> — تغییرنام <code>name</code> آزاد، افزودن <code>repeated string emails = 4</code> (تگ تازه)، تگ‌های بازنشسته <span class=\"ltr\">reserve</span>. <b><span class=\"ltr\">Avro</span>:</b> رکورد با <code>name</code> و <code>age</code> دارای <span class=\"ltr\">default</span> و فیلد <span class=\"ltr\">union</span> تازه <code>emails</code> با پیش‌فرض خالی؛ تغییرنام فقط با <code>aliases: [\"oldName\"]</code> روی خواننده جدید. <b>انتشار:</b> بررسی <span class=\"ltr\">registry</span> ← <span class=\"ltr\">deploy</span> خواننده‌های متحمل ← نوشتن دوگانه قدیم+جدید ← کوچ گروه‌های خواننده ← <span class=\"ltr\">deprecated</span> ← حذف پس از مهلت مصرف‌کننده‌های عقب‌مانده.</p>",
+  "worked_en": "<table><thead><tr><th>Change (writer to reader)</th><th>Protobuf</th><th>Avro</th></tr></thead><tbody><tr><td>Add optional</td><td>B ok, F ok</td><td>B ok, F ok (needs default)</td></tr><tr><td>Rename</td><td>B ok, F ok</td><td>B ok (alias), F no</td></tr><tr><td>One to many, in place</td><td>type/packing/direction-dependent: do not</td><td>no rule: do not</td></tr><tr><td>One to many, new field</td><td>B ok, F ok after dual-write</td><td>B ok, F ok after dual-write</td></tr></tbody></table>",
+  "worked_fa": "<table><thead><tr><th>تغییر (نویسنده به خواننده)</th><th>Protobuf</th><th>Avro</th></tr></thead><tbody><tr><td>افزودن اختیاری</td><td>B هست، F هست</td><td>B هست، F هست (با default)</td></tr><tr><td>تغییرنام</td><td>B هست، F هست</td><td>B هست (با alias)، F نیست</td></tr><tr><td>تکی به چندتایی درجا</td><td>وابسته به نوع و جهت: ممنوع</td><td>بدون قاعده: ممنوع</td></tr><tr><td>تکی به چندتایی با فیلد تازه</td><td>پس از نوشتن دوگانه هر دو هست</td><td>پس از نوشتن دوگانه هر دو هست</td></tr></tbody></table>",
+  "code": {
+    "lang": "java",
+    "code": "public class CompatDemo {\n    // Teaching model of the chapter's evolution rules (not the real\n    // libraries): prints the verdict matrix and measures packed vs\n    // unpacked repeated-int32 bytes to show why packing matters.\n\n    static int varintLen(int n) {\n        int l = 1;\n        while ((n >>>= 7) != 0) {\n            l++;\n        }\n        return l;\n    }\n\n    public static void main(String[] args) {\n        int[] vals = {25, 31, 44};\n        int unpacked = 0;\n        int packedBody = 0;\n        for (int v : vals) {\n            unpacked += 1 + varintLen(v);\n            packedBody += varintLen(v);\n        }\n        int packed = 1 + varintLen(packedBody) + packedBody;\n        System.out.println(\"repeated int32 x3 unpacked bytes: \" + unpacked);\n        System.out.println(\"repeated int32 x3 packed bytes: \" + packed);\n        String[][] rows = {\n            {\"add optional\", \"B ok F ok\", \"B ok F ok (default)\"},\n            {\"rename\", \"B ok F ok\", \"B ok (alias) F no\"},\n            {\"one-to-many in place\", \"depends: do not\", \"no rule: do not\"},\n        };\n        for (String[] r : rows) {\n            System.out.println(r[0] + \" | protobuf \" + r[1] + \" | avro \" + r[2]);\n        }\n        if (unpacked != 6 || packed != 5) {\n            throw new AssertionError(\"packing math moved\");\n        }\n        System.out.println(\"packing check: unpacked=6 packed=5, verdicts as taught\");\n    }\n}\n",
+    "run_fa": "javac CompatDemo.java && java CompatDemo — فقط استاندارد جاوا (JDK 27)، فوری. این برنامه مدل آموزشی قواعد فصل است، نه خود کتابخانه‌ها؛ بررسی واقعی با Schema Registry محلی آزمایشگاه انجام می‌شود.",
+    "run_en": "javac CompatDemo.java && java CompatDemo — Java stdlib only (JDK 27), instant. This program is a teaching model of the chapter's rules, not the libraries themselves; the real check runs against a lab Schema Registry.",
+    "expected_fa": "تکراری x3: unpacked برابر ۶ بایت و packed برابر ۵ بایت؛ سپس سه سطر حکم (افزودن، تغییرنام، تعداد درجا) و تأیید packing check.",
+    "expected_en": "repeated int32 x3 unpacked bytes: 6; repeated int32 x3 packed bytes: 5; add optional | protobuf B ok F ok | avro B ok F ok (default); rename | protobuf B ok F ok | avro B ok (alias) F no; one-to-many in place | protobuf depends: do not | avro no rule: do not; packing check: unpacked=6 packed=5, verdicts as taught.",
+    "status": "verified"
+  },
+  "tests_en": "Measure per schema version: decode-error rate, unknown-field-drop counter, and the share of records still carrying the old field; alert if any cohort's error rate moves during the window. Rollback drill: restore the previous schema version and binary, confirm old and new records still read.",
+  "tests_fa": "به‌ازای هر نسخه <span class=\"ltr\">schema</span> اندازه بگیر: نرخ خطای <span class=\"ltr\">decode</span>، شمارنده حذف فیلد ناشناخته، و سهم رکوردهایی که هنوز فیلد قدیمی را دارند؛ اگر نرخ خطای گروهی در پنجره تکان خورد هشدار بده. تمرین <span class=\"ltr\">rollback</span>: نسخه قبلی <span class=\"ltr\">schema</span> و باینری را برگردان و مطمئن شو رکوردهای قدیم و جدید هنوز خوانده می‌شوند.",
+  "alternatives": [
+    {
+      "en": "Stop-the-world rewrite of stored data to the new schema: one version forever after, at the cost of migration downtime and archived copies that still carry the old shape.",
+      "fa": "بازنویسی یک‌جای داده ذخیره‌شده به <span class=\"ltr\">schema</span> تازه: بعدش برای همیشه یک نسخه، به قیمت <span class=\"ltr\">downtime</span> مهاجرت و کپی‌های آرشیوی که هنوز شکل قدیمی را دارند."
+    }
+  ],
+  "failures": [
+    {
+      "en": "In-place singular-to-repeated on strings via JSON rendering: old single strings and new arrays parse in both directions yet values corrupt — the worst failure because monitors stay green.",
+      "fa": "تغییر تکی‌به‌چندتایی درجا روی رشته‌ها از مسیر رندر <span class=\"ltr\">JSON</span>: رشته‌های تکی قدیمی و آرایه‌های تازه هر دو جهت <span class=\"ltr\">parse</span> می‌شوند ولی مقدارها خراب‌اند — بدترین خرابی چون مانیتورها سبز می‌مانند."
+    },
+    {
+      "en": "Removing the old field while lagging consumers still read it: their decodes default or drop data they still need — schedule removal by consumer-lag evidence, not by calendar.",
+      "fa": "حذف فیلد قدیمی وقتی مصرف‌کننده‌های عقب‌مانده هنوز می‌خوانندش: <span class=\"ltr\">decode</span>هایشان پیش‌فرض می‌گذارد یا داده موردنیاز را می‌اندازد — حذف را با شاهد عقب‌ماندگی مصرف‌کننده زمان‌بندی کن، نه با تقویم."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "Only when telemetry proves no reader needs it: zero reads of the old tag/field across a full retention window (teaching window: months of consumer lag), the registry marks it deprecated, and archives are either migrated or quarantined to old-code readers. Until then the tag stays reserved and the reader stays tolerant.",
+      "a_fa": "فقط وقتی تله‌متری ثابت کند هیچ خواننده‌ای نیازش ندارد: صفر خواندن تگ/فیلد قدیمی در یک پنجره نگهداشت کامل (پنجره آموزشی: ماه‌ها عقب‌ماندگی مصرف‌کننده)، <span class=\"ltr\">registry</span> آن را <span class=\"ltr\">deprecated</span> کرده، و آرشیوها یا مهاجرت کرده‌اند یا به خواننده‌های کد قدیمی قرنطینه شده‌اند. تا آن روز تگ <span class=\"ltr\">reserved</span> می‌ماند و خواننده متحمل.",
+      "level": "senior",
+      "q_en": "Old consumers are months behind. When can you remove the old field or tag?",
+      "q_fa": "consumerهای قدیمی ماه‌ها عقب‌اند؛ چه زمانی tag یا فیلد قدیمی را حذف می‌کنی؟"
+    }
+  ],
+  "mistakes": [
+    {
+      "en": "Assuming an Avro alias works both ways. It only teaches the NEW reader the old name; old readers stay ignorant of the new one.",
+      "fa": "فرض این‌که <span class=\"ltr\">alias</span> در <span class=\"ltr\">Avro</span> هر دو جهت کار می‌کند. فقط به خواننده <b>جدید</b> نام قدیمی را می‌آموزد؛ خواننده‌های قدیمی از نام تازه بی‌خبر می‌مانند."
+    },
+    {
+      "en": "Calling singular-to-repeated 'compatible because it parses'. Parseability without a lossless value mapping is a green monitor over corrupt data.",
+      "fa": "گفتن تکی‌به‌چندتایی «سازگار است چون parse می‌شود». قابل‌تجزیه بودن بدون نگاشت بی‌اتلاف مقدار، مانیتور سبز روی داده خراب است."
+    },
+    {
+      "en": "Adding an Avro field without a default and blaming the registry. The rule is explicit: no default, no backward compatibility.",
+      "fa": "افزودن فیلد <span class=\"ltr\">Avro</span> بدون <span class=\"ltr\">default</span> و مقصر دانستن <span class=\"ltr\">registry</span>. قاعده صریح است: بدون default، سازگاری backward نیست."
+    }
+  ],
+  "diagrams": [
+    {
+      "file": "diagrams/sol2a-migration.html",
+      "made": "archify",
+      "source": ".archify/workflow-cardinality-migration-20261014-182400",
+      "kind_fa": "گردش‌کار",
+      "kind_en": "workflow",
+      "caption_fa": "ریل مهاجرت با فیلد تازه: اول خواننده، آخر حذف",
+      "caption_en": "New-field migration rail: readers first, drop last",
+      "height": 640,
+      "narration": {
+        "scenario_fa": "یک تماس تکی باید چندتایی شود در حالی که مصرف‌کننده‌های قدیمی ماه‌ها عقب‌اند. ریل را چپ‌به‌راست دنبال کن.",
+        "scenario_en": "One contact must become many while old consumers lag months behind. Follow the rail left to right.",
+        "steps": [
+          {
+            "fa": "دو گره اول: پیش‌نویس تغییر و دروازه بررسی registry — ناسازگار برگردد، سازگار جلو برود.",
+            "en": "First two nodes: draft the change, then the registry gate — incompatible loops back, compatible moves on."
+          },
+          {
+            "fa": "سه گره میانی: خواننده‌های متحمل، نوشتن دوگانه، کوچ گروه‌به‌گروه — ترتیب امن همین است.",
+            "en": "Middle three nodes: tolerant readers, dual-write, cohort-by-cohort move — this order is the safe one."
+          },
+          {
+            "fa": "دو خروجی آخر: بازنشستگی فقط پس از رفتن آخرین قدیمی؛ جهش خطا به rollback می‌رسد.",
+            "en": "Final two exits: retirement only after the last old reader is gone; an error spike reaches rollback."
+          }
+        ],
+        "point_fa": "نقطه تصمیم دروازه registry است: بدون حکم سازگار، هیچ deployای.",
+        "point_en": "The decision point is the registry gate: no compatible verdict, no deploy.",
+        "failure_fa": "حذف زودهنگام فیلد قدیمی یا تغییر درجا — هر دو در این ریل جایی ندارند و به سطر قرمز ماتریس می‌رسند.",
+        "failure_en": "Early removal of the old field or an in-place retype — neither has a place on this rail and both land on the matrix's red row.",
+        "guarantee_fa": "شکل ترتیب انتشار را نشان می‌دهد؛ مهلت حذف را تله‌متری مصرف‌کننده تعیین می‌کند، نه شکل.",
+        "guarantee_en": "The figure shows deploy order; consumer telemetry sets the removal deadline, not the figure.",
+        "nonguarantee_fa": "حکم هر تغییر خاص (نوع، packing، جهت) را نشان نمی‌دهد — آن کار بررسی registry است.",
+        "nonguarantee_en": "It does not verdict any specific change (type, packing, direction) — that is the registry check's job."
+      },
+      "selfcheck": {
+        "q_fa": "چرا rollback هم schema و هم باینری را برمی‌گرداند؟",
+        "q_en": "Why does rollback restore both the schema and the binary?",
+        "a_fa": "چون خواننده و نویسنده جفت‌اند: schema تازه با باینری قدیمی (یا برعکس) همان ناسازگاری را برمی‌گرداند.",
+        "a_en": "Because reader and writer are a pair: a new schema with an old binary (or vice versa) brings the same incompatibility back."
+      }
+    },
+    {
+      "file": "diagrams/sol2-compat-matrix.html",
+      "made": "hand",
+      "kind_fa": "جدول ماتریس",
+      "kind_en": "matrix table",
+      "caption_fa": "Avro در برابر Protobuf روی افزودن، تغییرنام و cardinality — با جهت",
+      "caption_en": "Avro vs Protobuf on add, rename and cardinality — with direction",
+      "height": 640,
+      "narration": {
+        "failure_en": "Trace the red row: an in-place cardinality change parses on both sides yet corrupts values — the matrix shows 'do not' exactly there, and the footer moral ('parseable is not lossless') names the trap.",
+        "failure_fa": "سطر قرمز را دنبال کن: تغییر تعداد درجا در هر دو سمت <span class=\"ltr\">parse</span> می‌شود ولی مقدارها را خراب می‌کند — ماتریس دقیقاً همان‌جا «ممنوع» نشان می‌دهد و پیام پانوشت («قابل‌تجزیه بودن همان بی‌اتلاف بودن نیست») نام تله را می‌گوید.",
+        "guarantee_en": "The figure guarantees direction-explicit verdicts for the three changes. It does not enumerate every type-and-packing combination — that is what the registry check is for.",
+        "guarantee_fa": "شکل حکم‌های صریح با جهت را برای سه تغییر تضمین می‌کند. همه ترکیب‌های نوع و <span class=\"ltr\">packing</span> را برنمی‌شمارد — آن کار بررسی <span class=\"ltr\">registry</span> است.",
+        "nonguarantee_en": "It says nothing about JSON renderings, where repeated fields and defaults follow different rules than the binary paths shown.",
+        "nonguarantee_fa": "درباره رندرهای <span class=\"ltr\">JSON</span> چیزی نمی‌گوید، جایی که فیلدهای تکراری و پیش‌فرض‌ها قواعدی متفاوت از مسیرهای باینری شکل دارند.",
+        "point_en": "The decision point is the third row: any cardinality change must leave the 'new field + dual-write' column — never the 'in place' one.",
+        "point_fa": "نقطه تصمیم سطر سوم است: هر تغییر تعداد باید از ستون «فیلد تازه + نوشتن دوگانه» بگذرد — هرگز از «درجا».",
+        "scenario_en": "A user-profile schema must gain an optional field, survive a rename, and turn one contact into many — while old mobile clients lag months behind. Read the matrix row by row.",
+        "scenario_fa": "اسکیمای پروفایل کاربر باید فیلد اختیاری بگیرد، از تغییرنام جان سالم به در ببرد و یک راه تماس را به چندتا تبدیل کند — در حالی که کلاینت‌های موبایل قدیمی ماه‌ها عقب‌اند. ماتریس را سطر‌به‌سطر بخوان.",
+        "steps": [
+          {
+            "en": "Header first: B means the new reader with the old writer, F the old reader with the new writer — every cell below is read in that light.",
+            "fa": "اول سربرگ: B یعنی خواننده جدید با نویسنده قدیمی، F یعنی خواننده قدیمی با نویسنده جدید — هر خانه پایین را با همین عینک بخوان."
+          },
+          {
+            "en": "Green row: adding is safe on both sides, with a fresh tag on the left and a reader default on the right.",
+            "fa": "سطر سبز: افزودن در هر دو سمت امن است، با تگ تازه در چپ و <span class=\"ltr\">default</span> خواننده در راست."
+          },
+          {
+            "en": "Split row: rename is free on the tag side but alias-backed and backward-only on the name side.",
+            "fa": "سطر دوشقه: تغییرنام در سمت تگ آزاد است ولی در سمت نام با <span class=\"ltr\">alias</span> و فقط backward."
+          },
+          {
+            "en": "Red row plus footer: cardinality goes through a new field and dual-write — parsing alone never proves safety.",
+            "fa": "سطر قرمز به‌علاوه پانوشت: تعداد از مسیر فیلد تازه و نوشتن دوگانه می‌گذرد — تنها <span class=\"ltr\">parse</span> شدن هرگز ایمنی را ثابت نمی‌کند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "The rename row: Protobuf stays green both ways while Avro shows backward-only. The asymmetry comes from names living on the Avro wire (matched by name) but not on the Protobuf wire (matched by tag).",
+        "a_fa": "سطر تغییرنام: ‏<span class=\"ltr\">Protobuf</span> هر دو جهت سبز می‌ماند ولی <span class=\"ltr\">Avro</span> فقط-backward نشان می‌دهد. نامتقارنی از این می‌آید که نام‌ها روی سیم <span class=\"ltr\">Avro</span> زندگی می‌کنند (جفت‌شدن با نام) ولی روی سیم <span class=\"ltr\">Protobuf</span> نه (جفت‌شدن با تگ).",
+        "q_en": "Which row is asymmetric between the two columns, and what causes it?",
+        "q_fa": "کدام سطر بین دو ستون نامتقارن است و علتش چیست؟"
+      }
+    }
+  ],
+  "lab_fa": "<p>برای پروفایل کاربر schemaهای Avro و Protobuf با نسخهٔ runtime مشخص بنویس. افزودن فیلد، rename و singular→repeated را در هر دو جهت old writer→new reader و new writer→old reader آزمایش کن. در Avro، reader default و جهت alias را صریح بنویس؛ nullable بودن به‌تنهایی default ایجاد نمی‌کند. در Protobuf، tag را ثابت نگه دار و تفاوت binary با JSON، حفظ unknown field در binary round-trip و حذف آن در JSON یا کپی field-by-field را بسنج. برای cardinality، نوع scalar/message و packed بودن را تعیین کن و فقط به parse موفق اکتفا نکن: همهٔ مقدارها باید بررسی شوند. مسیر امن را با فیلد و tag تازه، دورهٔ dual-read/write و آزمون rollback طراحی کن؛ معیار قبولی «حفظ معنا» است.</p>",
+  "lab_en": "<p>Write Avro and Protobuf user-profile schemas with named runtime versions. Test field addition, rename and singular→repeated in both old-writer→new-reader and new-writer→old-reader directions. State Avro reader defaults and alias direction; nullable alone supplies no default. For Protobuf retain tags and compare binary with JSON, including unknown-field binary round-trips versus JSON or field-by-field copying. State scalar/message type and packed encoding before assessing cardinality changes; verify every value, not just successful parsing. Design a new-field/new-tag migration with dual-read/write and rollback tests. Semantic preservation is the acceptance criterion.</p>",
+  "reasoning_fa": "<p>سازگاری را جهت‌دار می‌سنجیم چون reader تازه و reader قدیم اطلاعات یکسانی ندارند؛ alias تازه نمی‌تواند reader قدیم را تغییر دهد. در Protobuf tag هویت wire است، برای همین rename باینری با تغییر tag یکسان نیست. تبدیل چند مقدار به یک مقدار ممکن است parse شود ولی بقیه را دور بریزد؛ پس معیار اصلی حفظ معناست. فیلد تازه مسیر rollback می‌دهد چون مصرف‌کنندهٔ قدیم هنوز فیلد قبلی را می‌خواند؛ حذف آن فقط بعد از خروج آخرین reader قدیمی مجاز است.</p>",
+  "reasoning_en": "<p>Compatibility is directional because new and old readers know different schemas; a new alias cannot teach an old reader. Protobuf wire identity is the tag, so binary renaming differs from changing tags. Reading many values as one may parse yet discard values, making semantics the criterion. A new field preserves rollback while old readers use the old field; remove it only after the last old reader retires.</p>"
+}

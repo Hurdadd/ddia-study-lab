@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consistent hashing ring — DDIA Chapter 7 Solution 2 assembly</title>
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 450" role="img" aria-label="Moved-key percentages for four mapping methods on node join and leave">
+<title>Join and leave moves: mod-N near 90%, ring and rendezvous near 9%</title>
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0 0L10 5L0 10z" fill="#302828"/>
+</marker>
+</defs>
+<text x="620" y="52" font-size="30" font-weight="900" text-anchor="middle">Join moves little, leave mirrors join</text>
+<text x="620" y="86" font-size="16" text-anchor="middle">10k keys, stable hashed mapping; movement counted key by key in the Java run</text>
+<rect x="24" y="150" width="1192" height="44" rx="12" fill="#fffdf7"/>
+<rect x="24" y="238" width="1192" height="44" rx="12" fill="#fffdf7"/>
+<line x1="24" y1="145" x2="1216" y2="145" stroke="#302828" stroke-width="2"/>
+<text x="40" y="130" font-size="15" font-weight="800">method</text>
+<text x="590" y="130" font-size="15" font-weight="800" text-anchor="middle">load per node at 10</text>
+<text x="830" y="130" font-size="15" font-weight="800" text-anchor="middle">moved 10 to 11</text>
+<text x="1060" y="130" font-size="15" font-weight="800" text-anchor="middle">moved 10 to 9</text>
+<text x="40" y="179" font-size="17" font-weight="800">mod-N</text>
+<text x="590" y="179" font-size="16" text-anchor="middle">luck only</text>
+<rect x="755" y="156" width="150" height="30" rx="10" fill="#ffcfb8"/>
+<text x="830" y="179" font-size="16" font-weight="800" text-anchor="middle">90.8%</text>
+<text x="1060" y="179" font-size="16" text-anchor="middle">89.8%</text>
+<text x="40" y="223" font-size="17" font-weight="800">ring + 100 vnodes</text>
+<text x="590" y="223" font-size="16" text-anchor="middle">840..1164</text>
+<text x="830" y="223" font-size="16" text-anchor="middle">8.8%</text>
+<text x="1060" y="223" font-size="16" text-anchor="middle">8.7%</text>
+<text x="40" y="267" font-size="17" font-weight="800">rendezvous</text>
+<text x="590" y="267" font-size="16" text-anchor="middle">even</text>
+<text x="830" y="267" font-size="16" text-anchor="middle">9.2%</text>
+<text x="1060" y="267" font-size="16" text-anchor="middle">9.9%</text>
+<text x="40" y="311" font-size="17" font-weight="800">fixed 64 shards</text>
+<text x="590" y="311" font-size="16" text-anchor="middle">6 per node</text>
+<text x="830" y="311" font-size="16" text-anchor="middle">8.7%</text>
+<text x="1060" y="311" font-size="16" text-anchor="middle">9.3%</text>
+<line x1="24" y1="330" x2="1216" y2="330" stroke="#302828" stroke-width="2"/>
+<text x="620" y="372" font-size="14" text-anchor="middle">raw FNV let node n10 steal 40% of keys — a finalizer fixed it; never ship an untested hash</text>
+<text x="620" y="402" font-size="14" text-anchor="middle">a 2x node takes 2x shares with no global move; a leave rehomes only its own ranges</text>
+<text x="620" y="432" font-size="14" text-anchor="middle">legend: pink cell is the mod-N trap — node count must never sit inside the key mapping</text>
+</svg>
+</div>
+</body>
+</html>

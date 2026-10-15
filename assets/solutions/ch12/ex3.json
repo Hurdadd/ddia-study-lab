@@ -1,0 +1,296 @@
+{
+  "alternatives": [
+    {
+      "en": "Direct table CDC without an outbox (Debezium on the domain tables): wins on day one with zero code changes; loses the moment an internal column drops, because the internal schema is now public API and a production consumer breaks customer-faced.",
+      "fa": "CDC مستقیم جدول بدون outbox (Debezium روی جدول‌های دامنه): روز اول با صفر تغییر کد می‌برد؛ لحظه‌ای که ستون داخلی حذف شود می‌بازد چون اسکیمای داخلی حالا API عمومی است و مصرف‌کننده پروداکشن روبه‌مشتری را می‌شکند."
+    },
+    {
+      "en": "Dual writes from application code (database, then index): loses on both faults of §4.1 — the ordering race with no error at all, and the half-committed pair. Kept here only as the anti-pattern the outbox replaces.",
+      "fa": "نوشتن دوگانه از کد اپ (اول پایگاه داده بعد ایندکس): روی هر دو خطای §۴.۱ می‌بازد — مسابقه ترتیب بدون هیچ خطایی و جفت نیم‌commitشده. این‌جا فقط به‌عنوان آنتی‌پترنی که outbox جایگزینش می‌شود نگه داشته شده."
+    },
+    {
+      "en": "Periodic batch ETL into the index: wins on simplicity and on tiny catalogs; loses freshness (stale until the next run) and replays history needlessly on every run.",
+      "fa": "ETL دسته‌ای دوره‌ای به ایندکس: روی سادگی و کاتالوگ‌های کوچک می‌برد؛ تازگی را می‌بازد (کهنه تا اجرای بعد) و هر اجرا تاریخ را بیهوده بازپخش می‌کند."
+    }
+  ],
+  "answer_en": "Commit business rows with their outbox records. Use a supported consistent snapshot/log-boundary protocol to obtain complete state plus replayable changes. Install the snapshot, then apply per-entity ordered changes with event-ID dedup and entity-version regression guards. Retained event history and an optional compacted entity-state topic have different contracts. Budget and measure snapshot/WAL costs; zero load and perpetual freshness are not guarantees.",
+  "answer_fa": "business و outbox را در یک تراکنش ثبت کن و با پروتکل snapshot سازگار connector، state کامل را همراه مرز log قابل‌بازپخش بساز. پس از نصب snapshot، تغییرها را به‌ترتیب هر entity با event_id برای dedup و entity_version برای جلوگیری از عقب‌رفتن اعمال کن. event topic تاریخ وقایع را با retention حفظ می‌کند؛ state topic اختیاری با کلید entity و tombstone قرارداد دیگری است. هزینهٔ snapshot و WAL را بودجه‌بندی و اندازه‌گیری کن؛ فشار صفر و تازگی همیشگی تضمین نیستند.",
+  "assumptions": [
+    {
+      "en": "A transactional record database with a logical replication log (teaching Postgres-like) and a log-based broker with compaction and retention. Teaching scale: 50M rows, throttled snapshot at 20k rows/s, WAL retained 3 days — teaching numbers, not benchmarks.",
+      "fa": "پایگاه داده مرجع تراکنشی با لاگ replication منطقی (آموزشی و شبه Postgres) و بروکر لاگ‌محور با compaction و retention. مقیاس آموزشی: ۵۰M سطر، snapshot مهارشده با ۲۰k سطر بر ثانیه و WAL با نگهداری ۳ روز — اعداد آموزشی‌اند نه بنچمارک."
+    },
+    {
+      "en": "The indexer is idempotent and owns no state the record cannot rebuild; consumers downstream of the index tolerate versioned corrections but the index itself must converge to the record.",
+      "fa": "ایندکسر idempotent است و stateای ندارد که مرجع نتواند بازسازی‌اش کند؛ مصرف‌کننده‌های پایین ایندکس اصلاحیه‌های نسخه‌دار را تاب می‌آورند ولی خود ایندکس باید به مرجع همگرا شود."
+    },
+    {
+      "fa": "برای شروع از snapshot پشتیبانی‌شدهٔ connector استفاده می‌کنیم. انتقال snapshot به replica فقط با پشتیبانی نسخه و هماهنگی snapshot/LSN مجاز است؛ بار replica و WAL همچنان هزینه دارند.",
+      "en": "Begin with the connector-supported snapshot protocol. Replica snapshots require version support and coordinated snapshot/LSN boundaries; replica load and WAL still cost resources."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n\n// Single-thread, in-memory teaching model. Snapshot+LSN is atomic by construction.\n// A real connector must supply a consistent snapshot/log-boundary protocol.\n// No real Kafka, database throttling or durable process crash is tested here.\npublic class CdcBootstrap {\n    record Event(String eventId, String key, String value, long version) {}\n    Map<String,String> record=new LinkedHashMap<>(), index=new LinkedHashMap<>();\n    Map<String,Long> versions=new HashMap<>(); // includes tombstone versions\n    List<Event> events=new ArrayList<>();\n    Set<String> dedup=new HashSet<>();\n    long lsn=0, snapshotBoundary=-1;\n    void write(String key,String value) {\n        lsn++;\n        if(value==null) record.remove(key); else record.put(key,value);\n        events.add(new Event(\"e\"+lsn,key,value,lsn));\n    }\n    void snapshot() {\n        // No concurrent writes in this model: source state and boundary agree.\n        snapshotBoundary=lsn;\n        index.clear(); index.putAll(record); versions.clear(); dedup.clear();\n        for(String key:index.keySet()) versions.put(key,snapshotBoundary);\n    }\n    void apply(Event event) {\n        // A snapshot has state, not old event IDs; guard old overlap by boundary.\n        if(event.version<=snapshotBoundary || dedup.contains(event.eventId)) return;\n        if(event.version>versions.getOrDefault(event.key,-1L)) {\n            if(event.value==null) index.remove(event.key); else index.put(event.key,event.value);\n            versions.put(event.key,event.version);\n        }\n        dedup.add(event.eventId); // apply+version+dedup are one modeled sink step\n    }\n    void catchUp(int stopAfter) {\n        int applied=0;\n        for(Event event:events) {\n            if(event.version<=snapshotBoundary || dedup.contains(event.eventId)) continue;\n            apply(event);\n            if(++applied==stopAfter) return; // simulated consumer pause\n        }\n    }\n    void check(boolean condition) { if(!condition) throw new AssertionError(); }\n    public static void main(String[] args) {\n        CdcBootstrap c=new CdcBootstrap();\n        c.write(\"p1\",\"red boots\"); c.write(\"p2\",\"blue coat\"); c.write(\"p3\",\"green hat\");\n        c.snapshot(); // B=3\n        c.write(\"p2\",\"navy coat\"); c.write(\"p3\",null);\n        c.catchUp(1); // pause with only e4 applied, then resume from modeled sink state\n        c.check(!c.index.equals(c.record));\n        c.catchUp(Integer.MAX_VALUE); c.check(c.index.equals(c.record));\n        c.apply(c.events.get(2)); // old pre-snapshot row must not resurrect deleted p3\n        c.check(!c.index.containsKey(\"p3\"));\n        c.catchUp(Integer.MAX_VALUE); c.check(c.index.equals(c.record));\n        c.write(\"p1\",\"v6\"); Event old=c.events.get(c.events.size()-1);\n        c.write(\"p1\",\"v7\"); Event newer=c.events.get(c.events.size()-1);\n        c.apply(newer); c.apply(old); c.apply(newer);\n        c.check(c.index.get(\"p1\").equals(\"v7\"));\n        c.check(c.index.equals(c.record));\n        Map<String,String> stateTopic=new HashMap<>(c.record); // full current-state model\n        List<Event> purgedHistory=List.of();\n        c.check(purgedHistory.isEmpty() && !c.record.isEmpty());\n        c.check(stateTopic.equals(c.record));\n        System.out.println(\"PASS snapshot B=3, pause/resume, duplicate, stale overlap, version regression, tombstone\");\n        System.out.println(\"PASS purged events cannot seed full state; index=\"+c.index);\n    }\n}\n",
+    "expected_en": "PASS snapshot B=3, pause/resume, duplicate, stale overlap, version regression, tombstone; PASS purged events cannot seed full state; index={p1=v7, p2=navy coat}. This is an in-memory model, not a broker/database crash test.",
+    "expected_fa": "PASS برای snapshot در B=3، توقف/ادامه، تکرار، هم‌پوشانی کهنه، عقب‌رفتن نسخه و tombstone؛ ایندکس نهایی {p1=v7, p2=navy coat}. این مدل در حافظه است و آزمون crash پایگاه داده یا بروکر نیست.",
+    "lang": "java",
+    "run_en": "javac CdcBootstrap.java && java CdcBootstrap — stdlib Java only, instant. The log, topics and snapshot are in-memory models: this proves the boundary/dedup/contract logic, not a Debezium/Kafka deployment.",
+    "run_fa": "javac CdcBootstrap.java && java CdcBootstrap — فقط استاندارد جاوا و فوری. لاگ و تاپیک‌ها و snapshot مدل‌های درون‌حافظه‌اند: این منطق مرز/dedup/قرارداد را اثبات می‌کند نه استقرار Debezium/Kafka را.",
+    "status": "verified"
+  },
+  "design_en": "<p>Commit outbox(event_id UUID PK,entity_key,entity_version,type,payload) with business rows. This design partitions events by entity_key to preserve entity order and carries event_id in payload/headers for dedup. Event-ID keys are also possible but require separate entity-order handling. An optional compacted entity-keyed state topic uses null tombstones. Compaction over unique event keys usually saves no space.</p><p>Obtain the complete record snapshot and boundary B through one consistent protocol; a snapshot of a purged outbox is incomplete state. Bulk-load, then apply ordered changes under version guards. Retention must cover snapshot + outage + catch-up with margin; missing history requires explicit rebuilding. Compare checksums only at a valid shared boundary.</p>",
+  "design_fa": "<p>outbox(event_id UUID PK,entity_key,entity_version,type,payload) همراه سطر business commit می‌شود. رویدادها در این طرح با entity_key پارتیشن می‌شوند تا ترتیب همان entity حفظ شود و event_id در payload/header برای dedup است؛ کلید event_id هم ممکن است اما ترتیب entity را نیازمند پروتکل جدا می‌کند. state topic اختیاری با entity key و null tombstone، آخرین state هر entity را نگه می‌دارد. compaction روی کلید یکتای هر event معمولاً فضا کم نمی‌کند.</p><p>snapshot کاملِ مرجع و مرز B باید از یک پروتکل سازگار بیایند؛ snapshot خودِ outbox purgeشده state کامل نیست. پس از bulk-load، تغییرها به‌ترتیب با version guard اعمال می‌شوند. retention لاگ باید snapshot+قطعی+catch-up را با حاشیه پوشش دهد؛ اگر تاریخ لازم از دست رفت، بازسازی صریح لازم است. checksum فقط بین stateهای یک مرز معتبر مقایسه می‌شود.</p>",
+  "diagrams": [
+    {
+      "caption_en": "CDC pipeline: outbox events, compacted state, snapshot at LSN B",
+      "caption_fa": "پایپ‌لاین CDC: رویدادهای outbox، state فشرده و snapshot در LSN ـه B",
+      "file": "diagrams/sol3-cdc-pipeline.html",
+      "height": 720,
+      "kind_en": "dataflow",
+      "kind_fa": "جریان‌داده",
+      "made": "archify",
+      "narration": {
+        "failure_en": "After an indexer pause, replay from a valid checkpoint with event-ID dedup and version guards. Missing WAL requires rebuilding. Internal column removal is compatible only while public payload generation remains compatible; an outbox alone is insufficient.",
+        "failure_fa": "پس از توقف ایندکسر، تغییرها از checkpoint معتبر با event_id و version guard بازپخش می‌شوند. اگر WAL موردنیاز حذف شده باشد بازسازی لازم است. حذف ستون داخلی فقط وقتی سازگار است که تولید payload عمومی نیز حفظ شود؛ صرف وجود outbox کافی نیست.",
+        "guarantee_en": "Separates snapshot, event and state contracts. Snapshot/LSN alignment needs a supported protocol; replica reads in the figure are a version-dependent option. The diagram does not prove zero load or zero downtime.",
+        "guarantee_fa": "سه قرارداد snapshot، رویداد و state را جدا نشان می‌دهد. snapshot/LSN باید با پروتکل پشتیبانی‌شده هماهنگ شود؛ replica روی شکل یک گزینهٔ مشروط به نسخه است. figure تضمین فشار صفر یا قطعی صفر نمی‌دهد.",
+        "nonguarantee_en": "It assumes WAL retention covers the bootstrap; when it does not, the snapshot path must run again — said in the runbook, not drawn here.",
+        "nonguarantee_fa": "فرض می‌کند نگهداری WAL ـه bootstrap را می‌پوشاند؛ وقتی نپوشاند مسیر snapshot باید دوباره بدود — در ران‌بوک گفته شده نه این‌جا کشیده.",
+        "point_en": "The decision point is the outbox row: business and event commit together, so downstream order is the leader's own order.",
+        "point_fa": "نقطه تصمیم سطر outbox است: کسب‌وکار و رویداد با هم commit می‌شوند تا ترتیب پایین‌دست همان ترتیب خود رهبر باشد.",
+        "scenario_en": "One leader feeds a search index without ever being written twice. Read the main row first — record, capture, stream, build, serve — then the two helper paths for snapshot and state. Event-ID keys shown here are one variant requiring rekeying or an ordering protocol per entity; the answer chooses entity keys with separate event IDs for dedup.",
+        "scenario_fa": "یک رهبر ایندکس جستجو را تغذیه می‌کند بدون این‌که هرگز دو بار نوشته شود. اول سطر اصلی — مرجع، capture، استریم، ساخت، سرو — بعد دو مسیر کمکی snapshot و state. کلید event_id روی شکل، یک variant است: برای ترتیب هر entity نیاز به rekey یا پروتکل ترتیب دارد؛ انتخاب متن پاسخ entity_key همراه event_id جدا برای dedup است.",
+        "steps": [
+          {
+            "en": "Main row: the OLTP record decides write order, the outbox carries it in the same transaction, and the relay publishes keyed events.",
+            "fa": "سطر اصلی: مرجع OLTP ترتیب write را مشخص می‌کند، outbox آن را در همان تراکنش حمل می‌کند و رله رویدادهای کلیددار منتشر می‌کند."
+          },
+          {
+            "en": "Helper paths: a throttled snapshot seeds at LSN B while the compacted state topic offers full-state scans and repair.",
+            "fa": "مسیرهای کمکی: snapshot مهارشده در LSN ـه B seed می‌کند و تاپیک فشرده state اسکن کامل و تعمیر پیشنهاد می‌دهد."
+          },
+          {
+            "en": "Serve: the indexer dedups by event id, applies upserts and tombstone deletes, and serves only when lag is near zero.",
+            "fa": "سرو: ایندکسر با event id ـه dedup می‌کند، upsertها و حذف‌های tombstone را اعمال می‌کند و فقط وقتی lag نزدیک صفر است سرو می‌کند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "The outbox table with its own stable schema: the relay reads it, never the domain tables, so internal columns can drop freely.",
+        "a_fa": "جدول outbox با اسکیمای پایدار خودش: رله آن را می‌خواند نه جدول‌های دامنه را، پس ستون‌های داخلی آزادانه می‌توانند حذف شوند.",
+        "q_en": "Tomorrow a column drops from the internal products table. Which part of this pipeline notices, and which does not?",
+        "q_fa": "فردا ستونی از جدول داخلی محصولات حذف می‌شود. کدام بخش این پایپ‌لاین متوجه می‌شود و کدام نه؟"
+      },
+      "source": ".archify/dataflow-ch12-sol3-pipeline-20261014-222300"
+    },
+    {
+      "caption_en": "Bootstrap runbook: snapshot, catch up, prove it",
+      "caption_fa": "ران‌بوک bootstrap: snapshot، catch-up و اثبات",
+      "file": "diagrams/sol3-bootstrap-runbook.html",
+      "height": 720,
+      "kind_en": "workflow",
+      "kind_fa": "گردش‌کار",
+      "made": "archify",
+      "narration": {
+        "failure_en": "After an indexer pause, replay from a valid checkpoint with event-ID dedup and version guards. Missing WAL requires rebuilding. Internal column removal is compatible only while public payload generation remains compatible; an outbox alone is insufficient.",
+        "failure_fa": "پس از توقف ایندکسر، تغییرها از checkpoint معتبر با event_id و version guard بازپخش می‌شوند. اگر WAL موردنیاز حذف شده باشد بازسازی لازم است. حذف ستون داخلی فقط وقتی سازگار است که تولید payload عمومی نیز حفظ شود؛ صرف وجود outbox کافی نیست.",
+        "guarantee_en": "Separates snapshot, event and state contracts. Snapshot/LSN alignment needs a supported protocol; replica reads in the figure are a version-dependent option. The diagram does not prove zero load or zero downtime.",
+        "guarantee_fa": "سه قرارداد snapshot، رویداد و state را جدا نشان می‌دهد. snapshot/LSN باید با پروتکل پشتیبانی‌شده هماهنگ شود؛ replica روی شکل یک گزینهٔ مشروط به نسخه است. figure تضمین فشار صفر یا قطعی صفر نمی‌دهد.",
+        "nonguarantee_en": "It does not size the snapshot budget for the reader's catalog — 20k rows/s here is a teaching rate, re-measured per database.",
+        "nonguarantee_fa": "بودجه snapshot را برای کاتالوگ خواننده اندازه نمی‌کند — ۲۰k سطر بر ثانیه این‌جا نرخ آموزشی است و per-database دوباره سنجیده می‌شود.",
+        "point_en": "The decision point is the recorded LSN: everything before it comes from the photo, everything after from the diary, and the overlap is deduped, never trusted.",
+        "point_fa": "نقطه تصمیم LSN ثبت‌شده است: همه قبل آن از عکس می‌آید و همه بعد آن از دفترچه و هم‌پوشانی dedup می‌شود نه اعتماد.",
+        "scenario_en": "The assembly: photograph, diary, proof. Read the spine first, then each exception as the answer to one bootstrap mishap. Event-ID keys shown here are one variant requiring rekeying or an ordering protocol per entity; the answer chooses entity keys with separate event IDs for dedup.",
+        "scenario_fa": "اسمبل نهایی: عکس، دفترچه، اثبات. اول ستون فقرات، بعد هر استثنا به‌عنوان جواب یک بدبیاری bootstrap. کلید event_id روی شکل، یک variant است: برای ترتیب هر entity نیاز به rekey یا پروتکل ترتیب دارد؛ انتخاب متن پاسخ entity_key همراه event_id جدا برای dedup است.",
+        "steps": [
+          {
+            "en": "Photograph: a throttled replica snapshot fixes boundary B without the leader noticing the export.",
+            "fa": "عکس: snapshot مهارشده replica مرز B را ثابت می‌کند بدون این‌که رهبر export را حس کند."
+          },
+          {
+            "en": "Diary: outbox events after B stream in with event-ID dedup, absorbing the snapshot overlap by construction.",
+            "fa": "دفترچه: رویدادهای outbox بعد از B با dedup ـه event-ID جاری می‌شوند و هم‌پوشانی snapshot را ذاتاً جذب می‌کنند."
+          },
+          {
+            "en": "Proof: checksums at a stated boundary, a kill mid-work with resume, and a schema-drop test that stays green.",
+            "fa": "اثبات: checksumها در مرز اعلام‌شده، kill وسط کار با ادامه و test حذف ستون که سبز می‌ماند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Re-snapshot loudly: the LSN is gone from WAL, so no diary covers the gap — guessing would invent history. A fresh throttled photo plus streaming from the new boundary is the only honest path.",
+        "a_fa": "بلند re-snapshot بگیر: LSN از WAL رفته پس هیچ دفترچه‌ای شکاف را نمی‌پوشاند — حدس زدن تاریخ جعل می‌کرد. فقط عکس مهارشده تازه به‌علاوه جاری‌سازی از مرز تازه مسیر صادق است.",
+        "q_en": "The bootstrap takes longer than WAL retention and the boundary LSN has expired. What now?",
+        "q_fa": "bootstrap از نگهداری WAL طولانی‌تر شده و LSN مرز منقضی شده. حالا چه؟"
+      },
+      "source": ".archify/workflow-ch12-sol3-bootstrap-20261014-222300"
+    },
+    {
+      "caption_en": "Snapshot, event topic, state topic: three different contracts",
+      "caption_fa": "snapshot، تاپیک رویداد و تاپیک state: سه قرارداد متفاوت",
+      "file": "diagrams/sol3-three-contracts.html",
+      "height": 640,
+      "kind_en": "contract strip",
+      "kind_fa": "نوار قرارداد",
+      "made": "hand",
+      "narration": {
+        "failure_en": "After an indexer pause, replay from a valid checkpoint with event-ID dedup and version guards. Missing WAL requires rebuilding. Internal column removal is compatible only while public payload generation remains compatible; an outbox alone is insufficient.",
+        "failure_fa": "پس از توقف ایندکسر، تغییرها از checkpoint معتبر با event_id و version guard بازپخش می‌شوند. اگر WAL موردنیاز حذف شده باشد بازسازی لازم است. حذف ستون داخلی فقط وقتی سازگار است که تولید payload عمومی نیز حفظ شود؛ صرف وجود outbox کافی نیست.",
+        "guarantee_en": "Separates snapshot, event and state contracts. Snapshot/LSN alignment needs a supported protocol; replica reads in the figure are a version-dependent option. The diagram does not prove zero load or zero downtime.",
+        "guarantee_fa": "سه قرارداد snapshot، رویداد و state را جدا نشان می‌دهد. snapshot/LSN باید با پروتکل پشتیبانی‌شده هماهنگ شود؛ replica روی شکل یک گزینهٔ مشروط به نسخه است. figure تضمین فشار صفر یا قطعی صفر نمی‌دهد.",
+        "nonguarantee_en": "It says nothing about the snapshot throttle rate or the kill acceptance — those live in the runbook figure above.",
+        "nonguarantee_fa": "درباره نرخ throttle ـه snapshot یا پذیرش kill چیزی نمی‌گوید — آن‌ها در شکل ران‌بوک بالا زندگی می‌کنند.",
+        "point_en": "The decision points are the key rows: event id versus entity key decides which topic may compact and which may seed.",
+        "point_fa": "نقطه‌های تصمیم سطرهای کلیدند: event id در برابر entity key مشخص می‌کند کدام تاپیک می‌تواند فشرده شود و کدام seed کند.",
+        "scenario_en": "The assembly as a comparison, not a flow. Read column by column: what each contract keys by, keeps, deletes with, and whether it may seed a newcomer. Event-ID keys shown here are one variant requiring rekeying or an ordering protocol per entity; the answer chooses entity keys with separate event IDs for dedup.",
+        "scenario_fa": "اسمبل نهایی به‌صورت مقایسه نه جریان. ستون‌به‌ستون بخوان: هر قرارداد با چه کلیدی، چه نگه می‌دارد، با چه حذف می‌کند و آیا می‌تواند تازه‌وارد seed کند. کلید event_id روی شکل، یک variant است: برای ترتیب هر entity نیاز به rekey یا پروتکل ترتیب دارد؛ انتخاب متن پاسخ entity_key همراه event_id جدا برای dedup است.",
+        "steps": [
+          {
+            "en": "Snapshot column: a one-off consistent copy at LSN B, throttled, dropped after catch-up — seeds exactly one bootstrap.",
+            "fa": "ستون snapshot: کپی سازگار یک‌بارمصرف در LSN ـه B، مهارشده و بعد از catch-up انداخته‌شده — دقیقاً یک bootstrap را seed می‌کند."
+          },
+          {
+            "en": "Event column: append-only diary keyed by event id with retention; tombstones are brief events; purged pages seed nothing.",
+            "fa": "ستون رویداد: دفترچه append-only با کلید event id و retention؛ tombstoneها رویدادهای کوتاه‌اند؛ صفحه‌های پاره چیزی seed نمی‌کنند."
+          },
+          {
+            "en": "State column: compacted phone book keyed by entity key; tombstones linger until observed; seeds newcomers while retained.",
+            "fa": "ستون state: دفتر تلفن فشرده با کلید entity key؛ tombstoneها تا مشاهده می‌مانند؛ تا وقتی نگه داشته شده تازه‌وارد seed می‌کند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "The compacted entity-state topic while it still retains every key, or a fresh throttled snapshot — never the purged outbox, which replays zero events.",
+        "a_fa": "تاپیک فشرده entity-state تا وقتی هنوز هر کلید را نگه داشته یا snapshot مهارشده تازه — هرگز outbox پاک‌شده که صفر رویداد بازپخش می‌کند.",
+        "q_en": "Every outbox row older than a week is purged. Where does a brand-new consumer get complete state?",
+        "q_fa": "همه سطرهای outbox قدیمی‌تر از یک هفته purge شده‌اند. مصرف‌کننده کاملاً تازه state کامل را از کجا می‌گیرد؟"
+      }
+    }
+  ],
+  "failures": [
+    {
+      "en": "Snapshot/stream gap: the snapshot records LSN B and streaming starts there, so nothing is missed; the overlap replays and event-ID dedup absorbs it (demo: e3 applies twice, harmlessly).",
+      "fa": "شکاف snapshot/استریم: snapshot ـه LSN ـه B را ثبت می‌کند و جاری‌سازی از همان‌جا شروع می‌شود، پس چیزی جا نمی‌ماند؛ هم‌پوشانی بازپخش می‌شود و dedup ـه event-ID جذبش می‌کند (دمو: e3 دوبار اعمال می‌شود بی‌اثر)."
+    },
+    {
+      "en": "Snapshot/stream duplicate: same overlap, same dedup — the guard is the event id, so replaying the boundary twice converges instead of doubling.",
+      "fa": "تکراری snapshot/استریم: همان هم‌پوشانی و همان dedup — نگهبان event id است، پس بازپخش دوباره مرز همگرا می‌شود به‌جای دو برابر شدن."
+    },
+    {
+      "en": "Kill mid-bootstrap: the indexer resumes from its checkpoint, replays, dedups, and the boundary checksum proves convergence (demo part 2: one skip, match true).",
+      "fa": "kill وسط bootstrap: ایندکسر از checkpoint ادامه می‌دهد، بازپخش و dedup می‌کند و checksum مرز همگرایی را اثبات می‌کند (بخش ۲ دمو: یک skip و match درست)."
+    },
+    {
+      "en": "Internal column dropped: the relay reads the outbox contract, never the domain tables, so the pipeline stays green and no consumer pages.",
+      "fa": "حذف ستون داخلی: رله قرارداد outbox را می‌خواند نه جدول‌های دامنه را، پس پایپ‌لاین سبز می‌ماند و هیچ مصرف‌کننده‌ای page نمی‌شود."
+    },
+    {
+      "en": "Tombstone lost before every follower observed it: the delete resurrects on the laggard, so tombstone retention must exceed the slowest follower's lag plus margin.",
+      "fa": "گم شدن tombstone قبل از مشاهده همه دنباله‌روها: حذف روی عقب‌مانده زنده می‌شود، پس نگهداری tombstone باید از lag کندترین دنباله‌رو به‌علاوه حاشیه بیشتر باشد."
+    },
+    {
+      "en": "Outbox purged before a newcomer arrives: the diary cannot seed, so the newcomer reads the compacted entity-state topic or triggers a fresh throttled snapshot — decided loudly, never by guessing.",
+      "fa": "purge ـه outbox قبل از رسیدن تازه‌وارد: دفترچه نمی‌تواند seed کند، پس تازه‌وارد تاپیک فشرده entity-state را می‌خواند یا snapshot مهارشده تازه می‌گیرد — بلند تصمیم گرفته می‌شود نه با حدس."
+    },
+    {
+      "en": "Unbounded snapshot pressure: reads come from a replica at a capped rate with a stated budget (teaching 20k rows/s), and a blown budget slows the snapshot — never the leader.",
+      "fa": "فشار بی‌کران snapshot: خواندن‌ها از replica با نرخ سقفی و بودجه اعلام‌شده می‌آیند (آموزشی ۲۰k سطر بر ثانیه) و بودجه منفجرشده snapshot را کند می‌کند — هرگز رهبر را نه."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "The compacted entity-state topic while it retains every key, or a fresh throttled snapshot. Never the purged outbox: retention already dropped those pages, so replaying it rebuilds a Swiss-cheese history. The strip figure exists to make exactly this mistake unmakeable.",
+      "a_fa": "تاپیک فشرده entity-state تا وقتی هر کلید را نگه داشته یا snapshot مهارشده تازه. هرگز outbox پاک‌شده: retention آن صفحه‌ها را انداخته، پس بازپخش آن تاریخ پنیرسوییسی می‌سازد. شکل نوار دقیقاً هست تا این اشتباه ناشدنی شود.",
+      "level": "staff",
+      "q_en": "Old outbox rows have been purged. Where does a new consumer get complete state?",
+      "q_fa": "outbox قدیمی purge شده؛ مصرف‌کنندهٔ جدید از کجا state کامل را می‌سازد؟"
+    },
+    {
+      "a_en": "The entity-keyed state topic benefits from compaction because its contract needs latest state. Event history must retain every event in the supported window; entity-key compaction can erase that history. With unique event-ID keys, compaction generally removes nothing rather than automatically deleting history.",
+      "a_fa": "در این طرح state topic با entity key از compaction سود می‌برد چون آخرین state را می‌خواهیم. event topic باید تمام وقایع داخل retention را حفظ کند؛ compaction با entity key می‌تواند history لازم را حذف کند. اگر کلید event_id یکتا باشد compaction معمولاً چیزی حذف نمی‌کند، نه اینکه history را خودکار از بین ببرد.",
+      "level": "senior",
+      "q_en": "Which of the two topics should be log-compacted, and why is compacting the other one wrong?",
+      "q_fa": "کدام‌یک از دو تاپیک باید log-compact شود و چرا فشرده کردن دیگری غلط است؟"
+    },
+    {
+      "a_en": "Two indexers may build concurrently (blue-green index), but only one owns serving reads per alias, and both checkpoint independently: a kill on one never rewinds the other. Cutover flips the alias after the boundary checksum, and rollback flips it back — the alias, not the data, is the atomic switch.",
+      "a_fa": "دو ایندکسر می‌توانند هم‌زمان بسازند (ایندکس آبی-سبز) ولی به‌ازای هر alias فقط یکی مالک سرو خواندن است و هر دو مستقل checkpoint می‌گیرند: kill یکی دیگری را عقب نمی‌برد. cutover بعد از checksum مرز alias را می‌چرخاند و rollback برمی‌گرداند — سوییچ اتمیک alias است نه داده.",
+      "level": "staff",
+      "q_en": "Two index builders run at once during a migration. Who serves reads, and what survives a kill?",
+      "q_fa": "دو سازنده ایندکس هنگام مهاجرت هم‌زمان می‌دوند. کی خواندن سرو می‌کند و با kill چه می‌ماند؟"
+    }
+  ],
+  "interview_q_en": "Build a search view without dual writes or public table schemas. Specify business+outbox atomicity, a consistent record snapshot and its LSN boundary, event-ID dedup, compacted entity keys, tombstones, WAL retention and throttled rebuilding.",
+  "interview_q_fa": "ایندکس جست‌وجو را بدون dual write با قرارداد event مستقل از schema داخلی طراحی کن. تراکنش business+outbox، consistent snapshot مرجع و مرز LSN را مشخص کن. event-ID dedup را از compacted state با entity key و tombstone جدا کن؛ lag، WAL retention، rebuild و schema change را تست کن.",
+  "lab_en": "<p>Write business rows and outbox(event_id,entity_key,entity_version,type,payload) atomically. Obtain a complete record snapshot aligned with a consistent LSN using the connector protocol; reading an LSN around an arbitrary SELECT is insufficient. Prefer the connector's supported snapshot mode; replica snapshots require version support and coordinated boundaries. Separate an event topic with per-entity ordering plus event-ID dedup from an optional entity-keyed compacted state topic; null values at entity keys encode tombstones. Budget I/O, CPU, replica lag and WAL: never promise zero load or perpetual freshness. Install the snapshot before ordered catch-up and use version guards against stale replay. Test kill/restart, deletes, purged outbox and retention overruns with checksums at a common boundary; projection rebuilds cannot depend on retaining all historical outbox rows.</p>",
+  "lab_fa": "<p>business row و outbox(event_id,entity_key,entity_version,type,payload) را در یک تراکنش بنویس. snapshot کاملِ دادهٔ مرجع را با پروتکل connector و مرز LSN سازگار بگیر؛ صرف خواندن LSN قبل یا بعد از یک SELECT تضمین هماهنگی نیست. شروع کم‌پیچیدگی، snapshot رسمی connector است؛ snapshot از replica فقط با پشتیبانی نسخه و هماهنگی مرز مجاز است. topic رویداد با حفظ ترتیب هر entity و event_id برای dedup، و state topic اختیاری با کلید entity و compaction را جدا تعریف کن؛ null value روی کلید entity نقش tombstone دارد. بار IO، CPU، lag و WAL را با بودجهٔ اعلام‌شده محدود کن؛ «بی‌فشار» یا «همیشه تازه» تضمین نده. bootstrap ابتدا snapshot را نصب و سپس تغییرها را با version guard اعمال کند تا replay کهنه state را عقب نبرد. kill/restart، delete، outbox purge و توقف بیش از retention را با checksum در مرز یکسان بیازما؛ ساخت projection نباید بر بقای تمام تاریخ outbox تکیه کند.</p>",
+  "mental_en": "The index is a follower that starts from a photograph plus the diary written after the photo. The diary (outbox events) and the current phone book (compacted entity state) are different books: burning old diary pages never burns the phone book, but a newcomer with no phone book needs a fresh photograph.",
+  "mental_fa": "ایندکس دنباله‌رویی است که از عکس به‌علاوه دفترچه نوشته‌شده بعد از عکس شروع می‌کند. دفترچه (رویدادهای outbox) و دفتر تلفن فعلی (entity-state فشرده) دو کتاب متفاوت‌اند: سوزاندن صفحه‌های قدیم دفترچه هرگز دفتر تلفن را نمی‌سوزاند ولی تازه‌وارد بدون دفتر تلفن عکس تازه می‌خواهد.",
+  "mistakes": [
+    {
+      "en": "Seeding a newcomer from the purged outbox: retention dropped those pages, so replay rebuilds partial history and the missing keys fail silently. The outbox is a diary, not a phone book.",
+      "fa": "seed کردن تازه‌وارد از outbox پاک‌شده: retention آن صفحه‌ها را انداخته، پس بازپخش تاریخ ناقص می‌سازد و کلیدهای گمشده بی‌صدا شکست می‌خورند. outbox دفترچه است نه دفتر تلفن."
+    },
+    {
+      "en": "Compacting the outbox event topic by entity key to 'save space': it destroys the history other consumers need while keeping one copy per entity — the worst of both contracts.",
+      "fa": "فشرده کردن تاپیک رویداد outbox با کلید entity برای «صرفه‌جویی جا»: تاریخ‌ای را نابود می‌کند که مصرف‌کننده‌های دیگر می‌خواهند و یک کپی per-entity نگه می‌دارد — بدترین هر دو قرارداد."
+    },
+    {
+      "en": "Snapshotting without recording the LSN boundary: the stream then starts from a guess, and the gap-or-duplicate question has no honest answer.",
+      "fa": "snapshot بدون ثبت مرز LSN: استریم بعد از حدس شروع می‌شود و سؤال شکاف-یا-تکراری جواب صادق ندارد."
+    },
+    {
+      "en": "Reading internal tables through CDC as if they were a stable contract: the first dropped column pages a production consumer at night.",
+      "fa": "خواندن جدول‌های داخلی با CDC انگار قرارداد پایدارند: اولین ستون حذف‌شده نصف‌شب به مصرف‌کننده پروداکشن page می‌زند."
+    },
+    {
+      "en": "Assuming snapshot pressure is zero: an unthrottled bulk export contends with the leader, and the outage it causes is self-inflicted.",
+      "fa": "فرض این‌که فشار snapshot صفر است: export انبوه مهارنشده با رهبر رقابت می‌کند و قطعی‌ای که می‌سازد خودزده است."
+    }
+  ],
+  "number": 3,
+  "slug": "cdc-index-bootstrap",
+  "sources": [
+    "outbox",
+    "cdc",
+    "kafka"
+  ],
+  "steps": [
+    {
+      "en": "Commit business and outbox together with versioned payload, event ID, entity key and entity version. Internal column changes preserve consumers only when the compatible payload mapping is maintained during rollout.",
+      "fa": "business و outbox را یکجا ثبت کن؛ payload نسخه‌دار، event_id، entity_key و entity_version دارند. تغییر ستون داخلی فقط وقتی بیرون را نمی‌شکند که تبدیل payload سازگار نیز در همان rollout حفظ شود.",
+      "t_en": "One transaction, stable contract",
+      "t_fa": "یک تراکنش، قرارداد پایدار"
+    },
+    {
+      "en": "Coordinate snapshot and boundary B through the supported connector protocol; an ordinary SELECT with an independently sampled LSN is insufficient. Throttle snapshot work against I/O and lag budgets.",
+      "fa": "snapshot و مرز B را با پروتکل رسمی connector هماهنگ کن؛ یک SELECT عادی با LSN خوانده‌شده در زمانی دیگر کافی نیست. نرخ snapshot را زیر بودجهٔ IO و lag مهار کن.",
+      "t_en": "Snapshot with a boundary",
+      "t_fa": "snapshot با مرز"
+    },
+    {
+      "en": "After installing the snapshot, catch up from the consistent boundary. Event IDs dedup repeated events; entity versions reject stale replay. A state snapshot does not list historical event IDs, so event-ID dedup alone cannot resolve snapshot overlap.",
+      "fa": "پس از نصب snapshot، تغییرهای از مرز سازگار را catch-up کن؛ event_id تکرار رویداد و entity_version بازپخش کهنه را مهار می‌کنند. در یک state snapshot نمی‌دانیم کدام event_idهای قبلی حضور دارند؛ پس dedup شناسه به‌تنهایی snapshot overlap را حل نمی‌کند.",
+      "t_en": "Catch up with dedup",
+      "t_fa": "catch-up با dedup"
+    },
+    {
+      "en": "Keep three contracts apart: the one-off snapshot, the append-only event topic keyed by event id under retention, and the compacted state topic keyed by entity key where tombstones linger until observed. A purged diary never seeds.",
+      "fa": "سه قرارداد را جدا نگه دار: snapshot یک‌بارمصرف، تاپیک append-only رویداد با کلید event id زیر retention، و تاپیک فشرده state با کلید entity key که tombstoneها تا مشاهده می‌مانند. دفترچه پاره هرگز seed نمی‌کند.",
+      "t_en": "Three contracts, stated",
+      "t_fa": "سه قرارداد، اعلام‌شده"
+    },
+    {
+      "en": "Prove it with a kill: stop the indexer mid-catch-up, resume, and checksum index versus record at a stated boundary; keep WAL retention wider than the slowest bootstrap and throttle the photo, or re-snapshot loudly.",
+      "fa": "با kill اثباتش کن: ایندکسر را وسط catch-up نگه دار، ادامه بده و ایندکس را در برابر مرجع در مرز اعلام‌شده checksum بگیر؛ نگهداری WAL را پهن‌تر از کندترین bootstrap نگه دار و عکس را مهار کن وگرنه بلند re-snapshot بگیر.",
+      "t_en": "Acceptance by kill test",
+      "t_fa": "پذیرش با kill ـه test"
+    }
+  ],
+  "tests_en": "<p>Acceptance: kill the indexer mid-catch-up and require lag-to-zero plus a boundary checksum match; drop an internal column and require the pipeline to stay green; purge the outbox and require the newcomer runbook to refuse it as seed. Metrics: end-to-end lag, snapshot read rate vs budget, tombstone age vs slowest follower, dedup-skip rate. Real Debezium/Kafka steps are guide-only here.</p>",
+  "tests_fa": "<p>پذیرش: ایندکسر را وسط catch-up بکش و lag-تا-صفر به‌علاوه تطبیق checksum مرز را بخواه؛ ستون داخلی حذف کن و سبز ماندن پایپ‌لاین را بخواه؛ outbox را purge کن و بخواه ران‌بوک تازه‌وارد آن را به‌عنوان seed رد کند. متریک‌ها: lag سرتاسری، نرخ خواندن snapshot در برابر بودجه، سن tombstone در برابر کندترین دنباله‌رو و نرخ skip ـه dedup. گام‌های واقعی Debezium/Kafka این‌جا فقط راهنما هستند.</p>",
+  "worked_en": "<p>At the teaching 50M rows and 20k rows/s, snapshotting takes at least 2500 seconds or 41.7 minutes. Overhead, I/O and catch-up add time; measure service impact. Three-day retention is about 103.7 times that lower bound, not protection against every outage. The demo models an atomic in-memory snapshot and logical crash only; its throughput is not a database benchmark.</p>",
+  "worked_fa": "<p>با فرض آموزشی ۵۰میلیون سطر و ۲۰هزار سطر/ثانیه، حد پایین snapshot برابر ۲۵۰۰ ثانیه یا ۴۱٫۷ دقیقه است. overhead و IO و catch-up آن را افزایش می‌دهند؛ اثر روی سرویس باید اندازه‌گیری شود. سه روز retention حدود ۱۰۳٫۷ برابر این حد پایین است، اما تضمین پوشش همهٔ خرابی‌ها نیست. دمو فقط snapshot اتمیکِ درون‌حافظه‌ای و crash منطقی را مدل می‌کند؛ نرخ آن benchmark پایگاه داده نیست.</p>",
+  "reasoning_fa": "<p>۵۰میلیون سطر ÷۲۰هزار سطر/ثانیه =۲۵۰۰ ثانیه، حدود ۴۱٫۷ دقیقه؛ این حد پایین آموزشی بدون overhead و تغییرهای هم‌زمان است. سه روز WAL فقط وقتی کافی است که زمان snapshot+قطعی+catch-up+حاشیه از آن کمتر باشد و حجم دیسک هم پاسخ دهد. snapshot هزینهٔ IO و نگهداری نسخه دارد حتی روی replica. مرز LSN از پروتکل snapshot سازگار می‌آید؛ event_id تکرار همان رویداد را می‌گیرد و entity_version جلوی عقب‌رفتن state را. compaction برحسب key کار می‌کند و جای snapshot کاملِ مرجع یا تاریخ وقایع را نمی‌گیرد.</p>",
+  "reasoning_en": "<p>50M rows / 20k rows/s = 2500 seconds, about 41.7 minutes, a teaching lower bound before overhead and concurrent changes. Three-day WAL retention suffices only if snapshot + outage + catch-up + margin fit and disk capacity supports it. Snapshots cost I/O and version retention even on replicas. Derive LSN boundaries through a consistent snapshot protocol. Event IDs dedup events; entity versions prevent state regression. Key-based compaction replaces neither complete record snapshots nor event history.</p>"
+}

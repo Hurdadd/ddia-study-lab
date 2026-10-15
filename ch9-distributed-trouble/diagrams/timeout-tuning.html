@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Choosing a Timeout — Fast Detection vs False Alarms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#f7f2e8;color:#302828;
+    font-family:'Nunito','Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%;display:flex;justify-content:center;padding:10px 0;}
+  svg{width:100%;height:auto;max-width:1240px;background:#f7f2e8;}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828;}
+  .ttl{font-size:22px;font-weight:900;}
+  .sub{font-size:14px;font-weight:700;fill:#6e665c;}
+  .hd{font-size:17px;font-weight:900;}
+  .lbl{font-size:13px;font-weight:900;}
+  .ln{font-size:14px;font-weight:400;}
+  .foot{font-size:14px;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Timeout tuning tradeoff: too short causes false alarms and cascading failure, too long slows recovery, adaptive follows measured latency">
+<title>Timeout tuning tradeoff</title>
+
+  <text class="ttl" x="620" y="44" text-anchor="middle">Choosing a Timeout — Fast Detection vs False Alarms</text>
+  <text class="sub" x="620" y="70" text-anchor="middle">A timeout is a guess, never a proof of failure.</text>
+
+  <!-- too short -->
+  <g>
+    <rect x="40" y="100" width="365" height="360" rx="18" fill="#bfe6c9"/>
+    <text class="hd" x="222" y="142" text-anchor="middle">TOO SHORT</text>
+    <text class="lbl" x="64" y="182">good: fast detection</text>
+    <text class="ln" x="64" y="208">failed node leaves rotation</text>
+    <text class="ln" x="64" y="234">in seconds, not minutes</text>
+    <text class="lbl" x="64" y="278">risk: false positives cascade</text>
+    <text class="ln" x="64" y="304">live node is called dead,</text>
+    <text class="ln" x="64" y="330">its load hits the rest,</text>
+    <text class="ln" x="64" y="356">rest looks dead too: outage</text>
+    <text class="lbl" x="64" y="404">verdict: only with spare capacity</text>
+  </g>
+
+  <!-- too long -->
+  <g>
+    <rect x="437" y="100" width="365" height="360" rx="18" fill="#ffc2da"/>
+    <text class="hd" x="619" y="142" text-anchor="middle">TOO LONG</text>
+    <text class="lbl" x="461" y="182">good: rarely cries wolf</text>
+    <text class="ln" x="461" y="208">almost no false alarms</text>
+    <text class="ln" x="461" y="234">stable membership view</text>
+    <text class="lbl" x="461" y="278">risk: users pay the wait</text>
+    <text class="ln" x="461" y="304">requests hang till timeout,</text>
+    <text class="ln" x="461" y="330">failover takes forever,</text>
+    <text class="ln" x="461" y="356">SLO budget burns away</text>
+    <text class="lbl" x="461" y="404">verdict: safe but sluggish</text>
+  </g>
+
+  <!-- adaptive -->
+  <g>
+    <rect x="834" y="100" width="365" height="360" rx="18" fill="#c3ceff"/>
+    <text class="hd" x="1016" y="142" text-anchor="middle">ADAPTIVE</text>
+    <text class="lbl" x="858" y="182">good: tracks real RTT</text>
+    <text class="ln" x="858" y="208">Phi Accrual follows the</text>
+    <text class="ln" x="858" y="234">measured delay distribution</text>
+    <text class="lbl" x="858" y="278">risk: still never certain</text>
+    <text class="ln" x="858" y="304">harder to implement,</text>
+    <text class="ln" x="858" y="330">needs live measurements,</text>
+    <text class="ln" x="858" y="356">a guess with better math</text>
+    <text class="lbl" x="858" y="404">verdict: best default choice</text>
+  </g>
+
+  <rect x="40" y="482" width="1160" height="134" rx="16" fill="#ffe08a"/>
+  <text class="foot" x="64" y="514">No correct value exists: measure first, then balance.</text>
+  <text class="ln" x="64" y="542">Networks have unbounded delay, so a formula like 2d + r is fiction.</text>
+  <text class="ln" x="64" y="570">Record the RTT distribution and pick the tradeoff explicitly.</text>
+</svg>
+</div>
+</body>
+</html>

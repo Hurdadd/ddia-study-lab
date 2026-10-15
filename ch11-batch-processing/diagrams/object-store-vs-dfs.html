@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where bytes live: three storages</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#f7f2e8;font-family:'Nunito','Vazirmatn',system-ui,sans-serif}
+  .stage{max-width:1240px;margin:0 auto;padding:16px}
+  svg{display:block;width:100%;height:auto}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Local filesystem versus distributed filesystem versus object store">
+<title>Where bytes live: three storages</title>
+<rect x="0" y="0" width="1240" height="660" rx="24" fill="#f7f2e8"/>
+<text x="620" y="54" text-anchor="middle" font-size="22" font-weight="800">Where bytes live: three storages</text>
+
+<rect x="40" y="110" width="350" height="300" rx="20" fill="#ffe08a"/>
+<text x="215" y="170" text-anchor="middle" font-size="17" font-weight="800">Local FS (ext4)</text>
+<text x="215" y="212" text-anchor="middle" font-size="15">4KB blocks</text>
+<text x="215" y="244" text-anchor="middle" font-size="15">inodes on one disk</text>
+<text x="215" y="300" text-anchor="middle" font-size="15">atomic rename, locks</text>
+<text x="215" y="344" text-anchor="middle" font-size="15">one machine only</text>
+
+<rect x="445" y="110" width="350" height="300" rx="20" fill="#bfe6c9"/>
+<text x="620" y="170" text-anchor="middle" font-size="17" font-weight="800">Distributed FS</text>
+<text x="620" y="212" text-anchor="middle" font-size="15">128MB blocks</text>
+<text x="620" y="244" text-anchor="middle" font-size="15">NameNode metadata</text>
+<text x="620" y="300" text-anchor="middle" font-size="15">run tasks near data</text>
+<text x="620" y="344" text-anchor="middle" font-size="15">replication, shared-nothing</text>
+
+<rect x="850" y="110" width="350" height="300" rx="20" fill="#c3ceff"/>
+<text x="1025" y="170" text-anchor="middle" font-size="17" font-weight="800">Object store</text>
+<text x="1025" y="212" text-anchor="middle" font-size="15">bucket plus key</text>
+<text x="1025" y="244" text-anchor="middle" font-size="15">immutable after put</text>
+<text x="1025" y="300" text-anchor="middle" font-size="15">no locks, no links</text>
+<text x="1025" y="344" text-anchor="middle" font-size="15">compute scales apart</text>
+
+<rect x="40" y="450" width="1160" height="160" rx="20" fill="#ffc2da"/>
+<text x="620" y="508" text-anchor="middle" font-size="17" font-weight="800">Object-store fine print</text>
+<text x="620" y="546" text-anchor="middle" font-size="15">rename is copy plus delete, and it is not atomic</text>
+<text x="620" y="578" text-anchor="middle" font-size="15">empty directories are impossible</text>
+</svg>
+</div>
+</body>
+</html>

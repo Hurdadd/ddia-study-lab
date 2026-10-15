@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Federated Reads vs Unbundled Writes — Two Ways to Combine Tools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#f7f2e8;color:#302828;
+    font-family:'Nunito','Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%;display:flex;justify-content:center;padding:10px 0;}
+  svg{width:100%;height:auto;max-width:1240px;background:#f7f2e8;}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828;}
+  .ttl{font-size:22px;font-weight:900;}
+  .sub{font-size:14px;font-weight:700;fill:#6e665c;}
+  .hd{font-size:17px;font-weight:900;}
+  .lbl{font-size:13px;font-weight:900;}
+  .ln{font-size:14px;font-weight:400;}
+  .foot{font-size:14px;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Federated databases unify reads with one query layer while unbundled databases sync writes with an event log">
+<title>Federated reads vs unbundled writes</title>
+
+  <text class="ttl" x="620" y="44" text-anchor="middle">Federated Reads vs Unbundled Writes — Two Ways to Combine</text>
+  <text class="sub" x="620" y="70" text-anchor="middle">No single engine fits all patterns: unify queries, or sync writes.</text>
+
+  <g>
+    <rect x="40" y="110" width="490" height="330" rx="18" fill="#c3ceff"/>
+    <text class="hd" x="285" y="152" text-anchor="middle">FEDERATED — unify reads</text>
+    <text class="ln" x="64" y="196">one query interface (Trino,</text>
+    <text class="ln" x="64" y="236">Postgres foreign wrappers)</text>
+    <text class="ln" x="64" y="276">apps tap engines directly,</text>
+    <text class="ln" x="64" y="316">or combine via the layer</text>
+    <text class="ln" x="64" y="356">relational tradition: clean</text>
+    <text class="lbl" x="64" y="410">semantics, complex build</text>
+  </g>
+
+  <line x1="548" y1="275" x2="676" y2="275" stroke="#302828" stroke-width="3"/>
+  <text class="lbl" x="612" y="248" text-anchor="middle">writes are</text>
+  <text class="lbl" x="612" y="306" text-anchor="middle">the hard part</text>
+
+  <g>
+    <rect x="710" y="110" width="490" height="330" rx="18" fill="#bfe6c9"/>
+    <text class="hd" x="955" y="152" text-anchor="middle">UNBUNDLED — sync writes</text>
+    <text class="ln" x="734" y="196">event log + CDC link systems</text>
+    <text class="ln" x="734" y="236">unbundles index maintenance</text>
+    <text class="ln" x="734" y="276">ordered log, idempotent apply</text>
+    <text class="ln" x="734" y="316">Unix tradition: small tools,</text>
+    <text class="ln" x="734" y="356">one pipe-like API above</text>
+    <text class="lbl" x="734" y="410">loose coupling, safe faults</text>
+  </g>
+
+  <rect x="40" y="462" width="1160" height="154" rx="16" fill="#ffe08a"/>
+  <text class="foot" x="64" y="494">Why unbundle wins:</text>
+  <text class="ln" x="64" y="522">the hard problem is keeping WRITES in sync, not mapping reads.</text>
+  <text class="ln" x="64" y="550">ordered log + idempotent writes beat XA across strange systems.</text>
+  <text class="ln" x="64" y="578">breadth, not depth: cover more workloads, not one workload faster.</text>
+</svg>
+</div>
+</body>
+</html>

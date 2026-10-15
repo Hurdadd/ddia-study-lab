@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slow Consumer — Drop, Buffer, or Backpressure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#f7f2e8;color:#302828;
+    font-family:'Nunito','Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%;display:flex;justify-content:center;padding:10px 0;}
+  svg{width:100%;height:auto;max-width:1240px;background:#f7f2e8;}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828;}
+  .ttl{font-size:22px;font-weight:900;}
+  .sub{font-size:14px;font-weight:700;fill:#6e665c;}
+  .hd{font-size:17px;font-weight:900;}
+  .lbl{font-size:13px;font-weight:900;}
+  .ln{font-size:14px;font-weight:400;}
+  .foot{font-size:14px;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Three ways to handle a producer faster than its consumer: drop, buffer, or backpressure">
+<title>Slow consumer: drop, buffer, backpressure</title>
+
+  <text class="ttl" x="620" y="44" text-anchor="middle">Producer Faster Than Consumer — Three Options</text>
+  <text class="sub" x="620" y="70" text-anchor="middle">Drop it, buffer it, or push back: pick by what loss costs you.</text>
+
+  <g>
+    <rect x="40" y="100" width="360" height="356" rx="18" fill="#ffc2da"/>
+    <text class="hd" x="220" y="142" text-anchor="middle">1 · DROP</text>
+    <text class="ln" x="64" y="184">discard messages when behind</text>
+    <text class="ln" x="64" y="224">sensor readings: one lost</text>
+    <text class="ln" x="64" y="264">dot barely matters</text>
+    <text class="ln" x="64" y="304">but event COUNTS go wrong</text>
+    <text class="ln" x="64" y="344">counting needs reliability</text>
+    <text class="lbl" x="64" y="412">use when loss is OK</text>
+  </g>
+
+  <g>
+    <rect x="440" y="100" width="360" height="356" rx="18" fill="#ffe08a"/>
+    <text class="hd" x="620" y="142" text-anchor="middle">2 · BUFFER</text>
+    <text class="ln" x="464" y="184">queue in memory, then</text>
+    <text class="ln" x="464" y="224">spill to disk</text>
+    <text class="ln" x="464" y="264">log broker = giant ring</text>
+    <text class="ln" x="464" y="304">buffer (oldest drops)</text>
+    <text class="ln" x="464" y="344">full disk drops too</text>
+    <text class="lbl" x="464" y="412">monitor the lag!</text>
+  </g>
+
+  <g>
+    <rect x="840" y="100" width="360" height="356" rx="18" fill="#bfe6c9"/>
+    <text class="hd" x="1020" y="142" text-anchor="middle">3 · BACKPRESSURE</text>
+    <text class="ln" x="864" y="184">stall the producer</text>
+    <text class="ln" x="864" y="224">Unix pipes and TCP:</text>
+    <text class="ln" x="864" y="264">small fixed buffer;</text>
+    <text class="ln" x="864" y="304">sender blocks till read</text>
+    <text class="ln" x="864" y="344">nothing lost, nothing free</text>
+    <text class="lbl" x="864" y="412">lossless, but slower</text>
+  </g>
+
+  <rect x="40" y="478" width="1160" height="138" rx="16" fill="#c3ceff"/>
+  <text class="foot" x="64" y="512">Second question: crash or offline — is anything lost?</text>
+  <text class="ln" x="64" y="542">durability = disk writes + replication, paid in throughput and latency.</text>
+  <text class="ln" x="64" y="572">sampling a sensor? dropping is fine. counting money? never drop.</text>
+  <text class="ln" x="64" y="602">durable enough for the job — no more, no less.</text>
+</svg>
+</div>
+</body>
+</html>

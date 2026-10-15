@@ -1,0 +1,1796 @@
+{
+  "reviewed_on": "2026-10-14",
+  "scope": "Backend / Distributed Systems · Senior / Staff",
+  "exercises": [
+    {
+      "chapter": 1,
+      "number": 1,
+      "level": "senior",
+      "priority": "core",
+      "decision": "refocus",
+      "minutes": 35,
+      "lab": "۳۰–۶۰ دقیقه",
+      "reason": "مرجع داده، مشتق‌ها و انتشار تغییر، مسئلهٔ واقعی طراحی است؛ صرف نام‌گذاری اجزا عمق کافی ندارد.",
+      "prompt": "فروشگاهی را طراحی کن که سفارش را ثبت می‌کند و کش، جست‌وجو، گزارش و پیشنهاد محصول دارد. مرجع هر واقعیت را مشخص کن. اگر سفارش commit شود ولی انتشار رویداد شکست بخورد چه می‌کنی؟ قرارداد تازگی هر نما، مسیر بازسازی و هزینهٔ حداقل معماری را توضیح بده.",
+      "signals": [
+        "مرجع و مشتق را برای هر واقعیت جدا می‌کند",
+        "dual write، outbox/CDC و idempotency را تحلیل می‌کند",
+        "برای تازگی و بازسازی معیار قابل سنجش دارد"
+      ],
+      "followup": "اگر مشتری بلافاصله بعد از ثبت سفارش آن را در جست‌وجو نبیند، تجربهٔ کاربر را چطور حفظ می‌کنی؟",
+      "sources": [
+        "amazon",
+        "outbox"
+      ],
+      "reason_en": "Record and derived data are useful, but classification alone is too shallow.",
+      "prompt_en": "Design order storage and its cache, search, reporting and recommendation views. Explain commit-without-publication, freshness contracts, rebuilding and minimum cost.",
+      "signals_en": [
+        "Authority per fact",
+        "Atomic publication and idempotence",
+        "Freshness and rebuild criteria"
+      ],
+      "lab_fa": "<p>برای این اجزا مشخص کن هرکدام <span class=\"ltr\">system of record</span> است یا <span class=\"ltr\">derived</span> و چرا: پایگاه داده سفارش‌ها، کش وضعیت سفارش، ایندکس جست‌وجوی سفارش‌ها، گزارش ماهانه فروش، مدل پیشنهاد محصول. بعد بگو: با ثبت سفارش جدید، کدام سیستم‌ها باید به‌روز شوند و مکانیزم انتشار چه باشد؟</p>",
+      "lab_en": "<p>For each of these, decide <span class=\"ltr\">system of record</span> or <span class=\"ltr\">derived</span> and why: the orders database, the order-status cache, the order search index, the monthly sales report, the recommendation model. Then: when a new order lands, which systems must update, and by what propagation mechanism?</p>",
+      "title_fa": "تمرین ۱ — معماری یک فروشگاه آنلاین",
+      "title_en": "Exercise 1 — an online shop’s architecture",
+      "folder": "ch1-tradeoffs",
+      "hue": "peach",
+      "followup_en": "How do you preserve the user experience if a new order is not yet visible in search?",
+      "lab_en_duration": "30–60 minutes"
+    },
+    {
+      "chapter": 1,
+      "number": 2,
+      "level": "senior",
+      "priority": "core",
+      "decision": "refocus",
+      "minutes": 40,
+      "lab": "۳۰–۶۰ دقیقه",
+      "reason": "برآورد بار و انتخاب کمترین توزیع مفید است؛ تعداد سفارش روزانه به‌تنهایی دلیل sharding نیست.",
+      "prompt": "روزانه دو میلیون سفارش، اوج ده‌برابری، گزارش فروش و الزام نگهداری داده در یک کشور داریم. ابتدا اندازهٔ رکورد، read/write ratio، SLO و رشد را روشن کن. سه طرح تک‌گره، primary+replica و sharding را با شواهد ظرفیت مقایسه کن؛ بکاپ، failover و محل داده را هم پوشش بده.",
+      "signals": [
+        "میانگین را با peak اشتباه نمی‌گیرد",
+        "residency را با لزوم sharding یکی نمی‌گیرد",
+        "threshold مهاجرت و هزینهٔ عملیاتی را مشخص می‌کند"
+      ],
+      "followup": "با پنج برابر شدن حجم و نصف شدن بودجه، کدام بخش را اول تغییر می‌دهی؟",
+      "sources": [
+        "amazon",
+        "atlassian"
+      ],
+      "reason_en": "Capacity estimates should justify distribution rather than assume it.",
+      "prompt_en": "Compare single-node, primary/replica and sharded designs for two million daily orders, tenfold peaks, analytics and in-country storage. Specify workload, SLOs, growth, failover, backup and migration thresholds.",
+      "signals_en": [
+        "Average versus peak",
+        "Residency versus sharding",
+        "Migration thresholds and cost"
+      ],
+      "lab_fa": "<p>سناریو: روزانه ۲ میلیون سفارش، گزارش‌های تحلیلی تیم فروش، و قانونی که داده کاربران باید داخل کشور بماند. برای هر سه بگو چه زمانی از «تک‌ماشین» به «توزیع‌شده» می‌رسی، دلیل دقیق چیست و حداقل معماری انتخابی چه شکلی است.</p>",
+      "lab_en": "<p>Scenario: 2M orders/day, analytical reports for the sales team, and a law keeping user data inside the country. For each, say when you move from “single-node” to “distributed”, the exact reason, and what the minimal chosen architecture looks like.</p>",
+      "title_fa": "تمرین ۲ — تصمیم توزیع",
+      "title_en": "Exercise 2 — the distribution decision",
+      "folder": "ch1-tradeoffs",
+      "hue": "peach",
+      "followup_en": "With fivefold data growth and half the budget, which component do you change first?",
+      "lab_en_duration": "30–60 minutes"
+    },
+    {
+      "chapter": 1,
+      "number": 3,
+      "level": "staff",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 35,
+      "lab": "۱–۲ ساعت",
+      "reason": "حذف داده در سامانه‌های لاگ‌محور برای پلتفرم و حریم خصوصی مهم است؛ انتظار حفظ متن قانون برای همهٔ نقش‌ها مناسب نیست.",
+      "prompt": "درخواست حذف یک کاربر را از مرجع تا کش، ایندکس، لاگ، بکاپ و مجموعهٔ آموزش دنبال کن. گزینه‌های جداسازی PII، retention، بازنویسی سگمنت و حذف کلید رمز را مقایسه کن. بگو چه چیزی در restore نباید دوباره زنده شود و کدام تصمیم نیازمند تفسیر حقوقی است.",
+      "signals": [
+        "همهٔ کپی‌ها و restore را پوشش می‌دهد",
+        "محدودیت crypto-shredding و لینک‌پذیری را می‌بیند",
+        "تأیید حذف را با مدرک و SLA داخلی طراحی می‌کند"
+      ],
+      "followup": "اگر یک مصرف‌کنندهٔ قدیمی هنگام حذف آفلاین باشد چه تضمینی داری؟",
+      "sources": [
+        "privacy",
+        "atlassian"
+      ],
+      "reason_en": "Important for privacy/platform roles; legal memorization is not a general backend requirement.",
+      "prompt_en": "Trace deletion through the record, cache, index, log, backup and training data. Compare PII separation, retention, rewriting and key deletion. Prevent resurrection after restore and identify legal uncertainties.",
+      "signals_en": [
+        "Derived copies and restore",
+        "Key-deletion limitations",
+        "Deletion evidence and deadlines"
+      ],
+      "lab_fa": "<p>اگر سیستمت روی <span class=\"ltr\">append-only event log</span> ساخته شده و کاربر حذف داده‌اش را بخواهد، چه گزینه‌های مهندسی داری؟ هر گزینه را با تریدآفش بیان کن.</p>",
+      "lab_en": "<p>If your system is built on an <span class=\"ltr\">append-only event log</span> and a user requests deletion, what engineering options do you have? State each option with its trade-off.</p>",
+      "title_fa": "تمرین ۳ — چالش GDPR",
+      "title_en": "Exercise 3 — the GDPR challenge",
+      "folder": "ch1-tradeoffs",
+      "hue": "peach",
+      "followup_en": "What happens when an old consumer is offline throughout a deletion?",
+      "lab_en_duration": "1–2 hours"
+    },
+    {
+      "chapter": 2,
+      "number": 1,
+      "level": "foundation",
+      "priority": "core",
+      "decision": "correct",
+      "minutes": 25,
+      "lab": "۳۰–۶۰ دقیقه",
+      "reason": "روز آموزشی ۸۶۴۰۰ ثانیه و ضریب اوج ۱۰ است؛ هر سفارش سه پیام اعلان می‌سازد. کش، یک سطر خلاصهٔ سفارش با کلید order_id در k مقصد منطقی است؛ k را جدا از سه سرویس تعیین کن.",
+      "prompt": "برای دو میلیون سفارش در روز و اوج ده‌برابری، RPS و تعداد سه پیام داخلی به‌ازای هر سفارش را حساب کن. سپس یک view مشخص تعریف کن که هر سفارش در k مقصد آن نوشته می‌شود؛ write amplification، نرخ خواندن، اندازهٔ payload و lag را مقایسه کن و دربارهٔ materialization تصمیم بگیر.",
+      "signals": [
+        "۲۳٫۱۵ و ۲۳۱٫۵ سفارش در ثانیه را درست محاسبه می‌کند",
+        "سه پیام را با k نوشتن کش یکی نمی‌گیرد",
+        "فرض‌ها و نقطهٔ سربه‌سر را بیان می‌کند"
+      ],
+      "followup": "اگر یک مشتری بزرگ k را صد برابر کند چه اتفاقی برای tail latency می‌افتد؟",
+      "sources": [
+        "amazon",
+        "slo"
+      ],
+      "reason_en": "A teaching day has 86400 seconds and the peak factor is 10; each order emits three notifications. The cache stores an order-summary row keyed by order_id in k logical destinations; k is independent of the three services.",
+      "prompt_en": "Calculate average and peak orders/s and three internal notifications per order. Define a materialized view with k destinations, then compare extra writes, read savings, payload size and freshness.",
+      "signals_en": [
+        "Correct average/peak math",
+        "Notification versus view fan-out",
+        "Explicit break-even assumptions"
+      ],
+      "lab_fa": "<p>روزانه ۲ میلیون سفارش و سه اعلان به سرویس‌های موجودی، ریسک و اطلاع‌رسانی داریم. با فرض آموزشی اوج ده‌برابری، سفارش و پیام بر ثانیه را جدا حساب کن. برای کش، یک سطر خلاصهٔ سفارش در k مقصد منطقی تعریف کن؛ ابتدا k=1 و سپس k=5 را بسنج. هر تغییر سفارش در هر مقصد یک upsert دارد؛ تکثیر فیزیکی ذخیره‌ساز را جدا بشمار. نرخ خواندن Q، هزینهٔ خواندن مرجع C_db، هزینهٔ خواندن کش C_cache و هزینهٔ نگهداری هر نوشتن C_w را با واحد سازگار تعریف کن. شرط Q×(C_db−C_cache) > λ_order×k×C_w را از مقایسهٔ هزینه‌ها به دست بیاور؛ اندازهٔ payload، ترافیک و lag مجاز را هم بسنج. توضیح بده چرا سه اعلان لزوماً سه نوشتن کش نیست.</p>",
+      "lab_en": "<p>Assume 2M orders/day, three internal notifications per order and a teaching peak factor of ten. Calculate orders/s and messages/s separately. Define a cache containing one order-summary row in k logical destinations; compare k=1 and k=5, with one upsert per destination per order change. Count physical storage replication separately. Define read rate Q, source-read cost C_db, cache-read cost C_cache and per-write maintenance cost C_w in compatible units. Derive Q×(C_db−C_cache) > λ_order×k×C_w by comparing saved read cost with added write cost. Include payload, bandwidth and allowed lag; explain why three notifications do not imply three cache writes.</p>",
+      "title_fa": "تمرین ۱ — محاسبهٔ بار",
+      "title_en": "Exercise 1 — load math",
+      "folder": "ch2-nonfunctional",
+      "hue": "butter",
+      "followup_en": "What happens to tail latency when one large customer increases k by a factor of 100?",
+      "lab_en_duration": "30–60 minutes",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "روز آموزشی ۸۶۴۰۰ ثانیه و ضریب اوج ۱۰ است؛ هر سفارش سه پیام اعلان می‌سازد. کش، یک سطر خلاصهٔ سفارش با کلید order_id در k مقصد منطقی است؛ k را جدا از سه سرویس تعیین کن.",
+        "en": "A teaching day has 86400 seconds and the peak factor is 10; each order emits three notifications. The cache stores an order-summary row keyed by order_id in k logical destinations; k is independent of the three services."
+      }
+    },
+    {
+      "chapter": 2,
+      "number": 2,
+      "level": "senior",
+      "priority": "core",
+      "decision": "keep",
+      "minutes": 30,
+      "lab": "۳۰–۶۰ دقیقه",
+      "reason": "SLO، تجربهٔ کاربر و پیامد خرابی از کاربردی‌ترین بخش‌های این مجموعه‌اند؛ داشبورد باید به اقدام وصل شود.",
+      "prompt": "برای استعلام وضعیت سفارش SLI و SLO با بازهٔ اندازه‌گیری، latency percentile و availability تعریف کن. مرز success، timeout و خطای وابستگی را روشن کن. error budget و هشدار burn rate را طراحی کن و SLO داخلی را از تعهد قراردادی SLA جدا کن.",
+      "signals": [
+        "صورت و مخرج SLI روشن است",
+        "percentile و availability دو معیار مستقل‌اند",
+        "هشدار، rollback و تصمیم انتشار به budget وصل‌اند"
+      ],
+      "followup": "میانگین عالی است ولی p99 خراب؛ کدام گروه کاربران را بررسی می‌کنی؟",
+      "sources": [
+        "slo",
+        "atlassian"
+      ],
+      "reason_en": "A strong operational exercise when monitoring leads to action.",
+      "prompt_en": "Define order-status SLIs, latency and availability SLOs, measurement windows, error budget and burn-rate alerts. Distinguish internal objectives from contractual SLA remedies.",
+      "signals_en": [
+        "SLI numerator and denominator",
+        "Latency versus availability",
+        "Budget-driven alerts and rollback"
+      ],
+      "lab_fa": "<p>\n      برای سرویسِ «استعلام وضعیت سفارش» یک SLO بنویس با percentile و دسترس‌پذیری؛ بعد مشخص کن اگر SLO نقض شد،\n      SLA چه پیامدی برای مشتری دارد و چه چیزی در داشبورد مانیتورینگ باید دیده شود.\n    </p>",
+      "lab_en": "<p>\n      Write an SLO with percentiles and availability for an “order status” service; then state what the SLA promises the customer\n      if the SLO breaks, and what must show on the monitoring dashboard.\n    </p>",
+      "title_fa": "تمرین ۲ — نوشتن SLO و SLA",
+      "title_en": "Exercise 2 — writing SLO and SLA",
+      "folder": "ch2-nonfunctional",
+      "hue": "butter",
+      "followup_en": "The average latency is excellent but p99 is poor. Which user groups do you investigate?",
+      "lab_en_duration": "30–60 minutes"
+    },
+    {
+      "chapter": 2,
+      "number": 3,
+      "level": "senior",
+      "priority": "core",
+      "decision": "refocus",
+      "minutes": 45,
+      "lab": "۳–۶ ساعت",
+      "reason": "multi-AZ و rolling upgrade مهم‌اند؛ داشتن دو ماشین به‌تنهایی SPOFهای کنترل، state و شبکه را حذف نمی‌کند.",
+      "prompt": "یک API ثبت سفارش با پایگاه داده و صف طراحی کن که خرابی یک ماشین یا AZ را تحمل کند. failure domain، quorum، fencing، session state، health check، ظرفیت AZ باقی‌مانده و RPO/RTO را مشخص کن. انتشار سازگار و rollback بدون توقف را توضیح بده.",
+      "signals": [
+        "SPOFهای data plane و control plane را می‌یابد",
+        "HA را با backup و disaster recovery یکی نمی‌گیرد",
+        "در ظرفیت و schema rollout شرط قابل آزمون می‌دهد"
+      ],
+      "followup": "در rolling upgrade نسخه‌های قدیم و جدید هم‌زمان فعال‌اند؛ تغییر schema را چگونه منتشر می‌کنی؟",
+      "sources": [
+        "microsoft",
+        "atlassian"
+      ],
+      "reason_en": "Two machines do not eliminate every single point of failure.",
+      "prompt_en": "Design an order API, database and queue that survive one host or AZ failure. Specify quorum, fencing, health checks, spare capacity, RPO/RTO, compatible rolling upgrades and rollback.",
+      "signals_en": [
+        "Data/control-plane failure domains",
+        "HA versus backup/DR",
+        "Capacity and rollout acceptance gates"
+      ],
+      "lab_fa": "<p>\n      معماری یک سرویس نمونه را بردار، SPOFهایش را فهرست کن و طرحی بده که در آن: از دست رفتن یک ماشین یا یک منطقهٔ در دسترسی (AZ)\n      سرویس را نکشد، و بتوان بدون downtime انتشار نسخهٔ جدید داد (rolling upgrade). هر تصمیم را با تریدآفش بنویس.\n    </p>",
+      "lab_en": "<p>\n      Take a sample service architecture, list its SPOFs, and sketch a design where losing one machine or one availability zone (AZ)\n      doesn’t kill the service, and new versions ship with no downtime (rolling upgrades). Write each decision with its trade-off.\n    </p>",
+      "title_fa": "تمرین ۳ — حذف SPOF",
+      "title_en": "Exercise 3 — removing SPOFs",
+      "folder": "ch2-nonfunctional",
+      "hue": "butter",
+      "followup_en": "Old and new binaries coexist during rolling deployment. How do you roll out a schema change?",
+      "lab_en_duration": "3–6 hours"
+    },
+    {
+      "chapter": 3,
+      "number": 1,
+      "level": "senior",
+      "priority": "core",
+      "decision": "refocus",
+      "minutes": 40,
+      "lab": "۱–۲ ساعت",
+      "reason": "مدل‌سازی بر اساس query و constraint ارزشمند است؛ پاسخ «SQL یا NoSQL» بدون workload ضعیف است.",
+      "prompt": "کاتالوگ محصول، برند، دسته‌بندی چندگانه و نظر کاربران را با مدل رابطه‌ای و سندی طراحی کن. سه query پرتکرار، pagination، رشد نظرات، uniqueness و تغییر برند را مشخص کن. schema و index را رسم کن و یک انتخاب متناسب با بار داشته باش.",
+      "signals": [
+        "cardinality، FK و index روشن‌اند",
+        "آرایهٔ بی‌حد نظرات را در سند جا نمی‌دهد",
+        "انتخاب را با query و consistency توجیه می‌کند"
+      ],
+      "followup": "اگر محصول در چند دسته باشد و نظرات میلیون‌تایی شوند مدل چگونه تغییر می‌کند؟",
+      "sources": [
+        "amazon",
+        "atlassian"
+      ],
+      "reason_en": "Model choices should follow queries, cardinality and constraints.",
+      "prompt_en": "Model products, brands, multiple categories and unbounded reviews in relational and document forms. Specify three queries, pagination, indexes and uniqueness; justify a workload-specific choice.",
+      "signals_en": [
+        "Cardinality, keys and indexes",
+        "Bounded document growth",
+        "Query-driven consistency choices"
+      ],
+      "lab_fa": "<p>\n      یک فروشگاه اینترنتی با محصول، دسته‌بندی، برند و نظر کاربران را در نظر بگیر. دو مدل‌سازی بنویس: یکی رابطه‌ای (با جدول‌های لازم و کلیدها)\n      و یکی سندی (JSON). برای هرکدام بگو: چه کوئری‌هایی ساده‌اند، چه کوئری‌هایی نیاز به join یا کد اضافه دارند، و کدام را انتخاب می‌کنی — چرا؟\n    </p>",
+      "lab_en": "<p>\n      Take an online shop with products, categories, brands and user reviews. Write two modellings: one relational (with tables and keys)\n      and one document-based (JSON). For each, say: which queries are simple, which need joins or extra code, and which you would pick — why?\n    </p>",
+      "title_fa": "تمرین ۱ — مدل‌سازی کاتالوگ فروشگاه",
+      "title_en": "Exercise 1 — modelling a shop catalog",
+      "folder": "ch3-data-models",
+      "hue": "mint",
+      "followup_en": "How does the model change when a product has multiple categories and millions of reviews?",
+      "lab_en_duration": "1–2 hours"
+    },
+    {
+      "chapter": 3,
+      "number": 2,
+      "level": "foundation",
+      "priority": "core",
+      "decision": "refocus",
+      "minutes": 20,
+      "lab": "۳۰–۶۰ دقیقه",
+      "reason": "نمونهٔ خوبی برای normalization است؛ نسخهٔ فعلی برای لول بالا باید به update propagation و cache invalidation برسد.",
+      "prompt": "لوگوی یک برند روی صد هزار محصول دیده می‌شود. reference، embedding و read model مشتق را مقایسه کن. هزینهٔ خواندن، fan-out تغییر، stale data و failure میان batch update را بیان کن؛ انتخابت را با حد تازگی قابل قبول توجیه کن.",
+      "signals": [
+        "کپی را بدون مسیر update پیشنهاد نمی‌دهد",
+        "خواندن سریع را با هزینه نوشتن مبادله می‌کند",
+        "منبع حقیقت و نسخهٔ logo را مشخص می‌کند"
+      ],
+      "followup": "با شکست به‌روزرسانی در نیمهٔ محصولات چه چیزی را retry می‌کنی؟",
+      "sources": [
+        "atlassian",
+        "outbox"
+      ],
+      "reason_en": "Useful foundations; propagation failures provide the senior follow-up.",
+      "prompt_en": "Compare references, embedding and a derived read model for one brand logo across 100,000 products. Analyze read cost, update fan-out, partial failure, staleness and versioning.",
+      "signals_en": [
+        "Copy propagation",
+        "Read/write cost trade-off",
+        "Authority and versioning"
+      ],
+      "lab_fa": "<p>\n      در همان فروشگاه، لوگوی برند در صفحهٔ محصول نمایش داده می‌شود. اگر لوگو عوض شود چه اتفاقی می‌افتد؟\n      دو طرح بده (کپی لوگو در هر محصول، در برابر جدول برند با ارجاع) و هر کدام را با هزینهٔ خواندن/نوشتن و ریسک ناسازگاری بسنج.\n    </p>",
+      "lab_en": "<p>\n      In the same shop, the brand logo shows on the product page. What happens if the logo changes?\n      Sketch two designs (logo copied into each product vs a referenced brand table) and weigh each by read/write cost and inconsistency risk.\n    </p>",
+      "title_fa": "تمرین ۲ — تصمیم نرمال‌سازی",
+      "title_en": "Exercise 2 — the normalization call",
+      "folder": "ch3-data-models",
+      "hue": "mint",
+      "followup_en": "What do you retry when a logo update fails halfway through the products?",
+      "lab_en_duration": "30–60 minutes"
+    },
+    {
+      "chapter": 3,
+      "number": 3,
+      "level": "senior",
+      "priority": "core",
+      "decision": "refocus",
+      "minutes": 40,
+      "lab": "۲–۴ ساعت",
+      "reason": "رزرو و replay سناریوی قوی‌ای است؛ نام‌گذاری event به‌تنهایی کافی نیست و concurrency قید صندلی مهم‌تر است.",
+      "prompt": "رزرو سینما را با event log و سه projection وضعیت صندلی، فروش و بلیت طراحی کن. دو درخواست هم‌زمان برای یک صندلی، انقضای hold، لغو و اصلاح رزرو را توضیح بده. invariant را در write path اعمال کن و replay را از ارسال دوبارهٔ بلیت جدا کن.",
+      "signals": [
+        "یک صندلی دو رزرو تأییدشده ندارد",
+        "command و event و compensating event را جدا می‌کند",
+        "projection و اثر بیرونی idempotent هستند"
+      ],
+      "followup": "رویداد SeatHeld دیر برسد ولی SeatReleased قبلاً پردازش شده باشد چه می‌کنی؟",
+      "sources": [
+        "idempotency",
+        "amazon"
+      ],
+      "reason_en": "Reservation invariants matter more than naming events.",
+      "prompt_en": "Design cinema reservations with a log and seat, sales and ticket projections. Handle concurrent requests, hold expiry, cancellation and corrections. Enforce seat exclusivity at the write boundary and prevent replayed external effects.",
+      "signals_en": [
+        "Seat exclusivity",
+        "Commands versus events",
+        "Idempotent projections and side effects"
+      ],
+      "lab_fa": "<p>\n      برای سیستم رزرو صندلی سینما: فهرست رویدادها را بنویس (نام‌ها به زمان گذشته)، سه projection تعریف کن (وضعیت صندلی‌ها، گزارش فروش، چاپ بلیت)،\n      و بگو اگر کاربری اشتباه رزرو کرد چطور با یک رویداد تازه اصلاحش می‌کنی. یک حالت هم پیدا کن که پردازشِ دوباره در آن خطرناک باشد.\n    </p>",
+      "lab_en": "<p>\n      For a cinema seat-booking system: list the events (past-tense names), define three projections (seat status, sales report, ticket printing),\n      and say how a mistaken booking is fixed with a fresh event. Also find one case where replaying is dangerous.\n    </p>",
+      "title_fa": "تمرین ۳ — event sourcing برای رزرو سینما",
+      "title_en": "Exercise 3 — event sourcing for cinema booking",
+      "folder": "ch3-data-models",
+      "hue": "mint",
+      "followup_en": "What happens if SeatHeld arrives after SeatReleased has already been processed?",
+      "lab_en_duration": "2–4 hours"
+    },
+    {
+      "chapter": 4,
+      "number": 1,
+      "level": "senior",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 45,
+      "lab": "۶–۱۲ ساعت",
+      "reason": "LSM/WAL برای storage/platform مفید است؛ ساخت موتور کامل و یک میلیون benchmark تمرین چندساعته است، نه سؤال معمول جلسه.",
+      "prompt": "برای workload نوشتن‌محور با point read و range read، LSM و B-tree را مقایسه کن. مسیر write، WAL، memtable، SSTable، compaction و tombstone را رسم کن. توضیح بده crash بین flush و ثبت manifest چه می‌کند و چه زمانی write/read/space amplification بالا می‌رود.",
+      "signals": [
+        "durability را از index حافظه جدا می‌کند",
+        "نسخهٔ جدید و tombstone درست انتخاب می‌شوند",
+        "benchmark دادهٔ خام، fsync و cache را مشخص می‌کند"
+      ],
+      "followup": "حذف tombstone هنگام compaction چه زمانی رکورد قدیمی را زنده می‌کند؟",
+      "sources": [
+        "microsoft",
+        "atlassian"
+      ],
+      "reason_en": "A substantial storage lab rather than a normal live interview task.",
+      "prompt_en": "Compare LSM and B-tree for write-heavy point/range reads. Draw WAL, memtable, SSTable and compaction. Explain crash recovery, manifests, tombstones and write/read/space amplification.",
+      "signals_en": [
+        "Durability versus RAM indexing",
+        "Latest versions and tombstones",
+        "Defined fsync/cache benchmark conditions"
+      ],
+      "lab_fa": "با همان دو تابعِ bash بخش ۱ شروع کن و قدم‌به‌قدم موتورت را کامل کن: اول hash index در حافظه با بازسازی بعد از restart؛\n      بعد memtable با flush به فایلِ مرتب (SSTable ساده) و خواندنِ جدیدبه‌قدیم؛ بعد merge دو سگمنت با نگه‌داشتنِ تازه‌ترین مقدار و tombstone برای حذف.\n      در پایان یک آزمایش بنویس: یک میلیون نوشتنِ تصادفی، اندازه‌گیریِ مجموعِ بایت‌های نوشته‌شده روی دیسک تقسیم‌بر دادهٔ خام (write amplification)، و مقایسهٔ زمانِ ۱۰ هزار خواندنِ نقطه‌ای در برابر یک range query.",
+      "lab_en": "<p>Start from section 1’s two bash functions and complete your engine step by step: first an in-memory hash index with post-restart rebuild; then a memtable flushing to a sorted file (a simple SSTable) with newest-to-oldest reads; then merging two segments keeping the newest value, with tombstones for deletes. Finish with a test: a million random writes, measuring total disk bytes over raw data (write amplification), and comparing 10k point reads against one range query.</p>",
+      "title_fa": "تمرین ۱ — موتور کلید-مقدار log-structured",
+      "title_en": "Exercise 1 — a log-structured key-value engine",
+      "folder": "ch4-storage-retrieval",
+      "hue": "sky",
+      "followup_en": "When can dropping a tombstone during compaction resurrect an old value?",
+      "lab_en_duration": "6–12 hours"
+    },
+    {
+      "chapter": 4,
+      "number": 2,
+      "level": "senior",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 40,
+      "lab": "۳–۶ ساعت",
+      "reason": "column pruning، partition pruning و star schema برای data engineering مناسب‌اند؛ RLE دستی ارزش مصاحبه‌ای کمتری دارد.",
+      "prompt": "گزارش فروش هر دسته‌بندی به تفکیک روز هفته را روی fact فروش و dimension محصول و تاریخ طراحی کن. SQL، partition key، sort key و ستون‌های خوانده‌شده را مشخص کن. اثر skew، cardinality، bitmap و تغییر دسته‌بندی محصول در تاریخ را تحلیل کن.",
+      "signals": [
+        "pruning را با خواندن کمتر ستون تفکیک می‌کند",
+        "تعریف تاریخی category روشن است",
+        "compression را با cardinality و order توجیه می‌کند"
+      ],
+      "followup": "آیا فروش سال گذشته باید با دسته‌بندی امروز گزارش شود یا دسته‌بندی زمان فروش؟",
+      "sources": [
+        "microsoft",
+        "atlassian"
+      ],
+      "reason_en": "Strong for data engineering; manual RLE is an optional depth exercise.",
+      "prompt_en": "Design daily category sales analytics with fact and dimension tables. Provide SQL, partition/sort keys and read columns. Explain pruning, skew, bitmap compression and historical category semantics.",
+      "signals_en": [
+        "Column versus block pruning",
+        "Historical category semantics",
+        "Compression under stated cardinality"
+      ],
+      "lab_fa": "یک جدولِ فروش (تاریخ، محصول، فروشگاه، تعداد، مبلغ) و دو جدولِ بعدِ تاریخ و محصول را طراحی کن. برای پرس‌وجوی «مجموع فروش هر دسته‌بندی به‌تفکیک روزِ هفته در سال گذشته»:\n      کلیدهای مرتب‌سازی منطقی برای فایل‌های ستونی انتخاب کن، کوئری SQL را بنویس، و بگو دقیقاً کدام ستون‌ها و کدام بلوک‌ها خوانده می‌شوند.\n      سپس ستونِ «دسته‌بندی محصول» (با ۵ مقدار متمایز) را دستی bitmap کدگذاری و فشرده‌سازی run-length کن و فیلترِ <span class=\"ltr\">WHERE category = A AND weekday = 2</span> را با عملیات بیتی اجرا کن.",
+      "lab_en": "<p>Design a sales fact table (date, product, store, quantity, amount) plus date and product dimension tables. For the query “last year’s total sales per category by weekday”: pick sensible sort keys for the columnar files, write the SQL, and say exactly which columns and blocks get read. Then hand-encode the “product category” column (5 distinct values) with bitmaps and run-length compression, and execute <span class=\"ltr\">WHERE category = A AND weekday = 2</span> with bitwise ops.</p>",
+      "title_fa": "تمرین ۲ — انباردادهٔ ستونی از صفر",
+      "title_en": "Exercise 2 — a columnar warehouse from scratch",
+      "folder": "ch4-storage-retrieval",
+      "hue": "sky",
+      "followup_en": "Should last year’s sales use today’s category or the category at the time of sale?",
+      "lab_en_duration": "3–6 hours"
+    },
+    {
+      "chapter": 4,
+      "number": 3,
+      "level": "senior",
+      "priority": "role",
+      "decision": "correct",
+      "minutes": 45,
+      "lab": "۳–۶ ساعت",
+      "reason": "الگوی /appl./ دو trigram ثابت app و ppl دارد؛ اشتراک postingها فقط نامزد می‌سازد و regex نتیجه را تأیید می‌کند. recall@k با exact top-k مقایسه می‌شود.",
+      "prompt": "جست‌وجوی محصول را با inverted index، فیلتر و vector index طراحی کن. برای red AND apples اشتراک postings را توضیح بده. برای regex /appl./ ابتدا candidates با trigram و سپس تأیید regex را انجام بده. در IVF با nprobe=1، recall@k را نسبت به exact top-k و p95 latency بسنج؛ hybrid ranking و جداسازی tenant را هم تحلیل کن.",
+      "signals": [
+        "candidate filtering را با match قطعی اشتباه نمی‌گیرد",
+        "ANN ground truth و recall@k درست تعریف شده",
+        "freshness، ACL و هزینه در retrieval دیده می‌شوند"
+      ],
+      "followup": "اگر regex هیچ trigram ثابت نداشته باشد یا filter بسیار محدود باشد چه مسیر جایگزینی داری؟",
+      "sources": [
+        "atlassian",
+        "vector"
+      ],
+      "reason_en": "The pattern /appl./ requires app and ppl; intersect their postings to find candidates, then verify the regex. Recall@k compares approximate results with exact top-k.",
+      "prompt_en": "Design lexical and vector product retrieval. Intersect postings for red AND apples; filter /appl./ by trigram then verify the regex. Evaluate IVF using exact top-k recall@k and p95 latency, and discuss hybrid ranking and tenant isolation.",
+      "signals_en": [
+        "Candidates versus verified matches",
+        "Exact recall ground truth",
+        "Freshness and authorization"
+      ],
+      "lab_fa": "<p>برای ۱۱ سند کوتاه یک inverted index بساز و red AND apples را با اشتراک postingها پاسخ بده. trigram index را با substringهای سه‌حرفی همان متن بساز؛ برای regex بدون حساسیت اضافهٔ زبانی /appl./ از app و ppl نامزد بگیر و سپس خود regex را روی نامزدها اجرا کن. یک نامزد کاذب مثل app ... ppl اضافه کن تا ضرورت تأیید روشن شود. برای IVF، بردارهای ۱۰۰۰بعدی و پنج خوشه صرفاً سناریوی فکری‌اند؛ در آزمایش کوچک می‌توان بردار مصنوعی ساده‌تر با برچسب روشن داشت. exact top-k، نحوهٔ فاصله و tie-breaking را ثابت کن؛ recall@k = |ANN_k ∩ exact_k|/k و p95 زمان پرس‌وجو را برای چند nprobe بسنج. از ۱۱ سند نتیجهٔ کارایی production نگیر؛ محدودیت tenant را پیش از retrieval اعمال کن.</p>",
+      "lab_en": "<p>Build an inverted index for 11 short documents and answer red AND apples by intersecting postings. Build trigrams from the same text. For the plain regex /appl./, intersect app and ppl postings, then run the regex on every candidate. Include a false candidate such as app ... ppl to demonstrate verification. Treat 1000-D vectors in five IVF clusters as a thought experiment; label any smaller synthetic demo explicitly. Fix distance and tie-breaking, compute exact top-k, and measure recall@k = |ANN_k ∩ exact_k|/k and p95 query time for several nprobe values. Eleven documents cannot establish production performance. Apply tenant restrictions before retrieval.</p>",
+      "title_fa": "تمرین ۳ — ایندکس جست‌وجو: از متن تا بردار",
+      "title_en": "Exercise 3 — a search index: from text to vectors",
+      "folder": "ch4-storage-retrieval",
+      "hue": "sky",
+      "followup_en": "What fallback handles a regex without any fixed trigram, or a highly selective filter?",
+      "lab_en_duration": "3–6 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "الگوی /appl./ دو trigram ثابت app و ppl دارد؛ اشتراک postingها فقط نامزد می‌سازد و regex نتیجه را تأیید می‌کند. recall@k با exact top-k مقایسه می‌شود.",
+        "en": "The pattern /appl./ requires app and ppl; intersect their postings to find candidates, then verify the regex. Recall@k compares approximate results with exact top-k."
+      }
+    },
+    {
+      "chapter": 5,
+      "number": 1,
+      "level": "foundation",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 25,
+      "lab": "۱–۲ ساعت",
+      "reason": "wire format برای protocol/storage آموزشی است؛ حفظ ۶۶ و ۳۳ بایت اولویت عمومی ندارد. شرط حفظ unknown field باید دقیق باشد.",
+      "prompt": "با یک رکورد کوچک تفاوت JSON، MessagePack و Protobuf را در schema، حجم و debugging توضیح بده. یک tag را دستی decode کن. فیلد email اضافه کن و دو مسیر binary round-trip و تبدیل به JSON را از نظر حفظ unknown field مقایسه کن.",
+      "signals": [
+        "tag و varint را می‌فهمد، عدد حفظ نمی‌کند",
+        "runtime و نوع تبدیل را مشخص می‌کند",
+        "wire compatibility را از API compatibility جدا می‌کند"
+      ],
+      "followup": "proxy قدیمی پیام را field-by-field به پیام جدید کپی می‌کند؛ چه داده‌ای گم می‌شود؟",
+      "sources": [
+        "protobuf",
+        "atlassian"
+      ],
+      "reason_en": "Understanding compatibility is more valuable than memorizing byte totals.",
+      "prompt_en": "Compare JSON, MessagePack and Protobuf, decode one tag, then add email. Test unknown-field preservation in binary round-trips against JSON conversion or field-by-field copying.",
+      "signals_en": [
+        "Tag/varint understanding",
+        "Specified conversion/runtime",
+        "Wire versus application compatibility"
+      ],
+      "lab_fa": "رکوردِ <code>{\"userName\": \"Martin\", \"favoriteNumber\": 1337, \"interests\": [\"daydreaming\", \"hacking\"]}</code> را بردار.\n      اول با قواعدِ MessagePack (بایتِ نوع + طول) و بعد با قواعدِ varint و tagِ پروتوباف (که در بخش ۳.۴ دیدی) کدگذاریِ دستی کن\n      و بایت‌ها را بشمار؛ باید تقریباً به ۶۶ و ۳۳ بایت برسی. سپس یک فیلدِ تازه (<code>email</code>) با تگ ۴ اضافه کن و نشان بده\n      کدِ قدیمی‌ات (بدونِ دانستنِ تگ ۴) چطور رکورد را round-trip می‌کند بدون آنکه داده گم شود.",
+      "lab_en": "<p>Take the record <code>{\"userName\": \"Martin\", \"favoriteNumber\": 1337, \"interests\": [\"daydreaming\", \"hacking\"]}</code>. First hand-encode it with MessagePack rules (type + length bytes), then with protobuf’s varint and tag rules from section 3.4, and count the bytes; you should land near 66 and 33. Then add a fresh field (<code>email</code>) with tag 4 and show how your old code (unaware of tag 4) round-trips the record with no loss.</p>",
+      "title_fa": "تمرین ۱ — بایت‌ها را دستی بشمار",
+      "title_en": "Exercise 1 — count the bytes by hand",
+      "folder": "ch5-encoding-evolution",
+      "hue": "lilac",
+      "followup_en": "An old proxy copies recognized fields into a fresh message. What data disappears?",
+      "lab_en_duration": "1–2 hours"
+    },
+    {
+      "chapter": 5,
+      "number": 2,
+      "level": "senior",
+      "priority": "core",
+      "decision": "correct",
+      "minutes": 40,
+      "lab": "۲–۴ ساعت",
+      "reason": "جهت writer→reader، فرمت binary/JSON، tag، default و alias مشخص‌اند؛ parse شدن با حفظ همهٔ مقدارها یکسان نیست.",
+      "prompt": "برای Avro و Protobuf افزودن فیلد، rename و تغییر cardinality را بررسی کن. جهت writer→reader، default، alias، tag و binary/JSON را دقیق مشخص کن. scalar-to-array را با فیلد جدید و دورهٔ dual compatibility منتشر کن؛ compatibility test و rollback داشته باش.",
+      "signals": [
+        "backward یعنی reader جدید/writer قدیم را روشن می‌کند",
+        "rename Avro را خودکار دوطرفه فرض نمی‌کند",
+        "packed numeric و lossy string repeated را می‌بیند"
+      ],
+      "followup": "consumerهای قدیمی ماه‌ها عقب‌اند؛ چه زمانی tag یا فیلد قدیمی را حذف می‌کنی؟",
+      "sources": [
+        "protobuf",
+        "avro"
+      ],
+      "reason_en": "Name writer→reader direction, binary/JSON format, tags, defaults and aliases; parseability differs from preserving all values.",
+      "prompt_en": "Compare Avro and Protobuf field addition, rename and cardinality changes. Specify writer/reader direction, aliases, defaults and tags. Migrate cardinality with a new field and compatibility tests; distinguish parseability from lossless semantics.",
+      "signals_en": [
+        "Explicit writer/reader direction",
+        "Asymmetric rename handling",
+        "Packing and lossy repeated fields"
+      ],
+      "lab_fa": "<p>برای پروفایل کاربر schemaهای Avro و Protobuf با نسخهٔ runtime مشخص بنویس. افزودن فیلد، rename و singular→repeated را در هر دو جهت old writer→new reader و new writer→old reader آزمایش کن. در Avro، reader default و جهت alias را صریح بنویس؛ nullable بودن به‌تنهایی default ایجاد نمی‌کند. در Protobuf، tag را ثابت نگه دار و تفاوت binary با JSON، حفظ unknown field در binary round-trip و حذف آن در JSON یا کپی field-by-field را بسنج. برای cardinality، نوع scalar/message و packed بودن را تعیین کن و فقط به parse موفق اکتفا نکن: همهٔ مقدارها باید بررسی شوند. مسیر امن را با فیلد و tag تازه، دورهٔ dual-read/write و آزمون rollback طراحی کن؛ معیار قبولی «حفظ معنا» است.</p>",
+      "lab_en": "<p>Write Avro and Protobuf user-profile schemas with named runtime versions. Test field addition, rename and singular→repeated in both old-writer→new-reader and new-writer→old-reader directions. State Avro reader defaults and alias direction; nullable alone supplies no default. For Protobuf retain tags and compare binary with JSON, including unknown-field binary round-trips versus JSON or field-by-field copying. State scalar/message type and packed encoding before assessing cardinality changes; verify every value, not just successful parsing. Design a new-field/new-tag migration with dual-read/write and rollback tests. Semantic preservation is the acceptance criterion.</p>",
+      "title_fa": "تمرین ۲ — تکاملِ schema زیرِ فشار",
+      "title_en": "Exercise 2 — schema evolution under pressure",
+      "folder": "ch5-encoding-evolution",
+      "hue": "lilac",
+      "followup_en": "Old consumers are months behind. When can you remove the old field or tag?",
+      "lab_en_duration": "2–4 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "جهت writer→reader، فرمت binary/JSON، tag، default و alias مشخص‌اند؛ parse شدن با حفظ همهٔ مقدارها یکسان نیست.",
+        "en": "Name writer→reader direction, binary/JSON format, tags, defaults and aliases; parseability differs from preserving all values."
+      }
+    },
+    {
+      "chapter": 5,
+      "number": 3,
+      "level": "staff",
+      "priority": "core",
+      "decision": "refocus",
+      "minutes": 45,
+      "lab": "۳–۶ ساعت",
+      "reason": "durable workflow، replay و side effect برای backend جدی ارزشمندند؛ باید تصمیم قطعی و نسخه‌بندی invocation روشن باشد.",
+      "prompt": "workflow موجودی، پرداخت و ارسال را در برابر crash و retry طراحی کن. شناسهٔ هر گام، log پایدار، نتیجهٔ ذخیره‌شده و compensation را مشخص کن. تغییر ترتیب گام‌ها، branching و schema را برای invocationهای در جریان نسخه‌بندی کن و هزینهٔ recovery را بگو.",
+      "signals": [
+        "شناسه بین retry ثابت است",
+        "پرداخت/ارسال بیرونی با قرارداد idempotency پوشش داده شده",
+        "کد جدید replay تاریخچه قدیم را نمی‌شکند"
+      ],
+      "followup": "provider ارسال idempotency key ندارد؛ تضمینت چه تغییری می‌کند؟",
+      "sources": [
+        "idempotency",
+        "atlassian"
+      ],
+      "reason_en": "Durable replay is relevant when versioning and side effects are explicit.",
+      "prompt_en": "Design inventory/payment/shipping workflow recovery with stable step IDs, durable results and compensation. Version changes to step order, branching and payloads for running invocations.",
+      "signals_en": [
+        "Stable retry IDs",
+        "External idempotency contract",
+        "Version-safe replay"
+      ],
+      "lab_fa": "یک workflow سه‌مرحله‌ایِ «ثبت‌سفارش» (موجودی، پرداخت، ارسال) طراحی کن که قابلِ بازپخش باشد: برای هر گام شناسهٔ idempotency تعریف کن،\n      مشخص کن چه چیزی در لاگِ پایدار ثبت می‌شود، و بنویس اگر مرحلهٔ سوم دوبار اجرا شود چه اتفاقی می‌افتد.\n      در پایان، سه تغییرِ کد را که بازپخشِ invocationهای در جریان را می‌شکنند فهرست کن و برای هرکدام راه‌کارِ «نسخهٔ جدا» را شرح بده.",
+      "lab_en": "<p>Design a replayable three-step “place-order” workflow (inventory, payment, shipping): define an idempotency ID per step, pin down what lands in the durable log, and write what happens if step three runs twice. Finish by listing three code changes that break in-flight replay, with the “separate version” remedy for each.</p>",
+      "title_fa": "تمرین ۳ — از تئوری تا عملیات",
+      "title_en": "Exercise 3 — from theory to operations",
+      "folder": "ch5-encoding-evolution",
+      "hue": "lilac",
+      "followup_en": "The shipping provider has no idempotency key. How does that change your guarantee?",
+      "lab_en_duration": "3–6 hours"
+    },
+    {
+      "chapter": 6,
+      "number": 1,
+      "level": "senior",
+      "priority": "core",
+      "decision": "refocus",
+      "minutes": 40,
+      "lab": "۳–۶ ساعت",
+      "reason": "replica lag و consistency تجربهٔ کاربر مستقیماً به طراحی مرتبط‌اند؛ نصب replica را به مسیر آزمایشگاهی منتقل می‌کنیم.",
+      "prompt": "بعد از ویرایش پروفایل، یک read replica مقدار قدیمی برمی‌گرداند. read-your-writes، monotonic reads و causal consistency را با history کوتاه نشان بده. routing به primary، session stickiness و version/LSN barrier را مقایسه کن و برای lag بی‌حد fallback تعریف کن.",
+      "signals": [
+        "زمان ثابت sleep را تضمین consistency نمی‌داند",
+        "دو replica را با version دنبال می‌کند",
+        "قیمت تازگی را در latency و availability می‌بیند"
+      ],
+      "followup": "اگر primary بعد از ACK خراب شود، read-your-writes چه وابستگی‌ای به replication durability دارد؟",
+      "sources": [
+        "amazon",
+        "atlassian"
+      ],
+      "reason_en": "A useful consistency discussion; replica setup belongs in the lab.",
+      "prompt_en": "Show read-your-writes, monotonic-read and causal anomalies after profile changes. Compare primary routing, stickiness and version/LSN barriers, including fallback when lag has no known bound.",
+      "signals_en": [
+        "No fixed sleep guarantee",
+        "Version-aware routing",
+        "Freshness/availability trade-off"
+      ],
+      "lab_fa": "<p>\n      یک اسکریپتِ ساده بنویس که به یک پایگاه دادهِ تک‌رهبرِ ناهمزمان (مثلاً PostgreSQL با یک read replica) نوشته و بلافاصله از\n      follower بخواند. lag را اندازه بگیر و بعد هر سه ناهنجاری را عمداً بازتولید کن: خواندنِ نوشتهٔ خودت، عقب‌گردِ زمان\n      (دو خواندن از دو replica)، و جابه‌جاییِ ترتیبِ علّی. برای هرکدام یک راه‌حلِ عملی پیاده کن و نشان بده ناهنجاری رفع شده است.\n    </p>",
+      "lab_en": "<p>Write a small script that writes to an async single-leader database (e.g. PostgreSQL with one read replica) and immediately reads from the follower. Measure the lag, then deliberately reproduce all three anomalies: reading your own writes, time moving backward (two reads from two replicas), and swapped causal order. Implement one practical fix for each and show the anomaly gone.</p>",
+      "title_fa": "تمرین ۱ — lag را به دام بینداز",
+      "title_en": "Exercise 1 — trap the lag",
+      "folder": "ch6-replication",
+      "hue": "rose",
+      "followup_en": "If the primary fails after ACK, how does read-your-writes depend on replication durability?",
+      "lab_en_duration": "3–6 hours"
+    },
+    {
+      "chapter": 6,
+      "number": 2,
+      "level": "senior",
+      "priority": "role",
+      "decision": "correct",
+      "minutes": 35,
+      "lab": "۲–۴ ساعت",
+      "reason": "هر دو دستگاه ابتدا milk:t1 و bread:t2 را دیده‌اند؛ فاز اول add تازه ندارد. حذف tag مشاهده‌شده با حذف یک add هم‌زمان فرق دارد.",
+      "prompt": "دو دستگاه سبد مشترک را آفلاین ویرایش می‌کنند: هر کدام یک آیتم شناخته‌شده را حذف می‌کند و هیچ add تازه‌ای وجود ندارد. LWW، union سادهٔ siblings و OR-Set با tag/tombstone را مقایسه کن. سپس add هم‌زمان با remove را اضافه کن و semantics مطلوب محصول را انتخاب کن.",
+      "signals": [
+        "LWW را با clock skew و lost update تحلیل می‌کند",
+        "remove مشاهده‌شده با concurrent add تازه فرق دارد",
+        "GC tombstone را به causal stability وصل می‌کند"
+      ],
+      "followup": "دستگاهی یک سال آفلاین بوده؛ tombstone را چه زمانی می‌توان پاک کرد؟",
+      "sources": [
+        "crdt",
+        "atlassian"
+      ],
+      "reason_en": "Both devices initially observed milk:t1 and bread:t2; phase one has no fresh adds. Removing observed tags differs from removing a concurrent new add.",
+      "prompt_en": "Start with two offline devices removing different known cart items and no new adds. Compare LWW, sibling union and an OR-Set with tagged adds/removals. Then introduce concurrent add/remove and choose product semantics.",
+      "signals_en": [
+        "Clock skew and lost updates",
+        "Observed removals versus fresh concurrent adds",
+        "Safe tombstone collection"
+      ],
+      "lab_fa": "<p>دو دستگاه سبد {milk:t1, bread:t2} را دیده‌اند و آفلاین می‌شوند: A شیر و B نان را حذف می‌کند و هیچ add جدیدی نداریم. LWW کل سبد، نگه‌داشتن sibling با سیاست union صریح، و OR-Set با tag یکتای هر add و حذف tagهای مشاهده‌شده را مقایسه کن. نتیجه را در هر ترتیب ادغام و با پیام تکراری بررسی کن. سپس milk:t3 را هم‌زمان با حذف روی دستگاه دیگر اضافه کن: برای add-wins و remove-wins قرارداد جدا بنویس. برای tombstone GC، causal stability یا محدودیت معتبر عضویت/آفلاین‌بودن را مشخص کن و ورود دوبارهٔ replica قدیمی را بیازما؛ صرف انقضای تایمر دلیل امنی برای GC نیست.</p>",
+      "lab_en": "<p>Both devices observe {milk:t1, bread:t2}, then go offline: A removes milk and B removes bread, with no new adds. Compare whole-cart LWW, siblings with an explicit union policy, and an OR-Set with unique add tags and observed-tag removals. Check every merge order and duplicate delivery. Then add milk:t3 concurrently with another device's remove; specify separate add-wins and remove-wins contracts. Justify tombstone GC using causal stability or an enforced membership/offline bound, and test an old replica rejoining; a timer alone does not establish safe GC.</p>",
+      "title_fa": "تمرین ۲ — سبد خریدِ هم‌زمان",
+      "title_en": "Exercise 2 — the concurrent shopping cart",
+      "folder": "ch6-replication",
+      "hue": "rose",
+      "followup_en": "A device has been offline for a year. When is it safe to collect tombstones?",
+      "lab_en_duration": "2–4 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "هر دو دستگاه ابتدا milk:t1 و bread:t2 را دیده‌اند؛ فاز اول add تازه ندارد. حذف tag مشاهده‌شده با حذف یک add هم‌زمان فرق دارد.",
+        "en": "Both devices initially observed milk:t1 and bread:t2; phase one has no fresh adds. Removing observed tags differs from removing a concurrent new add."
+      }
+    },
+    {
+      "chapter": 6,
+      "number": 3,
+      "level": "staff",
+      "priority": "role",
+      "decision": "correct",
+      "minutes": 45,
+      "lab": "۳–۶ ساعت",
+      "reason": "برای membership ثابت، هر write quorum سه‌عضوی با هر read quorum سه‌عضوی از پنج عضو اشتراک دارد؛ تازگی به نسخه‌ها، دوام و عضویت نیز وابسته است.",
+      "prompt": "با n=5,w=3,r=3 نشان بده چه تضمینی از تقاطع مجموعه‌ها داریم و چه تضمینی نداریم. partial write، lost ACK، stale replacement و تغییر membership را تحلیل کن. مانیتور staleness را با version، probe و divergence طراحی کن؛ failure را با rollback یکی ندان.",
+      "signals": [
+        "membership و durable ACK را از نامساوی جدا می‌کند",
+        "نوشتن ناموفق می‌تواند قابل مشاهده باشد",
+        "بدون ترتیب لاگ، واحد سنجش تازگی را تعریف می‌کند"
+      ],
+      "followup": "در rebalancing هم‌زمان، quorum قدیم و جدید چگونه باید هم‌پوشانی داشته باشند؟",
+      "sources": [
+        "abd",
+        "jepsen"
+      ],
+      "reason_en": "With fixed membership, every three-node write quorum intersects every three-node read quorum among five nodes; freshness also needs version, durability and membership assumptions.",
+      "prompt_en": "For n=5,w=3,r=3, explain quorum intersection and its limits. Analyze partial writes, lost ACKs, stale replacement and changing membership; define useful version probes and divergence monitoring.",
+      "signals_en": [
+        "Membership and durability assumptions",
+        "Visibility of partial writes",
+        "Meaningful staleness metrics"
+      ],
+      "lab_fa": "<p>پنج replica با w=3 و r=3 و نسخهٔ مرتب در این مدل آموزشی بساز. ابتدا با شمارش مجموعه‌ها ثابت کن w+r>n اشتراک می‌دهد. پاسخ گمشده را از ذخیره‌نشدن جدا ثبت کن؛ ACKها باید به نوشتن بادوام مربوط باشند. سپس بازسازی ناقص replica، تغییر membership بدون انتقال امن و نوشتن جزئیِ اعلام‌شده به‌عنوان ناموفق را تزریق کن. برای هر history، زمان ارسال، دوام، ACK و مقدار read را نشان بده و بگو کدام فرض نقض شده؛ خود نامساوی تغییر نمی‌کند. مانیتور version divergence و probe خواندن پس از نوشتن طراحی کن. فاصلهٔ عدد نسخه فقط در مدل نسخهٔ شمارنده معنا دارد؛ اندازه‌گیری زمانی به timestamp/ساعت مرجع و عدم‌قطعیت مشخص نیاز دارد.</p>",
+      "lab_en": "<p>Simulate five replicas with w=3, r=3 and ordered versions in this teaching model. First prove quorum intersection by enumerating sets. Distinguish lost responses from missing storage, and tie ACKs to durable writes. Inject stale replica restoration, unsafe membership changes and partially applied failed writes. Record send, persistence, ACK and read results for each history, identifying the failed premise while the inequality stays true. Design version-divergence monitoring and read-after-write probes. Numeric version distance is meaningful only for a counter model; time-based staleness needs a timestamp/reference clock and stated uncertainty.</p>",
+      "title_fa": "تمرین ۳ — مرز تضمین‌های quorum",
+      "title_en": "Exercise 3 — quorum guarantee boundaries",
+      "folder": "ch6-replication",
+      "hue": "rose",
+      "followup_en": "How should old and new quorums overlap during concurrent rebalancing?",
+      "lab_en_duration": "3–6 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "برای membership ثابت، هر write quorum سه‌عضوی با هر read quorum سه‌عضوی از پنج عضو اشتراک دارد؛ تازگی به نسخه‌ها، دوام و عضویت نیز وابسته است.",
+        "en": "With fixed membership, every three-node write quorum intersects every three-node read quorum among five nodes; freshness also needs version, durability and membership assumptions."
+      }
+    },
+    {
+      "chapter": 7,
+      "number": 1,
+      "level": "senior",
+      "priority": "core",
+      "decision": "refocus",
+      "minutes": 40,
+      "lab": "۲–۴ ساعت",
+      "reason": "hotspot و query-aware sharding مهم‌اند؛ hash-range بدون تعیین کلید هش پاسخ یکتایی ندارد.",
+      "prompt": "برای دادهٔ ماهانهٔ سنسورها، timestamp-range، sensor:timestamp range، hash(sensor_id) و hash(full_key) را مقایسه کن. هم بار لحظه‌ای و هم مجموع ماه را بسنج. مسیر query یک سنسور در یک ماه، hotspot سنسور پرنرخ و repartitioning را توضیح بده.",
+      "signals": [
+        "توزیع ماهانه hotspot لحظه‌ای را پنهان نمی‌کند",
+        "hash sensor را با hash full key یکی نمی‌گیرد",
+        "query fan-out و write skew کمی شده‌اند"
+      ],
+      "followup": "یک سنسور ۴۰٪ نوشتن‌ها را تولید کند؛ چه تغییری در کلید می‌دهی؟",
+      "sources": [
+        "microsoft",
+        "amazon"
+      ],
+      "reason_en": "Hash-range needs a specified hash key; monthly totals can hide instantaneous hotspots.",
+      "prompt_en": "Compare timestamp ranges, sensor:timestamp ranges, hash(sensor_id) and hash(full_key). Measure instantaneous and monthly load, query fan-out, hot sensors and repartitioning.",
+      "signals_en": [
+        "Instantaneous hotspot measurement",
+        "Specified hash input",
+        "Query fan-out and skew"
+      ],
+      "lab_fa": "<p>\n      برای پایگاه دادهِ زمان‌سریِ سنسورها (کلید = timestamp) طرحِ sharding طراحی کن: سه جایگزین (key-range با کلیدِ timestamp،\n      key-range با کلیدِ <code>sensor_id:timestamp</code>، و hash-range) را روی یک مجموعه‌دادهٔ مصنوعیِ یک ماهه پیاده کن.\n      توزیعِ نوشتن بین shardها را اندازه بگیر، hotspot را با اعداد نشان بده، و trade-offِ «range scan برای یک ماهِ یک سنسور»\n      را در هر سه طرح بسنج. کدام را برای چه نوع کوئری انتخاب می‌کنی و چرا؟\n    </p>",
+      "lab_en": "<p>Design a sharding scheme for a sensor time-series database (key = timestamp): implement three alternatives (key-range on a timestamp key, key-range on a <code>sensor_id:timestamp</code> key, and hash-range) over one synthetic month of data. Measure write spread across shards, show the hotspot in numbers, and weigh the “one month of one sensor range scan” trade-off in all three schemes. Which do you pick for which query type, and why?</p>",
+      "title_fa": "تمرین ۱ — طرحِ sharding برای دادهٔ زمان‌سری",
+      "title_en": "Exercise 1 — a sharding scheme for time-series data",
+      "folder": "ch7-sharding",
+      "hue": "peach",
+      "followup_en": "One sensor generates 40% of all writes. How do you change the partition key?",
+      "lab_en_duration": "2–4 hours"
+    },
+    {
+      "chapter": 7,
+      "number": 2,
+      "level": "senior",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 35,
+      "lab": "۱–۳ ساعت",
+      "reason": "consistent hashing مرتبط است، ولی درصد جابه‌جایی تنها معیار نیست؛ policy نگاشت fixed shard نیز باید تعریف شود.",
+      "prompt": "برای اضافه/حذف node، modulo، rendezvous و fixed logical shards با جدول مالکیت را مقایسه کن. درصد حرکت را برای mapping مشخص محاسبه کن و دربارهٔ skew، وزن node، failure، replication و مهاجرت تدریجی تصمیم بگیر.",
+      "signals": [
+        "ثبات hash در restart تضمین شده",
+        "حرکت داده را از تغییر routing جدا می‌کند",
+        "fixed shard بدون ownership policy مقایسه نشده"
+      ],
+      "followup": "node جدید دو برابر ظرفیت دارد؛ balancing را بدون جابه‌جایی همهٔ کلیدها چطور انجام می‌دهی؟",
+      "sources": [
+        "microsoft",
+        "atlassian"
+      ],
+      "reason_en": "Movement percentage alone misses skew, capacity weights and migration policy.",
+      "prompt_en": "Compare modulo, rendezvous and fixed logical shards with an explicit ownership map. Estimate movement on joins/leaves and discuss skew, weighted nodes, replication and staged handoff.",
+      "signals_en": [
+        "Stable hash function",
+        "Data movement versus routing",
+        "Explicit shard ownership policy"
+      ],
+      "lab_fa": "<p>\n      یک <span class=\"ltr\">rendezvous hashing</span> ساده و یک «تعدادِ ثابتِ shard» پیاده کن. با شبیه‌سازیِ اضافه و حذفِ node\n      (از ۱۰ به ۱۱ و از ۱۰ به ۹)، درصدِ کلیدهای جابه‌جاشده را در هر دو اندازه بگیر و با حالتِ <code>hash % N</code> مقایسه کن.\n      منحنیِ «جابه‌جایی در برابر تغییرِ اندازهٔ خوشه» را رسم کن و جواب بده: برای چه الگویِ رشدی، کدام روش کمترین داده‌جابه‌جایی را می‌دهد؟\n    </p>",
+      "lab_en": "<p>Implement a simple <span class=\"ltr\">rendezvous hashing</span> and a “fixed shard count”. Simulating node joins and leaves (10→11 and 10→9), measure the moved-key percentage in both and compare with <code>hash % N</code>. Plot the “moves vs cluster-size change” curve and answer: for which growth pattern does each method move the least data?</p>",
+      "title_fa": "تمرین ۲ — consistent hashing را خودت بساز",
+      "title_en": "Exercise 2 — build consistent hashing yourself",
+      "folder": "ch7-sharding",
+      "hue": "peach",
+      "followup_en": "A new node has twice the capacity. How do you rebalance without moving every key?",
+      "lab_en_duration": "1–3 hours"
+    },
+    {
+      "chapter": 7,
+      "number": 3,
+      "level": "staff",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 45,
+      "lab": "۴–۸ ساعت",
+      "reason": "global index از deep diveهای خوب است؛ latency چهار SQLite محلی پیش‌بینی شبکه و cluster واقعی نیست.",
+      "prompt": "برای دادهٔ چهار shard، local و global secondary index طراحی کن. write path، تک‌شرط/دوشرط، scatter-gather، failure جزئی و lag را مقایسه کن. یک تغییر چندtermی را با outbox/version مدیریت کن و تعداد RPC، p99 و هزینهٔ consistency را مشخص کن.",
+      "signals": [
+        "source shard و index shard را جدا می‌شمارد",
+        "index غیراتمیک را مرجع حقیقت فرض نمی‌کند",
+        "benchmark محلی را به cluster تعمیم نمی‌دهد"
+      ],
+      "followup": "index کالا را نشان می‌دهد ولی حذف آن در مرجع ثبت شده؛ خواننده چه می‌کند؟",
+      "sources": [
+        "outbox",
+        "atlassian"
+      ],
+      "reason_en": "A useful distributed-index deep dive; local SQLite timings do not predict networked p99.",
+      "prompt_en": "Design local and global secondary indexes over four shards. Compare writes, one/two predicates, scatter-gather, partial failures and lag. Specify outbox/version handling, RPC counts and consistency cost.",
+      "signals_en": [
+        "Base and index shard counts",
+        "Derived-index consistency limits",
+        "No network conclusions from local timing"
+      ],
+      "lab_fa": "<p>\n      روی چهار فایلِ SQLite (به‌عنوان چهار shard) دو مدلِ ایندکسِ ثانویه بساز: (الف) ایندکسِ محلیِ درونِ هر shard و خواندنِ scatter-gather،\n      (ب) ایندکسِ globalِ جداگانه shardشده بر اساسِ مقدار. بارِ کاریِ نوشتن/خواندن (تک‌شرط و دوشرطه) را اجرا کن،\n      latency (میانه و p99) و تعدادِ shardهای درگیر در هر عملیات را گزارش کن. سپس سناریوی «یک نوشتن، چند term» را بدونِ تراکنش اجرا کن\n      و نشان بده چه اتفاقی برای سازگاریِ ایندکس می‌افتد.\n    </p>",
+      "lab_en": "<p>On four SQLite files (as four shards) build two secondary-index models: (a) a per-shard local index with scatter-gather reads, (b) a separate global index sharded by value. Run a write/read workload (single- and double-condition), report latency (median and p99) and shards engaged per operation. Then run a “one write, several terms” scenario with no transaction and show what happens to index consistency.</p>",
+      "title_fa": "تمرین ۳ — local در برابر global: اندازه‌گیری، نه تئوری",
+      "title_en": "Exercise 3 — local vs global: measure, don't theorize",
+      "folder": "ch7-sharding",
+      "hue": "peach",
+      "followup_en": "The index returns a product already deleted from the record. What does the reader do?",
+      "lab_en_duration": "4–8 hours"
+    },
+    {
+      "chapter": 8,
+      "number": 1,
+      "level": "senior",
+      "priority": "core",
+      "decision": "correct",
+      "minutes": 40,
+      "lab": "۳–۶ ساعت",
+      "reason": "آزمایش‌ها برای PostgreSQL 18 هستند: READ UNCOMMITTED مانند READ COMMITTED است، RR جلوی phantom را می‌گیرد و write skew هنوز ممکن است.",
+      "prompt": "روی PostgreSQL مشخص، history دو اتصال برای read skew، lost update، phantom و write skew بساز و isolation را مقایسه کن. برای dirty read/write آزمون عدم وقوع و blocking بنویس. ناهنجاری را با SQL دقیق توضیح بده و رفتار محصول را از حداقل استاندارد SQL جدا کن.",
+      "signals": [
+        "عدم وقوع هم نتیجهٔ معتبر آزمایش است",
+        "lost update ناشی از read-modify-write را درست نشان می‌دهد",
+        "RR در PostgreSQL phantom را حذف می‌کند ولی write skew ممکن است"
+      ],
+      "followup": "UPDATE balance=balance+1 چه تفاوتی با SELECT و UPDATE مقدار ثابت دارد؟",
+      "sources": [
+        "postgres"
+      ],
+      "reason_en": "Tests target PostgreSQL 18: READ UNCOMMITTED behaves as READ COMMITTED, RR prevents phantoms, and write skew can still occur.",
+      "prompt_en": "Create two-session SQL histories for read skew, lost update, phantom and write skew on a named PostgreSQL version. Test dirty-read/write prevention and blocking. Compare implemented guarantees with the SQL standard.",
+      "signals_en": [
+        "Valid prevention results",
+        "Correct read-modify-write histories",
+        "Product-specific isolation guarantees"
+      ],
+      "lab_fa": "<p>روی PostgreSQL 18 با دو session، history دقیق SQL بساز. read skew و read-modify-write lost update را روی حساب‌ها، phantom را روی پرس‌وجوی مجموعه، و write skew را روی invariant دو پزشک on-call آزمایش کن. سطح isolation، ترتیب statementها و commit/rollback را ثبت کن. برای dirty read نتیجه باید عدم رؤیت دادهٔ commitنشده باشد و برای dirty write انتظار روی row lock را ثبت کن. phantom در RR این محصول منع می‌شود؛ برای write skew، RR را با Serializable و retry کامل تراکنش مقایسه کن. شمارش نتیجهٔ ممنوع‌شده به‌عنوان «جلوگیری موفق» بخشی از آزمون است.</p>",
+      "lab_en": "<p>Use two sessions on PostgreSQL 18 and record exact SQL histories. Test account read skew, read-modify-write lost updates, phantom set queries and a two-doctor on-call write-skew invariant. Record isolation, statement order and commit/rollback. Assert dirty-read prevention and dirty-write row-lock waiting. PostgreSQL RR prevents phantoms; compare RR write skew with Serializable and whole-transaction retry. Prevention of a forbidden outcome is a successful test result.</p>",
+      "title_fa": "تمرین ۱ — ناهنجاری‌ها را زنده بساز",
+      "title_en": "Exercise 1 — reproduce the anomalies live",
+      "folder": "ch8-transactions",
+      "hue": "butter",
+      "followup_en": "How does UPDATE balance=balance+1 differ from SELECT followed by an absolute-value UPDATE?",
+      "lab_en_duration": "3–6 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "آزمایش‌ها برای PostgreSQL 18 هستند: READ UNCOMMITTED مانند READ COMMITTED است، RR جلوی phantom را می‌گیرد و write skew هنوز ممکن است.",
+        "en": "Tests target PostgreSQL 18: READ UNCOMMITTED behaves as READ COMMITTED, RR prevents phantoms, and write skew can still occur."
+      }
+    },
+    {
+      "chapter": 8,
+      "number": 2,
+      "level": "senior",
+      "priority": "core",
+      "decision": "correct",
+      "minutes": 45,
+      "lab": "۳–۶ ساعت",
+      "reason": "رزروها بازهٔ نیمه‌باز [start,end) دارند؛ قفل روی سطر موجود اتاق در همان تراکنش گرفته می‌شود و بررسی overlap بعد از اخذ قفل است.",
+      "prompt": "برای رزرو بازه‌ای یک اتاق، invariant عدم overlap را تعریف کن. check+insert، READ COMMITTED، lock روی ردیف ثابت اتاق، SERIALIZABLE و exclusion constraint را مقایسه کن. برای پنجاه درخواست هم‌زمان retry، contention و p99 را طراحی کن؛ قید UNIQUE فقط برای slot ثابت کافی است.",
+      "signals": [
+        "قفل ردیف موجود اتاق را از قفل رزرو خالی جدا می‌کند",
+        "بازه زمانی با equality اشتباه نشده",
+        "abort، retry کل تراکنش و fairness دیده شده‌اند"
+      ],
+      "followup": "کاربر رزرو را تمدید کند و هم‌زمان رزرو بعدی ساخته شود؛ قیدت هنوز درست است؟",
+      "sources": [
+        "postgres",
+        "pg-lock",
+        "pg-range"
+      ],
+      "reason_en": "Bookings use half-open intervals [start,end); lock the existing room row within the transaction and check overlap after acquiring it.",
+      "prompt_en": "Enforce no overlapping room reservations. Compare check/insert, Read Committed, a stable room-row lock, Serializable and exclusion constraints. Design 50-way contention tests and report retry and latency; UNIQUE fits discrete fixed slots.",
+      "signals_en": [
+        "Existing room-row lock",
+        "Overlap versus equality constraints",
+        "Whole-transaction retry and contention"
+      ],
+      "lab_fa": "<p>برای هر اتاق، نبود دو بازهٔ commitشده با شرط start1<end2 AND start2<end1 ناورداست؛ [start,end) اجازهٔ دو جلسهٔ چسبیده را می‌دهد. پنج طرح را روی ۵۰ درخواست هم‌زمان برای یک بازهٔ یکسان بسنج: check/insert ساده، READ COMMITTED، قفل سطر موجود اتاق با SELECT FOR UPDATE سپس بررسی و insert در همان تراکنش، Serializable با retry کامل، و exclusion constraint روی room و range. یک طرح عمداً غلط با قفل‌کردن نتیجهٔ خالی رزرو نیز برای شاهد شکست داشته باش. شمار رزرو موفق، رد conflict، abort/retry و median/p99 را جدا گزارش کن. UNIQUE فقط برای slotهای گسستهٔ ازپیش‌تعریف‌شده مناسب است؛ latencyها را اندازه بگیر، حدس را benchmark ننام.</p>",
+      "lab_en": "<p>Enforce no committed pair for a room satisfying start1<end2 AND start2<end1; half-open intervals allow adjacent meetings. Compare five designs under 50 simultaneous requests for one identical interval: plain check/insert, READ COMMITTED, locking the existing room row before check/insert in the same transaction, Serializable with whole-transaction retry, and a room/range exclusion constraint. Include the deliberately broken empty-result reservation lock as a counterexample. Report successes, conflict refusals, abort/retry and median/p99 separately. UNIQUE covers predefined discrete slots only; measure latency rather than invent benchmarks.</p>",
+      "title_fa": "تمرین ۲ — یک سیستمِ رزروِ بدونِ double-booking طراحی کن",
+      "title_en": "Exercise 2 — a reservation system with no double-booking",
+      "folder": "ch8-transactions",
+      "hue": "butter",
+      "followup_en": "A user extends a booking while another user reserves the next interval. Is the constraint still correct?",
+      "lab_en_duration": "3–6 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "رزروها بازهٔ نیمه‌باز [start,end) دارند؛ قفل روی سطر موجود اتاق در همان تراکنش گرفته می‌شود و بررسی overlap بعد از اخذ قفل است.",
+        "en": "Bookings use half-open intervals [start,end); lock the existing room row within the transaction and check overlap after acquiring it."
+      }
+    },
+    {
+      "chapter": 8,
+      "number": 3,
+      "level": "senior",
+      "priority": "core",
+      "decision": "correct",
+      "minutes": 45,
+      "lab": "۲–۴ ساعت",
+      "reason": "اثر محلی و کلید dedup در یک تراکنش‌اند؛ ACK بعد از commit است و رکورد dedup تا پایان افق معتبر replay حفظ می‌شود.",
+      "prompt": "صف و پردازشگر با processed_messages و قید UNIQUE بساز. ثبت ID و اثر محلی را در یک تراکنش و ACK را پس از commit بگذار. در سه نقطه crash تزریق کن؛ نسخهٔ بدون dedup را مقایسه کن. retention شناسه و side effect بیرونی را صریح تعیین کن.",
+      "signals": [
+        "commit-before-ack و redelivery را توضیح می‌دهد",
+        "تکراری با payload متفاوت رد می‌شود",
+        "حد تضمین محلی و افق dedup مشخص است"
+      ],
+      "followup": "اپراتور پیام شش‌ماهه را replay کند ولی dedup بعد از یک ماه حذف شده باشد چه می‌شود؟",
+      "sources": [
+        "idempotency",
+        "kafka"
+      ],
+      "reason_en": "The local effect and dedup key share one transaction; ACK follows commit and dedup records survive the supported replay horizon.",
+      "prompt_en": "Implement an idempotent queue consumer using a unique processed-message ID and local effects in one transaction, then ACK. Inject three crash points, compare with no dedup, and define retention and external-effect boundaries.",
+      "signals_en": [
+        "Commit before ACK",
+        "Payload binding",
+        "Defined local boundary and dedup horizon"
+      ],
+      "lab_fa": "<p>صف at-least-once و جدول processed_messages با کلید یکتا در همان DB اثر محلی بساز. درج شناسه و اثر را یکجا commit کن، سپس ACK بده. crash قبل از commit، بعد از commit و قبل از ACK، و بعد از ACK را تزریق کن و مجموع اثر را assert کن. افق replay را از retry کاربر، نگهداری صف، DLQ و restore تعیین کن؛ ACK مجوز پاک‌کردن کلید نیست. replay یک پیام پس از GC را عمداً آزمایش و سیاست رد/بازیابی آن را مشخص کن. ارسال SMS یا برداشت از سرویس بیرونی را خارج از تضمین تراکنش بدان و کلید idempotency مقصد را جدا طراحی کن. نسخهٔ بدون dedup را برای مقایسه اجرا کن.</p>",
+      "lab_en": "<p>Build an at-least-once queue and a unique processed_messages key in the same database as the local effect. Commit ID and effect together, then ACK. Inject crashes before commit, after commit before ACK and after ACK; assert total effect. Derive the replay horizon from client retries, queue retention, DLQ and restores; ACK does not authorize key deletion. Test replay after GC explicitly and specify rejection/recovery. External SMS or provider charges need destination idempotency outside this local transaction. Run a no-dedup comparison.</p>",
+      "title_fa": "تمرین ۳ — exactly-once با idempotency، نه با 2PC",
+      "title_en": "Exercise 3 — exactly-once with idempotency, not 2PC",
+      "folder": "ch8-transactions",
+      "hue": "butter",
+      "followup_en": "An operator replays a six-month-old message after dedup was deleted at one month. What happens?",
+      "lab_en_duration": "2–4 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "اثر محلی و کلید dedup در یک تراکنش‌اند؛ ACK بعد از commit است و رکورد dedup تا پایان افق معتبر replay حفظ می‌شود.",
+        "en": "The local effect and dedup key share one transaction; ACK follows commit and dedup records survive the supported replay horizon."
+      }
+    },
+    {
+      "chapter": 9,
+      "number": 1,
+      "level": "senior",
+      "priority": "core",
+      "decision": "refocus",
+      "minutes": 30,
+      "lab": "۱–۲ ساعت",
+      "reason": "timeout ambiguity کاربردی است؛ نسخهٔ مصاحبه باید retry storm، deadline و overload را هم بپرسد.",
+      "prompt": "شمارنده یا پرداختی داریم که درخواست، commit یا پاسخ آن ممکن است گم شود. history هر حالت را نشان بده. پروتکل با request ID، result lookup، payload binding و retention طراحی کن؛ deadline، backoff+jitter و retry budget را اضافه کن.",
+      "signals": [
+        "timeout را با عدم اجرا یکی نمی‌گیرد",
+        "ID درخواست قصد مشتری را حفظ می‌کند",
+        "retry در همهٔ لایه‌ها بار را چندبرابر نمی‌کند"
+      ],
+      "followup": "سه لایه هر کدام سه بار retry کنند، حداکثر چند تلاش downstream داریم؟",
+      "sources": [
+        "idempotency",
+        "retry"
+      ],
+      "reason_en": "Add overload-aware retry policies to the timeout ambiguity example.",
+      "prompt_en": "Trace lost request, server failure and lost response. Design request ID, result lookup, payload binding and retention, then deadlines, backoff with jitter and a retry budget.",
+      "signals_en": [
+        "Timeout remains indeterminate",
+        "Caller intent in request ID",
+        "Bounded layered retries"
+      ],
+      "lab_fa": "<p>\n        یک سرویسِ ساده بنویس که یک شمارنده را افزایش می‌دهد و یک کلاینت که درخواست می‌فرستد.\n        به‌صورتِ تصادفی یکی از سه حالتِ نمودارِ ۱ را شبیه‌سازی کن (درخواست گم، سرور کرش، پاسخ گم).\n        حالا retry را اضافه کن و نشان بده بدونِ idempotency، شمارنده بیش از یک‌بار زیاد می‌شود.\n        <b>سوال:</b> چه تغییری در پروتکل، تکرار را بی‌اثر می‌کند؟\n      </p>",
+      "lab_en": "<p>Write a simple service bumping a counter plus a client sending requests. Randomly simulate one of Diagram 1's three states (lost request, crashed server, lost reply). Now add retry and show the counter over-increments without idempotency. <b>Question:</b> which protocol change neutralizes repeats?</p>",
+      "title_fa": "تمرین ۱ — شبیه‌سازِ ابهامِ timeout",
+      "title_en": "Exercise 1 — the timeout-ambiguity simulator",
+      "folder": "ch9-distributed-trouble",
+      "hue": "mint",
+      "followup_en": "Three layers each make up to three attempts. What is the maximum number of downstream attempts?",
+      "lab_en_duration": "1–2 hours"
+    },
+    {
+      "chapter": 9,
+      "number": 2,
+      "level": "senior",
+      "priority": "role",
+      "decision": "correct",
+      "minutes": 25,
+      "lab": "۱–۲ ساعت",
+      "reason": "اختلاف CLOCK_REALTIME روی دو host/VM مستقل با بازهٔ عدم‌قطعیت سنجیده می‌شود؛ CLOCK_MONOTONIC فقط مدت روی همان host را می‌سنجد.",
+      "prompt": "wall clock و monotonic clock را در deadline، اندازه‌گیری duration و LWW مقایسه کن. skew را با دو host/VM مستقل یا ساعت mock تزریق کن. uncertainty ناشی از زمان ارسال نمونه را گزارش کن و نشان بده timestamp آینده چگونه write واقعی بعدی را می‌پوشاند.",
+      "signals": [
+        "monotonic clock بین ماشین‌ها مقایسه نمی‌شود",
+        "mock skew با اندازه‌گیری skew واقعی برچسب متفاوت دارد",
+        "rollback ساعت و uncertainty دیده شده‌اند"
+      ],
+      "followup": "NTP ساعت را step کند؛ timeout و TTL برنامه کدام clock را باید استفاده کنند؟",
+      "sources": [
+        "clocks",
+        "atlassian"
+      ],
+      "reason_en": "Measure CLOCK_REALTIME offset across independent hosts/VMs with uncertainty; CLOCK_MONOTONIC measures durations on one host only.",
+      "prompt_en": "Compare wall and monotonic clocks for durations, deadlines and LWW. Use independent hosts/VMs or explicitly mocked skew. Report sampling uncertainty and show how a future timestamp hides a later real write.",
+      "signals_en": [
+        "No cross-host monotonic comparison",
+        "Real versus mock skew",
+        "Clock steps and sampling uncertainty"
+      ],
+      "lab_fa": "<p>روی دو host/VM با ساعت مستقل، نمونه‌های CLOCK_REALTIME و مدت‌های CLOCK_MONOTONIC را ثبت کن. offset ساعت دوم نسبت به اول را با timestamp exchange و RTT اندازه بگیر؛ عدم‌قطعیت مسیر نامتقارن و زمان پردازش را ثبت کن و فرض‌های استفاده از RTT/2 را توضیح بده. مقدارهای monotonic دو host را از هم کم نکن چون مبدأ مشترک ندارند. دو کانتینر روی یک Linux host معمولاً CLOCK_REALTIME مشترک دارند. بدون زیرساخت، +۲۵۰ میلی‌ثانیه را در clock mock تزریق و همهٔ خروجی‌ها را شبیه‌سازی بنام. نشان بده LWW مبتنی بر ساعت دیواری چگونه نوشتن واقعاً دیرتر را کنار می‌گذارد و چرا ساعت واقعی سیستم کاربر لازم نیست تغییر کند.</p>",
+      "lab_en": "<p>On two independent-clock hosts/VMs, record CLOCK_REALTIME samples and local CLOCK_MONOTONIC durations. Estimate the second wall clock's offset using timestamp exchange and RTT; document processing and asymmetric-delay uncertainty and the assumptions behind RTT/2. Never subtract monotonic timestamps from different hosts: their origins differ. Two containers on one Linux host normally share CLOCK_REALTIME. Without infrastructure inject +250ms into a mock clock and label every output simulated. Show wall-clock LWW discarding a genuinely later write; no change to the user's real system clock is needed.</p>",
+      "title_fa": "تمرین ۲ — clock skew و عدم‌قطعیت اندازه‌گیری",
+      "title_en": "Exercise 2 — clock skew and measurement uncertainty",
+      "folder": "ch9-distributed-trouble",
+      "hue": "mint",
+      "followup_en": "NTP steps the wall clock. Which clock should application timeouts and TTL durations use?",
+      "lab_en_duration": "1–2 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "اختلاف CLOCK_REALTIME روی دو host/VM مستقل با بازهٔ عدم‌قطعیت سنجیده می‌شود؛ CLOCK_MONOTONIC فقط مدت روی همان host را می‌سنجد.",
+        "en": "Measure CLOCK_REALTIME offset across independent hosts/VMs with uncertainty; CLOCK_MONOTONIC measures durations on one host only."
+      }
+    },
+    {
+      "chapter": 9,
+      "number": 3,
+      "level": "staff",
+      "priority": "core",
+      "decision": "correct",
+      "minutes": 40,
+      "lab": "۱–۳ ساعت",
+      "reason": "epoch هر lease افزایش می‌یابد؛ storage مقادیر کمتر از بیشینهٔ پذیرفته‌شده را اتمیک رد می‌کند. op_id مستقل، retry را تشخیص می‌دهد.",
+      "prompt": "کارگر A lease با token=7 دارد، pause می‌شود و B با token=8 می‌نویسد؛ A سپس بیدار می‌شود. storage باید stale epoch را اتمیک رد کند. چند write معتبر در یک epoch را از duplicate operation جدا کن و برای token allocation و دوام highest-seen شرط تعریف کن.",
+      "signals": [
+        "lease expiry به‌تنهایی جلوی stale write را نمی‌گیرد",
+        "token کمتر رد می‌شود؛ token برابر نیازمند semantics جداست",
+        "بررسی token در خود storage انجام می‌شود"
+      ],
+      "followup": "storage restart شود و highest token را فراموش کند، چه خطایی ممکن است؟",
+      "sources": [
+        "fencing",
+        "atlassian"
+      ],
+      "reason_en": "Epoch increases per lease; storage atomically rejects values below its highest accepted epoch. An independent op_id identifies retries.",
+      "prompt_en": "Pause owner A at token 7, let B obtain token 8 and write, then resume A. Enforce atomic stale-epoch rejection in storage. Distinguish multiple legitimate same-epoch writes from duplicate operations and persist the highest token.",
+      "signals_en": [
+        "Lease expiry is insufficient",
+        "Epoch versus operation identity",
+        "Storage-enforced durable fencing"
+      ],
+      "lab_fa": "<p>lock service با lease و epoch افزایشی و storage بادوام بساز. در یک تراکنش، epoch کمتر از highest_epoch را رد کن و برای epoch تازه high-water mark و اثر را با هم پایدار کن. در یک epoch، op_id تازه باید مجاز و retry همان op_id باید بی‌اثر باشد. A با epoch=7 متوقف می‌شود؛ B با epoch=8 در storage fence را ثبت می‌کند و دو write متفاوت انجام می‌دهد؛ سپس A برمی‌گردد و رد می‌شود. تأکید کن صرف صدور lease جدید تا قبل از رؤیت epoch در storage، fence را فعال نمی‌کند. restart storage، تکرار عملیات و جابه‌جایی پیام‌ها را با assertion مستقل بسنج.</p>",
+      "lab_en": "<p>Build a lease/epoch service and durable storage. In one transaction reject epoch below highest_epoch and persist a newer epoch with the effect. A new op_id in the same epoch is valid; retrying an old op_id is a no-op. Pause A at epoch 7; B installs epoch 8 at storage and performs two distinct writes; resume A and reject it. Issuing the lease alone does not activate the storage fence until storage observes it. Assert behavior across storage restart, operation retries and reordered messages.</p>",
+      "title_fa": "تمرین ۳ — fencing token عملی",
+      "title_en": "Exercise 3 — fencing tokens in practice",
+      "folder": "ch9-distributed-trouble",
+      "hue": "mint",
+      "followup_en": "Storage restarts and forgets the highest fencing token. What failure becomes possible?",
+      "lab_en_duration": "1–3 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "epoch هر lease افزایش می‌یابد؛ storage مقادیر کمتر از بیشینهٔ پذیرفته‌شده را اتمیک رد می‌کند. op_id مستقل، retry را تشخیص می‌دهد.",
+        "en": "Epoch increases per lease; storage atomically rejects values below its highest accepted epoch. An independent op_id identifies retries."
+      }
+    },
+    {
+      "chapter": 9,
+      "number": 4,
+      "level": "senior",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 25,
+      "lab": "۱–۲ ساعت",
+      "reason": "safety/liveness برای استدلال خوب است؛ مثال at-most-once delivery می‌تواند به از دست رفتن پیام منجر شود و فرض progress باید صریح باشد.",
+      "prompt": "برای صف، safety «اثر پیام بیش از یک بار اعمال نشود» و liveness «پیام معتبر تحت بازیابی شبکه بالاخره اثر کند» تعریف کن. partition دائمی، redelivery و از دست رفتن dedup را تحلیل کن. برای هر ادعا یک counterexample و فرض زمانی روشن بده.",
+      "signals": [
+        "delivery را از application effect جدا می‌کند",
+        "liveness بدون فرض شبکه/ظرفیت قول داده نمی‌شود",
+        "مثال safety violation می‌تواند همراه progress باشد"
+      ],
+      "followup": "سیستم همهٔ پیام‌ها را رد کند؛ کدام خاصیت ظاهراً سالم می‌ماند؟",
+      "sources": [
+        "jepsen",
+        "kafka"
+      ],
+      "reason_en": "Progress requires explicit recovery, network and capacity assumptions.",
+      "prompt_en": "Define no duplicate application effects as safety and eventual valid-message effects under recovery as liveness. Give counterexamples for permanent partitions, redelivery and missing dedup state.",
+      "signals_en": [
+        "Delivery versus effects",
+        "Explicit progress assumptions",
+        "Independent safety/liveness counterexamples"
+      ],
+      "lab_fa": "<p>\n        برای یک سرویسِ صف‌محورِ ساده، دو خاصیتِ safety و liveness بنویس (مثلاً «هر پیام حداکثر یک‌بار تحویل می‌شود»\n        و «هر پیامِ ارسال‌شده بالاخره تحویل می‌شود»). بعد یک سناریوی خرابیِ شبکه طراحی کن که liveness را نقض کند\n        ولی safety نه. <b>آیا برعکسش ممکن است؟</b>\n      </p>",
+      "lab_en": "<p>For a simple queue-based service, write two properties — one safety, one liveness (e.g. “each message is delivered at most once” and “each sent message is eventually delivered”). Then design a network failure breaking liveness but not safety. <b>Is the reverse possible?</b></p>",
+      "title_fa": "تمرین ۴ — safety/liveness",
+      "title_en": "Exercise 4 — safety/liveness",
+      "folder": "ch9-distributed-trouble",
+      "hue": "mint",
+      "followup_en": "The service rejects every message. Which property can appear healthy?",
+      "lab_en_duration": "1–2 hours"
+    },
+    {
+      "chapter": 10,
+      "number": 1,
+      "level": "foundation",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 25,
+      "lab": "۱–۲ ساعت",
+      "reason": "Lamport پایهٔ مفید است ولی پیاده‌سازی سه پروسه برای backend عمومی اولویت نخست نیست.",
+      "prompt": "برای سه process، send/receive و رخداد محلی را با Lamport clock شماره‌گذاری کن. با tie-breaker process ID ترتیب کامل بساز. یک مثال نشان بده که L(a)<L(b) علت‌ومعلولی بودن را اثبات نمی‌کند؛ vector clock و هزینه‌اش را مقایسه کن.",
+      "signals": [
+        "receive=max(local,received)+1 درست است",
+        "ترتیب کل را با causality یکی نمی‌گیرد",
+        "concurrency از Lamport قابل تشخیص نیست"
+      ],
+      "followup": "دو رخداد بدون هیچ پیام چه timestampهایی می‌توانند داشته باشند؟",
+      "sources": [
+        "lamport",
+        "atlassian"
+      ],
+      "reason_en": "Useful distributed-systems foundations, with lower general-backend priority.",
+      "prompt_en": "Label local events and messages using Lamport clocks and process-ID tie breaking. Show why increasing timestamps do not imply causality or detect concurrency; compare vector-clock costs.",
+      "signals_en": [
+        "Correct receive rule",
+        "Total order versus causality",
+        "Concurrency limitations"
+      ],
+      "lab_fa": "<p>\n        سه پروسه‌ی ساده بنویس که پیام رد و بدل می‌کنند و هر کدام ساعتِ Lamport خودشان را دارند.\n        قاعده‌ی «افزایش هنگامِ رویداد» و «رساندن به max هنگامِ دریافت» را پیاده‌سازی و تست کن.\n        بعد سناریوی نمودار ۵ را اجرا کن و نشان بده ترتیبِ نهاییِ timestampها دقیقاً\n        <span class=\"ltr\">(1,A) &lt; (1,C) &lt; (2,B)</span> می‌شود.\n        <b>سوال:</b> چه ورودی‌ای می‌تواند نشان دهد که این ساعت، «هم‌زمانی» را تشخیص نمی‌دهد؟\n      </p>",
+      "lab_en": "<p>Write three small processes that exchange messages, each keeping its own Lamport clock.\n        Implement “increment on event” and “catch up to max on receive” and test them.\n        Then run Diagram 5's scenario and show the final timestamp order is exactly\n        <span class=\"ltr\">(1,A) &lt; (1,C) &lt; (2,B)</span>.\n        <b>Question:</b> what input could show this clock cannot detect “concurrency”?</p>",
+      "title_fa": "تمرین ۱ — ساعتِ Lamport عملی",
+      "title_en": "Exercise 1 — a working Lamport clock",
+      "folder": "ch10-consensus",
+      "hue": "sky",
+      "followup_en": "What timestamps can two independent events with no messages have?",
+      "lab_en_duration": "1–2 hours"
+    },
+    {
+      "chapter": 10,
+      "number": 2,
+      "level": "staff",
+      "priority": "role",
+      "decision": "correct",
+      "minutes": 45,
+      "lab": "۳–۶ ساعت",
+      "reason": "write با هدف w=3 هنوز کامل نشده و فقط یک replica مقدار تازه را دارد؛ read باید پیش از پاسخ، بیشینهٔ نسخه را به quorum برگرداند.",
+      "prompt": "با سه replica و write در جریان که هنوز فقط به یکی رسیده، دو quorum read بساز که اولی جدید و دومی قدیمی می‌خواند. سپس الگوریتم register با version مرتب و write-back به اکثریت پیش از بازگشت read را مشخص کن. برای multi-writer مرحلهٔ query پیش از write و فرض membership ثابت را تحلیل کن.",
+      "signals": [
+        "w=3 تأییدشده روی همه را با partial write یکی نمی‌گیرد",
+        "background repair را با synchronous quorum write-back جدا می‌کند",
+        "version، crash و concurrent writer assumptions معلوم‌اند"
+      ],
+      "followup": "اگر یک reader بعد از خواندن جدید و قبل از write-back بمیرد، کدام read باید completed حساب شود؟",
+      "sources": [
+        "abd",
+        "jepsen"
+      ],
+      "reason_en": "The write targeting w=3 is incomplete with one updated replica; reads must write the maximum version back to a quorum before replying.",
+      "prompt_en": "Construct new-then-old quorum reads during an incomplete three-replica write. Specify ordered versions and majority write-back before returning a read. Discuss a query phase for multiple writers, fixed membership and crash assumptions.",
+      "signals_en": [
+        "Partial versus acknowledged writes",
+        "Background repair versus quorum write-back",
+        "Version and writer assumptions"
+      ],
+      "lab_fa": "<p>سه replica ابتدا v1 دارند. write تک‌نویسنده با هدف w=3 فقط n1 را به v2 رسانده و هنوز کامل نشده است. read اول r=2 از {n1,n2} مقدار v2 و read دوم که بعد از پایان اول آغاز می‌شود از {n2,n3} مقدار v1 می‌گیرد؛ history را رسم و نقض new-then-old را ثابت کن. نسخهٔ اصلاح‌شده، max نسخه را پیش از پاسخ read به quorum دوگرهی write-back می‌کند و replica هرگز به نسخهٔ کمتر عقب نمی‌رود. قبل و بعد از write-back crash تزریق کن و completed را از دید caller تعریف کن. read repair پس‌زمینه این شرط را نمی‌دهد. مدل SWMR با عضویت ثابت را صریح بنویس؛ برای MWMR query timestamp قبل از write، tag یکتای مرتب و quorum مناسب لازم است.</p>",
+      "lab_en": "<p>Start three replicas at v1. An incomplete single-writer write targeting w=3 has updated only n1 to v2. Read1 from {n1,n2} returns v2; Read2 starts after Read1 completes and returns v1 from {n2,n3}. Draw the history and prove new-then-old violates linearizability. Fix it with maximum-version write-back to a two-node quorum before returning, with replicas rejecting version regression. Inject crashes before and after write-back; completion is observed by the caller. Background repair does not satisfy the condition. State fixed-membership SWMR assumptions; MWMR additionally needs pre-write timestamp queries, uniquely ordered tags and suitable quorums.</p>",
+      "title_fa": "تمرین ۲ — quorum و نقض خطی‌پذیری",
+      "title_en": "Exercise 2 — quorums and a linearizability violation",
+      "folder": "ch10-consensus",
+      "hue": "sky",
+      "followup_en": "A reader crashes after observing the new value but before write-back. Should that read count as completed?",
+      "lab_en_duration": "3–6 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "write با هدف w=3 هنوز کامل نشده و فقط یک replica مقدار تازه را دارد؛ read باید پیش از پاسخ، بیشینهٔ نسخه را به quorum برگرداند.",
+        "en": "The write targeting w=3 is incomplete with one updated replica; reads must write the maximum version back to a quorum before replying."
+      }
+    },
+    {
+      "chapter": 10,
+      "number": 3,
+      "level": "senior",
+      "priority": "core",
+      "decision": "correct",
+      "minutes": 35,
+      "lab": "۲–۴ ساعت",
+      "reason": "رزرو بادوامِ بازه پیش از صدور، یکتایی را با پذیرش gap حفظ می‌کند؛ شاردها می‌توانند بازه یا namespace جدا داشته باشند.",
+      "prompt": "مولد ID با رزرو پایدار بازه طراحی کن و crash وسط دسته را تحلیل کن. uniqueness، gap-free، ترتیب تخصیص و ترتیب مشاهدهٔ real-time را جدا تعریف کن. طرح مرکزی، UUID و shard-prefixed ID را مقایسه کن؛ برای failover، allocator را fence کن.",
+      "signals": [
+        "high-water mark قبل از صدور ID پایدار می‌شود",
+        "gap را از duplicate جدا می‌کند",
+        "نیاز به هماهنگی را به ضمانت ordering وصل می‌کند"
+      ],
+      "followup": "دو node بازه‌های جدا دارند؛ آیا IDهای صادرشده به ترتیب زمان جهانی افزایش می‌یابند؟",
+      "sources": [
+        "amazon",
+        "atlassian"
+      ],
+      "reason_en": "Durably reserving ranges before issuance preserves uniqueness with gaps; shards may allocate disjoint ranges or namespaces.",
+      "prompt_en": "Persist ID-range reservations before issuing IDs and crash mid-range. Separate uniqueness, gaplessness, allocation order and real-time observation. Compare a centralized allocator, UUIDs and shard-prefixed IDs; fence failover.",
+      "signals_en": [
+        "Durable high-water mark",
+        "Gaps versus duplicate IDs",
+        "Ordering-specific coordination"
+      ],
+      "lab_fa": "<p>مولد شناسه، high-water mark دسته را قبل از تحویل اولین ID پایدار می‌کند. دستهٔ ۱ تا ۵ را رزرو کن، ۱ تا ۳ را بده، crash و از ۶ شروع کن؛ نبود تکرار و مجازبودن gap را assert کن. سپس دو allocator با بازهٔ بادوام جدا یا namespace جدا بساز و یکتایی را بیازما. uniqueness، gap-free، ترتیب تخصیص و ترتیب real-time پاسخ‌های غیرهم‌پوشان را جدا تعریف کن؛ batching و چند allocator ممکن است ترتیب جهانی را از بین ببرند. در failover هیچ بازهٔ رزروشده را دوباره واگذار نکن و reserve بعدی را با epoch در storage محافظت کن. fence روی reserve به‌تنهایی پاسخ‌های باقی‌مانده در RAM رهبر قدیم را متوقف نمی‌کند؛ برای ترتیب جهانی، مسیر پاسخ نیز باید مالک معتبر را کنترل کند.</p>",
+      "lab_en": "<p>Persist each batch high-water mark before issuing its first ID. Reserve 1..5, issue 1..3, crash and restart at 6; assert no duplicates with allowed gaps. Then implement two allocators with durably disjoint ranges or namespaces and test uniqueness. Define uniqueness, gap-free allocation, allocation order and real-time ordering of non-overlapping responses separately; batching across allocators can break global order. Never reassign reserved ranges after failover, and epoch-fence future reservations at storage. A reserve fence alone cannot stop an old leader serving its remaining RAM IDs; global ordering also needs a valid-owner check on the response path.</p>",
+      "title_fa": "تمرین ۳ — مولدِ شناسه‌ی oracle با failover",
+      "title_en": "Exercise 3 — an oracle ID generator with failover",
+      "folder": "ch10-consensus",
+      "hue": "sky",
+      "followup_en": "Two nodes issue IDs from disjoint ranges. Do the IDs increase in global real-time order?",
+      "lab_en_duration": "2–4 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "رزرو بادوامِ بازه پیش از صدور، یکتایی را با پذیرش gap حفظ می‌کند؛ شاردها می‌توانند بازه یا namespace جدا داشته باشند.",
+        "en": "Durably reserving ranges before issuance preserves uniqueness with gaps; shards may allocate disjoint ranges or namespaces."
+      }
+    },
+    {
+      "chapter": 10,
+      "number": 4,
+      "level": "staff",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 40,
+      "lab": "۴–۸ ساعت",
+      "reason": "linearizability checker برای infra/database بسیار خوب ولی در جلسه معمول بیشتر history reasoning پرسیدنی است.",
+      "prompt": "یک history کوچک شامل invoke/return read و write را روی register خطی‌سنجی کن. ترتیب real-time را حفظ و عملیات هم‌پوشان را جابه‌جا کن. برای test harness bounded search طراحی کن؛ pending operation و timeout نامعلوم را درست مدل کن.",
+      "signals": [
+        "completion قبل از invocation بعدی تقدم اجباری دارد",
+        "خواندن stale بعد از write تمام‌شده رد می‌شود",
+        "checker اثبات همهٔ اجراهای آینده نیست"
+      ],
+      "followup": "timeout یک write را failed حساب می‌کنی یا indeterminate؟ چرا؟",
+      "sources": [
+        "jepsen",
+        "abd"
+      ],
+      "reason_en": "A specialist checker lab; small-history reasoning is the live interview version.",
+      "prompt_en": "Check a small register history while preserving real-time precedence and reordering overlapping operations. Design bounded search, model pending/indeterminate operations and explain the limits of sampled histories.",
+      "signals_en": [
+        "Real-time precedence",
+        "Completed-write stale-read rejection",
+        "Limits of finite testing"
+      ],
+      "lab_fa": "<p>\n        یک key-value store ساده بساز و یک تست‌کننده که زمانِ شروع و پایانِ هر read/write را ثبت کند.\n        بعد الگوریتمی بنویس که بررسی کند آیا می‌توان این عملیات‌ها را در یک ترتیبِ معتبرِ register چید\n        (هر read مقدارِ آخرین write قبل از خودش را برگرداند) طوری که ترتیبِ زمانِ واقعی هم رعایت شود.\n        <b>سوال:</b> با اجرای این خطی‌سنج روی یک پیاده‌سازیِ «خواندن از replica»، کدام اجراها رد می‌شوند؟\n      </p>",
+      "lab_en": "<p>Build a tiny key-value store plus a tester recording each read/write's start and end time.\n        Then write an algorithm checking whether these operations fit a valid register order\n        (each read returning the latest write before it) that also respects real-time order.\n        <b>Question:</b> running this checker on a “read from any replica” implementation, which executions fail?</p>",
+      "title_fa": "تمرین ۴ — خطی‌سنجِ ساده",
+      "title_en": "Exercise 4 — a mini linearizability checker",
+      "folder": "ch10-consensus",
+      "hue": "sky",
+      "followup_en": "Do you model a timed-out write as failed or indeterminate, and why?",
+      "lab_en_duration": "4–8 hours"
+    },
+    {
+      "chapter": 11,
+      "number": 1,
+      "level": "senior",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 30,
+      "lab": "۲–۴ ساعت",
+      "reason": "memory-bounded aggregation برای data/platform کاربرد دارد؛ pipeline یونیکس ابزار آموزشی است و آستانه URL عدد عمومی ندارد.",
+      "prompt": "top URLها را برای لاگی بزرگ‌تر از RAM محاسبه کن. hash aggregation و external sort را با cardinality، RAM، spill، I/O و approximate counting مقایسه کن. benchmark را با ورودی، memory cap و خروجی برابر طراحی کن؛ آستانه شکست را برای همان محیط گزارش کن.",
+      "signals": [
+        "working set به distinct keys و overhead وابسته است",
+        "OOM را به کندی عادی تعبیر نمی‌کند",
+        "sort spill و hash spill/partition دیده شده‌اند"
+      ],
+      "followup": "فقط top-100 تقریبی لازم باشد، کدام قید را می‌توان سبک‌تر کرد؟",
+      "sources": [
+        "microsoft",
+        "atlassian"
+      ],
+      "reason_en": "Useful data/platform work; no universal distinct-URL threshold exists.",
+      "prompt_en": "Compute top URLs for logs larger than RAM. Compare hash aggregation, external sort, spilling and approximate counts. Benchmark equal outputs under a stated memory cap and report environment-specific limits.",
+      "signals_en": [
+        "Cardinality and object overhead",
+        "OOM versus latency",
+        "Spill and partition strategies"
+      ],
+      "lab_fa": "<p>\n        یک فایلِ لاگِ نمونه (چند صد هزار خط) بساز یا از لاگِ واقعیِ وب‌سرور استفاده کن.\n        pipelineِ کاملِ <code>cat | awk | sort | uniq -c | sort -r -n | head</code> را با دستورهای واقعی اجرا کن\n        و زمان بگیر. بعد همان کار را با تجمیعِ hash در پایتون پیاده کن و مقایسه کن.\n        حالا حجمِ ورودی را آن‌قدر زیاد کن که working set از حافظه بگذرد و ببین چه اتفاقی می‌افتد.\n        <b>سوال:</b> دقیقاً در چه نقطه‌ای (چند URL متمایز؟) روشِ hash از sort کُندتر/ناممکن می‌شود و چرا؟\n      </p>",
+      "lab_en": "<p>Build a sample log file (a few hundred thousand lines) or use a real web-server log.\n        Run the full <code>cat | awk | sort | uniq -c | sort -r -n | head</code> pipeline with real commands\n        and time it. Then do the same with hash aggregation in Python and compare.\n        Now grow the input until the working set exceeds memory and watch what happens.\n        <b>Question:</b> at exactly what point (how many distinct URLs?) does hashing get slower/impossible than sort, and why?</p>",
+      "title_fa": "تمرین ۱ — pipeline در برابرِ تجمیعِ hash",
+      "title_en": "Exercise 1 — pipeline vs hash aggregation",
+      "folder": "ch11-batch-processing",
+      "hue": "lilac",
+      "followup_en": "If only an approximate top-100 is required, which constraint can be relaxed?",
+      "lab_en_duration": "2–4 hours"
+    },
+    {
+      "chapter": 11,
+      "number": 2,
+      "level": "senior",
+      "priority": "role",
+      "decision": "correct",
+      "minutes": 40,
+      "lab": "۳–۶ ساعت",
+      "reason": "دو جریان جدا فقط با user_id مرتب می‌شوند و یک پروفایل یکتا به‌ازای کاربر دارند؛ mixed reducer به profile-first یا buffering نیاز دارد.",
+      "prompt": "کلیک‌های بزرگ و یک پروفایل یکتا به‌ازای user را با external sort و streaming merge join ترکیب کن. null/missing profile و skew را تعریف کن. سپس ورودی mixed reducer را مقایسه کن که در آن profile-first secondary sort یا buffering لازم است؛ تفاوت دو قرارداد را بگو.",
+      "signals": [
+        "sort بزرگ‌تر از حافظه spill واقعی دارد",
+        "uniqueness پروفایل و join type مشخص است",
+        "دو sorted stream را با mixed reducer اشتباه نمی‌گیرد"
+      ],
+      "followup": "اگر برای هر user چند نسخهٔ پروفایل تاریخی باشد، کدام نسخه باید به کلیک وصل شود؟",
+      "sources": [
+        "microsoft",
+        "atlassian"
+      ],
+      "reason_en": "Two separate streams need user_id sorting and one unique profile per user; a mixed reducer needs profile-first ordering or buffering.",
+      "prompt_en": "Externally sort and merge clicks with one unique profile per user. Define missing-profile behavior and skew. Contrast this with a mixed reducer stream that needs profile-first ordering or buffering; explain the different contracts.",
+      "signals_en": [
+        "Real external spill",
+        "Profile uniqueness and join type",
+        "Separate streams versus mixed reducer"
+      ],
+      "lab_fa": "<p>دو CSV کلیک (user_id,url,ts) و پروفایل یکتا (user_id,dob) بساز که از سقف chunk مرتب‌سازی بزرگ‌تر باشند. هر دو را با spill به دیسک برحسب user_id مرتب کن و با دو cursor، left join بده؛ پروفایل گمشده NULL و metric دارد. توضیح بده چرا join به O(1) state پروفایل نیاز دارد ولی حافظهٔ sort و merge fan-in جدا محاسبه می‌شود. سپس یک جریان mixed reducer بساز که در آن کلیک پیش از پروفایل می‌رسد و هزینهٔ buffering را با profile-first secondary sort مقایسه کن. ترتیب ts فقط اگر خروجی آن را بخواهد لازم است. skew و پروفایل تکراری را آزمایش و سیاست رد یا تجمیع آن را صریح تعیین کن.</p>",
+      "lab_en": "<p>Create clicks (user_id,url,ts) and unique profiles (user_id,dob) CSVs larger than the sort chunk limit. Externally sort both by user_id with real disk spills, then left-join using two cursors; emit NULL and a metric for missing profiles. Explain O(1) profile state while accounting separately for sort memory and merge fan-in. Contrast a mixed reducer receiving clicks before profiles: compare buffering with profile-first secondary sort. Timestamp order is required only if the output contract demands it. Test skew and duplicate profiles with an explicit reject/aggregation policy.</p>",
+      "title_fa": "تمرین ۲ — sort-merge join روی دو فایلِ بزرگ‌تر از حافظه",
+      "title_en": "Exercise 2 — sort-merge join on two bigger-than-memory files",
+      "folder": "ch11-batch-processing",
+      "hue": "lilac",
+      "followup_en": "With multiple historical profiles per user, which version belongs to a click?",
+      "lab_en_duration": "3–6 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "دو جریان جدا فقط با user_id مرتب می‌شوند و یک پروفایل یکتا به‌ازای کاربر دارند؛ mixed reducer به profile-first یا buffering نیاز دارد.",
+        "en": "Two separate streams need user_id sorting and one unique profile per user; a mixed reducer needs profile-first ordering or buffering."
+      }
+    },
+    {
+      "chapter": 11,
+      "number": 3,
+      "level": "staff",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 40,
+      "lab": "۴–۸ ساعت",
+      "reason": "shuffle و skew برای data infra مفیدند؛ نوشتن همهٔ فایل‌ها از صفر برای backend عمومی بازده زمانی پایینی دارد.",
+      "prompt": "shuffle برای group-by را طراحی کن: partition یکسان، sort محلی و merge در reducer. hot key، حجم شبکه، combiner و checksum فایل میانی را تحلیل کن. با خرابی خروجی یک mapper تعیین کن چه چیزی و بر اساس کدام lineage دوباره اجرا می‌شود.",
+      "signals": [
+        "hash در workerها ثابت و مشترک است",
+        "retry mapper خروجی attempt جدا دارد",
+        "side effect بیرونی قرارداد replay را نقض می‌کند"
+      ],
+      "followup": "یک key نصف داده را دارد؛ چگونه reducer را از hotspot نجات می‌دهی؟",
+      "sources": [
+        "microsoft",
+        "atlassian"
+      ],
+      "reason_en": "Useful for data infrastructure; building every file is an optional extended lab.",
+      "prompt_en": "Design partitioning, mapper-local sorting and reducer merge for group-by. Analyze hot keys, network volume, combiners and checksums. Recompute lost intermediate output from immutable lineage using isolated attempts.",
+      "signals_en": [
+        "Stable worker partitioning",
+        "Attempt isolation",
+        "Deterministic side-effect-free retry"
+      ],
+      "lab_fa": "<p>\n        یک shuffleِ چند-worker بنویس: N کارگر که رکوردها را بر اساسِ <code>hash(key) % N</code> partition می‌کنند،\n        هر worker به‌ازای هر partition یک فایلِ مرتب می‌نویسد (مثلِ m1r2)، و مرحلهٔ reduce فایل‌های هر partition را\n        mergesort می‌کند. روی داده‌ی نمونه تست کن که همه‌ی رکوردهای هم‌کلید کنارِ هم برسند.\n        <b>سوال:</b> اگر یکی از فایل‌های میانیِ یک worker خراب شود، برای ادامهٔ job چه چیزی را باید دوباره اجرا کنی —\n        و چرا اجرای دوباره‌اش امن است؟\n      </p>",
+      "lab_en": "<p>Write a multi-worker shuffle: N workers partitioning records by <code>hash(key) % N</code>,\n        each worker writing one sorted file per partition (like m1r2), with the reduce stage\n        mergesorting each partition's files. Test on sample data that same-key records all land together.\n        <b>Question:</b> if one worker's intermediate file corrupts, what must you rerun to continue the job —\n        and why is rerunning it safe?</p>",
+      "title_fa": "تمرین ۳ — یک shuffle ساده",
+      "title_en": "Exercise 3 — a mini shuffle",
+      "folder": "ch11-batch-processing",
+      "hue": "lilac",
+      "followup_en": "One key accounts for half the records. How do you prevent a reducer hotspot?",
+      "lab_en_duration": "4–8 hours"
+    },
+    {
+      "chapter": 11,
+      "number": 4,
+      "level": "staff",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 40,
+      "lab": "۳–۶ ساعت",
+      "reason": "atomic publication کاربرد جدی دارد؛ rename فایل‌سیستم محلی را نباید بی‌قید به object storage تعمیم داد.",
+      "prompt": "job چندtaskی روی ورودی immutable را با attempt output و manifest نسخه‌دار طراحی کن. crash وسط write و پیش از publish تزریق کن. خواننده باید یک نسخهٔ کامل ثابت ببیند؛ CAS/atomic pointer، cleanup و retry را متناسب با storage انتخاب کن.",
+      "signals": [
+        "task commit با job publish یکی نیست",
+        "reader manifest را یک بار pin می‌کند",
+        "partial attempt و نسخه قدیم امن مدیریت می‌شوند"
+      ],
+      "followup": "دو job هم‌زمان روی یک نام خروجی publish کنند؛ کدام نسخه برنده می‌شود؟",
+      "sources": [
+        "atlassian",
+        "jepsen"
+      ],
+      "reason_en": "Atomic publication is valuable; local rename semantics do not automatically transfer to object storage.",
+      "prompt_en": "Design versioned attempt outputs and a job manifest. Inject mid-write and pre-publication crashes. Readers pin one complete manifest; select a storage-appropriate atomic pointer or CAS and safe garbage collection.",
+      "signals_en": [
+        "Task completion versus job publication",
+        "Pinned reader manifest",
+        "Safe incomplete output cleanup"
+      ],
+      "lab_fa": "<p>\n        یک jobِ چندtaskی بساز که shardهای ورودیِ immutable را به shardهای خروجی تبدیل می‌کند.\n        سپس یک «خراب‌کننده» اضافه کن: با احتمالِ مشخص، وسطِ نوشتنِ خروجیِ یک task بمیرد.\n        منطقِ بازتلاش را پیاده کن: حذفِ خروجیِ ناقص، اجرای دوبارهٔ task، و commit فقط بعد از موفقیتِ همه.\n        در پایان تست کن: خواننده یا «کلِ نتیجه» می‌بیند یا هیچ‌چیز، حتی با چندین خرابیِ وسطِ راه.\n        <b>سوال:</b> اگر به‌جای حذفِ خروجیِ ناقص، آن را نگه داری و task دوباره اجرا شود، چه نتیجه‌ای ممکن است تولید شود؟\n      </p>",
+      "lab_en": "<p>Build a multi-task job turning immutable input shards into output shards.\n        Then add a “killer”: with some probability, die mid-way through writing one task's output.\n        Implement retry logic: delete partial output, rerun the task, commit only after all succeed.\n        Finally test: readers see either “the whole result” or nothing, even with several mid-way failures.\n        <b>Question:</b> keeping partial output instead of deleting it, then rerunning the task — what could that produce?</p>",
+      "title_fa": "تمرین ۴ — شبیه‌سازیِ بازتلاش و all-or-nothing",
+      "title_en": "Exercise 4 — simulating retry and all-or-nothing",
+      "folder": "ch11-batch-processing",
+      "hue": "lilac",
+      "followup_en": "Two jobs concurrently publish to the same output name. Which version wins?",
+      "lab_en_duration": "3–6 hours"
+    },
+    {
+      "chapter": 12,
+      "number": 1,
+      "level": "staff",
+      "priority": "core",
+      "decision": "correct",
+      "minutes": 45,
+      "lab": "۴–۸ ساعت",
+      "reason": "checkpoint با کلید (topic,partition) همراه totalها commit می‌شود؛ epoch مالک در DB و در همان تراکنش بررسی می‌شود.",
+      "prompt": "Kafka با سه partition و click count در DB را طراحی کن. اثر و checkpoint هر topic/partition را در یک تراکنش ذخیره کن؛ last_offset هر کاربر فقط با key-to-partition ثابت معنا دارد. crash، ACK گم‌شده، rebalance و stale consumer را با fencing و replay منظم تحلیل کن.",
+      "signals": [
+        "offset دو partition مقایسه نشده",
+        "commit اثر و checkpoint اتمیک است",
+        "پرش offset، writer هم‌زمان و rebalance پوشش داده شده‌اند"
+      ],
+      "followup": "تعداد partitionها تغییر کند و کاربر جابه‌جا شود؛ dedup key چگونه مهاجرت می‌کند؟",
+      "sources": [
+        "kafka",
+        "idempotency"
+      ],
+      "reason_en": "Checkpoints keyed by (topic,partition) commit with totals; the sink database checks owner epoch within that transaction.",
+      "prompt_en": "Count clicks from three Kafka partitions into a database. Commit effects and topic/partition checkpoints together. Explain fixed key routing for per-user offsets, crashes, lost ACKs, ordered replay, rebalances and stale-consumer fencing.",
+      "signals_en": [
+        "Partition-scoped offsets",
+        "Atomic output/checkpoint",
+        "Ordering, rebalance and fencing"
+      ],
+      "lab_fa": "<p>تاپیک clicks سه پارتیشن با routing ثابت user_id دارد. جدول click_counts(user_id,total) و consumer_checkpoints(topic,partition,last_offset,owner_epoch) با کلید مرکب بساز. برای هر پارتیشن، سطر checkpoint را در تراکنش قفل کن، epoch را بررسی کن، فقط رکوردهای مرتبِ بعد از last_offset را اعمال کن و totalها و آخرین offset واقعاً پردازش‌شده را با هم commit کن؛ ACK بروکر بعد از commit است. هم‌زمانی دو batch در یک epoch هم باید با قفل/شرط تراکنشی کنترل شود. epoch گروه Kafka خودکار DB را fence نمی‌کند: انتقال مالکیت باید epoch معتبر را در sink نصب کند. crash، ACK گمشده، replay، مالک کهنه و دو پارتیشن با offset یکسان را بیازما. checkpoint را با TTL حذف نکن؛ نبود تاریخچهٔ لازم یا تغییر routing به cutover، event_id و بازسازی مشخص نیاز دارد.</p>",
+      "lab_en": "<p>Use a three-partition clicks topic with fixed user_id routing. Create click_counts(user_id,total) and consumer_checkpoints(topic,partition,last_offset,owner_epoch) with a composite checkpoint key. Lock the partition checkpoint inside a transaction, validate epoch, process ordered records newer than last_offset, and commit totals plus the last actually processed offset together; broker ACK follows commit. Serialize batches even within one epoch. Kafka group epochs do not automatically fence a database: ownership transfer must install a valid epoch at the sink. Test crashes, lost ACKs, replay, stale owners and equal offsets in different partitions. Never expire active checkpoints by TTL; missing history or routing changes require explicit cutover, event IDs and rebuilding.</p>",
+      "title_fa": "تمرین ۱ — شمارندهٔ exactly-once روی کافکا و پایگاه داده",
+      "title_en": "Exercise 1 — an exactly-once counter on Kafka and a database",
+      "folder": "ch12-stream-processing",
+      "hue": "rose",
+      "followup_en": "Partition count changes and a user moves. How do you migrate the dedup identity?",
+      "lab_en_duration": "4–8 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "checkpoint با کلید (topic,partition) همراه totalها commit می‌شود؛ epoch مالک در DB و در همان تراکنش بررسی می‌شود.",
+        "en": "Checkpoints keyed by (topic,partition) commit with totals; the sink database checks owner epoch within that transaction."
+      }
+    },
+    {
+      "chapter": 12,
+      "number": 2,
+      "level": "senior",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 40,
+      "lab": "۳–۶ ساعت",
+      "reason": "event-time join و late data برای streaming مناسب‌اند؛ زمان ثابت چند دقیقه بدون توزیع lateness توجیه ندارد.",
+      "prompt": "search و click را با session و event time در پنجره یک‌ساعته join کن. هر دو arrival order، dedup و تعریف CTR را پوشش بده. watermark، idle partition، allowed lateness و اصلاحیه را بر اساس دادهٔ lateness انتخاب کن؛ در throughput ده‌برابری state و backpressure را برآورد کن.",
+      "signals": [
+        "processing time با event time یکی نیست",
+        "join چندبه‌چند CTR را بی‌دلیل چندبرابر نمی‌کند",
+        "late-drop و correction metric دارند"
+      ],
+      "followup": "یک partition بیکار watermark را نگه دارد؛ پنجره‌ها را چطور می‌بندی؟",
+      "sources": [
+        "kafka",
+        "atlassian"
+      ],
+      "reason_en": "Lateness choices need measurements rather than an arbitrary timeout.",
+      "prompt_en": "Join search and click by session and event time. Handle either arrival order, dedup and CTR semantics. Choose watermarks, idle-partition policy, lateness and corrections; estimate tenfold state growth and backpressure.",
+      "signals_en": [
+        "Event versus processing time",
+        "Avoid duplicate join inflation",
+        "Measured lateness/correction policy"
+      ],
+      "lab_fa": "<p>\n      برای نرخِ کلیک، join استریمِ جستجو و کلیک با session id و پنجرهٔ یک‌ساعته می‌خواهی.\n      تصمیم بگیر و مستدل بنویس: (الف) اگر کلیک قبل از جستجو برسد state را چطور می‌چینی که هر دو ترتیب جواب دهد؛\n      (ب) timeout بستنِ پنجره را چند دقیقه بعد از پایانِ ساعت می‌گذاری و watermark را از کجا می‌گیری؛\n      (پ) با دیررسِ بعد از بستن چه می‌کنی — بی‌خیال یا اصلاحیه؟ اثرِ هر کدام روی متریکِ «نرخِ کلیک» چیست و چطور متریکش می‌کنی؛\n      (ت) اگر throughput ده برابر شود، state بافر چقدر رشد می‌کند و کجایش را به دیسک می‌بری؟\n    </p>",
+      "lab_en": "<p>For click rate, you want to join the search and click streams on session id with a one-hour window. Decide and justify in writing: (a) if a click arrives before the search, how do you arrange state so both orders work; (b) how many minutes past the hour do you set the closing timeout, and where do you get the watermark from; (c) what do you do with post-close laggards — ignore or correct? What is each choice's effect on the “click rate” metric, and how do you metric it; (d) if throughput grows tenfold, how much does buffer state grow and which part do you move to disk?</p>",
+      "title_fa": "تمرین ۲ — join جستجو–کلیک با دیررس‌ها",
+      "title_en": "Exercise 2 — a search–click join with laggards",
+      "folder": "ch12-stream-processing",
+      "hue": "rose",
+      "followup_en": "An idle partition holds back the watermark. How do you close windows safely?",
+      "lab_en_duration": "3–6 hours"
+    },
+    {
+      "chapter": 12,
+      "number": 3,
+      "level": "staff",
+      "priority": "core",
+      "decision": "correct",
+      "minutes": 45,
+      "lab": "۴–۸ ساعت",
+      "reason": "snapshot سازگار باید با مرز لاگِ معتبر هماهنگ شود؛ event topic و state topic کلید و retention متفاوت دارند و bootstrap هزینهٔ قابل‌اندازه‌گیری دارد.",
+      "prompt": "ایندکس جست‌وجو را بدون dual write با قرارداد event مستقل از schema داخلی طراحی کن. تراکنش business+outbox، consistent snapshot مرجع و مرز LSN را مشخص کن. event-ID dedup را از compacted state با entity key و tombstone جدا کن؛ lag، WAL retention، rebuild و schema change را تست کن.",
+      "signals": [
+        "snapshot gap/duplicate و replay پوشش داده شده‌اند",
+        "کلید compaction و delete semantics صریح است",
+        "فشار snapshot صفر فرض نشده و throttling دارد"
+      ],
+      "followup": "outbox قدیمی purge شده؛ مصرف‌کنندهٔ جدید از کجا state کامل را می‌سازد؟",
+      "sources": [
+        "outbox",
+        "cdc",
+        "kafka"
+      ],
+      "reason_en": "A consistent snapshot must align with a valid log boundary; event and state topics have different keys/retention and bootstrap has measurable cost.",
+      "prompt_en": "Build a search view without dual writes or public table schemas. Specify business+outbox atomicity, a consistent record snapshot and its LSN boundary, event-ID dedup, compacted entity keys, tombstones, WAL retention and throttled rebuilding.",
+      "signals_en": [
+        "Snapshot boundary and replay",
+        "Entity key and tombstone semantics",
+        "Bounded snapshot/WAL pressure"
+      ],
+      "lab_fa": "<p>business row و outbox(event_id,entity_key,entity_version,type,payload) را در یک تراکنش بنویس. snapshot کاملِ دادهٔ مرجع را با پروتکل connector و مرز LSN سازگار بگیر؛ صرف خواندن LSN قبل یا بعد از یک SELECT تضمین هماهنگی نیست. شروع کم‌پیچیدگی، snapshot رسمی connector است؛ snapshot از replica فقط با پشتیبانی نسخه و هماهنگی مرز مجاز است. topic رویداد با حفظ ترتیب هر entity و event_id برای dedup، و state topic اختیاری با کلید entity و compaction را جدا تعریف کن؛ null value روی کلید entity نقش tombstone دارد. بار IO، CPU، lag و WAL را با بودجهٔ اعلام‌شده محدود کن؛ «بی‌فشار» یا «همیشه تازه» تضمین نده. bootstrap ابتدا snapshot را نصب و سپس تغییرها را با version guard اعمال کند تا replay کهنه state را عقب نبرد. kill/restart، delete، outbox purge و توقف بیش از retention را با checksum در مرز یکسان بیازما؛ ساخت projection نباید بر بقای تمام تاریخ outbox تکیه کند.</p>",
+      "lab_en": "<p>Write business rows and outbox(event_id,entity_key,entity_version,type,payload) atomically. Obtain a complete record snapshot aligned with a consistent LSN using the connector protocol; reading an LSN around an arbitrary SELECT is insufficient. Prefer the connector's supported snapshot mode; replica snapshots require version support and coordinated boundaries. Separate an event topic with per-entity ordering plus event-ID dedup from an optional entity-keyed compacted state topic; null values at entity keys encode tombstones. Budget I/O, CPU, replica lag and WAL: never promise zero load or perpetual freshness. Install the snapshot before ordered catch-up and use version guards against stale replay. Test kill/restart, deletes, purged outbox and retention overruns with checksums at a common boundary; projection rebuilds cannot depend on retaining all historical outbox rows.</p>",
+      "title_fa": "تمرین ۳ — آوردنِ ایندکسِ تازه با CDC بدونِ قطعی",
+      "title_en": "Exercise 3 — bringing a fresh index with CDC, outage-free",
+      "folder": "ch12-stream-processing",
+      "hue": "rose",
+      "followup_en": "Old outbox rows have been purged. Where does a new consumer get complete state?",
+      "lab_en_duration": "4–8 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "snapshot سازگار باید با مرز لاگِ معتبر هماهنگ شود؛ event topic و state topic کلید و retention متفاوت دارند و bootstrap هزینهٔ قابل‌اندازه‌گیری دارد.",
+        "en": "A consistent snapshot must align with a valid log boundary; event and state topics have different keys/retention and bootstrap has measurable cost."
+      }
+    },
+    {
+      "chapter": 13,
+      "number": 1,
+      "level": "senior",
+      "priority": "core",
+      "decision": "refocus",
+      "minutes": 45,
+      "lab": "۲–۴ ساعت",
+      "reason": "انتقال با request ID و پاسخ گم‌شده مسئلهٔ اصلی backend است؛ با فصل ۸ هم‌پوشانی دارد، اینجا endpoint و replay سرتاسری محورند.",
+      "prompt": "API انتقال دو حساب را با request ID از client تا DB طراحی کن. payload و نتیجه را به ID bind کن؛ UNIQUE، debit/credit و log باید اتمیک باشند. پاسخ commit گم‌شده و retry را تحلیل کن و projection موجودی را مستقل از log بساز.",
+      "signals": [
+        "دو transfer یکسان با ID متفاوت مجازند",
+        "همان ID با payload متفاوت رد می‌شود",
+        "balance invariant و نتیجهٔ replay حفظ می‌شوند"
+      ],
+      "followup": "دو درخواست هم‌زمان با یک ID برسند؛ پاسخ موفق یا pending را چگونه تعیین می‌کنی؟",
+      "sources": [
+        "idempotency",
+        "postgres"
+      ],
+      "reason_en": "Strong endpoint exercise; distinguish it from the local consumer lab.",
+      "prompt_en": "Design a transfer API with end-to-end request IDs bound to payload and result. Commit uniqueness, debit/credit and the input log together. Recover lost commit responses and independently rebuild balances from the log.",
+      "signals_en": [
+        "Independent intentional transfers",
+        "Reject reused ID with different payload",
+        "Balances and replay invariants"
+      ],
+      "lab_fa": "<b>شناسهٔ سرتاسری در عمل:</b> یک فرمِ انتقالِ موجودیِ ساده (دو حساب + مبلغ) با پایگاه دادهِ رابطه‌ای بساز که به‌جای دو UPDATE مستقیم، اول <span class=\"ltr\">request_id</span> یکتا را با قیدِ UNIQUE درج کند (الگوی مثالِ ۱۳-۲). بعد سناریوی «COMMIT رفت ولی پاسخ گم شد + retry کاربر» را شبیه‌سازی کن و نشان بده بالانس‌ها دقیقاً یک بار عوض می‌شوند. سپس ستونِ درخواست‌ها را به‌عنوانِ لاگِ رویداد در نظر بگیر و یک مصرف‌کنندهٔ جدا بنویس که بالانس‌ها را فقط از همان لاگ بازسازی کند.",
+      "lab_en": "<b>End-to-end IDs in practice:</b> build a simple balance-transfer form (two accounts + amount) on a relational database that, instead of two direct UPDATEs, first inserts a unique request_id under a UNIQUE constraint (the Example 13-2 pattern). Then simulate “COMMIT went through but the reply was lost + user retry” and show balances change exactly once. Next treat the requests column as an event log and write a separate consumer that rebuilds balances only from that log.",
+      "title_fa": "تمرین ۱ — شناسهٔ سرتاسری در عمل",
+      "title_en": "Exercise 1 — End-to-end IDs in practice",
+      "folder": "ch13-streaming-philosophy",
+      "hue": "butter",
+      "followup_en": "Two requests with the same ID arrive concurrently. How do you return success or pending?",
+      "lab_en_duration": "2–4 hours"
+    },
+    {
+      "chapter": 13,
+      "number": 2,
+      "level": "staff",
+      "priority": "core",
+      "decision": "refocus",
+      "minutes": 45,
+      "lab": "۳–۶ ساعت",
+      "reason": "migration و rollback از تمرین‌های بسیار باارزش Staff هستند؛ read traffic shifting باید با صحت و lag محدود شود.",
+      "prompt": "schema کاتالوگ را با یک log مرجع و دو projection قدیم/جدید مهاجرت بده. backfill+catch-up، shadow read، canary، rollback و زمان حذف نسخه قدیم را تعریف کن. bug در projection جدید و lag را inject کن؛ compatibility و مالکیت write path را روشن نگه دار.",
+      "signals": [
+        "درصد ترافیک با feature flag قابل بازگشت است",
+        "schema جدید قبل از آماده‌شدن خوانده نمی‌شود",
+        "چک صحت، هزینه دو نسخه و cutover criteria روشن‌اند"
+      ],
+      "followup": "کاربر بعد از خواندن schema جدید داده‌ای بنویسد که نسخه قدیم نمی‌فهمد؛ rollback هنوز ممکن است؟",
+      "sources": [
+        "atlassian",
+        "amazon"
+      ],
+      "reason_en": "Migration and rollback are high-value staff design topics.",
+      "prompt_en": "Migrate a catalog with a shared input log and independent old/new projections. Specify backfill, catch-up, shadow reads, canary routing, rollback and old-view retirement. Inject projection bugs and lag; keep write ownership explicit.",
+      "signals_en": [
+        "Reversible traffic routing",
+        "Readiness before cutover",
+        "Validation and dual-view cost"
+      ],
+      "lab_fa": "<b>مهاجرتِ دوگانه:</b> یک APIی لیستِ محصولات با دو نسخهٔ schema (قدیم: یک جدولِ تخت؛ جدید: جدول + جدولِ جزئیات) بساز که هر دو از یک لاگِ ورودیِ مشترک با دو projection مستقل تغذیه شوند. درصدی از ترافیکِ خواندن را به نمای تازه بفرست، یک باگِ عمدی در projection تازه بگذار، و مسیرِ rollback (برگرداندنِ ۱۰۰٪ ترافیک به نمای قدیم) را تمرین کن.",
+      "lab_en": "<b>Dual migration:</b> build a product-list API with two schema versions (old: one flat table; new: table + details table) fed by two independent projections from one shared input log. Send a percent of read traffic to the fresh view, plant a deliberate bug in the fresh projection, and practice the rollback path (returning 100% of traffic to the old view).",
+      "title_fa": "تمرین ۲ — مهاجرتِ دوگانه",
+      "title_en": "Exercise 2 — Dual migration",
+      "folder": "ch13-streaming-philosophy",
+      "hue": "butter",
+      "followup_en": "A client writes data the old schema cannot represent after reading the new schema. Is rollback still possible?",
+      "lab_en_duration": "3–6 hours"
+    },
+    {
+      "chapter": 13,
+      "number": 3,
+      "level": "staff",
+      "priority": "role",
+      "decision": "correct",
+      "minutes": 50,
+      "lab": "۶–۱۲ ساعت",
+      "reason": "رکورد فایل framing/checksum و fsync دارد؛ تصمیم و تعهد انتشار پایدارند. pending و اثر هر leg باید با مرز مشاهده مشخص حساب شوند.",
+      "prompt": "انتقال مبدأ، مقصد و کارمزد را با سه log و پردازش قطعی طراحی کن. framed record/checksum/fsync، رزرو موجودی، تصمیم پایدار، outbox و dedup را مشخص کن. crash پس از انتشار بخشی از خروجی را بازیابی کن و تفاوت integrity نهایی، pending state و رؤیت اتمیک را بیان کن.",
+      "signals": [
+        "تصمیم retry با موجودی متفاوت دوباره گرفته نمی‌شود",
+        "پول در حال انتقال در حسابداری دیده می‌شود",
+        "جبران یا پیشبرد تصمیم با مدرک انتخاب شده"
+      ],
+      "followup": "مقصد برای همیشه بسته شده باشد؛ چگونه پرداخت pending را حل می‌کنی؟",
+      "sources": [
+        "idempotency",
+        "jepsen"
+      ],
+      "reason_en": "File records need framing/checksum and fsync; decisions and publication obligations are durable. Account for pending funds and each leg at a defined observation boundary.",
+      "prompt_en": "Design source/destination/fee logs using framed checksummed durable records, reserved funds, persistent decisions, an outbox and dedup. Recover after publishing only some outputs. Distinguish pending funds, final integrity and atomic visibility.",
+      "signals_en": [
+        "Persistent deterministic decision",
+        "Account for pending funds",
+        "Explicit visibility guarantees"
+      ],
+      "lab_fa": "<p>سه shard مبدأ، مقصد و کارمزد با پردازندهٔ تک‌نخ و لاگ فایلی بساز. قرارداد فایل [length,payload,checksum]، fsync پیش از ACK، و recovery دم ناقص را تعریف کن؛ خرابی میانی را بی‌صدا دور نینداز. تصمیم و رزرو وجه و تعهد انتشار outbox باید از یک رکورد پایدار قابل بازسازی باشند. هر leg کلید (payment_id,leg_type) دارد؛ مقصد اثر و dedup را با هم پایدار می‌کند. بعد از هر انتشار crash و پس از restart همان تصمیم ذخیره‌شده را replay کن. مبلغ pending را به تفکیک leg حساب کن تا پرداختی که در مقصد اعمال شده دوباره در pending شمرده نشود؛ جمع اقتصادی فقط در یک مرز منطقی مشترک قابل سنجش است. همگرایی نهایی، رؤیت اتمیک بین shardها نمی‌دهد؛ تأخیر بی‌نهایت و leg ناموفق به وضعیت محصول و reconciliation/compensation مشخص نیاز دارد.</p>",
+      "lab_en": "<p>Build source, destination and fee shards with single-thread processors and file logs. Define [length,payload,checksum], fsync-before-ACK and truncated-tail recovery; never silently discard interior corruption. Reconstruct the decision, reservation and outbox obligation from one durable record. Identify each leg by (payment_id,leg_type); persist destination dedup with its effect. Crash after each publication and replay the stored decision after restart. Track pending per leg so credited funds are not counted again as pending; economic conservation needs a common logical observation boundary. Eventual convergence does not provide cross-shard atomic visibility. Indefinite delay or a permanently failed leg needs an explicit product state and reconciliation/compensation protocol.</p>",
+      "title_fa": "تمرین ۳ — پرداختِ چندshardیِ مینیاتوری",
+      "title_en": "Exercise 3 — Miniature multishard payment",
+      "folder": "ch13-streaming-philosophy",
+      "hue": "butter",
+      "followup_en": "The destination account closes permanently. How do you resolve a pending transfer?",
+      "lab_en_duration": "6–12 hours",
+      "resolution": {
+        "status": "resolved",
+        "date": "2026-10-15",
+        "fa": "رکورد فایل framing/checksum و fsync دارد؛ تصمیم و تعهد انتشار پایدارند. pending و اثر هر leg باید با مرز مشاهده مشخص حساب شوند.",
+        "en": "File records need framing/checksum and fsync; decisions and publication obligations are durable. Account for pending funds and each leg at a defined observation boundary."
+      }
+    },
+    {
+      "chapter": 13,
+      "number": 4,
+      "level": "staff",
+      "priority": "core",
+      "decision": "refocus",
+      "minutes": 40,
+      "lab": "۲–۴ ساعت",
+      "reason": "reconciliation و silent corruption عمق عملیاتی خوبی دارند؛ checker باید checkpoint برابر و فرض مستقل داشته باشد.",
+      "prompt": "برای انتقال یا projection یک auditor مستقل طراحی کن که log مرجع را تا checkpoint مشخص بازپخش کند. state واقعی را در همان مرز مقایسه کن، mismatch و lag را جدا بشمار و missing update تزریق کن. حدود تشخیص bug مشترک، هزینه و repair امن را توضیح بده.",
+      "signals": [
+        "stateهای دو زمان متفاوت مقایسه نمی‌شوند",
+        "checker همان تابع buggy را بدون استقلال تکرار نمی‌کند",
+        "تشخیص با repair خودکار بی‌قید یکی نیست"
+      ],
+      "followup": "لاگ ورودی خودش ناقص باشد؛ auditor چه چیزی را نمی‌تواند ثابت کند؟",
+      "sources": [
+        "jepsen",
+        "atlassian"
+      ],
+      "reason_en": "Independent reconciliation should compare the same checkpoint, not different ages of state.",
+      "prompt_en": "Replay the authoritative log to a stated checkpoint using an independent auditor. Compare actual state at the same boundary, distinguish lag from corruption, inject missing updates and define safe repair and shared-bug limitations.",
+      "signals_en": [
+        "Same-checkpoint comparison",
+        "Independent recomputation",
+        "Detection versus safe repair"
+      ],
+      "lab_fa": "<b>حسابرسیِ سرتاسری:</b> برای یکی از تمرین‌های بالا یک checker جدا بنویس که مستقل از کدِ اصلی، لاگِ ورودی را می‌خواند و state مشتق را بازمحاسبه و با state واقعی مقایسه می‌کند (ایدهٔ «اجرای مجددِ مشتق برای چک»). یک خرابیِ خاموش (مثلاً update گم‌شده در یک replica) تزریق کن و ببین checker چه زمانی می‌گیردش.",
+      "lab_en": "<b>End-to-end auditing:</b> for one of the exercises above, write a separate checker that independently reads the input log, recomputes the derived state and compares with the real state (the “re-run the derivative for checking” idea). Inject a silent failure (e.g. a lost update in one replica) and see when the checker catches it.",
+      "title_fa": "تمرین ۴ — حسابرسیِ سرتاسری",
+      "title_en": "Exercise 4 — End-to-end auditing",
+      "folder": "ch13-streaming-philosophy",
+      "hue": "butter",
+      "followup_en": "The input log itself is incomplete. What can the auditor no longer prove?",
+      "lab_en_duration": "2–4 hours"
+    },
+    {
+      "chapter": 14,
+      "number": 1,
+      "level": "senior",
+      "priority": "extra",
+      "decision": "optional",
+      "minutes": 35,
+      "lab": "۳–۶ ساعت",
+      "reason": "برای ML/fairness ارزشمند است؛ آموزش مدل تبعیض‌آمیز مصنوعی اولویت عمومی مصاحبهٔ backend نیست.",
+      "prompt": "برای مدل وام با proxyهایی مثل کدپستی، leakage و اختلاف پذیرش گروه‌ها را تحلیل کن. metric عدالت را با objective و label bias انتخاب کن؛ baseline، subgroup evaluation، appeal و monitoring را طراحی کن. روشن کن حذف ویژگی حساس چه چیزی را حل نمی‌کند.",
+      "signals": [
+        "correlation با causation یا قصد مدل یکی نیست",
+        "fairness به یک metric خلاصه نشده",
+        "utility و محدودیت داده مصنوعی صریح است"
+      ],
+      "followup": "ground truth وام‌های ردشده را نداریم؛ ارزیابی equal opportunity چه مشکلی دارد؟",
+      "sources": [
+        "microsoft",
+        "atlassian"
+      ],
+      "reason_en": "Valuable for ML/fairness roles, not a general backend prerequisite.",
+      "prompt_en": "Analyze protected-group proxies and unequal acceptance in a lending model. Choose an operational fairness objective, address label bias and evaluate subgroup outcomes, utility, appeals and synthetic-data limitations.",
+      "signals_en": [
+        "Correlation limitations",
+        "Multiple fairness objectives",
+        "Utility and synthetic-data limits"
+      ],
+      "lab_fa": "<p>یک دیتاستِ مصنوعیِ تصمیمِ وام/استخدام بساز که ستونِ محافظت‌شده (مثلاً گروه) در آن حذف شده ولی دو پروکسی (کدپستی و مدلِ دستگاه) با آن همبسته‌اند. یک مدلِ ساده آموزش بده و نشان بده (الف) مدل پروکسی را بازسازی می‌کند و (ب) نرخِ پذیرش بینِ گروه‌ها نابرابر است. بعد یک تعریفِ عملیاتی از «عادلانه‌بودن» انتخاب کن، اثرش را روی دقت بسنج، و بنویس چرا هیچ معیاری به‌تنهایی کافی نیست.</p>",
+      "lab_en": "<p>Build a synthetic loan/hiring dataset with the protected column (e.g. group) removed but two proxies (postcode and device model) correlated with it. Train a simple model and show (a) the model reconstructs the proxy and (b) acceptance rates differ across groups. Then pick one operational definition of “fairness”, measure its effect on accuracy, and write why no single metric suffices.</p>",
+      "title_fa": "تمرین ۱ — حسابرسیِ پروکسی",
+      "title_en": "Exercise 1 — proxy audit",
+      "folder": "ch14-doing-right",
+      "hue": "lilac",
+      "followup_en": "There is no outcome label for rejected loans. What problem does this cause for equal-opportunity evaluation?",
+      "lab_en_duration": "3–6 hours"
+    },
+    {
+      "chapter": 14,
+      "number": 2,
+      "level": "staff",
+      "priority": "extra",
+      "decision": "optional",
+      "minutes": 30,
+      "lab": "۳–۶ ساعت",
+      "reason": "feedback loop برای systems thinking آموزنده است؛ عدد ۵۰ دوره و مدل ثروت شواهد واقعی استخدام نیستند.",
+      "prompt": "برای score→employment→income→score یک feedback loop رسم کن. فرض‌های مدل را بگو، دو مداخله پیشنهاد بده و sensitivity analysis با seed و پارامتر مشترک طراحی کن. metric inequality، subgroup outcome و آثار ناخواسته را مشخص کن.",
+      "signals": [
+        "شبیه‌سازی را اثبات اجتماعی معرفی نمی‌کند",
+        "دو مداخله با شرایط اولیه برابر مقایسه می‌شوند",
+        "پایداری نتیجه نسبت به پارامترها سنجیده می‌شود"
+      ],
+      "followup": "مداخله میانگین ثروت را بهتر کند ولی بدترین گروه را بدتر؛ نتیجه را چگونه گزارش می‌دهی؟",
+      "sources": [
+        "microsoft",
+        "atlassian"
+      ],
+      "reason_en": "A systems-thinking exercise; a toy wealth simulation is not empirical hiring evidence.",
+      "prompt_en": "Draw score/employment/income feedback. State assumptions, compare two interventions with matched seeds and populations, and test sensitivity, inequality and unintended subgroup effects.",
+      "signals_en": [
+        "No social proof from toy simulation",
+        "Matched seeds and populations",
+        "Parameter sensitivity"
+      ],
+      "lab_fa": "<p>جمعیتی از عامل‌ها با نمرهٔ اولیه بساز؛ هر دوره شوکِ تصادفی (بیماری/بیکاری) به بعضی بزن و قانونِ «کارفرما زیرِ آستانه استخدام نمی‌کند» را اعمال کن. بعد از ۵۰ دوره توزیعِ نمره و ثروت را رسم کن و ببین نابرابریِ اولیه تقویت شد یا نه. بعد یک مداخله (مثلاً نادیده‌گرفتنِ نمرهٔ زیرِ آستانه برای متقاضیِ باسابقه) اضافه کن و اثرش را مقایسه کن.</p>",
+      "lab_en": "<p>Build a population of agents with initial scores; each round, hit some with a random shock (illness/unemployment) and apply the rule “employers don’t hire below the threshold”. After 50 rounds plot the score and wealth distributions and check whether initial inequality was amplified. Then add one intervention (e.g. ignoring sub-threshold scores for experienced applicants) and compare its effect.</p>",
+      "title_fa": "تمرین ۲ — شبیه‌سازیِ مارپیچ",
+      "title_en": "Exercise 2 — spiral simulation",
+      "folder": "ch14-doing-right",
+      "hue": "lilac",
+      "followup_en": "An intervention raises mean wealth but worsens the weakest group. How do you report it?",
+      "lab_en_duration": "3–6 hours"
+    },
+    {
+      "chapter": 14,
+      "number": 3,
+      "level": "senior",
+      "priority": "extra",
+      "decision": "optional",
+      "minutes": 30,
+      "lab": "۲–۴ ساعت",
+      "reason": "privacy review مفید است؛ نتیجهٔ حقوقی قطعی از یک policy عمومی یا فرض «همه‌چیز باید consent باشد» غلط است.",
+      "prompt": "یک policy واقعی را با تاریخ و نسخه مشخص بخوان و data flow را رسم کن. consent را از سایر مبانی پردازش تفکیک کن؛ purpose، retention، withdrawal و انتخاب کاربر را بررسی کن. ادعاهای تأییدنشده درباره implementation را unknown علامت بزن و گزارش مهندسی بده.",
+      "signals": [
+        "policy عمومی مدرک implementation نیست",
+        "consent فقط یکی از مبانی حقوقی است",
+        "برداشت مهندسی از رأی حقوقی جداست"
+      ],
+      "followup": "رد tracking موجب از دست رفتن خدمت پایه شود؛ چه سؤال‌هایی برای بررسی رضایت آزاد لازم است؟",
+      "sources": [
+        "consent",
+        "legal-basis"
+      ],
+      "reason_en": "A public privacy policy does not prove implementation; consent is not the only legal basis.",
+      "prompt_en": "Review a dated real policy, map purposes and retention, distinguish consent from other processing bases, assess withdrawal and user choice, and mark implementation claims unknown. Produce an engineering assessment rather than a legal verdict.",
+      "signals_en": [
+        "Policy versus implementation",
+        "Multiple lawful processing bases",
+        "Engineering versus legal conclusions"
+      ],
+      "lab_fa": "<p>یک سرویسِ پرکاربرد انتخاب کن و سیاستِ حریمش را بخوان؛ جریانِ داده (چه چیزی، چرا، تا کِی، با چه کسی مشترک) را نقشه کن و چک‌لیستِ GDPR (آزاد/مشخص/آگاهانه/بدونِ ابهام + ردِ بدونِ ضرر) را روی هر بند اعمال کن. در پایان یک گزارشِ یک‌صفحه‌ای بنویس: کدام بندها «رضایت» واقعی‌اند و کدام فقط ظاهرش را دارند — و کاربرِ کم‌برخوردار چه گزینه‌ای دارد.</p>",
+      "lab_en": "<p>Pick a widely used service and read its privacy policy; map the data flow (what, why, how long, shared with whom) and apply the GDPR checklist (free/specific/informed/unambiguous + costless refusal) to each clause. Finish with a one-page report: which clauses are real “consent” and which only look like it — and what option a disadvantaged user has.</p>",
+      "title_fa": "تمرین ۳ — ممیزیِ رضایتِ یک سرویسِ واقعی",
+      "title_en": "Exercise 3 — consent audit of a real service",
+      "folder": "ch14-doing-right",
+      "hue": "lilac",
+      "followup_en": "Refusing tracking removes the basic service. What evidence is needed to assess freely given consent?",
+      "lab_en_duration": "2–4 hours"
+    },
+    {
+      "chapter": 14,
+      "number": 4,
+      "level": "staff",
+      "priority": "role",
+      "decision": "refocus",
+      "minutes": 40,
+      "lab": "۳–۶ ساعت",
+      "reason": "data minimization، retention و حذف سرتاسری برای platform/security مهم‌اند؛ با فصل ۱ مشترک است ولی اجرای purge محور متفاوت دارد.",
+      "prompt": "برای فروشگاه جدول data/purpose/retention/delete طراحی کن. purge دوره‌ای، legal hold، aggregate قابل بازشناسایی، backup restore و audit بدون ذخیره PII اضافه را پوشش بده. حذف را در cache، search و model data پیگیری کن و سناریوی رخنه را با موجودی واقعی داده بسنج.",
+      "signals": [
+        "retention نمونه را الزام قانونی معرفی نمی‌کند",
+        "aggregate را خودکار ناشناس نمی‌داند",
+        "purge idempotent و قابل ردیابی طراحی شده"
+      ],
+      "followup": "restore بکاپ شش‌ماهه چگونه مانع برگشت کاربران حذف‌شده می‌شود؟",
+      "sources": [
+        "privacy",
+        "atlassian"
+      ],
+      "reason_en": "Valuable for privacy/security/platform; deletion operations differ from the chapter-one options discussion.",
+      "prompt_en": "Design retention and purge for a shop, including legal holds, re-identifiable aggregates, backups, restores and minimal audit data. Trace deletion through derived views and evaluate breach exposure using the actual data inventory.",
+      "signals_en": [
+        "Illustrative versus required retention",
+        "Aggregate re-identification risk",
+        "Idempotent traceable purge"
+      ],
+      "lab_fa": "<p>برای یک سرویسِ فرضی (مثلاً فروشگاهِ آنلاین با تبلیغِ هدفمند) جدولِ «چه داده‌ای، چرا لازم است، تا کِی نگه می‌داریم، بعدش چه می‌شود» بنویس؛ یک اسکریپتِ پاک‌سازیِ دوره‌ای (retention + purge + aggregate) طراحی کن؛ و سناریوی رخنه را بنویس: «چه چیزی لو نرفت چون اصلاً نداشتیمش». در آخر درختِ تصمیمِ نمودار ۱۰ را روی سه قلمِ دادهٔ واقعیِ همان سرویس اعمال کن.</p>",
+      "lab_en": "<p>For a hypothetical service (e.g. an online shop with targeted ads) write the “what data, why needed, kept how long, what happens after” table; design a periodic purge script (retention + purge + aggregate); and write the breach scenario: “what didn’t leak because we never had it”. Finally, apply diagram 10’s decision tree to three real data items of that same service.</p>",
+      "title_fa": "تمرین ۴ — سیاستِ کمینه‌سازی و پاک‌سازی",
+      "title_en": "Exercise 4 — minimization and purge policy",
+      "folder": "ch14-doing-right",
+      "hue": "lilac",
+      "followup_en": "How does restoring a six-month-old backup avoid resurrecting deleted users?",
+      "lab_en_duration": "3–6 hours"
+    }
+  ],
+  "corrected_on": "2026-10-15"
+}

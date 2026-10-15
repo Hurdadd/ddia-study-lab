@@ -1,0 +1,208 @@
+{
+  "alternatives": [
+    {
+      "en": "Leader-based linearizable reads (read from the leader, or leader-confirmed reads): simpler to reason about, but every read pays leader latency and the leader is a bottleneck. Choose it when contention is low and simplicity beats read throughput; choose quorum register reads when reads must scale out.",
+      "fa": "خواندن خطی‌پذیر رهبرمحور (خواندن از رهبر یا خواندن با تأیید رهبر): استدلالش ساده‌تر ولی هر خواندن هزینه latency رهبر را می‌دهد و رهبر گلوگاه است. وقتی رقابت کم است و سادگی به توان خواندن می‌ارزد انتخابش کن؛ وقتی خواندن باید مقیاس بخورد خواندن رجیستری quorum را."
+    }
+  ],
+  "answer_en": "Stage an in-flight write that reached only one of three replicas, then read r=2 twice: the first quorum meets the new version, the second starts later yet reads older — new-then-old, a linearizability violation with w + r &gt; n intact. Fix it the ABD way: versions are ordered, and every reader writes the max version back to a quorum BEFORE returning. Background read-repair is async and guarantees nothing; write-back-before-return does.",
+  "answer_fa": "نوشتنی در پرواز بساز که فقط به یکی از سه replica رسیده، بعد دو بار با <span class=\"ltr\">r=2</span> بخوان: quorum اول نسخه تازه را می‌بیند و دومی که دیرتر شروع شده کهنه‌تر می‌خواند — تازه-بعد-کهنه، نقض خطی‌پذیری با <span class=\"ltr\">w + r &gt; n</span> سالم. درستش کن به روش <span class=\"ltr\">ABD</span>: نسخه‌ها مرتب‌اند و هر خواننده نسخه بیشینه را قبل از برگشتن به quorum برمی‌گرداند. <span class=\"ltr\">read-repair</span> پس‌زمینه ناهمگام است و هیچ‌چیز را تضمین نمی‌کند؛ write-back قبل از بازگشت می‌کند.",
+  "assumptions": [
+    {
+      "en": "Three replicas n1/n2/n3, fixed membership; no rebalancing during the scenario.",
+      "fa": "سه replica به نام <span class=\"ltr\">n1 و n2 و n3</span> با membership ثابت؛ حین سناریو rebalancing نیست."
+    },
+    {
+      "en": "Single writer, ordered versions v1(old) < v2(new); the write targets w=3 but only n1 has stored v2 — partial, never acknowledged.",
+      "fa": "تک‌نویسنده با نسخه‌های مرتب <span class=\"ltr\">v1</span> (کهنه) <span class=\"ltr\">v2</span> (تازه)؛ نوشتن هدف <span class=\"ltr\">w=3</span> دارد ولی فقط <span class=\"ltr\">n1</span> نسخه <span class=\"ltr\">v2</span> را ذخیره کرده — جزئی و هرگز تأییدشده نیست."
+    },
+    {
+      "en": "Reads take r=2 and return the max version they meet; reader B's read starts after reader A's read returned.",
+      "fa": "خواندن‌ها با <span class=\"ltr\">r=2</span> بیشینه نسخه دیده‌شده را برمی‌گردانند؛ خواندن خواننده <span class=\"ltr\">B</span> بعد از برگشتن خواندن <span class=\"ltr\">A</span> شروع می‌شود."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n// Teaching demo: versions on 3 replicas, an in-flight write on n1 only,\n// new-then-old r=2 reads, then the ABD fix: write-back before return.\npublic class QuorumDemo {\n    record Ver(long v, String val) {}\n    public static void main(String[] a) {\n        Map<String, Ver> store = new LinkedHashMap<>(Map.of(\n            \"n1\", new Ver(2, \"new\"), \"n2\", new Ver(1, \"old\"), \"n3\", new Ver(1, \"old\")));\n        Ver r1 = maxOf(store, List.of(\"n1\", \"n2\"));\n        Ver r2 = maxOf(store, List.of(\"n2\", \"n3\"));\n        System.out.println(\"read1 {n1,n2} -> v\" + r1.v() + \"=\" + r1.val());\n        System.out.println(\"read2 {n2,n3} -> v\" + r2.v() + \"=\" + r2.val());\n        System.out.println(\"violation (new-then-old) = \" + (r1.v() > r2.v()));\n        store.put(\"n2\", r1); // write-back of v2 to a quorum BEFORE return\n        Ver r2b = maxOf(store, List.of(\"n2\", \"n3\"));\n        System.out.println(\"after write-back, read2 -> v\" + r2b.v() + \"=\" + r2b.val());\n        if (!(r1.v() == 2 && r2.v() == 1 && r2b.v() == 2)) throw new AssertionError();\n        System.out.println(\"OK: versions ordered, write-back-before-return fixes it\");\n    }\n    static Ver maxOf(Map<String, Ver> s, List<String> q) {\n        return q.stream().map(s::get).max(Comparator.comparingLong(Ver::v)).orElseThrow();\n    }\n}\n",
+    "expected_en": "read1 returns v2=new, read2 returns v1=old (violation true), after write-back read2 returns v2=new; OK. (actual output of this environment)",
+    "expected_fa": "خواندن اول <span class=\"ltr\">v2=new</span> و دومی <span class=\"ltr\">v1=old</span> (نقض true) و بعد از write-back دومی <span class=\"ltr\">v2=new</span>؛ <span class=\"ltr\">OK</span>. (خروجی واقعی همین محیط)",
+    "lang": "java",
+    "run_en": "javac QuorumDemo.java && java QuorumDemo — stdlib Java only, instant.",
+    "run_fa": "javac QuorumDemo.java && java QuorumDemo — فقط استاندارد جاوا، فوری.",
+    "status": "verified"
+  },
+  "design_en": "<p>Each replica stores <code>(version, value)</code> with totally ordered versions. Write path (single writer): stamp v+1, send to all three, wait for w ACKs — here only one lands, so the write stays in flight. Read path: query r=2, pick max version, write it back to r=2, then return. Multi-writer adds a query phase: read the highest timestamp from a quorum before stamping the write.</p>",
+  "design_fa": "<p>هر replica جفت <code>(version, value)</code> را با نسخه‌های کاملاً مرتب نگه می‌دارد. مسیر نوشتن (تک‌نویسنده): مهر <span class=\"ltr\">v+1</span> بزن، به هر سه بفرست و منتظر <span class=\"ltr\">w</span> تأیید بمان — این‌جا فقط یکی می‌رسد پس نوشتن در پرواز می‌ماند. مسیر خواندن: از <span class=\"ltr\">r=2</span> بپرس، بیشینه را بردار، به <span class=\"ltr\">r=2</span> برگردان، بعد برگرد. چندنویسنده فاز query می‌افزاید: قبل از مهر زدن بالاترین timestamp را از quorum بخوان.</p>",
+  "diagrams": [
+    {
+      "caption_en": "In-flight v2 on n1 only, new-then-old reads, then write-back before return",
+      "caption_fa": "نسخه v2 در پرواز فقط روی n1، خواندن‌های تازه-بعد-کهنه، بعد write-back قبل از بازگشت",
+      "file": "diagrams/sol2-step1-quorum-race.html",
+      "height": 700,
+      "kind_en": "sequence: race then fix",
+      "kind_fa": "توالی: مسابقه بعد درست",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Trace the middle band: reader B's lifeline starts after reader A's return arrow, yet its return value v1 is older than A's v2. The pink STALE label sits exactly on that backward step.",
+        "failure_fa": "باند وسط را دنبال کن: خط زندگی خواننده <span class=\"ltr\">B</span> بعد از پیکان بازگشت <span class=\"ltr\">A</span> شروع می‌شود ولی مقدار برگشتی‌اش <span class=\"ltr\">v1</span> از <span class=\"ltr\">v2</span> دیده‌شده کهنه‌تر است. برچسب صورتی <span class=\"ltr\">STALE</span> دقیقاً روی همان قدم عقب است.",
+        "guarantee_en": "The figure shows the partial write, the violating pair, and the write-back repair in order. It does not show concurrent writers or membership change — the third card names both as extra assumptions.",
+        "guarantee_fa": "شکل نوشتن جزئی و جفت ناقض و تعمیر write-back را به‌ترتیب نشان می‌دهد. نویسنده‌های هم‌زمان و تغییر membership را نشان نمی‌دهد — کارت سوم هر دو را به‌عنوان فرض اضافه نام می‌برد.",
+        "nonguarantee_en": "Durability of the in-flight write is not promised: v2 on one replica may still be lost on crashes. Linearizability here is about read freshness, not write survival.",
+        "nonguarantee_fa": "ماندگاری نوشتن در پرواز وعده داده نشده: <span class=\"ltr\">v2</span> روی یک replica ممکن است با crash گم شود. خطی‌پذیری این‌جا درباره تازگی خواندن است نه بقای نوشتن.",
+        "point_en": "The decision point is the write-back arrow: max version out to a quorum before the read returns. Everything after it converges.",
+        "point_fa": "نقطه تصمیم پیکان write-back است: نسخه بیشینه به quorum قبل از برگشتن خواندن. هرچه بعدش است همگرا می‌شود.",
+        "scenario_en": "A writer, two readers and three replicas across three bands: the in-flight write, the violating read pair, and the write-back fix. Read top to bottom.",
+        "scenario_fa": "یک نویسنده و دو خواننده و سه replica در سه باند: نوشتن در پرواز و جفت خواندن ناقض و درست write-back. از بالا به پایین بخوان.",
+        "steps": [
+          {
+            "en": "Top band: write v2=new lands on n1 only; the n2/n3 arrows are dashed in flight, never stored — partial, not acknowledged.",
+            "fa": "باند بالا: نوشتن <span class=\"ltr\">v2=new</span> فقط روی <span class=\"ltr\">n1</span> می‌نشیند؛ پیکان‌های <span class=\"ltr\">n2 و n3</span> چین‌دار و در پروازند و هرگز ذخیره نشده‌اند — جزئی، نه تأییدشده."
+          },
+          {
+            "en": "Middle band: reader A reads {n1,n2} and returns v2; reader B starts after that return, reads {n2,n3} and returns v1 STALE — time moved backwards.",
+            "fa": "باند وسط: خواننده <span class=\"ltr\">A</span> از <span class=\"ltr\">n1 و n2</span> می‌خواند و <span class=\"ltr\">v2</span> برمی‌گرداند؛ خواننده <span class=\"ltr\">B</span> بعد از آن بازگشت شروع می‌کند و از <span class=\"ltr\">n2 و n3</span> می‌خواند و <span class=\"ltr\">v1 STALE</span> برمی‌گرداند — زمان به عقب برگشت."
+          },
+          {
+            "en": "Bottom band: the max version v2 goes back out to a quorum before the read returns; the re-read meets v2 everywhere it looks.",
+            "fa": "باند پایین: نسخه بیشینه <span class=\"ltr\">v2</span> قبل از برگشتن خواندن به quorum برمی‌گردد؛ خواندن دوباره هرجا نگاه کند <span class=\"ltr\">v2</span> را می‌بیند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Because the write never completed: only one replica stored v2, so no quorum was obliged to carry it. w + r > n promises that quorums overlap, not that a partial write is visible — overlap with a replica that never saw v2 returns v1, legally for sets, wrongly for freshness.",
+        "a_fa": "چون نوشتن هرگز کامل نشد: فقط یک replica نسخه <span class=\"ltr\">v2</span> را ذخیره کرد پس هیچ quorumای موظف به حملش نبود. <span class=\"ltr\">w + r &gt; n</span> هم‌پوشانی مجموعه‌ها را وعده می‌دهد نه رؤیت‌پذیری نوشتن جزئی را — هم‌پوشانی با replicaای که <span class=\"ltr\">v2</span> را ندیده <span class=\"ltr\">v1</span> برمی‌گرداند: برای مجموعه‌ها قانونی و برای تازگی غلط.",
+        "q_en": "w + r > n holds throughout. Why is the stale read still possible?",
+        "q_fa": "چرا با این‌که <span class=\"ltr\">w + r &gt; n</span> همه‌جا برقرار است خواندن کهنه هنوز ممکن است؟"
+      },
+      "source": ".archify/sequence-ch10-sol2-quorum-20261014-221512"
+    },
+    {
+      "caption_en": "Replica versions at t0 and t1 beside the three read outcomes and the repair rule",
+      "caption_fa": "نسخه‌های replica در t0 و t1 کنار سه نتیجه خواندن و قاعده تعمیر",
+      "file": "diagrams/sol2-quorum-writeback.html",
+      "height": 640,
+      "kind_en": "versions + outcomes",
+      "kind_fa": "نسخه‌ها + نتیجه‌ها",
+      "made": "hand",
+      "narration": {
+        "failure_en": "Trace the rose outcome row: {n2:v1, n3:v1} at a read that started after v2 was already returned. Then trace the green row below it: the same quorum after the write-back arrow returns v2. The only change between the rows is the write-back.",
+        "failure_fa": "سطر صورتی نتیجه را دنبال کن: <span class=\"ltr\">{n2:v1, n3:v1}</span> در خواندنی که بعد از برگشتن <span class=\"ltr\">v2</span> شروع شده. بعد سطر سبز زیرش را دنبال کن: همان quorum بعد از پیکان write-back نسخه <span class=\"ltr\">v2</span> برمی‌گرداند. تنها فرق دو سطر write-back است.",
+        "guarantee_en": "The figure shows versions, outcomes and the repair rule together. It does not bound how long the in-flight write takes, nor promise its survival.",
+        "guarantee_fa": "شکل نسخه‌ها و نتیجه‌ها و قاعده تعمیر را با هم نشان می‌دهد. نه سقف مدت نوشتن در پرواز را می‌گوید نه بقایش را وعده می‌دهد.",
+        "nonguarantee_en": "Linearizable CAS and multi-writer timestamp allocation are outside this figure — CAS needs consensus, stated in the chapter, not here.",
+        "nonguarantee_fa": "<span class=\"ltr\">CAS</span> خطی‌پذیر و تخصیص timestamp چندنویسنده بیرون این شکل‌اند — <span class=\"ltr\">CAS</span> طبق فصل consensus می‌خواهد، نه این‌جا.",
+        "point_en": "The decision point is the yellow rule box: repair must land before the return, not after. Background repair is honestly labeled too late.",
+        "point_fa": "نقطه تصمیم جعبه زرد قاعده است: تعمیر باید قبل از بازگشت بنشیند نه بعدش. تعمیر پس‌زمینه هم صادقانه دیر برچسب خورده.",
+        "scenario_en": "Left: replica versions at t0 (v2 on n1 only) and t1 (v2 written back to n2). Right: the three read outcomes. Bottom: the yellow rule box. Read left, then right, then the rule.",
+        "scenario_fa": "چپ: نسخه‌های replica در <span class=\"ltr\">t0</span> (<span class=\"ltr\">v2</span> فقط روی <span class=\"ltr\">n1</span>) و <span class=\"ltr\">t1</span> (<span class=\"ltr\">v2</span> برگشته به <span class=\"ltr\">n2</span>). راست: سه نتیجه خواندن. پایین: جعبه زرد قاعده. اول چپ بعد راست بعد قاعده.",
+        "steps": [
+          {
+            "en": "Left top: t0 — n1 green with v2, n2/n3 blue with v1. The caption says it plainly: partial, never acknowledged as w=3.",
+            "fa": "چپ بالا: <span class=\"ltr\">t0</span> — <span class=\"ltr\">n1</span> سبز با <span class=\"ltr\">v2</span> و <span class=\"ltr\">n2 و n3</span> آبی با <span class=\"ltr\">v1</span>. زیرنویسش علنی می‌گوید: جزئی و هرگز تأییدشده به‌عنوان <span class=\"ltr\">w=3</span> نیست."
+          },
+          {
+            "en": "Middle arrow: write-back v2 to the quorum, before return. Left bottom: t1 — n2 turned green.",
+            "fa": "پیکان وسط: برگرداندن <span class=\"ltr\">v2</span> به quorum قبل از بازگشت. چپ پایین: <span class=\"ltr\">t1</span> — <span class=\"ltr\">n2</span> سبز شد."
+          },
+          {
+            "en": "Right: read1 returns v2 (allowed, concurrent), read2 returns v1 STALE (violation, started later), re-read returns v2 (fixed).",
+            "fa": "راست: خواندن اول <span class=\"ltr\">v2</span> برمی‌گرداند (مجاز، هم‌زمان) و خواندن دوم <span class=\"ltr\">v1 STALE</span> (نقض، دیرتر شروع شده) و خواندن دوباره <span class=\"ltr\">v2</span> (درست شد)."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "No. The repair must complete before the read returns to its caller. A background task that runs later cannot retroactively linearize a value already returned — the caller already observed the violation.",
+        "a_fa": "نه. تعمیر باید قبل از برگشتن خواندن به صداکننده تمام شود. کار پس‌زمینه‌ای که بعداً می‌دود نمی‌تواند مقداری که قبلاً برگشته را عطف‌بماسبق خطی‌پذیر کند — صداکننده نقض را قبلاً دیده.",
+        "q_en": "Can background read-repair replace the write-back?",
+        "q_fa": "آیا read-repair پس‌زمینه می‌تواند جای write-back را بگیرد؟"
+      }
+    }
+  ],
+  "failures": [
+    {
+      "en": "Reader crashes after observing v2 but before write-back: if the caller never got a response, the read never completed — no precedence edge, and the next reader's write-back still propagates v2. If it returned v2 then died mid-write-back, the completed read DID set precedence, and the duty passes to the next reader, which writes back whatever max it meets. Completed means the response reached the caller, not that the reader saw the value internally.",
+      "fa": "مرگ خواننده بعد از دیدن <span class=\"ltr\">v2</span> ولی قبل از write-back: اگر صداکننده پاسخی نگرفت خواندن هرگز کامل نشد — یال تقدم نیست و write-back خواننده بعد هنوز <span class=\"ltr\">v2</span> را پخش می‌کند. اگر <span class=\"ltr\">v2</span> را برگرداند بعد وسط write-back مرد، خواندن کامل‌شده تقدم را گذاشت و وظیفه به خواننده بعد می‌رسد که هر بیشینه‌ای ببیند برمی‌گرداند. کامل یعنی پاسخ به صداکننده رسید، نه این‌که خواننده مقدار را درون خود دید."
+    },
+    {
+      "en": "Concurrent writers without a query phase: two writers stamping v2 independently fork the value — same version, different data. Guard: query the highest timestamp from a quorum first (ABD multi-writer), so versions stay unique per writer.",
+      "fa": "نویسنده‌های هم‌زمان بدون فاز query: دو نویسنده که مستقل مهر <span class=\"ltr\">v2</span> می‌زنند مقدار را دوشاخه می‌کنند — یک نسخه با دو داده. نگهبان: اول بالاترین timestamp را از quorum بپرس (چندنویسنده <span class=\"ltr\">ABD</span>) تا نسخه‌ها per-writer یکتا بمانند."
+    },
+    {
+      "en": "Membership change mid-scenario: w + r > n computed over two different member sets overlaps nothing. Guard: joint quorums — old and new member sets must overlap each other until the change completes.",
+      "fa": "تغییر membership وسط سناریو: <span class=\"ltr\">w + r &gt; n</span> روی دو مجموعه عضو متفاوت هیچ هم‌پوشانی ندارد. نگهبان: quorumهای مشترک — مجموعه‌های قدیم و جدید تا پایان تغییر باید هم را هم‌پوشانی کنند."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "If the reader crashes before write-back and before replying, the read is pending and may be omitted from a completed history; a later old read is not necessarily a violation. If v2 already reached the caller, the completed read constrains later reads and returning v1 violates linearizability. Passing repair duty to the next reader is insufficient: it may never see v2. A correct protocol withholds the reply until quorum write-back completes.",
+      "a_fa": "اگر reader پیش از write-back و پیش از پاسخ بمیرد، read کامل نشده است و می‌توان آن را در history کامل‌شده حذف کرد؛ read بعدی که مقدار قدیم می‌دهد لزوماً نقض نیست. اگر پاسخ v2 قبلاً به caller رسیده باشد، read کامل است و بازگشت v1 در read بعدی نقض است. انتقال وظیفه به خوانندهٔ بعد تضمین نمی‌دهد، چون ممکن است اصلاً v2 را نبیند؛ پروتکل درست پاسخ را تا پایان write-back quorum نگه می‌دارد.",
+      "level": "staff",
+      "q_en": "A reader crashes after observing the new value but before write-back. Should that read count as completed?",
+      "q_fa": "اگر یک reader بعد از خواندن جدید و قبل از write-back بمیرد، کدام read باید completed حساب شود؟"
+    },
+    {
+      "a_en": "Because it is arithmetic over sets, and freshness needs three more premises: the write completed (all w stored, not one), versions are ordered so readers can compare, and the max is written back before the read returns. Quorum overlap without those premises is a bridge that may carry the old value — same sets, same sum, stale cargo.",
+      "a_fa": "چون حساب روی مجموعه‌هاست و تازگی سه پیش‌فرض دیگر می‌خواهد: نوشتن کامل شده باشد (هر <span class=\"ltr\">w</span> ذخیره، نه یکی)، نسخه‌ها مرتب باشند تا خواننده مقایسه کند، و بیشینه قبل از برگشتن خواندن برگردد. هم‌پوشانی quorum بدون این پیش‌فرض‌ها پلی است که شاید بار کهنه ببرد — همان مجموعه‌ها و همان جمع با بار کهنه.",
+      "level": "senior",
+      "q_en": "Why doesn't w + r > n alone guarantee fresh reads?",
+      "q_fa": "چرا <span class=\"ltr\">w + r &gt; n</span> به‌تنهایی خواندن تازه را تضمین نمی‌کند؟"
+    }
+  ],
+  "interview_q_en": "Construct new-then-old quorum reads during an incomplete three-replica write. Specify ordered versions and majority write-back before returning a read. Discuss a query phase for multiple writers, fixed membership and crash assumptions.",
+  "interview_q_fa": "با سه replica و write در جریان که هنوز فقط به یکی رسیده، دو quorum read بساز که اولی جدید و دومی قدیمی می‌خواند. سپس الگوریتم register با version مرتب و write-back به اکثریت پیش از بازگشت read را مشخص کن. برای multi-writer مرحلهٔ query پیش از write و فرض membership ثابت را تحلیل کن.",
+  "mental_en": "A quorum is a bridge between the write and the read — but a bridge only carries what was actually loaded onto it. A partial write loads one end; the read crossing from the other end finds nothing new. Write-back is the reader carrying the news across before reporting back.",
+  "mental_fa": "quorum پلی است میان نوشتن و خواندن — ولی پل فقط چیزی را می‌برد که واقعاً رویش بار شده. نوشتن جزئی یک سر را بار می‌کند؛ خواندنی که از سر دیگر می‌گذرد چیز تازه‌ای نمی‌یابد. write-back یعنی خواننده خبر را قبل از گزارش برگشتن آن‌طرف می‌برد.",
+  "mistakes": [
+    {
+      "en": "Calling the targeted w=3 an acknowledged w=3. Sent-to-three is not stored-on-three; only ACKs count, and here there is one.",
+      "fa": "نامیدن <span class=\"ltr\">w=3</span> هدف با <span class=\"ltr\">w=3</span> تأییدشده. ارسال به سه مساوی ذخیره روی سه نیست؛ فقط <span class=\"ltr\">ACK</span>ها حساب‌اند و این‌جا یکی است."
+    },
+    {
+      "en": "Claiming background read-repair makes reads linearizable. Repair after the return is history cosmetics — the caller already saw the violation. Say 'eventual repair', never 'linearizable'.",
+      "fa": "ادعای خطی‌پذیر شدن خواندن با read-repair پس‌زمینه. تعمیر بعد از بازگشت آرایش تاریخ است — صداکننده نقض را قبلاً دیده. بگو «تعمیر eventual» و هرگز «خطی‌پذیر»."
+    },
+    {
+      "en": "Comparing versions by wall-clock timestamps (LWW). Wall clocks skew; skewed stamps order values wrongly and silently. Versions here are logical and ordered by construction.",
+      "fa": "مقایسه نسخه‌ها با timestamp ساعت دیواری (<span class=\"ltr\">LWW</span>). ساعت‌های دیواری skew دارند؛ مهرهای کج مقدارها را غلط و بی‌صدا مرتب می‌کنند. نسخه‌های این‌جا منطقی‌اند و با ساخت مرتب‌اند."
+    }
+  ],
+  "number": 2,
+  "slug": "quorum-writeback",
+  "sources": [
+    "abd",
+    "jepsen"
+  ],
+  "steps": [
+    {
+      "en": "Separate targeted from acknowledged: the write aimed at w=3 but only n1 stored v2. Name it partial — no quorum owes it visibility.",
+      "fa": "هدف را از تأییدشده جدا کن: نوشتن <span class=\"ltr\">w=3</span> را نشانه گرفت ولی فقط <span class=\"ltr\">n1</span> نسخه <span class=\"ltr\">v2</span> را ذخیره کرد. نامش جزئی — هیچ quorumای مدیون رؤیت‌پذیری‌اش نیست.",
+      "t_en": "Partial is not acked",
+      "t_fa": "جزئی یعنی تأییدنشده"
+    },
+    {
+      "en": "Run the violating pair: read1 from {n1,n2} returns max(v2,v1)=v2 (concurrent, allowed); read2 from {n2,n3} starts after read1 returned and gets max(v1,v1)=v1. New-then-old with the inequality intact.",
+      "fa": "جفت ناقض را اجرا کن: خواندن اول از <span class=\"ltr\">n1 و n2</span> برمی‌گرداند <span class=\"ltr\">max(v2,v1)=v2</span> (هم‌زمان، مجاز)؛ خواندن دوم از <span class=\"ltr\">n2 و n3</span> بعد از برگشتن اول شروع می‌شود و می‌گیرد <span class=\"ltr\">max(v1,v1)=v1</span>. تازه-بعد-کهنه با نامساوی سالم.",
+      "t_en": "Replay the violation",
+      "t_fa": "بازپخش نقض"
+    },
+    {
+      "en": "Apply the ABD fix: the reader writes v2 back to {n1,n2} — a quorum — BEFORE returning. The re-read from {n2,n3} now meets v2. Repair before the return is the guarantee; repair after it is cosmetics.",
+      "fa": "درست <span class=\"ltr\">ABD</span> را اعمال کن: خواننده <span class=\"ltr\">v2</span> را به <span class=\"ltr\">n1 و n2</span> — یک quorum — قبل از برگشتن برمی‌گرداند. خواندن دوباره از <span class=\"ltr\">n2 و n3</span> حالا <span class=\"ltr\">v2</span> را می‌بیند. تعمیر قبل از بازگشت تضمین است؛ تعمیر بعدش آرایش.",
+      "t_en": "Write back before return",
+      "t_fa": "برگرداندن قبل از بازگشت"
+    },
+    {
+      "en": "State the remaining assumptions honestly: single writer here (multi-writer needs a pre-write timestamp query), fixed membership (rebalancing needs joint quorums), and versions ordered by construction, never by wall clock.",
+      "fa": "فرض‌های مانده را صادقانه بگو: این‌جا تک‌نویسنده (چندنویسنده query timestamp قبل از نوشتن می‌خواهد)، membership ثابت (rebalancing quorum مشترک می‌خواهد) و نسخه‌های مرتب با ساخت، هرگز با ساعت دیواری.",
+      "t_en": "Name the assumptions",
+      "t_fa": "نام بردن فرض‌ها"
+    }
+  ],
+  "tests_en": "Replay the exact pair and assert new-then-old without the fix and newest-always with it; kill a reader between observe and write-back and assert the next reader still repairs; run two writers without a query phase and watch versions fork; measure write-back quorum latency (teaching: one extra quorum round-trip per read) and alert when it exceeds the read budget.",
+  "tests_fa": "همان جفت را بازپخش کن و بدون درست، تازه-بعد-کهنه و با آن، همیشه-تازه‌ترین را <span class=\"ltr\">assert</span> کن؛ خواننده را میان دیدن و برگرداندن بکُش و <span class=\"ltr\">assert</span> کن خواننده بعد هنوز تعمیر می‌کند؛ دو نویسنده بدون فاز query اجرا کن و دوشاخه شدن نسخه‌ها را ببین؛ latency quorum برگشتی را بسنج (آموزشی: یک round-trip اضافه per-read) و با عبور از بودجه خواندن هشدار بده.",
+  "worked_en": "<p>Teaching numbers: replicas hold (v2=new) on n1, (v1=old) on n2/n3. Read1 {n1,n2} = max(2,1) = v2. Read2 {n2,n3} = max(1,1) = v1 — violation. Write-back puts v2 on n2; re-read {n2,n3} = max(2,1) = v2 — fixed. Cost of the fix (teaching): one extra quorum round-trip on every read.</p>",
+  "worked_fa": "<p>اعداد آموزشی: replicaها نگه می‌دارند <span class=\"ltr\">(v2=new)</span> روی <span class=\"ltr\">n1</span> و <span class=\"ltr\">(v1=old)</span> روی <span class=\"ltr\">n2 و n3</span>. خواندن اول از <span class=\"ltr\">n1 و n2</span> می‌شود <span class=\"ltr\">max(2,1)=v2</span>. خواندن دوم از <span class=\"ltr\">n2 و n3</span> می‌شود <span class=\"ltr\">max(1,1)=v1</span> — نقض. write-back نسخه <span class=\"ltr\">v2</span> را روی <span class=\"ltr\">n2</span> می‌گذارد؛ خواندن دوباره می‌شود <span class=\"ltr\">max(2,1)=v2</span> — درست شد. هزینه درست (آموزشی): یک round-trip اضافه quorum روی هر خواندن.</p>",
+  "lab_fa": "<p>سه replica ابتدا v1 دارند. write تک‌نویسنده با هدف w=3 فقط n1 را به v2 رسانده و هنوز کامل نشده است. read اول r=2 از {n1,n2} مقدار v2 و read دوم که بعد از پایان اول آغاز می‌شود از {n2,n3} مقدار v1 می‌گیرد؛ history را رسم و نقض new-then-old را ثابت کن. نسخهٔ اصلاح‌شده، max نسخه را پیش از پاسخ read به quorum دوگرهی write-back می‌کند و replica هرگز به نسخهٔ کمتر عقب نمی‌رود. قبل و بعد از write-back crash تزریق کن و completed را از دید caller تعریف کن. read repair پس‌زمینه این شرط را نمی‌دهد. مدل SWMR با عضویت ثابت را صریح بنویس؛ برای MWMR query timestamp قبل از write، tag یکتای مرتب و quorum مناسب لازم است.</p>",
+  "lab_en": "<p>Start three replicas at v1. An incomplete single-writer write targeting w=3 has updated only n1 to v2. Read1 from {n1,n2} returns v2; Read2 starts after Read1 completes and returns v1 from {n2,n3}. Draw the history and prove new-then-old violates linearizability. Fix it with maximum-version write-back to a two-node quorum before returning, with replicas rejecting version regression. Inject crashes before and after write-back; completion is observed by the caller. Background repair does not satisfy the condition. State fixed-membership SWMR assumptions; MWMR additionally needs pre-write timestamp queries, uniquely ordered tags and suitable quorums.</p>",
+  "reasoning_fa": "<p>read1 مقدار write ناتمام را می‌تواند ببیند، ولی اگر آن مقدار را برگرداند، read2 بعدی دیگر نمی‌تواند به قبلش برگردد. write-back پیش از پاسخ، مقدار دیده‌شده را روی اکثریت می‌گذارد؛ هر اکثریت بعدی با آن اشتراک دارد. پس برای n=3 دو عضو کافی است؛ درخواست ACK هر سه در مثال فقط پنجرهٔ write ناتمام را واضح می‌کند. اثبات به monotonic نسخه، membership ثابت و قواعد writer وابسته است، نه صرف جمع r+w.</p>",
+  "reasoning_en": "<p>Read1 may observe an incomplete write, but once it returns that value a later Read2 cannot go backwards. Before-return write-back places the observed version on a majority; every later majority intersects it. With n=3, two replicas suffice; targeting all three writes merely exposes the incomplete-write window. The proof also needs monotonic versions, fixed membership and a defined writer protocol.</p>"
+}

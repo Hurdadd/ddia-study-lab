@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Five booking guards compared — DDIA Chapter 8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Five no-double-booking designs compared on overlaps, retries and verdict">
+<title>Five booking guards compared</title>
+<text x="620" y="56" font-size="30" font-weight="900" text-anchor="middle">No double-booking: five guards, one invariant</text>
+<text x="620" y="90" font-size="16" text-anchor="middle">invariant: no two committed rows for room R overlap; overlap is not equality</text>
+<g>
+<rect x="30" y="112" width="280" height="44" rx="12" fill="#e8dfc9"/>
+<text x="52" y="140" font-size="16" font-weight="800">design</text>
+<rect x="320" y="112" width="200" height="44" rx="12" fill="#e8dfc9"/>
+<text x="420" y="140" font-size="16" font-weight="800" text-anchor="middle">overlaps</text>
+<rect x="530" y="112" width="320" height="44" rx="12" fill="#e8dfc9"/>
+<text x="690" y="140" font-size="16" font-weight="800" text-anchor="middle">retry + contention</text>
+<rect x="860" y="112" width="350" height="44" rx="12" fill="#e8dfc9"/>
+<text x="1035" y="140" font-size="16" font-weight="800" text-anchor="middle">verdict</text>
+</g>
+<g>
+<rect x="30" y="164" width="280" height="52" rx="12" fill="#fffdf7"/>
+<text x="52" y="196" font-size="15" font-weight="800">A plain check + INSERT</text>
+<rect x="320" y="164" width="200" height="52" rx="12" fill="#ffcfb8"/>
+<text x="420" y="196" font-size="15" font-weight="800" text-anchor="middle">1 DOUBLE</text>
+<rect x="530" y="164" width="320" height="52" rx="12" fill="#fffdf7"/>
+<text x="690" y="196" font-size="15" text-anchor="middle">no retry, silent corruption</text>
+<rect x="860" y="164" width="350" height="52" rx="12" fill="#ffcfb8"/>
+<text x="1035" y="196" font-size="15" font-weight="800" text-anchor="middle">BROKEN</text>
+</g>
+<g>
+<rect x="30" y="222" width="280" height="52" rx="12" fill="#fffdf7"/>
+<text x="52" y="254" font-size="15" font-weight="800">B RC transaction</text>
+<rect x="320" y="222" width="200" height="52" rx="12" fill="#ffcfb8"/>
+<text x="420" y="254" font-size="15" font-weight="800" text-anchor="middle">1 DOUBLE</text>
+<rect x="530" y="222" width="320" height="52" rx="12" fill="#fffdf7"/>
+<text x="690" y="254" font-size="15" text-anchor="middle">no retry, no predicate lock</text>
+<rect x="860" y="222" width="350" height="52" rx="12" fill="#ffcfb8"/>
+<text x="1035" y="254" font-size="15" font-weight="800" text-anchor="middle">BROKEN</text>
+</g>
+<g>
+<rect x="30" y="280" width="280" height="52" rx="12" fill="#fffdf7"/>
+<text x="52" y="312" font-size="15" font-weight="800">C fixed room-row lock</text>
+<rect x="320" y="280" width="200" height="52" rx="12" fill="#bfe6c9"/>
+<text x="420" y="312" font-size="15" font-weight="800" text-anchor="middle">0, winner 1</text>
+<rect x="530" y="280" width="320" height="52" rx="12" fill="#fffdf7"/>
+<text x="690" y="312" font-size="15" text-anchor="middle">hot room serializes, 409 rest</text>
+<rect x="860" y="280" width="350" height="52" rx="12" fill="#bfe6c9"/>
+<text x="1035" y="312" font-size="15" font-weight="800" text-anchor="middle">SIMPLEST CORRECT</text>
+</g>
+<g>
+<rect x="30" y="338" width="280" height="52" rx="12" fill="#fffdf7"/>
+<text x="52" y="370" font-size="15" font-weight="800">D exclusion constraint</text>
+<rect x="320" y="338" width="200" height="52" rx="12" fill="#bfe6c9"/>
+<text x="420" y="370" font-size="15" font-weight="800" text-anchor="middle">0, winner 1</text>
+<rect x="530" y="338" width="320" height="52" rx="12" fill="#fffdf7"/>
+<text x="690" y="370" font-size="15" text-anchor="middle">no hotspot, write boundary</text>
+<rect x="860" y="338" width="350" height="52" rx="12" fill="#bfe6c9"/>
+<text x="1035" y="370" font-size="15" font-weight="800" text-anchor="middle">PREFER AT SCALE</text>
+</g>
+<g>
+<rect x="30" y="396" width="280" height="52" rx="12" fill="#fffdf7"/>
+<text x="52" y="428" font-size="15" font-weight="800">E serializable + retry</text>
+<rect x="320" y="396" width="200" height="52" rx="12" fill="#bfe6c9"/>
+<text x="420" y="428" font-size="15" font-weight="800" text-anchor="middle">0, winner 1</text>
+<rect x="530" y="396" width="320" height="52" rx="12" fill="#fffdf7"/>
+<text x="690" y="428" font-size="15" text-anchor="middle">40001, retry WHOLE txn</text>
+<rect x="860" y="396" width="350" height="52" rx="12" fill="#bfe6c9"/>
+<text x="1035" y="428" font-size="15" font-weight="800" text-anchor="middle">CORRECT IF APP RETRIES</text>
+</g>
+<g>
+<rect x="30" y="462" width="1180" height="56" rx="14" fill="#d7e5f5"/>
+<text x="60" y="486" font-size="15" font-weight="800">50-thread race on C: winners 1, doubles 0, median 6us, p99 167us (teaching numbers)</text>
+<text x="60" y="508" font-size="14">extend [9,11) to [9,12) vs new [11,13): the guard re-checks the NEW range, equality would miss it</text>
+</g>
+<g>
+<rect x="30" y="528" width="1180" height="56" rx="14" fill="#f3e3c2"/>
+<text x="60" y="552" font-size="15" font-weight="800">UNIQUE fits discrete fixed slots only; intervals need overlap, never equality</text>
+<text x="60" y="574" font-size="14">SELECT FOR UPDATE on the empty reservation result locks nothing: lock the room row or the write</text>
+</g>
+<text x="620" y="622" font-size="15" text-anchor="middle">abort means retry the whole transaction with backoff + jitter and a bound, not the failed statement</text>
+</svg>
+</div>
+</body>
+</html>

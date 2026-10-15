@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reference vs embedding vs derived view — DDIA Chapter 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Logo update cost across three designs">
+<title>Logo update cost across three designs</title>
+<text x="620" y="52" font-size="28" font-weight="900" text-anchor="middle">One logo, 100K products: read cost vs write fan-out</text>
+<text x="620" y="84" font-size="15" text-anchor="middle">teaching numbers: 800 reads/s, 1.5 ms lookup, 2K/s backfill</text>
+<g>
+<rect x="40" y="110" width="360" height="330" rx="20" fill="#bfe6c9"/>
+<text x="220" y="150" font-size="20" font-weight="800" text-anchor="middle">Reference</text>
+<text x="220" y="196" font-size="14" text-anchor="middle">reads: +1 lookup each</text>
+<text x="220" y="224" font-size="14" text-anchor="middle">tax: 1.2 core-s/s</text>
+<text x="220" y="252" font-size="14" text-anchor="middle">change: 1 atomic row</text>
+<text x="220" y="280" font-size="14" text-anchor="middle">stale window: none</text>
+<text x="220" y="330" font-size="15" font-weight="800" text-anchor="middle">freshness: immediate</text>
+<text x="220" y="360" font-size="14" text-anchor="middle">fallback: the table itself</text>
+<text x="220" y="404" font-size="14" text-anchor="middle">pick when instant matters</text>
+</g>
+<g>
+<rect x="440" y="110" width="360" height="330" rx="20" fill="#ffcfb8"/>
+<text x="620" y="150" font-size="20" font-weight="800" text-anchor="middle">Embedding</text>
+<text x="620" y="196" font-size="14" text-anchor="middle">reads: zero extra</text>
+<text x="620" y="224" font-size="14" text-anchor="middle">change: 100K writes</text>
+<text x="620" y="252" font-size="14" text-anchor="middle">mixed window: ~50 s</text>
+<text x="620" y="280" font-size="14" text-anchor="middle">no resume cursor</text>
+<text x="620" y="330" font-size="15" font-weight="800" text-anchor="middle">freshness: worst</text>
+<text x="620" y="360" font-size="14" text-anchor="middle">death mid-batch: mix stays</text>
+<text x="620" y="404" font-size="14" text-anchor="middle">almost never pick this</text>
+</g>
+<g>
+<rect x="840" y="110" width="360" height="330" rx="20" fill="#c3ceff"/>
+<text x="1020" y="150" font-size="20" font-weight="800" text-anchor="middle">Derived view</text>
+<text x="1020" y="196" font-size="14" text-anchor="middle">reads: zero + version tag</text>
+<text x="1020" y="224" font-size="14" text-anchor="middle">change: 100K async</text>
+<text x="1020" y="252" font-size="14" text-anchor="middle">guard: logo_v check</text>
+<text x="1020" y="280" font-size="14" text-anchor="middle">resume from cursor</text>
+<text x="1020" y="330" font-size="15" font-weight="800" text-anchor="middle">lag budget: 5 s, alerted</text>
+<text x="1020" y="360" font-size="14" text-anchor="middle">covers 10K per sweep</text>
+<text x="1020" y="404" font-size="14" text-anchor="middle">pick when 5 s is fine</text>
+</g>
+<rect x="40" y="458" width="1160" height="82" rx="16" fill="#ffe08a"/>
+<text x="620" y="492" font-size="15" font-weight="800" text-anchor="middle">authority: brands(logo_url, logo_v) - retry only the unwritten cursor range</text>
+<text x="620" y="520" font-size="15" text-anchor="middle">duplicate outbox events die on the version guard - lag past budget falls back</text>
+<rect x="40" y="556" width="1160" height="64" rx="16" fill="#bfe6c9"/>
+<text x="620" y="594" font-size="15" text-anchor="middle">decision: the acceptable lag number picks the method - a copy is a debt with an update path</text>
+</svg>
+</div>
+</body>
+</html>

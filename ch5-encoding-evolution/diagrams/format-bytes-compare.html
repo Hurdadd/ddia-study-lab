@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concept: one record, four encodings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;background:#f7f2e8;display:flex;justify-content:center;padding:24px;font-family:'Nunito','Vazirmatn',system-ui,sans-serif}
+  .stage{width:100%;max-width:1240px;background:#f7f2e8}
+  svg{display:block;width:100%;height:auto;background:#f7f2e8}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Bar chart comparing the same record encoded as JSON, MessagePack, Protobuf and Avro with byte sizes and reasons">
+<title>Same record, four encodings</title>
+<text x="620" y="52" text-anchor="middle" font-size="20" font-weight="800">Same record, four encodings</text>
+<text x="60" y="140" font-size="16" font-weight="800">JSON (text)</text>
+<rect x="300" y="150" width="648" height="40" rx="16" fill="#ffc2da" stroke="#302828" stroke-width="2.5"/>
+<text x="972" y="178" font-size="14" font-weight="800">81 bytes</text>
+<text x="300" y="212" font-size="13">field names travel in the data</text>
+<text x="60" y="250" font-size="16" font-weight="800">MessagePack</text>
+<rect x="300" y="260" width="528" height="40" rx="16" fill="#ffcfb8" stroke="#302828" stroke-width="2.5"/>
+<text x="840" y="288" font-size="14" font-weight="800">66 bytes</text>
+<text x="300" y="322" font-size="13">same model, binary, still no schema</text>
+<text x="60" y="360" font-size="16" font-weight="800">Protocol Buffers</text>
+<rect x="300" y="370" width="264" height="40" rx="16" fill="#c3ceff" stroke="#302828" stroke-width="2.5"/>
+<text x="576" y="398" font-size="14" font-weight="800">33 bytes</text>
+<text x="300" y="432" font-size="13">field names replaced by tag numbers</text>
+<text x="60" y="470" font-size="16" font-weight="800">Avro</text>
+<rect x="300" y="480" width="256" height="40" rx="16" fill="#bfe6c9" stroke="#302828" stroke-width="2.5"/>
+<text x="568" y="508" font-size="14" font-weight="800">32 bytes</text>
+<text x="300" y="542" font-size="13">values only, order from the schema</text>
+<text x="620" y="612" text-anchor="middle" font-size="15" font-weight="800">Schema drops the names: 81 bytes become 32</text>
+</svg>
+</div>
+</body>
+</html>

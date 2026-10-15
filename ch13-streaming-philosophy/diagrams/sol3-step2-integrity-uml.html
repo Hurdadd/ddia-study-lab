@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pending money is a row, not a gap — DDIA Chapter 13 Solution 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="UML of decision, pending reservation and account records showing pending versus final visibility">
+<title>Decision, pending reservation and account records</title>
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0 0L10 5L0 10z" fill="#302828"/>
+</marker>
+</defs>
+<text x="620" y="52" font-size="30" font-weight="900" text-anchor="middle">Pending money is a row, not a gap</text>
+<text x="620" y="86" font-size="16" text-anchor="middle">decision once, reservation visible, legs settle separately</text>
+<text x="40" y="118" font-size="14" text-anchor="start">the three records:</text>
+<g>
+<rect x="40" y="130" width="340" height="200" rx="16" fill="#c3ceff"/>
+<text x="210" y="168" font-size="17" font-weight="800" text-anchor="middle">Account</text>
+<text x="210" y="200" font-size="14" text-anchor="middle">id, balance</text>
+<text x="210" y="228" font-size="14" text-anchor="middle">one row per shard leg</text>
+<text x="210" y="256" font-size="14" text-anchor="middle">legs land separately</text>
+<text x="210" y="284" font-size="14" text-anchor="middle">sum check proves total</text>
+</g>
+<line x1="380" y1="230" x2="446" y2="230" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<text x="413" y="216" font-size="13" text-anchor="middle">settles</text>
+<g>
+<rect x="450" y="130" width="340" height="200" rx="16" fill="#ffe08a"/>
+<text x="620" y="168" font-size="17" font-weight="800" text-anchor="middle">PendingReservation</text>
+<text x="620" y="200" font-size="14" text-anchor="middle">payment_id, amount</text>
+<text x="620" y="228" font-size="14" text-anchor="middle">in-flight money is a row</text>
+<text x="620" y="256" font-size="14" text-anchor="middle">released only by settle</text>
+<text x="620" y="284" font-size="14" text-anchor="middle">crash leaves it visible</text>
+</g>
+<line x1="790" y1="230" x2="856" y2="230" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<text x="823" y="216" font-size="13" text-anchor="middle">allows</text>
+<g>
+<rect x="860" y="130" width="340" height="200" rx="16" fill="#9278ef"/>
+<text x="1030" y="168" font-size="17" font-weight="800" text-anchor="middle">PaymentDecision</text>
+<text x="1030" y="200" font-size="14" text-anchor="middle">payment_id is the key</text>
+<text x="1030" y="228" font-size="14" text-anchor="middle">written once, never changed</text>
+<text x="1030" y="256" font-size="14" text-anchor="middle">restart re-reads it</text>
+<text x="1030" y="284" font-size="14" text-anchor="middle">no second verdict</text>
+</g>
+<text x="40" y="368" font-size="14" text-anchor="start">what readers can and cannot see:</text>
+<g>
+<rect x="40" y="380" width="360" height="112" rx="16" fill="#bfe6c9"/>
+<text x="220" y="420" font-size="16" font-weight="800" text-anchor="middle">legs land separately</text>
+<text x="220" y="448" font-size="14" text-anchor="middle">reader sees dst before fee</text>
+<text x="220" y="474" font-size="14" text-anchor="middle">that is normal, not a bug</text>
+<rect x="440" y="380" width="360" height="112" rx="16" fill="#ffe08a"/>
+<text x="620" y="420" font-size="16" font-weight="800" text-anchor="middle">pending is always visible</text>
+<text x="620" y="448" font-size="14" text-anchor="middle">ledger shows reserved funds</text>
+<text x="620" y="474" font-size="14" text-anchor="middle">nothing vanishes mid-flight</text>
+<rect x="840" y="380" width="360" height="112" rx="16" fill="#ffcfb8"/>
+<text x="1020" y="420" font-size="16" font-weight="800" text-anchor="middle">no atomic snapshot</text>
+<text x="1020" y="448" font-size="14" text-anchor="middle">convergence is not visibility</text>
+<text x="1020" y="474" font-size="14" text-anchor="middle">final does not mean instant</text>
+</g>
+<text x="620" y="548" font-size="14" text-anchor="middle">legend: blue = per-leg state, yellow = money in flight, purple = the one durable verdict</text>
+<text x="620" y="578" font-size="14" text-anchor="middle">integrity means conserved totals plus visible pending, not all-legs-at-once</text>
+</svg>
+</div>
+</body>
+</html>

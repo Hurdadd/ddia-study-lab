@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Bias Launders Itself — Proxies Rebuild Locked Traits</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .ph{font:700 14px system-ui,sans-serif; fill:#e8edf7}
+  .phs{font:12px system-ui,sans-serif; fill:#a7b3cc}
+  .item{font:12.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .itemsm{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .chip-t{font:700 12px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .dec-t{font:700 13px ui-monospace,Menlo,monospace; fill:#fda4af}
+  .edge{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .q{font:700 14px system-ui,sans-serif; fill:#fbbf24}
+  .qs{font:13px system-ui,sans-serif; fill:#cfe3ff}
+  .note{font:12.5px system-ui,sans-serif; fill:#cfe3ff}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .box-t{font:700 12.5px ui-monospace,Menlo,monospace; fill:#e8edf7}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="Three panels showing protected traits locked away, proxy features openly collected, and an opaque model turning proxies into hire, loan, insure and fly decisions, with a quote strip about bias laundering">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+    <marker id="arrd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5eead4"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="32" text-anchor="middle">How Bias Launders Itself — Proxies Rebuild Locked Traits</text>
+  <text class="sub" x="620" y="54" text-anchor="middle">delete the protected column and the model rebuilds it from postal codes, devices and receipts</text>
+
+  <!-- ============ PANEL 1: protected traits ============ -->
+  <rect x="40" y="80" width="310" height="380" rx="10" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="ph" x="60" y="110">Protected traits — locked</text>
+  <text class="phs" x="60" y="130">withheld from the model</text>
+  <line x1="60" y1="142" x2="330" y2="142" stroke="#2a3652" stroke-width="1.2"/>
+  <!-- padlock icon -->
+  <path d="M308,104 v-7 a8,8 0 0 1 16,0 v7" fill="none" stroke="#fbbf24" stroke-width="2.4"/>
+  <rect x="304" y="104" width="24" height="20" rx="3" fill="#fbbf24" stroke="#0b111c" stroke-width="1.5"/>
+  <circle cx="316" cy="112" r="2.4" fill="#0b111c"/>
+  <line x1="316" y1="114" x2="316" y2="119" stroke="#0b111c" stroke-width="2"/>
+  <text class="item" x="60" y="172">🔒 ethnicity</text>
+  <text class="item" x="60" y="207">🔒 age</text>
+  <text class="item" x="60" y="242">🔒 gender</text>
+  <text class="item" x="60" y="277">🔒 disability</text>
+  <text class="item" x="60" y="312">🔒 beliefs / religion</text>
+  <text class="note" x="60" y="352">kept out of training input —</text>
+  <text class="note" x="60" y="372">the law says: do not use.</text>
+  <text class="small" x="60" y="398">deleting the column changes nothing</text>
+  <text class="small" x="60" y="416">if proxies rebuild it.</text>
+
+  <!-- ============ PANEL 2: proxy features ============ -->
+  <rect x="370" y="80" width="290" height="380" rx="10" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="ph" x="390" y="110">Proxy features — open</text>
+  <text class="phs" x="390" y="130">collected freely, looks neutral</text>
+  <line x1="390" y1="142" x2="640" y2="142" stroke="#2a3652" stroke-width="1.2"/>
+  <!-- open-lock icon -->
+  <path d="M610,104 v-7 a8,8 0 0 1 15,-3" fill="none" stroke="#5eead4" stroke-width="2.4"/>
+  <rect x="606" y="104" width="24" height="20" rx="3" fill="#5eead4" stroke="#0b111c" stroke-width="1.5"/>
+  <circle cx="618" cy="112" r="2.4" fill="#0b111c"/>
+  <line x1="618" y1="114" x2="618" y2="119" stroke="#0b111c" stroke-width="2"/>
+  <text class="item" x="390" y="172">◯ postal code</text>
+  <text class="itemsm" x="390" y="190">segregated areas → ethnicity</text>
+  <text class="item" x="390" y="217">◯ IP address</text>
+  <text class="itemsm" x="390" y="235">neighbourhood + household</text>
+  <text class="item" x="390" y="262">◯ device model</text>
+  <text class="itemsm" x="390" y="280">income bracket → age, class</text>
+  <text class="item" x="390" y="307">◯ purchase history</text>
+  <text class="itemsm" x="390" y="325">lifestyle → beliefs, gender</text>
+  <text class="note" x="390" y="362">each looks innocent alone —</text>
+  <text class="note" x="390" y="382">together they rebuild</text>
+  <text class="small" x="390" y="404">the locked column, cleanly.</text>
+
+  <!-- ============ channel label chip ============ -->
+  <rect x="668" y="96" width="114" height="46" rx="8" fill="#86efac" stroke="#0b111c" stroke-width="1.5"/>
+  <text class="chip-t" x="725" y="115" text-anchor="middle">strong</text>
+  <text class="chip-t" x="725" y="132" text-anchor="middle">predictor of</text>
+
+  <!-- ============ arrows proxies → model ============ -->
+  <line x1="664" y1="190" x2="786" y2="190" stroke="#86efac" stroke-width="1.8" marker-end="url(#arr)"/>
+  <line x1="664" y1="245" x2="786" y2="245" stroke="#86efac" stroke-width="1.8" marker-end="url(#arr)"/>
+  <line x1="664" y1="300" x2="786" y2="300" stroke="#86efac" stroke-width="1.8" marker-end="url(#arr)"/>
+  <line x1="664" y1="355" x2="786" y2="355" stroke="#86efac" stroke-width="1.8" marker-end="url(#arr)"/>
+
+  <!-- ============ PANEL 3: opaque model → decisions ============ -->
+  <rect x="790" y="80" width="410" height="380" rx="10" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="ph" x="806" y="110">Opaque model → Decisions</text>
+  <text class="phs" x="806" y="130">weights unreadable — bias hidden</text>
+  <rect x="812" y="145" width="362" height="105" rx="8" fill="#1b2438" stroke="#5eead4" stroke-width="1.4"/>
+  <text class="box-t" x="828" y="172">scoring model v3.2</text>
+  <text class="small" x="828" y="194">4.2M weights — no reason codes</text>
+  <text class="small" x="828" y="214">auditors see inputs + outputs only</text>
+  <text class="itemsm" x="828" y="234">fair on paper, skewed in practice</text>
+  <line x1="993" y1="254" x2="993" y2="282" stroke="#5eead4" stroke-width="1.8" marker-end="url(#arrd)"/>
+  <text class="edge" x="1003" y="274">scores</text>
+  <text class="item" x="806" y="304">Decisions — the same people lose:</text>
+  <rect x="812" y="318" width="170" height="34" rx="8" fill="#3b1f2b" stroke="#f43f5e" stroke-width="1.4"/>
+  <text class="dec-t" x="897" y="340" text-anchor="middle">hire</text>
+  <rect x="994" y="318" width="170" height="34" rx="8" fill="#3b1f2b" stroke="#f43f5e" stroke-width="1.4"/>
+  <text class="dec-t" x="1079" y="340" text-anchor="middle">loan</text>
+  <rect x="812" y="360" width="170" height="34" rx="8" fill="#3b1f2b" stroke="#f43f5e" stroke-width="1.4"/>
+  <text class="dec-t" x="897" y="382" text-anchor="middle">insure</text>
+  <rect x="994" y="360" width="170" height="34" rx="8" fill="#3b1f2b" stroke="#f43f5e" stroke-width="1.4"/>
+  <text class="dec-t" x="1079" y="382" text-anchor="middle">fly</text>
+  <text class="note" x="806" y="420">appeals go nowhere —</text>
+  <text class="small" x="806" y="440">nobody can explain the score.</text>
+
+  <!-- ============ bottom quote strip ============ -->
+  <rect x="40" y="480" width="1160" height="116" rx="10" fill="#1b2438" stroke="#fbbf24" stroke-width="1.3" stroke-dasharray="6 4"/>
+  <text class="q" x="620" y="508" text-anchor="middle">machine learning is like money laundering for bias</text>
+  <text class="qs" x="620" y="531" text-anchor="middle">extrapolating a discriminatory past codifies and amplifies it —</text>
+  <text class="qs" x="620" y="551" text-anchor="middle">the future needs moral imagination, not just historical data</text>
+  <text class="small" x="620" y="573" text-anchor="middle">past as training data → past as destiny, unless we intervene</text>
+
+  <text class="small" x="60" y="622">neutral hiring / lending / insurance / travel examples — how bias launders itself</text>
+</svg>
+</div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reservation log, projections and send guard — DDIA Chapter 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Cinema reservation event log and projections">
+<title>Cinema reservation event log and projections</title>
+<text x="620" y="52" font-size="28" font-weight="900" text-anchor="middle">Cinema log: one race, one winner, three views</text>
+<text x="620" y="84" font-size="15" text-anchor="middle">teaching numbers: 300 seats, 50 bookings/s peak, 10 min hold</text>
+<g>
+<rect x="40" y="110" width="220" height="220" rx="20" fill="#ffcfb8"/>
+<text x="150" y="150" font-size="19" font-weight="800" text-anchor="middle">Commands</text>
+<text x="150" y="192" font-size="14" text-anchor="middle">HoldSeat A5 (u1)</text>
+<text x="150" y="220" font-size="14" text-anchor="middle">HoldSeat A5 (u2)</text>
+<text x="150" y="248" font-size="14" text-anchor="middle">a please, may fail</text>
+<text x="150" y="292" font-size="14" text-anchor="middle">guard: seat v == read v</text>
+</g>
+<g>
+<rect x="280" y="110" width="680" height="220" rx="20" fill="#ffe08a"/>
+<text x="620" y="150" font-size="19" font-weight="800" text-anchor="middle">Event log: append-only, ordered</text>
+<rect x="300" y="168" width="196" height="70" rx="10" fill="#f7f2e8"/>
+<text x="398" y="196" font-size="14" font-weight="800" text-anchor="middle">1 SeatHeld</text>
+<text x="398" y="218" font-size="13" text-anchor="middle">u1 wins A5</text>
+<rect x="508" y="168" width="196" height="70" rx="10" fill="#f7f2e8"/>
+<text x="606" y="196" font-size="14" font-weight="800" text-anchor="middle">2 SeatTaken</text>
+<text x="606" y="218" font-size="13" text-anchor="middle">u2 loses, retries</text>
+<rect x="716" y="168" width="224" height="70" rx="10" fill="#f7f2e8"/>
+<text x="828" y="196" font-size="14" font-weight="800" text-anchor="middle">3 SeatConfirmed</text>
+<text x="828" y="218" font-size="13" text-anchor="middle">u1 pays, done</text>
+<rect x="300" y="248" width="310" height="62" rx="10" fill="#f7f2e8"/>
+<text x="455" y="274" font-size="14" font-weight="800" text-anchor="middle">4 HoldExpired / Canceled</text>
+<text x="455" y="296" font-size="13" text-anchor="middle">frees the seat, history stays</text>
+<rect x="622" y="248" width="318" height="62" rx="10" fill="#f7f2e8"/>
+<text x="781" y="274" font-size="14" font-weight="800" text-anchor="middle">5 BookingCorrected</text>
+<text x="781" y="296" font-size="13" text-anchor="middle">fresh event, never edit</text>
+</g>
+<g>
+<rect x="980" y="110" width="220" height="220" rx="20" fill="#c3ceff"/>
+<text x="1090" y="150" font-size="19" font-weight="800" text-anchor="middle">Send guard</text>
+<text x="1090" y="192" font-size="14" text-anchor="middle">key: event id</text>
+<text x="1090" y="220" font-size="14" text-anchor="middle">first send: ticket</text>
+<text x="1090" y="248" font-size="14" text-anchor="middle">repeat: blocked</text>
+<text x="1090" y="292" font-size="14" text-anchor="middle">replay never sends</text>
+</g>
+<g>
+<rect x="40" y="348" width="360" height="150" rx="20" fill="#bfe6c9"/>
+<text x="220" y="388" font-size="19" font-weight="800" text-anchor="middle">Seat map view</text>
+<text x="220" y="424" font-size="14" text-anchor="middle">seat: status + hold_id</text>
+<text x="220" y="452" font-size="14" text-anchor="middle">late Held never relocks</text>
+</g>
+<g>
+<rect x="440" y="348" width="360" height="150" rx="20" fill="#bfe6c9"/>
+<text x="620" y="388" font-size="19" font-weight="800" text-anchor="middle">Sales report view</text>
+<text x="620" y="424" font-size="14" text-anchor="middle">confirmed minus cancels</text>
+<text x="620" y="452" font-size="14" text-anchor="middle">replay rebuilds it free</text>
+</g>
+<g>
+<rect x="840" y="348" width="360" height="150" rx="20" fill="#bfe6c9"/>
+<text x="1020" y="388" font-size="19" font-weight="800" text-anchor="middle">Ticket print view</text>
+<text x="1020" y="424" font-size="14" text-anchor="middle">consumer + sent-table</text>
+<text x="1020" y="452" font-size="14" text-anchor="middle">lost ticket: resend, same key</text>
+</g>
+<rect x="40" y="516" width="1160" height="104" rx="16" fill="#ffcfb8"/>
+<text x="620" y="552" font-size="15" font-weight="800" text-anchor="middle">the seat version referees, never the view - crash between append and send is safe to retry</text>
+<text x="620" y="582" font-size="15" text-anchor="middle">replay rebuilds views with no external effect - a fix is always a fresh compensating event</text>
+</svg>
+</div>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Four guarantees, three schemes — DDIA Chapter 10 Solution 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Table of four ID guarantees across oracle, UUID and shard-prefixed schemes">
+<title>Four guarantees, three schemes</title>
+<text x="620" y="52" font-size="30" font-weight="900" text-anchor="middle">Four guarantees, three schemes</text>
+<text x="620" y="86" font-size="16" text-anchor="middle">name which guarantee the product pays for, never bundle all four by default</text>
+<g>
+<rect x="40" y="112" width="260" height="56" rx="14" fill="#9278ef"/>
+<text x="170" y="147" font-size="15" font-weight="800" text-anchor="middle">guarantee</text>
+<rect x="320" y="112" width="290" height="56" rx="14" fill="#9278ef"/>
+<text x="465" y="140" font-size="15" font-weight="800" text-anchor="middle">oracle, central batch</text>
+<text x="465" y="160" font-size="13" text-anchor="middle">persist hwm, fence failover</text>
+<rect x="630" y="112" width="290" height="56" rx="14" fill="#9278ef"/>
+<text x="775" y="140" font-size="15" font-weight="800" text-anchor="middle">UUID random</text>
+<text x="775" y="160" font-size="13" text-anchor="middle">no coordination at all</text>
+<rect x="940" y="112" width="260" height="56" rx="14" fill="#9278ef"/>
+<text x="1070" y="140" font-size="15" font-weight="800" text-anchor="middle">shard-prefixed</text>
+<text x="1070" y="160" font-size="13" text-anchor="middle">A-*, B-* disjoint</text>
+</g>
+<g>
+<rect x="40" y="180" width="260" height="64" rx="14" fill="#c3ceff"/>
+<text x="170" y="205" font-size="15" font-weight="800" text-anchor="middle">unique IDs</text>
+<text x="170" y="227" font-size="13" text-anchor="middle">never twice</text>
+<rect x="320" y="180" width="290" height="64" rx="14" fill="#bfe6c9"/>
+<text x="465" y="218" font-size="16" font-weight="800" text-anchor="middle">yes</text>
+<rect x="630" y="180" width="290" height="64" rx="14" fill="#bfe6c9"/>
+<text x="775" y="218" font-size="16" font-weight="800" text-anchor="middle">yes</text>
+<rect x="940" y="180" width="260" height="64" rx="14" fill="#bfe6c9"/>
+<text x="1070" y="218" font-size="16" font-weight="800" text-anchor="middle">yes</text>
+</g>
+<g>
+<rect x="40" y="256" width="260" height="64" rx="14" fill="#c3ceff"/>
+<text x="170" y="281" font-size="15" font-weight="800" text-anchor="middle">no gaps</text>
+<text x="170" y="303" font-size="13" text-anchor="middle">1,2,3 with no skip</text>
+<rect x="320" y="256" width="290" height="64" rx="14" fill="#bfe6c9"/>
+<text x="465" y="294" font-size="16" font-weight="800" text-anchor="middle">yes, one decider</text>
+<rect x="630" y="256" width="290" height="64" rx="14" fill="#ffcfb8"/>
+<text x="775" y="294" font-size="16" font-weight="800" text-anchor="middle">no</text>
+<rect x="940" y="256" width="260" height="64" rx="14" fill="#ffcfb8"/>
+<text x="1070" y="294" font-size="16" font-weight="800" text-anchor="middle">no</text>
+</g>
+<g>
+<rect x="40" y="332" width="260" height="64" rx="14" fill="#c3ceff"/>
+<text x="170" y="357" font-size="15" font-weight="800" text-anchor="middle">allocation order</text>
+<text x="170" y="379" font-size="13" text-anchor="middle">IDs leave in order</text>
+<rect x="320" y="332" width="290" height="64" rx="14" fill="#bfe6c9"/>
+<text x="465" y="370" font-size="16" font-weight="800" text-anchor="middle">yes</text>
+<rect x="630" y="332" width="290" height="64" rx="14" fill="#ffcfb8"/>
+<text x="775" y="370" font-size="16" font-weight="800" text-anchor="middle">no</text>
+<rect x="940" y="332" width="260" height="64" rx="14" fill="#ffe08a"/>
+<text x="1070" y="370" font-size="16" font-weight="800" text-anchor="middle">per-shard only</text>
+</g>
+<g>
+<rect x="40" y="408" width="260" height="64" rx="14" fill="#c3ceff"/>
+<text x="170" y="433" font-size="15" font-weight="800" text-anchor="middle">real-time order</text>
+<text x="170" y="455" font-size="13" text-anchor="middle">later issue, bigger ID</text>
+<rect x="320" y="408" width="290" height="64" rx="14" fill="#ffe08a"/>
+<text x="465" y="446" font-size="16" font-weight="800" text-anchor="middle">with fence</text>
+<rect x="630" y="408" width="290" height="64" rx="14" fill="#ffcfb8"/>
+<text x="775" y="446" font-size="16" font-weight="800" text-anchor="middle">no</text>
+<rect x="940" y="408" width="260" height="64" rx="14" fill="#ffcfb8"/>
+<text x="1070" y="446" font-size="16" font-weight="800" text-anchor="middle">no</text>
+</g>
+<g>
+<rect x="40" y="492" width="1160" height="88" rx="16" fill="#ffe08a"/>
+<text x="620" y="522" font-size="14" font-weight="800" text-anchor="middle">uniqueness shards freely, ordering needs coordination: two nodes on disjoint ranges stay unique, yet A-2 may predate B-1 in real time</text>
+<text x="620" y="546" font-size="14" text-anchor="middle">crash mid-batch: IDs 4,5 skipped, nothing repeats — gaps allowed, duplicates never</text>
+<text x="620" y="568" font-size="14" text-anchor="middle">failover without fencing re-issues: the standby needs a fresh epoch before serving</text>
+</g>
+<text x="620" y="614" font-size="14" text-anchor="middle">legend: green = holds, rose = does not hold, yellow = holds with a condition</text>
+<text x="620" y="638" font-size="14" text-anchor="middle">read the column your product needs, pay only for that column</text>
+</svg>
+</div>
+</body>
+</html>

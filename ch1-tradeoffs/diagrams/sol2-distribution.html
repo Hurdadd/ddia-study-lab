@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Three designs against tripwires — DDIA Chapter 1 Solution 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Decision table comparing single node, primary replica and sharded designs">
+<title>Three designs against tripwires</title>
+<text x="620" y="52" font-size="30" font-weight="900" text-anchor="middle">Which design earns its cost, and when</text>
+<text x="620" y="86" font-size="16" text-anchor="middle">teaching load: 2M rows/day, 231 writes/s peak, analytics off the warehouse, data in-country</text>
+<g font-size="14" font-weight="800">
+<text x="60" y="126">design</text>
+<text x="330" y="126">green while</text>
+<text x="640" y="126">tripwire that flips it</text>
+<text x="950" y="126">price of the design</text>
+</g>
+<g>
+<rect x="40" y="142" width="1160" height="104" rx="16" fill="#bfe6c9"/>
+<text x="60" y="178" font-size="16" font-weight="800">single-node + standby</text>
+<text x="60" y="204" font-size="14">start here</text>
+<text x="330" y="178" font-size="14">writes, size, ops cost green</text>
+<text x="330" y="204" font-size="14">at 2M/day with headroom</text>
+<text x="640" y="178" font-size="14">sustained writes past 5k/s</text>
+<text x="640" y="204" font-size="14">or data past 3x RAM</text>
+<text x="950" y="178" font-size="14">cheapest to run and debug</text>
+<text x="950" y="204" font-size="14">harder migration later</text>
+</g>
+<g>
+<rect x="40" y="258" width="1160" height="104" rx="16" fill="#c3ceff"/>
+<text x="60" y="294" font-size="16" font-weight="800">primary + read replicas</text>
+<text x="60" y="320" font-size="14">read scale + AZ survival</text>
+<text x="330" y="294" font-size="14">reads fan out, one AZ can die</text>
+<text x="330" y="320" font-size="14">primary still takes all writes</text>
+<text x="640" y="294" font-size="14">same write tripwire as above</text>
+<text x="640" y="320" font-size="14">replicas never buy writes</text>
+<text x="950" y="294" font-size="14">replica boxes + lag watch</text>
+<text x="950" y="320" font-size="14">stale-read contracts needed</text>
+</g>
+<g>
+<rect x="40" y="374" width="1160" height="104" rx="16" fill="#ffcfb8"/>
+<text x="60" y="410" font-size="16" font-weight="800">sharded</text>
+<text x="60" y="436" font-size="14">only past the tripwire</text>
+<text x="330" y="410" font-size="14">write cell stays green</text>
+<text x="330" y="436" font-size="14">past any single writer</text>
+<text x="640" y="410" font-size="14">earned by a crossed number</text>
+<text x="640" y="436" font-size="14">never by fashion</text>
+<text x="950" y="410" font-size="14">ops cost highest: rebalance,</text>
+<text x="950" y="436" font-size="14">hot keys, cross-shard queries</text>
+</g>
+<g>
+<rect x="40" y="494" width="1160" height="80" rx="16" fill="#ffe08a"/>
+<text x="620" y="528" font-size="15" font-weight="700" text-anchor="middle">answered once, not per row: analytics always reads the warehouse, residency is placement in-country</text>
+<text x="620" y="554" font-size="14" text-anchor="middle">legend: green = start, blue = read scale, peach = paywalled write scale, yellow = one-time answers</text>
+</g>
+</svg>
+</div>
+</body>
+</html>

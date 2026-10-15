@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anomaly x isolation matrix on PostgreSQL 18 — DDIA Chapter 8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Anomaly by isolation level matrix for PostgreSQL 18">
+<title>Anomaly x isolation matrix (PostgreSQL 18)</title>
+<text x="620" y="56" font-size="30" font-weight="900" text-anchor="middle">Anomalies vs isolation: what PG 18 really does</text>
+<text x="620" y="90" font-size="16" text-anchor="middle">green = prevented or clean, rose = reproduced live, H-codes map to the simulator histories</text>
+<g>
+<rect x="30" y="112" width="310" height="44" rx="12" fill="#e8dfc9"/>
+<text x="52" y="140" font-size="16" font-weight="800">anomaly</text>
+<rect x="350" y="112" width="280" height="44" rx="12" fill="#e8dfc9"/>
+<text x="490" y="132" font-size="16" font-weight="800" text-anchor="middle">READ COMMITTED</text>
+<text x="490" y="150" font-size="13" text-anchor="middle">the default</text>
+<rect x="640" y="112" width="280" height="44" rx="12" fill="#e8dfc9"/>
+<text x="780" y="132" font-size="16" font-weight="800" text-anchor="middle">REPEATABLE READ</text>
+<text x="780" y="150" font-size="13" text-anchor="middle">= snapshot isolation in PG</text>
+<rect x="930" y="112" width="280" height="44" rx="12" fill="#e8dfc9"/>
+<text x="1070" y="132" font-size="16" font-weight="800" text-anchor="middle">SERIALIZABLE</text>
+<text x="1070" y="150" font-size="13" text-anchor="middle">SSI, retry on 40001</text>
+</g>
+<g>
+<rect x="30" y="164" width="310" height="52" rx="12" fill="#fffdf7"/>
+<text x="52" y="186" font-size="15" font-weight="800">dirty read (H1)</text>
+<text x="52" y="206" font-size="13">even at READ UNCOMMITTED</text>
+<rect x="350" y="164" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="490" y="196" font-size="15" font-weight="800" text-anchor="middle">PREVENTED</text>
+<rect x="640" y="164" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="780" y="196" font-size="15" font-weight="800" text-anchor="middle">PREVENTED</text>
+<rect x="930" y="164" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="1070" y="196" font-size="15" font-weight="800" text-anchor="middle">PREVENTED</text>
+</g>
+<g>
+<rect x="30" y="222" width="310" height="52" rx="12" fill="#fffdf7"/>
+<text x="52" y="244" font-size="15" font-weight="800">dirty write (H2)</text>
+<text x="52" y="264" font-size="13">row lock to end of txn</text>
+<rect x="350" y="222" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="490" y="254" font-size="15" font-weight="800" text-anchor="middle">BLOCKS</text>
+<rect x="640" y="222" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="780" y="254" font-size="15" font-weight="800" text-anchor="middle">BLOCKS</text>
+<rect x="930" y="222" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="1070" y="254" font-size="15" font-weight="800" text-anchor="middle">BLOCKS</text>
+</g>
+<g>
+<rect x="30" y="280" width="310" height="52" rx="12" fill="#fffdf7"/>
+<text x="52" y="302" font-size="15" font-weight="800">read skew (H3/H4)</text>
+<text x="52" y="322" font-size="13">transfer 100, read A then B</text>
+<rect x="350" y="280" width="280" height="52" rx="12" fill="#ffcfb8"/>
+<text x="490" y="312" font-size="15" font-weight="800" text-anchor="middle">SKEW 1100</text>
+<rect x="640" y="280" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="780" y="312" font-size="15" font-weight="800" text-anchor="middle">CLEAN 1000</text>
+<rect x="930" y="280" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="1070" y="312" font-size="15" font-weight="800" text-anchor="middle">CLEAN 1000</text>
+</g>
+<g>
+<rect x="30" y="338" width="310" height="52" rx="12" fill="#fffdf7"/>
+<text x="52" y="360" font-size="15" font-weight="800">lost update, RMW (H5)</text>
+<text x="52" y="380" font-size="13">read 10, write 11 twice</text>
+<rect x="350" y="338" width="280" height="52" rx="12" fill="#ffcfb8"/>
+<text x="490" y="370" font-size="15" font-weight="800" text-anchor="middle">LOST, final 11</text>
+<rect x="640" y="338" width="280" height="52" rx="12" fill="#ffcfb8"/>
+<text x="780" y="370" font-size="15" font-weight="800" text-anchor="middle">LOST, final 11</text>
+<rect x="930" y="338" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="1070" y="370" font-size="15" font-weight="800" text-anchor="middle">CLEAN 12</text>
+</g>
+<g>
+<rect x="30" y="396" width="310" height="52" rx="12" fill="#fffdf7"/>
+<text x="52" y="418" font-size="15" font-weight="800">atomic increment (H6)</text>
+<text x="52" y="438" font-size="13">balance = balance + 1</text>
+<rect x="350" y="396" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="490" y="428" font-size="15" font-weight="800" text-anchor="middle">CLEAN 12</text>
+<rect x="640" y="396" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="780" y="428" font-size="15" font-weight="800" text-anchor="middle">CLEAN 12</text>
+<rect x="930" y="396" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="1070" y="428" font-size="15" font-weight="800" text-anchor="middle">CLEAN 12</text>
+</g>
+<g>
+<rect x="30" y="454" width="310" height="52" rx="12" fill="#fffdf7"/>
+<text x="52" y="476" font-size="15" font-weight="800">phantom recount (H7/H8)</text>
+<text x="52" y="496" font-size="13">COUNT twice, rival INSERTs</text>
+<rect x="350" y="454" width="280" height="52" rx="12" fill="#ffcfb8"/>
+<text x="490" y="486" font-size="15" font-weight="800" text-anchor="middle">2 THEN 3</text>
+<rect x="640" y="454" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="780" y="486" font-size="15" font-weight="800" text-anchor="middle">STABLE 2</text>
+<rect x="930" y="454" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="1070" y="486" font-size="15" font-weight="800" text-anchor="middle">STABLE 2</text>
+</g>
+<g>
+<rect x="30" y="512" width="310" height="52" rx="12" fill="#fffdf7"/>
+<text x="52" y="534" font-size="15" font-weight="800">write skew (H9/H10)</text>
+<text x="52" y="554" font-size="13">two on-call, both step down</text>
+<rect x="350" y="512" width="280" height="52" rx="12" fill="#ffcfb8"/>
+<text x="490" y="544" font-size="15" font-weight="800" text-anchor="middle">EMPTY SET</text>
+<rect x="640" y="512" width="280" height="52" rx="12" fill="#ffcfb8"/>
+<text x="780" y="544" font-size="15" font-weight="800" text-anchor="middle">EMPTY SET</text>
+<rect x="930" y="512" width="280" height="52" rx="12" fill="#bfe6c9"/>
+<text x="1070" y="544" font-size="15" font-weight="800" text-anchor="middle">ONE SURVIVOR</text>
+</g>
+<text x="620" y="606" font-size="15" text-anchor="middle">H1/H2 are prevention tests: blocking observed, anomaly absent, and that absence is the result</text>
+<text x="620" y="632" font-size="15" text-anchor="middle">name product + version (PG 18), never the SQL minimum: Oracle calls SI serializable</text>
+</svg>
+</div>
+</body>
+</html>

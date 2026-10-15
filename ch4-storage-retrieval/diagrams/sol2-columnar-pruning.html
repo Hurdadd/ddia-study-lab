@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Columnar pruning: read little, skip much — DDIA Chapter 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Columnar storage with column pruning, partition pruning and a bitmap filter panel">
+<title>Columnar pruning: read little, skip much</title>
+<text x="620" y="52" font-size="27" font-weight="900" text-anchor="middle">Columnar pruning: read little, skip much</text>
+<text x="620" y="82" font-size="15" text-anchor="middle">query: sales per category by weekday, last year (teaching data)</text>
+<g>
+<rect x="30" y="105" width="740" height="250" rx="20" fill="#cfe3ff"/>
+<text x="400" y="140" font-size="19" font-weight="800" text-anchor="middle">Fact file: one column per lane, blocks below</text>
+<rect x="60" y="160" width="130" height="60" rx="12" fill="#bfe6c9"/>
+<text x="125" y="197" font-size="15" font-weight="800" text-anchor="middle">day READ</text>
+<rect x="205" y="160" width="130" height="60" rx="12" fill="#bfe6c9"/>
+<text x="270" y="197" font-size="15" font-weight="800" text-anchor="middle">pid READ</text>
+<rect x="350" y="160" width="130" height="60" rx="12" fill="#f7f2e8"/>
+<text x="415" y="197" font-size="15" font-weight="800" text-anchor="middle">qty SKIP</text>
+<rect x="495" y="160" width="130" height="60" rx="12" fill="#bfe6c9"/>
+<text x="560" y="197" font-size="15" font-weight="800" text-anchor="middle">amount READ</text>
+<rect x="640" y="160" width="100" height="60" rx="12" fill="#f7f2e8"/>
+<text x="690" y="197" font-size="15" font-weight="800" text-anchor="middle">SKIP</text>
+<rect x="60" y="240" width="130" height="44" rx="10" fill="#bfe6c9"/>
+<text x="125" y="269" font-size="14" text-anchor="middle">2025 blocks</text>
+<rect x="205" y="240" width="130" height="44" rx="10" fill="#d8d2c2"/>
+<text x="270" y="269" font-size="14" text-anchor="middle">2024 skipped</text>
+<rect x="350" y="240" width="130" height="44" rx="10" fill="#d8d2c2"/>
+<text x="415" y="269" font-size="14" text-anchor="middle">2024 skipped</text>
+<rect x="495" y="240" width="130" height="44" rx="10" fill="#bfe6c9"/>
+<text x="560" y="269" font-size="14" text-anchor="middle">2025 blocks</text>
+<rect x="640" y="240" width="100" height="44" rx="10" fill="#d8d2c2"/>
+<text x="690" y="269" font-size="14" text-anchor="middle">skipped</text>
+<text x="400" y="322" font-size="14" text-anchor="middle">partition prune by year, then column prune: 3 of 5 lanes read</text>
+</g>
+<g>
+<rect x="790" y="105" width="420" height="250" rx="20" fill="#ffe08a"/>
+<text x="1000" y="140" font-size="19" font-weight="800" text-anchor="middle">Bitmap filter: cat B + wd 2</text>
+<rect x="820" y="160" width="170" height="52" rx="12" fill="#f7f2e8"/>
+<text x="905" y="193" font-size="14" text-anchor="middle">cat B: 1011 rows</text>
+<rect x="1010" y="160" width="170" height="52" rx="12" fill="#f7f2e8"/>
+<text x="1095" y="193" font-size="14" text-anchor="middle">wd 2: 0101 rows</text>
+<rect x="905" y="232" width="180" height="52" rx="12" fill="#bfe6c9"/>
+<text x="995" y="265" font-size="14" font-weight="800" text-anchor="middle">AND = 0001 rows</text>
+<text x="1000" y="318" font-size="14" text-anchor="middle">low cardinality: bitmap wins</text>
+</g>
+<g>
+<rect x="30" y="375" width="1180" height="255" rx="20" fill="#e9e2d2"/>
+<text x="620" y="412" font-size="19" font-weight="800" text-anchor="middle">Skew and history decide correctness (teaching rules)</text>
+<text x="620" y="452" font-size="14" text-anchor="middle">skew: one hot product id crowds a sort block, range prune degrades</text>
+<text x="620" y="492" font-size="14" text-anchor="middle">high-cardinality ids: dictionary + run-length, not raw bitmaps</text>
+<text x="620" y="532" font-size="14" text-anchor="middle">category moved in June: report uses the category at sale time</text>
+<text x="620" y="572" font-size="14" text-anchor="middle">slowly changing dimension keeps both old and new labels</text>
+</g>
+</svg>
+</div>
+</body>
+</html>

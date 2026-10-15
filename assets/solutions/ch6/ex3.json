@@ -1,0 +1,253 @@
+{
+  "alternatives": [
+    {
+      "en": "Read repair (write back the max version to a quorum before returning): heals laggards on the read path, but a lone background repair without a read-time promise is not linearizability.",
+      "fa": "read repair (بازگرداندن نسخه بیشینه به quorum پیش از بازگشت خواندن): عقب‌مانده‌ها را در مسیر خواندن شفا می‌دهد ولی repair پس‌زمینه تنها بدون قول زمان-خواندن linearizability نیست."
+    },
+    {
+      "en": "Bigger write quorum (w=5): every later read sees the write, at the price of write latency and availability — the single-leader log buys the same with less.",
+      "fa": "quorum نوشتن بزرگ‌تر (w=5): هر خواندن بعدی نوشته را می‌بیند به قیمت تأخیر و availability نوشتن — لاگ تک‌رهبر همان را ارزان‌تر می‌خرد."
+    }
+  ],
+  "answer_en": "Set arithmetic guarantees every two three-node sets among five intersect. Freshness additionally needs defined membership, durable acknowledged writes and version/concurrent-write rules. A lost ACK does not imply lost data. Monitor version probes, lagging replicas and read-after-write probes. Time-based staleness is possible with an explicit time reference and uncertainty; numeric version distance alone is not seconds.",
+  "answer_fa": "اشتراک quorum از حساب مجموعه‌ها می‌آید: هر دو مجموعهٔ سه‌عضوی از پنج عضو دست‌کم یک عضو مشترک دارند. اما خواندن تازه به یک membership مشخص، دوام نوشته‌های ACKشده و قواعد مقایسهٔ نسخه و برخورد با نوشتن‌های هم‌زمان نیاز دارد. گم‌شدن ACK لزوماً به معنی گم‌شدن داده نیست. version probe، مجموعهٔ replicaهای عقب‌مانده و read-after-write probe را مانیتور کن؛ زمانِ کهنگی نیز با مرجع زمانی و عدم‌قطعیت تعریف‌شده قابل اندازه‌گیری است، نه با تبدیل بی‌دلیل فاصلهٔ نسخه به ثانیه.",
+  "assumptions": [
+    {
+      "en": "Five replicas, <code>w=3</code>, <code>r=3</code>; versions <code>v6/v7/v8</code> order all writes, no log order exists.",
+      "fa": "پنج replica با <code>w=3</code> و <code>r=3</code>؛ نسخه‌های <code>v6/v7/v8</code> همه نوشته‌ها را مرتب می‌کنند و ترتیب لاگ نیست."
+    },
+    {
+      "en": "Teaching cadence for the probe (every 10 seconds) and teaching bounds; production numbers come from measurement.",
+      "fa": "آهنگ probe (هر ۱۰ ثانیه) و کران‌ها آموزشی‌اند؛ اعداد پروداکشن از اندازه‌گیری می‌آیند."
+    },
+    {
+      "en": "Membership is fixed except in the rebalancing scenario, where old and new member sets are named explicitly.",
+      "fa": "membership ثابت است مگر در سناریوی rebalancing که مجموعه اعضا قدیم و جدید صریح نام برده می‌شوند."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n\n// Teaching demo: n=5, w=3, r=3. The ARITHMETIC (any two 3-sets of 5 overlap)\n// never breaks; the FRESHNESS inference breaks when its assumptions do.\npublic class QuorumDemo {\n    // replica -> newest version stored\n    static int readMax(Set<String> quorum, Map<String, Integer> store) {\n        int m = -1;\n        for (String r : quorum) m = Math.max(m, store.getOrDefault(r, -1));\n        return m;\n    }\n\n    public static void main(String[] a) {\n        Map<String, Integer> store = new HashMap<>(Map.of(\n                \"n1\", 6, \"n2\", 6, \"n3\", 6, \"n4\", 6, \"n5\", 6));\n        // Happy path: write v7 to {n1,n2,n3} (w=3 ACKs), read {n3,n4,n5} -> overlap {n3} -> v7.\n        store.put(\"n1\", 7); store.put(\"n2\", 7); store.put(\"n3\", 7);\n        System.out.println(\"happy path: read{n3,n4,n5} sees v\" + readMax(Set.of(\"n3\", \"n4\", \"n5\"), store)\n                + \" (overlap {n3} carries v7)\");\n\n        // Assumption 1: ACK set = durable set. v8 reaches {n1,n2,n3} but two ACKs are lost,\n        // so the coordinator reports FAILURE while v8 sits on three nodes.\n        store.put(\"n1\", 8); store.put(\"n2\", 8); store.put(\"n3\", 8);\n        System.out.println(\"lost ACKs: coordinator reports v8 FAILED, yet read{n3,n4,n5} sees v\"\n                + readMax(Set.of(\"n3\", \"n4\", \"n5\"), store) + \" (failure is not rollback)\");\n\n        // Assumption 2: overlapping node still holds what it ACKed. n4/n5 caught up\n        // to v7 via read repair; then n3 is rebuilt from an old snapshot (back to\n        // v6) and a read quorum {n3,n4,n5} returns v7, missing v8.\n        store.put(\"n4\", 7); store.put(\"n5\", 7);\n        store.put(\"n3\", 6);\n        System.out.println(\"stale replacement: n3 rebuilt from old snapshot -> read{n3,n4,n5} sees v\"\n                + readMax(Set.of(\"n3\", \"n4\", \"n5\"), store) + \", v8 missed despite w+r>n\");\n\n        // Assumption 3: same membership. Data rebalances to {n4..n8}; a read quorum drawn\n        // from the NEW members {n6,n7,n8} never intersects the old write set.\n        Set<String> oldWrite = Set.of(\"n1\", \"n2\", \"n3\"), newRead = Set.of(\"n6\", \"n7\", \"n8\");\n        Set<String> overlap = new HashSet<>(oldWrite); overlap.retainAll(newRead);\n        System.out.println(\"membership change: old-write vs new-read overlap = \" + overlap\n                + \" (inequality was computed over different member sets)\");\n\n        // Monitor without a log order: probe versions, report max/min + laggards.\n        Map<String, Integer> probe = Map.of(\"n1\", 8, \"n2\", 8, \"n3\", 6, \"n4\", 7, \"n5\", 7);\n        int mx = Collections.max(probe.values()), mn = Collections.min(probe.values());\n        List<String> behind = new ArrayList<>();\n        for (var e : probe.entrySet()) if (e.getValue() < mx) behind.add(e.getKey() + \"@v\" + e.getValue());\n        Collections.sort(behind);\n        System.out.println(\"staleness probe: max=v\" + mx + \" min=v\" + mn + \" behind=\" + behind);\n        System.out.println(\"OK: 3+3>5 held in every line above; assumptions did the breaking\");\n    }\n}\n",
+    "expected_en": "happy path sees v7 via {n3}; lost ACKs show a FAILED v8 still readable; stale replacement misses v8; membership overlap is empty; probe reports max/min/behind; closing OK. (actual output of this environment)",
+    "expected_fa": "مسیر خوش‌بینانه v7 را از {n3} می‌بیند؛ ACKهای گمشده v8 شکست‌خورده ولی خواندنی را نشان می‌دهند؛ جایگزینی کهنه v8 را از دست می‌دهد؛ هم‌پوشانی membership خالی است؛ probe بیشینه/کمینه/عقب‌مانده را گزارش می‌دهد؛ OK پایانی. (خروجی واقعی همین محیط)",
+    "lang": "java",
+    "run_en": "javac QuorumDemo.java && java QuorumDemo — stdlib Java only, instant.",
+    "run_fa": "javac QuorumDemo.java && java QuorumDemo — فقط استاندارد جاوا، فوری.",
+    "status": "verified"
+  },
+  "design_en": "<p>The staleness monitor is a sampled version prober over all five replicas (teaching: every 10 seconds), a metric of <code>max - min</code> plus the behind-set, a dashboard that shows versions per replica, and a pager that fires past a teaching bound with the matching scenario attached (lost ACK, rebuild, or move). Rebalancing gets a separate joint-quorum watch: old and new quorums must overlap each other, not just themselves.</p>",
+  "design_fa": "<p>مانیتور کهنگی یک version prober نمونه‌بردار روی هر پنج replica است (آموزشی: هر ۱۰ ثانیه)، متریک <code>max - min</code> به‌علاوه مجموعه عقب‌مانده، داشبوردی که نسخه per-replica را نشان می‌دهد و پیجری که بعد از کران آموزشی با سناریوی منطبق (ACK گمشده، بازسازی یا جابه‌جایی) شلیک می‌کند. rebalancing دیده‌بان joint-quorum جدا دارد: quorumهای قدیم و جدید باید با هم هم‌پوشانی داشته باشند نه فقط با خودشان.</p>",
+  "diagrams": [
+    {
+      "caption_en": "Quorum intersection carries the version",
+      "caption_fa": "اشتراک quorum نسخه را حمل می‌کند",
+      "file": "diagrams/sol3-step1-quorum-holds.html",
+      "height": 640,
+      "kind_en": "sequence",
+      "kind_fa": "توالی",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Had the write reached only two replicas, w=3 would never be met and the client would retry — the bridge never forms without its three ACKs.",
+        "failure_fa": "اگر نوشته فقط به دو replica می‌رسید، w=3 هیچ‌وقت محقق نمی‌شد و کلاینت retry می‌کرد — پل بدون سه ACKاش ساخته نمی‌شود.",
+        "guarantee_en": "The figure shows the overlap carrying the max version to the read. It does not show what the overlap assumes.",
+        "guarantee_fa": "شکل نشان می‌دهد هم‌پوشانی نسخه بیشینه را به خواندن می‌رساند. نشان نمی‌دهد هم‌پوشانی چه فرض‌هایی دارد.",
+        "nonguarantee_en": "It is silent on lost ACKs, rebuilds and membership — those are the next diagram.",
+        "nonguarantee_fa": "درباره ACK گمشده، بازسازی و membership ساکت است — آن‌ها مال نمودار بعدی‌اند.",
+        "point_en": "The decision point is the shared node: freshness crosses only where the two sets meet.",
+        "point_fa": "نقطه تصمیم گره مشترک است: تازگی فقط از جایی می‌گذرد که دو مجموعه به هم می‌رسند.",
+        "scenario_en": "Write v7 to {n1,n2,n3} with three ACKs, then read {n3,n4,n5}. Read top to bottom: the write act, then the read act, meeting at n3.",
+        "scenario_fa": "نوشتن v7 روی {n1,n2,n3} با سه ACK و بعد خواندن {n3,n4,n5}. بالا‌به‌پایین بخوان: پرده نوشتن، بعد پرده خواندن، با ملاقات در n3.",
+        "steps": [
+          {
+            "en": "Messages 1 to 6: the client writes v7 to three replicas and collects three ACKs — the write quorum is met.",
+            "fa": "پیام‌های ۱ تا ۶: کلاینت v7 را به سه replica می‌نویسد و سه ACK جمع می‌کند — quorum نوشتن محقق شده."
+          },
+          {
+            "en": "Messages 7 to 9: the client reads a different three-set; only n3 belongs to both.",
+            "fa": "پیام‌های ۷ تا ۹: کلاینت سه‌مجموعه دیگری را می‌خواند؛ فقط n3 عضو هر دو است."
+          },
+          {
+            "en": "Messages 10 to 12: n3 answers v7 while the others answer v6, so the read takes the max — freshness crossed on {n3}.",
+            "fa": "پیام‌های ۱۰ تا ۱۲: n3 مقدار v7 می‌دهد و بقیه v6 پس خواندن بیشینه را می‌گیرد — تازگی از {n3} گذشته."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Message 10 (n3 answering v7): it is the only read answered from inside the write set.",
+        "a_fa": "پیام ۱۰ (پاسخ v7 از n3): تنها خواندنی است که از داخل مجموعه نوشتن پاسخ گرفته.",
+        "q_en": "Which single message carries freshness from the write set to the read set?",
+        "q_fa": "کدام تک‌پیام تازگی را از مجموعه نوشتن به مجموعه خواندن می‌رساند?"
+      },
+      "source": ".archify/sequence-ch6-sol3-holds-20261014-190500"
+    },
+    {
+      "caption_en": "Same arithmetic, broken freshness",
+      "caption_fa": "همان حساب، تازگی شکسته",
+      "file": "diagrams/sol3-step2-assumptions-break.html",
+      "height": 700,
+      "kind_en": "sequence",
+      "kind_fa": "توالی",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Trace each premise on the arrows: ACKs that never arrive, a bridge that forgets, members that never met. The sums never change; the evidence does.",
+        "failure_fa": "هر فرض را روی فلش‌ها دنبال کن: ACKهایی که نرسیدند، پلی که فراموش کرد، اعضایی که هم را ندیدند. جمع‌ها هیچ‌وقت عوض نمی‌شوند؛ مدرک عوض می‌شود.",
+        "guarantee_en": "The figure shows three ways freshness dies with the arithmetic intact. It does not rank them — production telemetry does.",
+        "guarantee_fa": "شکل سه راه مردن تازگی با حساب سالم را نشان می‌دهد. رتبه‌بندی‌شان نمی‌کند — تله‌متری پروداکشن می‌کند.",
+        "nonguarantee_en": "It says nothing about how to watch for these — that is the assembly monitor.",
+        "nonguarantee_fa": "درباره نحوه دیده‌بانی این‌ها چیزی نمی‌گوید — آن مال مانیتور اسمبل است.",
+        "point_en": "The decision point names the broken premise per act: durability of ACKs, memory of the bridge, identity of the membership.",
+        "point_fa": "نقطه تصمیم فرض شکسته هر پرده را نام می‌برد: durability ACKها، حافظه پل، هویت membership.",
+        "scenario_en": "Same n=5, w=3, r=3 in three acts: ACKs lost, a bridge rebuilt from an old snapshot, and a read from new members. The arithmetic never moves.",
+        "scenario_fa": "همان n=5 و w=3 و r=3 در سه پرده: ACKهای گمشده، پل بازسازی‌شده از اسنپ‌شات قدیمی، و خواندن از اعضای تازه. حساب هیچ‌وقت تکان نمی‌خورد.",
+        "steps": [
+          {
+            "en": "Act one: v8 reaches three nodes but two ACKs are lost, so the coordinator reports failure — yet the next read returns v8. Failure is not rollback.",
+            "fa": "پرده یک: v8 به سه گره می‌رسد ولی دو ACK گم می‌شود پس هماهنگ‌کننده شکست گزارش می‌دهد — ولی خواندن بعدی v8 را برمی‌گرداند. شکست rollback نیست."
+          },
+          {
+            "en": "Act two: n3 is restored from an old v6 snapshot; the overlap is still {n3}, but the bridge now carries v6 and v8 is missed.",
+            "fa": "پرده دو: n3 از اسنپ‌شات قدیمی v6 برگردانده می‌شود؛ هم‌پوشانی هنوز {n3} است ولی پل حالا v6 حمل می‌کند و v8 از دست می‌رود."
+          },
+          {
+            "en": "Act three: a read quorum from new members {n6..} never met the old write set — the inequality was computed over two different memberships.",
+            "fa": "پرده سه: quorum خواندن از اعضای تازه {n6..} هیچ‌وقت مجموعه نوشتن قدیم را ندیده — نامساوی روی دو membership متفاوت حساب شده."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "No line: 3+3>5 holds in every act. Freshness breaks on the premises (ACK durability, bridge memory, one membership), never on the sum.",
+        "a_fa": "هیچ خطی: 3+3>5 در هر سه پرده برقرار است. تازگی روی فرض‌ها می‌شکند (durability ACK، حافظه پل، یک membership) هرگز روی جمع.",
+        "q_en": "Which line of the demo breaks w + r > n?",
+        "q_fa": "کدام خط دمو w + r > n را می‌شکند?"
+      },
+      "source": ".archify/sequence-ch6-sol3-broken-20261014-190600"
+    },
+    {
+      "caption_en": "Staleness monitor without a log",
+      "caption_fa": "مانیتور کهنگی بدون لاگ",
+      "file": "diagrams/sol3-staleness-monitor.html",
+      "height": 640,
+      "kind_en": "dataflow",
+      "kind_fa": "جریان داده",
+      "made": "archify",
+      "narration": {
+        "failure_en": "If the prober itself is partitioned, absence of answers mimics universal freshness — monitor the monitor with a heartbeat, or staleness goes dark exactly when it matters.",
+        "failure_fa": "اگر خود prober پارتیشن شود، نبود پاسخ‌ها تازگی همگانی را تقلید می‌کند — مانیتور را با heartbeat دیده‌بانی کن وگرنه کهنگی دقیقاً وقتی تاریک می‌شود که مهم است.",
+        "guarantee_en": "The figure composes probing, comparing and paging into one loop; it sets no production bound.",
+        "guarantee_fa": "شکل probe و مقایسه و paging را در یک حلقه سوار می‌کند؛ کران پروداکشن تعیین نمی‌کند.",
+        "nonguarantee_en": "It covers steady membership only; rebalancing needs the joint-quorum watch from the design.",
+        "nonguarantee_fa": "فقط membership پایدار را پوشش می‌دهد؛ rebalancing دیده‌بان joint-quorum جدا از بخش طراحی می‌خواهد.",
+        "point_en": "The decision point is the metric node: max minus min plus the behind-set replaces the missing log order.",
+        "point_fa": "نقطه تصمیم گره متریک است: بیشینه منهای کمینه به‌علاوه مجموعه عقب‌مانده جای ترتیب لاگ غایب را می‌گیرد.",
+        "scenario_en": "No log order exists, so a prober asks every replica for its newest version on a teaching cadence. Read left to right: probe, answers, compare, act.",
+        "scenario_fa": "ترتیب لاگ نیست پس prober با آهنگ آموزشی از هر replica تازه‌ترین نسخه‌اش را می‌پرسد. چپ‌به‌راست بخوان: probe، پاسخ‌ها، مقایسه، اقدام.",
+        "steps": [
+          {
+            "en": "Probe arrows ask caught-up and lagging replicas alike for their newest version — versions are the only clock here.",
+            "fa": "فلش‌های probe از replicaهای رسیده و عقب‌مانده یکسان تازه‌ترین نسخه را می‌پرسند — نسخه‌ها تنها ساعت اینجایند."
+          },
+          {
+            "en": "v8 and v6 flow into the metric, which reports max=v8, min=v6 and the behind-set — divergence, not seconds.",
+            "fa": "v8 و v6 وارد متریک می‌شوند که بیشینه ۸ و کمینه ۶ و مجموعه عقب‌مانده را گزارش می‌دهد — واگرایی، نه ثانیه."
+          },
+          {
+            "en": "The dashboard shows versions per replica; the pager fires past the teaching bound with the matching scenario attached.",
+            "fa": "داشبورد نسخه per-replica را نشان می‌دهد؛ پیجر بعد از کران آموزشی با سناریوی منطبق شلیک می‌کند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "max=v8, min=v6, behind={n3@n6, n4/n5@v7}: divergence in versions, because seconds would need a log order that does not exist.",
+        "a_fa": "بیشینه ۸، کمینه ۶، عقب‌مانده‌ها {n3 با ۶ و n4/n5 با ۷}: واگرایی در نسخه‌ها، چون ثانیه ترتیب لاگی می‌خواهد که نیست.",
+        "q_en": "The probe returns one v8 and four older versions. What does the monitor report?",
+        "q_fa": "probe یک v8 و چهار نسخه قدیمی‌تر برمی‌گرداند. مانیتور چه گزارش می‌دهد?"
+      },
+      "source": ".archify/dataflow-ch6-sol3-monitor-20261014-190700"
+    }
+  ],
+  "failures": [
+    {
+      "en": "Coordinator reports failure while the write sits durable (lost ACKs): a naive retry writes v9 over v8 and forks intent. Guard: fence retries with versions — read before rewriting, or carry the write's identity.",
+      "fa": "گزارش شکست هماهنگ‌کننده درحالی‌که نوشته durable نشسته (ACKهای گمشده): retry ساده‌لوح v9 را روی v8 می‌نویسد و نیت را دوشقه می‌کند. نگهبان: retryها را با نسخه fence کن — پیش از بازنویسی بخوان یا هویت نوشته را حمل کن."
+    },
+    {
+      "en": "Replica rebuilt from an old snapshot rejoins and serves reads: every quorum containing it reports older versions. Guard: rebuilt nodes must catch up past the acknowledged frontier before serving, the leaderless cousin of the deletion watermark.",
+      "fa": "replica بازسازی‌شده از اسنپ‌شات قدیمی برمی‌گردد و خواندن سرو می‌کند: هر quorum شامل آن نسخه‌های قدیمی‌تر گزارش می‌دهد. نگهبان: گره‌های بازسازی‌شده باید پیش از سرو از مرز تأییدشده جلو بزنند، پسرعموی بدون‌رهبر watermark حذف."
+    },
+    {
+      "en": "Concurrent rebalancing moves data while quorums are drawn from both memberships: neither quorum overlaps the other. Guard: joint quorums — require overlap between old and new sets until the move completes.",
+      "fa": "rebalancing هم‌زمان داده را جابه‌جا می‌کند درحالی‌که quorumها از هر دو membership کشیده می‌شوند: هیچ‌کدام با دیگری هم‌پوشانی ندارد. نگهبان: joint quorum — تا پایان جابه‌جایی هم‌پوشانی قدیم و جدید را لازم بگیر."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "They must overlap each other, not just themselves: during the move, require quorums that intersect both the old and the new member set (joint quorums / expanded majorities), so no write lands where a read will never look. Reads and writes keep working through the transition at the price of bigger quorums; only after every replica acknowledges the new membership may the old set retire.",
+      "a_fa": "باید با هم هم‌پوشانی داشته باشند نه فقط با خودشان: هنگام جابه‌جایی quorumهایی بخواه که هم مجموعه قدیم و هم جدید را قطع کنند (joint quorum / اکثریت توسعه‌یافته) تا هیچ نوشته‌ای جایی ننشیند که خواندن هیچ‌وقت نگاهش نکند. خواندن و نوشتن در گذار کار می‌کنند به قیمت quorumهای بزرگ‌تر؛ فقط وقتی هر replica membership تازه را تأیید کرد مجموعه قدیم بازنشسته می‌شود.",
+      "level": "staff",
+      "q_en": "How should old and new quorums overlap during concurrent rebalancing?",
+      "q_fa": "در rebalancing هم‌زمان، quorum قدیم و جدید چگونه باید هم‌پوشانی داشته باشند?"
+    },
+    {
+      "a_en": "It does not: repair copies the max version outward, which heals laggards but promises nothing about the next read's set. Linearizability needs the read itself to intersect a fresh write (or a fencing token on the read path); background copying is hygiene, not a guarantee.",
+      "a_fa": "نمی‌دهد: repair نسخه بیشینه را به بیرون کپی می‌کند که عقب‌مانده‌ها را شفا می‌دهد ولی درباره مجموعه خواندن بعدی قولی نمی‌دهد. linearizability می‌خواهد خود خواندن با نوشته تازه قطع کند (یا token fencing در مسیر خواندن)؛ کپی پس‌زمینه بهداشت است نه تضمین.",
+      "level": "staff",
+      "q_en": "Does background read repair alone give linearizability?",
+      "q_fa": "آیا read repair پس‌زمینه به‌تنهایی linearizability می‌دهد?"
+    }
+  ],
+  "interview_q_en": "For n=5,w=3,r=3, explain quorum intersection and its limits. Analyze partial writes, lost ACKs, stale replacement and changing membership; define useful version probes and divergence monitoring.",
+  "interview_q_fa": "با n=5,w=3,r=3 نشان بده چه تضمینی از تقاطع مجموعه‌ها داریم و چه تضمینی نداریم. partial write، lost ACK، stale replacement و تغییر membership را تحلیل کن. مانیتور staleness را با version، probe و divergence طراحی کن؛ failure را با rollback یکی ندان.",
+  "lab_en": "<p>Simulate five replicas with w=3, r=3 and ordered versions in this teaching model. First prove quorum intersection by enumerating sets. Distinguish lost responses from missing storage, and tie ACKs to durable writes. Inject stale replica restoration, unsafe membership changes and partially applied failed writes. Record send, persistence, ACK and read results for each history, identifying the failed premise while the inequality stays true. Design version-divergence monitoring and read-after-write probes. Numeric version distance is meaningful only for a counter model; time-based staleness needs a timestamp/reference clock and stated uncertainty.</p>",
+  "lab_fa": "<p>پنج replica با w=3 و r=3 و نسخهٔ مرتب در این مدل آموزشی بساز. ابتدا با شمارش مجموعه‌ها ثابت کن w+r>n اشتراک می‌دهد. پاسخ گمشده را از ذخیره‌نشدن جدا ثبت کن؛ ACKها باید به نوشتن بادوام مربوط باشند. سپس بازسازی ناقص replica، تغییر membership بدون انتقال امن و نوشتن جزئیِ اعلام‌شده به‌عنوان ناموفق را تزریق کن. برای هر history، زمان ارسال، دوام، ACK و مقدار read را نشان بده و بگو کدام فرض نقض شده؛ خود نامساوی تغییر نمی‌کند. مانیتور version divergence و probe خواندن پس از نوشتن طراحی کن. فاصلهٔ عدد نسخه فقط در مدل نسخهٔ شمارنده معنا دارد؛ اندازه‌گیری زمانی به timestamp/ساعت مرجع و عدم‌قطعیت مشخص نیاز دارد.</p>",
+  "mental_en": "Picture two committees of three drawn from five people: they always share a member, and that member is the only bridge news can cross. Freshness is not the bridge existing — it is the bridge remembering, the letters actually arriving, and both committees drawn from the same five.",
+  "mental_fa": "دو کمیته سه‌نفره از پنج نفر را تصور کن: همیشه یک عضو مشترک دارند و آن عضو تنها پلی است که خبر می‌تواند از آن بگذرد. تازگی وجود پل نیست — به خاطر سپردن پل، رسیدن واقعی نامه‌ها، و کشیده شدن هر دو کمیته از همان پنج نفر است.",
+  "mistakes": [
+    {
+      "en": "Reading w + r > n as a freshness promise. It promises an intersecting node; freshness additionally needs ACK durability, bridge memory and one membership.",
+      "fa": "خواندن w + r > n به‌عنوان قول تازگی. آن گره مشترک را قول می‌دهد؛ تازگی اضافه‌تر durability ACK، حافظه پل و یک membership می‌خواهد."
+    },
+    {
+      "en": "Treating a reported failure as a rollback. A failed write may sit durable on three nodes and surface in the next read — retry accordingly, with versions.",
+      "fa": "برخورد با شکست گزارش‌شده مثل rollback. نوشته شکست‌خورده شاید روی سه گره durable نشسته و در خواندن بعدی بالا بیاید — retry را بر همان اساس با نسخه انجام بده."
+    },
+    {
+      "en": "Measuring staleness in seconds. Without a log order there is no global clock to be seconds behind; versions and behind-sets are the honest units.",
+      "fa": "سنجش کهنگی با ثانیه. بدون ترتیب لاگ ساعت سراسری نیست که از آن عقب باشی؛ نسخه‌ها و مجموعه‌های عقب‌مانده واحدهای صادق‌اند."
+    }
+  ],
+  "number": 3,
+  "slug": "break-the-quorum",
+  "sources": [
+    "abd",
+    "jepsen"
+  ],
+  "steps": [
+    {
+      "en": "Count the arithmetic: C(5,3) sets pairwise intersect in at least one node, so write quorum and read quorum always share a bridge member. That is all the inequality ever says.",
+      "fa": "حساب را بشمار: مجموعه‌های C(5,3) دوبه‌دو دست‌کم یک گره مشترک دارند پس quorum نوشتن و خواندن همیشه یک عضو پل مشترک دارند. نامساوی فقط همین را می‌گوید و بس.",
+      "t_en": "Count what the sum promises",
+      "t_fa": "بشمار جمع چه قولی می‌دهد"
+    },
+    {
+      "en": "Walk the happy versioned history: v7 lands on {n1,n2,n3} with three ACKs; the read of {n3,n4,n5} finds v7 on the bridge and v6 elsewhere, and takes the max. Versions ride writes; the max crosses the bridge.",
+      "fa": "history نسخه‌دار خوش را برو: v7 با سه ACK روی {n1,n2,n3} می‌نشیند؛ خواندن {n3,n4,n5} روی پل v7 و جای دیگر v6 می‌یابد و بیشینه را می‌گیرد. نسخه‌ها سوار نوشته‌اند؛ بیشینه از پل می‌گذرد.",
+      "t_en": "Walk the happy history",
+      "t_fa": "history خوش را برو"
+    },
+    {
+      "en": "Break each premise in turn. Lost ACKs: v8 sits on three nodes while the coordinator reports failure — the next read returns the failed write. Stale replacement: n3 is rebuilt from a v6 snapshot and the same overlap carries v6, missing v8. Membership: a read from new members never met the old write set — the sum was computed over two different fives.",
+      "fa": "هر فرض را به‌نوبت بشکن. ACK گمشده: v8 روی سه گره نشسته درحالی‌که هماهنگ‌کننده شکست گزارش می‌دهد — خواندن بعدی نوشته شکست‌خورده را برمی‌گرداند. جایگزینی کهنه: n3 از اسنپ‌شات v6 بازسازی می‌شود و همان هم‌پوشانی v6 حمل می‌کند و v8 از دست می‌رود. membership: خواندن از اعضای تازه هیچ‌وقت مجموعه نوشتن قدیم را ندیده — جمع روی دو پنج‌تای متفاوت حساب شده.",
+      "t_en": "Break the premises, not the sum",
+      "t_fa": "فرض‌ها را بشکن، نه جمع را"
+    },
+    {
+      "en": "Monitor without a log order: probe all five for newest versions, report max, min and the behind-set, and page past a teaching bound with the matching scenario attached. Rebalancing is watched separately with joint quorums.",
+      "fa": "بدون ترتیب لاگ مانیتور کن: هر پنج‌تا را برای تازه‌ترین نسخه probe کن، بیشینه و کمینه و مجموعه عقب‌مانده را گزارش بده و بعد از کران آموزشی با سناریوی منطبق page بزن. rebalancing جدا با joint quorum دیده‌بانی می‌شود.",
+      "t_en": "Probe versions, not seconds",
+      "t_fa": "نسخه probe کن، نه ثانیه"
+    }
+  ],
+  "tests_en": "Inject lost ACKs and random delays in the simulated client; assert a reported-failed write still surfaces; rebuild a node from an old snapshot and assert the probe diverges; change membership mid-test and assert joint-quorum overlap.",
+  "tests_fa": "در کلاینت شبیه‌سازی‌شده ACK گمشده و تأخیر تصادفی تزریق کن؛ assert کن نوشته شکست‌خورده گزارش‌شده هنوز بالا می‌آید؛ گرهی را از اسنپ‌شات قدیمی بازسازی کن و assert کن probe واگرا می‌شود؛ وسط تست membership را عوض کن و assert کن هم‌پوشانی joint-quorum هست.",
+  "reasoning_fa": "<p>از اصل شمول و عدم‌شمول داریم |W∩R|≥|W|+|R|−n؛ برای ۳+۳−۵، حداقل یک عضو مشترک است. این اثبات دربارهٔ مجموعه‌هاست؛ تضمین نمی‌کند عضو مشترک داده را واقعاً پایدار نگه داشته یا عضو جایگزین همان history را دارد. probe ده‌ثانیه‌ای انتخاب آموزشیِ هزینه در برابر سرعت کشف است: کوتاه‌تر، ترافیک بیشتر و تشخیص سریع‌تر. اختلاف نسخه را به ثانیه تبدیل نمی‌کنیم مگر نرخ تولید/مرجع زمانی و عدم‌قطعیت معلوم باشد.</p>",
+  "reasoning_en": "<p>Inclusion–exclusion gives |W∩R|≥|W|+|R|−n; 3+3−5 means at least one shared member. This set proof cannot establish durable contents or replacement history. A ten-second probe interval trades monitoring cost against detection delay: shorter costs more and detects sooner. Version distance cannot become seconds without a production-rate/time reference and uncertainty model.</p>"
+}

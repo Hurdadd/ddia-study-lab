@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Total order is not causality — DDIA Chapter 10 Solution 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Sorted Lamport stamps versus two message-free events with no causal path">
+<title>Total order is not causality</title>
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0 0L10 5L0 10z" fill="#302828"/>
+</marker>
+</defs>
+<text x="620" y="52" font-size="30" font-weight="900" text-anchor="middle">Total order is not causality</text>
+<text x="620" y="86" font-size="16" text-anchor="middle">sorted stamps decide display order, only messages decide happened-before</text>
+<text x="620" y="128" font-size="15" font-weight="800" text-anchor="middle">the exchange, sorted with pid tie-break</text>
+<g>
+<rect x="170" y="150" width="200" height="96" rx="16" fill="#9278ef"/>
+<text x="270" y="188" font-size="22" font-weight="800" text-anchor="middle">(1,A)</text>
+<text x="270" y="216" font-size="14" text-anchor="middle">A posts, c 0 to 1</text>
+<rect x="520" y="150" width="200" height="96" rx="16" fill="#9278ef"/>
+<text x="620" y="188" font-size="22" font-weight="800" text-anchor="middle">(1,C)</text>
+<text x="620" y="216" font-size="14" text-anchor="middle">C posts, B adopts 1</text>
+<rect x="870" y="150" width="200" height="96" rx="16" fill="#9278ef"/>
+<text x="970" y="188" font-size="22" font-weight="800" text-anchor="middle">(2,B)</text>
+<text x="970" y="216" font-size="14" text-anchor="middle">B replies, c 1 to 2</text>
+</g>
+<line x1="374" y1="198" x2="516" y2="198" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="724" y1="198" x2="866" y2="198" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<text x="620" y="282" font-size="15" text-anchor="middle">total order: (1,A) &lt; (1,C) &lt; (2,B) — good for sorting, says nothing about cause</text>
+<text x="620" y="330" font-size="15" font-weight="800" text-anchor="middle">the trap: two events, zero messages</text>
+<g>
+<rect x="140" y="352" width="330" height="120" rx="16" fill="#ffcfb8"/>
+<text x="305" y="392" font-size="18" font-weight="800" text-anchor="middle">event x on A</text>
+<text x="305" y="420" font-size="14" text-anchor="middle">stamped (5,A)</text>
+<text x="305" y="444" font-size="14" text-anchor="middle">no message in or out</text>
+<rect x="770" y="352" width="330" height="120" rx="16" fill="#ffcfb8"/>
+<text x="935" y="392" font-size="18" font-weight="800" text-anchor="middle">event y on C</text>
+<text x="935" y="420" font-size="14" text-anchor="middle">stamped (3,C)</text>
+<text x="935" y="444" font-size="14" text-anchor="middle">no message in or out</text>
+</g>
+<text x="620" y="404" font-size="20" font-weight="900" text-anchor="middle">no path</text>
+<text x="620" y="432" font-size="15" text-anchor="middle">either way</text>
+<text x="620" y="508" font-size="15" text-anchor="middle">(3,C) &lt; (5,A) in stamps, yet neither caused the other — concurrency is invisible</text>
+<g>
+<rect x="40" y="532" width="1160" height="62" rx="16" fill="#ffe08a"/>
+<text x="620" y="558" font-size="14" font-weight="800" text-anchor="middle">Lamport rule: send ticks +1, receive adopts max — the clock never moves backwards</text>
+<text x="620" y="580" font-size="14" text-anchor="middle">price of truth about concurrency: vector clocks, one entry per process</text>
+</g>
+<text x="620" y="626" font-size="14" text-anchor="middle">legend: violet = message exchange, rose = message-free trap, yellow = the rule and its price</text>
+</svg>
+</div>
+</body>
+</html>

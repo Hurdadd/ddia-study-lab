@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From Lambda to Kappa — One Engine for History and Now</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#f7f2e8;color:#302828;
+    font-family:'Nunito','Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%;display:flex;justify-content:center;padding:10px 0;}
+  svg{width:100%;height:auto;max-width:1240px;background:#f7f2e8;}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828;}
+  .ttl{font-size:22px;font-weight:900;}
+  .sub{font-size:14px;font-weight:700;fill:#6e665c;}
+  .hd{font-size:17px;font-weight:900;}
+  .lbl{font-size:13px;font-weight:900;}
+  .ln{font-size:14px;font-weight:400;}
+  .foot{font-size:14px;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="From the retired lambda architecture with two code paths to the unified kappa architecture with one replayable engine">
+<title>Lambda to kappa</title>
+
+  <text class="ttl" x="620" y="44" text-anchor="middle">From Lambda to Kappa — One Engine for History and Now</text>
+  <text class="sub" x="620" y="70" text-anchor="middle">Lambda ran everything twice; kappa replays history through the stream engine.</text>
+
+  <g>
+    <rect x="40" y="110" width="490" height="330" rx="18" fill="#ffc2da"/>
+    <text class="hd" x="285" y="152" text-anchor="middle">LAMBDA — retired</text>
+    <text class="ln" x="64" y="196">batch layer: reprocess all history</text>
+    <text class="ln" x="64" y="236">speed layer: fresh events only</text>
+    <text class="ln" x="64" y="276">serving layer merges both views</text>
+    <text class="ln" x="64" y="316">two code paths, double bugs</text>
+    <text class="ln" x="64" y="356">merge logic never quite right</text>
+    <text class="lbl" x="64" y="410">complexity retired it</text>
+  </g>
+
+  <line x1="548" y1="275" x2="676" y2="275" stroke="#302828" stroke-width="3"/>
+  <polygon points="676,262 700,275 676,288" fill="#302828"/>
+  <text class="lbl" x="612" y="248" text-anchor="middle">one engine</text>
+  <text class="lbl" x="612" y="306" text-anchor="middle">instead</text>
+
+  <g>
+    <rect x="710" y="110" width="490" height="330" rx="18" fill="#bfe6c9"/>
+    <text class="hd" x="955" y="152" text-anchor="middle">KAPPA — unified</text>
+    <text class="ln" x="734" y="196">one stream engine does both jobs</text>
+    <text class="ln" x="734" y="236">replay history through it</text>
+    <text class="ln" x="734" y="276">fresh events flow as usual</text>
+    <text class="ln" x="734" y="316">needs exactly-once semantics</text>
+    <text class="ln" x="734" y="356">window by EVENT time</text>
+    <text class="lbl" x="734" y="410">Beam on Flink / Dataflow</text>
+  </g>
+
+  <rect x="40" y="462" width="1160" height="154" rx="16" fill="#ffe08a"/>
+  <text class="foot" x="64" y="494">Kappa's three conditions:</text>
+  <text class="ln" x="64" y="522">1. replay history from the same engine that eats fresh events.</text>
+  <text class="ln" x="64" y="550">2. exactly-once: broken tasks' partial output discarded, like batch.</text>
+  <text class="ln" x="64" y="578">3. event-time windows — processing time is meaningless on replay.</text>
+</svg>
+</div>
+</body>
+</html>

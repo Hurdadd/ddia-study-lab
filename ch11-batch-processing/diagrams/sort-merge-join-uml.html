@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sort-Merge Join on user_id — MapReduce Join of Activity Events and User Profiles</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .cls-t{font:700 14px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .edge-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .note{font:12.5px system-ui,sans-serif; fill:#cfe3ff}
+  .note-h{font:700 13px system-ui,sans-serif; fill:#fbbf24}
+  .card-lbl{font:700 11.5px ui-monospace,Menlo,monospace; fill:#86efac}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .colh{font:700 11.5px ui-monospace,Menlo,monospace; fill:#93c5fd}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="Structural diagram of a sort-merge join on user_id: activity events and user profiles are mapped to key-value pairs, shuffled by user_id, and joined in one reducer">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="32" text-anchor="middle">Sort-Merge Join on user_id — Joining Two Sharded Datasets in MapReduce (Figures 11-2 / 11-3)</text>
+  <text class="sub" x="620" y="54" text-anchor="middle">left: the fact and dimension tables · middle: the shuffle gathers one user's records · right: the reducer and the next job</text>
+
+  <!-- ======================= LEFT: fact table (activity events) ======================= -->
+  <g>
+    <rect x="40" y="100" width="280" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="180" y="120" text-anchor="middle">activity events (clickstream)</text>
+    <rect x="40" y="130" width="280" height="172" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="colh" x="56" y="152">user_id  url      timestamp</text>
+    <line x1="56" y1="160" x2="304" y2="160" stroke="#2a3652" stroke-width="1.2"/>
+    <text class="attr" x="56" y="182">42    /news    10-01 09:12</text>
+    <text class="attr" x="56" y="208">7     /blog    10-01 11:40</text>
+    <text class="attr" x="56" y="234">42    /docs    10-01 10:05</text>
+    <text class="attr" x="56" y="260">42    /news    10-02 08:20</text>
+    <text class="small" x="56" y="286">·  ·  ·</text>
+  </g>
+  <text class="small" x="56" y="332">fact table of the star schema — sharded into multiple</text>
+  <text class="small" x="56" y="350">files, so many mappers process it in parallel</text>
+
+  <!-- ======================= LEFT: dimension table (user profiles) ======================= -->
+  <g>
+    <rect x="40" y="382" width="280" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="180" y="402" text-anchor="middle">user profiles (dimension)</text>
+    <rect x="40" y="412" width="280" height="120" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="colh" x="56" y="434">user_id  date_of_birth</text>
+    <line x1="56" y1="442" x2="304" y2="442" stroke="#2a3652" stroke-width="1.2"/>
+    <text class="attr" x="56" y="466">42    1990-07-14</text>
+    <text class="attr" x="56" y="492">7     1985-02-03</text>
+    <text class="small" x="56" y="518">·  ·  ·</text>
+  </g>
+  <text class="small" x="56" y="556">dimension table of the star schema — also sharded,</text>
+  <text class="small" x="56" y="574">read row by row by its own mapper</text>
+
+  <!-- ======================= MAP stage: two mappers emit keyed pairs ======================= -->
+  <path d="M322 226 L571 255" fill="none" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="340" y="170">mapper over events:</text>
+  <text class="edge-lbl" x="340" y="188">emit (key=user_id, value=url)</text>
+
+  <path d="M322 470 H558 V192 H571" fill="none" stroke="#86efac" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="340" y="420">mapper over profiles:</text>
+  <text class="edge-lbl" x="340" y="438">emit (key=user_id, value=DOB)</text>
+
+  <!-- ======================= MIDDLE: shuffle result for one reducer ======================= -->
+  <g>
+    <rect x="575" y="100" width="270" height="30" rx="8" fill="#7c3aed" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="710" y="120" text-anchor="middle">shuffle by user_id</text>
+    <text class="small" x="575" y="152">sorted reducer input for user_id = 42</text>
+
+    <rect x="575" y="164" width="270" height="34" rx="6" fill="#1b2438" stroke="#fbbf24" stroke-width="1.5"/>
+    <text class="attr" x="589" y="186">(42, dob=1990-07-14)</text>
+    <text class="card-lbl" x="831" y="186" text-anchor="end">profile</text>
+
+    <rect x="575" y="206" width="270" height="34" rx="6" fill="#161d2e" stroke="#93c5fd" stroke-width="1.4"/>
+    <text class="attr" x="589" y="228">(42, url=/news, 10-01 09:12)</text>
+
+    <rect x="575" y="248" width="270" height="34" rx="6" fill="#161d2e" stroke="#93c5fd" stroke-width="1.4"/>
+    <text class="attr" x="589" y="270">(42, url=/docs, 10-01 10:05)</text>
+
+    <rect x="575" y="290" width="270" height="34" rx="6" fill="#161d2e" stroke="#93c5fd" stroke-width="1.4"/>
+    <text class="attr" x="589" y="312">(42, url=/news, 10-02 08:20)</text>
+  </g>
+  <text class="small" x="575" y="352">secondary sort: profile record first,</text>
+  <text class="small" x="575" y="370">then the user's events in timestamp order</text>
+
+  <!-- ======================= RIGHT: reducer logic ======================= -->
+  <g>
+    <rect x="880" y="100" width="330" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="1045" y="120" text-anchor="middle">reducer — sort-merge join</text>
+    <rect x="880" y="130" width="330" height="140" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="attr" x="896" y="158">dob = first value</text>
+    <text class="small" x="1044" y="158"># the profile record</text>
+    <text class="attr" x="896" y="186">for e in events:</text>
+    <text class="small" x="1036" y="186"># sorted by timestamp</text>
+    <text class="attr" x="896" y="214">    emit(e.url, dob)</text>
+    <text class="small" x="896" y="248">out: (url, date_of_birth) per page view</text>
+  </g>
+
+  <rect x="880" y="292" width="330" height="124" rx="10" fill="#1b2438" stroke="#fbbf24" stroke-width="1.3" stroke-dasharray="6 4"/>
+  <text class="note-h" x="896" y="316">Why it is a sort-merge join</text>
+  <text class="note" x="896" y="338">one user's record in memory at a time;</text>
+  <text class="note" x="896" y="358">no network calls during the join;</text>
+  <text class="note" x="896" y="378">mapper output is sorted by key; reducers</text>
+  <text class="note" x="896" y="398">merge the sorted lists from both sides</text>
+
+  <!-- ======================= BOTTOM: next job in the workflow ======================= -->
+  <g>
+    <rect x="575" y="448" width="635" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="cls-t" x="892" y="468" text-anchor="middle">next MapReduce job — group by + aggregation</text>
+    <rect x="575" y="478" width="635" height="112" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+    <text class="note" x="591" y="504">shuffle by url: the reducer sees all page views for one URL</text>
+    <text class="note" x="591" y="526">it keeps a counter of views per age group, one URL at a time</text>
+    <text class="attr" x="591" y="552">emit (url, age_group, view_count)</text>
+    <text class="small" x="591" y="576">group by + aggregation — viewer age comes from date_of_birth</text>
+  </g>
+
+  <!-- ======================= legend ======================= -->
+  <text class="small" x="620" y="628" text-anchor="middle">pill = pipeline stage · box = record or code · dashed = why the join works · arrow = data flow</text>
+</svg>
+</div>
+</body>
+</html>

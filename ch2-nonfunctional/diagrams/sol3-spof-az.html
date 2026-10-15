@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Surviving one host or AZ — DDIA Chapter 2 Solution 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Order path across three AZs with database standby and replicated queue">
+<title>One host or one AZ can die, the order path survives</title>
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0 0L10 5L0 10z" fill="#302828"/>
+</marker>
+</defs>
+<text x="620" y="52" font-size="30" font-weight="900" text-anchor="middle">Survive one host or one AZ: stateless up top, fenced state below</text>
+<text x="620" y="86" font-size="16" text-anchor="middle">teaching topology: 3 AZs, N+1 capacity, RPO 1 min, RTO 5 min</text>
+<g>
+<rect x="490" y="108" width="260" height="52" rx="14" fill="#9278ef"/>
+<text x="620" y="140" font-size="16" font-weight="700" text-anchor="middle">load balancer + health checks</text>
+<text x="620" y="196" font-size="14" text-anchor="middle">client order writes, peak 231/s</text>
+<line x1="620" y1="160" x2="620" y2="186" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+</g>
+<g>
+<rect x="40" y="210" width="350" height="150" rx="16" fill="none" stroke="#302828" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="215" y="234" font-size="14" font-weight="800" text-anchor="middle">AZ-a failure domain</text>
+<rect x="70" y="246" width="290" height="90" rx="12" fill="#c3ceff"/>
+<text x="215" y="280" font-size="15" font-weight="700" text-anchor="middle">stateless API x2</text>
+<text x="215" y="306" font-size="14" text-anchor="middle">no session state inside</text>
+</g>
+<g>
+<rect x="445" y="210" width="350" height="150" rx="16" fill="none" stroke="#302828" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="620" y="234" font-size="14" font-weight="800" text-anchor="middle">AZ-b failure domain</text>
+<rect x="475" y="246" width="290" height="90" rx="12" fill="#c3ceff"/>
+<text x="620" y="280" font-size="15" font-weight="700" text-anchor="middle">stateless API x2</text>
+<text x="620" y="306" font-size="14" text-anchor="middle">any AZ row may go grey</text>
+</g>
+<g>
+<rect x="850" y="210" width="350" height="150" rx="16" fill="none" stroke="#302828" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="1025" y="234" font-size="14" font-weight="800" text-anchor="middle">AZ-c failure domain</text>
+<rect x="880" y="246" width="290" height="90" rx="12" fill="#c3ceff"/>
+<text x="1025" y="280" font-size="15" font-weight="700" text-anchor="middle">stateless API x2</text>
+<text x="1025" y="306" font-size="14" text-anchor="middle">survivors take the peak</text>
+</g>
+<line x1="320" y1="196" x2="215" y2="244" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="620" y1="196" x2="620" y2="244" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="920" y1="196" x2="1025" y2="244" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<g>
+<rect x="40" y="390" width="1160" height="160" rx="16" fill="none" stroke="#ff7e49" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="620" y="414" font-size="14" font-weight="800" text-anchor="middle">state failure domain: fencing and RPO/RTO live here</text>
+<rect x="70" y="428" width="330" height="96" rx="12" fill="#ffcfb8"/>
+<text x="235" y="458" font-size="15" font-weight="700" text-anchor="middle">DB primary + crown</text>
+<text x="235" y="484" font-size="14" text-anchor="middle">sync standby ACKs writes</text>
+<text x="235" y="506" font-size="14" text-anchor="middle">old primary fenced by epoch</text>
+<rect x="430" y="428" width="330" height="96" rx="12" fill="#ffe08a"/>
+<text x="595" y="458" font-size="15" font-weight="700" text-anchor="middle">replicated queue</text>
+<text x="595" y="484" font-size="14" text-anchor="middle">3 consumers, checkpointed</text>
+<text x="595" y="506" font-size="14" text-anchor="middle">poison goes to dead-letter</text>
+<rect x="790" y="428" width="380" height="96" rx="12" fill="#bfe6c9"/>
+<text x="980" y="458" font-size="15" font-weight="700" text-anchor="middle">backup + RPO/RTO</text>
+<text x="980" y="484" font-size="14" text-anchor="middle">snapshot + WAL, RPO 1 min</text>
+<text x="980" y="506" font-size="14" text-anchor="middle">restore drill proves RTO 5 min</text>
+</g>
+<line x1="215" y1="360" x2="235" y2="426" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="620" y1="360" x2="595" y2="426" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="1025" y1="360" x2="980" y2="426" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<text x="620" y="600" font-size="14" text-anchor="middle">legend: dashed lines = failure can strike everything inside together, crown = only one writer, deploy via expand-migrate-contract</text>
+<text x="620" y="628" font-size="14" text-anchor="middle">HA (standby, seconds) is not backup (snapshot, minutes) is not DR (second region)</text>
+</svg>
+</div>
+</body>
+</html>

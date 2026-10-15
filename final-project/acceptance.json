@@ -1,0 +1,130 @@
+[
+  {
+    "id": "P01",
+    "injection_fa": "دو درخواست یکسان با کلید یکسان؛ یکی پس از پاسخ گمشده.",
+    "injection_en": "Duplicate requests with a shared key, including a lost response.",
+    "expected_fa": "یک run؛ hash متفاوت conflict.",
+    "expected_en": "One run; conflicting hashes rejected.",
+    "status": "planned"
+  },
+  {
+    "id": "P02",
+    "injection_fa": "crash پیش و پس از commit step و ارسال ابزار.",
+    "injection_en": "Crash before/after step commits and tool dispatch.",
+    "expected_fa": "step پایدار حفظ؛ outcome نامعلوم به reconcile.",
+    "expected_en": "Durable steps survive; uncertain outcomes reconcile.",
+    "status": "planned"
+  },
+  {
+    "id": "P03",
+    "injection_fa": "worker A pause و B takeover؛ A بیدار شود.",
+    "injection_en": "A pauses, B takes over, A resumes.",
+    "expected_fa": "A حق commit ندارد؛ guard در sink هدف اجرا شود.",
+    "expected_en": "A cannot commit; target sink guards are exercised.",
+    "status": "planned"
+  },
+  {
+    "id": "P04",
+    "injection_fa": "snapshot در حین update/delete و overlap replay.",
+    "injection_en": "Snapshot concurrent with updates/deletes and overlapping replay.",
+    "expected_fa": "مرجع و مشتق در همان cut برابر.",
+    "expected_en": "Record/projection match at the same cut.",
+    "status": "planned"
+  },
+  {
+    "id": "P05",
+    "injection_fa": "حذف سند هنگام embedding، سپس replay نسخهٔ قبلی.",
+    "injection_en": "Delete during embedding, then replay an older revision.",
+    "expected_fa": "سند resurrect نمی‌شود؛ chunk قدیمی قابل‌خواندن نیست.",
+    "expected_en": "No resurrection or visible stale chunks.",
+    "status": "planned"
+  },
+  {
+    "id": "P06",
+    "injection_fa": "revocation در query، run جاری، cache و citation قدیمی.",
+    "injection_en": "Revoke access during queries/runs and against old caches/citations.",
+    "expected_fa": "policy فعلی enforce؛ خروجیِ ممنوع تحویل داده نشود.",
+    "expected_en": "Current policy enforced; forbidden output not delivered.",
+    "status": "planned"
+  },
+  {
+    "id": "P07",
+    "injection_fa": "outage بیشتر از Kafka/WAL retention.",
+    "injection_en": "Outage beyond Kafka/WAL retention.",
+    "expected_fa": "degraded و resnapshot؛ gap پنهان صفر.",
+    "expected_en": "Explicit degraded/resnapshot path; no hidden gap.",
+    "status": "planned"
+  },
+  {
+    "id": "P08",
+    "injection_fa": "schema قدیم/جدید و replay event قدیمی.",
+    "injection_en": "Old/new schemas and historical replay.",
+    "expected_fa": "compatibility طبق fixture؛ ناشناخته quarantine.",
+    "expected_en": "Fixture-backed compatibility; unknown schemas quarantined.",
+    "status": "planned"
+  },
+  {
+    "id": "P09",
+    "injection_fa": "دو tenant با entity مشابه و یک tenant پرمصرف.",
+    "injection_en": "Two tenants with similar entity IDs and one noisy tenant.",
+    "expected_fa": "isolation داده و quota؛ starvation با metric دیده شود.",
+    "expected_en": "Data/quota isolation; visible starvation metrics.",
+    "status": "planned"
+  },
+  {
+    "id": "P10",
+    "injection_fa": "spend هم‌زمان، timeout provider و usage نامعلوم.",
+    "injection_en": "Concurrent spending, provider timeouts, unknown usage.",
+    "expected_fa": "رزرو overspend نکند؛ usage pending reconcile شود.",
+    "expected_en": "Reservations prevent overspending; pending usage reconciles.",
+    "status": "planned"
+  },
+  {
+    "id": "P11",
+    "injection_fa": "log آلوده به prompt injection و tool call نامعتبر.",
+    "injection_en": "Injected log content and invalid tool calls.",
+    "expected_fa": "credential فاش و ابزار خارج scope اجرا نشود.",
+    "expected_en": "No credential exposure or out-of-scope execution.",
+    "status": "planned"
+  },
+  {
+    "id": "P12",
+    "injection_fa": "نسخهٔ agent با regression عمدی؛ canary ضعیف.",
+    "injection_en": "Injected agent regression and degraded canary.",
+    "expected_fa": "gate نسخه را رد و pointer rollback شود.",
+    "expected_en": "Gate rejection and pointer rollback.",
+    "status": "planned"
+  },
+  {
+    "id": "P13",
+    "injection_fa": "ترتیب‌های معکوس event و دادهٔ دیررس پس از window.",
+    "injection_en": "Reversed arrivals and late data after window closure.",
+    "expected_fa": "state محدود و report revision اصلاحی؛ billing از ledger.",
+    "expected_en": "Bounded state, corrected report revisions; ledger-based billing.",
+    "status": "planned"
+  },
+  {
+    "id": "P14",
+    "injection_fa": "artifact ناقص و دو attempt هم‌زمان rebuild.",
+    "injection_en": "Partial artifacts and concurrent rebuild attempts.",
+    "expected_fa": "تنها manifest کامل و مالک معتبر publish کند.",
+    "expected_en": "Only complete, valid-owner manifests publish.",
+    "status": "planned"
+  },
+  {
+    "id": "P15",
+    "injection_fa": "failover منبع، slot ناموجود و backup restore.",
+    "injection_en": "Source failover, missing slots, backup restoration.",
+    "expected_fa": "پیوستگی cursor یا resnapshot؛ حذف/ACL احیا نشود.",
+    "expected_en": "Proven continuity or resnapshot; no erased/revoked data restoration.",
+    "status": "planned"
+  },
+  {
+    "id": "P16",
+    "injection_fa": "burst و طول prompt متفاوت در serving.",
+    "injection_en": "Serving bursts and varying prompt lengths.",
+    "expected_fa": "TTFT/ITL/queue/error/cost گزارش شوند؛ نتیجهٔ مصنوعی با واقعی تفکیک.",
+    "expected_en": "Report TTFT/ITL/queues/errors/costs; distinguish simulated from measured results.",
+    "status": "planned"
+  }
+]

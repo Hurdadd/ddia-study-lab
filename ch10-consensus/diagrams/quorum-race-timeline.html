@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quorum Reads and Writes Are Not Linearizable — Figure 10-6</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .pill-t{font:700 13px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .edge-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .tick-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .warn-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#fda4af}
+  .win-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .note{font:12.5px system-ui,sans-serif; fill:#cfe3ff}
+  .note-h{font:700 13px system-ui,sans-serif; fill:#fbbf24}
+  .chip{font:700 11.5px ui-monospace,Menlo,monospace; fill:#0b111c}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="A quorum execution where client B reads an older value than client A despite w plus r greater than n">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+    <marker id="arrw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#fda4af"/>
+    </marker>
+    <marker id="arrp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c084fc"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="30" text-anchor="middle">A Quorum Is Not Enough — w + r &gt; n and Still a Stale Read (Figure 10-6)</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">n = 3 replicas, w = 3, r = 2 · client B starts after client A returned, yet gets the older value</text>
+
+  <!-- writer lane -->
+  <rect x="60" y="82" width="110" height="30" rx="8" fill="#7c3aed" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="115" y="102" text-anchor="middle">writer</text>
+  <rect x="300" y="82" width="760" height="30" rx="8" fill="#1b2438" stroke="#c084fc" stroke-width="1.8"/>
+  <text class="attr" x="680" y="102" text-anchor="middle">write(x, 1) → sent to all three replicas (w = 3) — acks trickle in</text>
+
+  <!-- replica tracks -->
+  <rect x="60" y="166" width="110" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="115" y="186" text-anchor="middle">replica n1</text>
+  <rect x="60" y="246" width="110" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="115" y="266" text-anchor="middle">replica n2</text>
+  <rect x="60" y="326" width="110" height="30" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="115" y="346" text-anchor="middle">replica n3</text>
+
+  <line x1="200" y1="181" x2="1160" y2="181" stroke="#2a3652" stroke-width="2"/>
+  <line x1="200" y1="261" x2="1160" y2="261" stroke="#2a3652" stroke-width="2"/>
+  <line x1="200" y1="341" x2="1160" y2="341" stroke="#2a3652" stroke-width="2"/>
+
+  <!-- write delivery markers -->
+  <line x1="470" y1="112" x2="470" y2="172" stroke="#c084fc" stroke-width="1.5" marker-end="url(#arrp)"/>
+  <path d="M470 181 l9 -9 l9 9 l-9 9 z" fill="#c084fc"/>
+  <text class="small" x="496" y="176">x = 1 arrives</text>
+
+  <line x1="860" y1="112" x2="860" y2="252" stroke="#c084fc" stroke-width="1.5" marker-end="url(#arrp)"/>
+  <path d="M860 261 l9 -9 l9 9 l-9 9 z" fill="#c084fc"/>
+  <text class="small" x="886" y="256">x = 1 arrives</text>
+
+  <line x1="950" y1="112" x2="950" y2="332" stroke="#c084fc" stroke-width="1.5" marker-end="url(#arrp)"/>
+  <path d="M950 341 l9 -9 l9 9 l-9 9 z" fill="#c084fc"/>
+  <text class="small" x="976" y="336">x = 1 arrives</text>
+
+  <text class="small" x="200" y="158">each replica flips 0 → 1 at a different moment — replication is in flight</text>
+
+  <!-- client A -->
+  <rect x="60" y="406" width="110" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="115" y="426" text-anchor="middle">client A</text>
+  <rect x="520" y="406" width="220" height="30" rx="8" fill="#161d2e" stroke="#86efac" stroke-width="1.6"/>
+  <text class="attr" x="630" y="426" text-anchor="middle">read r = 2 ⇒ 1</text>
+  <rect x="520" y="444" width="104" height="22" rx="6" fill="#86efac"/>
+  <text class="chip" x="572" y="460" text-anchor="middle">n1: 1</text>
+  <rect x="636" y="444" width="104" height="22" rx="6" fill="#fbbf24"/>
+  <text class="chip" x="688" y="460" text-anchor="middle">n2: 0</text>
+  <text class="small" x="520" y="398">quorum {n1, n2} — read races the write</text>
+
+  <!-- client B -->
+  <rect x="60" y="506" width="110" height="30" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="115" y="526" text-anchor="middle">client B</text>
+  <rect x="820" y="506" width="220" height="30" rx="8" fill="#2a1620" stroke="#fda4af" stroke-width="1.8"/>
+  <text class="warn-lbl" x="930" y="526" text-anchor="middle">read r = 2 ⇒ 0 — STALE</text>
+  <rect x="820" y="544" width="104" height="22" rx="6" fill="#fbbf24"/>
+  <text class="chip" x="872" y="560" text-anchor="middle">n2: 0</text>
+  <rect x="936" y="544" width="104" height="22" rx="6" fill="#fbbf24"/>
+  <text class="chip" x="988" y="560" text-anchor="middle">n3: 0</text>
+  <text class="small" x="820" y="498">quorum {n2, n3} — both replicas still lag</text>
+
+  <!-- the violation arrow -->
+  <path d="M740 432 C 790 450, 790 490, 816 512" fill="none" stroke="#fda4af" stroke-width="1.6" marker-end="url(#arrw)"/>
+  <text class="warn-lbl" x="548" y="484">B starts after A returned</text>
+  <text class="warn-lbl" x="548" y="500">yet reads an older value</text>
+
+  <!-- footnote -->
+  <rect x="60" y="584" width="1120" height="60" rx="12" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="note-h" x="76" y="606">Why quorums are not enough</text>
+  <text class="note" x="76" y="628">Fixes: synchronous read repair before returning · fetch the latest timestamp from a quorum before writing · wall-clock LWW is never linearizable (clock skew) · linearizable CAS needs consensus.</text>
+</svg>
+</div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exactly-Once in Streams — Inside and Outside the Framework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#f7f2e8;color:#302828;
+    font-family:'Nunito','Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%;display:flex;justify-content:center;padding:10px 0;}
+  svg{width:100%;height:auto;max-width:1240px;background:#f7f2e8;}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828;}
+  .ttl{font-size:22px;font-weight:900;}
+  .sub{font-size:14px;font-weight:700;fill:#6e665c;}
+  .hd{font-size:17px;font-weight:900;}
+  .lbl{font-size:13px;font-weight:900;}
+  .ln{font-size:14px;font-weight:400;}
+  .foot{font-size:14px;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Exactly-once in streams: microbatch or checkpoint inside the framework, atomic commit or idempotent sink for outside effects">
+<title>Exactly-once: inside and outside the framework</title>
+
+  <text class="ttl" x="620" y="40" text-anchor="middle">Exactly-Once in Streams — Inside and Outside</text>
+  <text class="sub" x="620" y="64" text-anchor="middle">No “end” to wait for: checkpoint inside, commit or idempotence outside.</text>
+
+  <text class="lbl" x="40" y="100">INSIDE THE FRAMEWORK — same trick as batch</text>
+  <g>
+    <rect x="40" y="112" width="560" height="172" rx="18" fill="#ffcfb8"/>
+    <text class="hd" x="320" y="150" text-anchor="middle">MICROBATCH (Spark)</text>
+    <text class="ln" x="64" y="190">cut the stream into ~1s blocks</text>
+    <text class="ln" x="64" y="222">each block runs like a mini-batch</text>
+    <text class="ln" x="64" y="254">failed block restarts, partial dropped</text>
+  </g>
+  <g>
+    <rect x="640" y="112" width="560" height="172" rx="18" fill="#ffe08a"/>
+    <text class="hd" x="920" y="150" text-anchor="middle">CHECKPOINT (Flink)</text>
+    <text class="ln" x="664" y="190">rolling snapshots of state</text>
+    <text class="ln" x="664" y="222">barrier-triggered, no fixed size</text>
+    <text class="ln" x="664" y="254">restart from latest, drop the gap</text>
+  </g>
+
+  <text class="lbl" x="40" y="314">OUTSIDE EFFECTS — the framework cannot un-send</text>
+  <g>
+    <rect x="40" y="326" width="560" height="172" rx="18" fill="#bfe6c9"/>
+    <text class="hd" x="320" y="364" text-anchor="middle">ATOMIC COMMIT</text>
+    <text class="ln" x="64" y="404">state + messages + offset</text>
+    <text class="ln" x="64" y="436">persist all-or-nothing, only if processing succeeded</text>
+    <text class="ln" x="64" y="468">kept inside one framework</text>
+  </g>
+  <g>
+    <rect x="640" y="326" width="560" height="172" rx="18" fill="#c3ceff"/>
+    <text class="hd" x="920" y="364" text-anchor="middle">IDEMPOTENT SINK</text>
+    <text class="ln" x="664" y="404">store Kafka offset with the write</text>
+    <text class="ln" x="664" y="436">repeats become no-ops</text>
+    <text class="ln" x="664" y="468">needs same-order replay + fencing</text>
+  </g>
+
+  <rect x="40" y="512" width="1160" height="108" rx="16" fill="#d3c3f2"/>
+  <text class="foot" x="64" y="544">exactly-once = effectively-once:</text>
+  <text class="ln" x="64" y="572">visible effect as if processed once — even when retried.</text>
+  <text class="ln" x="64" y="600">state recovery: remote store, replicated local, or rebuild from inputs.</text>
+</svg>
+</div>
+</body>
+</html>

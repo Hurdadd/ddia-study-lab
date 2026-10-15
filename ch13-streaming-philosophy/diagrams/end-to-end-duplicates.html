@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duplicate Suppression Is End-to-End — Timeline Across Three Hops</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .pill-t{font:700 13px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .edge-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .band-h{font:700 14px system-ui,sans-serif; fill:#93c5fd}
+  .tick-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+  .warn-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#fda4af}
+  .retry-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#fbbf24}
+  .win-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .note{font:12.5px system-ui,sans-serif; fill:#cfe3ff}
+  .note-h{font:700 13px system-ui,sans-serif; fill:#fbbf24}
+  .lane{font:700 13px ui-monospace,Menlo,monospace; fill:#93c5fd}
+  .xmark{font:700 17px system-ui,sans-serif; fill:#f43f5e}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="Timeline showing a retried transfer across three hops: TCP suppresses duplicates within one connection, a timed-out retry becomes a separate request, and a unique request ID in the database rejects the duplicate">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+    <marker id="arro" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#fbbf24"/>
+    </marker>
+    <marker id="arrw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#fda4af"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="30" text-anchor="middle">Duplicate Suppression Is End-to-End — One Retry, Three Hops</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">the same transfer is retried at every layer — only an ID carried from client to database stops it twice</text>
+
+  <!-- shared time axis -->
+  <line x1="180" y1="74" x2="1180" y2="74" stroke="#93c5fd" stroke-width="1.6" marker-end="url(#arr)"/>
+  <text class="tick-lbl" x="1172" y="66" text-anchor="end">time</text>
+  <text class="small" x="1010" y="66">not to scale</text>
+
+  <!-- zone separators -->
+  <line x1="445" y1="86" x2="445" y2="292" stroke="#3b4a6b" stroke-width="1.4" stroke-dasharray="6 5"/>
+  <line x1="815" y1="86" x2="815" y2="292" stroke="#3b4a6b" stroke-width="1.4" stroke-dasharray="6 5"/>
+
+  <!-- zone headers -->
+  <text class="band-h" x="247" y="104" text-anchor="middle">ZONE 1 · hop 1: TCP duplicate suppression</text>
+  <text class="band-h" x="630" y="104" text-anchor="middle">ZONE 2 · hop 2: the timeout gap</text>
+  <text class="band-h" x="1002" y="104" text-anchor="middle">ZONE 3 · the database: constraint does the job</text>
+
+  <!-- ================= ZONE 1 ================= -->
+  <text class="small" x="295" y="124" text-anchor="middle">one TCP connection: app → DB</text>
+  <rect x="70" y="128" width="86" height="26" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="113" y="146" text-anchor="middle">app</text>
+  <line x1="166" y1="141" x2="425" y2="141" stroke="#3b4a6b" stroke-width="1.4"/>
+  <rect x="70" y="188" width="86" height="26" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="113" y="206" text-anchor="middle">DB</text>
+  <line x1="166" y1="201" x2="425" y2="201" stroke="#3b4a6b" stroke-width="1.4"/>
+  <rect x="166" y="182" width="259" height="32" fill="none" stroke="#f43f5e" stroke-width="1.2" stroke-dasharray="5 4" rx="6"/>
+  <!-- original packet -->
+  <path d="M232 143 L250 184" fill="none" stroke="#86efac" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="224" y="178" text-anchor="end">SYN · original</text>
+  <!-- retried packet, killed at TCP layer -->
+  <path d="M328 143 L346 184" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#arro)"/>
+  <text class="retry-lbl" x="354" y="172" text-anchor="start">retry</text>
+  <text class="xmark" x="340" y="200">✗</text>
+  <text class="warn-lbl" x="364" y="207" text-anchor="start">dropped</text>
+  <text class="win-lbl" x="295" y="244" text-anchor="middle">TCP suppresses duplicates</text>
+  <text class="win-lbl" x="295" y="262" text-anchor="middle">within ONE connection</text>
+  <text class="small" x="247" y="284" text-anchor="middle">conn breaks → new conn: TCP cannot help</text>
+
+  <!-- ================= ZONE 2 ================= -->
+  <rect x="465" y="128" width="86" height="26" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="508" y="146" text-anchor="middle">browser</text>
+  <line x1="561" y1="141" x2="795" y2="141" stroke="#3b4a6b" stroke-width="1.4"/>
+  <rect x="465" y="188" width="86" height="26" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="508" y="206" text-anchor="middle">server</text>
+  <line x1="561" y1="201" x2="795" y2="201" stroke="#3b4a6b" stroke-width="1.4"/>
+  <!-- first POST -->
+  <path d="M590 143 L602 184" fill="none" stroke="#86efac" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="604" y="130" text-anchor="middle">POST /transfer</text>
+  <rect x="553" y="208" width="86" height="18" rx="5" fill="#1b2438" stroke="#86efac" stroke-width="1"/>
+  <text class="small" x="596" y="221" text-anchor="middle">req=0286…</text>
+  <!-- the timeout gap -->
+  <line x1="660" y1="128" x2="660" y2="224" stroke="#f43f5e" stroke-width="1.8" stroke-dasharray="5 4"/>
+  <text class="warn-lbl" x="660" y="240" text-anchor="middle">COMMIT sent,</text>
+  <text class="warn-lbl" x="660" y="258" text-anchor="middle">reply lost — timed out?</text>
+  <!-- retried POST -->
+  <path d="M720 143 L732 184" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#arro)"/>
+  <text class="retry-lbl" x="730" y="132" text-anchor="middle">retry: same POST</text>
+  <rect x="683" y="208" width="86" height="18" rx="5" fill="#1b2438" stroke="#fbbf24" stroke-width="1"/>
+  <text class="small" x="726" y="221" text-anchor="middle">req=0286…</text>
+  <text class="small" x="630" y="280" text-anchor="middle">retry = separate request, separate transaction</text>
+
+  <!-- ================= ZONE 3 ================= -->
+  <rect x="835" y="128" width="86" height="26" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="878" y="146" text-anchor="middle">app</text>
+  <line x1="931" y1="141" x2="1170" y2="141" stroke="#3b4a6b" stroke-width="1.4"/>
+  <rect x="835" y="188" width="86" height="26" rx="8" fill="#7c3aed" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="pill-t" x="878" y="206" text-anchor="middle">DB</text>
+  <line x1="931" y1="201" x2="1170" y2="201" stroke="#3b4a6b" stroke-width="1.4"/>
+  <!-- attempt 1 lands -->
+  <path d="M990 143 L1002 184" fill="none" stroke="#86efac" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="996" y="132" text-anchor="middle">INSERT req=…</text>
+  <text class="win-lbl" x="996" y="196" text-anchor="start">✓</text>
+  <!-- attempt 2 rejected -->
+  <path d="M1080 143 L1092 184" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#arro)"/>
+  <text class="retry-lbl" x="1094" y="132" text-anchor="middle">same req ID</text>
+  <text class="xmark" x="1094" y="200">✗</text>
+  <text class="win-lbl" x="1002" y="242" text-anchor="middle">UNIQUE(request_id)</text>
+  <text class="win-lbl" x="1002" y="260" text-anchor="middle">rejects the dup — 2nd tx aborts</text>
+  <text class="win-lbl" x="1002" y="280" text-anchor="middle">moved $11 once, not $22</text>
+
+  <!-- ================= evidence band ================= -->
+  <rect x="60" y="300" width="545" height="170" rx="10" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="note-h" x="76" y="324">Example 13-1 — NOT idempotent: a retry moves $22, not $11</text>
+  <text class="attr" x="76" y="346">BEGIN TRANSACTION;</text>
+  <text class="attr" x="76" y="366">UPDATE accounts SET balance = balance + 11.00</text>
+  <text class="attr" x="76" y="386">UPDATE accounts SET balance = balance - 11.00</text>
+  <text class="attr" x="76" y="406">COMMIT;   -- to 1234 / from 4321</text>
+  <text class="warn-lbl" x="76" y="446">retried after timeout ⇒ $22 moved instead of $11</text>
+
+  <rect x="635" y="300" width="545" height="170" rx="10" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="note-h" x="651" y="324">Example 13-2 — idempotent: UNIQUE(request_id), INSERT-first</text>
+  <text class="attr" x="651" y="346">ALTER TABLE requests ADD UNIQUE (request_id);</text>
+  <text class="attr" x="651" y="366">BEGIN TRANSACTION;</text>
+  <text class="attr" x="651" y="386">INSERT INTO requests VALUES('0286FDB8…', 4321, 1234, 11.00);</text>
+  <text class="attr" x="651" y="406">UPDATEs + COMMIT;  -- 2nd INSERT fails, tx aborts</text>
+  <text class="win-lbl" x="651" y="446">duplicate rejected ⇒ $11 moved once, not $22</text>
+
+  <!-- ================= moral strip ================= -->
+  <rect x="60" y="484" width="1120" height="64" rx="10" fill="#1b2438" stroke="#fbbf24" stroke-width="1.3" stroke-dasharray="6 4"/>
+  <text class="note-h" x="620" y="510" text-anchor="middle">TCP dedup (one connection) ⊊ DB transactions (one hop) ⊊ request ID, client → database (end to end)</text>
+  <text class="note" x="620" y="532" text-anchor="middle">each inner layer narrows duplicates — but only the end-to-end ID solves it</text>
+
+  <!-- legend -->
+  <line x1="60" y1="570" x2="110" y2="570" stroke="#86efac" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text class="small" x="118" y="574">request</text>
+  <line x1="200" y1="570" x2="250" y2="570" stroke="#fbbf24" stroke-width="1.8" stroke-dasharray="5 3" marker-end="url(#arro)"/>
+  <text class="small" x="258" y="574">retry / 2nd attempt</text>
+  <text class="xmark" x="420" y="576">✗</text>
+  <text class="small" x="438" y="574">rejected</text>
+  <line x1="540" y1="570" x2="590" y2="570" stroke="#f43f5e" stroke-width="1.8" stroke-dasharray="5 4"/>
+  <text class="small" x="598" y="574">reply lost / timeout</text>
+
+  <text class="small" x="60" y="600">sources: Example 13-1 ($11/$22, accounts 1234/4321) · Example 13-2 (request_id 0286FDB8…, INSERT-first transaction)</text>
+  <text class="small" x="60" y="622">Saltzer–Reed–Clark (1984): duplicate suppression can only be solved end to end — lower layers only reduce the odds</text>
+</svg>
+</div>
+</body>
+</html>

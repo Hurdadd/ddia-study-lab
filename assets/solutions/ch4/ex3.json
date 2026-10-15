@@ -1,0 +1,240 @@
+{
+  "alternatives": [
+    {
+      "en": "Full scan for a tiny corpus or a regex with no fixed trigram: no index to maintain, exact by construction. Cost: O(corpus) per query — fine for hundreds of docs, hopeless for millions.",
+      "fa": "پیمایش کامل برای corpus کوچک یا regex بدون trigram ثابت: ایندکسی برای نگه‌داری نیست و ذاتاً دقیق است. هزینه: O(corpus) به‌ازای هر کوئری — برای صدها سند خوب و برای میلیون‌ها ناامیدکننده."
+    },
+    {
+      "en": "Exact kNN when the vector set is small enough that a full scan meets the p95 budget. Cost: linear scan per query; the day it misses the budget, IVF with measured recall replaces it.",
+      "fa": "kNN دقیق وقتی مجموعهٔ بردارها آن‌قدر کوچک است که پیمایش کامل در بودجهٔ p95 جا می‌شود. هزینه: پیمایش خطی هر کوئری؛ روزی که بودجه را از دست بدهد IVF با recall اندازه‌گیری‌شده جایش را می‌گیرد."
+    }
+  ],
+  "answer_en": "The pattern /appl./ requires app and ppl. Intersecting postings yields eight candidates; the regex verifies seven. Document 10 contains both trigrams separately but does not match the pattern, so verification is necessary. Recall@k compares ANN with exact top-k; p95 reports latency cost. The demo’s synthetic 1-D vectors do not establish production embedding quality or capacity.",
+  "answer_fa": "الگوی /appl./ به app و ppl نیاز دارد؛ اشتراک postingها ۸ نامزد می‌دهد و regex هفت مورد را تأیید می‌کند. سند ۱۰ هر دو trigram را در دو جای جدا دارد ولی خود الگو را ندارد؛ پس verify ضروری است. recall@k نتایج ANN را با exact top-k مقایسه می‌کند و p95 هزینهٔ تأخیر را نشان می‌دهد. دمو بردار مصنوعی یک‌بعدی دارد؛ از آن ظرفیت یا کیفیت embedding واقعی نتیجه نمی‌گیریم.",
+  "assumptions": [
+    {
+      "en": "Eleven short teaching documents; the trigram demo runs on their real text here.",
+      "fa": "یازده سند کوتاه آموزشی؛ دموی trigram این‌جا روی متن واقعی‌شان اجرا می‌شود."
+    },
+    {
+      "en": "Recall demo uses synthetic 1-D vectors in 4 clusters, not real embeddings — it teaches the metric, not production recall.",
+      "fa": "دموی recall از بردارهای مصنوعی یک‌بعدی در ۴ خوشه استفاده می‌کند، نه embedding واقعی — متریک را یاد می‌دهد، نه recall پروداکشن را."
+    },
+    {
+      "en": "Latency is p50/p95 over 20,000 repeated in-process runs on this machine — a teaching harness, not a benchmark.",
+      "fa": "تأخیر p50/p95 روی ۲۰٬۰۰۰ اجرای تکراری درون‌پراسس همین ماشین است — harness آموزشی، نه بنچ‌مارک."
+    },
+    {
+      "en": "Single-tenant demo; multi-tenancy is a stated filter rule, not a second index in the code.",
+      "fa": "دمو تک‌مستأجر؛ چندمستأجری یک قاعدهٔ فیلتر اعلام‌شده است، نه ایندکس دوم در کد."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\nimport java.util.regex.Pattern;\n\npublic class RetrievalToy {\n    static Set<String> trigrams(String s) {\n        s = \"  \" + s.toLowerCase() + \" \";\n        Set<String> out = new HashSet<>();\n        for (int i = 0; i + 3 <= s.length(); i++) out.add(s.substring(i, i + 3));\n        return out;\n    }\n\n    public static void main(String[] a) {\n        String[] docs = {\"red apples fresh\", \"green apples tart\", \"red berries sweet\",\n                \"apple pie recipe\", \"red apple juice\", \"blueberries fresh\",\n                \"applause loud crowd\", \"crab apples wild\", \"red wine aged\",\n                \"pineapple chunks\", \"happy app and ppl day\"};\n        Map<String, Set<Integer>> inv = new HashMap<>();\n        Map<String, Set<Integer>> tri = new HashMap<>();\n        for (int d = 0; d < docs.length; d++) {\n            for (String w : docs[d].split(\" \")) inv.computeIfAbsent(w, k -> new HashSet<>()).add(d);\n            for (String t : trigrams(docs[d])) tri.computeIfAbsent(t, k -> new HashSet<>()).add(d);\n        }\n        Set<Integer> and = new TreeSet<>(inv.get(\"red\"));\n        and.retainAll(inv.get(\"apples\"));\n        System.out.println(\"red AND apples = \" + and);\n        Pattern pat = Pattern.compile(\"appl.\");\n        Set<Integer> cands = new TreeSet<>(tri.getOrDefault(\"app\", Set.of()));\n        cands.retainAll(tri.getOrDefault(\"ppl\", Set.of()));\n        List<Integer> verified = new ArrayList<>();\n        for (int d : cands) if (pat.matcher(docs[d]).find()) verified.add(d);\n        System.out.println(\"trigram app AND ppl candidates = \" + cands);\n        System.out.println(\"regex /appl./ verified = \" + verified);\n        System.out.println(\"doc10 candidate but not verified = \"\n                + (cands.contains(10) && !verified.contains(10)));\n        List<Integer> fullScan = new ArrayList<>();\n        for (int d=0; d<docs.length; d++) if (pat.matcher(docs[d]).find()) fullScan.add(d);\n        if (!verified.equals(fullScan) || !cands.contains(10) || verified.contains(10))\n            throw new AssertionError(\"candidate filtering lost a match or skipped verification\");\n        int[] cluster = new int[20]; // IVF recall on synthetic 1-D vectors\n        for (int p = 0; p < 20; p++) cluster[p] = p / 5;\n        for (int nprobe : new int[]{1, 2, 4}) {\n            double sum = 0;\n            for (int q = 0; q < 20; q++) sum += recallAtK(q, 3, nprobe, cluster);\n            System.out.println(\"nprobe=\" + nprobe + \" mean recall@3=\"\n                    + Math.round(sum / 20 * 1000) / 1000.0);\n        }\n        long[] exact = new long[20000], approx = new long[20000];\n        for (int i = 0; i < 20000; i++) {\n            int q = i % 20;\n            long t = System.nanoTime();\n            topK(q, 3, null, cluster);\n            exact[i] = System.nanoTime() - t;\n            t = System.nanoTime();\n            topK(q, 3, Set.of(cluster[q]), cluster);\n            approx[i] = System.nanoTime() - t;\n        }\n        Arrays.sort(exact); Arrays.sort(approx);\n        System.out.println(\"exact p50=\" + exact[10000] + \"ns p95=\" + exact[19000] + \"ns\");\n        System.out.println(\"approx p50=\" + approx[10000] + \"ns p95=\" + approx[19000] + \"ns\");\n    }\n\n    static double recallAtK(int q, int k, int nprobe, int[] cluster) {\n        Set<Integer> exact = new HashSet<>(topK(q, k, null, cluster));\n        List<Integer> order = new ArrayList<>(List.of(0, 1, 2, 3));\n        order.sort(Comparator.comparingInt(c -> Math.abs(c - cluster[q])));\n        Set<Integer> probed = new HashSet<>();\n        for (int i = 0; i < nprobe; i++) probed.add(order.get(i));\n        List<Integer> found = topK(q, k, probed, cluster);\n        return found.stream().filter(exact::contains).count() / (double) k;\n    }\n\n    static List<Integer> topK(int q, int k, Set<Integer> probed, int[] cluster) {\n        List<Integer> s = new ArrayList<>();\n        for (int p = 0; p < 20; p++)\n            if (probed == null || probed.contains(cluster[p])) s.add(p);\n        s.sort(Comparator.comparingInt(p -> Math.abs(p - q)));\n        return s.subList(0, Math.min(k, s.size()));\n    }\n}",
+    "expected_en": "red AND apples = [0]; candidates [0,1,3,4,6,7,9,10]; verified [0,1,3,4,6,7,9]; doc10 drops; recall@3 0.9 / 0.967 / 1.0 for nprobe 1/2/4; exact p50=333ns p95=583ns; approx p50=250ns p95=375ns (this machine, teaching harness).",
+    "expected_fa": "خروجی واقعی همین محیط (JDK 27): اشتراک [0]؛ هشت نامزد و هفت تأییدشده با افتادن سند ۱۰؛ recall@3 برابر ۰٫۹ و ۰٫۹۶۷ و ۱؛ p50/p95 دقیق ۳۳۳/۵۸۳ نانوثانیه و تقریبی ۲۵۰/۳۷۵ نانوثانیه (همین ماشین، harness آموزشی).",
+    "lang": "java",
+    "run_en": "javac RetrievalToy.java && java RetrievalToy — stdlib only, seconds. Raise the doc count or dims to feel the recall cost.",
+    "run_fa": "javac RetrievalToy.java && java RetrievalToy — فقط کتابخانه استاندارد، چند ثانیه. تعداد سند یا بعد را بالا ببر تا هزینهٔ recall را حس کنی.",
+    "status": "verified"
+  },
+  "design_en": "<p>Parts: a tokenizer feeding an inverted index (term to sorted postings); a trigram index (fixed substring to doc set); a regex verifier running <span class=\"ltr\">java.util.regex</span> only over candidates; an IVF vector index (clusters plus nprobe); one hybrid ranker merging lexical and vector scores with stated weights; a tenant predicate pushed below the search; a refresh window after which writes become visible. Read path for <span class=\"ltr\">red AND apples</span>: intersect the two postings lists. Read path for <span class=\"ltr\">/appl./</span>: extract fixed trigram <span class=\"ltr\">app</span>, fetch candidates, verify each, drop doc 10.</p>",
+  "design_fa": "<p>اجزا: tokenizer که ایندکس معکوس (term به postings مرتب) را تغذیه می‌کند؛ ایندکس trigram (زیررشتهٔ ثابت به مجموعهٔ سند)؛ تأییدکنندهٔ regex که <span class=\"ltr\">java.util.regex</span> را فقط روی نامزدها اجرا می‌کند؛ ایندکس برداری IVF (خوشه‌ها به‌علاوه nprobe)؛ یک ranker ترکیبی که امتیاز متنی و برداری را با وزن‌های اعلام‌شده می‌آمیزد؛ شرط tenant که زیر جست‌وجو رانده می‌شود؛ پنجرهٔ refresh که بعدش نوشتن‌ها دیده می‌شوند. مسیر خواندن <span class=\"ltr\">red AND apples</span>: اشتراک دو postings list. مسیر خواندن <span class=\"ltr\">/appl./</span>: استخراج trigram ثابت <span class=\"ltr\">app</span>، گرفتن نامزدها، تأیید تک‌تک و انداختن سند ۱۰.</p>",
+  "failures": [
+    {
+      "en": "Stale index serves a deleted doc: the write landed but the refresh window has not passed. Contract: every result carries the index version, and deletes win visibly at the next refresh — never silently.",
+      "fa": "ایندکس stale سند حذف‌شده را می‌دهد: نوشتن نشسته ولی پنجرهٔ refresh نگذشته. قرارداد: هر نتیجه نسخهٔ ایندکس را دارد و حذف‌ها در refresh بعدی آشکارا می‌برند — هرگز خاموش."
+    },
+    {
+      "en": "Tenant leak through a shared index: one missing predicate returns another tenant's docs. Rule: the tenant filter is pushed below the search (or a per-tenant index), and a test asserts foreign docs never surface.",
+      "fa": "نشت tenant از ایندکس مشترک: یک شرط جامانده سندهای مستأجر دیگر را برمی‌گرداند. قاعده: فیلتر tenant زیر جست‌وجو رانده می‌شود (یا ایندکس جدا هر مستأجر) و یک تست assert می‌کند سند بیگانه هیچ‌وقت بالا نمی‌آید."
+    },
+    {
+      "en": "nprobe too low silently drops the best match: recall falls with no error. Mitigation: monitor recall@k against the exact ground truth per query cohort and page when it drifts.",
+      "fa": "nprobe کم بی‌سروصدا بهترین تطابق را می‌اندازد: recall بدون خطا می‌افتد. چاره: پایش recall@k در برابر ground truth دقیق به‌ازای هر گروه کوئری و پیج وقتی drift کرد."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "Two fallbacks, in order: if a selective tenant or category filter exists, run it first and verify only that smaller set; otherwise fall back to a full scan of the corpus. A trigram-less regex is O(corpus) by nature — the honest answer states the cost instead of pretending the index helps.",
+      "a_fa": "دو جایگزین به ترتیب: اگر فیلتر tenant یا دستهٔ گزینشی هست اول اجرایش کن و فقط همان مجموعهٔ کوچک‌تر را تأیید کن؛ وگرنه به پیمایش کامل corpus برگرد. regex بدون trigram ذاتاً O(corpus) است — پاسخ صادقانه هزینه را اعلام می‌کند نه این‌که وانمود کند ایندکس کمک می‌کند.",
+      "level": "senior",
+      "q_en": "What fallback handles a regex without any fixed trigram, or a highly selective filter?",
+      "q_fa": "اگر regex هیچ trigram ثابت نداشته باشد یا filter بسیار محدود باشد چه مسیر جایگزینی داری؟"
+    },
+    {
+      "a_en": "The exact top-k computed by brute force over the same vectors. recall@k is the fraction of those k that the approximate path also returns. Same vectors, same k, same distance — otherwise the fraction is meaningless.",
+      "a_fa": "همان top-k دقیق با brute-force روی همان بردارها. recall@k کسری از آن k است که مسیر تقریبی هم برمی‌گرداند. همان بردارها، همان k و همان فاصله — وگرنه کسر بی‌معناست.",
+      "level": "senior",
+      "q_en": "What exactly is the ground truth for your recall@k number?",
+      "q_fa": "ground truth عدد recall@k تو دقیقاً چیست؟"
+    },
+    {
+      "a_en": "Start with measured weights on a labelled eval set (lexical precision versus vector recall per query cohort), then guard with per-cohort recall floors and a p95 budget. Tenants split by filter pushdown while the cardinality is small; a tenant whose volume or ACL strictness dominates gets its own index, because a shared index plus a forgotten predicate is a leak.",
+      "a_fa": "با وزن‌های اندازه‌گیری‌شده روی مجموعهٔ eval برچسب‌دار شروع کن (دقت متنی در برابر recall برداری به‌ازای هر گروه کوئری) و بعد با کف recall هر گروه و بودجهٔ p95 نگهش دار. tenantها تا وقتی cardinality کوچک است با pushdown فیلتر جدا می‌شوند؛ مستأجری که حجم یا سخت‌گیری ACLش غالب است ایندکس خودش را می‌گیرد، چون ایندکس مشترک به‌علاوه شرط فراموش‌شده یعنی نشت.",
+      "level": "staff",
+      "q_en": "How do you set hybrid weights and isolate tenants as query volume grows?",
+      "q_fa": "وزن‌های ترکیبی را چطور می‌چینی و با رشد حجم کوئری tenantها را چطور ایزوله می‌کنی؟"
+    },
+    {
+      "q_fa": "چرا tenant filter باید در مسیر retrieval باشد؟",
+      "q_en": "Why enforce tenant filtering on the retrieval path?",
+      "a_fa": "tenant_id از هویت احراز‌شده می‌آید، نه فقط body درخواست. فیلتر همهٔ مسیرهای lexical، vector، cache و fetch سند باید همین مرز را رعایت کند؛ cache key شامل tenant است. post-filter ساده ممکن است recall را کاهش دهد و رتبه‌بندی/metadata بدون مجوز را پردازش کند. تست با دو tenant دارای متن و vector یکسان باید نبود سند و metadata دیگری را assert کند؛ تغییر ACL نیز version یا invalidation می‌خواهد.",
+      "a_en": "Derive tenant identity from authentication, not just request body. Apply the same boundary to lexical/vector retrieval, caches and document fetches; cache keys include tenant. Simple post-filtering can reduce recall and process unauthorized ranking metadata. Test two tenants with identical text/vectors for cross-tenant document and metadata exclusion. ACL changes need versioning or invalidation.",
+      "level": "staff"
+    }
+  ],
+  "interview_q_en": "Design lexical and vector product retrieval. Intersect postings for red AND apples; filter /appl./ by trigram then verify the regex. Evaluate IVF using exact top-k recall@k and p95 latency, and discuss hybrid ranking and tenant isolation.",
+  "interview_q_fa": "جست‌وجوی محصول را با inverted index، فیلتر و vector index طراحی کن. برای red AND apples اشتراک postings را توضیح بده. برای regex /appl./ ابتدا candidates با trigram و سپس تأیید regex را انجام بده. در IVF با nprobe=1، recall@k را نسبت به exact top-k و p95 latency بسنج؛ hybrid ranking و جداسازی tenant را هم تحلیل کن.",
+  "lab_en": "<p>Build an inverted index for 11 short documents and answer red AND apples by intersecting postings. Build trigrams from the same text. For the plain regex /appl./, intersect app and ppl postings, then run the regex on every candidate. Include a false candidate such as app ... ppl to demonstrate verification. Treat 1000-D vectors in five IVF clusters as a thought experiment; label any smaller synthetic demo explicitly. Fix distance and tie-breaking, compute exact top-k, and measure recall@k = |ANN_k ∩ exact_k|/k and p95 query time for several nprobe values. Eleven documents cannot establish production performance. Apply tenant restrictions before retrieval.</p>",
+  "lab_fa": "<p>برای ۱۱ سند کوتاه یک inverted index بساز و red AND apples را با اشتراک postingها پاسخ بده. trigram index را با substringهای سه‌حرفی همان متن بساز؛ برای regex بدون حساسیت اضافهٔ زبانی /appl./ از app و ppl نامزد بگیر و سپس خود regex را روی نامزدها اجرا کن. یک نامزد کاذب مثل app ... ppl اضافه کن تا ضرورت تأیید روشن شود. برای IVF، بردارهای ۱۰۰۰بعدی و پنج خوشه صرفاً سناریوی فکری‌اند؛ در آزمایش کوچک می‌توان بردار مصنوعی ساده‌تر با برچسب روشن داشت. exact top-k، نحوهٔ فاصله و tie-breaking را ثابت کن؛ recall@k = |ANN_k ∩ exact_k|/k و p95 زمان پرس‌وجو را برای چند nprobe بسنج. از ۱۱ سند نتیجهٔ کارایی production نگیر؛ محدودیت tenant را پیش از retrieval اعمال کن.</p>",
+  "mental_en": "A full scan is O(corpus) per query; every index is a shortcut that charges update cost. Candidates are suspects, matches are convictions: the trigram proposes, the regex proves. Vector search adds a second shortcut that also charges a measured recall loss.",
+  "mental_fa": "پیمایش کامل O(corpus) به‌ازای هر کوئری است؛ هر ایندکس میان‌بری است که هزینهٔ به‌روزرسانی می‌گیرد. نامزدها مظنون‌اند و تطابق‌ها محکوم: trigram پیشنهاد می‌دهد و regex اثبات می‌کند. جست‌وجوی برداری میان‌بر دومی اضافه می‌کند که افت recall اندازه‌گیری‌شده هم می‌گیرد.",
+  "mistakes": [
+    {
+      "en": "Calling a trigram hit a match. The trigram is a necessary condition, not a sufficient one — doc 10 proves the verify step is load-bearing.",
+      "fa": "تطابق خواندن برخورد trigram. trigram شرط لازم است نه کافی — سند ۱۰ ثابت می‌کند گام تأیید باربر است."
+    },
+    {
+      "en": "Quoting recall without a ground truth. recall@k is a fraction against the exact top-k; without it the number is decoration.",
+      "fa": "گفتن recall بدون ground truth. recall@k کسری نسبت به top-k دقیق است؛ بدون آن عدد تزئین است."
+    },
+    {
+      "en": "Leaving nprobe at 1 because it is fast. Speed without measured recall is a silent quality cut — the demo's 0.900 says what one probe costs.",
+      "fa": "رها کردن nprobe روی ۱ چون سریع است. سرعت بدون recall اندازه‌گیری‌شده کاهش خاموش کیفیت است — ۰٫۹ دموی ما می‌گوید یک probe چه می‌ارزد."
+    }
+  ],
+  "number": 3,
+  "slug": "trigram-verify",
+  "sources": [
+    "atlassian",
+    "vector"
+  ],
+  "steps": [
+    {
+      "en": "Tokenize all docs into term-to-postings lists once. At query time intersect the red and apples lists (bitwise AND over sorted ids) down to doc 0. Phrase and ranking refinements come later; the intersection is the exact boolean core.",
+      "fa": "همهٔ سندها را یک‌بار به فهرست term تا postings بشکن. موقع کوئری فهرست‌های red و apples را اشتراک بگیر (AND بیتی روی شناسه‌های مرتب) تا سند ۰. ریزه‌کاری phrase و ranking بعداً می‌آید؛ اشتراک همان هستهٔ boolean دقیق است.",
+      "t_en": "Postings first",
+      "t_fa": "اول postings"
+    },
+    {
+      "en": "The literal appl contains app and ppl. Their postings intersect in eight candidates; document 10 has both separately and fails regex verification. Compare the result with a full regex scan to assert that no actual match was lost.",
+      "fa": "literal چهارحرفی appl شامل app و ppl است. اشتراک postingهایشان هشت نامزد دارد؛ سند ۱۰ هر دو را جداگانه دارد و پس از اجرای regex رد می‌شود. هر دو نامزدسازی و verify لازم‌اند؛ خروجی را با full scan مقایسه می‌کنیم تا هیچ match واقعی گم نشود.",
+      "t_en": "Candidates, then proof",
+      "t_fa": "اول نامزد، بعد اثبات"
+    },
+    {
+      "en": "The literal appl contains app and ppl. Their postings intersect in eight candidates; document 10 has both separately and fails regex verification. Compare the result with a full regex scan to assert that no actual match was lost.",
+      "fa": "literal چهارحرفی appl شامل app و ppl است. اشتراک postingهایشان هشت نامزد دارد؛ سند ۱۰ هر دو را جداگانه دارد و پس از اجرای regex رد می‌شود. هر دو نامزدسازی و verify لازم‌اند؛ خروجی را با full scan مقایسه می‌کنیم تا هیچ match واقعی گم نشود.",
+      "t_en": "Name the fallback",
+      "t_fa": "جایگزین را نام ببر"
+    },
+    {
+      "en": "IVF splits vectors into clusters and each query probes nprobe of them. Ground truth is the exact top-k over all vectors; the teaching run gives mean recall@3 of 0.900, 0.967 and 1.000 for nprobe 1, 2 and 4, with approx p95 below exact p95 in the same harness.",
+      "fa": "IVF بردارها را به خوشه‌ها می‌شکند و هر کوئری nprobeتایشان را می‌گردد. ground truth همان top-k دقیق روی همهٔ بردارهاست؛ اجرای آموزشی میانگین recall@3 برابر ۰٫۹ و ۰٫۹۶۷ و ۱ برای nprobeهای ۱ و ۲ و ۴ می‌دهد و p95 تقریبی در همان harness زیر p95 دقیق است.",
+      "t_en": "Measure recall and latency",
+      "t_fa": "recall و تأخیر را بسنج"
+    },
+    {
+      "en": "The literal appl contains app and ppl. Their postings intersect in eight candidates; document 10 has both separately and fails regex verification. Compare the result with a full regex scan to assert that no actual match was lost.",
+      "fa": "literal چهارحرفی appl شامل app و ppl است. اشتراک postingهایشان هشت نامزد دارد؛ سند ۱۰ هر دو را جداگانه دارد و پس از اجرای regex رد می‌شود. هر دو نامزدسازی و verify لازم‌اند؛ خروجی را با full scan مقایسه می‌کنیم تا هیچ match واقعی گم نشود.",
+      "t_en": "Rank hybrid, isolate tenants",
+      "t_fa": "ترکیبی rank بده، tenantها را ایزوله کن"
+    }
+  ],
+  "tests_en": "Verify: postings intersection equals a brute-force AND over the docs; the verified set equals a brute-force regex over the whole corpus; recall@k is computed against the exact top-k on the same vectors; p95 comes from repeated timed runs with stated N. Tenant test: seed a foreign-tenant doc containing the query terms and assert it never surfaces.",
+  "tests_fa": "راستی‌آزمایی: اشتراک postings برابر AND brute-force روی سندها؛ مجموعهٔ تأییدشده برابر regex brute-force روی کل corpus؛ recall@k روی همان بردارها نسبت به top-k دقیق؛ p95 از اجراهای زمان‌دار تکراری با N اعلام‌شده. تست tenant: سند مستأجر بیگانهٔ حاوی termهای کوئری بکار و assert کن هیچ‌وقت بالا نمی‌آید.",
+  "worked_en": "<p>Java demo from this environment (JDK 27): <code>red AND apples = [0]</code>; <code>trigram 'app' candidates = [0, 1, 3, 4, 6, 7, 9, 10]</code>; <code>regex /appl./ verified = [0, 1, 3, 4, 6, 7, 9]</code>; <code>doc10 candidate but not verified = true</code>. Recall on synthetic vectors: <code>nprobe=1 mean recall@3=0.9</code>, <code>nprobe=2 mean recall@3=0.967</code>, <code>nprobe=4 mean recall@3=1.0</code>. Latency harness (20,000 runs, this machine): <code>exact p50=333ns p95=583ns</code>, <code>approx p50=250ns p95=375ns</code>. Interpretation: one probe costs a tenth of recall and buys the lower p95 — a teaching measurement, not a benchmark.</p>",
+  "worked_fa": "<p>دموی جاوا همین محیط (JDK 27): <code>red AND apples = [0]</code>؛ هشت نامزد trigram و هفت تأییدشده با <code>doc10 ... = true</code>؛ recall روی بردارهای مصنوعی <code>0.9</code> و <code>0.967</code> و <code>1.0</code> برای nprobeهای ۱ و ۲ و ۴؛ تأخیر (۲۰٬۰۰۰ اجرا، همین ماشین) دقیق <code>p50=333ns p95=583ns</code> و تقریبی <code>p50=250ns p95=375ns</code>. تفسیر: یک probe یک‌دهم recall می‌ارزد و p95 پایین‌تر را می‌خرد — اندازه‌گیری آموزشی، نه بنچ‌مارک.</p>",
+  "diagrams": [
+    {
+      "file": "diagrams/sol3-s1-retrieval-pipeline.html",
+      "made": "archify",
+      "source": ".archify/dataflow-retrieval-pipeline-20261014-182519",
+      "kind_fa": "گذر داده خط retrieval",
+      "kind_en": "retrieval-pipeline dataflow",
+      "caption_fa": "پیشنهاد از ایندکس، اثبات با regex، رتبهٔ ترکیبی",
+      "caption_en": "Propose from indexes, prove by regex, rank hybrid",
+      "height": 640,
+      "narration": {
+        "failure_en": "Trace doc 10: it carries the app trigram so it becomes a candidate, then the regex rejects it and it never reaches the ranker. Candidates are suspects; only verified docs are results.",
+        "failure_fa": "سند ۱۰ را دنبال کن: trigram app را دارد پس نامزد می‌شود، بعد regex ردش می‌کند و هیچ‌وقت به ranker نمی‌رسد. نامزدها مظنون‌اند؛ فقط سندهای تأییدشده نتیجه‌اند.",
+        "guarantee_en": "The figure guarantees the order: propose from indexes, prove by regex, rank hybrid. It does not set weights or probes.",
+        "guarantee_fa": "شکل ترتیب را تضمین می‌کند: پیشنهاد از ایندکس‌ها، اثبات با regex، رتبهٔ ترکیبی. وزن‌ها و probeها را تعیین نمی‌کند.",
+        "nonguarantee_en": "It says nothing about tenant isolation mechanics, freshness windows, or production recall.",
+        "nonguarantee_fa": "درباره سازوکار ایزولاسیون tenant، پنجرهٔ تازگی یا recall پروداکشن چیزی نمی‌گوید.",
+        "point_en": "The verify node is the filter point: nothing unverified reaches the ranker.",
+        "point_fa": "نقطهٔ فیلتر همان گره تأیید است: هیچ تأییدنشده‌ای به ranker نمی‌رسد.",
+        "scenario_en": "A shopper types appl plus a wildcard. Start at the query on the left and follow the three index branches.",
+        "scenario_fa": "خریداری appl به‌علاوه یک wildcard می‌زند. از کوئری در چپ شروع کن و سه شاخهٔ ایندکس را دنبال کن.",
+        "steps": [
+          {
+            "en": "The query fans out to three indexes: inverted for the boolean words, trigram for the fixed app, IVF for the vector.",
+            "fa": "کوئری به سه ایندکس می‌رسد: معکوس برای کلمات boolean، trigram برای app ثابت، و IVF برای بردار."
+          },
+          {
+            "en": "Boolean hits and 8 trigram candidates meet at verify: the regex keeps 7 and drops doc 10.",
+            "fa": "برخوردهای boolean و ۸ نامزد trigram در تأیید به هم می‌رسند: regex هفت‌تا را نگه می‌دارد و سند ۱۰ را می‌اندازد."
+          },
+          {
+            "en": "Verified lexical hits plus the vector top-k merge in the hybrid ranker with stated weights.",
+            "fa": "برخوردهای متنی تأییدشده به‌علاوه top-k برداری در ranker ترکیبی با وزن‌های اعلام‌شده می‌آمیزند."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "It becomes a candidate via the app trigram, then the regex rejects it — which is exactly why candidates and matches are different things.",
+        "a_fa": "با trigram app نامزد می‌شود و بعد regex ردش می‌کند — و دقیقاً به همین دلیل نامزد با تطابق فرق دارد.",
+        "q_en": "Why does doc 10 (happy app day) appear in candidates but not in matches?",
+        "q_fa": "چرا سند ۱۰ در نامزدها هست ولی در تطابق‌ها نیست?"
+      }
+    },
+    {
+      "file": "diagrams/sol3-trigram-verify.html",
+      "made": "hand",
+      "kind_fa": "خط نامزد-بعد-تأیید + پنل recall",
+      "kind_en": "candidates-then-verify pipeline + recall panel",
+      "caption_fa": "اول نامزدهای trigram بعد تأیید regex، با پنل recall و تأخیر (اعداد آموزشی)",
+      "caption_en": "Trigram candidates first, regex verification second, with recall/latency panel (teaching numbers)",
+      "height": 640,
+      "narration": {
+        "failure_en": "Trace the trigram-less regex: no fixed trigram means no candidate arrow, so the query falls to the bottom fallback line — full scan or selective filter first.",
+        "failure_fa": "regex بدون trigram را دنبال کن: بدون trigram ثابت پیکان نامزدی نیست، پس کوئری به خط جایگزین پایین می‌افتد — پیمایش کامل یا اول فیلتر گزینشی.",
+        "guarantee_en": "The figure guarantees the two-stage contract and the recall definition. It does not promise any production number.",
+        "guarantee_fa": "شکل قرارداد دومرحله‌ای و تعریف recall را تضمین می‌کند. هیچ عدد پروداکشنی را قول نمی‌دهد.",
+        "nonguarantee_en": "It says nothing about embedding quality, index refresh, or per-tenant deployment.",
+        "nonguarantee_fa": "درباره کیفیت embedding، refresh ایندکس یا استقرار هر مستأجر چیزی نمی‌گوید.",
+        "point_en": "Two decision points: the verify step (candidates become matches) and the nprobe choice (recall bought with latency).",
+        "point_fa": "دو نقطهٔ تصمیم: گام تأیید (نامزدها تطابق می‌شوند) و انتخاب nprobe (recall که با تأخیر خریده می‌شود).",
+        "scenario_en": "Read the pipeline left to right, then drop to the recall bars and the bottom rules: propose, prove, measure, isolate.",
+        "scenario_fa": "خط را چپ‌به‌راست بخوان و بعد به میله‌های recall و قواعد پایین برو: پیشنهاد، اثبات، اندازه‌گیری، ایزولاسیون.",
+        "steps": [
+          {
+            "en": "Top lane: regex to trigram app to 8 candidates to verify-each to 7 matches — doc 10 drops where the arrow says so.",
+            "fa": "خط بالا: از regex به trigram app به ۸ نامزد به تأیید تک‌تک به ۷ تطابق — سند ۱۰ همان‌جا که پیکان می‌گوید می‌افتد."
+          },
+          {
+            "en": "Middle lane: red AND apples intersects postings to doc 0 — the exact boolean core beside the fuzzy regex path.",
+            "fa": "خط وسط: اشتراک postings برای red AND apples به سند ۰ — هستهٔ boolean دقیق کنار مسیر فازی regex."
+          },
+          {
+            "en": "Right panel: nprobe bars 0.900, 0.967 and 1.000 against the exact top-k ground truth, with p95 beside recall.",
+            "fa": "پنل راست: میله‌های nprobe با ۰٫۹ و ۰٫۹۶۷ و ۱ در برابر ground truth دقیق top-k و p95 کنار recall."
+          },
+          {
+            "en": "Bottom lane: hybrid score, per-query p95, tenant filter first, and the no-trigram fallback.",
+            "fa": "خط پایین: امتیاز ترکیبی، p95 هر کوئری، اول فیلتر tenant و جایگزین بدون trigram."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "No: the old /ap.l/ has no substring that every match must contain, so the trigram index cannot propose candidates for it.",
+        "a_fa": "نه: /ap.l/ قدیمی هیچ زیررشته‌ای ندارد که هر تطابقی حتماً داشته باشد، پس ایندکس trigram نمی‌تواند برایش نامزد بدهد.",
+        "q_en": "Could the original /ap.l/ pattern from the chapter use the trigram index the same way?",
+        "q_fa": "آیا الگوی /ap.l/ اولیهٔ فصل می‌توانست همین‌طور از ایندکس trigram استفاده کند?"
+      }
+    }
+  ],
+  "reasoning_fa": "<p>trigram یعنی سه حرف پیوسته، پس literal چهارحرفی appl شامل app و ppl است. وجود هر دو در سند هنوز regex را ثابت نمی‌کند چون ممکن است در دو جای جدا باشند؛ مرحلهٔ verify به همین دلیل لازم است. recall@k سهم k نتیجهٔ دقیق است که ANN یافته: هشت نتیجهٔ مشترک از ده یعنی ۰٫۸. nprobe بیشتر candidate و کار بیشتری دارد و معمولاً recall را بالا می‌برد؛ p95 را اندازه می‌گیریم چون میانگین، queryهای کند را پنهان می‌کند. بردارهای یک‌بعدی دمو فقط برای فهم معیارند.</p>",
+  "reasoning_en": "<p>A trigram is three consecutive characters, so literal appl contains app and ppl. Both may occur separately in a document, hence regex verification. Recall@k is the fraction of exact top-k recovered: eight shared results out of ten gives 0.8. More probes inspect more candidates and usually improve recall at greater cost. Measure p95 because the mean hides slow queries. The demo’s 1-D vectors teach the metric only.</p>"
+}

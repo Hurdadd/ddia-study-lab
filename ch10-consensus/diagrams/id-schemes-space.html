@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ID Generation Schemes — Unique, Ordered, Linearizable Are Different Things</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .sub{font:13px system-ui,sans-serif; fill:#a7b3cc}
+  .grp-t{font:700 13.5px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .card-t{font:700 13px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .chip{font:700 11.5px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .note{font:12.5px system-ui,sans-serif; fill:#cfe3ff}
+  .note-h{font:700 13px system-ui,sans-serif; fill:#fbbf24}
+  .small{font:11.5px ui-monospace,Menlo,monospace; fill:#a7b3cc}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 660" role="img" aria-label="Three families of ID generation schemes with their ordering and fault-tolerance guarantees">
+  <text class="ttl" x="620" y="30" text-anchor="middle">ID Generation — Unique ≠ Ordered ≠ Linearizable</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">every scheme hands out unique IDs · they differ in ordering guarantees, fault tolerance, and how far away the answer comes from</text>
+
+  <!-- ============ column 1 : single node ============ -->
+  <rect x="60" y="80" width="210" height="26" rx="8" fill="#0e7490" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="grp-t" x="165" y="98" text-anchor="middle">① Single node</text>
+
+  <rect x="60" y="120" width="340" height="24" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="230" y="137" text-anchor="middle">Autoincrement counter</text>
+  <rect x="60" y="144" width="340" height="60" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="74" y="164">unique + total order + linearizable</text>
+  <text class="attr" x="74" y="184">one fetch-and-add on one counter</text>
+  <text class="attr" x="74" y="200">SPOF · cross-region RTT · bottleneck</text>
+
+  <rect x="60" y="222" width="340" height="24" rx="8" fill="#86efac" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="230" y="239" text-anchor="middle">Timestamp oracle (single leader)</text>
+  <rect x="60" y="246" width="340" height="82" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="74" y="266">one counter, replicated for fault tolerance</text>
+  <text class="attr" x="74" y="286">persist a batch of IDs, hand them out in</text>
+  <text class="attr" x="74" y="306">sequence — crash skips IDs, never repeats</text>
+  <text class="attr" x="74" y="322">not shardable · every region asks one node</text>
+
+  <rect x="60" y="352" width="300" height="24" rx="12" fill="#fbbf24"/>
+  <text class="chip" x="210" y="369" text-anchor="middle">linearizable ✓ · fault-tolerant only via replication</text>
+
+  <!-- ============ column 2 : distributed ============ -->
+  <rect x="450" y="80" width="250" height="26" rx="8" fill="#2563eb" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="grp-t" x="575" y="98" text-anchor="middle">② Distributed generators</text>
+
+  <rect x="450" y="120" width="350" height="24" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="625" y="137" text-anchor="middle">Sharded counters</text>
+  <rect x="450" y="144" width="350" height="42" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="464" y="164">unique; order lost across shards</text>
+  <text class="attr" x="464" y="182">IDs 16 and 17 — which came first?</text>
+
+  <rect x="450" y="200" width="350" height="24" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="625" y="217" text-anchor="middle">Preallocated blocks</text>
+  <rect x="450" y="224" width="350" height="62" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="464" y="244">node A takes 1–1000, node B takes 1001–2000</text>
+  <text class="attr" x="464" y="264">a later write can still get a smaller ID</text>
+  <text class="attr" x="464" y="282">a crash wastes the rest of the block</text>
+
+  <rect x="450" y="300" width="350" height="24" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="625" y="317" text-anchor="middle">Random UUID v4</text>
+  <rect x="450" y="324" width="350" height="62" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="464" y="344">128 bits, generated locally — zero calls</text>
+  <text class="attr" x="464" y="364">collisions vanishingly unlikely</text>
+  <text class="attr" x="464" y="382">order is random — comparing IDs tells nothing</text>
+
+  <rect x="450" y="400" width="350" height="24" rx="8" fill="#93c5fd" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="625" y="417" text-anchor="middle">Wall-clock + sequence</text>
+  <rect x="450" y="424" width="350" height="82" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="464" y="444">UUIDv7 / ULID / Snowflake: time + shard + seq</text>
+  <text class="attr" x="464" y="464">≈ real-time order, compact, no round trip</text>
+  <text class="attr" x="464" y="484">clock skew / NTP jumps can invert order</text>
+  <text class="attr" x="464" y="502">→ almost certainly not linearizable</text>
+
+  <!-- ============ column 3 : logical clocks ============ -->
+  <rect x="850" y="80" width="230" height="26" rx="8" fill="#7c3aed" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="grp-t" x="965" y="98" text-anchor="middle">③ Logical clocks</text>
+
+  <rect x="850" y="120" width="330" height="24" rx="8" fill="#c084fc" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="1015" y="137" text-anchor="middle">Lamport clock</text>
+  <rect x="850" y="144" width="330" height="82" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="864" y="164">timestamp = (counter, nodeID)</text>
+  <text class="attr" x="864" y="184">counter := max(local, seen) + 1</text>
+  <text class="attr" x="864" y="204">total order that respects causality</text>
+  <text class="attr" x="864" y="222">no wall-clock meaning · not linearizable</text>
+
+  <rect x="850" y="240" width="330" height="24" rx="8" fill="#c084fc" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="1015" y="257" text-anchor="middle">Hybrid logical clock (HLC)</text>
+  <rect x="850" y="264" width="330" height="82" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="864" y="284">physical time + Lamport-style bump</text>
+  <text class="attr" x="864" y="304">monotonic even across NTP adjustments</text>
+  <text class="attr" x="864" y="324">≈ wall-clock meaning + causal order</text>
+  <text class="attr" x="864" y="342">needs only roughly synced clocks</text>
+
+  <rect x="850" y="360" width="330" height="24" rx="8" fill="#c084fc" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="card-t" x="1015" y="377" text-anchor="middle">Vector clocks</text>
+  <rect x="850" y="384" width="330" height="62" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="attr" x="864" y="404">one counter per node in every timestamp</text>
+  <text class="attr" x="864" y="424">tells “concurrent” from “later”</text>
+  <text class="attr" x="864" y="442">size grows with the number of nodes</text>
+
+  <rect x="850" y="462" width="300" height="24" rx="12" fill="#fbbf24"/>
+  <text class="chip" x="1000" y="479" text-anchor="middle">causal order ✓ · linearizable recency ✗</text>
+
+  <!-- ============ bottom band ============ -->
+  <rect x="60" y="530" width="1120" height="110" rx="12" fill="#161d2e" stroke="#2a3652" stroke-width="1.4"/>
+  <text class="note-h" x="76" y="556">Ordering is not deciding</text>
+  <text class="note" x="76" y="580">To enforce a constraint — a lock, a unique username, the last seat on a flight — the winner must know its timestamp is the lowest.</text>
+  <text class="note" x="76" y="600">That requires hearing from every node that might have stamped a request; one unreachable node halts the decision.</text>
+  <text class="note" x="76" y="620">Fault-tolerant decision-making therefore needs consensus (next section): single-node counters are linearizable but fragile,</text>
+  <text class="note" x="76" y="636">logical clocks are robust but not linearizable.</text>
+</svg>
+</div>
+</body>
+</html>

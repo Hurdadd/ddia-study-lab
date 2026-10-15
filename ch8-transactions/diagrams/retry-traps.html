@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retrying an Aborted Transaction — Five Traps to Avoid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#f7f2e8;color:#302828;
+    font-family:'Nunito','Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%;display:flex;justify-content:center;padding:10px 0;}
+  svg{width:100%;height:auto;max-width:1240px;background:#f7f2e8;}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828;}
+  .ttl{font-size:22px;font-weight:900;}
+  .sub{font-size:14px;font-weight:700;fill:#6e665c;}
+  .hd{font-size:17px;font-weight:900;}
+  .lbl{font-size:13px;font-weight:900;}
+  .ln{font-size:14px;font-weight:400;}
+  .foot{font-size:14px;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="When a transaction retry is safe and five traps that make retry dangerous">
+<title>Transaction retry rules and traps</title>
+
+  <text class="ttl" x="620" y="44" text-anchor="middle">Retrying an Aborted Transaction — Five Traps</text>
+  <text class="sub" x="620" y="70" text-anchor="middle">Abort is not the end: retry — but only transient failures deserve it.</text>
+
+  <!-- LEFT: retry -->
+  <g>
+    <rect x="40" y="100" width="560" height="380" rx="18" fill="#bfe6c9"/>
+    <text class="hd" x="320" y="142" text-anchor="middle">RETRY — transient failures</text>
+    <circle cx="80" cy="184" r="6" fill="#2e7d54"/>
+    <text class="ln" x="96" y="190">deadlock victim abort</text>
+    <circle cx="80" cy="224" r="6" fill="#2e7d54"/>
+    <text class="ln" x="96" y="230">isolation or SSI conflict abort</text>
+    <circle cx="80" cy="264" r="6" fill="#2e7d54"/>
+    <text class="ln" x="96" y="270">brief network outage</text>
+    <circle cx="80" cy="304" r="6" fill="#2e7d54"/>
+    <text class="ln" x="96" y="310">leader failover in progress</text>
+    <circle cx="80" cy="344" r="6" fill="#2e7d54"/>
+    <text class="ln" x="96" y="350">lock wait timeout</text>
+    <text class="ln" x="80" y="410">all five vanish on their own — trying again is cheap</text>
+    <text class="ln" x="80" y="438">and the second attempt usually succeeds</text>
+  </g>
+
+  <!-- RIGHT: traps -->
+  <g>
+    <rect x="640" y="100" width="560" height="380" rx="18" fill="#ffc2da"/>
+    <text class="hd" x="920" y="142" text-anchor="middle">NEVER retry blindly — 5 traps</text>
+    <circle cx="680" cy="184" r="6" fill="#c2437f"/>
+    <text class="ln" x="696" y="190">1. reply lost but commit won: dedup!</text>
+    <circle cx="680" cy="224" r="6" fill="#c2437f"/>
+    <text class="ln" x="696" y="230">2. overload: backoff, do not hammer</text>
+    <circle cx="680" cy="264" r="6" fill="#c2437f"/>
+    <text class="ln" x="696" y="270">3. permanent error: fix, do not retry</text>
+    <circle cx="680" cy="304" r="6" fill="#c2437f"/>
+    <text class="ln" x="696" y="310">4. outside side effects: email sent?</text>
+    <circle cx="680" cy="344" r="6" fill="#c2437f"/>
+    <text class="ln" x="696" y="350">5. client crash mid-retry: work lost</text>
+    <text class="ln" x="680" y="410">trap 1 duplicates the write; trap 2 deepens the outage;</text>
+    <text class="ln" x="680" y="438">traps 3 to 5 need design, not retries</text>
+  </g>
+
+  <rect x="40" y="502" width="1160" height="114" rx="16" fill="#ffe08a"/>
+  <text class="foot" x="64" y="534">The retry contract:</text>
+  <text class="ln" x="64" y="562">bounded retries with exponential backoff and jitter; retry only transient errors.</text>
+  <text class="ln" x="64" y="590">Most ORMs never retry — the exception bubbles up and user input is dropped.</text>
+</svg>
+</div>
+</body>
+</html>

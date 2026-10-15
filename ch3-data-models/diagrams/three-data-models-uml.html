@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One Résumé, Three Data Models — Relational, Document, Graph</title>
+<style>
+  html,body{margin:0;background:#0b111c;color:#e8edf7;
+    font-family:'Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%; display:flex; justify-content:center; padding:10px 0;}
+  svg{width:100%; height:auto; max-width:1240px;}
+  .ttl{font:700 19px system-ui,sans-serif; fill:#5eead4}
+  .panel-t{font:700 15px system-ui,sans-serif; fill:#93c5fd}
+  .cls-t{font:700 13.5px ui-monospace,Menlo,monospace; fill:#0b111c}
+  .attr{font:12.5px ui-monospace,Menlo,monospace; fill:#cfe3ff}
+  .note{font:12.5px system-ui,sans-serif; fill:#a7b3cc}
+  .card-lbl{font:700 12px system-ui,sans-serif; fill:#fbbf24}
+  .edge-lbl{font:700 12px ui-monospace,Menlo,monospace; fill:#86efac}
+  .cap{font:12.5px system-ui,sans-serif; fill:#a7b3cc}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg viewBox="0 0 1240 640" role="img" aria-label="Class and ER diagram comparing relational, document and graph models for one resume">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#86efac"/>
+    </marker>
+    <marker id="diamond" viewBox="0 0 12 10" refX="11" refY="5" markerWidth="11" markerHeight="9" orient="auto">
+      <path d="M0,5 L6,0 L12,5 L6,10 z" fill="#1b2438" stroke="#93c5fd"/>
+    </marker>
+    <style>
+      .box{fill:#161d2e; stroke:#2a3652; stroke-width:1.4; rx:8}
+      .hd{fill:#1b2438; stroke:#2a3652; stroke-width:1.4}
+      .hd-a{fill:#0e7490}
+      .hd-b{fill:#2563eb}
+      .hd-c{fill:#7c3aed}
+    </style>
+  </defs>
+
+  <text class="ttl" x="620" y="34" text-anchor="middle">One Résumé, Three Shapes — Relational · Document · Graph</text>
+
+  <!-- ================= Panel A: Relational ================= -->
+  <text class="panel-t" x="205" y="72" text-anchor="middle">A · Relational: tables + foreign keys</text>
+
+  <g>
+    <rect class="box" x="75" y="92" width="260" height="30" rx="8"/>
+    <rect class="hd hd-a" x="75" y="92" width="260" height="30" rx="8"/>
+    <text class="cls-t" x="205" y="112" text-anchor="middle">person</text>
+    <rect class="box" x="75" y="122" width="260" height="86"/>
+    <text class="attr" x="90" y="144">person_id      PK</text>
+    <text class="attr" x="90" y="164">first_name</text>
+    <text class="attr" x="90" y="184">last_name</text>
+  </g>
+
+  <g>
+    <rect class="box" x="75" y="300" width="260" height="30" rx="8"/>
+    <rect class="hd hd-a" x="75" y="300" width="260" height="30" rx="8"/>
+    <text class="cls-t" x="205" y="320" text-anchor="middle">job</text>
+    <rect class="box" x="75" y="330" width="260" height="106"/>
+    <text class="attr" x="90" y="352">job_id         PK</text>
+    <text class="attr" x="90" y="372">person_id      FK</text>
+    <text class="attr" x="90" y="392">title</text>
+    <text class="attr" x="90" y="412">start_date</text>
+  </g>
+
+  <line x1="205" y1="208" x2="205" y2="300" stroke="#86efac" stroke-width="1.6" marker-start="url(#diamond)"/>
+  <text class="edge-lbl" x="215" y="240">1</text>
+  <text class="edge-lbl" x="215" y="262">0..*</text>
+  <text class="edge-lbl" x="222" y="284" text-anchor="start">person_id</text>
+
+  <text class="cap" x="205" y="470" text-anchor="middle">one row per thing; references must stay valid</text>
+  <text class="cap" x="205" y="490" text-anchor="middle">listing a résumé = JOIN at read time</text>
+  <text class="cap" x="205" y="510" text-anchor="middle">multi-object transaction keeps FK + indexes in sync</text>
+
+  <!-- ================= Panel B: Document ================= -->
+  <text class="panel-t" x="620" y="72" text-anchor="middle">B · Document: one self-contained tree</text>
+
+  <g>
+    <rect class="box" x="490" y="92" width="260" height="30" rx="8"/>
+    <rect class="hd hd-b" x="490" y="92" width="260" height="30" rx="8"/>
+    <text class="cls-t" x="620" y="112" text-anchor="middle">resume  (one JSON document)</text>
+    <rect class="box" x="490" y="122" width="260" height="186"/>
+    <text class="attr" x="505" y="144">_id</text>
+    <text class="attr" x="505" y="164">name</text>
+    <text class="attr" x="505" y="184">jobs: [</text>
+    <text class="attr" x="522" y="204">{ title, start_date },</text>
+    <text class="attr" x="522" y="224">{ title, start_date }</text>
+    <text class="attr" x="505" y="244">]</text>
+    <text class="attr" x="505" y="264">education: [ ... ]</text>
+    <text class="attr" x="505" y="284">skills:    [ ... ]</text>
+  </g>
+
+  <g>
+    <rect class="box" x="490" y="360" width="260" height="30" rx="8"/>
+    <rect class="hd hd-b" x="490" y="360" width="260" height="30" rx="8"/>
+    <text class="cls-t" x="620" y="380" text-anchor="middle">job (embedded, not a table)</text>
+    <rect class="box" x="490" y="390" width="260" height="66"/>
+    <text class="attr" x="505" y="412">title</text>
+    <text class="attr" x="505" y="432">start_date</text>
+  </g>
+
+  <line x1="620" y1="308" x2="620" y2="360" stroke="#93c5fd" stroke-width="1.6" marker-start="url(#diamond)"/>
+  <text class="edge-lbl" x="630" y="330">1</text>
+  <text class="edge-lbl" x="630" y="350">0..* embedded</text>
+
+  <text class="cap" x="620" y="480" text-anchor="middle">all fields of one user live together — no join needed</text>
+  <text class="cap" x="620" y="500" text-anchor="middle">denormalization: the résumé listing duplicates job data</text>
+  <text class="cap" x="620" y="520" text-anchor="middle">updating duplicated copies needs a multi-object transaction</text>
+
+  <!-- ================= Panel C: Graph ================= -->
+  <text class="panel-t" x="1035" y="72" text-anchor="middle">C · Graph: nodes and relationships are first-class</text>
+
+  <g>
+    <rect class="box" x="880" y="100" width="180" height="30" rx="8"/>
+    <rect class="hd hd-c" x="880" y="100" width="180" height="30" rx="8"/>
+    <text class="cls-t" x="970" y="120" text-anchor="middle">(:Person)</text>
+    <rect class="box" x="880" y="130" width="180" height="46"/>
+    <text class="attr" x="895" y="152">name</text>
+    <text class="attr" x="895" y="170">born</text>
+  </g>
+
+  <g>
+    <rect class="box" x="1100" y="240" width="130" height="30" rx="8"/>
+    <rect class="hd hd-c" x="1100" y="240" width="130" height="30" rx="8"/>
+    <text class="cls-t" x="1165" y="260" text-anchor="middle">(:Company)</text>
+    <rect class="box" x="1100" y="270" width="130" height="46"/>
+    <text class="attr" x="1115" y="292">name</text>
+    <text class="attr" x="1115" y="310">industry</text>
+  </g>
+
+  <g>
+    <rect class="box" x="880" y="380" width="180" height="30" rx="8"/>
+    <rect class="hd hd-c" x="880" y="380" width="180" height="30" rx="8"/>
+    <text class="cls-t" x="970" y="400" text-anchor="middle">(:City)</text>
+    <rect class="box" x="880" y="410" width="180" height="46"/>
+    <text class="attr" x="895" y="432">name</text>
+    <text class="attr" x="895" y="450">country</text>
+  </g>
+
+  <path d="M1060 150 L1100 236" fill="none" stroke="#86efac" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text class="edge-lbl" x="1030" y="196">[:WORKS_AT</text>
+  <text class="edge-lbl" x="1030" y="212">{since}]</text>
+
+  <path d="M880 172 L880 376" fill="none" stroke="#86efac" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text class="edge-lbl" x="826" y="272">[:LIVES_IN]</text>
+
+  <path d="M1100 316 L1062 396" fill="none" stroke="#86efac" stroke-width="1.6" marker-end="url(#arrow)"/>
+  <text class="edge-lbl" x="1122" y="356">[:LOCATED_IN]</text>
+
+  <text class="cap" x="1035" y="490" text-anchor="middle">relationships carry data of their own ({since})</text>
+  <text class="cap" x="1035" y="510" text-anchor="middle">traversal cost depends on the query, not the schema</text>
+  <text class="cap" x="1035" y="530" text-anchor="middle">good fit when the data is all about how things connect</text>
+
+  <!-- footer rule -->
+  <line x1="40" y1="580" x2="1200" y2="580" stroke="#2a3652"/>
+  <text class="note" x="620" y="606" text-anchor="middle">Same information, three shapes: the model decides which access patterns are cheap — and which ones need transactions or duplication.</text>
+</svg>
+</div>
+</body>
+</html>

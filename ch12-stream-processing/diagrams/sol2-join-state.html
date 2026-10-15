@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search-Click Join State: Two Buffers, One Operator, One Metric</title>
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+.ttl{font-size:19px;font-weight:900}
+.sub{font-size:13px}
+.pill-t{font-size:13px;font-weight:800}
+.attr{font-size:13px}
+.edge-lbl{font-size:13px;font-weight:800}
+.small{font-size:13px}
+.note{font-size:13px}
+.note-h{font-size:13px;font-weight:800}
+.card-h{font-size:13px;font-weight:800}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="UML-style state layout for a session-keyed search-click join">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2e7d4f"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="30" text-anchor="middle">Search-Click Join State: Two Buffers, One Operator, One Metric</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">keyed by session id, ordered by event time, first click wins, duplicates dropped by event id</text>
+
+  <!-- Box A -->
+  <rect x="60" y="90" width="300" height="280" rx="12" fill="#ffe08a"/>
+  <rect x="76" y="102" width="160" height="28" rx="7" fill="#f7f2e8"/>
+  <text class="pill-t" x="156" y="121" text-anchor="middle">SessionBuffer</text>
+  <line x1="76" y1="140" x2="344" y2="140" stroke="#302828" stroke-opacity="0.3" stroke-width="1.2"/>
+  <text class="attr" x="76" y="170">searches by event time</text>
+  <text class="attr" x="76" y="200">clicks by event time</text>
+  <text class="attr" x="76" y="230">seenIds: dedup set</text>
+  <text class="attr" x="76" y="260">watermark: min(partitions)</text>
+  <text class="small" x="76" y="310">one buffer per session id;</text>
+  <text class="small" x="76" y="332">either side may arrive first</text>
+
+  <!-- Box B -->
+  <rect x="470" y="90" width="300" height="280" rx="12" fill="#bfe6c9"/>
+  <rect x="486" y="102" width="150" height="28" rx="7" fill="#f7f2e8"/>
+  <text class="pill-t" x="561" y="121" text-anchor="middle">JoinOperator</text>
+  <line x1="486" y1="140" x2="754" y2="140" stroke="#302828" stroke-opacity="0.3" stroke-width="1.2"/>
+  <text class="attr" x="486" y="170">buffer, probe other side</text>
+  <text class="attr" x="486" y="200">match: emit clicked once</text>
+  <text class="attr" x="486" y="230">expiry: emit unclicked</text>
+  <text class="attr" x="486" y="260">laggard: correct or drop</text>
+  <text class="small" x="486" y="310">expiry is itself an output,</text>
+  <text class="small" x="486" y="332">not the absence of one</text>
+
+  <!-- Box C -->
+  <rect x="880" y="90" width="300" height="280" rx="12" fill="#c3ceff"/>
+  <rect x="896" y="102" width="110" height="28" rx="7" fill="#f7f2e8"/>
+  <text class="pill-t" x="951" y="121" text-anchor="middle">CTR Sink</text>
+  <line x1="896" y1="140" x2="1164" y2="140" stroke="#302828" stroke-opacity="0.3" stroke-width="1.2"/>
+  <text class="attr" x="896" y="170">clicked / all searches</text>
+  <text class="attr" x="896" y="200">v1 value, v2 correction</text>
+  <text class="attr" x="896" y="230">meter: late_dropped_total</text>
+  <text class="attr" x="896" y="260">alert when late share grows</text>
+  <text class="small" x="896" y="310">each search counted once;</text>
+  <text class="small" x="896" y="332">many-to-many never inflates</text>
+
+  <!-- arrows -->
+  <line x1="360" y1="215" x2="470" y2="215" stroke="#2e7d4f" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="415" y="206" text-anchor="middle">probe</text>
+  <line x1="770" y1="215" x2="880" y2="215" stroke="#2e7d4f" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text class="edge-lbl" x="825" y="206" text-anchor="middle">emit</text>
+
+  <!-- cards -->
+  <rect x="60" y="400" width="360" height="120" rx="12" fill="#ffe08a"/>
+  <text class="card-h" x="76" y="428">Either order works</text>
+  <text class="note" x="76" y="458">click before search waits in buffer;</text>
+  <text class="note" x="76" y="488">no assumption about arrival order</text>
+
+  <rect x="440" y="400" width="360" height="120" rx="12" fill="#bfe6c9"/>
+  <text class="card-h" x="456" y="428">Idle partition parked</text>
+  <text class="note" x="456" y="458">watermark is the minimum, idle out;</text>
+  <text class="note" x="456" y="488">parking is metered, never silent</text>
+
+  <rect x="820" y="400" width="360" height="120" rx="12" fill="#c3ceff"/>
+  <text class="card-h" x="836" y="428">CTR counts searches once</text>
+  <text class="note" x="836" y="458">first click wins; rest are evidence;</text>
+  <text class="note" x="836" y="488">corrections retract, never double</text>
+
+  <!-- footer -->
+  <rect x="60" y="540" width="1120" height="100" rx="12" fill="#f7f2e8" stroke="#302828" stroke-width="1.4"/>
+  <text class="note-h" x="76" y="572">Why this shape</text>
+  <text class="note" x="76" y="600">State is the join: buffer both sides by session, probe on every arrival, expire loudly. The operator never asks</text>
+  <text class="note" x="76" y="624">which side came first, only whether the watermark still allows the answer to change.</text>
+</svg>
+</div>
+</body>
+</html>

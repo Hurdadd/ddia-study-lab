@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Watermark Timeline: Windows Close While Partitions Idle and Laggards Land</title>
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+.ttl{font-size:19px;font-weight:900}
+.sub{font-size:13px}
+.pill-t{font-size:13px;font-weight:800}
+.attr{font-size:13px}
+.tick-lbl{font-size:13px;font-weight:700}
+.small{font-size:13px}
+.warn-lbl{font-size:13px;font-weight:800;fill:#c0392b}
+.win-lbl{font-size:13px;font-weight:800;fill:#2e7d4f}
+.note{font-size:13px}
+.note-h{font-size:13px;font-weight:800}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Event-time timeline with an idle partition, a watermark close, one correction and one drop">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2e7d4f"/>
+    </marker>
+    <marker id="arrw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/>
+    </marker>
+  </defs>
+
+  <text class="ttl" x="620" y="30" text-anchor="middle">Watermark Timeline: Windows Close While Partitions Idle and Laggards Land</text>
+  <text class="sub" x="620" y="52" text-anchor="middle">event time runs left to right; the watermark is a threshold, never a promise</text>
+
+  <!-- lane labels -->
+  <rect x="40" y="150" width="130" height="30" rx="8" fill="#c3ceff"/>
+  <text class="pill-t" x="105" y="170" text-anchor="middle">partition 0</text>
+  <rect x="40" y="250" width="130" height="30" rx="8" fill="#ffe08a"/>
+  <text class="pill-t" x="105" y="270" text-anchor="middle">partition 1</text>
+
+  <!-- tracks -->
+  <line x1="200" y1="165" x2="1160" y2="165" stroke="#302828" stroke-opacity="0.3" stroke-width="2"/>
+  <line x1="200" y1="265" x2="1160" y2="265" stroke="#302828" stroke-opacity="0.3" stroke-width="2"/>
+
+  <!-- P0 events: t5 q1, t12 c1, t18 q2, t20 c2, t61 q3 -->
+  <circle cx="240" cy="165" r="7" fill="#2e7d4f"/>
+  <circle cx="296" cy="165" r="7" fill="#2e7d4f"/>
+  <circle cx="344" cy="165" r="7" fill="#2e7d4f"/>
+  <circle cx="360" cy="165" r="7" fill="#d97706"/>
+  <circle cx="688" cy="165" r="7" fill="#2e7d4f"/>
+  <text class="small" x="200" y="140">searches q1 q2 q3, clicks c1 c2; c2 first</text>
+
+  <!-- P1 events then idle -->
+  <circle cx="264" cy="265" r="7" fill="#2e7d4f"/>
+  <circle cx="360" cy="265" r="7" fill="#2e7d4f"/>
+  <line x1="360" y1="265" x2="1160" y2="265" stroke="#d97706" stroke-width="2" stroke-dasharray="7 6"/>
+  <text class="small" x="560" y="300">idle after t=20: parked by timeout, watermark excludes partition 1</text>
+
+  <!-- watermark -->
+  <line x1="680" y1="110" x2="680" y2="340" stroke="#0e7490" stroke-width="2" stroke-dasharray="8 6"/>
+  <text class="attr" x="694" y="126">watermark = 60</text>
+  <text class="attr" x="694" y="148">window [0,60) closes</text>
+
+  <!-- laggards -->
+  <line x1="600" y1="110" x2="600" y2="158" stroke="#2e7d4f" stroke-width="1.6" marker-end="url(#arr)"/>
+  <text class="win-lbl" x="600" y="100" text-anchor="middle">laggard at t=50: CORRECT</text>
+  <line x1="280" y1="110" x2="280" y2="158" stroke="#c0392b" stroke-width="1.6" marker-end="url(#arrw)"/>
+  <text class="warn-lbl" x="280" y="100" text-anchor="middle">older laggard at t=10: DROP</text>
+
+  <!-- axis -->
+  <line x1="200" y1="340" x2="1160" y2="340" stroke="#302828" stroke-width="1.6"/>
+  <text class="tick-lbl" x="200" y="362" text-anchor="middle">0</text>
+  <text class="tick-lbl" x="360" y="362" text-anchor="middle">20</text>
+  <text class="tick-lbl" x="520" y="362" text-anchor="middle">40</text>
+  <text class="tick-lbl" x="680" y="362" text-anchor="middle">60</text>
+  <text class="tick-lbl" x="840" y="362" text-anchor="middle">80</text>
+  <text class="tick-lbl" x="1000" y="362" text-anchor="middle">100</text>
+  <text class="tick-lbl" x="1160" y="362" text-anchor="middle">120</text>
+  <text class="small" x="200" y="388">event-time minutes; window [0,60) closes when the watermark passes 60</text>
+
+  <!-- footer -->
+  <rect x="40" y="420" width="1160" height="220" rx="12" fill="#f7f2e8" stroke="#302828" stroke-width="1.4"/>
+  <text class="note-h" x="60" y="452">How to read this timeline</text>
+  <text class="note" x="60" y="482">Partition 1 goes quiet after t=20. After the idle timeout it is parked: the watermark advances on partition 0 alone,</text>
+  <text class="note" x="60" y="508">so windows keep closing instead of waiting forever. Parking is metered and alerted, never silent.</text>
+  <text class="note" x="60" y="544">A laggard inside allowed lateness revises the metric: retract v1, publish v2, count one correction. A laggard beyond</text>
+  <text class="note" x="60" y="570">the horizon is dropped and counted in late_dropped_total; when that share grows, the lateness budget was wrong.</text>
+  <text class="note" x="60" y="606">Replay after a restart re-reads by event time, so the rebuilt windows are identical: determinism is free.</text>
+</svg>
+</div>
+</body>
+</html>

@@ -1,0 +1,226 @@
+{
+  "alternatives": [
+    {
+      "en": "Read-back-first when the outcome is queryable ('did you apply req-7?'): one lookup can settle the unknown without any retry policy. Cheaper than full idempotency when reads are cheap and the result log is indexed by request ID — but useless when the operation has no readable state.",
+      "fa": "اول خواندن وضعیت وقتی نتیجه قابل استعلام است («req-7 را اعمال کردی؟»): یک lookup می‌تواند ناشناخته را بدون هیچ سیاست retry حل کند. وقتی خواندن ارزان و لاگ نتیجه با شناسه درخواست ایندکس شده، ارزان‌تر از idempotency کامل است — ولی وقتی عملیات حالت خواندنی ندارد بی‌فایده است."
+    },
+    {
+      "en": "Fail-loud when the operation is neither idempotent nor queryable: return an explicit error and let a human or a higher layer reconcile. Costs a visible failure, buys zero corruption — the right trade when a double charge is worse than a rejected request.",
+      "fa": "شکست صریح وقتی عملیات نه idempotent است نه قابل استعلام: خطای صریح برگردان و بگذار انسان یا لایه بالاتر مغایرت را حل کند. قیمتش یک شکست visible است و سودش صفر corruption — وقتی شارژ دوباره بدتر از درخواست ردشده است، تریدآف درست همین است."
+    }
+  ],
+  "answer_en": "A timeout leaves the outcome UNKNOWN — lost request, dead server, or lost reply look identical. So every mutating request carries one caller-chosen ID bound to its payload; the server looks the ID up, returns the stored result on repeats, and rejects the ID with a new payload. Retries are bounded end to end: per-attempt deadlines, backoff with jitter, and a retry budget — three layers of three attempts peak at 27 downstream tries, never more.",
+  "answer_fa": "بعد از timeout نتیجه <span class=\"ltr\">UNKNOWN</span> می‌ماند — درخواست گم‌شده، سرور مرده و پاسخ گم‌شده یکسان دیده می‌شوند. پس هر درخواست تغییردهنده یک شناسهٔ انتخاب caller دارد که به payload گره خورده؛ سرور اول شناسه را lookup می‌کند، روی تکرار نتیجهٔ ذخیره‌شده را برمی‌گرداند و همان شناسه با payload تازه را رد می‌کند. بازتلاش‌ها سرتاسری کران‌دارند: deadline برای هر تلاش، backoff با jitter و بودجهٔ retry — سه لایهٔ سه‌تلاشی در اوج به ۲۷ تلاش downstream می‌رسند، هرگز بیشتر.",
+  "assumptions": [
+    {
+      "en": "One counter service, one client, at-most-two attempts per request in the demo (teaching numbers).",
+      "fa": "یک سرویس شمارنده، یک کلاینت و در دمو حداکثر دو تلاش برای هر درخواست (اعداد آموزشی)."
+    },
+    {
+      "en": "Layered-retry math uses 3 layers x 3 attempts each (teaching numbers) — the shape matters, not the constants.",
+      "fa": "حساب retry لایه‌ای با ۳ لایه و ۳ تلاش برای هرکدام است (اعداد آموزشی) — شکل مهم است نه ثابت‌ها."
+    },
+    {
+      "en": "The result log keeps (request ID, payload hash, result) past the maximum retry window (teaching retention) — retry after the window is fail-loud, not guesswork.",
+      "fa": "لاگ نتیجه سه‌تایی (شناسه درخواست، hashpayload و نتیجه) را بیشتر از پنجرهٔ حداکثر retry نگه می‌دارد (نگهداری آموزشی) — retry بعد از پنجره شکست صریح است نه حدس."
+    }
+  ],
+  "code": {
+    "code": "import java.util.*;\n// Teaching demo: after a timeout the client knows NOTHING - the request may\n// be lost, the server may have crashed, or the reply may be lost. Retry with\n// the SAME request ID collapses repeats into one effect; a fresh ID doubles it.\npublic class TimeoutDemo {\n    // What really happened on the server for one client request.\n    enum Truth { LOST_REQUEST, CRASHED_BEFORE_APPLY, APPLIED_REPLY_LOST }\n    static class Server {\n        int effects = 0;                       // real-world effects applied\n        Map<String, String> results = new HashMap<>(); // request ID -> stored result\n        Map<String, String> payloadOf = new HashMap<>(); // request ID -> bound payload\n        // Returns the result string; null means \"client never sees it\".\n        String apply(String reqId, String payload, boolean replyLost) {\n            if (results.containsKey(reqId)) {\n                if (!payloadOf.get(reqId).equals(payload)) return \"REJECTED: id reused with new payload\";\n                return results.get(reqId) + \" (duplicate suppressed)\";\n            }\n            payloadOf.put(reqId, payload);\n            effects++;\n            String r = \"ok counter=\" + effects;\n            results.put(reqId, r);\n            return replyLost ? null : r;\n        }\n    }\n    // One client request with ONE retry. naive=false reuses the request ID.\n    static String run(Truth truth, boolean naive) {\n        Server s = new Server();\n        String id = \"req-7\";\n        String first = null;\n        switch (truth) {\n            case LOST_REQUEST -> first = null;                       // never arrived\n            case CRASHED_BEFORE_APPLY -> first = null;               // died doing nothing\n            case APPLIED_REPLY_LOST -> first = s.apply(id, \"pay-100\", true);\n        }\n        boolean timeout = (first == null);                            // client only sees silence\n        String retryId = naive ? \"req-7-again\" : id;                  // naive = fresh ID\n        String second = s.apply(retryId, \"pay-100\", false);\n        return \"timeout=\" + timeout + \" outcome=UNKNOWN retry=\" + second + \" effects=\" + s.effects;\n    }\n    public static void main(String[] a) {\n        for (Truth t : Truth.values()) {\n            System.out.println(t + \" naive-retry  -> \" + run(t, true));\n            System.out.println(t + \" same-id-retry -> \" + run(t, false));\n        }\n        int layers = 3, attempts = 3;                                 // teaching numbers\n        int worst = (int) Math.pow(attempts, layers);                 // 3^3\n        System.out.println(\"layered worst case = \" + attempts + \"^\" + layers + \" = \" + worst + \" downstream attempts\");\n        Server s = new Server();\n        s.apply(\"req-7\", \"pay-100\", false);\n        System.out.println(\"payload binding -> \" + s.apply(\"req-7\", \"pay-999\", false));\n        System.out.println(\"OK: unknown stays unknown; same ID keeps one effect\");\n    }\n}\n",
+    "expected_en": "Six scenario lines: naive retry double-applies only in APPLIED_REPLY_LOST (counter=2, effects=2); same-ID retry keeps counter=1 and effects=1 in all three truths. Then 3^3 = 27, the payload-mismatch REJECTED line, and the OK line. (actual output of this environment)",
+    "expected_fa": "شش خط سناریو: retry ساده‌لوحانه فقط در حالت APPLIED_REPLY_LOST دو اثر می‌سازد (counter=2 و effects=2)؛ retry با شناسهٔ ثابت در هر سه حالت counter=1 و effects=1 نگه می‌دارد. بعد ۳^۳ = ۲۷، خط REJECTED ناسازگاری payload و خط OK. (خروجی واقعی همین محیط)",
+    "lang": "java",
+    "run_en": "javac TimeoutDemo.java && java TimeoutDemo — stdlib Java only, instant.",
+    "run_fa": "javac TimeoutDemo.java && java TimeoutDemo — فقط استاندارد جاوا، فوری.",
+    "status": "verified"
+  },
+  "design_en": "<p>Request ID: one UUID per caller intent, minted by the client before the first send and kept across retries. Server table <code>(request_id UNIQUE, payload_hash, result, kept_until)</code>: on arrival, insert-or-lookup in one atomic step — a present ID returns its stored result (or rejects on payload mismatch), an absent ID applies once and stores. Retention covers the longest retry window plus clock slack; reads after expiry fail loud. Every retry carries the same ID, a per-attempt deadline, backoff with jitter, and charges a shared retry budget that sheds load when the downstream is slow.</p>",
+  "design_fa": "<p>شناسهٔ درخواست: یک UUID برای هر قصد caller که کلاینت قبل از اولین ارسال می‌سازد و در retryها نگه می‌دارد. جدول سرور <code>(request_id UNIQUE, payload_hash, result, kept_until)</code>: هنگام رسیدن، درج-یا-lookup در یک گام اتمیک — شناسهٔ حاضر نتیجهٔ ذخیره‌شده را برمی‌گرداند (یا روی ناسازگاری payload رد می‌کند) و شناسهٔ غایب یک‌بار اعمال و ذخیره می‌شود. نگهداری طولانی‌ترین پنجرهٔ retry به‌علاوهٔ slack ساعت را پوشش می‌دهد؛ خواندن بعد از انقضا شکست صریح است. هر retry همان شناسه را دارد با deadline هر تلاش، backoff و jitter، و از بودجهٔ مشترک retry خرج می‌کند که هنگام کندی downstream بار را shed می‌کند.</p>",
+  "diagrams": [
+    {
+      "caption_en": "One ambiguous timeout, one same-ID retry, one payload rule",
+      "caption_fa": "یک timeout مبهم، یک retry با شناسهٔ ثابت، یک قاعدهٔ payload",
+      "file": "diagrams/sol1-step1-timeout-outcomes.html",
+      "height": 720,
+      "kind_en": "sequence: timeout + retry",
+      "kind_fa": "توالی: timeout و retry",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Trace the dashed reply arrow: the effect is applied (counter=1 in the store) yet the client times out. Now trace a naive retry with a fresh ID down the same path: the store sees an unknown ID and applies again — counter=2. The failure is invisible on the wire; only the effect count tells it.",
+        "failure_fa": "پیکان چین پاسخ را دنبال کن: اثر اعمال شده (counter=1 در فروشگاه) ولی کلاینت timeout می‌گیرد. حالا یک retry ساده‌لوحانه با شناسهٔ تازه را در همان مسیر دنبال کن: فروشگاه شناسهٔ ناآشنا می‌بیند و دوباره اعمال می‌کند — counter=2. خرابی روی سیم نامرئی است؛ فقط شمارش اثر آن را لو می‌دهد.",
+        "guarantee_en": "The figure shows the retry collapsing into one effect via the result lookup, and the payload-mismatch rejection. It does not bound retry storms across layers — that is the assembly diagram's job.",
+        "guarantee_fa": "شکل نشان می‌دهد retry با lookup نتیجه در یک اثر جمع می‌شود و ناسازگاری payload رد می‌شود. طوفان retry میان لایه‌ها را کران نمی‌کند — آن کار نمودار اسمبل است.",
+        "nonguarantee_en": "It says nothing about how long results are kept, what happens after retention expires, or how layers multiply attempts — all outside this figure.",
+        "nonguarantee_fa": "دربارهٔ مدت نگهداری نتایج، سرنوشت بعد از انقضا و ضرب تلاش‌ها میان لایه‌ها چیزی نمی‌گوید — همه بیرون این شکل‌اند.",
+        "point_en": "The decision point is the lookup-before-apply arrow: every arrival, first or retry, passes the request-ID lookup before any effect. No lookup, no safety.",
+        "point_fa": "نقطهٔ تصمیم پیکان lookup-قبل-از-اعمال است: هر رسیدن، چه اول چه retry، قبل از هر اثر از lookup شناسه می‌گذرد. بدون lookup، امنیتی نیست.",
+        "scenario_en": "A payment request times out and nobody knows whether the money moved. Walk the lifelines top to bottom: the ambiguous silence, the budgeted retry with the same ID, and the payload rule at the end.",
+        "scenario_fa": "یک درخواست پرداخت timeout می‌گیرد و هیچ‌کس نمی‌داند پول جابه‌جا شده یا نه. خط‌های زندگی را از بالا به پایین برو: سکوت مبهم، retry بودجه‌دار با همان شناسه و قاعدهٔ payload در پایان.",
+        "steps": [
+          {
+            "en": "Top: the Client sends req-7 with payload P; the Service applies it and records counter=1 in the Result Log — one caller intent, one ID.",
+            "fa": "بالا: کلاینت req-7 را با payload هفت می‌فرستد؛ سرویس اعمالش می‌کند و counter=1 را در لاگ نتیجه ثبت می‌کند — یک قصد caller و یک شناسه."
+          },
+          {
+            "en": "The reply is lost on the wire, so the client times out with outcome UNKNOWN — applied or not, the wire looks the same.",
+            "fa": "پاسخ روی سیم گم می‌شود، پس کلاینت با نتیجهٔ UNKNOWNtimeout می‌گیرد — اعمال شده یا نه، سیم یکسان دیده می‌شود."
+          },
+          {
+            "en": "The client charges the budget, waits backoff plus jitter, and retries the SAME req-7 with the same payload — never a fresh ID.",
+            "fa": "کلاینت از بودجه خرج می‌کند، backoff به‌علاوهٔ jitter صبر می‌کند و همان req-7 را با همان payload تکرار می‌کند — هرگز شناسهٔ تازه."
+          },
+          {
+            "en": "The server looks req-7 up, finds counter=1, and returns the stored result with no second effect; reusing the ID with a new payload is rejected.",
+            "fa": "سرور req-7 را lookup می‌کند، counter=1 را پیدا می‌کند و نتیجهٔ ذخیره‌شده را بدون اثر دوم برمی‌گرداند؛ استفادهٔ دوبارهٔ شناسه با payload تازه رد می‌شود."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "Because the server looks the ID up before applying: the retried req-7 hits the stored counter=1 and returns it. A fresh ID looks new, so it applies a second time.",
+        "a_fa": "چون سرور قبل از اعمال شناسه را lookup می‌کند: req-7 تکراری به counter=1 ذخیره‌شده می‌خورد و همان را برمی‌گرداند. شناسهٔ تازه نو به‌نظر می‌رسد، پس بار دوم اعمال می‌شود.",
+        "q_en": "The reply was lost but the effect applied. Why does the same-ID retry not double-charge?",
+        "q_fa": "پاسخ گم شده ولی اثر اعمال شده. چرا retry با شناسهٔ ثابت دو بار شارژ نمی‌کند؟"
+      },
+      "source": ".archify/sequence-ch9-sol1-outcomes-20261014-210101"
+    },
+    {
+      "caption_en": "Idempotency first, read-back second, guard third, fail loud last",
+      "caption_fa": "اول idempotency، بعد خواندن وضعیت، بعد محافظت نوشته، آخر شکست صریح",
+      "file": "diagrams/sol1-timeout-simulator.html",
+      "height": 640,
+      "kind_en": "workflow: recovery choice",
+      "kind_fa": "گردش‌کار: انتخاب بازیابی",
+      "made": "archify",
+      "narration": {
+        "failure_en": "Trace a slow downstream with no budget: every client retries at once, three layers triple each attempt, and 27 tries land where one sufficed — the thundering herd. The Budget Gate leaf is the only arrow that stops it: attempts run out, waits spread out, the deadline cuts the tail.",
+        "failure_fa": "یک downstream کند بدون بودجه را دنبال کن: هر کلاینت هم‌زمان retry می‌کند، سه لایه هر تلاش را سه‌برابر می‌کنند و ۲۷ تلاش جایی می‌نشیند که یکی کافی بود — گلهٔ رعدآسا. برگ Budget Gate تنها پیکانی است که جلویش را می‌گیرد: تلاش‌ها تمام می‌شوند، انتظارها پخش می‌شوند و deadline دم را می‌برد.",
+        "guarantee_en": "The figure orders the four responses and shows the budget governing retries. It does not prove the constants (3x3, the backoff base) — those are teaching numbers you measure per dependency.",
+        "guarantee_fa": "شکل چهار پاسخ را مرتب می‌کند و نشان می‌دهد بودجه retryها را اداره می‌کند. ثابت‌ها (۳×۳ و پایهٔ backoff) را اثبات نمی‌کند — آن‌ها اعداد آموزشی‌اند که برای هر وابستگی اندازه می‌گیری.",
+        "nonguarantee_en": "It does not cover what the guarded write checks (that is the fencing exercise) or how long results are retained.",
+        "nonguarantee_fa": "دربارهٔ این‌که نوشتهٔ محافظت‌شده چه چیزی را بررسی می‌کند (آن تمرین fencing است) یا نگهداری نتایج چیزی نمی‌گوید.",
+        "point_en": "The decision order is the point: idempotency before read-back, read-back before guarding, guarding before failing. Skipping ahead (retry without an ID, guard without a read) is where corruption enters.",
+        "point_fa": "نکته ترتیب تصمیم است: idempotency قبل از خواندن وضعیت، خواندن قبل از محافظت، محافظت قبل از شکست. جلو زدن (retry بدون شناسه یا محافظت بدون خواندن) همان‌جاست که corruption وارد می‌شود.",
+        "scenario_en": "The timeout fired and the same-ID retry needs a policy around it. Start at the timed-out request on the left and ask the three questions in order; each yes-leaf ends in exactly one effect.",
+        "scenario_fa": "timeout زده و retry با شناسهٔ ثابت به سیاست دورش نیاز دارد. از درخواست timeoutخورده در چپ شروع کن و سه سؤال را به‌ترتیب بپرس؛ هر برگ بله در دقیقاً یک اثر تمام می‌شود.",
+        "steps": [
+          {
+            "en": "First question — Idempotent? Yes drops to Retry Same ID, governed by the Budget Gate (deadline, backoff plus jitter, 27 max).",
+            "fa": "سؤال اول — Idempotent؟ بله به Retry Same ID می‌رسد زیر نظر Budget Gate (با deadline و backoff و jitter و سقف ۲۷)."
+          },
+          {
+            "en": "No leads to the second question — Queryable? Yes drops to Read Back Result: ask the result log before touching anything.",
+            "fa": "نه به سؤال دوم می‌رسد — Queryable؟ بله به Read Back Result می‌رسد: قبل از دست زدن به چیزی از لاگ نتیجه بپرس."
+          },
+          {
+            "en": "No again leads to the third — Needs Guard? Yes drops to the fenced Guarded Write; no ends at Fail Explicitly.",
+            "fa": "دوباره نه به سومی می‌رسد — Needs Guard؟ بله به Guarded Write فنس‌دار می‌رسد؛ نه در Fail Explicitly تمام می‌شود."
+          },
+          {
+            "en": "All three yes-leaves end in one effect (dedup, stored result, or fencing); the fail leaf ends in an honest error, never a guess.",
+            "fa": "هر سه برگ بله در یک اثر تمام می‌شوند (dedup یا نتیجهٔ ذخیره یا fencing)؛ برگ شکست در خطای صادقانه تمام می‌شود، هرگز حدس."
+          }
+        ]
+      },
+      "selfcheck": {
+        "a_en": "27: each of the 3 layers turns 1 attempt into up to 3, so 3×3×3 downstream tries. The budget caps attempts, the deadline cuts the tail, jitter spreads the herd.",
+        "a_fa": "۲۷: هر ۳ لایه یک تلاش را تا ۳ تلاش می‌کنند، پس ۳×۳×۳ تلاش downstream. بودجه تلاش‌ها را سقف می‌زند، deadline دم را می‌برد و jitter گله را پخش می‌کند.",
+        "q_en": "Three layers each retry up to three times. What is the worst downstream fan-out, and which knob caps it?",
+        "q_fa": "سه لایه هرکدام تا سه بار retry می‌کنند. بدترین fan-out به downstream چقدر است و کدام دستگیره سقفش می‌زند؟"
+      },
+      "source": ".archify/workflow-ch9-sol1-recovery-20261014-210102"
+    }
+  ],
+  "failures": [
+    {
+      "en": "Retry storm on a slow downstream: without a budget every client hammers at once and layered retries multiply (up to 27x). Guard with a shared retry budget, backoff plus jitter, per-attempt deadlines, and load shedding when the budget drains.",
+      "fa": "طوفان retry روی downstream کند: بدون بودجه هر کلاینت هم‌زمان می‌کوبد و retryهای لایه‌ای چندبرابر می‌شوند (تا ۲۷ برابر). نگهبان: بودجهٔ مشترک retry، backoff به‌علاوهٔ jitter، deadline هر تلاش و shed کردن بار وقتی بودجه خالی شد."
+    },
+    {
+      "en": "Result-log entry lost before retention ends (disk loss, early expiry): a retry then looks new and double-applies. Guard with durable, replicated result storage and fail-loud after the retention window instead of guessing.",
+      "fa": "گم شدن ورودی لاگ نتیجه قبل از پایان نگهداری (خرابی دیسک یا انقضای زود): retry بعد نو به‌نظر می‌رسد و دو بار اعمال می‌شود. نگهبان: ذخیرهٔ بادوام و تکثیرشدهٔ نتیجه و شکست صریح بعد از پنجرهٔ نگهداری به‌جای حدس."
+    },
+    {
+      "en": "Payload confusion: two different caller intents share one ID (client bug). The binding check rejects the second payload — loud, safe, and debuggable — instead of silently applying the wrong intent.",
+      "fa": "قاطی payload: دو قصد متفاوت caller یک شناسه را شریک می‌شوند (باگ کلاینت). بررسی binding دومین payload را رد می‌کند — بلند و امن و قابل debug — به‌جای اعمال بی‌صدای قصد اشتباه."
+    }
+  ],
+  "followups": [
+    {
+      "a_en": "27. Each layer turns one incoming attempt into up to three downstream attempts, and the layers stack multiplicatively: 3 x 3 x 3. That is the worst case with no budget and no deadline cutting tails — the teaching number assumes every layer exhausts its attempts. In production you cap it with a shared retry budget (a fraction of traffic), per-attempt deadlines, and jittered backoff so the 27 never arrive in lockstep.",
+      "a_fa": "۲۷. هر لایه یک تلاش ورودی را تا سه تلاش downstream می‌کند و لایه‌ها ضربی روی هم می‌نشینند: ۳×۳×۳. این بدترین حالت بدون بودجه و بدون deadline است که دم را ببرد — عدد آموزشی فرض می‌کند هر لایه تلاش‌هایش را تمام می‌کند. در پروداکشن با بودجهٔ مشترک retry (کسری از ترافیک)، deadline هر تلاش و backoff jitterدار سقفش می‌زنی تا ۲۷تایی هرگز هم‌قدم نرسند.",
+      "level": "senior",
+      "q_en": "Three layers each make up to three attempts. What is the maximum number of downstream attempts?",
+      "q_fa": "سه لایه هر کدام سه بار retry کنند، حداکثر چند تلاش downstream داریم؟"
+    },
+    {
+      "a_en": "The budget and the deadline, in that order — plus jitter. First the shared retry budget stops new attempts when the downstream is already sick (this is the only knob that sees global load). Then per-attempt deadlines cut each hanging try so one slow dependency cannot hold every worker. Jitter spreads the survivors so they do not arrive in lockstep, and load shedding drops the excess with an explicit error instead of queueing it. Without the budget, backoff alone just delays the same 27x stampede.",
+      "a_fa": "اول بودجه و بعد deadline — به‌علاوهٔ jitter. اول بودجهٔ مشترک retry وقتی downstream از قبل مریض است تلاش تازه را متوقف می‌کند (این تنها دستگیره‌ای است که بار سرتاسری را می‌بیند). بعد deadline هر تلاش، تلاش آویزان را می‌برد تا یک وابستگی کند نتواند همهٔ workerها را نگه دارد. jitter بازمانده‌ها را پخش می‌کند تا هم‌قدم نرسند و shed کردن بار اضافه را با خطای صریح می‌اندازد به‌جای صف کردنش. بدون بودجه، backoff به‌تنهایی فقط همان رمّهٔ ۲۷برابری را عقب می‌اندازد.",
+      "level": "staff",
+      "q_en": "The downstream is slow and every client retries. What breaks first, and which knob do you turn?",
+      "q_fa": "downstream کند است و هر کلاینت retry می‌کند. اول چه چیزی می‌شکند و کدام دستگیره را می‌چرخانی؟"
+    },
+    {
+      "q_fa": "در overload چرا retry و rate limit را با هم طراحی می‌کنی؟",
+      "q_en": "Why design retries and rate limiting together?",
+      "a_fa": "retry ورودی تازه تولید می‌کند ولی ظرفیت سرویس را بیشتر نمی‌کند. در token bucket، refill r درخواست/ثانیه از ظرفیت پایدارِ اندازه‌گیری‌شده با حاشیه می‌آید و burst b از کار اضافی قابل‌تحمل در deadline صف: اگر ظرفیت آزاد c و انتظار مجاز T باشد، b≤c×T یک کران آموزشی است. صف را کران‌دار نگه دار، 429/503 و Retry-After بده، retry را در یک لایه با deadline و jitter محدود کن. ظرفیت و fairness هر tenant را جدا بسنج.",
+      "a_en": "Retries add arrivals, not capacity. Choose token-bucket refill r from measured sustainable capacity with margin and burst b from spare capacity c times the tolerated queue wait T: b≤c×T is a teaching bound. Bound queues, return 429/503 with Retry-After and limit retries to one layer with deadlines and jitter. Measure capacity and per-tenant fairness.",
+      "level": "staff"
+    }
+  ],
+  "interview_q_en": "A counter or payment request, its commit, or its reply can each be lost. Show the history of every case, design request IDs with result lookup, payload binding and retention, then add deadlines, backoff with jitter and a retry budget.",
+  "interview_q_fa": "شمارنده یا پرداختی داریم که درخواست، commit یا پاسخ آن ممکن است گم شود. history هر حالت را نشان بده. پروتکل با request ID، نتیجهٔ lookup، binding به payload و نگهداری طراحی کن؛ بعد deadline، backoff با jitter و بودجهٔ retry را اضافه کن.",
+  "mental_en": "The network owes you nothing after you send: silence is a fact about the reply, never a fact about the request. So stop asking 'did it fail?' — a question the wire cannot answer — and ask 'what does the result log say about this ID?' instead. Retries are then just polite re-askings of a question with a stored answer.",
+  "mental_fa": "شبکه بعد از ارسال هیچ بدهی به تو ندارد: سکوت واقعیتی دربارهٔ پاسخ است، هرگز واقعیتی دربارهٔ درخواست نیست. پس دست از «شکست خورد؟» بردار — سؤالی که سیم نمی‌تواند جوابش دهد — و بپرس «لاگ نتیجه دربارهٔ این شناسه چه می‌گوید؟». آن‌وقت retryها فقط دوباره‌پرسیدن مؤدبانهٔ سؤالی‌اند که جواب ذخیره‌شده دارد.",
+  "mistakes": [
+    {
+      "en": "Reading a timeout as 'it did not execute' and blindly resending: in the lost-reply case the effect already exists, so the resend doubles it. Timeout means unknown — always.",
+      "fa": "خواندن timeout به‌معنای «اجرا نشد» و ارسال کورکورانهٔ دوباره: در حالت پاسخ‌گمشده اثر از قبل هست، پس ارسال دوباره دوتایش می‌کند. timeout یعنی ناشناخته — همیشه."
+    },
+    {
+      "en": "Minting a fresh request ID per attempt: the server cannot link the retry to the original, so dedup never fires and every retry is a new charge. The ID belongs to the caller intent, not to the attempt.",
+      "fa": "ساختن شناسهٔ تازه برای هر تلاش: سرور نمی‌تواند retry را به اصلی وصل کند، پس dedup هرگز عمل نمی‌کند و هر retry یک شارژ تازه است. شناسه مال قصد caller است نه مال تلاش."
+    },
+    {
+      "en": "Unbounded retries at every layer: three innocent-looking 'retry 3 times' policies stack into 27 downstream attempts, and without jitter they arrive in lockstep. Bound attempts globally with a budget, not just locally with a count.",
+      "fa": "retry بی‌کران در هر لایه: سه سیاست معصوم «۳ بار retry» روی هم می‌نشینند و ۲۷ تلاش downstream می‌شوند و بدون jitter هم‌قدم می‌رسند. تلاش‌ها را سرتاسری با بودجه کران کن، نه فقط محلی با شمارش."
+    }
+  ],
+  "number": 1,
+  "slug": "timeout-simulator",
+  "sources": [
+    "idempotency",
+    "retry"
+  ],
+  "steps": [
+    {
+      "en": "Name the unknown first: a timeout fits three histories — request lost (nothing applied), server dead (maybe applied), reply lost (applied, unconfirmed). No client-side evidence separates them, so the design must work under all three.",
+      "fa": "اول ناشناخته را نام ببر: timeout با سه history می‌خواند — درخواست گم (هیچی اعمال نشده)، سرور مرده (شاید اعمال شده) و پاسخ گم (اعمال‌شدهٔ تأییدنشده). هیچ مدرک سمت کلاینت آن‌ها را جدا نمی‌کند، پس طراحی باید زیر هر سه کار کند.",
+      "t_en": "Timeout is not 'not executed'",
+      "t_fa": "timeout یعنی «اجرا نشد» نیست"
+    },
+    {
+      "en": "Give the intent one ID and the server one memory: the client mints a UUID per intent and keeps it across retries; the server inserts-or-looks-up (ID, payload hash, result) atomically, returning the stored result on repeats.",
+      "fa": "به قصد یک شناسه بده و به سرور یک حافظه: کلاینت برای هر قصد یک UUID می‌سازد و در retryها نگهش می‌دارد؛ سرور (شناسه، hashpayload و نتیجه) را اتمیک درج-یا-lookup می‌کند و روی تکرار نتیجهٔ ذخیره‌شده را برمی‌گرداند.",
+      "t_en": "Same ID, stored result",
+      "t_fa": "شناسهٔ ثابت، نتیجهٔ ذخیره‌شده"
+    },
+    {
+      "en": "Bind the ID to the payload and keep it past the retry window: the same ID with a different payload is rejected (client bug, caught loud), and lookups after retention expiry fail loud instead of applying blind.",
+      "fa": "شناسه را به payload گره بزن و بیشتر از پنجرهٔ retry نگهش دار: همان شناسه با payload متفاوت رد می‌شود (باگ کلاینت که بلند گرفته می‌شود) و lookupهای بعد از انقضای نگهداری شکست صریح می‌خورند به‌جای اعمال کور.",
+      "t_en": "Bind payload, retain results",
+      "t_fa": "گره payload، نگهداری نتایج"
+    },
+    {
+      "en": "Bound the storm, not just the attempt: per-attempt deadlines cut tails, backoff plus jitter spreads the herd, and a shared retry budget sheds load — 3 layers x 3 attempts peak at 27 downstream tries in the teaching math.",
+      "fa": "طوفان را کران کن نه فقط تلاش را: deadline هر تلاش دم را می‌برد، backoff به‌علاوهٔ jitter گله را پخش می‌کند و بودجهٔ مشترک retry بار را shed می‌کند — در حساب آموزشی ۳ لایه × ۳ تلاش در اوج ۲۷ تلاش downstream می‌شوند.",
+      "t_en": "Budget the layers",
+      "t_fa": "بودجه برای لایه‌ها"
+    }
+  ],
+  "tests_en": "Invariants: distinct IDs applied once each (effect count equals distinct-ID count); same ID plus same payload retried N times still yields one effect; same ID plus new payload is rejected, never applied. Metrics: retry rate per dependency, budget-exhaustion events, oldest unexpired result age, and tail latency of attempts — alert when the budget drains faster than the teaching drain rate.",
+  "tests_fa": "ناورداها: شناسه‌های متمایز هرکدام یک‌بار اعمال می‌شوند (شمارش اثر برابر شمارش شناسهٔ متمایز)؛ همان شناسه با همان payload بعد از N تکرار هنوز یک اثر دارد؛ همان شناسه با payload تازه رد می‌شود، هرگز اعمال نه. معیارها: نرخ retry هر وابستگی، رویدادهای خالی شدن بودجه، سن قدیمی‌ترین نتیجهٔ منقضی‌نشده و دم تأخیر تلاش‌ها — وقتی بودجه سریع‌تر از نرخ آموزشی خالی شد هشدار بده.",
+  "worked_en": "<p>Teaching math: 3 layers, up to 3 attempts each, so the worst downstream fan-out is 3 x 3 x 3 = 27 attempts for one caller try. A shared retry budget of a teaching 10% of traffic means the 28th concurrent retry waits or fails loud instead of joining the stampede. Backoff with jitter spreads the survivors: without it all 27 arrive in lockstep; with it they spread across the backoff window and the downstream recovers between waves.</p>",
+  "worked_fa": "<p>حساب آموزشی: ۳ لایه و هرکدام تا ۳ تلاش، پس بدترین fan-out به downstream برای یک تلاش caller برابر ۳×۳×۳ = ۲۷ تلاش است. بودجهٔ مشترک retry به اندازهٔ آموزشی ۱۰٪ ترافیک یعنی ۲۸مین retry هم‌زمان به‌جای پیوستن به رمّه صبر می‌کند یا بلند شکست می‌خورد. backoff با jitter بازمانده‌ها را پخش می‌کند: بدون آن هر ۲۷تایی هم‌قدم می‌رسند؛ با آن در پنجرهٔ backoff پخش می‌شوند و downstream میان موج‌ها نفس می‌کشد.</p>",
+  "reasoning_fa": "<p>timeout فقط نبود پاسخ را نشان می‌دهد، نه اجرا نشدن درخواست؛ به همین دلیل retry همان intent باید ID قبلی را حمل کند. سه لایه با سه attempt می‌توانند ۳×۳×۳=۲۷ فراخوان پایین‌دست بسازند، چون هر تلاش لایهٔ بالا تمام تلاش‌های پایین را دوباره فعال می‌کند. deadline مشترک، retry budget و jitter بار را محدود می‌کنند. دو attempt در دمو برای دیدن duplicate کافی است؛ عدد production باید از نرخ خطای گذرا و ظرفیت باقی‌مانده بیاید.</p>",
+  "reasoning_en": "<p>Timeout proves no response arrived, not that execution did not happen; retry the same intent with the same ID. Three layers with three attempts can cause 3×3×3=27 downstream calls because each upper attempt repeats lower attempts. Shared deadlines, retry budgets and jitter bound load. Two demo attempts expose duplication; production counts depend on transient errors and spare capacity.</p>"
+}

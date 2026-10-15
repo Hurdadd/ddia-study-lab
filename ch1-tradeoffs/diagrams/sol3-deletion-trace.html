@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One erasure across six copies — DDIA Chapter 1 Solution 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Deletion trace across record, cache, index, log, backup and training data">
+<title>One erasure request across six copies</title>
+<defs>
+<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0 0L10 5L0 10z" fill="#302828"/>
+</marker>
+</defs>
+<text x="620" y="50" font-size="30" font-weight="900" text-anchor="middle">One erasure, six copies, six weapons</text>
+<text x="620" y="84" font-size="16" text-anchor="middle">each copy names its mechanism and its evidence, a copy with no weapon is the finding</text>
+<g>
+<rect x="40" y="112" width="200" height="52" rx="12" fill="#9278ef"/>
+<text x="140" y="144" font-size="15" font-weight="700" text-anchor="middle">record: direct delete</text>
+<rect x="270" y="112" width="200" height="52" rx="12" fill="#c3ceff"/>
+<text x="370" y="144" font-size="15" font-weight="700" text-anchor="middle">cache: purge keys</text>
+<rect x="500" y="112" width="200" height="52" rx="12" fill="#c3ceff"/>
+<text x="600" y="144" font-size="15" font-weight="700" text-anchor="middle">index: purge + rebuild</text>
+<rect x="730" y="112" width="200" height="52" rx="12" fill="#ffe08a"/>
+<text x="830" y="144" font-size="15" font-weight="700" text-anchor="middle">log: tombstone</text>
+<rect x="960" y="112" width="120" height="52" rx="12" fill="#bfe6c9"/>
+<text x="1020" y="144" font-size="15" font-weight="700" text-anchor="middle">backup</text>
+<rect x="1090" y="112" width="110" height="52" rx="12" fill="#ffcfb8"/>
+<text x="1145" y="144" font-size="15" font-weight="700" text-anchor="middle">train</text>
+</g>
+<line x1="140" y1="164" x2="140" y2="200" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="370" y1="164" x2="370" y2="200" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="600" y1="164" x2="600" y2="200" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="830" y1="164" x2="830" y2="200" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="1020" y1="164" x2="1020" y2="200" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<line x1="1145" y1="164" x2="1145" y2="200" stroke="#302828" stroke-width="2" marker-end="url(#arr)"/>
+<g>
+<rect x="40" y="208" width="1160" height="200" rx="16" fill="#fffdf7"/>
+<text x="70" y="246" font-size="15" font-weight="800">log lane: append delete-user-X, compact segments without the user</text>
+<text x="70" y="278" font-size="14">or shred the per-user key: instant unreadability, no rewrite</text>
+<text x="70" y="310" font-size="15" font-weight="800">backup lane: expire by retention, restores replay through tombstones</text>
+<text x="70" y="342" font-size="14">a backup older than retention is destroyed, never replayed</text>
+<text x="70" y="374" font-size="15" font-weight="800">training lane: exclude at next retrain, document the lag honestly</text>
+</g>
+<g>
+<rect x="40" y="424" width="1160" height="96" rx="16" fill="none" stroke="#ff7e49" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="70" y="460" font-size="15" font-weight="800">dotted lane: the offline consumer, fenced by the deletion watermark</text>
+<text x="70" y="490" font-size="14">no serving until caught past the watermark, missed keys already destroyed so reads fail closed</text>
+</g>
+<text x="620" y="566" font-size="14" text-anchor="middle">resurrection guards: watermark for stragglers, tombstoned restore for backups</text>
+<text x="620" y="594" font-size="14" text-anchor="middle">legend: purple/blue = easy copies, yellow = the hard log, green/pink = slow copies, dashed = the fenced straggler</text>
+<text x="620" y="622" font-size="14" text-anchor="middle">deadlines needing a lawyer are named uncertain, never quoted as law</text>
+</svg>
+</div>
+</body>
+</html>

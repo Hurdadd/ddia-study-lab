@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ACID, Letter by Letter — What Each Promise Really Means</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;background:#f7f2e8;color:#302828;
+    font-family:'Nunito','Vazirmatn',system-ui,sans-serif;}
+  .stage{width:100%;display:flex;justify-content:center;padding:10px 0;}
+  svg{width:100%;height:auto;max-width:1240px;background:#f7f2e8;}
+  text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828;}
+  .ttl{font-size:22px;font-weight:900;}
+  .sub{font-size:14px;font-weight:700;fill:#6e665c;}
+  .big{font-size:34px;font-weight:900;}
+  .nm{font-size:16px;font-weight:900;}
+  .ln{font-size:14px;font-weight:400;}
+  .not{font-size:13px;font-weight:900;}
+  .notln{font-size:13px;font-weight:400;}
+  .pillt{font-size:12px;font-weight:800;}
+  .foot{font-size:14px;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="The four ACID letters with their real meanings and common misreadings">
+<title>ACID letters and their real meanings</title>
+
+  <text class="ttl" x="620" y="44" text-anchor="middle">ACID, Letter by Letter — What Each Promise Really Means</text>
+  <text class="sub" x="620" y="70" text-anchor="middle">Atomicity is abortability, not threading. Consistency is your own invariants.</text>
+
+  <!-- A -->
+  <g>
+    <rect x="40" y="100" width="265" height="430" rx="18" fill="#ffcfb8"/>
+    <text class="big" x="172" y="162" text-anchor="middle">A</text>
+    <text class="nm" x="172" y="194" text-anchor="middle">ATOMICITY</text>
+    <line x1="64" y1="210" x2="281" y2="210" stroke="#302828" stroke-width="2"/>
+    <text class="ln" x="64" y="236">all writes in the tx</text>
+    <text class="ln" x="64" y="262">either land together</text>
+    <text class="ln" x="64" y="288">or are all rolled back</text>
+    <text class="ln" x="64" y="314">so retry is always safe</text>
+    <text class="not" x="64" y="350">is NOT:</text>
+    <text class="notln" x="64" y="374">thread-style atomicity;</text>
+    <text class="notln" x="64" y="398">that is isolation's job</text>
+    <rect x="64" y="424" width="217" height="36" rx="18" fill="#fffdf7"/>
+    <text class="pillt" x="172" y="447" text-anchor="middle">call it abortability</text>
+  </g>
+
+  <!-- C -->
+  <g>
+    <rect x="335" y="100" width="265" height="430" rx="18" fill="#ffe08a"/>
+    <text class="big" x="467" y="162" text-anchor="middle">C</text>
+    <text class="nm" x="467" y="194" text-anchor="middle">CONSISTENCY</text>
+    <line x1="359" y1="210" x2="576" y2="210" stroke="#302828" stroke-width="2"/>
+    <text class="ln" x="359" y="236">your app's invariants</text>
+    <text class="ln" x="359" y="262">stay true: books balance,</text>
+    <text class="ln" x="359" y="288">keys unique, refs valid;</text>
+    <text class="ln" x="359" y="314">declare them, DB enforces</text>
+    <text class="not" x="359" y="350">is NOT:</text>
+    <text class="notln" x="359" y="374">replica sync;</text>
+    <text class="notln" x="359" y="398">nor linearizability</text>
+    <rect x="359" y="424" width="217" height="36" rx="18" fill="#fffdf7"/>
+    <text class="pillt" x="467" y="447" text-anchor="middle">DB keeps what you declare</text>
+  </g>
+
+  <!-- I -->
+  <g>
+    <rect x="630" y="100" width="265" height="430" rx="18" fill="#bfe6c9"/>
+    <text class="big" x="762" y="162" text-anchor="middle">I</text>
+    <text class="nm" x="762" y="194" text-anchor="middle">ISOLATION</text>
+    <line x1="654" y1="210" x2="871" y2="210" stroke="#302828" stroke-width="2"/>
+    <text class="ln" x="654" y="236">concurrent txs must not</text>
+    <text class="ln" x="654" y="262">trip each other: classic</text>
+    <text class="ln" x="654" y="288">answer is serializability</text>
+    <text class="ln" x="654" y="314">as if run one by one</text>
+    <text class="not" x="654" y="350">is NOT:</text>
+    <text class="notln" x="654" y="374">what most DBs sell;</text>
+    <text class="notln" x="654" y="398">know your real level</text>
+    <rect x="654" y="424" width="217" height="36" rx="18" fill="#fffdf7"/>
+    <text class="pillt" x="762" y="447" text-anchor="middle">weak levels burden the app</text>
+  </g>
+
+  <!-- D -->
+  <g>
+    <rect x="925" y="100" width="265" height="430" rx="18" fill="#c3ceff"/>
+    <text class="big" x="1057" y="162" text-anchor="middle">D</text>
+    <text class="nm" x="1057" y="194" text-anchor="middle">DURABILITY</text>
+    <line x1="949" y1="210" x2="1166" y2="210" stroke="#302828" stroke-width="2"/>
+    <text class="ln" x="949" y="236">once committed,</text>
+    <text class="ln" x="949" y="262">data is never forgotten:</text>
+    <text class="ln" x="949" y="288">fsync and WAL on one node,</text>
+    <text class="ln" x="949" y="314">copies on many nodes</text>
+    <text class="not" x="949" y="350">is NOT:</text>
+    <text class="notln" x="949" y="374">absolute: total disk</text>
+    <text class="notln" x="949" y="398">loss still loses data</text>
+    <rect x="949" y="424" width="217" height="36" rx="18" fill="#fffdf7"/>
+    <text class="pillt" x="1057" y="447" text-anchor="middle">commit is the point of no return</text>
+  </g>
+
+  <rect x="40" y="552" width="1160" height="64" rx="16" fill="#d3c3f2"/>
+  <text class="foot" x="64" y="579">Interview line: ACID is a marketing word — ask which isolation level is actually on.</text>
+  <text class="foot" x="64" y="603">Durability costs fsyncs; consistency costs declared constraints.</text>
+</svg>
+</div>
+</body>
+</html>

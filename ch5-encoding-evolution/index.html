@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-hue="lilac" data-title-fa="DDIA فصل ۵: کدگذاری و تکامل" data-title-en="DDIA Chapter 5: Encoding and Evolution">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DDIA Chapter 5: Encoding and Evolution</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/ddia.css">
+<link rel="stylesheet" href="../assets/exercise-audit.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a class="wordmark" href="../index.html">DDIA<em>·</em><span class="fa">مطالعه</span><span class="en">STUDY</span></a>
+  <nav class="topnav">
+    <a href="../index.html"><span class="fa">نقشه راه</span><span class="en">Roadmap</span></a>
+    <a href="index.html" aria-current="page"><span class="fa">فصل ۵</span><span class="en">Chapter 5</span></a>
+    <a href="../ch6-replication/index.html"><span class="fa">فصل بعد</span><span class="en">Next chapter</span></a>
+  </nav>
+  <button class="langbtn" data-lang-toggle><span class="fa">EN</span><span class="en">فارسی</span></button>
+  <button class="iconbtn" data-theme-toggle aria-label="theme">
+    <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  </button>
+</header>
+
+<section class="doc-hero">
+  <div class="blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+  <p class="crumb"><a href="../index.html"><span class="fa">نقشه راه</span><span class="en">Roadmap</span></a>/ <span class="fa">فصل ۵</span><span class="en">Chapter 5</span></p>
+  <h1 class="reveal"><span class="fa">کدگذاری و تکامل</span><span class="en">Encoding and evolution</span></h1>
+  <p class="lede reveal">
+    <span class="fa">داده برای خروج از حافظهٔ برنامه باید به قالبی قابل‌ذخیره یا قابل‌ارسال تبدیل شود. مسئلهٔ اصلی این فصل این است که پس از تغییرِ قالب، نسخه‌های قدیم و جدید چگونه همچنان با هم کار کنند.</span>
+    <span class="en">How data becomes bytes, how old and new versions coexist, and why backward/forward compatibility is the backbone of zero-downtime deploys — with 6 interactive (Archify) and 3 concept diagrams, a teacher narration for each, and an interview question pack.</span>
+  </p>
+  <div class="meta-row reveal">
+    <span><b><span class="fa">۹</span><span class="en">9</span></b> <span class="fa">نمودار (۶ تعاملی + ۳ مفهومی)</span><span class="en">diagrams (6 interactive + 3 concept)</span></span><span class="dot">·</span>
+    <span><span class="fa">محور: compatibility · protobuf · Avro · dataflow modes</span><span class="en">Theme: compatibility · protobuf · Avro · dataflow modes</span></span><span class="dot">·</span>
+    <span><span class="fa">زمان مطالعه: حدود ۶۰ دقیقه</span><span class="en">Reading time: ~60 min</span></span>
+  </div>
+</section>
+
+<div class="doc-wrap">
+<nav class="toc">
+<a class="fa" href="#chapter-examples">مثال‌های فنی این فصل</a>
+
+  <h3><span class="fa">فهرست موضوع‌ها</span><span class="en">Contents</span></h3>
+  <a href="#s0"><span class="fa">۰. نقشهٔ راه فصل</span><span class="en">0. Chapter roadmap</span></a>
+  <a href="#s1"><span class="fa">۱. encode و decode</span><span class="en">1. Encoding and decoding</span></a>
+  <a href="#s2"><span class="fa">۲. سازگاری و ارتقای تدریجی</span><span class="en">2. Compatibility and gradual upgrades</span></a>
+  <a class="lvl2" href="#s2-1"><span class="fa">۲.۱. نمودار ۱ + روایت مدرس</span><span class="en">2.1. Diagram 1 + teacher narration</span></a>
+  <a href="#s3"><span class="fa">۳. قالب‌های کدگذاری</span><span class="en">3. Encoding formats</span></a>
+  <a class="lvl2" href="#s3-1"><span class="fa">۳.۱. نمودار ۲ + روایت مدرس</span><span class="en">3.1. Diagram 2 + teacher narration</span></a>
+  <a class="lvl2" href="#s3-2"><span class="fa">۳.۲. قالب‌های ویژهٔ زبان</span><span class="en">3.2. Language-native formats</span></a>
+  <a class="lvl2" href="#s3-3"><span class="fa">۳.۳. JSON، XML، CSV و JSON Schema</span><span class="en">3.3. JSON, XML, CSV and JSON Schema</span></a>
+  <a class="lvl2" href="#s3-4"><span class="fa">۳.۴. Protocol Buffers</span><span class="en">3.4. Protocol Buffers</span></a>
+  <a class="lvl2" href="#s3-5"><span class="fa">۳.۵. Avro + نمودار ۳</span><span class="en">3.5. Avro + Diagram 3</span></a>
+  <a class="lvl2" href="#s3-6"><span class="fa">۳.۶. مزایای schema و اسکیماهای پویا</span><span class="en">3.6. Schema benefits and dynamic schemas</span></a>
+  <a class="lvl2" href="#s3-7"><span class="fa">۳.۷. چرخهٔ حیاتِ یک فیلدِ اسکیما + نمودار ۶</span><span class="en">3.7. A schema field’s lifecycle + Diagram 6</span></a>
+  <a href="#s4"><span class="fa">۴. حالت‌های جریان داده</span><span class="en">4. Dataflow modes</span></a>
+  <a class="lvl2" href="#s4-1"><span class="fa">۴.۱. نمودار ۴ + روایت مدرس</span><span class="en">4.1. Diagram 4 + teacher narration</span></a>
+  <a class="lvl2" href="#s4-2"><span class="fa">۴.۲. جریان داده از طریق پایگاه داده</span><span class="en">4.2. Dataflow via databases</span></a>
+  <a class="lvl2" href="#s4-3"><span class="fa">۴.۳. سرویس‌ها: REST و RPC</span><span class="en">4.3. Services: REST and RPC</span></a>
+  <a class="lvl2" href="#s4-4"><span class="fa">۴.۴. workflow و اجرای پایدار + نمودار ۵</span><span class="en">4.4. Workflows and durable execution + Diagram 5</span></a>
+  <a class="lvl2" href="#s4-5"><span class="fa">۴.۵. معماری event-driven</span><span class="en">4.5. Event-driven architecture</span></a>
+  <a href="#s5"><span class="fa">۵. بستهٔ مصاحبه</span><span class="en">5. Interview pack</span></a>
+  <a class="lvl2" href="#s5-1"><span class="fa">۵.۱. همه‌چیز در یک نگاه</span><span class="en">5.1. Everything at a glance</span></a>
+  <a class="lvl2" href="#s5-2"><span class="fa">۵.۲. سوالات پرتکرار</span><span class="en">5.2. Frequent questions</span></a>
+  <a class="lvl2" href="#s5-3"><span class="fa">۵.۳. اشتباهات رایج</span><span class="en">5.3. Common mistakes</span></a>
+  <a class="lvl2" href="#s5-4"><span class="fa">۵.۴. چک‌لیست ۵ دقیقه‌ای</span><span class="en">5.4. Five-minute checklist</span></a>
+  <a href="#s6"><span class="fa">۶. تمرین‌های عملی</span><span class="en">6. Hands-on exercises</span></a>
+</nav>
+
+<main class="doc">
+
+<section id="s0">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۰</span><span class="en">0</span></span><span class="fa">نقشهٔ راه فصل</span><span class="en">Chapter roadmap</span></h2>
+<aside class="callout fa example-index" id="chapter-examples" aria-label="مثال‌های فنی فصل ۵">
+<div class="tag">مثال‌های فنی فصل ۵</div>
+<p>هر مثال، وضعیت اولیه، ترتیبِ عملیات و نتیجه را نشان می‌دهد. عددها و داده‌ها فرض آموزشی‌اند؛ نام ابزارها فقط جایی آمده که رفتار مشخصِ آن ابزار موضوع بحث است.</p>
+<details><summary>فهرستِ مثال‌ها؛ رفتن مستقیم به هر موضوع</summary><ul>
+<li><a href="#example-ch5-0">رکورد قدیمی زیر کد جدید</a></li>
+<li><a href="#example-ch5-1">شیء با بایت فرق دارد</a></li>
+<li><a href="#example-ch5-2">چهار ترکیب در rolling upgrade</a></li>
+<li><a href="#example-ch5-3">مقایسهٔ قالب روی همان رکورد</a></li>
+<li><a href="#example-ch5-4">نام کلاس، قرارداد پایدار نیست</a></li>
+<li><a href="#example-ch5-5">شناسهٔ بزرگ در JSON</a></li>
+<li><a href="#example-ch5-6">Tag هویت فیلد است</a></li>
+<li><a href="#example-ch5-7">Resolution در Avro</a></li>
+<li><a href="#example-ch5-8">فیلد اضافی و فیلد غایب</a></li>
+<li><a href="#example-ch5-9">پیدا کردن schema نویسنده</a></li>
+<li><a href="#example-ch5-10">قرارداد پیش از ورود داده</a></li>
+<li><a href="#example-ch5-11">چرخهٔ حذف یک فیلد</a></li>
+<li><a href="#example-ch5-12">سه مسیر همان داده</a></li>
+<li><a href="#example-ch5-13">ویرایش نام، حذف email</a></li>
+<li><a href="#example-ch5-14">RPC ناموفق یا پاسخ نامعلوم؟</a></li>
+<li><a href="#example-ch5-15">کشف سرویس تا انتخاب مقصد</a></li>
+<li><a href="#example-ch5-16">ادامهٔ workflow بعد از crash</a></li>
+<li><a href="#example-ch5-17">Replay با کد عوض‌شده</a></li>
+<li><a href="#example-ch5-18">رویداد مستقل از مصرف‌کننده</a></li>
+</ul></details>
+<p class="small">برای بررسیِ رفتار ابزار: <a href="https://protobuf.dev/programming-guides/proto3/">Protocol Buffers: تکامل پیام</a>.</p>
+<p class="small"><a href="https://avro.apache.org/docs/1.12.0/specification/">Avro: قواعد schema resolution</a></p>
+</aside>
+
+
+
+  <div class="callout">
+    <div class="tag"><span class="fa">ایدهٔ کلیدی فصل</span><span class="en">Chapter thesis</span></div>
+    <div class="fa"><p>داده برای خروج از حافظهٔ برنامه باید به قالبی قابل‌ذخیره یا قابل‌ارسال تبدیل شود. مسئلهٔ اصلی این فصل این است که پس از تغییرِ قالب، نسخه‌های قدیم و جدید چگونه همچنان با هم کار کنند.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-0">
+<p class="example-title"><b>مثال فنی: رکورد قدیمی زیر کد جدید</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> نسخهٔ ۱ رکورد <code dir="ltr">{name: &quot;Sara&quot;}</code> نوشته و نسخهٔ ۲ فیلد <code dir="ltr">email</code> اضافه کرده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> خوانندهٔ تازه برای رکورد قدیمی باید رفتارِ نبود email را بداند؛ خوانندهٔ قدیمی هم باید فیلد تازه را طبق قرارداد تحمل کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> آزمون سازگاری باید هر دو جهت خواندن را پوشش دهد؛ صرفِ موفقیت encode/decode با نسخهٔ یکسان کافی نیست.</p>
+</div>
+<p>مثال‌های این فصل سناریوهای آموزشیِ برگرفته از کارهای روزمره‌اند. عددهای انتخاب‌شده برای توضیح‌اند؛ معماریِ داخلیِ یک شرکت مشخص را توصیف نمی‌کنند.</p></div><div class="en"><p>Whenever data crosses a <b>process</b> boundary — written to disk, sent over the network, or handed to the next version of the program itself — it must be encoded from “in-memory structures” into a <b>sequence of bytes</b>. This chapter isn’t about the details of that conversion; it’s about its <b>architectural consequences</b>: if you change the byte layout, who can no longer read the data?</p></div>
+    <div class="fa">
+      چون deploy در سیستم‌های بزرگ <b>تدریجی</b> است (rolling upgrade) و کلاینت‌ها را نمی‌توان مجبور به
+      به‌روزرسانی کرد، نسخه‌های قدیم و جدیدِ کد <b>هم‌زمان</b> اجرا می‌شوند و داده‌های قدیم و جدید کنار هم
+      می‌مانند. نتیجه: هر قالبِ داده باید هم <b>backward</b> باشد (کدِ جدید، دادهٔ قدیمی را بخواند) و هم
+      <b>forward</b> (کدِ قدیمی، دادهٔ جدید را نابود نکند).
+    </div><div class="en"><p>Because deploys in large systems are <b>gradual</b> (rolling upgrades) and clients can’t be forced to update, old and new versions of the code run <b>side by side</b> while old and new data sit next to each other. So every data format must be both <b>backward</b> compatible (new code reads old data) and <b>forward</b> compatible (old code doesn’t destroy new data).</p></div>
+  </div>
+
+  <div class="fa">این فصل دو نیمهٔ مشخص دارد:</div><div class="en"><p>This chapter has two distinct halves:</p></div>
+  <div class="fa">
+<ul>    <li><b>نیمهٔ اول — قالب‌های کدگذاری:</b> از قالب‌های ویژهٔ زبان (مثل <span class="ltr">java.io.Serializable</span>) تا JSON/XML/CSV و بعد قالب‌های باینریِ مبتنی بر schema مثل <b>Protocol Buffers</b> و <b>Avro</b>. هرکدام قواعد تکامل (schema evolution) متفاوتی دارند.</li>
+    <li><b>نیمهٔ دوم — حالت‌های جریان داده (modes of dataflow):</b> داده بین processها چطور حرکت می‌کند؟ از طریق <b>پایگاه داده</b> (نوشتن = پیام به آیندهٔ خودت)، از طریق <b>سرویس‌ها</b> (REST/RPC)، از طریق <b>workflow engine</b>‌ها (اجرای پایدار)، یا از طریق <b>message broker</b> و actorها (معماری event-driven). هر حالت، ترکیب متفاوتی از سازگاریِ backward/forward را لازم دارد.</li>
+  </ul></div><div class="en"><ul><li><b>First half — encoding formats:</b> from language-native formats (like <span class="ltr">java.io.Serializable</span>) through JSON/XML/CSV to schema-driven binary formats like <b>Protocol Buffers</b> and <b>Avro</b>. Each has different schema-evolution rules.</li><li><b>Second half — dataflow modes:</b> how does data move between processes? Via a <b>database</b> (writing = messaging your future self), via <b>services</b> (REST/RPC), via <b>workflow engines</b> (durable execution), or via a <b>message broker</b> and actors (event-driven architecture). Each mode needs a different mix of backward/forward compatibility.</li></ul></div>
+
+  <div class="callout">
+    <div class="tag"><span class="fa">نکتهٔ مصاحبه</span><span class="en">Interview tip</span></div>
+    <div class="fa">
+      جملهٔ طلایی این فصل: <b>«data outlives code»</b> — کد در چند دقیقه deploy می‌شود، اما دادهٔ پنج‌ساله
+      هنوز با همان فرمتِ روز اول روی دیسک است. هر تصمیمِ قالبِ داده، تعهدی بلندمدت‌تر از عمرِ هر نسخهٔ کد است.
+    </div><div class="en"><p>This chapter’s golden line: <b>“data outlives code”</b> — code deploys in minutes, but five-year-old data still sits on disk in its day-one format. Every data-format decision is a longer-term commitment than any code version’s lifetime.</p></div>
+  </div>
+</section>
+
+<section id="s1">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۱</span><span class="en">1</span></span><span class="fa">encode و decode</span><span class="en">Encoding and decoding</span></h2>
+
+  <div class="fa">
+<p>کدگذاری یعنی تبدیل دادهٔ داخل برنامه به بایت‌هایی که بتوان ذخیره یا ارسال کرد. رمزگشاییِ قالب یا decode، همان بایت‌ها را دوباره به دادهٔ قابل‌استفاده تبدیل می‌کند؛ این مفهوم با رمزنگاری امنیتی فرق دارد.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-1">
+<p class="example-title"><b>مثال فنی: شیء با بایت فرق دارد</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> برنامه شیئی با <code dir="ltr">user_id=17</code> و <code dir="ltr">name=Sara</code> در حافظه دارد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> encoder آن را به بایت تبدیل می‌کند؛ decoder با قواعد همان قالب، فیلدها را از بایت‌ها بازسازی می‌کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اشاره‌گرهای حافظه و کلاس‌های زبان به‌خودی‌خود قراردادِ قابل‌انتقال نیستند؛ قالب باید معنی فیلدها را مشخص کند.</p>
+</div>
+</div><div class="en"><p>Programs hold data in two shapes:</p></div>
+  <div class="fa">
+<ul>    <li><b>درون حافظه:</b> object، struct، لیست، آرایه، hash table، درخت — ساختارهایی که برای دسترسیِ سریعِ CPU (معمولاً با pointer) بهینه‌اند.</li>
+    <li><b>روی دیسک / شبکه:</b> باید <b>دنباله‌ای خوداتکا از بایت‌ها</b> باشد (مثل یک سند JSON)؛ چون pointer برای process دیگر معنایی ندارد.</li>
+  </ul></div><div class="en"><ul><li><b>In memory:</b> objects, structs, lists, arrays, hash tables, trees — structures optimized for fast CPU access (usually with pointers).</li><li><b>On disk / network:</b> must be a <b>self-contained byte sequence</b> (like one JSON document); a pointer means nothing to another process.</li></ul></div>
+  <div class="fa">
+    ترجمهٔ از نمایشِ درون‌حافظه‌ای به بایت‌ها یعنی <b>encoding</b> (معادل‌های رایج: serialization یا marshaling)
+    و ترجمهٔ معکوس یعنی <b>decoding</b> (parsing، deserialization یا unmarshaling).
+  </div><div class="en"><p>Translating from the in-memory representation to bytes is <b>encoding</b> (common synonyms: serialization, marshaling); the reverse is <b>decoding</b> (parsing, deserialization, unmarshaling).</p></div>
+
+  <div class="callout warn">
+    <div class="tag"><span class="fa">دامِ اصطلاح</span><span class="en">Terminology trap</span></div>
+    <div class="fa">
+      واژهٔ <span class="ltr">serialization</span> در بحث تراکنش‌ها (فصل ۸) معنای کاملاً متفاوتی دارد (ترتیب‌پذیریِ اجرا).
+      کتاب برای جلوگیری از ابهام، همه‌جا <b>encoding</b> می‌گوید.
+    </div><div class="en"><p>The word <span class="ltr">serialization</span> means something completely different in transaction discussions (Chapter 8: execution orderability). To avoid ambiguity, the book says <b>encoding</b> everywhere.</p></div>
+  </div>
+
+  <div class="fa">
+<ul>    <li>گاهی encode/decode لازم نیست: مثلاً موتوری که مستقیم روی دادهٔ فشردهٔ خوانده‌شده از دیسک کار می‌کند (بخش Query Execution در فصل ۴)، یا قالب‌های <b>zero-copy</b> مثل <span class="ltr">Cap'n Proto</span> و <span class="ltr">FlatBuffers</span> که همان بایت‌ها هم‌زمان نمایِ اجرا و نمایِ ذخیره‌سازی‌اند و تبدیلِ جداگانه ندارند.</li>
+    <li>اما اکثر سیستم‌ها به تبدیلِ بین اشیای درون حافظه و دنبالهٔ بایت نیاز دارند — و انتخابِ قالب، فقط بحثِ اندازه و سرعت نیست؛ بحثِ <b>تکامل‌پذیری</b> است.</li>
+  </ul></div><div class="en"><ul><li>Sometimes no encode/decode is needed: e.g. an engine working directly on compressed data read from disk (the Query Execution part of Chapter 4), or <b>zero-copy</b> formats like <span class="ltr">Cap’n Proto</span> and <span class="ltr">FlatBuffers</span> where the same bytes are both the execution and the storage view, with no separate conversion.</li><li>But most systems must convert between in-memory objects and byte sequences — and the format choice isn’t just about size and speed; it’s about <b>evolvability</b>.</li></ul></div>
+</section>
+
+<section id="s2">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۲</span><span class="en">2</span></span><span class="fa">سازگاری و ارتقای تدریجی</span><span class="en">Compatibility and gradual upgrades</span></h2>
+
+  <div class="fa">
+<p>در ارتقای تدریجی، نسخه‌های قدیم و جدید هم‌زمان کار می‌کنند. سازگاری عقب‌رو یعنی کد جدید دادهٔ قدیم را بخواند؛ سازگاری جلو‌رو یعنی کد قدیم بتواند با دادهٔ جدید طبق قرارداد کنار بیاید.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-2">
+<p class="example-title"><b>مثال فنی: چهار ترکیب در rolling upgrade</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> نیمی از سرورها نسخهٔ ۱ و نیمی نسخهٔ ۲ هستند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نسخهٔ ۲ رکورد قدیمی را می‌خواند؛ سپس نسخهٔ ۱ ممکن است رکوردی را بخواند که نسخهٔ ۲ نوشته است.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> backward مسیر خوانندهٔ جدید با دادهٔ قدیمی و forward مسیر خوانندهٔ قدیمی با دادهٔ جدید را پوشش می‌دهد.</p>
+</div>
+</div><div class="en"><p>Changes in program features usually mean changes in the data it stores: a fresh field, a fresh record type, or a fresh rendering of old data. But code never changes in one instant:</p></div>
+  <div class="fa">
+<ul>    <li><b>در سمت سرور:</b> <span class="ltr">rolling upgrade</span> (یا staged rollout) — نسخهٔ جدید چند node به چند node deploy می‌شود، پایش می‌شود و جلو می‌رود. بدون downtime، با releaseهای کوچک و مکرر.</li>
+    <li><b>در سمت کلاینت:</b> کاربر ممکن است مدت‌ها اپ را به‌روز نکند؛ کنترل دست تو نیست.</li>
+  </ul></div><div class="en"><ul><li><b>Server side:</b> <span class="ltr">rolling upgrades</span> (or staged rollouts) — the new version deploys node by node, gets monitored, and moves on. No downtime, with small frequent releases.</li><li><b>Client side:</b> users may not update the app for a long time; that timing is out of your hands.</li></ul></div>
+  <div class="fa">پس نسخه‌های قدیم و جدیدِ کد <b>و</b> قالب‌های قدیم و جدیدِ داده باید کنار هم زندگی کنند:</div><div class="en"><p>So old and new versions of the code <b>and</b> old and new versions of the data formats must live side by side:</p></div>
+
+  <div class="fa">
+    <table><thead><tr><th>نوع سازگاری</th><th>تعریف</th><th>یادآوری</th></tr></thead>
+    <tbody>
+      <tr><td><b>Backward compatibility</b></td><td>کدِ <b>جدیدتر</b> بتواند داده‌ای را که کدِ قدیمی‌تر نوشته بخواند</td><td>«از گذشته خواندن»</td></tr>
+      <tr><td><b>Forward compatibility</b></td><td>کدِ <b>قدیمی‌تر</b> بتواند داده‌ای را که کدِ جدیدتر نوشته بخواند</td><td>«از آینده خواندن» — سخت‌تر، چون کدِ قدیم باید افزوده‌های ناشناخته را نادیده <b>اما حفظ</b> کند</td></tr>
+    </tbody></table>
+  </div><div class="en"><table><thead><tr><th>Compatibility type</th><th>Definition</th><th>Mnemonic</th></tr></thead><tbody><tr><td><b>Backward compatibility</b></td><td><b>Newer</b> code can read data written by older code</td><td>“Reading from the past”</td></tr><tr><td><b>Forward compatibility</b></td><td><b>Older</b> code can read data written by newer code</td><td>“Reading from the future” — harder, since old code must ignore unknown additions <b>but preserve</b> them</td></tr></tbody></table></div>
+
+  <div class="callout">
+    <div class="tag"><span class="fa">در APIها دقیقاً چه چیزی سازگار می‌خواهد؟</span><span class="en">What exactly needs compatibility in APIs?</span></div>
+    <div class="fa">
+      اگر کلاینتِ <b>قدیمی</b> باید سرویسِ <b>جدید</b> را صدا بزند: روی <b>request</b> سازگاریِ backward و روی
+      <b>response</b> سازگاریِ forward لازم است. اگر کلاینتِ جدید با سرویسِ قدیمی حرف بزند، برعکس.
+      backward معمولاً آسان است (فرمتِ قدیم را می‌شناسی)؛ forward سخت‌تر است چون کدِ قدیم باید چیزهای ناشناخته را بی‌صدا کنار بگذارد.
+    </div>
+<div class="en"><p>If an <b>old</b> client must call a <b>new</b> service: <b>requests</b> need backward compatibility, <b>responses</b> need forward compatibility. A new client talking to an old service is the mirror image. Backward is usually easy (you know the old format); forward is harder since old code must silently set aside unknown things.</p></div>
+  </div>
+<h3><span class="fa">نمودار مفهومی — ماتریس سازگاری: چه کسی چه چیزی را می‌خواند؟</span><span class="en">Concept diagram — the compatibility matrix: who reads what?</span></h3>
+<div class="diagram">
+  <div class="cap">
+    <b><span class="fa">نمودار مفهومی · backward در برابر forward</span><span class="en">Concept diagram · Backward vs forward</span></b>
+    <a class="open" href="diagrams/compat-matrix.html" target="_blank"><span class="fa">باز کردن در صفحه جدا ↗</span><span class="en">Open standalone ↗</span></a>
+  </div>
+  <iframe src="diagrams/compat-matrix.html" title="Backward vs forward compatibility matrix" loading="lazy"></iframe>
+</div>
+<div class="teacher">
+  <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
+  <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: چهار ترکیب در rolling upgrade</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> نیمی از سرورها نسخهٔ ۱ و نیمی نسخهٔ ۲ هستند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نسخهٔ ۲ رکورد قدیمی را می‌خواند؛ سپس نسخهٔ ۱ ممکن است رکوردی را بخواند که نسخهٔ ۲ نوشته است.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> backward مسیر خوانندهٔ جدید با دادهٔ قدیمی و forward مسیر خوانندهٔ قدیمی با دادهٔ جدید را پوشش می‌دهد.</p>
+</div>
+<p>جدول دو در دو را بخوانید: سطرها «دادهٔ قدیمی» و «دادهٔ جدید»، ستون‌ها «کد قدیمی می‌خواند» و «کد جدید می‌خواند». خانهٔ «دادهٔ قدیمی + کد جدید» همان سازگاری <span class="ltr">backward</span> است (جدید، قدیم را می‌خواند) و خانهٔ «دادهٔ جدید + کد قدیمی» همان <span class="ltr">forward</span> (قدیم، جدید را می‌خواند و نگه می‌دارد). دو خانهٔ هم‌نسخه بی‌دردسرند. نوار پایین حکم ارتقای تدریجی است: چون نسخه‌ها قاطی‌اند، هر دو سازگاری لازم است.</p></div>
+  <div class="en"><p>Read the 2×2 grid: rows “Old data” and “New data”, columns “Old code reads” and “New code reads”. “Old data + new code” is <span class="ltr">backward</span> compatibility (the new reads the old); “New data + old code” is <span class="ltr">forward</span> (the old reads and preserves the new). The same-version cells are painless. The bottom bar states the rolling-upgrade rule: with mixed versions live, you need BOTH.</p></div>
+</div>
+
+  <h3 id="s2-1"><span class="fa">۲.۱ نمودار ۱ + روایت مدرس</span><span class="en">2.1 Diagram 1 — rolling upgrades and unknown-field loss</span></h3>
+  <div class="fa">
+    خطرِ معروفِ شکل ۵-۱ کتاب: کدِ قدیمی رکوردی را که کدِ جدید با فیلدِ تازه نوشته می‌خواند، به‌روز می‌کند و
+    دوباره می‌نویسد — و اگر decoder عمداً فیلدهای ناشناخته را نگه ندارد، آن فیلد برای همیشه می‌رود.
+  </div><div class="en"><p>The famous danger of the book’s Figure 5-1: old code reads a record the new code wrote with a fresh field, updates it, writes it back — and if the decoder doesn’t deliberately keep unknown fields, that field is gone forever.</p></div>
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار ۱ · Sequence — ارتقای تدریجی و خطر گم شدن فیلد ناشناخته</span><span class="en">Diagram 1 · Sequence — rolling upgrades and unknown-field loss</span></b>
+      <a class="open" href="diagrams/rolling-upgrade-compat.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/rolling-upgrade-compat.html" title="Rolling upgrade and unknown-field loss" loading="lazy"></iframe>
+  </div>
+
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار ۱</span><span class="en">Teacher narration</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: چهار ترکیب در rolling upgrade</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> نیمی از سرورها نسخهٔ ۱ و نیمی نسخهٔ ۲ هستند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نسخهٔ ۲ رکورد قدیمی را می‌خواند؛ سپس نسخهٔ ۱ ممکن است رکوردی را بخواند که نسخهٔ ۲ نوشته است.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> backward مسیر خوانندهٔ جدید با دادهٔ قدیمی و forward مسیر خوانندهٔ قدیمی با دادهٔ جدید را پوشش می‌دهد.</p>
+</div>
+
+      سه شرکت‌کننده داریم که از چپ به راست نشسته‌اند: <span class="ltr">«Service v2.2»</span>
+      (زیرنویس: <span class="ltr">«new code, new field»</span> — نسخهٔ جدیدِ کد)، وسط
+      <span class="ltr">«Record Store»</span> (زیرنویس: <span class="ltr">«shared database»</span>)، و سمت راست
+      <span class="ltr">«Service v2.1»</span> (زیرنویس: <span class="ltr">«old code still live»</span> — همان نسخهٔ قدیمی که هنوز زنده است).
+      زمان از بالا به پایین می‌گذرد و سه نوارِ عنوان در سمت چپ، سه پردهٔ داستان را جدا می‌کنند.
+    </div><div class="en"><p>Three participants, left to right: <span class="ltr">Service v2.2</span> (<span class="ltr">new code, new field</span>), <span class="ltr">Record Store</span> (<span class="ltr">shared database</span>), and <span class="ltr">Service v2.1</span> (<span class="ltr">old code still live</span>). Time flows downward through three titled bands.</p></div>
+    <div class="fa">
+      پردهٔ اول، <span class="ltr">«Rolling upgrade»</span>: فلشِ پررنگِ <span class="ltr">«write record with new field»</span>
+      از v2.2 به Record Store می‌رود. بعد فلشِ معمولیِ <span class="ltr">«read record»</span> از v2.1 (هنگام ارتقای تدریجی،
+      node قدیمی هنوز سرویس می‌دهد) و پاسخِ برگشتیِ <span class="ltr">«record incl. unknown field»</span> — یعنی رکوردِ حاویِ فیلدِ ناشناخته به دستِ کدِ قدیمی رسید.
+    </div><div class="en"><p>Act one, <span class="ltr">Rolling upgrade</span>: bold <span class="ltr">write record with new field</span> from v2.2 to the store; then plain <span class="ltr">read record</span> from v2.1 (during gradual rollout the old node still serves) with the reply <span class="ltr">record incl. unknown field</span> — the unknown-field record in old code’s hands.</p></div>
+    <div class="fa">
+      پردهٔ دوم، <span class="ltr">«Unknown-field hazard»</span>: فلشِ پررنگِ <span class="ltr">«update known fields, write back»</span>
+      از v2.1 به Store — و یادداشتِ زیرِ همان فلش می‌گوید <span class="ltr">«decoded into a plain model object»</span>
+      (رکورد در object ساده‌ای decode شده که فیلدِ ناشناخته را نگه نمی‌دارد). v2.2 دوباره می‌خواند
+      (<span class="ltr">«read record again»</span>) و پاسخِ برگشتی، تلخ است:
+      <span class="ltr">«new field gone — data lost»</span> با یادداشتِ <span class="ltr">«unknown field was not preserved»</span>.
+      این همان گم‌شدنِ بی‌صدای شکل ۵-۱ است.
+    </div><div class="en"><p>Act two, <span class="ltr">Unknown-field hazard</span>: bold <span class="ltr">update known fields, write back</span> from v2.1 to the store — annotated <span class="ltr">decoded into a plain model object</span> (the record decoded into a plain object that keeps no unknown field). v2.2 reads again (<span class="ltr">read record again</span>) and the reply is bitter: <span class="ltr">new field gone — data lost</span> (<span class="ltr">unknown field was not preserved</span>). That is Figure 5-1’s silent loss.</p></div>
+    <div class="fa">
+      پردهٔ سوم، <span class="ltr">«Preserving unknown fields»</span>: فلشِ چین‌چینِ <span class="ltr">«write record with field tag 4»</span>
+      — یعنی رکورد با <b>شمارهٔ تگِ فیلد</b> کد می‌شود نه با نام. کدِ قدیمی رکورد را round-trip می‌کند
+      (<span class="ltr">«old code round-trips the record»</span>) و این‌بار پاسخِ برگشتی خبر خوب می‌دهد:
+      <span class="ltr">«field tag 4 still intact»</span>.
+    </div><div class="en"><p>Act three, <span class="ltr">Preserving unknown fields</span>: the dashed <span class="ltr">write record with field tag 4</span> — the record encoded with a <b>field tag number</b>, not a name. Old code round-trips the record (<span class="ltr">old code round-trips the record</span>) and this time the reply is good news: <span class="ltr">field tag 4 still intact</span>.</p></div>
+    <div class="fa">
+      درسِ شکل: مشکل از «قدیمی بودنِ کد» نیست؛ از <b>قراردادِ decoder</b> است. قالب‌های مبتنی بر schema
+      (مثل Protocol Buffers و Avro) به کدِ قدیمی می‌گویند چیزهای ناشناخته را نادیده اما <b>بایت‌هایشان را دست‌نخورده</b> نگه دارد.
+    </div><div class="en"><p>The lesson: the problem isn’t “old code”; it’s the <b>decoder contract</b>. Schema-driven formats (like Protocol Buffers and Avro) tell old code to ignore unknown things but keep their <b>bytes untouched</b>.</p></div>
+  </div>
+</section>
+
+<section id="s3">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۳</span><span class="en">3</span></span><span class="fa">قالب‌های کدگذاری</span><span class="en">Encoding formats</span></h2>
+
+  <div class="fa">
+<p>قالبِ تبادل مشخص می‌کند داده چگونه نمایش داده شود و خواننده از کجا ساختارش را بفهمد. انتخاب قالب، بر حجم، خوانایی، ارتباط میان زبان‌ها و امکان تغییر آینده اثر دارد.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-3">
+<p class="example-title"><b>مثال فنی: مقایسهٔ قالب روی همان رکورد</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> رکورد <code dir="ltr">user_id=17, active=true</code> را در چند قالب می‌نویسیم.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> JSON نام فیلدها را متنی حمل می‌کند؛ قالب مبتنی بر schema می‌تواند شناسه یا جایگاه فیلد را به‌کار گیرد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> برای مقایسه باید همان داده، کتابخانه و تنظیمات سنجیده شوند؛ باینری بودن به‌تنهایی تضمین کمترین حجم یا بهترین تکامل نیست.</p>
+</div>
+</div><div class="en"><p>Now that we know which compatibilities are needed, what are the options? This part surveys three families: language-native formats, textual formats (JSON/XML/CSV), and schema-driven binary formats (Protocol Buffers and Avro).</p></div>
+
+  <h3 id="s3-1"><span class="fa">۳.۱ نمودار ۲ + روایت مدرس</span><span class="en">3.1 Diagram 2 — the encoding-format decision tree</span></h3>
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار ۲ · Workflow — درخت تصمیم انتخاب قالب کدگذاری</span><span class="en">Diagram 2 · Workflow — the encoding-format decision tree</span></b>
+      <a class="open" href="diagrams/encoding-format-choice.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/encoding-format-choice.html" title="Decision workflow for choosing an encoding format" loading="lazy"></iframe>
+  </div>
+
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار ۲</span><span class="en">Teacher narration</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: مقایسهٔ قالب روی همان رکورد</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> رکورد <code dir="ltr">user_id=17, active=true</code> را در چند قالب می‌نویسیم.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> JSON نام فیلدها را متنی حمل می‌کند؛ قالب مبتنی بر schema می‌تواند شناسه یا جایگاه فیلد را به‌کار گیرد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> برای مقایسه باید همان داده، کتابخانه و تنظیمات سنجیده شوند؛ باینری بودن به‌تنهایی تضمین کمترین حجم یا بهترین تکامل نیست.</p>
+</div>
+
+      این نمودار چهار نوار افقی دارد که از بالا به پایین عنوان‌شان هست:
+      <span class="ltr">«Decision»</span> (پرسش‌ها)، <span class="ltr">«Language-Native»</span> (که با پس‌زمینهٔ استثنا مشخص شده)،
+      <span class="ltr">«Textual Formats»</span> و <span class="ltr">«Binary Schema-Driven»</span>.
+      در بالا هم دو بخشِ فاز داریم: <span class="ltr">«Scope»</span> روی دو ستونِ اول و
+      <span class="ltr">«Choose the format»</span> روی بقیهٔ ستون‌ها.
+    </div><div class="en"><p>The chart has four horizontal lanes, top to bottom: <span class="ltr">Decision</span> (questions), <span class="ltr">Language-Native</span> (marked as the exception), <span class="ltr">Textual Formats</span>, <span class="ltr">Binary Schema-Driven</span> — with two phase bands above: <span class="ltr">Scope</span> over the first two columns, <span class="ltr">Choose the format</span> over the rest.</p></div>
+    <div class="fa">
+      مسیرِ اصلی از جعبهٔ <span class="ltr">«Record to Encode»</span> (زیرنویس: <span class="ltr">«object to bytes»</span>) شروع می‌شود؛
+      فلشِ پررنگِ <span class="ltr">«encode once»</span> آن را به اولین پرسش می‌رساند:
+      <span class="ltr">«Transient + One Language?»</span> (زیرنویس: <span class="ltr">«in-process handoff only»</span>، برچسبِ <span class="ltr">decide</span>).
+    </div><div class="en"><p>The main path starts at <span class="ltr">Record to Encode</span> (<span class="ltr">object to bytes</span>); the bold <span class="ltr">encode once</span> reaches the first question: <span class="ltr">Transient + One Language?</span> (<span class="ltr">in-process handoff only</span>).</p></div>
+    <div class="fa">
+      از هر پرسش دو فلش بیرون می‌آید. فلشِ «بله» از پرسشِ اول مستقیم پایین می‌آید به جعبهٔ
+      <span class="ltr">«Language-Native»</span> (زیرنویس: <span class="ltr">«Serializable / pickle»</span>، برچسبِ هشدارِ <span class="ltr">«compat risk»</span>)؛
+      فلشِ «خیر» به راست، به پرسشِ دوم: <span class="ltr">«Human-Readable?»</span>.
+      از آن «بله» پایین می‌رود به <span class="ltr">«JSON / XML / CSV»</span> (زیرنویس: <span class="ltr">«textual, schema optional»</span>،
+      برچسبِ <span class="ltr">«JSON Schema for validation»</span>) و «خیر» به راست به پرسشِ سوم:
+      <span class="ltr">«Schema-Driven Binary?»</span>.
+    </div><div class="en"><p>Each question has two exits. “Yes” from the first drops straight to <span class="ltr">Language-Native</span> (<span class="ltr">Serializable / pickle</span>; warning tag <span class="ltr">compat risk</span>); “no” goes right to the second question <span class="ltr">Human-Readable?</span>. Its “yes” drops to <span class="ltr">JSON / XML / CSV</span> (<span class="ltr">textual, schema optional</span>; <span class="ltr">JSON Schema for validation</span>), its “no” right to the third question <span class="ltr">Schema-Driven Binary?</span>.</p></div>
+    <div class="fa">
+      از پرسشِ سوم، فلشِ <span class="ltr">«tag-based»</span> پایین می‌آید و از کنارِ چپ به <span class="ltr">«Protocol Buffers»</span> می‌رسد
+      (زیرنویس: <span class="ltr">«field tags in the data»</span>، برچسبِ <span class="ltr">«Thrift similar»</span>) و فلشِ پررنگِ
+      <span class="ltr">«name-based»</span> به راست می‌پیچد و به <span class="ltr">«Avro»</span> می‌رسد
+      (زیرنویس: <span class="ltr">«writer and reader schemas»</span>، برچسبِ <span class="ltr">«no tag numbers»</span>).
+      این دو جعبه داخل قابِ <span class="ltr">«Defined evolution rules»</span> جمع شده‌اند — یعنی پاداشِ انتخابِ این مسیر.
+    </div><div class="en"><p>From the third question, <span class="ltr">tag-based</span> drops down-left to <span class="ltr">Protocol Buffers</span> (<span class="ltr">field tags in the data</span>; <span class="ltr">Thrift similar</span>), and bold <span class="ltr">name-based</span> turns right to <span class="ltr">Avro</span> (<span class="ltr">writer and reader schemas</span>; <span class="ltr">no tag numbers</span>). Both sit inside <span class="ltr">Defined evolution rules</span> — the reward for taking this path.</p></div>
+    <div class="fa">
+      درسِ شکل: ترتیبِ پرسش‌ها مهم است. اول <b>طول عمر و مخاطبِ بایت‌ها</b> را مشخص کن (موقت و تک‌زبانه؟)، بعد
+      <b>انسان‌خوان بودن</b>، و در آخر <b>قواعد تکامل</b>. هر «بله» شما را به خانواده‌ای می‌رساند و جزئیاتش را در بخش‌های بعد می‌بینیم.
+    </div><div class="en"><p>The lesson: question order matters. First pin down the bytes’ <b>lifespan and audience</b> (transient and single-language?), then <b>human-readability</b>, finally <b>evolution rules</b>. Each “yes” lands you in one family, detailed in the sections ahead.</p></div>
+  </div>
+
+  <h3 id="s3-2"><span class="fa">۳.۲ قالب‌های ویژهٔ زبان</span><span class="en">3.2 Language-native formats</span></h3>
+<div class="fa">
+<p>قالب‌های ویژهٔ زبان، ذخیرهٔ اشیای همان زبان را آسان می‌کنند، اما تبادل میان زبان‌ها و نسخه‌ها را دشوارتر می‌کنند. برخی روش‌های بازسازی شیء برای ورودی نامطمئن خطرناک‌اند.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-4">
+<p class="example-title"><b>مثال فنی: نام کلاس، قرارداد پایدار نیست</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فایل ذخیره‌شده به کلاس <code dir="ltr">OldUser</code> در نسخهٔ قبلی برنامه وابسته است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نسخهٔ جدید کلاس را حذف کرده یا زبان دیگری دارد؛ decoder ویژهٔ زبان ممکن است نتواند شیء را بسازد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> داده از عمر یک نسخهٔ کد طولانی‌تر است؛ برای تبادل، schema مستقل و ورودیِ معتبر لازم است.</p>
+</div>
+</div>
+
+  <div class="fa">
+<ul>    <li>اکثر زبان‌ها کتابخانهٔ کدگذاریِ داخلی دارند: <span class="ltr">java.io.Serializable</span> در Java، <span class="ltr">pickle</span> در Python، <span class="ltr">Marshal</span> در Ruby و کتابخانه‌هایی مثل <span class="ltr">Kryo</span>. راحت‌اند: object را با کمترین کد ذخیره و بازیابی می‌کنند.</li>
+    <li>اما چهار مشکلِ بنیادین دارند:</li>
+    <li><b>قفلِ زبانی:</b> کدگذاری به یک زبان گره خورده؛ خواندن داده با زبانِ دیگر دشوار است و یکپارچه‌سازی با سازمان‌های دیگر را ناممکن می‌کند.</li>
+    <li><b>امنیت:</b> برای بازسازیِ objectها، decoder باید بتواند class دلخواه instantiate کند — اگر مهاجم بایت‌های دلخواه بفرستد، معمولاً به اجرای کدِ دلخواه (RCE) می‌رسد.</li>
+    <li><b>نسخه‌بندیِ فرعی:</b> این کتابخانه‌ها برای «سریع و آسان» ساخته شده‌اند و معمولاً به سازگاریِ forward/backward بی‌توجه‌اند.</li>
+    <li><b>کاراییِ فرعی:</b> serialization داخلیِ Java به کندی و حجمِ متورم معروف است.</li>
+    <li>نتیجه: جز برای مقاصدِ بسیار موقت، از کدگذاریِ داخلیِ زبان استفاده نکن.</li>
+  </ul></div><div class="en"><ul><li>Most languages ship a built-in encoding library: <span class="ltr">java.io.Serializable</span> in Java, <span class="ltr">pickle</span> in Python, <span class="ltr">Marshal</span> in Ruby, plus libraries like <span class="ltr">Kryo</span>. They’re comfortable: store and restore objects with minimal code.</li><li>But they carry four fundamental problems:</li><li><b>Language lock-in:</b> encoding is tied to one language; reading the data in another language is hard, and integrating with other organizations becomes impossible.</li><li><b>Security:</b> to rebuild objects the decoder must instantiate arbitrary classes — if an attacker sends arbitrary bytes, arbitrary code execution (RCE) usually follows.</li><li><b>Versioning as an afterthought:</b> these libraries are built for “fast and easy” and mostly ignore forward/backward compatibility.</li><li><b>Performance as an afterthought:</b> Java’s built-in serialization is famously slow and bloated.</li><li>Verdict: never use language-internal encoding except for very transient purposes.</li></ul></div>
+
+  <h3 id="s3-3"><span class="fa">۳.۳ JSON، XML، CSV و JSON Schema</span><span class="en">3.3 JSON, XML, CSV and JSON Schema</span></h3>
+  <div class="fa">
+<p>JSON و XML ساختار نام‌دار دارند؛ CSV بیشتر برای جدول ساده است و جزئیاتش باید توافق شود. JSON Schema می‌تواند قواعدی مثل نوع فیلد و اجباری بودن آن را مشخص کند.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-5">
+<p class="example-title"><b>مثال فنی: شناسهٔ بزرگ در JSON</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> شناسهٔ <code dir="ltr">9007199254740993</code> به‌صورت JSON number به JavaScript می‌رسد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تبدیل به <code dir="ltr">Number</code> ممکن است آن را به <code dir="ltr">9007199254740992</code> گرد کند؛ قراردادِ رشته‌ای برای شناسه، رقم‌ها را حفظ می‌کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> JSON به‌تنهایی دقتِ همهٔ خواننده‌ها را تضمین نمی‌کند؛ نوع فیلد باید در دو طرف قرارداد روشن باشد.</p>
+</div>
+</div><div class="en"><p>Standard multi-language formats: <b>JSON</b> and <b>XML</b> (plus <b>CSV</b>, which holds only tabular data and doesn’t nest). They’re textual and fairly human-readable, but their problems are real:</p></div>
+  <div class="fa">
+<ul>    <li><b>XML</b> معمولاً طولانی و بیش از حد پیچیده نقد می‌شود.</li>
+    <li><b>ابهامِ اعداد:</b> در XML و CSV اصلاً نمی‌توان عدد را از رشتهٔ عددی تشخیص داد (مگر با schema بیرونی). JSON رشته و عدد را جدا می‌کند اما integer و floating-point را نه و دقت هم مشخص نمی‌کند. عدد بزرگ‌تر از <span class="ltr">2^53</span> در IEEE 754 دقیق نمی‌ماند؛ مثلاً X شناسهٔ ۶۴بیتیِ هر post را هم به‌صورت عدد JSON و هم رشتهٔ متنی برمی‌گرداند تا JavaScript خرابش نکند.</li>
+    <li><b>رشته‌های باینری ندارند:</b> JSON/XML از Unicode (متنِ انسان‌خوان) پشتیبانی می‌کنند نه دنبالهٔ بایتِ خام. راه‌حلِ رایج Base64 است که کار را «تقریبی» می‌کند و حدود یک‌سوم حجم را زیاد می‌کند.</li>
+    <li><b>XML Schema و JSON Schema</b> قدرتمند و در نتیجه پیچیده‌اند؛ برنامه‌ای که از آن‌ها استفاده نکند باید منطقِ کدگذاری/رمزگشایی را hardcode کند.</li>
+    <li><b>CSV اصلاً schema ندارد</b>؛ معنای هر سطر و ستون را باید برنامه تعیین کند و escape کردنِ ویرگول و خط‌جدید هم مبهم است.</li>
+    <li>با این همه، برای <b>تبادلِ بین سازمان‌ها</b> همین‌ها «به‌اندازهٔ کافی خوب»‌اند: تا وقتی دو طرف بر سرِ قالب توافق کنند، زیبایی و کارایی اهمیت کمتری دارد.</li>
+  </ul></div><div class="en"><ul><li><b>XML</b> is usually criticized as verbose and over-complex.</li><li><b>Number ambiguity:</b> in XML and CSV you can’t tell a number from a numeric string at all (without an external schema). JSON separates strings from numbers but not integers from floats, and pins no precision. Numbers above <span class="ltr">2^53</span> don’t survive IEEE 754 exactly; e.g. X returns each post’s 64-bit id both as a JSON number and as a text string so JavaScript won’t corrupt it.</li><li><b>No binary strings:</b> JSON/XML support Unicode (human-readable text), not raw byte sequences. The common workaround is Base64, which roughly works and inflates size by about a third.</li><li><b>XML Schema and JSON Schema</b> are powerful and hence complex; programs that skip them must hardcode the encode/decode logic.</li><li><b>CSV has no schema at all</b>; the program must define each row and column’s meaning, and escaping commas and newlines is murky.</li><li>Still, for <b>cross-organization exchange</b> these are “good enough”: as long as both sides agree on the format, beauty and efficiency matter less.</li></ul></div>
+
+  <div class="callout">
+    <div class="tag"><span class="fa">JSON Schema در عمل</span><span class="en">JSON Schema in practice</span></div>
+    <div class="fa">
+      JSON Schema امروز در OpenAPI (سرویس‌های وب)، registryهایی مثل <span class="ltr">Confluent Schema Registry</span> و
+      <span class="ltr">Apicurio</span>، و پایگاه داده‌ها (افزونهٔ <span class="ltr">pg_jsonschema</span> در PostgreSQL و
+      <span class="ltr">$jsonSchema</span> در MongoDB) رایج است. علاوه بر نوع‌های پایه (string، number، integer، object،
+      array، boolean، null) قواعد اعتبارسنجی هم دارد (مثلاً port بین ۱ تا ۶۵۵۳۵).
+    </div><div class="en"><p>JSON Schema is common today in OpenAPI (web services), registries like <span class="ltr">Confluent Schema Registry</span> and <span class="ltr">Apicurio</span>, and databases (the <span class="ltr">pg_jsonschema</span> extension in PostgreSQL, <span class="ltr">$jsonSchema</span> in MongoDB). Beyond base types (string, number, integer, object, array, boolean, null) it has validation rules (e.g. a port between 1 and 65535).</p></div>
+    <div class="fa">
+      نکتهٔ ظریف: <b>content model باز</b> در برابر <b>بسته</b>. باز (که <code>additionalProperties: true</code> پیش‌فرضش است)
+      هر فیلدِ تعریف‌نشده‌ای را می‌پذیرد؛ یعنی JSON Schema معمولاً می‌گوید چه چیزی <b>مجاز نیست</b> تا اینکه بگوید چه چیزی مجاز است.
+      مثال کتاب برای نقشهٔ «کلیدِ عددی → مقدارِ رشته‌ای»:
+    </div><div class="en"><p>The subtle point: an <b>open</b> vs <b>closed</b> content model. Open (whose default is <code>additionalProperties: true</code>) accepts any undefined field; so JSON Schema usually says what is <b>not allowed</b> rather than what is. The book’s example for a “numeric-key → string-value” map:</p></div>
+<pre>{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "patternProperties": {
+    "^[0-9]+$": { "type": "string" }
+  },
+  "additionalProperties": false
+}</pre>
+    <div class="fa">
+      JSON Schema به شرط‌های <code>if/else</code>، نوع‌های نام‌دار و ارجاع به schemaهای دوردست هم مجهز است —
+      قدرتمند، ولی تکامل‌دادنش به‌صورت سازگار کارِ دشواری است. XML Schema هم دغدغه‌های مشابه دارد.
+    </div><div class="en"><p>JSON Schema also handles <code>if/else</code> conditions, named types and remote-schema references — powerful, but evolving it compatibly is hard work. XML Schema shares similar concerns.</p></div>
+  </div>
+
+  <div class="callout warn">
+    <div class="tag"><span class="fa">باینری‌های «JSON» فقط نصفِ راه‌اند</span><span class="en">“JSON” binaries are only half the road</span></div>
+    <div class="fa">
+      قالب‌هایی مثل <span class="ltr">MessagePack</span>، <span class="ltr">CBOR</span> و <span class="ltr">BSON</span> همان مدلِ JSON را
+      باینری می‌کنند (گاهی با چند نوعِ اضافه مثل رشتهٔ باینری). اما چون schema ندارند، هنوز <b>نامِ همهٔ فیلدها</b> داخل بایت‌هاست.
+      مثالِ کتاب: رکوردِ سه‌فیلدیِ <code>{"userName": "Martin", "favoriteNumber": 1337, "interests": [...]}</code>
+      با MessagePack <b>۶۶ بایت</b> می‌شود در برابر <b>۸۱ بایتِ</b> JSON متنیِ بدون فاصله — صرفه‌جوییِ اندک در برابر ازدست‌دادنِ انسان‌خوانی.
+      در بخش‌های بعد همین رکورد را با Protocol Buffers (۳۳ بایت) و Avro (۳۲ بایت) می‌بینیم.
+    </div><div class="en"><p>Formats like <span class="ltr">MessagePack</span>, <span class="ltr">CBOR</span> and <span class="ltr">BSON</span> binarize the same JSON model (sometimes with a few extra types like binary strings). But schema-less, <b>every field name</b> still sits inside the bytes. The book’s example: the three-field record <code>{"userName": "Martin", "favoriteNumber": 1337, "interests": [...]}</code> becomes <b>66 bytes</b> in MessagePack vs <b>81 bytes</b> of spaceless textual JSON — a small saving for the loss of human-readability. Ahead we’ll see the same record at 33 bytes (Protocol Buffers) and 32 (Avro).</p></div>
+  </div>
+
+  <h3 id="s3-4"><span class="fa">۳.۴ Protocol Buffers</span><span class="en">3.4 Protocol Buffers</span></h3>
+  <div class="fa">
+<p>در Protocol Buffers، فیلدها شماره دارند و همین شماره بخشی از هویت آن‌ها روی شبکه است. تغییر نام با استفادهٔ دوباره از شمارهٔ یک فیلد حذف‌شده یکسان نیست.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-6">
+<p class="example-title"><b>مثال فنی: Tag هویت فیلد است</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> schema پیام شامل <code dir="ltr">string name = 1</code> است و بعد <code dir="ltr">string email = 2</code> اضافه می‌شود.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> شمارهٔ ۱ همچنان به name تعلق دارد؛ پس از حذف email، شمارهٔ ۲ برای معنای دیگری دوباره استفاده نمی‌شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> تغییر اسم ظاهری با تغییر هویت wire فرق دارد؛ reuse شماره می‌تواند دادهٔ قدیمی را با معنای اشتباه بخواند.</p>
+</div>
+</div><div class="en"><p><b>Protocol Buffers</b> (protobuf) is Google’s binary encoding library; <span class="ltr">Apache Thrift</span> (from Facebook) is very similar. Every datum needs a schema — in the IDL language:</p></div>
+<pre>syntax = "proto3";
+
+message Person {
+  string user_name = 1;
+  int64 favorite_number = 2;
+  repeated string interests = 3;
+}</pre>
+  <div class="fa">
+<ul>    <li>ابزارِ codegen از این schema در زبان‌های مختلف class می‌سازد؛ کدِ برنامه به همان کدِ تولیدشده صدا می‌زند. زبانِ schema بسیار ساده‌تر از JSON Schema است: فقط فیلد و نوع، نه قواعدِ اعتبارسنجیِ پیچیده.</li>
+    <li>کدگذاریِ همان رکوردِ مثال فقط <b>۳۳ بایت</b> است. برخلاف MessagePack، <b>نامِ فیلدها در داده نیست</b>؛ به‌جایش <b>شمارهٔ تگ (tag)</b> می‌آید: همان ۱ و ۲ و ۳ که در schema دیدی — یک نام‌مستعارِ فشرده برای فیلد.</li>
+    <li>نوعِ فیلد و تگ در <b>یک بایت</b> جا می‌شوند؛ اعداد <b>طول‌متغیر (varint)</b>‌اند: ۱۳۷۱ در دو بایت (بیتِ بالاییِ هر بایت یعنی «هنوز ادامه دارد»). اعدادِ <span class="ltr">−64..63</span> در یک بایت و <span class="ltr">−8192..8191</span> در دو بایت جا می‌شوند.</li>
+    <li>لیستِ صریح ندارد؛ <code>repeated</code> می‌گوید فیلد چند مقداری است و در بایت‌ها، تکرارِ همان تگ نمایش‌دهندهٔ آیتم‌هاست.</li>
+  </ul></div><div class="en"><ul><li>The codegen tool builds classes in many languages from this schema; application code calls into that generated code. The schema language is far simpler than JSON Schema: just fields and types, no complex validation rules.</li><li>Encoding the same example record takes only <b>33 bytes</b>. Unlike MessagePack, <b>field names aren’t in the data</b>; instead come <b>tag numbers</b>: the 1, 2, 3 you saw in the schema — a compact alias for each field.</li><li>A field’s type and tag fit in <b>one byte</b>; numbers are <b>variable-length (varint)</b>: 1337 fits in two bytes (each byte’s top bit means “more follows”). Numbers <span class="ltr">−64..63</span> fit in one byte, <span class="ltr">−8192..8191</span> in two.</li><li>There is no explicit list; <code>repeated</code> marks a multi-valued field, and in the bytes, repeating the same tag represents the items.</li></ul></div>
+
+  <div class="callout">
+    <div class="tag"><span class="fa">قواعد تکامل schema در protobuf</span><span class="en">Schema-evolution rules in protobuf</span></div>
+    <div class="fa">
+<ul>      <li>رکوردِ کدشده فقط الحاقِ فیلدهای کدشده است؛ فیلدِ تنظیم‌نشده اصلاً نوشته نمی‌شود. پس <b>تگ‌ها معنای داده را می‌سازند</b>.</li>
+      <li><b>تغییر نامِ فیلد آزاد است</b> (نام در داده نیست)؛ <b>تغییر تگ ممنوع</b> — همهٔ داده‌های موجود نامعتبر می‌شوند.</li>
+      <li><b>افزودنِ فیلدِ جدید با تگِ تازه</b> = forward compatible: کدِ قدیمی تگِ ناشناخته را نادیده می‌گیرد و (اگر درست پیاده شود) بایت‌هایش را حفظ می‌کند. backward هم برقرار است چون داده‌های قدیمی برای فیلدِ تازه، مقدارِ پیش‌فرض می‌گیرند.</li>
+      <li><b>حذفِ فیلد</b> آینهٔ افزودن است: تگِ قدیمی هرگز نباید دوباره استفاده شود (داده‌هایی هنوز با آن تگ نوشته شده‌اند)؛ می‌توان تگ‌های مستعمل را در schema <b>reserve</b> کرد.</li>
+      <li><b>تغییر نوعِ فیلد</b> برای بعضی نوع‌ها ممکن است ولی خطر truncation دارد: ۳۲بیتی ← ۶۴بیتی برای کدِ جدید ساده است، اما کدِ قدیمی مقدار ۶۴بیتی را در متغیر ۳۲بیتی می‌ریزد و بریده می‌شود.</li>
+    </ul></div><div class="en"><ul><li>An encoded record is just concatenated encoded fields; an unset field is never written. So <b>tags make the data’s meaning</b>.</li><li><b>Renaming a field is free</b> (names aren’t in the data); <b>changing a tag is forbidden</b> — all existing data becomes invalid.</li><li><b>Adding a field with a fresh tag</b> = forward compatible: old code skips unknown tags and (if implemented right) preserves their bytes. Backward holds too, since old data takes the default for the fresh field.</li><li><b>Removing a field</b> mirrors adding: the old tag must never be reused (data is still written with it); retired tags can be <b>reserved</b> in the schema.</li><li><b>Changing a field’s type</b> is possible for some types but risks truncation: 32-bit → 64-bit is easy for new code, but old code pours a 64-bit value into a 32-bit variable and clips it.</li></ul></div>
+  </div>
+
+  <h3 id="s3-5"><span class="fa">۳.۵ Avro + نمودار ۳</span><span class="en">3.5 Avro + Diagram 3</span></h3>
+  <div class="fa">
+<p>در Avro، ساختارِ نویسنده و خواننده برای تفسیر داده کنار هم قرار می‌گیرند. نام فیلدها و قواعد سازگاری و مقدار پیش‌فرض، در تغییر ساختار اهمیت دارند.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-7">
+<p class="example-title"><b>مثال فنی: Resolution در Avro</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> writer فقط <code dir="ltr">name</code> دارد؛ reader تازه فیلد <code dir="ltr">country</code> با default برابر <code dir="ltr">IR</code> اضافه کرده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> هنگام خواندن رکورد قدیمی، reader مقدارِ غایب country را از default می‌گیرد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> default برای حلِ نبود فیلد در دادهٔ نویسنده است؛ جای الزام نوشتن فیلد در schema نویسنده را نمی‌گیرد.</p>
+</div>
+</div><div class="en"><p><b>Apache Avro</b> (since 2009, a Hadoop subproject) differs from protobuf in interesting ways. It has two schema languages: <span class="ltr">Avro IDL</span> for humans and a JSON rendering for machines. Example:</p></div>
+<pre>record Person {
+  string userName;
+  union { null, long } favoriteNumber = null;
+  array&lt;string&gt; interests;
+}</pre>
+  <div class="fa">
+<ul>    <li>هیچ شمارهٔ تگی در کار نیست. کدگذاریِ همان رکورد فقط <b>۳۲ بایت</b> است — فشرده‌ترینِ همه. در بایت‌ها نه نامِ فیلد هست و نه نوعِ داده؛ فقط مقادیرِ به‌هم‌چسبیده (رشته = طول + بایت‌های UTF-8). رمزگشاییِ درست فقط با <b>دقیقاً همان schemaای که نوشتن با آن انجام شده</b> ممکن است.</li>
+    <li>پس هنگام خواندن، برنامه با <b>دو schema</b> کار می‌کند: <b>writer's schema</b> (همانِ موقعِ نوشتن) و <b>reader's schema</b> (آنچه کدِ فعلی انتظار دارد). Avro با مقایسهٔ این دو، داده را از نمایِ writer به نمایِ reader ترجمه می‌کند.</li>
+  </ul></div><div class="en"><ul><li>No tag numbers at all. Encoding the same record takes only <b>32 bytes</b> — the most compact of all. The bytes hold neither field names nor data types; just concatenated values (a string = length + UTF-8 bytes). Correct decoding is possible only with <b>exactly the schema used at write time</b>.</li><li>So at read time the program works with <b>two schemas</b>: the <b>writer’s schema</b> (the one at write time) and the <b>reader’s schema</b> (what current code expects). Avro translates the data from the writer’s view to the reader’s view by comparing the two.</li></ul></div>
+
+  <h4><span class="fa">قواعد resolution (فرمولِ شکل ۵-۶ کتاب)</span><span class="en">Resolution rules (the book’s Figure 5-6 formula)</span></h4>
+<div class="fa"><p>خواننده باید دادهٔ نوشته‌شده با اسکیمای قبلی را طبق قواعدِ سازگاری به اسکیمای خودش نگاشت کند؛ مقدار پیش‌فرض برای فیلدِ غایب کاربرد دارد.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-8">
+<p class="example-title"><b>مثال فنی: فیلد اضافی و فیلد غایب</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> writer فیلدهای <code dir="ltr">name, age</code> دارد؛ reader فقط <code dir="ltr">name, country</code> می‌خواهد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> age موردنیاز reader نیست و کنار گذاشته می‌شود؛ country باید default معتبر داشته باشد، وگرنه resolution شکست می‌خورد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> «نسخه‌ها فرق دارند» همیشه قابل‌حل نیست؛ قواعد تطبیق schema تعیین می‌کند خواندن مجاز است یا نه.</p>
+</div></div>
+
+  <div class="fa">
+<ul>    <li>فیلدها <b>بر اساس نام</b> جفت می‌شوند؛ ترتیبِ فیلدها مهم نیست.</li>
+    <li>فیلدِ موجود در writer ولی نه در reader ← <b>نادیده گرفته می‌شود</b>.</li>
+    <li>فیلدِ موردِ انتظارِ reader که writer ننوشته ← با <b>مقدارِ پیش‌فرضِ reader</b> پر می‌شود.</li>
+    <li>برای سازگاری فقط می‌توان فیلدِ <b>دارای مقدارِ پیش‌فرض</b> را افزود یا حذف کرد. افزودنِ فیلدِ بدونِ default ← backward می‌شکند؛ حذفِ فیلدِ بدونِ default ← forward.</li>
+    <li>در Avro، <span class="ltr">null</span> پیش‌فرضِ همه‌چیز نیست: برای nullable بودن باید <code>union { null, ... }</code> بنویسی و فقط وقتی می‌توانی default برابرِ null بگذاری که null شاخهٔ اول union باشد.</li>
+    <li><b>تغییر نامِ فیلد</b> با <b>alias</b> در reader's schema ممکن است → backward هست ولی <b>forward نیست</b>. افزودنِ شاخه به union هم فقط backward است.</li>
+  </ul></div><div class="en"><ul><li>Fields pair <b>by name</b>; field order doesn’t matter.</li><li>A field present in the writer but not the reader is <b>ignored</b>.</li><li>A field the reader expects but the writer never wrote is filled with the <b>reader’s default</b>.</li><li>For compatibility you may only add or remove a field <b>with a default</b>. Adding a default-less field breaks backward; removing one breaks forward.</li><li>In Avro, <span class="ltr">null</span> isn’t everything’s default: for nullability you must write <code>union { null, ... }</code>, and you may default to null only when null is the union’s first branch.</li><li><b>Renaming a field</b> is possible with an <b>alias</b> in the reader’s schema → backward yes, but <b>not forward</b>. Adding a union branch is backward-only too.</li></ul></div>
+
+  <h4><span class="fa">اما writer's schema را از کجا بیاوریم؟</span><span class="en">But where do we get the writer’s schema?</span></h4>
+<div class="fa"><p>برای تفسیرِ درستِ داده باید اسکیمای نویسنده در دسترس باشد؛ ممکن است همراه فایل یا با شناسه‌ای در مخزنِ اسکیما معرفی شود.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-9">
+<p class="example-title"><b>مثال فنی: پیدا کردن schema نویسنده</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> پیام Avro شناسهٔ schema برابر <code dir="ltr">23</code> دارد و بایت‌های رکورد را حمل می‌کند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> مصرف‌کننده schema ۲۳ را از registryِ مورد توافق می‌گیرد و همراه reader schema به decoder می‌دهد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> داشتن فقط reader schema برای تفسیر همهٔ بایت‌ها کافی نیست؛ شناسه و دسترس‌پذیری schemaهای قدیمی باید حفظ شود.</p>
+</div></div>
+
+  <div class="fa">
+    <table><thead><tr><th>زمینه</th><th>راه‌حل</th><th>نمونه</th></tr></thead>
+    <tbody>
+      <tr><td><b>فایلِ بزرگِ پر از رکورد</b></td><td>schema یک‌بار در ابتدای فایل نوشته می‌شود (object container files)</td><td>dumpهای داده، فایل‌های Avro</td></tr>
+      <tr><td><b>پایگاه داده با رکوردهای تک‌تک</b></td><td>شمارهٔ نسخه در ابتدای هر رکورد + فهرستِ schemaها در پایگاه داده</td><td><span class="ltr">Confluent Schema Registry</span> برای Kafka، <span class="ltr">LinkedIn Espresso</span></td></tr>
+      <tr><td><b>ارتباطِ شبکه‌ای</b></td><td>مذاکرهٔ نسخهٔ schema هنگام باز شدنِ connection و استفاده تا پایانِ عمر آن</td><td>پروتکلِ Avro RPC</td></tr>
+    </tbody></table>
+  </div><div class="en"><table><thead><tr><th>Context</th><th>Fix</th><th>Example</th></tr></thead><tbody><tr><td><b>A big file full of records</b></td><td>The schema is written once at the file’s start (object container files)</td><td>Data dumps, Avro files</td></tr><tr><td><b>A database of individual records</b></td><td>A version number at each record’s start + a schema list in the database</td><td><span class="ltr">Confluent Schema Registry</span> for Kafka, <span class="ltr">LinkedIn Espresso</span></td></tr><tr><td><b>Network communication</b></td><td>Schema-version negotiation when the connection opens, used for its whole life</td><td>The Avro RPC protocol</td></tr></tbody></table></div>
+  <div class="fa">
+    نگه‌داشتنِ یک «پایگاه دادهِ نسخه‌های schema» به هر حال مفید است: هم سند (documentation) است و هم می‌توان سازگاریِ هر تغییر را
+    <b>قبل از deploy</b> بررسی کرد. شمارهٔ نسخه می‌تواند عددِ افزایشی یا hash خودِ schema باشد.
+  </div><div class="en"><p>Keeping a “schema-versions database” is useful anyway: it is documentation, and every change’s compatibility can be checked <b>before deploy</b>. Version numbers can be increasing integers or the schema’s own hash.</p></div>
+
+  <h3 id="s3-5-1"><span class="fa">نمودار ۳ + روایت مدرس</span><span class="en">Diagram 3 + teacher narration</span></h3>
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار ۳ · Dataflow — حل اختلاف اسکیما با writer's و reader's schema</span><span class="en">Diagram 3 · Dataflow — resolving schemas with writer’s and reader’s schemas</span></b>
+      <a class="open" href="diagrams/schema-resolution.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/schema-resolution.html" title="Schema resolution between writer's and reader's schemas" loading="lazy"></iframe>
+  </div>
+
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار ۳</span><span class="en">Teacher narration</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: Resolution در Avro</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> writer فقط <code dir="ltr">name</code> دارد؛ reader تازه فیلد <code dir="ltr">country</code> با default برابر <code dir="ltr">IR</code> اضافه کرده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> هنگام خواندن رکورد قدیمی، reader مقدارِ غایب country را از default می‌گیرد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> default برای حلِ نبود فیلد در دادهٔ نویسنده است؛ جای الزام نوشتن فیلد در schema نویسنده را نمی‌گیرد.</p>
+</div>
+
+      چهار ستون داریم که عنوان‌شان از چپ به راست است: <span class="ltr">«Write Side»</span>،
+      <span class="ltr">«Encoded Bytes»</span>، <span class="ltr">«Read Side»</span> و <span class="ltr">«Resolution»</span>.
+      نوارِ بالا جریانِ اصلی و نوارِ پایین، «پشتیبانِ schema» است.
+    </div><div class="en"><p>Four columns, left to right: <span class="ltr">Write Side</span>, <span class="ltr">Encoded Bytes</span>, <span class="ltr">Read Side</span>, <span class="ltr">Resolution</span>. The upper lane is the main flow; the lower lane is schema backstage.</p></div>
+    <div class="fa">
+      در نوارِ بالا: <span class="ltr">«Writer App»</span> (زیرنویس: <span class="ltr">«compiled with schema»</span>، برچسبِ
+      <span class="ltr">«writer's schema»</span>) با فلشِ پررنگِ <span class="ltr">«encode values in schema order»</span> به
+      <span class="ltr">«Encoded Record»</span> می‌رود (زیرنویس: <span class="ltr">«values only, no names»</span>، برچسبِ <span class="ltr">«32 bytes»</span>) —
+      دقت کنید هیچ نامی در بایت‌ها نیست. از آن فلشِ پررنگِ <span class="ltr">«bytes + version number»</span> به
+      <span class="ltr">«Reader App»</span> (زیرنویس: <span class="ltr">«uses two schemas»</span>) می‌رسد.
+    </div><div class="en"><p>Top lane: <span class="ltr">Writer App</span> (<span class="ltr">compiled with schema</span>; tag <span class="ltr">writer’s schema</span>) goes via bold <span class="ltr">encode values in schema order</span> to the <span class="ltr">Encoded Record</span> (<span class="ltr">values only, no names</span>; <span class="ltr">32 bytes</span>) — note no names in the bytes. From there bold <span class="ltr">bytes + version number</span> reaches the <span class="ltr">Reader App</span> (<span class="ltr">uses two schemas</span>).</p></div>
+    <div class="fa">
+      نوارِ پایین سه جعبهٔ حمایتی دارد. از <span class="ltr">«Writer's Schema»</span> (زیرنویس: <span class="ltr">«fields in write order»</span>،
+      برچسبِ <span class="ltr">«defaults declared»</span>) دو فلشِ چین‌چین می‌آید: یکی بالا به Writer App با برچسبِ
+      <span class="ltr">«writer's schema»</span> (قراردادِ compile-time) و دیگری به راست به <span class="ltr">«Schema Registry»</span>
+      با برچسبِ <span class="ltr">«register schema version»</span>. از Registry هم فلشِ چین‌چینِ <span class="ltr">«fetch writer's schema»</span>
+      بالا می‌رود و به Reader App می‌رسد — همان «شمارهٔ نسخه ← schema» که در جدولِ بالا دیدید.
+    </div><div class="en"><p>The lower lane holds three support boxes. From <span class="ltr">Writer’s Schema</span> (<span class="ltr">fields in write order</span>; <span class="ltr">defaults declared</span>) come two dashed arrows: one up to Writer App tagged <span class="ltr">writer’s schema</span> (the compile-time contract), one right to the <span class="ltr">Schema Registry</span> tagged <span class="ltr">register schema version</span>. From the Registry the dashed <span class="ltr">fetch writer’s schema</span> climbs to Reader App — the “version number → schema” trick from the table above.</p></div>
+    <div class="fa">
+      سومین جعبهٔ پایینی <span class="ltr">«Reader's Schema»</span> (زیرنویس: <span class="ltr">«fields code expects»</span>، برچسبِ
+      <span class="ltr">«may differ»</span>) است که با فلشِ چین‌چینِ <span class="ltr">«reader's schema»</span> به Reader App می‌رود.
+      بعد Reader App با فلشِ پررنگِ <span class="ltr">«two schemas to resolve»</span> به <span class="ltr">«Schema Resolution»</span>
+      (زیرنویس: <span class="ltr">«match by field name»</span>، برچسبِ <span class="ltr">«Avro spec rules»</span>) و از آن فلشِ
+      <span class="ltr">«translate to reader's schema»</span> به <span class="ltr">«Decoded Record»</span>
+      (زیرنویس: <span class="ltr">«defaults filled in»</span>، برچسبِ <span class="ltr">«extras ignored»</span>).
+    </div><div class="en"><p>The third lower box, <span class="ltr">Reader’s Schema</span> (<span class="ltr">fields code expects</span>; <span class="ltr">may differ</span>), goes via dashed <span class="ltr">reader’s schema</span> to Reader App. Then Reader App takes bold <span class="ltr">two schemas to resolve</span> to <span class="ltr">Schema Resolution</span> (<span class="ltr">match by field name</span>; <span class="ltr">Avro spec rules</span>), and <span class="ltr">translate to reader’s schema</span> on to the <span class="ltr">Decoded Record</span> (<span class="ltr">defaults filled in</span>; <span class="ltr">extras ignored</span>).</p></div>
+    <div class="fa">
+      درسِ شکل: خواندنِ داده در Avro یعنی <b>ترجمه بین دو schema</b>، نه فقط رمزگشاییِ بایت‌ها. writer's schema را یا خودِ فایل
+      دارد، یا registry با شمارهٔ نسخه می‌دهد؛ reader's schema همان چیزی است که کدِ امروزِ تو انتظار دارد.
+      و دو قاعدهٔ طلایی resolution در برچسبِ آخر خلاصه شده: <b>extras ignored</b> و <b>defaults filled in</b>.
+    </div><div class="en"><p>The lesson: reading data in Avro means <b>translating between two schemas</b>, not just decoding bytes. The writer’s schema comes either inside the file itself or from a registry via the version number; the reader’s schema is whatever today’s code expects. And the two golden resolution rules sit in the last tag: <b>extras ignored</b> and <b>defaults filled in</b>.</p></div>
+  </div>
+
+  <h3 id="s3-6"><span class="fa">۳.۶ مزایای schema و اسکیماهای پویا</span><span class="en">3.6 Schema benefits and dynamic schemas</span></h3>
+<div class="fa">
+<p>اسکیما قراردادِ شکل و معنای داده را روشن می‌کند. داشتن فایل اسکیما کافی نیست؛ باید نسخه‌ها، قواعد تغییر و دسترسیِ خواننده به ساختار مناسب هم مدیریت شوند.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-10">
+<p class="example-title"><b>مثال فنی: قرارداد پیش از ورود داده</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> پیام ورودی فیلد <code dir="ltr">age</code> را با متن <code dir="ltr">old</code> می‌فرستد، اما قرارداد عدد می‌خواهد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> validation پیام را رد یا قرنطینه می‌کند و مسیرِ خطا را ثبت می‌کند؛ صرف تولید کلاس از schema کافی نیست.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> schema اختلاف نوع را زود آشکار می‌کند؛ درستی قواعد دامنه مثل سن منفی هنوز کنترل جدا می‌خواهد.</p>
+</div>
+</div>
+
+  <div class="fa">
+<ul>    <li><b>اسکیماهای پویا با Avro راحت‌ترند:</b> چون تگی در schema نیست، می‌توان مستقیم از schema رابطه‌ای، Avro schema تولید کرد (هر جدول ← یک record، هر ستون ← یک فیلد) و dump کاملِ پایگاه داده را نوشت. اگر schema پایگاه داده عوض شود، همان مبدل دوباره اجرا می‌شود؛ چون فیلدها با نام شناخته می‌شوند، reader's schema قدیمی هنوز جفت می‌شود. در protobuf باید تگ‌ها را دستی تخصیص دهی و مراقب باشی تگی تکراری استفاده نشود.</li>
+    <li><b>قالب‌های باینریِ مبتنی بر schema چند مزیتِ بزرگ دارند:</b> فشرده‌تر از «JSONهای باینری»‌اند (نامِ فیلدها حذف می‌شود)؛ خودِ schema سندِ زنده است (برخلاف مستنداتِ دستی، همیشه به‌روز است چون برای decode لازم است)؛ با نگه‌داشتنِ registry می‌توان سازگاریِ تغییرات را قبل از deploy سنجید؛ و برای زبان‌های statically typed کد تولید می‌کند (بررسیِ نوع در compile-time).</li>
+    <li>این ایده‌ها تازه نیستند: <b>ASN.1</b> از ۱۹۸۴ با تگ‌ها تکاملِ schema داشت (هنوز در گواهی‌های SSL/X.509 با کدگذاریِ DER استفاده می‌شود) اما پیچیده و بدمستند است. بیشتر پایگاه‌های داده رابطه‌ای هم پروتکلِ باینریِ اختصاصی خودشان را دارند که driver (JDBC/ODBC) آن را decode می‌کند.</li>
+    <li>قاعدهٔ عملی: تعدادِ قالب‌های هم‌زمان در سیستم را <b>کم</b> نگه دار؛ هر قالبِ اضافه یعنی عملیاتِ بیشتر برای نگه‌داشتنِ سازگاری.</li>
+  </ul></div><div class="en"><ul><li><b>Dynamic schemas are easier with Avro:</b> with no tags in the schema you can generate an Avro schema straight from a relational schema (each table → one record, each column → one field) and write a full database dump. If the database schema changes, re-run the same converter; since fields are known by name, the old reader’s schema still pairs up. In protobuf you must allocate tags by hand and watch none get reused.</li><li><b>Schema-driven binary formats carry big wins:</b> denser than “JSON binaries” (field names drop out); the schema itself is living documentation (unlike hand docs, always current since decoding needs it); with a registry you can test a change’s compatibility before deploy; and they generate code for statically typed languages (compile-time type checks).</li><li>These ideas aren’t new: <b>ASN.1</b> has had tag-based schema evolution since 1984 (still used in SSL/X.509 certificates with DER encoding) but is complex and badly documented. Most relational databases also have their own proprietary binary protocol that the driver (JDBC/ODBC) decodes.</li><li>Practical rule: keep the number of simultaneous formats in the system <b>small</b>; each extra format means more work keeping compatibility.</li></ul></div>
+
+  <div class="fa">
+    <table><thead><tr><th>محور</th><th>JSON / XML</th><th>MessagePack و دوستان</th><th>Protocol Buffers</th><th>Avro</th></tr></thead>
+    <tbody>
+      <tr><td><b>schema</b></td><td>اختیاری (JSON Schema)</td><td>ندارد</td><td>اجباری (IDL با تگ)</td><td>اجباری (IDL/JSON بدون تگ)</td></tr>
+      <tr><td><b>شناسهٔ فیلد در داده</b></td><td>نامِ کامل</td><td>نامِ کامل</td><td>شمارهٔ تگ</td><td>هیچ (فقط ترتیبِ schema)</td></tr>
+      <tr><td><b>حجمِ رکوردِ مثال</b></td><td>۸۱ بایت</td><td>۶۶ بایت</td><td>۳۳ بایت</td><td>۳۲ بایت</td></tr>
+      <tr><td><b>سازگاری</b></td><td>بستگی به قراردادِ شما دارد</td><td>مثل JSON</td><td>با تگ‌های ثابت: روشن و قابل‌اتکا</td><td>با defaultها و resolution: روشن و قابل‌اتکا</td></tr>
+      <tr><td><b>انسان‌خوان</b></td><td>بله</td><td>نه</td><td>نه (ابزار می‌خواهد)</td><td>نه (ابزار می‌خواهد)</td></tr>
+      <tr><td><b>بهترین کاربرد</b></td><td>تبادلِ بین سازمان‌ها، APIهای عمومی</td><td>وقتی فقط می‌خواهی JSON کوچک‌تر شود</td><td>RPC (gRPC)، لاگ‌ها، پیام‌ها</td><td>فایل‌های بزرگ، dump، pipelineهای داده</td></tr>
+    </tbody></table>
+  </div><h3><span class="fa">نمودار مفهومی — یک رکورد، چهار کدگذاری</span><span class="en">Concept diagram — one record, four encodings</span></h3>
+<div class="diagram">
+  <div class="cap">
+    <b><span class="fa">نمودار مفهومی · چرا schema بایت‌ها را آب می‌کند</span><span class="en">Concept diagram · Why schemas shrink bytes</span></b>
+    <a class="open" href="diagrams/format-bytes-compare.html" target="_blank"><span class="fa">باز کردن در صفحه جدا ↗</span><span class="en">Open standalone ↗</span></a>
+  </div>
+  <iframe src="diagrams/format-bytes-compare.html" title="Same record in four encodings" loading="lazy"></iframe>
+</div>
+<div class="teacher">
+  <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
+  <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: مقایسهٔ قالب روی همان رکورد</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> رکورد <code dir="ltr">user_id=17, active=true</code> را در چند قالب می‌نویسیم.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> JSON نام فیلدها را متنی حمل می‌کند؛ قالب مبتنی بر schema می‌تواند شناسه یا جایگاه فیلد را به‌کار گیرد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> برای مقایسه باید همان داده، کتابخانه و تنظیمات سنجیده شوند؛ باینری بودن به‌تنهایی تضمین کمترین حجم یا بهترین تکامل نیست.</p>
+</div>
+<p>چهار میله را از بالا بخوانید: <span class="ltr">JSON</span> با ۸۱ بایت (نام فیلدها داخل داده سفر می‌کنند)، <span class="ltr">MessagePack</span> با ۶۶ بایت (همان مدل، باینری، ولی هنوز بی‌<span class="ltr">schema</span>)، پروتوباف با ۳۳ بایت (نام‌ها با شمارهٔ تگ جایگزین شده‌اند) و <span class="ltr">Avro</span> با ۳۲ بایت (فقط مقادیر؛ ترتیب از <span class="ltr">schema</span> می‌آید). جملهٔ پایین درس است: <span class="ltr">schema</span> نام‌ها را حذف می‌کند و ۸۱ بایت را ۳۲ می‌کند.</p></div>
+  <div class="en"><p>Read the four bars top-down: <span class="ltr">JSON</span> at 81 bytes (field names travel inside the data), <span class="ltr">MessagePack</span> at 66 (same model, binary, still schema-less), Protobuf at 33 (names replaced by tag numbers) and <span class="ltr">Avro</span> at 32 (values only; order comes from the schema). The bottom line is the lesson: the schema drops the names, turning 81 bytes into 32.</p></div>
+</div>
+<div class="en"><table><thead><tr><th>Aspect</th><th>JSON / XML</th><th>MessagePack &amp; friends</th><th>Protocol Buffers</th><th>Avro</th></tr></thead><tbody><tr><td><b>Schema</b></td><td>Optional (JSON Schema)</td><td>None</td><td>Mandatory (tagged IDL)</td><td>Mandatory (tagless IDL/JSON)</td></tr><tr><td><b>Field ID in data</b></td><td>Full name</td><td>Full name</td><td>Tag number</td><td>None (schema order only)</td></tr><tr><td><b>Example-record size</b></td><td>81 bytes</td><td>66 bytes</td><td>33 bytes</td><td>32 bytes</td></tr><tr><td><b>Compatibility</b></td><td>Depends on your conventions</td><td>Like JSON</td><td>With stable tags: clear and reliable</td><td>With defaults + resolution: clear and reliable</td></tr><tr><td><b>Human-readable</b></td><td>Yes</td><td>No</td><td>No (needs tools)</td><td>No (needs tools)</td></tr><tr><td><b>Best use</b></td><td>Cross-org exchange, public APIs</td><td>When you just want smaller JSON</td><td>RPC (gRPC), logs, messages</td><td>Big files, dumps, data pipelines</td></tr></tbody></table></div>
+
+  <h3 id="s3-7"><span class="fa">۳.۷ چرخهٔ حیاتِ یک فیلدِ اسکیما + نمودار ۶</span><span class="en">3.7 A schema field’s lifecycle + Diagram 6</span></h3>
+  <div class="fa">
+<p>تغییر یک فیلد بهتر است مرحله‌ای انجام شود: خواننده‌ها را آماده کنیم، نوشتن شکل تازه را شروع کنیم و پس از کنار رفتن وابستگی‌های قدیمی، شکل قبلی را حذف کنیم.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-11">
+<p class="example-title"><b>مثال فنی: چرخهٔ حذف یک فیلد</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویس از <code dir="ltr">full_name</code> به <code dir="ltr">given_name, family_name</code> مهاجرت می‌کند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> ابتدا خواننده‌ها هر دو شکل را تحمل می‌کنند؛ writerها مرحله‌ای عوض می‌شوند؛ حذف نهایی وقتی است که مصرف‌کننده و دادهٔ قدیمی پوشش داده شده‌اند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> حذف فیلد فقط تغییر یک فایل schema نیست؛ عمر داده و همهٔ readerها بخشی از مهاجرت‌اند.</p>
+</div>
+</div><div class="en"><p>So far we’ve seen how <span class="ltr">writer’s</span> and <span class="ltr">reader’s schemas</span> get along via resolution rules: the writer’s extra field is ignored, the writer’s missing field is filled with the reader’s default. But these rules only save us if schema change arrives <b>step by step</b>: in a live system, during a <span class="ltr">rolling upgrade</span> old and new code versions run <b>side by side</b> for hours or days, and every message must stay readable to both. So “adding one field” isn’t one deploy; it’s a multi-stage cycle, each step guaranteeing one compatibility.</p></div>
+  <div class="fa">
+    قانونِ طلاییِ این چرخه <b>readers first</b> است: اول کدی را deploy کنید که فیلدِ تازه را <b>می‌خواند</b> و اگر نبود
+    تحملش می‌کند، بعد کدی را که آن را <b>می‌نویسد</b>. ارزان‌ترینِ تغییرها، افزودنِ فیلدِ <b>اختیاری با مقدارِ پیش‌فرض</b> است —
+    در Avro یعنی <code>union { null, ... }</code> با default مناسب — چون خواننده‌های قدیمی نادیده‌اش می‌گیرند و خواننده‌های
+    جدید با پیش‌فرضِ خودشان پرش می‌کنند. اما تغییرِ نام یا نوعِ یک فیلد، در حکمِ «حذف + افزودن» است: اگر در یک گام انجام شود،
+    یکی از دو سازگاریِ <span class="ltr">backward/forward</span> می‌شکند.
+  </div><div class="en"><p>This cycle’s golden rule is <b>readers first</b>: first deploy code that <b>reads</b> the fresh field and tolerates its absence, then code that <b>writes</b> it. The cheapest changes add an <b>optional field with a default</b> — in Avro a <code>union { null, ... }</code> with a proper default — since old readers ignore it and new readers fill it with their own default. But renaming or retyping a field equals “delete + add”: done in one step, one of the two <span class="ltr">backward/forward</span> compatibilities breaks.</p></div>
+  <div class="fa">
+    و چرا <b>حذف</b> همیشه آخرین گام است؟ چون <b>داده از کد عمرش بیشتر است</b>: پیام‌های قدیمیِ مانده در صف‌ها، backupها و
+    فایل‌های آرشیوی برای همیشه با همان اسکیمای قدیمی می‌مانند. پس اول نوشتنِ فیلد را متوقف می‌کنیم (<span class="ltr">deprecated</span>)
+    اما خواننده‌ها هنوز باید رکوردهای حاویِ آن را بخوانند، و فقط وقتی هیچ خواننده‌ای به آن نیاز نداشت، از اسکیما حذفش می‌کنیم.
+    نمودار ۶ همین چرخه را به‌صورتِ یک ماشینِ وضعیت می‌کشد: پنج حالتِ اصلیِ فیلد، دو «دروازهٔ سازگاری» برای تصمیم‌های سخت،
+    و یک وضعیتِ بن‌بست برای وقتی که ترتیب را اشتباه رفته‌ایم.
+  </div><div class="en"><p>And why is <b>deletion</b> always the last step? Because <b>data outlives code</b>: old messages stuck in queues, backups and archive files keep their old schema forever. So first stop writing the field (<span class="ltr">deprecated</span>) while readers must still read records containing it, and only drop it from the schema once no reader needs it. Diagram 6 draws this cycle as a state machine: five main field states, two compatibility gates for the hard calls, and one dead-end state for wrong ordering.</p></div>
+
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار ۶ · Lifecycle — چرخهٔ حیاتِ فیلد در تکاملِ schema</span><span class="en">Diagram 6 · Lifecycle — a field’s life in schema evolution</span></b>
+      <a class="open" href="diagrams/schema-field-lifecycle.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/schema-field-lifecycle.html" title="Lifecycle of a schema field from added to removed safely" loading="lazy"></iframe>
+  </div>
+
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار ۶</span><span class="en">Teacher narration</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: چرخهٔ حذف یک فیلد</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویس از <code dir="ltr">full_name</code> به <code dir="ltr">given_name, family_name</code> مهاجرت می‌کند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> ابتدا خواننده‌ها هر دو شکل را تحمل می‌کنند؛ writerها مرحله‌ای عوض می‌شوند؛ حذف نهایی وقتی است که مصرف‌کننده و دادهٔ قدیمی پوشش داده شده‌اند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> حذف فیلد فقط تغییر یک فایل schema نیست؛ عمر داده و همهٔ readerها بخشی از مهاجرت‌اند.</p>
+</div>
+
+      این نمودار سه نوارِ (<span class="ltr">lane</span>) افقی دارد که عنوانشان از بالا به پایین این است:
+      <span class="ltr">«Field states»</span> (زندگیِ یک فیلد)، <span class="ltr">«Compatibility gates»</span>
+      (دروازه‌های تصمیمِ سازگاری) و <span class="ltr">«Terminal»</span> (وضعیتِ بن‌بست). پنج حالتِ نوارِ بالا شمارهٔ گام دارند —
+      <span class="ltr">«01»</span> تا <span class="ltr">«05»</span> — و مسیرِ عادیِ زندگیِ یک فیلد را می‌سازند؛ دو حالتِ
+      لوزی‌شکلِ نوارِ میانی «دروازه»‌اند و حالتِ قرمزِ نوارِ پایین، مقصدِ مسیرِ شکست.
+    </div><div class="en"><p>The diagram has three horizontal lanes, top to bottom: <span class="ltr">Field states</span> (a field’s life), <span class="ltr">Compatibility gates</span> (compatibility decision gates), <span class="ltr">Terminal</span> (dead end). The top lane’s five states are numbered <span class="ltr">01</span>–<span class="ltr">05</span> and form a field’s normal life; the middle lane’s two diamonds are gates, the bottom lane’s red state the failure destination.</p></div>
+    <div class="fa">
+      از چپِ نوارِ بالا شروع کنید: <span class="ltr">«Proposed»</span> (گامِ <span class="ltr">«01»</span>) با زیرنویسِ
+      <span class="ltr">«schema change drafted»</span> و برچسبِ <span class="ltr">«not deployed»</span> —
+      یعنی تغییر هنوز فقط روی کاغذ است و به هیچ سروری نرسیده. فلشِ پررنگِ <span class="ltr">«deploy readers first»</span>
+      آن را به <span class="ltr">«Added Optional»</span> (گامِ <span class="ltr">«02»</span>) می‌برد — زیرنویسِ
+      <span class="ltr">«new field, default or null»</span> و برچسبِ <span class="ltr">«writers may omit it»</span>:
+      فیلد در اسکیما هست و خواننده‌ها تحملش می‌کنند، اما هنوز هیچ نویسنده‌ای پرش نمی‌کند. فلشِ بعدی،
+      <span class="ltr">«writers fill it»</span>، به <span class="ltr">«In Use»</span> (گامِ <span class="ltr">«03»</span>)
+      می‌رسد — زیرنویسِ <span class="ltr">«new writers fill it»</span> و برچسبِ <span class="ltr">«old readers ignore it»</span> —
+      تنها حالتی از این پنج‌تا که فیلد واقعاً داده حمل می‌کند.
+    </div><div class="en"><p>Start left on the top lane: <span class="ltr">Proposed</span> (step <span class="ltr">01</span>; <span class="ltr">schema change drafted</span>; <span class="ltr">not deployed</span>) — the change is still only on paper. The bold <span class="ltr">deploy readers first</span> leads to <span class="ltr">Added Optional</span> (step <span class="ltr">02</span>; <span class="ltr">new field, default or null</span>; <span class="ltr">writers may omit it</span>): the field is in the schema and readers tolerate it, but no writer fills it yet. Next, <span class="ltr">writers fill it</span> reaches <span class="ltr">In Use</span> (step <span class="ltr">03</span>; <span class="ltr">new writers fill it</span>; <span class="ltr">old readers ignore it</span>) — the only one of the five where the field really carries data.</p></div>
+    <div class="fa">
+      از اینجا داستانِ جمع‌وجور کردن است. فلشِ <span class="ltr">«stop writing it»</span> به
+      <span class="ltr">«Deprecated»</span> (گامِ <span class="ltr">«04»</span>) می‌رود — زیرنویسِ
+      <span class="ltr">«no new writes»</span> و برچسبِ <span class="ltr">«readers still tolerate it»</span>:
+      نوشتنِ تازه متوقف شده، اما رکوردهای قدیمی هنوز فیلد را دارند و خواننده‌ها باید بتوانند همان‌ها را بخوانند.
+      سرانجام فلشِ <span class="ltr">«drop the field»</span> به <span class="ltr">«Removed»</span>
+      (گامِ <span class="ltr">«05»</span>) می‌رسد — زیرنویسِ <span class="ltr">«gone from the schema»</span> و برچسبِ
+      اطمینان‌بخشِ <span class="ltr">«safe to drop»</span>. دقت کنید این پنج گام فقط به همین ترتیب امن‌اند؛ برای هر
+      جابه‌جاییِ ترتیب، یکی از دو دروازهٔ نوارِ میانی باید جوابِ «بله» بدهد.
+    </div><div class="en"><p>From here it’s the winding-down story. <span class="ltr">stop writing it</span> goes to <span class="ltr">Deprecated</span> (step <span class="ltr">04</span>; <span class="ltr">no new writes</span>; <span class="ltr">readers still tolerate it</span>): fresh writes stop, but old records still carry the field and readers must keep reading them. Finally <span class="ltr">drop the field</span> reaches <span class="ltr">Removed</span> (step <span class="ltr">05</span>; <span class="ltr">gone from the schema</span>; reassuringly <span class="ltr">safe to drop</span>). These five steps are only safe in this order; any reordering must pass one of the middle lane’s two gates.</p></div>
+    <div class="fa">
+      حالا دروازه‌ها. از <span class="ltr">«Added Optional»</span> فلشِ چین‌چینِ <span class="ltr">«need it now?»</span>
+      به پایین می‌آید و به نوارِ <span class="ltr">«Compatibility gates»</span> می‌رسد: حالتِ لوزیِ
+      <span class="ltr">«All Writers Upgraded?»</span> با زیرنویسِ <span class="ltr">«old code still running»</span> و برچسبِ
+      <span class="ltr">«gate»</span>. اگر همهٔ نویسنده‌ها بالا رفته باشند، فلشِ <span class="ltr">«yes, all upgraded»</span>
+      مستقیم به <span class="ltr">«In Use»</span> برمی‌گردد — یعنی نوشتنِ فیلد فقط بعد از عبور از این دروازه شروع می‌شود.
+      اما اگر نسخه‌ای قدیمی هنوز در حال اجرا باشد، فلشِ قرمزِ <span class="ltr">«no, mixed fleet»</span> به نوارِ
+      <span class="ltr">«Terminal»</span> می‌رود: <span class="ltr">«Breaking Change»</span> با زیرنویسِ
+      <span class="ltr">«old code crashes or drops data»</span> و برچسبِ <span class="ltr">«roll back»</span> —
+      یعنی یا کدِ قدیمی می‌شکند یا داده را می‌بلعد، و تنها راه، برگرداندنِ deploy است.
+    </div><div class="en"><p>Now the gates. From <span class="ltr">Added Optional</span> the dashed <span class="ltr">need it now?</span> descends to the <span class="ltr">Compatibility gates</span> lane: the diamond <span class="ltr">All Writers Upgraded?</span> (<span class="ltr">old code still running</span>; <span class="ltr">gate</span>). If all writers are up, <span class="ltr">yes, all upgraded</span> returns straight to <span class="ltr">In Use</span> — writing the field starts only past this gate. But if an old version still runs, the red <span class="ltr">no, mixed fleet</span> drops to the <span class="ltr">Terminal</span> lane: <span class="ltr">Breaking Change</span> (<span class="ltr">old code crashes or drops data</span>; <span class="ltr">roll back</span>) — either old code breaks or it swallows data, and the only way out is rolling the deploy back.</p></div>
+    <div class="fa">
+      دروازهٔ دوم سمتِ راستِ همان نوار است: از <span class="ltr">«Deprecated»</span> فلشِ چین‌چینِ
+      <span class="ltr">«can we drop it?»</span> پایین می‌آید به <span class="ltr">«All Readers Upgraded?»</span>
+      با زیرنویسِ <span class="ltr">«ignore unknown fields»</span> و برچسبِ <span class="ltr">«gate»</span>.
+      جوابِ مثبت — فلشِ <span class="ltr">«yes, all upgraded»</span> — فیلد را به <span class="ltr">«Removed»</span> می‌رساند؛
+      اما جوابِ منفی — فلشِ <span class="ltr">«not yet»</span> — درست به خودِ <span class="ltr">«Deprecated»</span>
+      برمی‌گردد: حلقه‌ای که ممکن است هفته‌ها و ماه‌ها تکرار شود تا آخرین خواننده‌ای که هنوز به فیلد نیاز دارد بازنشسته شود.
+      حذفِ فیلد فقط وقتی <span class="ltr">«safe to drop»</span> است که این دروازه برای همیشه بسته شده باشد.
+    </div><div class="en"><p>The second gate sits right on the same lane: from <span class="ltr">Deprecated</span> the dashed <span class="ltr">can we drop it?</span> descends to <span class="ltr">All Readers Upgraded?</span> (<span class="ltr">ignore unknown fields</span>; <span class="ltr">gate</span>). A yes — <span class="ltr">yes, all upgraded</span> — carries the field to <span class="ltr">Removed</span>; a no — <span class="ltr">not yet</span> — loops right back to <span class="ltr">Deprecated</span>: a loop that may repeat for weeks and months until the last reader still needing the field retires. Dropping is <span class="ltr">safe to drop</span> only once this gate closes for good.</p></div>
+    <div class="fa">
+      درسِ اولِ شکل را در یک ترتیب جمع کنید: <b>readers first، writers second، drop last</b>. اول کدِ خواننده را بالا ببرید
+      تا فیلدِ ناشناخته را تحمل کند، بعد کدِ نویسنده را تا فیلد را پر کند، و حذف را فقط آخرِ کار و پس از هر دو دروازه انجام دهید.
+      در یک <span class="ltr">rolling upgrade</span> واقعی یعنی deployها را باید با همین ترتیب برنامه‌ریزی کنید:
+      نسخه‌ای که فقط «می‌خواند» همیشه ایمن است، نسخه‌ای که «می‌نویسد» فقط بعد از آن.
+    </div><div class="en"><p>Sum the figure’s first lesson into one order: <b>readers first, writers second, drop last</b>. First raise reader code to tolerate the unknown field, then writer code to fill it, and delete only at the very end, past both gates. In a real <span class="ltr">rolling upgrade</span> that means scheduling deploys in exactly this order: a version that only “reads” is always safe; one that “writes” only after it.</p></div>
+    <div class="fa">
+      و درسِ دوم: <b>داده از کد عمرش بیشتر است</b>، و هر تغییرِ «ظاهراً کوچک» ممکن است در لباسِ «حذف + افزودن» باشد —
+      تغییرِ نامِ فیلد، تغییرِ نوع، یا حتی عوض کردنِ مقدارِ پیش‌فرض. قیمتِ به‌هم‌ریختنِ ترتیب همان یک فلشِ قرمزِ
+      <span class="ltr">«no, mixed fleet»</span> است: <span class="ltr">«Breaking Change»</span> و بعد
+      <span class="ltr">«roll back»</span>. اگر هر تغییرِ اسکیما را با همین پنج گام و دو دروازه بسنجید،
+      deployِ بدونِ downtime دیگر شانس نیست؛ نتیجهٔ منطقیِ ترتیبِ درست است.
+    </div><div class="en"><p>And the second lesson: <b>data outlives code</b>, and every “seemingly small” change may wear a “delete + add” costume — renaming a field, retyping it, even changing its default. The price of scrambling the order is that one red arrow <span class="ltr">no, mixed fleet</span>: <span class="ltr">Breaking Change</span>, then <span class="ltr">roll back</span>. Weigh every schema change against these five steps and two gates, and downtime-free deploy stops being luck — it becomes the logical result of the right order.</p></div>
+  </div>
+</section>
+
+<section id="s4">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۴</span><span class="en">4</span></span><span class="fa">حالت‌های جریان داده</span><span class="en">Dataflow modes</span></h2>
+
+  <div class="fa">
+<p>داده می‌تواند از راه ذخیره‌سازی، درخواست مستقیم، صف پیام یا گردش‌کار میان برنامه‌ها منتقل شود. در هر مسیر باید بدانیم چه کسی تولید می‌کند، چه کسی می‌خواند و چه مدت بعد.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-12">
+<p class="example-title"><b>مثال فنی: سه مسیر همان داده</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> تغییر نام کاربر می‌تواند از رکورد پایگاه داده، پاسخ API یا پیام رویداد خوانده شود.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پایگاه داده نسخه‌های قدیمی را نگه می‌دارد؛ API با کلاینت‌های قدیمی سروکار دارد؛ صف ممکن است پیام قدیمی را دوباره تحویل دهد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هر مسیر پنجرهٔ سازگاری خودش را دارد؛ پایان انتشار سرورها لزوماً پایان دادهٔ قدیمی نیست.</p>
+</div>
+</div><div class="en"><p>Compatibility is a relation between one process that <b>encodes</b> and another that <b>decodes</b>. But data travels between processes in assorted ways. This part looks at four common modes.</p></div>
+
+  <h3 id="s4-1"><span class="fa">۴.۱ نمودار ۴ + روایت مدرس</span><span class="en">4.1 Diagram 4 + teacher narration</span></h3>
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار ۴ · Architecture — چهار حالت جریان داده و جای encode/decode</span><span class="en">Diagram 4 · Architecture — four dataflow modes and where encode/decode sit</span></b>
+      <a class="open" href="diagrams/dataflow-modes.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/dataflow-modes.html" title="Modes of dataflow: databases, services, workflows, events" loading="lazy"></iframe>
+  </div>
+
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار ۴</span><span class="en">Teacher narration</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: سه مسیر همان داده</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> تغییر نام کاربر می‌تواند از رکورد پایگاه داده، پاسخ API یا پیام رویداد خوانده شود.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پایگاه داده نسخه‌های قدیمی را نگه می‌دارد؛ API با کلاینت‌های قدیمی سروکار دارد؛ صف ممکن است پیام قدیمی را دوباره تحویل دهد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هر مسیر پنجرهٔ سازگاری خودش را دارد؛ پایان انتشار سرورها لزوماً پایان دادهٔ قدیمی نیست.</p>
+</div>
+
+      شکل از چپ شروع می‌شود: جعبهٔ <span class="ltr">«Application Process»</span> با زیرنویسِ
+      <span class="ltr">«in-memory objects»</span>. فلشِ پررنگِ <span class="ltr">«encode object to bytes»</span>
+      آن را به قلبِ شکل می‌رساند: جعبهٔ بزرگِ <span class="ltr">«Encoder / Decoder»</span>
+      (زیرنویس: <span class="ltr">«objects to bytes and back»</span>، برچسبِ <span class="ltr">«textual or schema-driven»</span>).
+    </div><div class="en"><p>The figure starts left: <span class="ltr">Application Process</span> (<span class="ltr">in-memory objects</span>). The bold <span class="ltr">encode object to bytes</span> carries it to the figure’s heart: the big <span class="ltr">Encoder / Decoder</span> box (<span class="ltr">objects to bytes and back</span>; <span class="ltr">textual or schema-driven</span>).</p></div>
+    <div class="fa">
+      از راستِ این جعبه، چهار فلش به چهار حالتِ جریان داده می‌رود و همه داخل قابِ
+      <span class="ltr">«Bytes cross a process boundary — backward + forward compatibility required»</span> جمع شده‌اند:
+    </div><div class="en"><p>From this box’s right, four arrows run to four dataflow modes, all gathered inside <span class="ltr">Bytes cross a process boundary — backward + forward compatibility required</span>:</p></div>
+    <div class="fa">
+<ul>      <li>بالاترین: <span class="ltr">«Database»</span> (زیرنویس: <span class="ltr">«writer encodes, later reader decodes»</span>، برچسبِ <span class="ltr">«data outlives code»</span>) با فلشِ پررنگِ <span class="ltr">«persist and read records»</span>.</li>
+      <li>دوم (هم‌ترازِ Encoder): <span class="ltr">«Services: REST / RPC»</span> (زیرنویس: <span class="ltr">«client encodes request, server replies»</span>، برچسبِ <span class="ltr">«evolve APIs independently»</span>) با فلشِ <span class="ltr">«request and response payloads»</span>.</li>
+      <li>سوم: <span class="ltr">«Workflow Engine»</span> (زیرنویس: <span class="ltr">«steps logged and replayed»</span>، برچسبِ <span class="ltr">«durable execution»</span>) با فلشِ <span class="ltr">«step results to durable log»</span>.</li>
+      <li>پایینی: <span class="ltr">«Broker / Actors»</span> (زیرنویس: <span class="ltr">«sender encodes, subscribers decode»</span>، برچسبِ <span class="ltr">«async messages»</span>) با فلشِ چین‌چینِ <span class="ltr">«publish events and messages»</span>.</li>
+    </ul></div><div class="en"><ul><li>Top: <span class="ltr">Database</span> (<span class="ltr">writer encodes, later reader decodes</span>; <span class="ltr">data outlives code</span>) via bold <span class="ltr">persist and read records</span>.</li><li>Second (level with the Encoder): <span class="ltr">Services: REST / RPC</span> (<span class="ltr">client encodes request, server replies</span>; <span class="ltr">evolve APIs independently</span>) via <span class="ltr">request and response payloads</span>.</li><li>Third: <span class="ltr">Workflow Engine</span> (<span class="ltr">steps logged and replayed</span>; <span class="ltr">durable execution</span>) via <span class="ltr">step results to durable log</span>.</li><li>Bottom: <span class="ltr">Broker / Actors</span> (<span class="ltr">sender encodes, subscribers decode</span>; <span class="ltr">async messages</span>) via dashed <span class="ltr">publish events and messages</span>.</li></ul></div>
+    <div class="fa">
+      درسِ شکل: در هر چهار حالت، کارِ یکسان است — object به بایت و بایت به object — اما <b>چه کسی encode می‌کند،
+      چه کسی decode، و کِی</b> فرق می‌کند. همین تفاوت‌ها تعیین می‌کند هر حالت چه سازگاری‌هایی لازم دارد؛
+      بقیهٔ این بخش تک‌تکِ همین چهار شاخه را باز می‌کند.
+    </div><div class="en"><p>The lesson: in all four modes the job is identical — object to bytes and bytes to object — but <b>who encodes, who decodes, and when</b> differ. Those very differences decide what compatibilities each mode needs; the rest of this part unpacks these four branches one by one.</p></div>
+  </div>
+
+  <h3 id="s4-2"><span class="fa">۴.۲ جریان داده از طریق پایگاه داده</span><span class="en">4.2 Dataflow via databases</span></h3>
+<div class="fa">
+<p>نوشتن در پایگاه داده، نوعی تحویل داده به خوانندهٔ آینده است. ممکن است نسخهٔ بعدی برنامه رکوردهایی را بخواند که سال‌ها قبل ساخته شده‌اند.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-13">
+<p class="example-title"><b>مثال فنی: ویرایش نام، حذف email</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> نسخهٔ ۲ رکورد <code dir="ltr">{name:Sara,email:a@b}</code> نوشته است؛ نسخهٔ ۱ فقط name را می‌شناسد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نسخهٔ ۱ کل شیء را می‌خواند، name را عوض می‌کند و بدون email بازمی‌نویسد؛ update محدود به name یا حفظ فیلد ناشناخته جلوی حذف را می‌گیرد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> یک read-modify-write قدیمی می‌تواند دادهٔ جدید را پاک کند، حتی وقتی decode بدون خطا بوده است.</p>
+</div>
+</div>
+
+  <div class="fa">
+<ul>    <li>در پایگاه داده، processِ نویسنده encode می‌کند و processِ خواننده decode. اگر فقط یک process داشته باشی، خواننده همان برنامه در آینده است: <b>ذخیره کردن یعنی پیام فرستادن به خودِ آینده‌ات</b> — پس backward compatibility قطعاً لازم است.</li>
+    <li>اما معمولاً چند process هم‌زمان به پایگاه داده دسترسی دارند (سرویس‌های مختلف یا چند instance از یک سرویس) و در میانهٔ rolling upgrade بعضی‌ها جدید و بعضی‌ها قدیمی‌اند؛ پس <b>forward compatibility هم لازم است</b>.</li>
+    <li><b>data outlives code:</b> ممکن است مقداری ۵ میلی‌ثانیه پیش و مقداری ۵ سال پیش نوشته شده باشد. کد در چند دقیقه عوض می‌شود؛ داده تا بازنویسیِ صریح با همان فرمتِ قدیمی می‌ماند.</li>
+    <li>بازنویسی (migration) داده به schema جدید ممکن است ولی روی دادهٔ بزرگ گران است؛ پس موتورها آن را <b>به‌تعویق‌انداخته و best-effort</b> انجام می‌دهند: موتورهای LSM هنگام compaction با جدیدترین فرمت بازنویسی می‌کنند؛ پایگاه‌های داده رابطه‌ای با افزودنِ ستونِ nullable بدونِ rewrite کار می‌کنند (هنگام خواندنِ ردیفِ قدیمی، null پر می‌شود). نتیجه: کلِ پایگاه داده «انگار» با یک schema کد شده، هرچند ذخیره‌سازی زیرین مخلوطی از نسخه‌هاست.</li>
+    <li>تغییراتِ پیچیده‌تر (تک‌مقداری ← چندمقداری، جابه‌جایی به جدولِ جدا) هنوز به بازنویسیِ سطحِ برنامه نیاز دارند و نگه‌داشتنِ سازگاری در چنین migrationهایی هنوز پژوهشی است.</li>
+    <li><b>بایگانی (archival):</b> snapshot یا dump معمولاً با <b>جدیدترین schema</b> و به‌صورت یکدست نوشته می‌شود (چون اصل داده در حال کپی است). چون dump یک‌جا نوشته و تغییرناپذیر می‌شود، Avro object container files عالی‌اند و فرصتِ خوبی است برای کدگذاریِ <b>ستونی</b> مثل Parquet (فصل ۱۱).</li>
+  </ul></div><div class="en"><ul><li>In a database the writer process encodes and the reader process decodes. With a single process the reader is the same program in the future: <b>storing means messaging your future self</b> — so backward compatibility is definitely needed.</li><li>But usually several processes touch the database at once (different services, or several instances of one service), and mid-rolling-upgrade some are new and some old; so <b>forward compatibility is needed too</b>.</li><li><b>Data outlives code:</b> one value may be 5 milliseconds old, another 5 years. Code changes in minutes; data keeps its old format until explicitly rewritten.</li><li>Rewriting (migrating) data to a new schema is possible but expensive on big data; so engines do it <b>deferred and best-effort</b>: LSM engines rewrite in the newest format during compaction; relational databases add nullable columns without rewrites (reading an old row fills null). Result: the whole database looks “as if” encoded with one schema, though the underlying storage mixes versions.</li><li>Trickier changes (single- → multi-valued, moving to a separate table) still need application-level rewrites, and keeping compatibility through such migrations is still research territory.</li><li><b>Archival:</b> a snapshot or dump is usually written uniformly with the <b>newest schema</b> (since the actual data is being copied). Since a dump is written at once and frozen, Avro object container files are ideal — and a good moment for <b>columnar</b> encodings like Parquet (Chapter 11).</li></ul></div>
+
+  <h3 id="s4-3"><span class="fa">۴.۳ سرویس‌ها: REST و RPC</span><span class="en">4.3 Services: REST and RPC</span></h3>
+  <div class="fa">
+<ul>    <li>الگوی رایج: <b>کلاینت و سرور</b>. سرور API را در شبکه می‌گذارد و کلاینت به آن درخواست می‌فرستد. وب همین‌طور کار می‌کند (GET برای گرفتن HTML/CSS/JS، POST برای فرستادن داده) با مجموعه‌ای استاندارد از پروتکل‌ها (HTTP، URL، TLS، HTML).</li>
+    <li>کلاینت فقط مرورگر نیست: اپ‌های موبایل و دسکتاپ و اپ‌های JavaScript مرورگر هم با HTTP به سرور وصل می‌شوند و معمولاً JSON می‌گیرند.</li>
+    <li>سرویس‌ها شبیه پایگاه داده‌اند (داده می‌پذیرند و می‌دهند) اما به‌جای زبانِ کوئریِ عمومی، <b>API ویژهٔ برنامه</b> دارند با ورودی/خروجی‌های ازپیش‌تعیین‌شده — همین، <b>کپسوله‌سازی</b> می‌آورد.</li>
+    <li>هدفِ معماری microservices این است که هر سرویس <b>مستقل deploy و تکامل</b> یابد (معمولاً یک تیم، یک سرویس، releaseهای مکرر). پس نسخه‌های قدیم و جدیدِ سرور و کلاینت هم‌زمان‌اند و فقط تا وقتی APIها سازگار بمانند، تیم‌ها آزادند زیرساخت را عوض کنند.</li>
+    <li><b>web service</b> یعنی سرویسی که زیرینش HTTP است؛ در سه زمینه به کار می‌رود: کلاینتِ روی دستگاهِ کاربر (اینترنتِ عمومی)، سرویس‌به‌سرویسِ درونِ یک سازمان (شبکهٔ خصوصی)، و سازمان‌به‌سازمان (APIهای عمومی مثل پردازشِ پرداخت یا OAuth).</li>
+    <li><b>REST</b> محبوب‌ترین فلسفهٔ طراحی است: فرمت‌های ساده، URL برای شناساییِ منابع، و امکاناتِ HTTP برای cache، احراز هویت و مذاکرهٔ نوعِ محتوا. اما کلاینت هنوز باید بداند کدام endpoint و چه فرمتی دارد؛ برای همین <b>IDL</b> می‌نویسند: <span class="ltr">OpenAPI</span> (Swagger) برای سرویس‌های JSON و Protocol Buffers برای gRPC. ابزارهای IDL مستندات می‌سازند، سازگاریِ تغییرات schema را بررسی می‌کنند و GUI برای آزمایش می‌دهند.</li>
+  </ul></div><div class="en"><ul><li>The common pattern: <b>client and server</b>. The server puts an API on the network and the client sends it requests. The web works this way (GET for HTML/CSS/JS, POST for sending data) with a standard protocol set (HTTP, URL, TLS, HTML).</li><li>Clients aren’t just browsers: mobile and desktop apps and browser JavaScript apps also reach servers over HTTP, usually taking JSON.</li><li>Services resemble databases (they take and give data) but instead of a general query language they expose a <b>program-specific API</b> with predefined inputs/outputs — which brings <b>encapsulation</b>.</li><li>The microservices goal is for each service to <b>deploy and evolve independently</b> (usually one team, one service, frequent releases). So old and new server and client versions coexist, and teams are free to change internals only while APIs stay compatible.</li><li>A <b>web service</b> is a service over HTTP; used in three settings: user-device clients (the public internet), service-to-service inside one organization (private network), and org-to-org (public APIs like payment processing or OAuth).</li><li><b>REST</b> is the most popular design philosophy: simple formats, URLs for resource identity, and HTTP facilities for caching, auth and content negotiation. But the client must still know which endpoint and format; hence <b>IDLs</b>: <span class="ltr">OpenAPI</span> (Swagger) for JSON services, Protocol Buffers for gRPC. IDL tools build docs, check schema-change compatibility, and give testing GUIs.</li></ul></div>
+
+  <div class="callout warn">
+    <div class="tag"><span class="fa">چرا «فراخوانی از راه دور» مثل فراخوانیِ محلی نیست؟</span><span class="en">Why isn’t a “remote call” like a local call?</span></div>
+    <div class="fa">
+<p>در REST یا RPC، برنامه از سرویس دیگری کاری می‌خواهد. این فراخوانی روی شبکه است و ممکن است دیر برسد، پاسخ آن گم شود یا نتیجه‌اش نامشخص بماند.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-14">
+<p class="example-title"><b>مثال فنی: RPC ناموفق یا پاسخ نامعلوم؟</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> کلاینت <code dir="ltr">CreateOrder(request_id=r7)</code> را می‌فرستد؛ سرور سفارش را ثبت می‌کند، ولی پاسخ نمی‌رسد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> retry با همان شناسه به همان نتیجه وصل می‌شود؛ retry با شناسهٔ تازه می‌تواند سفارش دوم بسازد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> برخلاف فراخوانی محلی، timeout شبکه نتیجهٔ عملیات دوردست را مشخص نمی‌کند؛ API باید این ابهام را مدیریت کند.</p>
+</div>
+</div><div class="en"><p>The <b>RPC</b> model wants a network request to look like calling a function (<span class="ltr">location transparency</span>) — but the differences are fundamental:</p></div>
+    <div class="fa">
+<ul>      <li>فراخوانیِ محلی قابل‌پیش‌بینی است؛ درخواستِ شبکه‌ای <b>غیرقابل‌پیش‌بینی</b> (گم‌شدن، کندیِ ماشینِ دور).</li>
+      <li>نتیجهٔ فراخوانیِ محلی یا مقدار است یا exception؛ درخواستِ شبکه‌ای یک پایانِ سوم هم دارد: <b>timeout بدون نتیجه</b> — نمی‌دانی اصلاً اجرا شد یا نه.</li>
+      <li>تلاشِ مجدد ممکن است عمل را <b>دوبار</b> اجرا کند (اگر فقط پاسخ گم شده باشد)؛ مگر قراردادِ <b>idempotence</b> و شناسه‌های یکتا داشته باشی (فصل ۱۲).</li>
+      <li>latency شبکه متغیر است: از کمتر از یک میلی‌ثانیه تا چند ثانیه، برخلافِ تابعِ محلی.</li>
+      <li>نمی‌توانی pointer بدهی؛ همه‌چیز باید encode شود — برای داده‌های بزرگ و objectهای mutable دردسرساز است.</li>
+      <li>کلاینت و سرور ممکن است زبان‌های متفاوت داشته باشند و ترجمهٔ نوع‌ها (مثل مشکلِ اعدادِ بزرگ‌تر از <span class="ltr">2^53</span> در JavaScript) زشت شود.</li>
+    </ul></div><div class="en"><ul><li>A local call is predictable; a network request is <b>unpredictable</b> (lost packets, a slow far machine).</li><li>A local call’s outcome is a value or an exception; a network request has a third ending: <b>timeout with no result</b> — you don’t know if it ran at all.</li><li>Retrying may run the action <b>twice</b> (if only the response was lost); unless you hold an <b>idempotence</b> contract and unique IDs (Chapter 12).</li><li>Network latency varies: from under a millisecond to seconds, unlike a local function.</li><li>You can’t pass pointers; everything must be encoded — painful for big data and mutable objects.</li><li>Client and server may speak different languages, and type translation gets ugly (like the bigger-than-<span class="ltr">2^53</span> numbers problem in JavaScript).</li></ul></div>
+    <div class="fa">
+      بخشی از جذابیتِ REST همین است که انتقالِ state روی شبکه را <b>فراتر از صدازدنِ تابع</b> می‌فهمد.
+      تاریخچه هم پر از شکست‌های پرطمطراق است: EJB و RMI فقط Java، DCOM فقط مایکروسافت، CORBA پیچیده و بدون سازگاری، SOAP/WS-* پیچیده.
+    </div><div class="en"><p>Part of REST’s appeal is understanding state transfer over the network as <b>beyond function calls</b>. History is full of grandiose failures too: EJB and RMI for Java only, DCOM for Microsoft only, CORBA complex and incompatible, SOAP/WS-* complex.</p></div>
+  </div>
+
+  <h4><span class="fa">load balancing، service discovery و service mesh</span><span class="en">Load balancing, service discovery and service mesh</span></h4>
+<div class="fa"><p>کشف سرویس مقصدهای موجود را معرفی می‌کند؛ متعادل‌ساز درخواست‌ها را پخش می‌کند؛ مشِ سرویس بخشی از ارتباطِ میان سرویس‌ها را مدیریت می‌کند.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-15">
+<p class="example-title"><b>مثال فنی: کشف سرویس تا انتخاب مقصد</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویس انبار سه instance دارد و یکی جابه‌جا شده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> discovery نشانی‌های معتبر را می‌دهد؛ load balancer یکی را انتخاب می‌کند؛ mesh می‌تواند سیاست اتصال و مشاهده‌پذیری مشترک اجرا کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هیچ‌کدام idempotency عملیات را خودکار نمی‌سازند؛ retry لایهٔ شبکه باید با معنای درخواست هماهنگ باشد.</p>
+</div></div>
+
+  <div class="fa">
+    <table><thead><tr><th>راه‌حل</th><th>چطور کار می‌کند</th><th>نقطهٔ ضعف / نکته</th></tr></thead>
+    <tbody>
+      <tr><td><b>Load balancer سخت‌افزاری</b></td><td>تجهیزِ ویژه در datacenter؛ کلاینت به یک host:port وصل می‌شود و اتصال به سرورها مسیردهی می‌شود</td><td>تشخیصِ خرابی و جابه‌جاییِ ترافیک؛ هزینهٔ سخت‌افزار</td></tr>
+      <tr><td><b>Load balancer نرم‌افزاری</b> (NGINX، HAProxy)</td><td>همان کار، به‌صورت برنامه روی سخت‌افزارِ معمولی</td><td>ساده و رایج برای deploymentهای متوسط</td></tr>
+      <tr><td><b>DNS</b></td><td>یک نامِ دامنه ← چند IP؛ لایهٔ شبکهٔ کلاینت یکی را انتخاب می‌کند</td><td>تغییرات کند منتشر می‌شوند و cache می‌شوند؛ با start/stop مکررِ سرورها IPهای کهنه می‌بینی</td></tr>
+      <tr><td><b>سیستمِ service discovery</b> (etcd، ZooKeeper)</td><td>instance خودش را با host:port و metadata (مالکیتِ shard، دیتاسنتر) ثبت می‌کند و heartbeat می‌فرستد؛ کلاینت فهرستِ endpointها را می‌گیرد</td><td>محیط‌های پویاتر؛ تصمیمِ load-balancingِ هوشمندانه‌تر (فصل ۷)</td></tr>
+      <tr><td><b>service mesh</b> (Istio، Linkerd)</td><td>load balancer نرم‌افزاری + discovery، به‌صورت کتابخانهٔ درون‌process یا sidecar در دو طرف؛ رمزنگاری در سطحِ load balancer</td><td>پیچیده ولی observability قوی؛ رایج در محیط‌های Kubernetes</td></tr>
+    </tbody></table>
+  </div><div class="en"><table><thead><tr><th>Fix</th><th>How it works</th><th>Weakness / note</th></tr></thead><tbody><tr><td><b>Hardware load balancer</b></td><td>Special datacenter gear; the client connects to one host:port and connections route to servers</td><td>Failure detection and traffic shifting; hardware cost</td></tr><tr><td><b>Software load balancer</b> (NGINX, HAProxy)</td><td>The same job as a program on commodity hardware</td><td>Simple and common for mid-size deployments</td></tr><tr><td><b>DNS</b></td><td>One domain name → several IPs; the client’s network layer picks one</td><td>Changes propagate slowly and get cached; with frequent server start/stops you see stale IPs</td></tr><tr><td><b>Service discovery</b> (etcd, ZooKeeper)</td><td>Each instance registers itself with host:port and metadata (shard ownership, datacenter) and heartbeats; the client fetches the endpoint list</td><td>More dynamic environments; smarter load-balancing calls (Chapter 7)</td></tr><tr><td><b>Service mesh</b> (Istio, Linkerd)</td><td>Software load balancer + discovery as an in-process library or sidecar on both sides; encryption at the load-balancer level</td><td>Complex but strong observability; common in Kubernetes environments</td></tr></tbody></table></div>
+
+  <div class="callout">
+    <div class="tag"><span class="fa">سازگاریِ RPC دقیقاً چه می‌خواهد؟</span><span class="en">What exactly does RPC compatibility need?</span></div>
+    <div class="fa">
+      چون می‌توان فرض کرد <b>اول همهٔ سرورها و بعد کلاینت‌ها</b> به‌روز می‌شوند: روی <b>requestها فقط backward</b> و روی
+      <b>responseها فقط forward</b> لازم است. gRPC و Avro RPC قواعدِ همان قالبِ کدگذاری‌شان را ارث می‌برند؛ در REST/JSON
+      معمولاً «افزودنِ پارامترِ اختیاریِ request» و «افزودنِ فیلدِ response» سازگار شمرده می‌شوند.
+      اما چون RPC اغلب از مرزِ سازمان می‌گذرد، کنترلی روی کلاینت‌ها نیست و سازگاری باید شاید <b>تا ابد</b> نگه داشته شود
+      (یا چند نسخهٔ API کنار هم نگه داشته شود). برای نسخه‌بندی هم توافقِ جهانی نیست: شماره در URL، هدرِ Accept، یا نسخهٔ هر کلاینت در سرور.
+    </div><div class="en"><p>Since we may assume <b>servers upgrade first, clients after</b>: <b>requests</b> need only backward, <b>responses</b> only forward. gRPC and Avro RPC inherit their encoding format’s rules; in REST/JSON “adding an optional request parameter” and “adding a response field” usually count as compatible. But since RPC often crosses org boundaries there is no control over clients, and compatibility may need keeping <b>forever</b> (or several API versions side by side). Versioning has no global agreement either: a number in the URL, the Accept header, or each client’s version on the server.</p></div>
+  </div>
+
+  <h3 id="s4-4"><span class="fa">۴.۴ workflow و اجرای پایدار (Durable Execution) + نمودار ۵</span><span class="en">4.4 Workflows and durable execution + Diagram 5</span></h3>
+  <div class="fa">
+<p>گردش‌کار پایدار، وضعیت مراحل را نگه می‌دارد تا پس از توقف برنامه بتوان ادامه داد. اثر بیرونیِ هر مرحله همچنان باید در برابر اجرای دوباره محافظت شود.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-16">
+<p class="example-title"><b>مثال فنی: ادامهٔ workflow بعد از crash</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> workflow مرحلهٔ رزرو و سپس صدور رسید دارد؛ رزرو با شناسهٔ <code dir="ltr">r7</code> موفق شده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> engine پیشرفت را پایدار می‌کند؛ بعد از crash از تاریخچه ادامه می‌دهد، اما فعالیتی که نتیجه‌اش ثبت نشده ممکن است دوباره فراخوانی شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اثر بیرونی رزرو باید با <code dir="ltr">r7</code> تکرارپذیرِ امن باشد؛ دوام workflow به‌معنی اجرای فیزیکی یک‌بارهٔ همهٔ APIها نیست.</p>
+</div>
+</div><div class="en"><p>The book’s example: a payment that must charge the card and deposit money to the bank account — separate services for fraud detection, card connectivity and bank connectivity. Running one payment = several service calls; this sequence is a <b>workflow</b>, each step a <b>task</b> (Temporal calls them <span class="ltr">activities</span>; some say <span class="ltr">durable functions</span>). Workflows are usually graphs of tasks, defined in a general language, a DSL, or BPEL.</p></div>
+  <div class="fa">
+<ul>    <li><b>workflow engine</b> تصمیم می‌گیرد هر task کِی و روی کدام ماشین اجرا شود، با خرابی چه کند و چقدر موازی‌سازی کند؛ از یک <b>orchestrator</b> (زمان‌بندی) و یک یا چند <b>executor</b> (اجرا) تشکیل شده. اجرا با trigger شروع می‌شود: زمان‌بندی، سرویسِ وب، یا انسان.</li>
+    <li>خانواده‌ها: ابزارهای داده‌ای مثل <span class="ltr">Airflow / Dagster / Prefect</span> (هماهنگ‌سازیِ ETL)، ابزارهای گرافیکی مثل <span class="ltr">Camunda / Orkes</span> با BPMN برای غیرمهندس‌ها، و چارچوب‌های <b>durable execution</b> مثل <span class="ltr">Temporal / Restate</span>.</li>
+  </ul></div><div class="en"><ul><li>A <b>workflow engine</b> decides when and on which machine each task runs, what to do on failure, and how much to parallelize; it is an <b>orchestrator</b> (scheduling) plus one or more <b>executors</b> (running). Runs start with a trigger: a schedule, a web service, or a human.</li><li>Families: data tools like <span class="ltr">Airflow / Dagster / Prefect</span> (ETL orchestration), graphical tools like <span class="ltr">Camunda / Orkes</span> with BPMN for non-engineers, and <b>durable execution</b> frameworks like <span class="ltr">Temporal / Restate</span>.</li></ul></div>
+
+  <div class="callout">
+    <div class="tag"><span class="fa">durable execution چه مشکلی را حل می‌کند؟</span><span class="en">What problem does durable execution solve?</span></div>
+    <div class="fa">
+      در معماری سرویسی، نمی‌توانی دو فراخوانیِ کارت و بانک را در یک تراکنشِ پایگاه‌داده‌ای بپیچی؛ ضمناً با درگاه‌های پرداختِ شخصِ ثالث هم کار می‌کنی.
+      اما می‌خواهی هر پرداخت <b>دقیقاً یک‌بار</b> پردازش شود. راه‌حل: چارچوب، همهٔ فراخوانی‌ها و تغییراتِ state را در
+      <b>ذخیره‌سازیِ پایدار (مثل write-ahead log)</b> ثبت می‌کند. اگر taskی شکست بخورد، دوباره اجرا می‌شود اما
+      <b>گام‌هایی که قبلاً موفق بوده‌اند رد می‌شوند</b> و نتیجهٔ قبلی‌شان برمی‌گردد — گویی فراخوانی تکرار نشده.
+    </div><div class="en"><p>In a service architecture you can’t wrap the card and bank calls in one database transaction; you also work with third-party payment gateways. But you want each payment processed <b>exactly once</b>. The fix: the framework records every call and state change in <b>durable storage (like a write-ahead log)</b>. If a task fails it re-runs, but <b>previously successful steps are skipped</b> with their old results returned — as if the call never repeated.</p></div>
+  </div>
+
+  <h4><span class="fa">نمودار ۵ + روایت مدرس</span><span class="en">Diagram 5 + teacher narration</span></h4>
+  <div class="diagram">
+    <div class="cap">
+      <b><span class="fa">نمودار ۵ · Sequence — اجرای پایدار و replay در workflow پرداخت</span><span class="en">Diagram 5 · Sequence — durable execution and replay in a payment workflow</span></b>
+      <a class="open" href="diagrams/durable-execution.html" target="_blank"><span class="fa">باز کردن در صفحهٔ جدا ↗</span><span class="en">Open standalone ↗</span></a>
+    </div>
+    <iframe src="diagrams/durable-execution.html" title="Durable execution payment workflow and replay" loading="lazy"></iframe>
+  </div>
+
+  <div class="teacher">
+    <div class="tag"><span class="fa">روایت مدرس از نمودار ۵</span><span class="en">Teacher narration</span></div>
+    <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: ادامهٔ workflow بعد از crash</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> workflow مرحلهٔ رزرو و سپس صدور رسید دارد؛ رزرو با شناسهٔ <code dir="ltr">r7</code> موفق شده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> engine پیشرفت را پایدار می‌کند؛ بعد از crash از تاریخچه ادامه می‌دهد، اما فعالیتی که نتیجه‌اش ثبت نشده ممکن است دوباره فراخوانی شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اثر بیرونی رزرو باید با <code dir="ltr">r7</code> تکرارپذیرِ امن باشد؛ دوام workflow به‌معنی اجرای فیزیکی یک‌بارهٔ همهٔ APIها نیست.</p>
+</div>
+
+      شش شرکت‌کننده از چپ به راست: <span class="ltr">«Checkout»</span> (زیرنویس: <span class="ltr">«workflow trigger»</span>)،
+      <span class="ltr">«Workflow Engine»</span> (زیرنویس: <span class="ltr">«workflow runtime»</span>)،
+      <span class="ltr">«Durable Log»</span> (زیرنویس: <span class="ltr">«write-ahead log»</span>)،
+      <span class="ltr">«Fraud Check»</span> (زیرنویس: <span class="ltr">«internal service»</span>)،
+      <span class="ltr">«Card Network»</span> و <span class="ltr">«Bank Service»</span> (هر دو زیرنویسِ <span class="ltr">«third-party API»</span>).
+      دو نوارِ عنوان در چپ: <span class="ltr">«First execution»</span> و <span class="ltr">«Crash recovery and replay»</span>.
+    </div><div class="en"><p>Six participants, left to right: <span class="ltr">Checkout</span> (<span class="ltr">workflow trigger</span>), <span class="ltr">Workflow Engine</span> (<span class="ltr">workflow runtime</span>), <span class="ltr">Durable Log</span> (<span class="ltr">write-ahead log</span>), <span class="ltr">Fraud Check</span> (<span class="ltr">internal service</span>), <span class="ltr">Card Network</span> and <span class="ltr">Bank Service</span> (both <span class="ltr">third-party API</span>). Two title bands at left: <span class="ltr">First execution</span> and <span class="ltr">Crash recovery and replay</span>.</p></div>
+    <div class="fa">
+      در اجرای اول: <span class="ltr">«start payment workflow»</span> از Checkout به موتور می‌آید. موتور گام‌ها را یکی‌یکی می‌فرستد:
+      <span class="ltr">«activity: check fraud»</span> به Fraud Check و پاسخِ <span class="ltr">«not fraudulent»</span>؛
+      بعد <span class="ltr">«append step result»</span> به Durable Log (فلشِ چین‌چین — یعنی هر گامِ موفق اول ثبت می‌شود)؛
+      بعد <span class="ltr">«activity: debit card»</span> به Card Network و پاسخِ <span class="ltr">«charged»</span> و دوباره ثبت در لاگ.
+      گامِ سوم <span class="ltr">«activity: deposit funds»</span> به Bank Service است که یادداشتِ زیرش می‌گوید:
+      <span class="ltr">«worker crashes mid-step»</span> — همین‌جا worker می‌میرد.
+    </div><div class="en"><p>First run: <span class="ltr">start payment workflow</span> arrives from Checkout. The engine sends steps one by one: <span class="ltr">activity: check fraud</span> to Fraud Check, reply <span class="ltr">not fraudulent</span>; then dashed <span class="ltr">append step result</span> to the Durable Log (every successful step is recorded first); then <span class="ltr">activity: debit card</span> to Card Network, reply <span class="ltr">charged</span>, recorded in the log again. The third step, <span class="ltr">activity: deposit funds</span> to Bank Service, is annotated <span class="ltr">worker crashes mid-step</span> — the worker dies right there.</p></div>
+    <div class="fa">
+      نوارِ دوم، قصهٔ نجات است: <span class="ltr">«re-execute workflow»</span> (فلشِ چین‌چین از Checkout)،
+      بعد <span class="ltr">«replay recorded steps»</span> از موتور به Durable Log — موتور می‌بیند check fraud و debit card قبلاً
+      انجام و ثبت شده‌اند. پس فقط گامِ گم‌شده را می‌فرستد:
+      <span class="ltr">«deposit funds (only missing step)»</span> به Bank Service، پاسخِ <span class="ltr">«deposited»</span>،
+      و در نهایتِ خوش، <span class="ltr">«payment complete, exactly once»</span> به Checkout.
+    </div><div class="en"><p>Band two is the rescue story: <span class="ltr">re-execute workflow</span> (dashed arrow from Checkout), then <span class="ltr">replay recorded steps</span> from the engine to the Durable Log — the engine sees fraud-check and debit-card already done and recorded. So it sends only the missing step: <span class="ltr">deposit funds (only missing step)</span> to Bank Service, reply <span class="ltr">deposited</span>, and the happy end <span class="ltr">payment complete, exactly once</span> to Checkout.</p></div>
+    <div class="fa">
+      درسِ شکل: «دقیقاً یک‌بار» با <b>تراکنشِ سنتیِ پایگاه‌داده‌ای</b> به دست نمی‌آید؛ با <b>لاگِ پایدار + بازپخش</b> به دست می‌آید.
+      و البته بهایی دارد — همان چیزی که در بخشِ بعد می‌خوانید.
+    </div><div class="en"><p>The lesson: “exactly once” doesn’t come from a <b>traditional database transaction</b>; it comes from a <b>durable log + replay</b>. And of course it has a price — which the next part covers.</p></div>
+  </div>
+
+  <h4><span class="fa">چالش‌های durable execution</span><span class="en">Durable-execution challenges</span></h4>
+<div class="fa"><p>اجرای پایدار باید با تکرار مرحله، تغییر نسخهٔ کد و نتیجهٔ نامشخصِ سرویس بیرونی کنار بیاید.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-17">
+<p class="example-title"><b>مثال فنی: Replay با کد عوض‌شده</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> workflow قدیمی در تاریخچه ابتدا «رزرو» و سپس «رسید» دارد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کد تازه اگر بدون نسخه‌بندی ترتیب تصمیم‌ها را عوض کند، replay ممکن است با تاریخچه ناسازگار شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> دادهٔ تصمیم و نسخهٔ منطق باید قابل‌تفسیر بمانند؛ ساعت و تصادف و I/O نباید بی‌قاعده داخل replay تصمیم‌ساز شوند.</p>
+</div></div>
+
+  <div class="fa">
+<ul>    <li>سرویس‌های بیرونی (مثل درگاهِ پرداختِ شخصِ ثالث) باید هنوز <b>idempotent</b> باشند؛ تو باید با شناسه‌های یکتا جلوی اجرای تکراری را بگیری.</li>
+    <li>چارچوب فراخوانی‌ها را <b>به ترتیب</b> ثبت می‌کند و انتظار دارد اجرای بعدی دقیقاً همان فراخوانی‌ها را به همان ترتیب بکند؛ پس جابه‌جاییِ دو خطِ کد می‌تواند رفتارِ بازپخشِ invocationهای در جریان را مبهم کند. راه‌حلِ امن: تغییرِ کدِ workflow را به‌صورت <b>نسخهٔ جدا</b> deploy کنی تا invocationهای قدیمی با منطقِ قدیم بازپخش شوند.</li>
+    <li>بازپخش باید <b>قطعی (deterministic)</b> باشد: همان ورودی ← همان خروجی. تولیدِ عددِ تصادفی یا خواندنِ ساعتِ سیستم ممنوع؛ چارچوب‌ها نسخه‌های قطعیِ این توابع را می‌دهند و ابزارهایی مثل <span class="ltr">Workflow Check</span> تخلف را پیدا می‌کنند. (بازگشت به بحثِ قطعیت در فصل ۹.)</li>
+  </ul></div><div class="en"><ul><li>Outside services (like third-party payment gateways) must still be <b>idempotent</b>; you must block repeat runs with unique IDs.</li><li>The framework records calls <b>in order</b> and expects the next run to make exactly the same calls in the same order; so swapping two code lines can blur the replay behavior of in-flight invocations. The safe fix: deploy workflow-code changes as a <b>separate version</b> so old invocations replay with old logic.</li><li>Replay must be <b>deterministic</b>: same input → same output. Random numbers and system-clock reads are banned; frameworks give deterministic versions of these functions, and tools like <span class="ltr">Workflow Check</span> catch violations. (Back to the determinism debate in Chapter 9.)</li></ul></div>
+
+  <h3 id="s4-5"><span class="fa">۴.۵ معماری event-driven</span><span class="en">4.5 Event-driven architecture</span></h3>
+<div class="fa">
+<p>در معماری رویدادمحور، تولیدکننده خبرِ وقوع یک اتفاق را منتشر می‌کند و مصرف‌کننده‌ها مستقل به آن واکنش نشان می‌دهند. شکل و نسخهٔ رویداد همچنان یک قرارداد مشترک است.</p>
+<div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-18">
+<p class="example-title"><b>مثال فنی: رویداد مستقل از مصرف‌کننده</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> سفارش <code dir="ltr">42</code> رویداد <code dir="ltr">OrderPlaced</code> را منتشر می‌کند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> گروه ارسال و گروه تحلیل هر دو آن را می‌گیرند؛ چند worker در گروه ارسال کار همان گروه را تقسیم می‌کنند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> pub/sub تکثیر بین گروه‌هاست و queue تقسیم کار داخل گروه؛ دریافت پیام هنوز به کنترل تکرار و خطا نیاز دارد.</p>
+</div>
+</div>
+
+  <div class="fa">
+<ul>    <li>در این معماری، درخواست یک <b>event یا message</b> است و فرستنده معمولاً <b>منتظر</b> پردازشِ گیرنده نمی‌ماند؛ پیام از یک <b>message broker</b> (event broker، message queue، MOM) می‌گذرد که پیام را موقتاً نگه می‌دارد.</li>
+    <li>مزایای broker نسبت به RPCِ مستقیم: بافر بودن وقتی گیرنده در دسترس نیست یا overload است؛ <b>تحویلِ مجددِ خودکار</b> بعد از crash؛ بی‌نیازی از service discovery؛ ارسالِ یک پیام به <b>چند گیرنده</b>؛ و جداییِ منطقیِ فرستنده و گیرنده (فرستنده فقط publish می‌کند).</li>
+    <li>دو الگوی توزیع: <b>queue</b> (یک مصرف‌کننده از چند مصرف‌کننده پیام را می‌گیرد) و <b>topic / pub-sub</b> (همهٔ subscriberها نسخهٔ خودشان را می‌گیرند).</li>
+    <li>brokerها مدلِ داده تحمیل نمی‌کنند: پیام = بایت‌ها + metadata. رایج: Protobuf/Avro/JSON به‌همراهِ یک schema registry؛ و <span class="ltr">AsyncAPI</span> معادلِ OpenAPI برای پیام. نمونه‌ها: RabbitMQ، ActiveMQ، NATS، Redpanda، Kafka (متن‌باز) و Kinesis، Azure Service Bus، Cloud Pub/Sub (ابری) — مقایسه در فصل ۱۲.</li>
+    <li><b>دوامِ پیام:</b> بسیاری روی دیسک می‌نویسند تا با crash از بین نروند؛ برخلافِ پایگاه داده، بسیاری بعد از مصرف خودکار حذف می‌کنند. برای event sourcing به broker نیاز داری که پیام‌ها را <b>تا ابد</b> نگه دارد (فصل ۳).</li>
+    <li>اگر مصرف‌کننده‌ای پیام را دوباره در topic دیگری publish کند، باید <b>فیلدهای ناشناخته را حفظ کند</b> — وگرنه همان بلای شکل ۵-۱ این‌بار وسطِ pipeline می‌آید.</li>
+    <li><b>actor model:</b> به‌جای thread و قفل و deadlock، منطق در actorها کپسوله می‌شود؛ هر actor state محلیِ خودش را دارد، با پیامِ ناهمزمان حرف می‌زند، یک پیام در هر لحظه پردازش می‌کند و تحویلِ پیام تضمین‌شده نیست. در چارچوب‌های توزیع‌شده مثل <span class="ltr">Akka</span>، <span class="ltr">Orleans</span> و <span class="ltr">Erlang/OTP</span> همان مکانیزم، محلی یا دور، یکسان است (پیام شفاف encode و در آن‌طرف decode می‌شود). location transparency این‌جا بهتر از RPC جواب می‌دهد چون مدل از اول «پیام ممکن است گم شود» را می‌پذیرد. برای rolling upgrade باز هم به کدگذاریِ سازگار نیاز داری.</li>
+  </ul></div><div class="en"><ul><li>In this architecture a request is an <b>event or message</b> and the sender usually <b>doesn’t wait</b> for the receiver’s processing; the message passes through a <b>message broker</b> (event broker, message queue, MOM) holding it temporarily.</li><li>Broker advantages over direct RPC: buffering when the receiver is down or overloaded; <b>automatic redelivery</b> after a crash; no service discovery needed; sending one message to <b>several receivers</b>; and logical sender/receiver decoupling (the sender only publishes).</li><li>Two distribution patterns: <b>queue</b> (one of several consumers takes the message) and <b>topic / pub-sub</b> (every subscriber gets its own copy).</li><li>Brokers impose no data model: a message = bytes + metadata. Common: Protobuf/Avro/JSON with a schema registry; <span class="ltr">AsyncAPI</span> as the message-world OpenAPI. Examples: RabbitMQ, ActiveMQ, NATS, Redpanda, Kafka (open source) and Kinesis, Azure Service Bus, Cloud Pub/Sub (cloud) — compared in Chapter 12.</li><li><b>Message durability:</b> many write to disk to survive crashes; unlike databases, many auto-delete after consumption. For event sourcing you need a broker keeping messages <b>forever</b> (Chapter 3).</li><li>If a consumer republishes a message to another topic it must <b>preserve unknown fields</b> — otherwise Figure 5-1’s curse strikes mid-pipeline.</li><li><b>Actor model:</b> instead of threads, locks and deadlocks, logic is encapsulated in actors; each actor owns its local state, talks over async messages, processes one message at a time, and delivery isn’t guaranteed. In distributed frameworks like <span class="ltr">Akka</span>, <span class="ltr">Orleans</span> and <span class="ltr">Erlang/OTP</span> the same mechanism works locally or remotely (messages transparently encode here, decode there). Location transparency works better here than in RPC because the model accepts “messages may be lost” from the start. Rolling upgrades still need compatible encoding.</li></ul></div>
+
+  <div class="fa">
+    <table><thead><tr><th>حالتِ جریان</th><th>چه کسی encode می‌کند</th><th>چه کسی decode می‌کند</th><th>سازگاریِ لازم</th></tr></thead>
+    <tbody>
+      <tr><td><b>پایگاه داده</b></td><td>processِ نویسنده</td><td>processِ خواننده (شاید نسخه‌ای قدیمی‌تر یا «خودِ آینده»)</td><td>backward + forward (data outlives code)</td></tr>
+      <tr><td><b>REST / RPC</b></td><td>کلاینت (request) و سرور (response)</td><td>سرور (request) و کلاینت (response)</td><td>backward روی request، forward روی response (سرورها اول)</td></tr>
+      <tr><td><b>workflow / durable execution</b></td><td>هر task هنگام تکمیل</td><td>orchestrator هنگام replay</td><td>قالبِ لاگ باید برای بازپخشِ آینده پایدار بماند؛ کدِ workflow قطعی</td></tr>
+      <tr><td><b>broker / actor</b></td><td>فرستنده</td><td>subscriberها (شاید با نسخه‌های مختلف)</td><td>backward + forward؛ حفظِ فیلدِ ناشناخته هنگام republish</td></tr>
+    </tbody></table>
+  </div><h3><span class="fa">نقشهٔ فصل — هفت ایده در یک نگاه</span><span class="en">Chapter map — seven ideas at a glance</span></h3>
+<div class="diagram">
+  <div class="cap">
+    <b><span class="fa">نقشهٔ فصل ۵ · انتخاب‌های کدگذاری در یک نگاه</span><span class="en">Chapter 5 map · Encoding choices at a glance</span></b>
+    <a class="open" href="diagrams/ch5-map.html" target="_blank"><span class="fa">باز کردن در صفحه جدا ↗</span><span class="en">Open standalone ↗</span></a>
+  </div>
+  <iframe src="diagrams/ch5-map.html" title="Chapter 5 map: encoding choices" loading="lazy"></iframe>
+</div>
+<div class="teacher">
+  <div class="tag"><span class="fa">روایت مدرس از نقشهٔ فصل</span><span class="en">Chapter-map narration</span></div>
+  <div class="fa">
+<div class="technical-example teacher-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: رکورد قدیمی زیر کد جدید</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> نسخهٔ ۱ رکورد <code dir="ltr">{name: &quot;Sara&quot;}</code> نوشته و نسخهٔ ۲ فیلد <code dir="ltr">email</code> اضافه کرده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> خوانندهٔ تازه برای رکورد قدیمی باید رفتارِ نبود email را بداند؛ خوانندهٔ قدیمی هم باید فیلد تازه را طبق قرارداد تحمل کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> آزمون سازگاری باید هر دو جهت خواندن را پوشش دهد؛ صرفِ موفقیت encode/decode با نسخهٔ یکسان کافی نیست.</p>
+</div>
+<p>گرهٔ میانی «کدگذاری و تکامل» است: از بالا «<span class="ltr">backward + forward</span>» (با یال «خواندن»)، «قالب‌های متنی» («بایت‌ها») و «پروتوباف + <span class="ltr">Avro</span>» («تگ‌ها»)؛ در میانه «رجیستری <span class="ltr">schema</span>» («بررسی») و «ارتقاهای تدریجی» («انتشار»)؛ و در پایین «سرویس‌ها + <span class="ltr">RPC</span>» («فراخوانی») و «رویدادها + <span class="ltr">workflow</span>ها» («جریان»). پیام نقشه: قالب، قراردادِ خواندنِ «کدِ هنوزنوشته‌نشده» از «دادهٔ دیروز» است.</p></div>
+  <div class="en"><p>The hub is “Encoding &amp; Evolution”: on top “Backward + forward” (“reads”), “Text formats” (“bytes”) and “Protobuf + Avro” (“tags”); mid-row the “Schema registry” (“checks”) and “Rolling upgrades” (“ships”); below “RPC + services” (“calls”) and “Events + workflows” (“streams”). The map’s message: a format is the contract letting “code not yet written” read “yesterday’s data.”</p></div>
+</div>
+<div class="en"><table><thead><tr><th>Dataflow mode</th><th>Who encodes</th><th>Who decodes</th><th>Needed compatibility</th></tr></thead><tbody><tr><td><b>Database</b></td><td>Writer process</td><td>Reader process (maybe older, or “future self”)</td><td>Backward + forward (data outlives code)</td></tr><tr><td><b>REST / RPC</b></td><td>Client (request) and server (response)</td><td>Server (request) and client (response)</td><td>Backward on requests, forward on responses (servers first)</td></tr><tr><td><b>Workflow / durable execution</b></td><td>Each task on completion</td><td>Orchestrator on replay</td><td>Log format must stay stable for future replays; deterministic workflow code</td></tr><tr><td><b>Broker / actor</b></td><td>Sender</td><td>Subscribers (maybe mixed versions)</td><td>Backward + forward; preserve unknown fields on republish</td></tr></tbody></table></div>
+</section>
+
+<section id="s5">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۵</span><span class="en">5</span></span><span class="fa">بستهٔ مصاحبه</span><span class="en">Interview pack</span></h2>
+
+  <h3 id="s5-1"><span class="fa">۵.۱ همه‌چیز در یک نگاه</span><span class="en">5.1 Everything at a glance</span></h3>
+  <div class="fa">
+    <table><thead><tr><th>اصطلاح</th><th>تعریف یک‌خطی</th><th>کلیدواژهٔ مصاحبه</th></tr></thead>
+    <tbody>
+      <tr><td><span class="ltr">Encoding / Decoding</span></td><td>تبدیلِ object درون‌حافظه به بایت و معکوس</td><td>serialize/marshal و parse/unmarshal</td></tr>
+      <tr><td><span class="ltr">Backward Compatibility</span></td><td>کدِ جدید، دادهٔ قدیمی را بخواند</td><td>خواندن از گذشته</td></tr>
+      <tr><td><span class="ltr">Forward Compatibility</span></td><td>کدِ قدیمی، دادهٔ جدید را بخواند/نگه دارد</td><td>نادیده‌گیریِ هوشمندانهٔ افزوده‌ها</td></tr>
+      <tr><td><span class="ltr">Rolling Upgrade</span></td><td>deploy تدریجیِ نسخهٔ جدید چند node به چند node</td><td>هم‌زمانیِ نسخه‌ها</td></tr>
+      <tr><td><span class="ltr">Data Outlives Code</span></td><td>داده سال‌ها با فرمتِ قدیمی می‌ماند</td><td>تعهدِ بلندمدتِ هر قالب</td></tr>
+      <tr><td><span class="ltr">Unknown Field Preservation</span></td><td>نگه‌داشتنِ بایت‌های فیلدِ ناشناخته هنگام بازنویسی</td><td>مانعِ گم‌شدنِ بی‌صدای داده</td></tr>
+      <tr><td><span class="ltr">JSON Schema</span></td><td>زبانِ نوع‌دهی و اعتبارسنجیِ اسناد JSON</td><td>content model باز/بسته، patternProperties</td></tr>
+      <tr><td><span class="ltr">Base64</span></td><td>کدگذاریِ بایت‌ها به‌صورت متن</td><td>حدود ۳۳٪ حجمِ اضافه</td></tr>
+      <tr><td><span class="ltr">MessagePack / CBOR</span></td><td>کدگذاریِ باینریِ همان مدلِ JSON</td><td>۶۶ بایت در برابر ۸۱ — بدون schema</td></tr>
+      <tr><td><span class="ltr">Field Tag (Protobuf)</span></td><td>شماره‌ای فشرده به‌جای نامِ فیلد در داده</td><td>تغییرِ نام آزاد، تغییرِ تگ ممنوع</td></tr>
+      <tr><td><span class="ltr">Varint</span></td><td>کدگذاریِ عدد با بایت‌های متغیر</td><td>۱۳۷۱ در دو بایت</td></tr>
+      <tr><td><span class="ltr">Writer's / Reader's Schema</span></td><td>schemaِ موقعِ نوشتن و schemaِ موردِ انتظارِ خواننده</td><td>Avro resolution با نامِ فیلد</td></tr>
+      <tr><td><span class="ltr">Schema Registry</span></td><td>فهرستِ نسخه‌های schema با بررسیِ سازگاری</td><td>Confluent، Apicurio، Espresso</td></tr>
+      <tr><td><span class="ltr">Object Container File</span></td><td>فایلِ Avro با یک schema در سرآغاز</td><td>dump و بایگانی</td></tr>
+      <tr><td><span class="ltr">IDL</span></td><td>زبانِ تعریفِ interface/data برای سرویس و داده</td><td>OpenAPI، proto، Avro IDL</td></tr>
+      <tr><td><span class="ltr">Location Transparency</span></td><td>جلوه دادنِ فراخوانیِ دور مثل فراخوانیِ محلی</td><td>در RPC گمراه‌کننده، در actorها معقول‌تر</td></tr>
+      <tr><td><span class="ltr">Service Discovery</span></td><td>یافتنِ endpointهای در دسترسِ یک سرویس</td><td>etcd، ZooKeeper، DNS، sidecar</td></tr>
+      <tr><td><span class="ltr">Durable Execution</span></td><td>اجرای workflow با لاگِ پایدار و بازپخش</td><td>exact-once، determinism</td></tr>
+      <tr><td><span class="ltr">Message Broker</span></td><td>واسطِ نگه‌دارندهٔ موقتِ پیام بین فرستنده و گیرنده</td><td>queue در برابر topic/pub-sub</td></tr>
+      <tr><td><span class="ltr">Actor Model</span></td><td>واحدهای هم‌زمان با state محلی و پیامِ ناهمزمان</td><td>Akka، Orleans، Erlang/OTP</td></tr>
+    </tbody></table>
+  </div><div class="en"><table><thead><tr><th>Term</th><th>One-line definition</th><th>Interview keyword</th></tr></thead><tbody><tr><td><span class="ltr">Encoding / decoding</span></td><td>In-memory object ↔ bytes, and back</td><td>Serialize/marshal, parse/unmarshal</td></tr><tr><td><span class="ltr">Backward compatibility</span></td><td>New code reads old data</td><td>Reading from the past</td></tr><tr><td><span class="ltr">Forward compatibility</span></td><td>Old code reads/keeps new data</td><td>Smart ignoring of additions</td></tr><tr><td><span class="ltr">Rolling upgrade</span></td><td>Gradual node-by-node deploy of the new version</td><td>Version coexistence</td></tr><tr><td><span class="ltr">Data outlives code</span></td><td>Data stays years in its old format</td><td>Every format’s long-term commitment</td></tr><tr><td><span class="ltr">Unknown-field preservation</span></td><td>Keeping unknown fields’ bytes on rewrite</td><td>Stops silent data loss</td></tr><tr><td><span class="ltr">JSON Schema</span></td><td>JSON documents’ typing and validation language</td><td>Open/closed content model, patternProperties</td></tr><tr><td><span class="ltr">Base64</span></td><td>Encoding bytes as text</td><td>~33% size overhead</td></tr><tr><td><span class="ltr">MessagePack / CBOR</span></td><td>Binary encoding of the same JSON model</td><td>66 vs 81 bytes — no schema</td></tr><tr><td><span class="ltr">Field tag (protobuf)</span></td><td>A compact number instead of the field name in data</td><td>Free renames, frozen tags</td></tr><tr><td><span class="ltr">Varint</span></td><td>Variable-byte number encoding</td><td>1337 in two bytes</td></tr><tr><td><span class="ltr">Writer’s / reader’s schema</span></td><td>Write-time schema vs the reader’s expected schema</td><td>Avro resolution by field name</td></tr><tr><td><span class="ltr">Schema registry</span></td><td>Schema-version list with compatibility checks</td><td>Confluent, Apicurio, Espresso</td></tr><tr><td><span class="ltr">Object container file</span></td><td>Avro file with one schema up front</td><td>Dumps and archives</td></tr><tr><td><span class="ltr">IDL</span></td><td>Interface/data definition language for services and data</td><td>OpenAPI, proto, Avro IDL</td></tr><tr><td><span class="ltr">Location transparency</span></td><td>Making remote calls look like local calls</td><td>Misleading in RPC, saner in actors</td></tr><tr><td><span class="ltr">Service discovery</span></td><td>Finding a service’s live endpoints</td><td>etcd, ZooKeeper, DNS, sidecar</td></tr><tr><td><span class="ltr">Durable execution</span></td><td>Workflow runs with a durable log and replay</td><td>Exactly-once, determinism</td></tr><tr><td><span class="ltr">Message broker</span></td><td>Temporary message holder between sender and receiver</td><td>Queue vs topic/pub-sub</td></tr><tr><td><span class="ltr">Actor model</span></td><td>Concurrent units with local state and async messages</td><td>Akka, Orleans, Erlang/OTP</td></tr></tbody></table></div>
+
+  <h3 id="s5-2"><span class="fa">۵.۲ سوالات پرتکرار مصاحبه (برای دیدن جواب کلیک کن)</span><span class="en">5.2 Frequent interview questions (click for answers)</span></h3>
+
+  <details><summary><span class="fa">۱. backward و forward compatibility یعنی چه و در APIها چطور معنا می‌شوند؟</span><span class="en">1. What do backward and forward compatibility mean — and in APIs?</span></summary>
+    <div class="fa"><p>عقب‌رو یعنی کدِ تازه دادهٔ قدیمی را بخواند؛ جلو‌رو یعنی کدِ قدیمی با دادهٔ تازه کنار بیاید. در <span class="ltr">API</span> باید نویسنده و خوانندهٔ درخواست و پاسخ را جدا مشخص کنیم.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: چهار ترکیب در rolling upgrade</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> نیمی از سرورها نسخهٔ ۱ و نیمی نسخهٔ ۲ هستند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نسخهٔ ۲ رکورد قدیمی را می‌خواند؛ سپس نسخهٔ ۱ ممکن است رکوردی را بخواند که نسخهٔ ۲ نوشته است.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> backward مسیر خوانندهٔ جدید با دادهٔ قدیمی و forward مسیر خوانندهٔ قدیمی با دادهٔ جدید را پوشش می‌دهد.</p>
+</div></div><div class="en"><p>Backward: new code reads old data/inputs. Forward: old code reads new data/outputs without destroying them. In APIs: for an old client calling a new service, requests must be backward and responses forward; for a new client with an old service, the mirror.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۲. چرا rolling upgrade هر دو نوع سازگاری را لازم دارد؟</span><span class="en">2. Why does a rolling upgrade need both compatibilities?</span></summary>
+    <div class="fa"><p>هنگامِ انتشارِ تدریجی، همهٔ گره‌ها و کلاینت‌ها هم‌زمان ارتقا پیدا نمی‌کنند؛ دادهٔ قدیمی و تازه هم کنار هم وجود دارد. بنابراین هر دو جهتِ خواندن ممکن است لازم باشد.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: چهار ترکیب در rolling upgrade</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> نیمی از سرورها نسخهٔ ۱ و نیمی نسخهٔ ۲ هستند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نسخهٔ ۲ رکورد قدیمی را می‌خواند؛ سپس نسخهٔ ۱ ممکن است رکوردی را بخواند که نسخهٔ ۲ نوشته است.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> backward مسیر خوانندهٔ جدید با دادهٔ قدیمی و forward مسیر خوانندهٔ قدیمی با دادهٔ جدید را پوشش می‌دهد.</p>
+</div></div><div class="en"><p>Because mid-deploy some nodes run new code and some old; data the new version writes may immediately be read by the old (forward), and old data must still be read by the new (backward). Client-side, users control the update timing.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۳. خطرِ شکل ۵-۱ کتاب چیست و چطور رفع می‌شود؟</span><span class="en">3. What is the book’s Figure 5-1 danger, and the fix?</span></summary>
+    <div class="fa"><p>کدِ قدیمی ممکن است فیلدِ ناشناخته را هنگامِ خواندن حذف کند و بعد با بازنویسی، آن را از دادهٔ اصلی هم پاک کند. حفظِ فیلد یا به‌روزرسانیِ محدود راه‌های جلوگیری‌اند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: ویرایش نام، حذف email</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> نسخهٔ ۲ رکورد <code dir="ltr">{name:Sara,email:a@b}</code> نوشته است؛ نسخهٔ ۱ فقط name را می‌شناسد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نسخهٔ ۱ کل شیء را می‌خواند، name را عوض می‌کند و بدون email بازمی‌نویسد؛ update محدود به name یا حفظ فیلد ناشناخته جلوی حذف را می‌گیرد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> یک read-modify-write قدیمی می‌تواند دادهٔ جدید را پاک کند، حتی وقتی decode بدون خطا بوده است.</p>
+</div></div><div class="en"><p>Old code decodes a record holding an unknown field, modifies and rewrites it; if the decoder doesn’t keep unknown fields, that field silently vanishes. Fix: schema-driven formats preserving unknown fields’ bytes on round-trip (protobuf does this), or decoding into a structure that explicitly retains them.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۴. چهار مشکلِ اصلیِ کدگذاریِ ویژهٔ زبان (مثل Serializable و pickle) چیست؟</span><span class="en">4. What are the four core problems of language-native encoding (Serializable, pickle)?</span></summary>
+    <div class="fa"><p>چهار خطرِ مهم: وابستگی به زبان و کلاس‌ها، بازسازیِ ناامنِ اشیا، دشواریِ تغییرِ نسخه و قالبِ نامناسبِ تبادل. این روش‌ها برای ورودیِ نامطمئن به‌ویژه نیازمند احتیاط‌اند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: نام کلاس، قرارداد پایدار نیست</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فایل ذخیره‌شده به کلاس <code dir="ltr">OldUser</code> در نسخهٔ قبلی برنامه وابسته است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نسخهٔ جدید کلاس را حذف کرده یا زبان دیگری دارد؛ decoder ویژهٔ زبان ممکن است نتواند شیء را بسازد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> داده از عمر یک نسخهٔ کد طولانی‌تر است؛ برای تبادل، schema مستقل و ورودیِ معتبر لازم است.</p>
+</div></div><div class="en"><p>Language lock-in (other-language reads are hard), the arbitrary-class-instantiation security hole (RCE), versioning/compatibility neglect, and weak performance (Java’s built-in serialization is notorious). Transient uses only.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۵. مشکلِ اعداد در JSON چیست؟</span><span class="en">5. What’s the numbers problem in JSON?</span></summary>
+    <div class="fa"><p>قالبِ <span class="ltr">JSON</span> تضمینِ مشترکی برای دقتِ همهٔ خواننده‌ها نمی‌دهد. بعضی محیط‌ها، از جمله عددِ معمولِ <span class="ltr">JavaScript</span>، همهٔ عددهای صحیحِ بزرگ را دقیق نگه نمی‌دارند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: شناسهٔ بزرگ در JSON</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> شناسهٔ <code dir="ltr">9007199254740993</code> به‌صورت JSON number به JavaScript می‌رسد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تبدیل به <code dir="ltr">Number</code> ممکن است آن را به <code dir="ltr">9007199254740992</code> گرد کند؛ قراردادِ رشته‌ای برای شناسه، رقم‌ها را حفظ می‌کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> JSON به‌تنهایی دقتِ همهٔ خواننده‌ها را تضمین نمی‌کند؛ نوع فیلد باید در دو طرف قرارداد روشن باشد.</p>
+</div></div><div class="en"><p>JSON doesn’t split integers from floats and pins no precision; numbers above 2^53 don’t stay exact in doubles. Example: X returns a post’s 64-bit id as both number and string. XML and CSV are worse: numbers aren’t distinguishable from numeric strings at all.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۶. چرا برای داده‌های باینری در JSON از Base64 استفاده می‌کنند و هزینه‌اش چیست؟</span><span class="en">6. Why is Base64 used for binary data in JSON — at what cost?</span></summary>
+    <div class="fa"><p><span class="ltr">Base64</span> بایت‌ها را به متنِ قابل‌حمل تبدیل می‌کند. اندازه معمولاً حدودِ یک‌سوم بیشتر می‌شود؛ این کدگذاری است و محرمانگی ایجاد نمی‌کند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: Base64 برای بایت در JSON</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فایل باینری سه‌بایتی باید در یک فیلد متنی JSON فرستاده شود.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> Base64 هر سه بایت را به چهار نویسه تبدیل می‌کند؛ برای ورودی بزرگ، حجم حدود یک‌سوم زیاد می‌شود، جدا از سربار JSON.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> این روش حمل بایت در رشته را ممکن می‌کند؛ فشرده‌سازی نیست و برای فایل بزرگ شاید مسیر جدا مناسب‌تر باشد.</p>
+</div></div><div class="en"><p>JSON/XML have no binary strings (unencoded byte sequences); Base64 turns bytes into text, with the schema declaring the value is really Base64. Cost: ~one-third size growth + conversion overhead. True binary formats have a native binary type.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۷. content model باز و بسته در JSON Schema یعنی چه؟</span><span class="en">7. What are open and closed content models in JSON Schema?</span></summary>
+    <div class="fa"><p>مدلِ باز، فیلدِ اضافه را مجاز می‌داند؛ مدلِ بسته آن را رد می‌کند. این انتخاب بر پذیرشِ نسخهٔ جدید و کشفِ اشتباهِ ورودی اثر دارد.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: Schema باز یا بسته</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> قرارداد فقط <code dir="ltr">name</code> را تعریف کرده؛ پیام تازه فیلد <code dir="ltr">email</code> هم می‌فرستد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> با <code dir="ltr">additionalProperties:false</code> در همان شیء، validator فیلد اضافه را رد می‌کند؛ مدل باز می‌تواند آن را بپذیرد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اضافه کردن فیلد همیشه سازگار نیست؛ سیاست خواننده دربارهٔ فیلد ناشناخته تعیین‌کننده است.</p>
+</div></div><div class="en"><p>Open: undefined fields allowed (<code>additionalProperties: true</code> by default). Closed: only explicit fields. So JSON Schema usually defines what is <b>not</b> allowed rather than what is. With patternProperties + additionalProperties you can also write constraints like “keys digits-only, values strings-only”.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۸. MessagePack چقدر فضا جبران می‌کند و چرا کتاب چندان تحویلش نمی‌گیرد؟</span><span class="en">8. How much space does MessagePack save — and why doesn’t the book rate it?</span></summary>
+    <div class="fa"><p>در نمونهٔ مشخصِ فصل، <span class="ltr">MessagePack</span> از ۸۱ به ۶۶ بایت رسیده است؛ این نسبت عمومی نیست. بدون اسکیما، نامِ فیلدها همچنان بخشی از داده‌اند و صرفِ باینری بودن همهٔ سربار را حذف نمی‌کند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: MessagePack چه چیزی را حذف می‌کند؟</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> شیء JSON نام فیلد <code dir="ltr">customer_id</code> را در هر رکورد تکرار می‌کند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> MessagePack نمایش نوع و مقدار را باینری‌تر می‌کند، اما در استفادهٔ map معمول، نام فیلد هنوز همراه هر رکورد است.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> سود حجم به داده بستگی دارد؛ قالب schemaدار می‌تواند نام‌ها را از wire حذف کند و قرارداد تکامل جدا بدهد.</p>
+</div></div><div class="en"><p>Example record: 66 vs 81 JSON bytes — ~18% smaller. Schema-less, field names stay in the data; only the JSON model got binarized. A small saving for lost human-readability; with a schema you reach 32–33 bytes.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۹. field tag در Protocol Buffers چیست و چه قوانینی دارد؟</span><span class="en">9. What is a field tag in Protocol Buffers — what are its rules?</span></summary>
+    <div class="fa"><p>تگ، شمارهٔ هویتِ فیلد در قالبِ سیمی است. نامِ فیلد می‌تواند طبقِ قرارداد عوض شود، اما شمارهٔ حذف‌شده نباید به معنای تازه اختصاص یابد و باید رزرو شود.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: Tag هویت فیلد است</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> schema پیام شامل <code dir="ltr">string name = 1</code> است و بعد <code dir="ltr">string email = 2</code> اضافه می‌شود.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> شمارهٔ ۱ همچنان به name تعلق دارد؛ پس از حذف email، شمارهٔ ۲ برای معنای دیگری دوباره استفاده نمی‌شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> تغییر اسم ظاهری با تغییر هویت wire فرق دارد؛ reuse شماره می‌تواند دادهٔ قدیمی را با معنای اشتباه بخواند.</p>
+</div></div><div class="en"><p>The number replacing the field’s name in data (the schema’s numbers). Field names may change (they aren’t in the data) but tags never — a tag change invalidates all existing data. Deleted fields’ tags must be reserved against reuse.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۰. قواعد تکاملِ schema در protobuf برای افزودن/حذف/تغییر نوع چیست؟</span><span class="en">10. What are protobuf’s schema-evolution rules for add/remove/retype?</span></summary>
+    <div class="fa"><p>فیلدِ تازه شمارهٔ تازه می‌خواهد؛ شمارهٔ حذف‌شده رزرو می‌شود. تغییرِ نوع باید طبقِ قواعدِ سازگاریِ سیمی بررسی شود و حتی تغییرِ مجاز می‌تواند در بعضی مقدارها داده را محدود کند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: تکامل protobuf با شمارهٔ ثابت</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فیلد <code dir="ltr">string name = 1</code> منتشر شده و پیام‌های قدیمی هنوز وجود دارند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> افزودن فیلد تازه با شمارهٔ آزاد می‌تواند با خوانندهٔ سازگار کار کند؛ حذف باید شماره و نام لازم را reserved کند؛ تغییر نوع باید قواعد wire و معنای مقدار را رعایت کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> تبدیل همان شماره از رشته به معنای عددیِ نامرتبط، مهاجرت امن نیست؛ حفظ شماره به‌تنهایی حفظ معنا را تضمین نمی‌کند.</p>
+</div></div><div class="en"><p>Add with a fresh tag: both backward and forward (old code skips and preserves unknowns; new code defaults old data). Remove: add’s mirror, tags never reused. Retype: possible for some types but truncation-risky (e.g. a 64-bit value read into old code’s 32-bit variable).</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۱. Avro هنگام decode از چه چیزی استفاده می‌کند و writer's schema از کجا می‌آید؟</span><span class="en">11. What does Avro decode with — and where does the writer’s schema come from?</span></summary>
+    <div class="fa"><p><span class="ltr">Avro</span> اسکیمای نویسنده و خواننده را تطبیق می‌دهد. اسکیمای نویسنده می‌تواند در فایل باشد یا با شناسه از مخزنِ قرارداد گرفته شود؛ دادهٔ باینری به‌تنهایی کافی نیست.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: پیدا کردن schema نویسنده</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> پیام Avro شناسهٔ schema برابر <code dir="ltr">23</code> دارد و بایت‌های رکورد را حمل می‌کند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> مصرف‌کننده schema ۲۳ را از registryِ مورد توافق می‌گیرد و همراه reader schema به decoder می‌دهد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> داشتن فقط reader schema برای تفسیر همهٔ بایت‌ها کافی نیست؛ شناسه و دسترس‌پذیری schemaهای قدیمی باید حفظ شود.</p>
+</div></div><div class="en"><p>Two schemas: writer’s (at write time) and reader’s (current code’s expectation); resolution pairs fields by name. Writer’s-schema sources: once up front in a big file (object container), a per-record version number + registry (like Confluent for Kafka), or connection-open negotiation (Avro RPC).</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۲. قواعدِ Avro دربارهٔ مقدارِ پیش‌فرض (default) چیست؟</span><span class="en">12. What are Avro’s default-value rules?</span></summary>
+    <div class="fa"><p>اگر خواننده فیلدی بخواهد که نویسنده نداشته، مقدارِ پیش‌فرضِ خواننده لازم است. حذفِ فیلد از نویسنده برای خوانندهٔ قدیمی نیز به قراردادِ همان خواننده وابسته است؛ <span class="ltr">default</span> به‌معنی اختیاری شدنِ نوشتن نیست.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: Resolution در Avro</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> writer فقط <code dir="ltr">name</code> دارد؛ reader تازه فیلد <code dir="ltr">country</code> با default برابر <code dir="ltr">IR</code> اضافه کرده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> هنگام خواندن رکورد قدیمی، reader مقدارِ غایب country را از default می‌گیرد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> default برای حلِ نبود فیلد در دادهٔ نویسنده است؛ جای الزام نوشتن فیلد در schema نویسنده را نمی‌گیرد.</p>
+</div>
+<p class="small">منبعِ توضیحِ فنی: <a href="https://avro.apache.org/docs/1.12.0/specification/#schema-resolution" target="_blank" rel="noopener">قواعدِ رسمیِ تطبیقِ اسکیمای Avro</a></p></div><div class="en"><p>Only a field with a default may be added or removed. Adding a default-less field breaks backward (the new reader doesn’t know what to put); removing one breaks forward (the old reader has no value).</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۳. چرا در Avro برای nullable بودن باید union نوشت؟</span><span class="en">13. Why must Avro nullability use a union?</span></summary>
+    <div class="fa"><p>برای پذیرفتنِ <span class="ltr">null</span>، نوع باید آن را صریحاً شامل شود. <span class="ltr">Union</span> فهرستِ نوع‌های مجاز است؛ مقدارِ پیش‌فرض و مجاز بودنِ <span class="ltr">null</span> دو موضوعِ مرتبط ولی جدا هستند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: Nullable در Avro</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> <code dir="ltr">email</code> ممکن است رشته یا null باشد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> schema باید union مانند <code dir="ltr">[&quot;null&quot;,&quot;string&quot;]</code> را مجاز کند؛ برای رکوردهای قدیمی می‌توان default معتبر <code dir="ltr">null</code> در reader تعریف کرد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> غایب بودن فیلد، null بودن مقدار و default داشتن سه مفهوم جدا هستند و باید جدا طراحی شوند.</p>
+</div></div><div class="en"><p>In Avro, null isn’t everything’s default; you must explicitly list a field’s possible types: <code>union { null, long }</code>. And you may default to null only when null is the union’s first branch. This explicitness blocks “can this field really be null?” bugs.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۴. تغییر نامِ فیلد در Avro چرا فقط backward است؟</span><span class="en">14. Why is an Avro field rename backward-only?</span></summary>
+    <div class="fa"><p><span class="ltr">Alias</span> در اسکیمای خوانندهٔ تازه می‌تواند نامِ قبلیِ نویسنده را بشناسد. خوانندهٔ قدیمی الزاماً از نامِ تازه خبر ندارد؛ جهتِ سازگاری را باید جدا بررسی کرد.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: تغییر نام با alias</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> writer قدیمی فیلد <code dir="ltr">surname</code> نوشته و reader جدید <code dir="ltr">family_name</code> با alias برابر <code dir="ltr">surname</code> دارد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> reader جدید نام قدیمی را تطبیق می‌دهد؛ reader قدیمی alias تازه را نمی‌شناسد و خواندن جهت معکوس خودکار حل نمی‌شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> این تغییر می‌تواند backward باشد بی‌آنکه forward باشد؛ هر دو جهت باید مستقل آزموده شوند.</p>
+</div></div><div class="en"><p>The reader’s schema may alias the old name, so data the old writer wrote under the stale name still reads (backward ✓). But the old writer doesn’t know the fresh name, and data the new writer wrote under it won’t pair up (forward ✗). Adding a union branch shares this verdict.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۵. مزایای قالب‌های باینریِ مبتنی بر schema نسبت به JSON چیست؟</span><span class="en">15. What advantages do schema-driven binary formats have over JSON?</span></summary>
+    <div class="fa"><p>اسکیما می‌تواند نام و نوع را از هر رکورد جدا کند، قرارداد را روشن و ابزارِ اعتبارسنجی و تولیدِ کد را ممکن کند. تضمینِ سازگاری به قواعدِ تغییر و پیاده‌سازی وابسته است.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: مقایسهٔ قالب روی همان رکورد</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> رکورد <code dir="ltr">user_id=17, active=true</code> را در چند قالب می‌نویسیم.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> JSON نام فیلدها را متنی حمل می‌کند؛ قالب مبتنی بر schema می‌تواند شناسه یا جایگاه فیلد را به‌کار گیرد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> برای مقایسه باید همان داده، کتابخانه و تنظیمات سنجیده شوند؛ باینری بودن به‌تنهایی تضمین کمترین حجم یا بهترین تکامل نیست.</p>
+</div></div><div class="en"><p>Denser (field names drop out); the schema is always-current documentation (decoding needs it); a registry lets you test a change’s compatibility before deploy; and they generate code for statically typed languages. Price: not human-readable without tools.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۶. «data outlives code» یعنی چه و چه نتیجه‌ای دارد؟</span><span class="en">16. What does “data outlives code” mean — what follows?</span></summary>
+    <div class="fa"><p>عمرِ داده معمولاً از یک نسخهٔ کد بیشتر است. ارتقای برنامه فایل‌ها و رکوردهای قدیمی را خودکار به شکلِ تازه تبدیل نمی‌کند؛ خواندن یا مهاجرتِ آن‌ها باید طراحی شود.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: سه مسیر همان داده</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> تغییر نام کاربر می‌تواند از رکورد پایگاه داده، پاسخ API یا پیام رویداد خوانده شود.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پایگاه داده نسخه‌های قدیمی را نگه می‌دارد؛ API با کلاینت‌های قدیمی سروکار دارد؛ صف ممکن است پیام قدیمی را دوباره تحویل دهد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هر مسیر پنجرهٔ سازگاری خودش را دارد؛ پایان انتشار سرورها لزوماً پایان دادهٔ قدیمی نیست.</p>
+</div></div><div class="en"><p>Code deploys in minutes, but years-old data keeps its write-day format. So migrating all data is expensive and engines defer it (compaction in LSM, nullable columns in SQL); every data format must be designed to be “read by code not yet written”.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۷. سه تفاوتِ محوریِ فراخوانیِ شبکه‌ای با فراخوانیِ محلی چیست؟</span><span class="en">17. What are three core network-call vs local-call differences?</span></summary>
+    <div class="fa"><p>فراخوانیِ شبکه ممکن است به مقصد نرسد، نتیجه‌اش پس از <span class="ltr">timeout</span> نامشخص بماند و تأخیرش بسیار متغیر باشد. همچنین تبادلِ قالب میان برنامه‌ها لازم است؛ مشابه بودنِ ظاهرِ <span class="ltr">RPC</span> این تفاوت‌ها را حذف نمی‌کند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: RPC ناموفق یا پاسخ نامعلوم؟</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> کلاینت <code dir="ltr">CreateOrder(request_id=r7)</code> را می‌فرستد؛ سرور سفارش را ثبت می‌کند، ولی پاسخ نمی‌رسد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> retry با همان شناسه به همان نتیجه وصل می‌شود؛ retry با شناسهٔ تازه می‌تواند سفارش دوم بسازد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> برخلاف فراخوانی محلی، timeout شبکه نتیجهٔ عملیات دوردست را مشخص نمی‌کند؛ API باید این ابهام را مدیریت کند.</p>
+</div></div><div class="en"><p>Unpredictability (network and far-machine failures); the third ending “timeout with no result” (did it run?) demanding idempotence for retries; and wildly varying latency. Plus no pointers and ugly cross-language type translations. So RPC shouldn’t pose too hard as a local function.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۸. چرا در RPC فقط backward برای request و forward برای response کافی است؟</span><span class="en">18. Why is backward-on-request + forward-on-response enough in RPC?</span></summary>
+    <div class="fa"><p>این دو جهت فقط با فرضِ مشخصِ ترتیبِ ارتقا کافی‌اند: سرورِ جدید درخواستِ قدیمی را می‌خواند و کلاینتِ قدیمی پاسخِ تازه را. اگر کلاینتِ تازه با سرورِ قدیمی کار کند، جهت‌های دیگر هم مطرح‌اند.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: API با سرور تازه</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> کلاینت قدیمی درخواستِ نسخهٔ ۱ می‌فرستد و پاسخ تازه را دریافت می‌کند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> سرور باید request قدیمی را بخواند؛ کلاینت باید response جدید را تحمل کند. اگر سرورهای قدیمی هنوز فعال‌اند، request تازه هم باید برای آن‌ها قابل‌قبول بماند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> جهت سازگاری به نویسنده و خوانندهٔ هر پیام بستگی دارد؛ یک حکم برای همهٔ rolloutها کافی نیست.</p>
+</div></div><div class="en"><p>Because the operational assumption is servers upgrade first, clients after; so requests are always read by the newer server (backward) and responses by the older client (forward). In cross-org APIs there’s no client control, so compatibility may need keeping forever, or parallel API versions.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۱۹. تفاوتِ queue و topic (pub/sub) چیست؟</span><span class="en">19. What’s the queue vs topic (pub/sub) difference?</span></summary>
+    <div class="fa"><p>در صفِ کاری، یک پیام به یک مصرف‌کننده برای انجامِ کار واگذار می‌شود. در انتشار–اشتراک، گروه‌های مستقل همان رویداد را دریافت می‌کنند؛ داخلِ هر گروه می‌توان بار را تقسیم کرد.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: رویداد مستقل از مصرف‌کننده</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> سفارش <code dir="ltr">42</code> رویداد <code dir="ltr">OrderPlaced</code> را منتشر می‌کند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> گروه ارسال و گروه تحلیل هر دو آن را می‌گیرند؛ چند worker در گروه ارسال کار همان گروه را تقسیم می‌کنند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> pub/sub تکثیر بین گروه‌هاست و queue تقسیم کار داخل گروه؛ دریافت پیام هنوز به کنترل تکرار و خطا نیاز دارد.</p>
+</div></div><div class="en"><p>In a queue, only one consumer takes each message (load splitting). In a topic, the broker delivers a copy to every subscriber (fan-out). Brokers usually impose no data model and keep a schema registry for compatibility; a consumer republishing a message must preserve unknown fields.</p></div>
+  </details>
+
+  <details><summary><span class="fa">۲۰. durable execution چطور «دقیقاً یک‌بار» می‌دهد و چه محدودیت‌هایی دارد؟</span><span class="en">20. How does durable execution deliver “exactly once” — and its limits?</span></summary>
+    <div class="fa"><p>موتورِ اجرای پایدار پیشرفت را ذخیره و پس از توقف ادامه می‌دهد. تضمینِ اثرِ یک‌باره در مقصدِ بیرونی به همکاریِ مقصد، تراکنش یا شناسهٔ جلوگیری از تکرار وابسته است.</p>
+<div class="technical-example concept-example review-example" data-example-version="technical-v2">
+<p class="example-title"><b>مثال فنی: ادامهٔ workflow بعد از crash</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> workflow مرحلهٔ رزرو و سپس صدور رسید دارد؛ رزرو با شناسهٔ <code dir="ltr">r7</code> موفق شده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> engine پیشرفت را پایدار می‌کند؛ بعد از crash از تاریخچه ادامه می‌دهد، اما فعالیتی که نتیجه‌اش ثبت نشده ممکن است دوباره فراخوانی شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اثر بیرونی رزرو باید با <code dir="ltr">r7</code> تکرارپذیرِ امن باشد؛ دوام workflow به‌معنی اجرای فیزیکی یک‌بارهٔ همهٔ APIها نیست.</p>
+</div></div><div class="en"><p>By recording every call and state change in durable storage and replaying the workflow after failure: successful steps are skipped with old results returned. Limits: outside services must be idempotent with unique IDs; call order must not change (code change = a separate version); code must be deterministic (no RNG, no system clock).</p></div>
+  </details>
+</section>
+
+<section id="s5-3">
+  <h2 class="reveal"><span class="secnum">5.3</span><span class="fa">اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">5.3 Common interview mistakes</span></h2>
+  <div class="fa">
+<ul>    <li>جا به جا گفتنِ backward و forward؛ قاعده: همیشه از خودت بپرس «<b>چه کسی</b> دارد <b>چه چیزی</b> را می‌خواند؟»</li>
+    <li>فکر کردنِ «JSON که schema ندارد، پس به تکاملِ فکر نمی‌خواهد» — داده‌های JSON هم سال‌ها می‌مانند و فیلدِ اضافه‌شده ممکن است توسط کدِ قدیمی پاک شود.</li>
+    <li>تغییر دادنِ tag در protobuf یا بازاستفاده از tagِ فیلدِ حذف‌شده — یعنی نابودیِ داده‌های موجود.</li>
+    <li>افزودنِ فیلدِ بدونِ default در Avro و تعجب از شکستنِ backward compatibility.</li>
+    <li>پیش‌فرض گرفتنِ «حفظِ فیلدهای ناشناخته» در همهٔ کتابخانه‌ها؛ این رفتار باید صریح بررسی و آزمایش شود.</li>
+    <li>یکی دانستنِ «باینری = فشرده»؛ MessagePack فقط ۶۶ در برابر ۸۱ بایت است؛ فشردگیِ واقعی از حذفِ نامِ فیلدها با schema می‌آید.</li>
+    <li>تلقیِ RPC مثل تابعِ محلی و فراموش کردنِ timeout، retry و idempotence.</li>
+    <li>جابه‌جاییِ ترتیبِ activityها در workflowِ durable و انتظارِ بازپخشِ سالم (یا فراموش کردنِ قطعیت).</li>
+    <li>فراموش کردنِ لزومِ idempotent بودنِ APIهای شخصِ ثالث در معماریِ event-driven و workflow.</li>
+  </ul></div><div class="en"><ul><li>Swapping backward and forward; the rule: always ask “<b>who</b> is reading <b>what</b>?”</li><li>Thinking “JSON has no schema, so no evolution thought needed” — JSON data lives for years too, and an added field may be wiped by old code.</li><li>Changing a protobuf tag or reusing a deleted field’s tag — destroying existing data.</li><li>Adding a default-less field in Avro, then wondering why backward compatibility broke.</li><li>Assuming “unknown-field preservation” in every library; the behavior must be checked and tested explicitly.</li><li>Equating “binary = compact”; MessagePack is only 66 vs 81 bytes — real density comes from dropping field names with a schema.</li><li>Treating RPC like a local function and forgetting timeout, retry and idempotence.</li><li>Reordering activities in a durable workflow and expecting healthy replay (or forgetting determinism).</li><li>Forgetting that third-party APIs must be idempotent in event-driven and workflow designs.</li></ul></div>
+
+  <h3 id="s5-4"><span class="fa">۵.۴ چک‌لیست مرور ۵ دقیقه‌ای قبل از مصاحبه</span><span class="en">5.4 Five-minute pre-interview checklist</span></h3>
+  <div class="fa">
+<ul>    <li>تعریفِ backward/forward + ترجمه‌اش به request/response در API.</li>
+    <li>قصهٔ شکل ۵-۱ را در ۳ جمله تعریف کن: چرا فیلدِ ناشناخته گم می‌شود و چطور جلویش را می‌گیریم.</li>
+    <li>سه خانوادهٔ قالب و قضاوتِ نهایی: ویژهٔ زبان (ممنوع)، متنی (تبادلِ انسان‌خوان)، باینریِ schema-driven (فشرده و تکامل‌پذیر).</li>
+    <li>قواعدِ تکاملِ protobuf (تگ ثابت، تغییرِ نام آزاد، reserve کردن) و Avro (default اجباری، union برای null، alias فقط backward).</li>
+    <li>سه زمینهٔ منبعِ writer's schema در Avro + مفهومِ resolution (ignore / default).</li>
+    <li>«data outlives code» و تکلیفِ سازگاری در چهار حالتِ جریان داده (پایگاه داده، RPC، workflow، broker) — جدولِ بخش ۴ را از حفظ بگو.</li>
+    <li>پنج تفاوتِ RPC با فراخوانیِ محلی + سه محدودیتِ durable execution (idempotence، ترتیب، determinism).</li>
+  </ul></div><div class="en"><ol><li>Backward/forward definitions + their request/response translation in APIs.</li><li>Tell Figure 5-1’s story in 3 sentences: why the unknown field vanishes and how to stop it.</li><li>The three format families and the final verdict: language-native (banned), textual (human-readable exchange), schema-driven binary (compact and evolvable).</li><li>Protobuf evolution rules (frozen tags, free renames, reserving) and Avro’s (mandatory defaults, unions for null, backward-only aliases).</li><li>Avro’s three writer’s-schema sources + resolution (ignore / default).</li><li>“Data outlives code” and compatibility duty in the four dataflow modes (database, RPC, workflow, broker) — recite section 4’s table.</li><li>Five RPC-vs-local differences + three durable-execution limits (idempotence, order, determinism).</li></ol></div>
+</section>
+
+<section id="s6">
+  <h2 class="reveal"><span class="secnum"><span class="fa">۶</span><span class="en">6</span></span><span class="fa">تمرین‌های مصاحبه و آزمایشگاه</span><span class="en">Interview exercises and hands-on labs</span></h2>
+<p class="exercise-section-note"><span class="fa">این تمرین‌ها برای مسیر Backend / Distributed Systems در ۱۴ اکتبر ۲۰۲۶ بازبینی شدند. سطح مربوط به نسخهٔ مصاحبه‌ای است؛ زمان آزمایشگاه جداست.</span><span class="en">Reviewed on 14 October 2026 for Backend / Distributed Systems. Level refers to the interview brief; full-lab time is separate.</span> <a href="../exercise-audit.html"><span class="fa">روش ارزیابی و مسیر مطالعه</span><span class="en">Method and study path</span></a></p>
+  <article class="exercise-block" id="exercise-1" data-reviewed-exercise="1">
+<h3><span class="fa">تمرین ۱ — بایت‌ها را دستی بشمار</span><span class="en">Exercise 1 — count the bytes by hand</span></h3>
+<div class="exercise-labels"><span class="exercise-label level-foundation"><span class="fa">L1 · پایه</span><span class="en">L1 · Foundations</span></span><span class="exercise-label priority-role"><span class="fa">وابسته به نقش</span><span class="en">Role-specific</span></span><span class="exercise-label"><span class="fa">25 دقیقه بحث</span><span class="en">25 min discussion</span></span></div>
+<p class="exercise-verdict"><span class="fa">wire format برای protocol/storage آموزشی است؛ حفظ ۶۶ و ۳۳ بایت اولویت عمومی ندارد. شرط حفظ unknown field باید دقیق باشد.</span><span class="en">Understanding compatibility is more valuable than memorizing byte totals.</span></p>
+<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">با یک رکورد کوچک تفاوت JSON، MessagePack و Protobuf را در schema، حجم و debugging توضیح بده. یک tag را دستی decode کن. فیلد email اضافه کن و دو مسیر binary round-trip و تبدیل به JSON را از نظر حفظ unknown field مقایسه کن.</span><span class="en">Compare JSON, MessagePack and Protobuf, decode one tag, then add email. Test unknown-field preservation in binary round-trips against JSON conversion or field-by-field copying.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">tag و varint را می‌فهمد، عدد حفظ نمی‌کند</span><span class="en">Tag/varint understanding</span></li><li><span class="fa">runtime و نوع تبدیل را مشخص می‌کند</span><span class="en">Specified conversion/runtime</span></li><li><span class="fa">wire compatibility را از API compatibility جدا می‌کند</span><span class="en">Wire versus application compatibility</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">proxy قدیمی پیام را field-by-field به پیام جدید کپی می‌کند؛ چه داده‌ای گم می‌شود؟</span><span class="en">An old proxy copies recognized fields into a fresh message. What data disappears?</span></p></details>
+<details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۱–۲ ساعت</span><span class="en">Extended hands-on laboratory · estimated 1–2 hours</span></summary><div class="fa">رکوردِ <code>{"userName": "Martin", "favoriteNumber": 1337, "interests": ["daydreaming", "hacking"]}</code> را بردار.
+      اول با قواعدِ MessagePack (بایتِ نوع + طول) و بعد با قواعدِ varint و tagِ پروتوباف (که در بخش ۳.۴ دیدی) کدگذاریِ دستی کن
+      و بایت‌ها را بشمار؛ باید تقریباً به ۶۶ و ۳۳ بایت برسی. سپس یک فیلدِ تازه (<code>email</code>) با تگ ۴ اضافه کن و نشان بده
+      کدِ قدیمی‌ات (بدونِ دانستنِ تگ ۴) چطور رکورد را round-trip می‌کند بدون آنکه داده گم شود.</div><div class="en"><p>Take the record <code>{"userName": "Martin", "favoriteNumber": 1337, "interests": ["daydreaming", "hacking"]}</code>. First hand-encode it with MessagePack rules (type + length bytes), then with protobuf’s varint and tag rules from section 3.4, and count the bytes; you should land near 66 and 33. Then add a fresh field (<code>email</code>) with tag 4 and show how your old code (unaware of tag 4) round-trips the record with no loss.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
+<p class="exercise-evidence"><a href="../exercise-audit.html#ch5-ex1"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-1"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://protobuf.dev/programming-guides/proto3/" target="_blank" rel="noopener">Protobuf · proto3 language guide</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+</article>
+  <article class="exercise-block" id="exercise-2" data-reviewed-exercise="2">
+<h3><span class="fa">تمرین ۲ — تکاملِ schema زیرِ فشار</span><span class="en">Exercise 2 — schema evolution under pressure</span></h3>
+<div class="exercise-labels"><span class="exercise-label level-senior"><span class="fa">L2 · Senior</span><span class="en">L2 · Senior</span></span><span class="exercise-label priority-core"><span class="fa">اولویت اصلی</span><span class="en">Core priority</span></span><span class="exercise-label"><span class="fa">40 دقیقه بحث</span><span class="en">40 min discussion</span></span></div>
+<p class="exercise-verdict"><span class="fa">جهت writer→reader، فرمت binary/JSON، tag، default و alias مشخص‌اند؛ parse شدن با حفظ همهٔ مقدارها یکسان نیست.</span><span class="en">Name writer→reader direction, binary/JSON format, tags, defaults and aliases; parseability differs from preserving all values.</span></p>
+<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">برای Avro و Protobuf افزودن فیلد، rename و تغییر cardinality را بررسی کن. جهت writer→reader، default، alias، tag و binary/JSON را دقیق مشخص کن. scalar-to-array را با فیلد جدید و دورهٔ dual compatibility منتشر کن؛ compatibility test و rollback داشته باش.</span><span class="en">Compare Avro and Protobuf field addition, rename and cardinality changes. Specify writer/reader direction, aliases, defaults and tags. Migrate cardinality with a new field and compatibility tests; distinguish parseability from lossless semantics.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">backward یعنی reader جدید/writer قدیم را روشن می‌کند</span><span class="en">Explicit writer/reader direction</span></li><li><span class="fa">rename Avro را خودکار دوطرفه فرض نمی‌کند</span><span class="en">Asymmetric rename handling</span></li><li><span class="fa">packed numeric و lossy string repeated را می‌بیند</span><span class="en">Packing and lossy repeated fields</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">consumerهای قدیمی ماه‌ها عقب‌اند؛ چه زمانی tag یا فیلد قدیمی را حذف می‌کنی؟</span><span class="en">Old consumers are months behind. When can you remove the old field or tag?</span></p></details>
+<details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۲–۴ ساعت</span><span class="en">Extended hands-on laboratory · estimated 2–4 hours</span></summary><div class="fa"><p>برای پروفایل کاربر schemaهای Avro و Protobuf با نسخهٔ runtime مشخص بنویس. افزودن فیلد، rename و singular→repeated را در هر دو جهت old writer→new reader و new writer→old reader آزمایش کن. در Avro، reader default و جهت alias را صریح بنویس؛ nullable بودن به‌تنهایی default ایجاد نمی‌کند. در Protobuf، tag را ثابت نگه دار و تفاوت binary با JSON، حفظ unknown field در binary round-trip و حذف آن در JSON یا کپی field-by-field را بسنج. برای cardinality، نوع scalar/message و packed بودن را تعیین کن و فقط به parse موفق اکتفا نکن: همهٔ مقدارها باید بررسی شوند. مسیر امن را با فیلد و tag تازه، دورهٔ dual-read/write و آزمون rollback طراحی کن؛ معیار قبولی «حفظ معنا» است.</p></div><div class="en"><p>Write Avro and Protobuf user-profile schemas with named runtime versions. Test field addition, rename and singular→repeated in both old-writer→new-reader and new-writer→old-reader directions. State Avro reader defaults and alias direction; nullable alone supplies no default. For Protobuf retain tags and compare binary with JSON, including unknown-field binary round-trips versus JSON or field-by-field copying. State scalar/message type and packed encoding before assessing cardinality changes; verify every value, not just successful parsing. Design a new-field/new-tag migration with dual-read/write and rollback tests. Semantic preservation is the acceptance criterion.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
+<p class="exercise-evidence"><a href="../exercise-audit.html#ch5-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://protobuf.dev/programming-guides/proto3/" target="_blank" rel="noopener">Protobuf · proto3 language guide</a> · <a href="https://avro.apache.org/docs/1.12.0/specification/" target="_blank" rel="noopener">Avro 1.12 · schema resolution</a></p>
+</article>
+  <article class="exercise-block" id="exercise-3" data-reviewed-exercise="3">
+<h3><span class="fa">تمرین ۳ — از تئوری تا عملیات</span><span class="en">Exercise 3 — from theory to operations</span></h3>
+<div class="exercise-labels"><span class="exercise-label level-staff"><span class="fa">L3 · Staff / Principal</span><span class="en">L3 · Staff / Principal</span></span><span class="exercise-label priority-core"><span class="fa">اولویت اصلی</span><span class="en">Core priority</span></span><span class="exercise-label"><span class="fa">45 دقیقه بحث</span><span class="en">45 min discussion</span></span></div>
+<p class="exercise-verdict"><span class="fa">durable workflow، replay و side effect برای backend جدی ارزشمندند؛ باید تصمیم قطعی و نسخه‌بندی invocation روشن باشد.</span><span class="en">Durable replay is relevant when versioning and side effects are explicit.</span></p>
+<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">workflow موجودی، پرداخت و ارسال را در برابر crash و retry طراحی کن. شناسهٔ هر گام، log پایدار، نتیجهٔ ذخیره‌شده و compensation را مشخص کن. تغییر ترتیب گام‌ها، branching و schema را برای invocationهای در جریان نسخه‌بندی کن و هزینهٔ recovery را بگو.</span><span class="en">Design inventory/payment/shipping workflow recovery with stable step IDs, durable results and compensation. Version changes to step order, branching and payloads for running invocations.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">شناسه بین retry ثابت است</span><span class="en">Stable retry IDs</span></li><li><span class="fa">پرداخت/ارسال بیرونی با قرارداد idempotency پوشش داده شده</span><span class="en">External idempotency contract</span></li><li><span class="fa">کد جدید replay تاریخچه قدیم را نمی‌شکند</span><span class="en">Version-safe replay</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">provider ارسال idempotency key ندارد؛ تضمینت چه تغییری می‌کند؟</span><span class="en">The shipping provider has no idempotency key. How does that change your guarantee?</span></p></details>
+<details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳–۶ ساعت</span><span class="en">Extended hands-on laboratory · estimated 3–6 hours</span></summary><div class="fa">یک workflow سه‌مرحله‌ایِ «ثبت‌سفارش» (موجودی، پرداخت، ارسال) طراحی کن که قابلِ بازپخش باشد: برای هر گام شناسهٔ idempotency تعریف کن،
+      مشخص کن چه چیزی در لاگِ پایدار ثبت می‌شود، و بنویس اگر مرحلهٔ سوم دوبار اجرا شود چه اتفاقی می‌افتد.
+      در پایان، سه تغییرِ کد را که بازپخشِ invocationهای در جریان را می‌شکنند فهرست کن و برای هرکدام راه‌کارِ «نسخهٔ جدا» را شرح بده.</div><div class="en"><p>Design a replayable three-step “place-order” workflow (inventory, payment, shipping): define an idempotency ID per step, pin down what lands in the durable log, and write what happens if step three runs twice. Finish by listing three code changes that break in-flight replay, with the “separate version” remedy for each.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
+<p class="exercise-evidence"><a href="../exercise-audit.html#ch5-ex3"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-3"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/" target="_blank" rel="noopener">AWS · safe retries with idempotent APIs</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+</article>
+<div class="doc-nav"><a href="../ch4-storage-retrieval/index.html"><span class="fa">→ فصل ۴: ذخیره‌سازی و بازیابی</span><span class="en">→ Chapter 4: Storage and retrieval</span></a><a href="../ch6-replication/index.html"><span class="fa">فصل ۶: تکثیر ←</span><span class="en">Chapter 6: Replication →</span></a></div></section>
+
+</main>
+</div>
+
+<footer class="footer">
+  <div class="giant">DDIA<em>·</em>05</div>
+  <p class="small">
+    <span class="fa">بر پایه «Designing Data-Intensive Applications، ویرایش ۲» · فصل ۵ · نمودارهای تعاملی با Archify، نمودارهای مفهومی دستی</span>
+    <span class="en">Based on “Designing Data-Intensive Applications, 2nd Edition” · Chapter 5 · Interactive diagrams with Archify, concept diagrams hand-built</span>
+  </p>
+</footer>
+
+<script src="../assets/site.js"></script>
+</body>
+</html>
