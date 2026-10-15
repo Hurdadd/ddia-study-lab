@@ -4,16 +4,11 @@
 
 **A distributed-systems study lab. An AI platform design workshop.**
 
-<a href="#build-understanding-before-infrastructure"><img src="assets/badges/status.svg" alt="Status: design prototype"></a>
-<a href="LICENSE"><img src="assets/badges/license.svg" alt="License: AGPL-3.0-only"></a>
-<a href="https://own-the-stack.vercel.app/"><img src="assets/badges/languages.svg" alt="Documentation: Persian and English"></a>
-<a href="https://own-the-stack.vercel.app/"><img src="assets/badges/website.svg" alt="Website: public"></a>
+<a href="#build-understanding-before-infrastructure"><img src="assets/badges/status.svg" alt="Status: design prototype"></a> <a href="LICENSE"><img src="assets/badges/license.svg" alt="License: AGPL-3.0-only"></a> <a href="https://own-the-stack.vercel.app/"><img src="assets/badges/languages.svg" alt="Documentation: Persian and English"></a> <a href="https://own-the-stack.vercel.app/"><img src="assets/badges/website.svg" alt="Website: public"></a>
 
 14 chapters · 15 ADRs · Architecture & UML · Interactive walkthroughs
 
-[**Explore the live site ↗**](https://own-the-stack.vercel.app/) &nbsp; · &nbsp;
-[**Enter the capstone**](https://own-the-stack.vercel.app/final-project/index.html#overview) &nbsp; · &nbsp;
-[**Play the developer POV**](https://own-the-stack.vercel.app/final-project/index.html#outcome)
+[**Explore the live site ↗**](https://own-the-stack.vercel.app/) &nbsp; · &nbsp; [**Enter the capstone**](https://own-the-stack.vercel.app/final-project/index.html#overview) &nbsp; · &nbsp; [**Play the developer POV**](https://own-the-stack.vercel.app/final-project/index.html#outcome)
 
 Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd)**
 
