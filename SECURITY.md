@@ -12,7 +12,8 @@ Do not disclose details publicly before a coordinated fix is available.
 The maintainer is hurdad ashouri (@Hurdadd). This volunteer project has no guaranteed
 security-response SLA; acknowledgement and remediation depend on availability.
 
-For the private deployment, verify Vercel Authentication protects every route and
-asset, including deployment-specific URLs. Never commit environment files, platform
-credentials, bypass links or `.vercel` authentication state. Report an unintended
-public deployment immediately through the private repository’s issue channel.
+The educational production website is intentionally public. Preview and generated
+Vercel deployment URLs retain Standard Protection; the GitHub repository remains
+private. Do not publish credentials, bypass links or `.vercel` authentication state.
+Report exposed credentials or unintended repository/source visibility through the
+private repository’s issue channel.

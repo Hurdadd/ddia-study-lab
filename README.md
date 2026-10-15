@@ -1,74 +1,102 @@
-# Own the Stack
+<div align="center">
 
-**Make Your Own AI Platform.**
+<img src="assets/readme-banner.svg" alt="Own the Stack — Make Your Own AI Platform. By hurdad ashouri." width="100%">
 
-Written, designed, and maintained by **hurdad ashouri** · [@Hurdadd](https://github.com/Hurdadd)
+**A distributed-systems study lab. An AI platform design workshop.**
 
-A bilingual Persian/English distributed-systems study lab and an evidence-led AI
-platform design workshop. Start with the developer’s problem, estimate the
-workload, defend decisions, draw the flows, and define recovery tests before
-claiming a production system.
+Persian + English · 14 chapters · 15 ADRs · Interactive flows · AGPL-3.0-only
 
-**Current release: an educational website and interactive design prototype.**
-The platform APIs, workers, database, CDC pipeline, model serving, real evaluations,
-and disaster-recovery automation are not implemented. The repository and deployment
-are intentionally private for this initial release; licensing prepares the project
-for future sharing and does not make it public.
+[**Explore the live site ↗**](https://own-the-stack.vercel.app/) &nbsp; · &nbsp;
+[**Enter the capstone**](https://own-the-stack.vercel.app/final-project/index.html#overview) &nbsp; · &nbsp;
+[**Play the developer POV**](https://own-the-stack.vercel.app/final-project/index.html#outcome)
 
-## Explore
+Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd)**
 
-[Private hosted site](https://own-the-stack.vercel.app/final-project/index.html) —
-requires Vercel authentication.
+</div>
 
-- [Study home](index.html): fourteen chapters inspired by *Designing Data-Intensive
-  Applications, 2nd Edition* (Martin Kleppmann and Chris Riccomini).
-- [Understand the project](final-project/index.html#overview): product, audience,
-  inputs/outputs, synthetic investigation scenario, and scope.
-- [Public interview evidence](final-project/index.html#company-evidence): attributed
-  accounts with role, date where available, evidence grade, and limitations.
-- [Design workshop](final-project/index.html#start-here): seven guided stages.
-- [Estimates](final-project/index.html#estimates) and [15 ADRs](final-project/adrs):
-  editable arithmetic and explicit rationale, assumptions, validation, and revisit triggers.
-- [Recovery objectives](final-project/index.html#recovery): RPO/RTO by failure domain.
-- [Summary and developer POV](final-project/index.html#outcome): local, user-controlled
-  product simulation with a worker-interruption/recovery story.
+---
 
-## What the proposed platform would do
+<div dir="rtl">
 
-A developer registers an AI application, submits a run, and retrieves a result
-and trace. Shared capabilities provide authorized live context, durable execution,
-model routing/budgets, and evaluation/release controls. The initial sample app
-investigates synthetic incidents with read-only tools. A later cited-answer app
-should reuse the same core. Training a foundation model from scratch and a
-multi-GPU training scheduler are outside the first slice.
+**از خواندن سیستم‌های توزیع‌شده تا طراحی پلتفرم AI خودت.**
 
-| Design scenario | RPO objective | RTO objective | Boundary |
-| --- | --- | --- | --- |
-| Worker process crash | 0 acknowledged state lost | 2 minutes | DB and disk survive |
-| Database/disk loss | ≤5 minutes | ≤30 minutes | Synthetic pilot; ≤10GB; independent backup + WAL |
-| Whole-region loss | ≤15 minutes | ≤4 hours | Cold recovery; cross-region backup/WAL; current IAM |
-| Derived retrieval index | 0 source data lost | ≤4 hours | Authoritative source intact; one-million-document scenario |
+اینجا فقط ابزارها را کنار هم نمی‌چینیم: اول مسئلهٔ توسعه‌دهنده را می‌فهمیم، بار و هزینه را تخمین می‌زنیم، برای تصمیم‌ها دلیل می‌آوریم و مسیر اجرا و بازیابی را رسم می‌کنیم. سایت برای همه باز است؛ مخزن GitHub فعلاً خصوصی می‌ماند.
 
-These are **selected design objectives, not measured results or hosting SLAs**.
-See [recovery contracts](final-project/recovery.json) and the [drill guide](docs/RECOVERY.md).
-Only the audience decision is accepted; technical ADRs remain proposed.
+</div>
 
-## Run locally
+## Build understanding before infrastructure
 
-Requires Python 3.10+; no application dependencies or API keys are needed.
+Own the Stack connects fourteen chapters of distributed-systems study to one
+reusable AI platform design. A developer should be able to define an AI app,
+submit a run, inspect its evidence and trace, and understand how it recovers when
+something fails. **Incident Investigator** is the first proposed application.
+
+> **What you can use today:** the bilingual educational website, design workshop,
+> calculators, architecture/UML diagrams and local animated walkthroughs.
+> The platform APIs, workers, database, CDC, model serving, real evaluations and
+> disaster-recovery automation are **not implemented yet**.
+
+## Start your journey
+
+| Step | Explore | What you get |
+| :--- | :--- | :--- |
+| **01 · Understand** | [Project overview](https://own-the-stack.vercel.app/final-project/index.html#overview) | The developer, the problem, inputs/outputs and the first slice |
+| **02 · Estimate** | [Workload & cost](https://own-the-stack.vercel.app/final-project/index.html#estimates) | Editable arithmetic, 12 assumptions and explicit limits |
+| **03 · Decide** | [Architecture decisions](https://own-the-stack.vercel.app/final-project/index.html#decisions) | 15 ADRs with alternatives, rationale, validation and revisit triggers |
+| **04 · Follow** | [Animated request flow](https://own-the-stack.vercel.app/final-project/index.html#architecture) | Trace a proposed request across the platform boundaries |
+| **05 · Recover** | [RPO & RTO](https://own-the-stack.vercel.app/final-project/index.html#recovery) | Failure-specific targets, recovery budgets and planned drills |
+| **06 · Experience** | [Developer POV](https://own-the-stack.vercel.app/final-project/index.html#outcome) | A synthetic seven-scene journey, including worker interruption and resume |
+
+Want the foundations first? [Open the fourteen chapters](https://own-the-stack.vercel.app/#chapters).
+For interview context, [browse the attributed evidence](https://own-the-stack.vercel.app/final-project/index.html#company-evidence): one official exercise and seven candidate accounts, with limitations shown.
+
+## One platform, five capabilities
+
+| Capability | Proposed responsibility |
+| :--- | :--- |
+| **Live Context** | Versioned, authorized data; retrieval freshness, CDC and deletion guards |
+| **Durable Runtime** | Persisted runs and steps, retries, ownership fencing and cancellation |
+| **AI Investigator** | Read-only incident investigation with evidence and uncertainty |
+| **Evaluation & Release** | Frozen versions, datasets, trials and evidence-led promotion |
+| **Model Gateway** | Provider adapters, budgets, deadlines, usage and a later local-serving phase |
+
+The design starts with a small end-to-end slice. A cited-answer app should later
+reuse the same core. Foundation-model training and a multi-GPU training scheduler
+are outside the first slice.
+
+## Recovery, with a reason behind every number
+
+| Failure scenario | RPO objective | RTO objective | Claim boundary |
+| :--- | :--- | :--- | :--- |
+| Worker crash | **0** acknowledged state lost | **2 min** | Database and disk survive |
+| Database / disk loss | **≤5 min** | **≤30 min** | Synthetic pilot ≤10GB; independent backup + WAL |
+| Whole-region loss | **≤15 min** | **≤4 h** | Cold cross-region recovery; current IAM |
+| Derived retrieval index | **0** authoritative data lost | **≤4 h** | Source intact; one-million-document scenario |
+
+**Selected design objectives, not measured results or hosting SLAs.** Only the
+audience decision is accepted; technical ADRs remain proposed.
+[Read the contracts](final-project/recovery.json) · [See the drill guide](docs/RECOVERY.md)
+
+## Try it locally
+
+Python **3.10+** is enough. No API key or database is required.
 
 ```sh
+git clone https://github.com/Hurdadd/own-the-stack.git
+cd own-the-stack
 python3 -m http.server 8766 --bind 127.0.0.1
 ```
 
-Open <http://127.0.0.1:8766/>. Fonts are requested from Google Fonts; offline use
-falls back to installed fonts. The calculators and animations send no model or
-platform requests. Motion starts on request and supports pause, stepping,
-keyboard operation, and reduced-motion preferences.
+Open **[localhost:8766](http://127.0.0.1:8766/)**. Cloning requires access to the
+private repository; the [hosted website](https://own-the-stack.vercel.app/) is public.
+Fonts load from Google Fonts with local fallbacks. Calculators and animations
+send no model/platform requests. Motion is user-controlled, with pause, stepping,
+keyboard support and reduced-motion behavior.
 
-## Build and check
+<details>
+<summary><strong>Development & verification</strong></summary>
 
-Committed HTML is usable as-is. Rebuild the capstone after changing its source:
+Committed HTML works as-is. After editing the capstone sources:
 
 ```sh
 python3 assets/build_final_project.py
@@ -77,71 +105,74 @@ python3 assets/structcheck.py index.html final-project/index.html
 python3 assets/build_site.py
 ```
 
-`public/` is the deployment artifact. Its allowlist excludes local history,
-review captures, credentials, generator state, and tool caches. Existing diagram
-exports are committed; regenerating them uses the optional Archify tool and is
-not required to run the website. Frozen capstone candidates/receipts are retained
-so the static checker can verify their provenance hashes.
+The allowlisted `public/` export excludes credentials, local history, review
+captures, generator state and tool caches. Frozen diagram exports and nine
+candidate/receipt pairs are checked by SHA-256; Archify is optional for regeneration.
 
-Optional browser checks require Node.js, installed Chrome and the pinned
-Playwright development dependency:
+For browser checks, start the local server, then use Node.js and installed Chrome:
 
 ```sh
 npm ci
 npm run test:browser
 ```
 
-Start the local server first. Set `BASE_URL` for another origin and
-`PW_CHANNEL=chromium` to use Playwright’s installed Chromium. Screenshots are
-written to the ignored review directory. See [development](docs/DEVELOPMENT.md).
+Set `BASE_URL` for another origin. For Playwright Chromium, run
+`npx playwright install chromium` and set `PW_CHANNEL=chromium`.
+Screenshots stay in the ignored review directory.
 
-## Repository map
+The Actions job is supplied at `.github/ci-templates/checks.yml` and is currently
+**inactive**: enabling it requires a credential with `workflow` scope.
+See [DEVELOPMENT](docs/DEVELOPMENT.md) for details.
+
+</details>
+
+<details>
+<summary><strong>Repository map</strong></summary>
 
 ```text
-assets/          shared styles, browser scripts, generators, checks
-ch*/             fourteen bilingual study chapters and diagrams
-final-project/   capstone site, ADRs, estimates, recovery and source ledgers
-docs/            development, recovery, privacy/deployment, provenance
-.github/         contribution templates, ownership and CI
+assets/          shared styles, scripts, generators and checks
+ch*/             fourteen bilingual chapters and diagrams
+final-project/   capstone, ADRs, estimates, recovery and evidence ledgers
+docs/            development, recovery, deployment and third-party notices
+.github/         contribution templates and the inactive CI template
 ```
 
-## Contributing and governance
+</details>
 
-Read [CONTRIBUTING](CONTRIBUTING.md), [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md),
-[SECURITY](SECURITY.md), [SUPPORT](SUPPORT.md), and [GOVERNANCE](GOVERNANCE.md).
-Keep proposed architecture separate from implemented behavior and targets separate
-from observations. Source company/interview claims and preserve uncertainty.
-Changes require review by the maintainer; private access is by invitation.
+## Help shape the project
 
-There is no CLA or mandatory copyright assignment. Contributions must be yours to
-submit and carry the applicable repository license; use a `Signed-off-by` line
-under the [Developer Certificate of Origin](DCO).
+| Contribute | Understand the rules | Report a problem |
+| :--- | :--- | :--- |
+| [Contributing](CONTRIBUTING.md) | [Code of conduct](CODE_OF_CONDUCT.md) | [Support](SUPPORT.md) |
+| [DCO sign-off](DCO) | [Governance](GOVERNANCE.md) | [Security policy](SECURITY.md) |
 
-## Deployment and privacy
+Keep proposals separate from implemented behavior and estimates separate from
+observations. Attribute company/interview claims and preserve uncertainty.
+Contributions require maintainer review and a `Signed-off-by` line under the DCO;
+there is no CLA or mandatory copyright assignment. Repository access is by invitation.
 
-See [DEPLOYMENT](docs/DEPLOYMENT.md). Deploy only after enabling Vercel Authentication
-for **all deployments**, with no public exceptions. A private GitHub repository
-alone does not protect a website. Verify anonymous access to the root, capstone,
-and direct assets is denied. Do not publish a share/bypass URL. Public launch is
-a separate, explicit decision.
+## Availability & ownership
 
-## License and attribution
+**Website: public. GitHub repository: private.** The production site opens without
+Vercel login. Preview/generated deployment URLs retain Standard Protection.
+See [deployment notes](docs/DEPLOYMENT.md) and [changelog](CHANGELOG.md).
 
-Original project work: [GNU AGPL-3.0-only](LICENSE), copyright © 2026
-**hurdad ashouri**. Preserve notices and comply with the license when conveying or
-modifying covered work, including applicable network-source obligations.
+Original work is © 2026 **hurdad ashouri**, licensed under
+[**GNU AGPL-3.0-only**](LICENSE). Preserve notices and comply with applicable
+source-sharing obligations when distributing or modifying covered work.
 
-The book, linked interview accounts, externally loaded fonts, and embedded
-third-party diagram/font code retain their own rights and licenses. See [NOTICE](NOTICE)
-and [third-party provenance](docs/THIRD_PARTY.md). This is an independent study
-project, not an official O’Reilly, author, employer, or interview-question product.
+The study refers to *Designing Data-Intensive Applications, 2nd Edition*, by
+Martin Kleppmann and Chris Riccomini. Book, font, diagram-component and linked-account
+rights remain with their owners. See [NOTICE](NOTICE) and
+[third-party notices](docs/THIRD_PARTY_NOTICES.md). This independent project is not
+affiliated with O’Reilly or the companies mentioned in the evidence register.
 
-## فارسی
+---
 
-این پروژه دفتر مطالعه و طراحی یک پلتفرم AI است: معرفی مسئله، ۱۴ فصل، تخمین،
-ADR، نمودار، قرارداد بازیابی و نمایش تعاملی از دید توسعه‌دهنده. سرویس‌های خودِ
-پلتفرم هنوز پیاده نشده‌اند. نویسنده و نگهدارنده: **hurdad ashouri**.
-مخزن و دیپلوی فعلاً خصوصی‌اند؛ مجوز کار اصیل پروژه AGPL-3.0-only است.
+<div align="center">
 
-The GitHub Actions job is supplied in `.github/ci-templates/checks.yml`; activation
-requires a credential with `workflow` scope. It is currently inactive.
+**Learn the trade-offs. Defend the decisions. Own the stack.**
+
+[Visit the lab ↗](https://own-the-stack.vercel.app/)
+
+</div>

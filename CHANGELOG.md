@@ -11,3 +11,11 @@
   portable static export and private-deployment instructions.
 
 Platform services, measured SLOs and actual disaster-recovery drills remain future work.
+
+## 0.1.1 — 2026-10-15
+
+- Redesigned the README with a branded SVG cover, bilingual introduction, guided
+  navigation, capability/recovery tables and collapsible contributor details.
+- Made the production website public at the maintainer’s request; retained the
+  private GitHub repository and protected preview/generated deployment URLs.
+- Updated deployment, security and ownership wording to match public site access.
