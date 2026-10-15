@@ -1,0 +1,208 @@
+{
+ "cards": [
+  {
+   "dot": "cyan",
+   "items": [
+    "Free means the seat version is bookable right now",
+    "Held carries the hold_id and its expiry deadline",
+    "The guard appends only when the read version is current"
+   ],
+   "title": "Hold path"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "Payment waiting ends in confirm or in release",
+    "The TTL watch ends in HoldExpired, never in deletion",
+    "Every wait names the event that continues it"
+   ],
+   "title": "Waiting states"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "Cancel and correct are fresh compensating events",
+    "History stays: nothing is edited or removed",
+    "Closed keeps the audit trail after the ticket"
+   ],
+   "title": "Explicit endings"
+  }
+ ],
+ "diagram_type": "lifecycle",
+ "lanes": [
+  {
+   "id": "main",
+   "label": "Seat hold path"
+  },
+  {
+   "id": "waiting",
+   "label": "Waiting + expiry watch"
+  },
+  {
+   "id": "terminal",
+   "label": "Terminal exits"
+  }
+ ],
+ "meta": {
+  "output": "ch3-data-models/diagrams/sol3-step2-hold-lifecycle.html",
+  "quality_profile": "showcase",
+  "subtitle": "Guards on every arrow: version, TTL and payment decide; cancel and correct are fresh events (teaching numbers)",
+  "title": "Hold lifecycle: guarded states of one seat"
+ },
+ "schema_version": 2,
+ "states": [
+  {
+   "id": "free",
+   "type": "start",
+   "label": "Free",
+   "sublabel": "version v, bookable",
+   "tag": "open",
+   "lane": "main",
+   "col": 0,
+   "step": "01"
+  },
+  {
+   "id": "guard",
+   "type": "decision",
+   "label": "Version guard",
+   "sublabel": "append iff v matches",
+   "tag": "referee",
+   "lane": "main",
+   "col": 1,
+   "step": "02"
+  },
+  {
+   "id": "held",
+   "type": "active",
+   "label": "Held",
+   "sublabel": "hold_id + expiry",
+   "tag": "claimed",
+   "lane": "main",
+   "col": 2,
+   "step": "03"
+  },
+  {
+   "id": "confirmed",
+   "type": "success",
+   "label": "Confirmed",
+   "sublabel": "ticket sent once",
+   "tag": "paid",
+   "lane": "main",
+   "col": 3,
+   "step": "04"
+  },
+  {
+   "id": "ttl_watch",
+   "type": "waiting",
+   "label": "TTL watch",
+   "sublabel": "sweeper sweep due",
+   "tag": "10 min",
+   "lane": "waiting",
+   "col": 2
+  },
+  {
+   "id": "pay_wait",
+   "type": "waiting",
+   "label": "Awaiting payment",
+   "sublabel": "confirm or release",
+   "tag": "pause",
+   "lane": "waiting",
+   "col": 3
+  },
+  {
+   "id": "canceled",
+   "type": "neutral",
+   "label": "Canceled",
+   "sublabel": "BookingCanceled event",
+   "tag": "terminal",
+   "lane": "terminal",
+   "col": 2
+  },
+  {
+   "id": "closed",
+   "type": "success",
+   "label": "Closed",
+   "sublabel": "history kept",
+   "tag": "terminal",
+   "lane": "terminal",
+   "col": 4
+  }
+ ],
+ "transitions": [
+  {
+   "id": "t-ask",
+   "from": "free",
+   "to": "guard",
+   "label": "HoldSeat please"
+  },
+  {
+   "id": "t-win",
+   "from": "guard",
+   "to": "held",
+   "label": "version matches",
+   "variant": "emphasis"
+  },
+  {
+   "id": "t-lose",
+   "from": "guard",
+   "to": "free",
+   "label": "stale: SeatTaken",
+   "variant": "dashed"
+  },
+  {
+   "id": "t-arm",
+   "from": "held",
+   "to": "ttl_watch",
+   "label": "TTL armed"
+  },
+  {
+   "id": "t-expire",
+   "from": "ttl_watch",
+   "to": "free",
+   "label": "HoldExpired, same hold_id",
+   "variant": "emphasis",
+   "route": "bottom-channel"
+  },
+  {
+   "id": "t-confirm-req",
+   "from": "held",
+   "to": "pay_wait",
+   "label": "confirm requested"
+  },
+  {
+   "id": "t-paid",
+   "from": "pay_wait",
+   "to": "confirmed",
+   "label": "paid in time",
+   "variant": "emphasis"
+  },
+  {
+   "id": "t-timeout",
+   "from": "pay_wait",
+   "to": "free",
+   "label": "timeout, seat freed",
+   "variant": "security"
+  },
+  {
+   "id": "t-close",
+   "from": "confirmed",
+   "to": "closed",
+   "label": "ticket done, idempotent",
+   "variant": "emphasis"
+  },
+  {
+   "id": "t-cancel",
+   "from": "held",
+   "to": "canceled",
+   "label": "BookingCanceled",
+   "variant": "security"
+  },
+  {
+   "id": "t-correct",
+   "from": "confirmed",
+   "to": "canceled",
+   "label": "BookingCorrected, fresh event",
+   "variant": "dashed"
+  }
+ ]
+}

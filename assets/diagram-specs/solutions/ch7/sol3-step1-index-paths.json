@@ -1,0 +1,207 @@
+{
+ "cards": [
+  {
+   "dot": "cyan",
+   "items": [
+    "A write touches exactly one base shard, and the local entry commits in the same shard transaction",
+    "A term lookup without the record id fans out to all 4 shards: 4 RPCs, then a merge",
+    "Tail latency follows the slowest shard; adding shards grows storage, not query throughput"
+   ],
+   "title": "Local: cheap writes, scatter reads"
+  },
+  {
+   "dot": "emerald",
+   "items": [
+    "The global index is sharded by term across 2 index shards; one record's write fans out to 1 base plus up to 2 index shards",
+    "Index writes travel asynchronously through an outbox relay, versioned per record, so a crash replays them",
+    "A single-term read touches 1 index shard plus the base shards holding the matches; two terms intersect over the network"
+   ],
+   "title": "Global: targeted reads, fanned-out writes"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "A multi-term write can land partially: the AND query then misses the record — a false negative, counted in the demo",
+    "A deleted record can linger in the index: the reader revalidates every id against the base, and the delete wins",
+    "Tripwires: fan-out equal to shard count, index lag per term, and a tombstone before any index purge"
+   ],
+   "title": "Staleness and tripwires"
+  }
+ ],
+ "diagram_type": "dataflow",
+ "flows": [
+  {
+   "classification": "write path",
+   "from": "wlocal",
+   "id": "wlocal-index",
+   "label": "same-shard transaction",
+   "to": "local",
+   "variant": "emphasis",
+   "labelAt": [
+    207,
+    100
+   ]
+  },
+  {
+   "classification": "scatter",
+   "from": "local",
+   "id": "local-scatter",
+   "label": "ask all 4 shards",
+   "to": "qscatter",
+   "variant": "emphasis",
+   "labelAt": [
+    423,
+    100
+   ]
+  },
+  {
+   "classification": "gather",
+   "from": "qscatter",
+   "id": "scatter-merge",
+   "label": "merge, delete wins",
+   "to": "merge",
+   "variant": "emphasis",
+   "labelAt": [
+    638,
+    100
+   ]
+  },
+  {
+   "classification": "write fan-out",
+   "from": "wglobal",
+   "id": "wglobal-index",
+   "label": "base plus outbox relay",
+   "to": "gindex",
+   "variant": "default",
+   "labelAt": [
+    207,
+    429
+   ]
+  },
+  {
+   "classification": "targeted read",
+   "from": "gindex",
+   "id": "gindex-term",
+   "label": "one shard per term",
+   "to": "qterm",
+   "variant": "default",
+   "labelAt": [
+    423,
+    429
+   ]
+  },
+  {
+   "classification": "record fetch",
+   "from": "qterm",
+   "id": "term-fetch",
+   "label": "ids may be stale",
+   "to": "fetch",
+   "variant": "default",
+   "labelAt": [
+    638,
+    429
+   ]
+  }
+ ],
+ "meta": {
+  "output": "ch7-sharding/diagrams/sol3-step1-index-paths.html",
+  "quality_profile": "showcase",
+  "title": "Secondary Index Paths — Local Versus Global",
+  "viewBox": [
+   1080,
+   560
+  ]
+ },
+ "nodes": [
+  {
+   "id": "wlocal",
+   "label": "Write a record",
+   "row": 0,
+   "stage": 0,
+   "sublabel": "record id known",
+   "tag": "1 base shard",
+   "type": "backend"
+  },
+  {
+   "id": "local",
+   "label": "Local index entry",
+   "row": 0,
+   "stage": 1,
+   "sublabel": "same shard commit",
+   "tag": "no cross-shard write",
+   "type": "database",
+   "width": 138
+  },
+  {
+   "id": "qscatter",
+   "label": "Scatter query",
+   "row": 0,
+   "stage": 2,
+   "sublabel": "term only, no id",
+   "tag": "4 RPCs",
+   "type": "backend"
+  },
+  {
+   "id": "merge",
+   "label": "Merge and revalidate",
+   "row": 0,
+   "stage": 3,
+   "sublabel": "check base",
+   "tag": "tail latency",
+   "type": "backend",
+   "width": 160
+  },
+  {
+   "id": "wglobal",
+   "label": "Write a record",
+   "row": 2,
+   "stage": 0,
+   "sublabel": "2 terms",
+   "tag": "1 base + outbox",
+   "type": "backend"
+  },
+  {
+   "id": "gindex",
+   "label": "Global index shards",
+   "row": 2,
+   "stage": 1,
+   "sublabel": "sharded by term",
+   "tag": "versioned, async",
+   "type": "database",
+   "width": 152
+  },
+  {
+   "id": "qterm",
+   "label": "Term lookup",
+   "row": 2,
+   "stage": 2,
+   "sublabel": "postings, 1 shard",
+   "tag": "stale possible",
+   "type": "backend"
+  },
+  {
+   "id": "fetch",
+   "label": "Fetch and filter",
+   "row": 2,
+   "stage": 3,
+   "sublabel": "ids to base shards",
+   "tag": "phantoms dropped",
+   "type": "backend"
+  }
+ ],
+ "schema_version": 1,
+ "stages": [
+  {
+   "label": "Write"
+  },
+  {
+   "label": "Index"
+  },
+  {
+   "label": "Query"
+  },
+  {
+   "label": "Results"
+  }
+ ]
+}

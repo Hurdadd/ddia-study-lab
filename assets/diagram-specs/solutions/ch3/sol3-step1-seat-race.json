@@ -1,0 +1,238 @@
+{
+ "activations": [
+  {
+   "participant": "api",
+   "from": 155,
+   "to": 572,
+   "type": "backend"
+  },
+  {
+   "participant": "log",
+   "from": 213,
+   "to": 253,
+   "type": "messagebus"
+  },
+  {
+   "participant": "ticket",
+   "from": 387,
+   "to": 456,
+   "type": "backend"
+  }
+ ],
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "Both HoldSeat commands carry the version they read",
+    "The conditional append admits exactly one writer",
+    "The loser gets SeatTaken, never silence"
+   ],
+   "title": "One seat, one winner"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "Confirm appends SeatConfirmed, the ticket fires once",
+    "A resend with the same key is blocked, not duplicated",
+    "Replay rebuilds views but never resends tickets"
+   ],
+   "title": "Exactly-once send"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "The sweeper frees expired holds with HoldExpired",
+    "Cancel and correct are fresh events, never edits",
+    "A late SeatHeld never relocks a freed seat"
+   ],
+   "title": "Expiry and correction"
+  }
+ ],
+ "diagram_type": "sequence",
+ "messages": [
+  {
+   "id": "hold-a",
+   "from": "u1",
+   "to": "api",
+   "y": 160,
+   "label": "HoldSeat A5 @v3",
+   "variant": "emphasis"
+  },
+  {
+   "id": "hold-b",
+   "from": "u2",
+   "to": "api",
+   "y": 189,
+   "label": "HoldSeat A5 @v3",
+   "variant": "emphasis"
+  },
+  {
+   "id": "cond-append",
+   "from": "api",
+   "to": "log",
+   "y": 218,
+   "label": "append iff seat v==3",
+   "variant": "emphasis",
+   "note": "conditional append: version decides"
+  },
+  {
+   "id": "u1-wins",
+   "from": "log",
+   "to": "api",
+   "y": 247,
+   "label": "appended v4, u1 wins",
+   "variant": "return"
+  },
+  {
+   "id": "held-reply",
+   "from": "api",
+   "to": "u1",
+   "y": 276,
+   "label": "held (u1)",
+   "variant": "return"
+  },
+  {
+   "id": "taken-reply",
+   "from": "api",
+   "to": "u2",
+   "y": 305,
+   "label": "SeatTaken, try another",
+   "variant": "default"
+  },
+  {
+   "id": "confirm",
+   "from": "u1",
+   "to": "api",
+   "y": 334,
+   "label": "confirm A5",
+   "variant": "emphasis"
+  },
+  {
+   "id": "append-confirmed",
+   "from": "api",
+   "to": "log",
+   "y": 363,
+   "label": "append SeatConfirmed",
+   "variant": "emphasis"
+  },
+  {
+   "id": "notify-ticket",
+   "from": "log",
+   "to": "ticket",
+   "y": 392,
+   "label": "on SeatConfirmed",
+   "variant": "dashed"
+  },
+  {
+   "id": "send-once",
+   "from": "ticket",
+   "to": "u1",
+   "y": 421,
+   "label": "ticket, key e-77",
+   "variant": "return"
+  },
+  {
+   "id": "resend",
+   "from": "u1",
+   "to": "ticket",
+   "y": 450,
+   "label": "resend ticket e-77",
+   "variant": "default"
+  },
+  {
+   "id": "blocked",
+   "from": "ticket",
+   "to": "u1",
+   "y": 479,
+   "label": "resend blocked, exactly once",
+   "variant": "return"
+  },
+  {
+   "id": "expire",
+   "from": "api",
+   "to": "log",
+   "y": 508,
+   "label": "sweeper: HoldExpired B2",
+   "variant": "dashed",
+   "note": "10-minute hold TTL"
+  },
+  {
+   "id": "cancel",
+   "from": "u2",
+   "to": "api",
+   "y": 537,
+   "label": "cancel B2 booking",
+   "variant": "default"
+  },
+  {
+   "id": "append-cancel",
+   "from": "api",
+   "to": "log",
+   "y": 566,
+   "label": "append BookingCanceled",
+   "variant": "emphasis",
+   "note": "fresh event, never an edit"
+  }
+ ],
+ "meta": {
+  "column_fit": "spread",
+  "output": "ch3-data-models/diagrams/sol3-step1-seat-race.html",
+  "quality_profile": "showcase",
+  "subtitle": "Two racers, one conditional append, one winner; expiry and correction ride the same log (teaching numbers)",
+  "title": "Seat race: conditional append decides",
+  "viewBox": [
+   1080,
+   690
+  ]
+ },
+ "participants": [
+  {
+   "id": "u1",
+   "label": "Viewer A",
+   "sublabel": "first racer",
+   "type": "external"
+  },
+  {
+   "id": "u2",
+   "label": "Viewer B",
+   "sublabel": "second racer",
+   "type": "external"
+  },
+  {
+   "id": "api",
+   "label": "Booking API",
+   "sublabel": "conditional writer",
+   "type": "backend"
+  },
+  {
+   "id": "log",
+   "label": "Event log",
+   "sublabel": "append-only, ordered",
+   "type": "messagebus"
+  },
+  {
+   "id": "ticket",
+   "label": "Ticket sender",
+   "sublabel": "idempotent key",
+   "type": "backend"
+  }
+ ],
+ "schema_version": 1,
+ "segments": [
+  {
+   "from": 150,
+   "label": "Race",
+   "to": 315
+  },
+  {
+   "from": 325,
+   "label": "Confirm + send once",
+   "to": 460
+  },
+  {
+   "from": 470,
+   "label": "Expiry + cancel",
+   "to": 576
+  }
+ ]
+}

@@ -1,0 +1,214 @@
+{
+ "activations": [
+  {
+   "from": 160,
+   "participant": "sessA",
+   "to": 250,
+   "type": "backend"
+  },
+  {
+   "from": 188,
+   "participant": "sessB",
+   "to": 244,
+   "type": "backend"
+  },
+  {
+   "from": 160,
+   "participant": "pg",
+   "to": 560,
+   "type": "database"
+  }
+ ],
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "Uncommitted writes stay invisible: the reader sees 500, never 400",
+    "The second writer waits on the row lock until T1 commits or aborts",
+    "Absence of the anomaly IS the test result here"
+   ],
+   "title": "Prevention is a result"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "READ COMMITTED re-reads committed data: A=500 pre-commit, B=600 post-commit",
+    "500 + 600 = 1100: money appears from nowhere mid-transfer",
+    "A start snapshot (500 + 500 = 1000) is immune"
+   ],
+   "title": "Read skew"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "Two read-modify-write cycles overlap: 10 -> 11 -> 11, one +1 lost",
+    "UPDATE t SET balance = balance + 1 serializes on the row lock: 12",
+    "The follow-up answer: never read-then-write an absolute value for counters"
+   ],
+   "title": "Lost update"
+  }
+ ],
+ "diagram_type": "sequence",
+ "messages": [
+  {
+   "from": "sessA",
+   "id": "t1-write",
+   "label": "UPDATE acct id=2 to 400 (uncommitted)",
+   "to": "pg",
+   "variant": "default",
+   "y": 160
+  },
+  {
+   "from": "pg",
+   "id": "t2-old",
+   "label": "SELECT sees 500: old committed value",
+   "to": "sessB",
+   "variant": "return",
+   "y": 188
+  },
+  {
+   "from": "sessA",
+   "id": "t1-commit",
+   "label": "COMMIT: 400 visible all at once",
+   "to": "pg",
+   "variant": "default",
+   "y": 216
+  },
+  {
+   "from": "sessB",
+   "id": "t2-wait",
+   "label": "UPDATE same row: BLOCKS on the row lock",
+   "to": "pg",
+   "variant": "security",
+   "y": 244
+  },
+  {
+   "from": "sessA",
+   "id": "t1-transfer",
+   "label": "BEGIN: move 100 A -> B (A=400, B=600)",
+   "to": "pg",
+   "variant": "default",
+   "y": 288
+  },
+  {
+   "from": "sessB",
+   "id": "t2-read-a",
+   "label": "RC: read A -> 500 (pre-commit)",
+   "to": "pg",
+   "variant": "default",
+   "y": 316
+  },
+  {
+   "from": "sessA",
+   "id": "t1-transfer-commit",
+   "label": "COMMIT transfer",
+   "to": "pg",
+   "variant": "default",
+   "y": 344
+  },
+  {
+   "from": "sessB",
+   "id": "t2-read-b",
+   "label": "RC: read B -> 600: 500+600=1100 SKEW",
+   "to": "pg",
+   "variant": "emphasis",
+   "y": 372
+  },
+  {
+   "from": "sessB",
+   "id": "t2-snapshot",
+   "label": "SI re-run: snapshot 500+500=1000, clean",
+   "to": "pg",
+   "variant": "return",
+   "y": 400
+  },
+  {
+   "from": "sessA",
+   "id": "t1-rmw-read",
+   "label": "read counter -> 10",
+   "to": "pg",
+   "variant": "default",
+   "y": 444
+  },
+  {
+   "from": "sessB",
+   "id": "t2-rmw-read",
+   "label": "read counter -> 10 (same stale read)",
+   "to": "pg",
+   "variant": "default",
+   "y": 472
+  },
+  {
+   "from": "sessA",
+   "id": "t1-rmw-write",
+   "label": "write 11, COMMIT",
+   "to": "pg",
+   "variant": "default",
+   "y": 500
+  },
+  {
+   "from": "sessB",
+   "id": "t2-rmw-write",
+   "label": "write 11, COMMIT: T1's +1 is LOST",
+   "to": "pg",
+   "variant": "emphasis",
+   "y": 528
+  },
+  {
+   "from": "sessA",
+   "id": "atomic-inc",
+   "label": "balance=balance+1 twice -> 12, no loss",
+   "to": "pg",
+   "variant": "security",
+   "y": 556
+  }
+ ],
+ "meta": {
+  "column_fit": "spread",
+  "output": "ch8-transactions/diagrams/sol1a-read-skew-lost-update.html",
+  "quality_profile": "showcase",
+  "title": "Ch8 Sol1a: dirty probes, read skew, lost update",
+  "viewBox": [
+   1080,
+   680
+  ]
+ },
+ "participants": [
+  {
+   "id": "sessA",
+   "label": "Session A",
+   "sublabel": "writer / mover",
+   "type": "backend"
+  },
+  {
+   "id": "sessB",
+   "label": "Session B",
+   "sublabel": "reader / rival writer",
+   "type": "backend"
+  },
+  {
+   "id": "pg",
+   "label": "PostgreSQL 18",
+   "sublabel": "documented rules only",
+   "type": "database"
+  }
+ ],
+ "schema_version": 1,
+ "segments": [
+  {
+   "from": 150,
+   "label": "Dirty probes: prevented at every level",
+   "to": 256
+  },
+  {
+   "from": 278,
+   "label": "Read skew: RC vs snapshot",
+   "to": 412
+  },
+  {
+   "from": 434,
+   "label": "Lost update: fix the write",
+   "to": 568
+  }
+ ]
+}

@@ -1,0 +1,192 @@
+{
+  "activations": [
+    {
+      "participant": "wal",
+      "from": 163,
+      "to": 200,
+      "type": "database"
+    },
+    {
+      "participant": "mem",
+      "from": 192,
+      "to": 228,
+      "type": "backend"
+    },
+    {
+      "participant": "files",
+      "from": 257,
+      "to": 294,
+      "type": "database"
+    },
+    {
+      "participant": "manifest",
+      "from": 327,
+      "to": 386,
+      "type": "database"
+    },
+    {
+      "participant": "wal",
+      "from": 353,
+      "to": 363,
+      "type": "database"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "items": [
+        "The ack goes out only after the WAL fsync, never after the RAM update",
+        "The manifest record is the commit point: only listed files serve reads",
+        "Restart replays checksummed WAL records and drops the corrupt tail"
+      ],
+      "title": "Durability order"
+    },
+    {
+      "dot": "rose",
+      "items": [
+        "The flushed-but-unlisted file is ignored, never half-served",
+        "No reader ever sees state between the flush and the manifest record",
+        "Replay rebuilds exactly the acknowledged prefix"
+      ],
+      "title": "Crash window"
+    }
+  ],
+  "diagram_type": "sequence",
+  "messages": [
+    {
+      "from": "client",
+      "id": "append",
+      "label": "append + fsync",
+      "to": "wal",
+      "variant": "emphasis",
+      "y": 168
+    },
+    {
+      "from": "wal",
+      "id": "update-map",
+      "label": "update sorted map",
+      "to": "mem",
+      "variant": "default",
+      "y": 196
+    },
+    {
+      "from": "mem",
+      "id": "ack",
+      "label": "ack after fsync",
+      "to": "client",
+      "variant": "return",
+      "y": 224
+    },
+    {
+      "from": "mem",
+      "id": "flush",
+      "label": "flush sorted SSTable",
+      "to": "files",
+      "variant": "emphasis",
+      "y": 262
+    },
+    {
+      "from": "files",
+      "id": "lost-record",
+      "label": "manifest record lost in crash",
+      "note": "crash lands between the flush and the manifest record",
+      "to": "manifest",
+      "variant": "dashed",
+      "y": 290
+    },
+    {
+      "from": "manifest",
+      "id": "read-manifest",
+      "label": "restart: read manifest",
+      "to": "mem",
+      "variant": "default",
+      "y": 332
+    },
+    {
+      "from": "wal",
+      "id": "replay",
+      "label": "replay checksummed WAL",
+      "to": "mem",
+      "variant": "emphasis",
+      "y": 358
+    },
+    {
+      "from": "manifest",
+      "id": "ignore-file",
+      "label": "ignore unlisted file",
+      "to": "files",
+      "variant": "dashed",
+      "y": 382
+    },
+    {
+      "from": "mem",
+      "id": "serve",
+      "label": "serve reads again",
+      "to": "client",
+      "variant": "return",
+      "y": 408
+    }
+  ],
+  "meta": {
+    "locale": "en",
+    "output": "ch4-storage-retrieval/diagrams/sol1-s2-crash-recovery.html",
+    "quality_profile": "showcase",
+    "subtitle": "Flush, crash, restart replay (teaching sketch)",
+    "title": "Crash between flush and manifest",
+    "column_fit": "spread",
+    "viewBox": [
+      1080,
+      580
+    ]
+  },
+  "participants": [
+    {
+      "id": "client",
+      "label": "Client",
+      "sublabel": "writer",
+      "type": "external"
+    },
+    {
+      "id": "wal",
+      "label": "WAL",
+      "sublabel": "append-only log",
+      "type": "database"
+    },
+    {
+      "id": "mem",
+      "label": "Memtable",
+      "sublabel": "sorted RAM",
+      "type": "backend"
+    },
+    {
+      "id": "files",
+      "label": "SSTable files",
+      "sublabel": "on disk",
+      "type": "database"
+    },
+    {
+      "id": "manifest",
+      "label": "Manifest",
+      "sublabel": "live file set",
+      "type": "database"
+    }
+  ],
+  "schema_version": 1,
+  "segments": [
+    {
+      "from": 150,
+      "to": 238,
+      "label": "Steady writes"
+    },
+    {
+      "from": 248,
+      "to": 302,
+      "label": "Flush, then crash"
+    },
+    {
+      "from": 312,
+      "to": 422,
+      "label": "Restart recovery"
+    }
+  ]
+}

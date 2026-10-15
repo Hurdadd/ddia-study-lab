@@ -1,0 +1,272 @@
+{
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "Each leaf names its mechanism and its evidence",
+    "A copy with no weapon is the finding — register it, never drop it",
+    "Fast copies close left, slow copies close right"
+   ],
+   "title": "Six copies, six weapons"
+  },
+  {
+   "dot": "orange",
+   "items": [
+    "Tombstone + compact: append delete-X, rewrite segments without the user",
+    "Or shred the per-user key: instant unreadability, destruction receipt",
+    "Data lingers until rewritten — say so, with the teaching retention"
+   ],
+   "title": "Two weapons for the log"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "Backups expire by retention; restores replay through tombstones",
+    "Training excludes the user at the next retrain — lag documented, not hidden",
+    "Deadlines need a lawyer; the runbook names them uncertain"
+   ],
+   "title": "Slow copies stay honest"
+  }
+ ],
+ "diagram_type": "workflow",
+ "edges": [
+  {
+   "from": "req",
+   "id": "e-request",
+   "label": "erasure for user X",
+   "to": "record",
+   "variant": "emphasis"
+  },
+  {
+   "from": "record",
+   "id": "e-seal-log",
+   "label": "seal the log",
+   "to": "tombstone",
+   "variant": "emphasis"
+  },
+  {
+   "from": "tombstone",
+   "id": "e-compact",
+   "label": "compact w/o user",
+   "to": "compact",
+   "variant": "emphasis"
+  },
+  {
+   "from": "compact",
+   "id": "e-expire",
+   "label": "log sealed — expire",
+   "to": "backup",
+   "variant": "emphasis"
+  },
+  {
+   "from": "backup",
+   "id": "e-proof",
+   "label": "expiry proof",
+   "role": "return",
+   "to": "verify",
+   "variant": "default"
+  },
+  {
+   "from": "record",
+   "id": "e-purge-views",
+   "label": "purge derived views",
+   "role": "branch",
+   "to": "cache",
+   "variant": "dashed"
+  },
+  {
+   "from": "cache",
+   "id": "e-rebuild-index",
+   "label": "rebuild w/o user",
+   "role": "branch",
+   "to": "index",
+   "variant": "dashed"
+  },
+  {
+   "from": "index",
+   "id": "e-index-evidence",
+   "label": "index evidence",
+   "role": "branch",
+   "to": "compact",
+   "variant": "default"
+  },
+  {
+   "from": "record",
+   "id": "e-instant",
+   "label": "instant option",
+   "role": "branch",
+   "to": "shred",
+   "variant": "dashed"
+  },
+  {
+   "from": "backup",
+   "id": "e-exclude-train",
+   "label": "exclude at retrain",
+   "role": "branch",
+   "to": "training",
+   "variant": "default"
+  }
+ ],
+ "groups": [
+  {
+   "fromCol": 1,
+   "id": "live_work",
+   "label": "record, cache, index",
+   "lane": "live",
+   "toCol": 3
+  },
+  {
+   "fromCol": 0,
+   "id": "log_weapons",
+   "label": "two weapons, one log",
+   "lane": "log",
+   "toCol": 2
+  }
+ ],
+ "lanes": [
+  {
+   "id": "request",
+   "label": "Erasure Request"
+  },
+  {
+   "id": "live",
+   "label": "Live Stores"
+  },
+  {
+   "id": "log",
+   "label": "Append-only Log"
+  },
+  {
+   "id": "slow",
+   "label": "Slow Copies"
+  }
+ ],
+ "mainPath": [
+  "req",
+  "record",
+  "tombstone",
+  "compact",
+  "backup",
+  "verify"
+ ],
+ "meta": {
+  "output": ".archify/workflow-ch1-sol3-runbook-20261014-182150/sol3-step1-erasure-runbook.html",
+  "quality_profile": "showcase",
+  "title": "Erasure Runbook: One Deletion Across Six Copies"
+ },
+ "nodes": [
+  {
+   "col": 0,
+   "id": "req",
+   "label": "Erasure request",
+   "lane": "request",
+   "sublabel": "delete user X + proof",
+   "type": "external",
+   "width": 150
+  },
+  {
+   "col": 1,
+   "id": "record",
+   "label": "Record: hard delete",
+   "lane": "live",
+   "sublabel": "row delete - receipt",
+   "type": "database",
+   "width": 150
+  },
+  {
+   "col": 2,
+   "id": "cache",
+   "label": "Cache: purge keys",
+   "lane": "live",
+   "sublabel": "purge keys - purge log",
+   "type": "database",
+   "width": 150
+  },
+  {
+   "col": 3,
+   "id": "index",
+   "label": "Index: purge/rebuild",
+   "lane": "live",
+   "sublabel": "rebuild w/o user - record",
+   "type": "database",
+   "width": 150
+  },
+  {
+   "col": 0,
+   "id": "shred",
+   "label": "Shred per-user key",
+   "lane": "log",
+   "sublabel": "destroy key - receipt",
+   "tag": "instant",
+   "type": "security",
+   "width": 150
+  },
+  {
+   "col": 2,
+   "id": "tombstone",
+   "label": "Tombstone the log",
+   "lane": "log",
+   "sublabel": "append delete-X - offset",
+   "type": "messagebus",
+   "width": 150
+  },
+  {
+   "col": 3,
+   "id": "compact",
+   "label": "Compact segments",
+   "lane": "log",
+   "sublabel": "rewrite w/o user - record",
+   "type": "database",
+   "width": 150
+  },
+  {
+   "col": 4,
+   "id": "backup",
+   "label": "Backups: expire",
+   "lane": "slow",
+   "sublabel": "retention expiry - proof",
+   "type": "database",
+   "width": 150
+  },
+  {
+   "col": 5,
+   "id": "training",
+   "label": "Training: exclude",
+   "lane": "slow",
+   "sublabel": "exclude at retrain - log",
+   "tag": "documented lag",
+   "type": "database",
+   "width": 150
+  },
+  {
+   "col": 5,
+   "id": "verify",
+   "label": "Verify closure",
+   "lane": "request",
+   "sublabel": "no live read returns user",
+   "type": "backend",
+   "width": 150
+  }
+ ],
+ "phases": [
+  {
+   "fromCol": 0,
+   "id": "intake",
+   "label": "Intake",
+   "toCol": 0
+  },
+  {
+   "fromCol": 1,
+   "id": "fastclose",
+   "label": "Fast copies",
+   "toCol": 3
+  },
+  {
+   "fromCol": 4,
+   "id": "slowclose",
+   "label": "Slow copies + proof",
+   "toCol": 5
+  }
+ ],
+ "schema_version": 2
+}

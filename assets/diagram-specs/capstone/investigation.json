@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "An investigation produces inspectable evidence",
+    "output": "final-project/diagrams/investigation.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1080,
+      650
+    ],
+    "column_fit": "spread"
+  },
+  "participants": [
+    {
+      "id": "user",
+      "type": "external",
+      "label": "Operator",
+      "sublabel": "authorized tenant"
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Control API",
+      "sublabel": "idempotent run"
+    },
+    {
+      "id": "run",
+      "type": "backend",
+      "label": "Runtime",
+      "sublabel": "persisted steps"
+    },
+    {
+      "id": "gate",
+      "type": "security",
+      "label": "Tool Gateway",
+      "sublabel": "current policy"
+    },
+    {
+      "id": "model",
+      "type": "backend",
+      "label": "Model Gateway",
+      "sublabel": "bounded request"
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "Run Store",
+      "sublabel": "durable state"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "user",
+      "to": "api",
+      "y": 165,
+      "label": "submit alert + idempotency key",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m1",
+      "from": "api",
+      "to": "run",
+      "y": 194,
+      "label": "durable run_id",
+      "variant": "default"
+    },
+    {
+      "id": "m2",
+      "from": "run",
+      "to": "gate",
+      "y": 223,
+      "label": "retrieve scoped context",
+      "variant": "security"
+    },
+    {
+      "id": "m3",
+      "from": "gate",
+      "to": "run",
+      "y": 252,
+      "label": "evidence + revision",
+      "variant": "return"
+    },
+    {
+      "id": "m4",
+      "from": "run",
+      "to": "model",
+      "y": 281,
+      "label": "hypotheses + tool schema",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m5",
+      "from": "model",
+      "to": "run",
+      "y": 310,
+      "label": "proposed tool call",
+      "variant": "return"
+    },
+    {
+      "id": "m6",
+      "from": "run",
+      "to": "gate",
+      "y": 339,
+      "label": "validate / authorize query",
+      "variant": "security"
+    },
+    {
+      "id": "m7",
+      "from": "gate",
+      "to": "run",
+      "y": 368,
+      "label": "bounded query evidence",
+      "variant": "return"
+    },
+    {
+      "id": "m8",
+      "from": "run",
+      "to": "store",
+      "y": 397,
+      "label": "persist result + next step",
+      "variant": "default"
+    },
+    {
+      "id": "m9",
+      "from": "run",
+      "to": "model",
+      "y": 426,
+      "label": "rank supported hypotheses",
+      "variant": "default"
+    },
+    {
+      "id": "m10",
+      "from": "model",
+      "to": "run",
+      "y": 455,
+      "label": "report with evidence IDs",
+      "variant": "return"
+    },
+    {
+      "id": "m11",
+      "from": "run",
+      "to": "api",
+      "y": 484,
+      "label": "persist final report",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m12",
+      "from": "api",
+      "to": "user",
+      "y": 513,
+      "label": "report + uncertainty + sources",
+      "variant": "return"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Contract",
+      "items": [
+        "Model output proposes actions; server policy authorizes them.",
+        "Each result carries a source, time interval, and revision.",
+        "Reads use quotas, query limits, and deadlines.",
+        "An accepted report can be inconclusive; certainty is never required."
+      ]
+    }
+  ]
+}

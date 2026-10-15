@@ -1,0 +1,220 @@
+{
+ "diagram_type": "workflow",
+ "edges": [
+  {
+   "id": "list-queries",
+   "from": "q3",
+   "to": "c_growth",
+   "label": "sets the test",
+   "variant": "emphasis"
+  },
+  {
+   "id": "unbounded-ref",
+   "from": "c_growth",
+   "to": "rel_schema",
+   "label": "unbounded: ref",
+   "variant": "emphasis"
+  },
+  {
+   "id": "tiny-embed",
+   "from": "c_growth",
+   "to": "doc_shape",
+   "label": "tiny: embed",
+   "variant": "default"
+  },
+  {
+   "id": "reviews-table",
+   "from": "rel_schema",
+   "to": "rel_guards",
+   "label": "UNIQUE + upsert",
+   "variant": "default"
+  },
+  {
+   "id": "default-pick",
+   "from": "rel_guards",
+   "to": "leaf_rel",
+   "label": "mixed load",
+   "variant": "emphasis"
+  },
+  {
+   "id": "reviews-out",
+   "from": "doc_shape",
+   "to": "doc_cost",
+   "label": "reviews stay out",
+   "variant": "default"
+  },
+  {
+   "id": "readmodel-only",
+   "from": "doc_cost",
+   "to": "leaf_doc",
+   "label": "hot page only",
+   "variant": "dashed"
+  },
+  {
+   "id": "atomic-row",
+   "from": "c_brand",
+   "to": "leaf_rel",
+   "label": "1 atomic UPDATE",
+   "variant": "emphasis"
+  },
+  {
+   "id": "derive-view",
+   "from": "leaf_rel",
+   "to": "leaf_hybrid",
+   "label": "derive when hot",
+   "variant": "dashed"
+  }
+ ],
+ "lanes": [
+  {
+   "id": "workload",
+   "label": "Queries & constraints"
+  },
+  {
+   "id": "relational",
+   "label": "Relational branch"
+  },
+  {
+   "id": "document",
+   "label": "Document branch"
+  },
+  {
+   "id": "choice",
+   "label": "Hybrid leaf"
+  }
+ ],
+ "mainPath": [
+  "q3",
+  "c_growth",
+  "rel_schema",
+  "rel_guards",
+  "leaf_rel",
+  "leaf_hybrid"
+ ],
+ "meta": {
+  "output": "ch3-data-models/diagrams/sol1-step1-model-choice.html",
+  "quality_profile": "showcase",
+  "subtitle": "Three hot queries decide the shape; growth, pagination, uniqueness and brand change pick the leaf (teaching numbers)",
+  "title": "Catalog model choice: queries first, shape second"
+ },
+ "nodes": [
+  {
+   "id": "q3",
+   "lane": "workload",
+   "col": 0,
+   "type": "external",
+   "label": "3 hot queries",
+   "sublabel": "3 reads decide",
+   "width": 112
+  },
+  {
+   "id": "c_growth",
+   "lane": "workload",
+   "col": 1,
+   "type": "backend",
+   "label": "Bounded growth?",
+   "sublabel": "unknown = unbounded",
+   "tag": "fork 1",
+   "width": 124
+  },
+  {
+   "id": "c_brand",
+   "lane": "workload",
+   "col": 2,
+   "type": "backend",
+   "label": "Atomic brand?",
+   "sublabel": "1 row, fresh read",
+   "tag": "fork 2",
+   "width": 124
+  },
+  {
+   "id": "rel_schema",
+   "lane": "relational",
+   "col": 2,
+   "type": "database",
+   "label": "Tables + UNIQUE",
+   "sublabel": "join + (prod, user)",
+   "width": 132
+  },
+  {
+   "id": "rel_guards",
+   "lane": "relational",
+   "col": 3,
+   "type": "backend",
+   "label": "Keyset + upsert",
+   "sublabel": "id > last",
+   "width": 132
+  },
+  {
+   "id": "leaf_rel",
+   "lane": "relational",
+   "col": 4,
+   "type": "backend",
+   "label": "Relational first",
+   "sublabel": "1-row change",
+   "tag": "pick for mixed load",
+   "width": 120
+  },
+  {
+   "id": "doc_shape",
+   "lane": "document",
+   "col": 1,
+   "type": "frontend",
+   "label": "Tiny embeds",
+   "sublabel": "thumb in, reviews out",
+   "width": 132
+  },
+  {
+   "id": "doc_cost",
+   "lane": "document",
+   "col": 2,
+   "type": "backend",
+   "label": "N-doc rewrite",
+   "sublabel": "fan-out + window",
+   "width": 132
+  },
+  {
+   "id": "leaf_doc",
+   "lane": "document",
+   "col": 3,
+   "type": "frontend",
+   "label": "Doc read model",
+   "sublabel": "hot page only",
+   "tag": "narrow win",
+   "width": 124
+  },
+  {
+   "id": "leaf_hybrid",
+   "lane": "choice",
+   "col": 4,
+   "type": "backend",
+   "label": "Tables + view",
+   "sublabel": "derive when hot",
+   "tag": "reports + hot page",
+   "width": 140
+  }
+ ],
+ "phases": [
+  {
+   "id": "ask",
+   "label": "Ask queries",
+   "fromCol": 0,
+   "toCol": 1
+  },
+  {
+   "id": "shape",
+   "label": "Shape data",
+   "fromCol": 2,
+   "toCol": 3,
+   "variant": "emphasis"
+  },
+  {
+   "id": "pick",
+   "label": "Pick leaf",
+   "fromCol": 4,
+   "toCol": 5,
+   "variant": "dashed"
+  }
+ ],
+ "schema_version": 2
+}

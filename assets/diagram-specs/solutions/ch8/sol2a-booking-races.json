@@ -1,0 +1,198 @@
+{
+ "activations": [
+  {
+   "from": 160,
+   "participant": "guestA",
+   "to": 280,
+   "type": "frontend"
+  },
+  {
+   "from": 190,
+   "participant": "guestB",
+   "to": 280,
+   "type": "frontend"
+  },
+  {
+   "from": 160,
+   "participant": "pg",
+   "to": 560,
+   "type": "database"
+  }
+ ],
+ "cards": [
+  {
+   "dot": "rose",
+   "items": [
+    "Both checks run against an empty table, both INSERTs land",
+    "[9,11) and [10,12) overlap: one room sold twice",
+    "Wrapping the same pair in READ COMMITTED changes nothing"
+   ],
+   "title": "Check-then-insert doubles"
+  },
+  {
+   "dot": "emerald",
+   "items": [
+    "Lock the STABLE room row in rooms, not the reservation rows",
+    "The loser blocks, then re-checks against the winner's row",
+    "One winner, zero overlaps, refusal is explicit"
+   ],
+   "title": "Room-row lock serializes"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "SELECT FOR UPDATE on an EMPTY reservation result locks nothing",
+    "Future overlapping ranges are phantoms to a row lock",
+    "Lock something that exists, or constrain the write itself"
+   ],
+   "title": "Empty locks lock nothing"
+  }
+ ],
+ "diagram_type": "sequence",
+ "messages": [
+  {
+   "from": "guestA",
+   "id": "a-check",
+   "label": "SELECT overlaps [9,11)? -> none",
+   "to": "pg",
+   "variant": "default",
+   "y": 160
+  },
+  {
+   "from": "guestB",
+   "id": "b-check",
+   "label": "SELECT overlaps [10,12)? -> none",
+   "to": "pg",
+   "variant": "default",
+   "y": 190
+  },
+  {
+   "from": "guestA",
+   "id": "a-insert",
+   "label": "INSERT [9,11); COMMIT",
+   "to": "pg",
+   "variant": "default",
+   "y": 220
+  },
+  {
+   "from": "guestB",
+   "id": "b-insert",
+   "label": "INSERT [10,12); COMMIT -> DOUBLE-BOOKED",
+   "to": "pg",
+   "variant": "emphasis",
+   "y": 250
+  },
+  {
+   "from": "guestA",
+   "id": "rc-check",
+   "label": "RC txn: check [9,11) -> none",
+   "to": "pg",
+   "variant": "default",
+   "y": 300
+  },
+  {
+   "from": "guestB",
+   "id": "rc-check-b",
+   "label": "RC txn: check [10,12) -> none, no pred-lock",
+   "to": "pg",
+   "variant": "default",
+   "y": 330
+  },
+  {
+   "from": "guestA",
+   "id": "rc-insert",
+   "label": "INSERT [9,11); COMMIT",
+   "to": "pg",
+   "variant": "default",
+   "y": 360
+  },
+  {
+   "from": "guestB",
+   "id": "rc-insert-b",
+   "label": "INSERT [10,12); COMMIT -> doubles AGAIN",
+   "to": "pg",
+   "variant": "emphasis",
+   "y": 390
+  },
+  {
+   "from": "guestA",
+   "id": "lock-room",
+   "label": "lock fixed room row R FOR UPDATE",
+   "to": "pg",
+   "variant": "security",
+   "y": 440
+  },
+  {
+   "from": "guestB",
+   "id": "lock-wait",
+   "label": "same lock request -> BLOCKS",
+   "to": "pg",
+   "variant": "security",
+   "y": 470
+  },
+  {
+   "from": "guestA",
+   "id": "lock-insert",
+   "label": "check + INSERT [9,11); COMMIT",
+   "to": "pg",
+   "variant": "default",
+   "y": 500
+  },
+  {
+   "from": "guestB",
+   "id": "lock-refuse",
+   "label": "unblocked: sees rival, refuses 409",
+   "to": "pg",
+   "variant": "return",
+   "y": 530
+  }
+ ],
+ "meta": {
+  "output": "ch8-transactions/diagrams/sol2a-booking-races.html",
+  "quality_profile": "showcase",
+  "title": "Ch8 Sol2a: booking races, then the room-row lock",
+  "viewBox": [
+   1080,
+   680
+  ],
+  "column_fit": "spread"
+ },
+ "participants": [
+  {
+   "id": "guestA",
+   "label": "Guest A",
+   "sublabel": "wants [9,11)",
+   "type": "frontend"
+  },
+  {
+   "id": "guestB",
+   "label": "Guest B",
+   "sublabel": "wants [10,12)",
+   "type": "frontend"
+  },
+  {
+   "id": "pg",
+   "label": "PostgreSQL 18",
+   "sublabel": "rooms + reservations",
+   "type": "database"
+  }
+ ],
+ "schema_version": 1,
+ "segments": [
+  {
+   "from": 150,
+   "label": "Check-then-insert: double booking",
+   "to": 262
+  },
+  {
+   "from": 290,
+   "label": "READ COMMITTED: still doubles",
+   "to": 402
+  },
+  {
+   "from": 430,
+   "label": "Fixed room-row lock: serialized",
+   "to": 542
+  }
+ ]
+}

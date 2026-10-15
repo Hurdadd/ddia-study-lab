@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "diagram_type": "dataflow",
+  "meta": {
+    "title": "Committed changes become versioned context",
+    "output": "final-project/diagrams/live-context.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1080,
+      480
+    ]
+  },
+  "stages": [
+    {
+      "label": "Record"
+    },
+    {
+      "label": "Capture"
+    },
+    {
+      "label": "Durable log"
+    },
+    {
+      "label": "Projection"
+    },
+    {
+      "label": "Read"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "record",
+      "type": "database",
+      "label": "Source + Outbox",
+      "sublabel": "one transaction",
+      "stage": 0,
+      "row": 0
+    },
+    {
+      "id": "cdc",
+      "type": "backend",
+      "label": "CDC Reader",
+      "sublabel": "committed changes",
+      "stage": 1,
+      "row": 0
+    },
+    {
+      "id": "events",
+      "type": "messagebus",
+      "label": "Event Topic",
+      "sublabel": "entity-key order",
+      "stage": 2,
+      "row": 0
+    },
+    {
+      "id": "projector",
+      "type": "backend",
+      "label": "Projector",
+      "sublabel": "version + epoch gate",
+      "stage": 3,
+      "row": 0
+    },
+    {
+      "id": "index",
+      "type": "database",
+      "label": "Context Index",
+      "sublabel": "active generation",
+      "stage": 4,
+      "row": 0
+    }
+  ],
+  "flows": [
+    {
+      "from": "record",
+      "to": "cdc",
+      "label": "WAL"
+    },
+    {
+      "from": "cdc",
+      "to": "events",
+      "label": "event"
+    },
+    {
+      "from": "events",
+      "to": "projector",
+      "label": "replay"
+    },
+    {
+      "from": "projector",
+      "to": "index",
+      "label": "upsert"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Three different contracts",
+      "items": [
+        "event_id identifies duplicates; entity_key determines ordering.",
+        "Append-only event history is different from compacted entity state.",
+        "Embeddings are derived; publish only if source revision and ACL remain valid.",
+        "Telemetry streams arrive through OTLP, not through database CDC."
+      ]
+    }
+  ]
+}

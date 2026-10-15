@@ -1,0 +1,189 @@
+{
+  "cards": [
+    {
+      "dot": "emerald",
+      "items": [
+        "The trigram proposes candidates, the regex disposes: doc 10 matches app but fails /appl./",
+        "Boolean AND intersects red and apples postings down to doc 0",
+        "A regex with no fixed trigram falls back to a full scan or a selective filter first"
+      ],
+      "title": "Candidates, then proof"
+    },
+    {
+      "dot": "orange",
+      "items": [
+        "Ground truth is the exact top-k, recall@k is measured against it",
+        "Teaching run: nprobe 1 gives 0.900, 2 gives 0.967, all clusters give 1.000",
+        "Report p95 latency beside recall, and isolate tenants before searching"
+      ],
+      "title": "Vector side, honestly measured"
+    }
+  ],
+  "diagram_type": "dataflow",
+  "flows": [
+    {
+      "from": "q",
+      "id": "bool-q",
+      "label": "red AND apples",
+      "to": "inv",
+      "variant": "default",
+      "labelAt": [
+        207,
+        195
+      ]
+    },
+    {
+      "from": "q",
+      "id": "tri-q",
+      "label": "trigram app",
+      "to": "tri",
+      "variant": "default",
+      "route": "straight",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        215,
+        302
+      ]
+    },
+    {
+      "from": "q",
+      "id": "vec-q",
+      "label": "probe 1 of 4 clusters",
+      "to": "ivf",
+      "variant": "default",
+      "labelAt": [
+        150,
+        470
+      ],
+      "route": "bottom-channel",
+      "fromSide": "bottom",
+      "toSide": "bottom"
+    },
+    {
+      "from": "inv",
+      "id": "bool-hits",
+      "label": "boolean hits",
+      "to": "verify",
+      "variant": "default",
+      "labelAt": [
+        400,
+        200
+      ]
+    },
+    {
+      "from": "tri",
+      "id": "cands",
+      "label": "8 candidates",
+      "to": "verify",
+      "variant": "emphasis",
+      "route": "straight",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        430,
+        292
+      ]
+    },
+    {
+      "from": "verify",
+      "id": "verified",
+      "label": "7 verified + boolean",
+      "to": "rank",
+      "variant": "emphasis",
+      "route": "straight",
+      "fromSide": "right",
+      "toSide": "left",
+      "labelAt": [
+        640,
+        322
+      ]
+    },
+    {
+      "from": "ivf",
+      "id": "vec-hits",
+      "label": "vector top-k",
+      "to": "rank",
+      "variant": "default",
+      "route": "bottom-channel",
+      "fromSide": "bottom",
+      "toSide": "bottom"
+    }
+  ],
+  "meta": {
+    "locale": "en",
+    "output": "ch4-storage-retrieval/diagrams/sol3-s1-retrieval-pipeline.html",
+    "quality_profile": "showcase",
+    "subtitle": "Trigram candidates, regex proof, IVF recall (teaching sketch)",
+    "title": "Retrieval pipeline: propose, prove, rank",
+    "viewBox": [
+      980,
+      600
+    ]
+  },
+  "nodes": [
+    {
+      "id": "q",
+      "label": "Product query",
+      "row": 1,
+      "stage": 0,
+      "sublabel": "text + vector",
+      "type": "external"
+    },
+    {
+      "id": "inv",
+      "label": "Inverted index",
+      "row": 0,
+      "stage": 1,
+      "sublabel": "term to postings",
+      "type": "database"
+    },
+    {
+      "id": "tri",
+      "label": "Trigram index",
+      "row": 1,
+      "stage": 1,
+      "sublabel": "fixed substrings",
+      "type": "database"
+    },
+    {
+      "id": "ivf",
+      "label": "IVF vector index",
+      "row": 2,
+      "stage": 1,
+      "sublabel": "clusters, nprobe",
+      "type": "database"
+    },
+    {
+      "id": "verify",
+      "label": "Verify + filter",
+      "row": 1,
+      "stage": 2,
+      "sublabel": "regex proof, boolean AND",
+      "type": "backend"
+    },
+    {
+      "id": "rank",
+      "label": "Hybrid ranker",
+      "row": 1,
+      "stage": 3,
+      "sublabel": "lexical + vector",
+      "type": "backend"
+    }
+  ],
+  "schema_version": 1,
+  "stages": [
+    {
+      "label": "Query"
+    },
+    {
+      "label": "Candidates"
+    },
+    {
+      "label": "Verify"
+    },
+    {
+      "label": "Rank"
+    }
+  ]
+}

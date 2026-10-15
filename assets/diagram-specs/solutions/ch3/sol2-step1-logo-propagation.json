@@ -1,0 +1,226 @@
+{
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "The brands table with logo_v is the single authority",
+    "A logo change is one atomic UPDATE plus one outbox event",
+    "Products keep only brand_id, never a blind copy"
+   ],
+   "title": "Authority first"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "The builder applies guarded writes with logo_v < new_v",
+    "Duplicates die on the version guard, order decides",
+    "The cursor (logo_v, product_id) is the resume point after death"
+   ],
+   "title": "Versioned propagation"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "Lag is observed against the 5 s teaching budget",
+    "Past the budget readers fall back to the authority table",
+    "Sync embedding has no cursor and no budget, only a blind window"
+   ],
+   "title": "Bounded staleness"
+  }
+ ],
+ "diagram_type": "dataflow",
+ "flows": [
+  {
+   "classification": "write",
+   "from": "logo_change",
+   "id": "atomic-update",
+   "label": "1 atomic UPDATE",
+   "to": "brands_db",
+   "variant": "emphasis",
+   "labelDy": 25
+  },
+  {
+   "classification": "event",
+   "from": "brands_db",
+   "id": "logo-event",
+   "label": "event + logo_v",
+   "to": "outbox",
+   "variant": "emphasis"
+  },
+  {
+   "classification": "consume",
+   "from": "outbox",
+   "id": "consume",
+   "label": "consume in order",
+   "to": "builder",
+   "variant": "default"
+  },
+  {
+   "classification": "resume",
+   "from": "cursor",
+   "id": "resume",
+   "label": "resume point",
+   "to": "builder",
+   "variant": "dashed",
+   "labelDy": 25
+  },
+  {
+   "classification": "apply",
+   "from": "builder",
+   "id": "apply",
+   "label": "guarded apply",
+   "to": "product_view",
+   "variant": "emphasis",
+   "labelDy": -39,
+   "labelDx": 1
+  },
+  {
+   "classification": "stale",
+   "from": "product_view",
+   "id": "stale-window",
+   "label": "mixed versions",
+   "to": "stale",
+   "variant": "security",
+   "labelDy": -10
+  },
+  {
+   "classification": "read",
+   "from": "product_view",
+   "id": "fast-read",
+   "label": "version-tagged read",
+   "to": "page_read",
+   "variant": "default"
+  },
+  {
+   "classification": "fallback",
+   "from": "page_read",
+   "id": "over-budget",
+   "label": "over budget",
+   "to": "fallback",
+   "variant": "dashed",
+   "labelDy": 25
+  },
+  {
+   "classification": "authority-read",
+   "from": "brands_db",
+   "id": "read-authority",
+   "label": "fresh row on lag",
+   "to": "fallback",
+   "variant": "security",
+   "route": "bottom-channel",
+   "fromSide": "bottom",
+   "toSide": "bottom"
+  }
+ ],
+ "meta": {
+  "output": "ch3-data-models/diagrams/sol2-step1-logo-propagation.html",
+  "quality_profile": "showcase",
+  "subtitle": "One record fans out to versioned views; the cursor resumes, the budget bounds staleness (teaching numbers)",
+  "title": "Logo change: record to derived views",
+  "viewBox": [
+   1080,
+   600
+  ]
+ },
+ "nodes": [
+  {
+   "id": "logo_change",
+   "label": "Logo change",
+   "row": 0,
+   "stage": 0,
+   "sublabel": "new file, 1 row",
+   "tag": "rare",
+   "type": "backend"
+  },
+  {
+   "id": "brands_db",
+   "label": "brands table",
+   "row": 1,
+   "stage": 0,
+   "sublabel": "logo_url + logo_v",
+   "tag": "authority",
+   "type": "database"
+  },
+  {
+   "id": "outbox",
+   "label": "Brand outbox",
+   "row": 1,
+   "stage": 1,
+   "sublabel": "carries new logo_v",
+   "tag": "ordered",
+   "type": "messagebus"
+  },
+  {
+   "id": "cursor",
+   "label": "Resume cursor",
+   "row": 0,
+   "stage": 2,
+   "sublabel": "(logo_v, product_id)",
+   "tag": "checkpoint",
+   "type": "database"
+  },
+  {
+   "id": "builder",
+   "label": "View builder",
+   "row": 1,
+   "stage": 2,
+   "sublabel": "guard logo_v < new_v",
+   "tag": "idempotent",
+   "type": "backend"
+  },
+  {
+   "id": "product_view",
+   "label": "Product read view",
+   "row": 1,
+   "stage": 3,
+   "sublabel": "version-tagged copies",
+   "tag": "derived",
+   "type": "database"
+  },
+  {
+   "id": "stale",
+   "label": "Stale window",
+   "row": 0,
+   "stage": 3,
+   "sublabel": "old/new mix, observed",
+   "tag": "teaching 5 s",
+   "type": "frontend"
+  },
+  {
+   "id": "page_read",
+   "label": "Product page",
+   "row": 0,
+   "stage": 4,
+   "sublabel": "reads view + version",
+   "tag": "fast",
+   "type": "frontend"
+  },
+  {
+   "id": "fallback",
+   "label": "Authority fallback",
+   "row": 1,
+   "stage": 4,
+   "sublabel": "lag past budget",
+   "tag": "safety",
+   "type": "backend"
+  }
+ ],
+ "schema_version": 1,
+ "stages": [
+  {
+   "label": "Authority"
+  },
+  {
+   "label": "Publish"
+  },
+  {
+   "label": "Propagate"
+  },
+  {
+   "label": "Views"
+  },
+  {
+   "label": "Read"
+  }
+ ]
+}

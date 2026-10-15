@@ -1,0 +1,211 @@
+{
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "The record database stays the single leader; every derived copy follows its order",
+    "Business row and outbox row commit in one transaction, so neither exists without the other",
+    "CDC reads the stable outbox contract, never the internal domain tables"
+   ],
+   "title": "One leader"
+  },
+  {
+   "dot": "cyan",
+   "items": [
+    "The outbox event topic is append-only and keyed by event id for dedup, with retention",
+    "The entity-state topic is compacted and keyed by entity key; deletes arrive as tombstones",
+    "The record snapshot is a one-off bulk seed at LSN B and is discarded after catch-up"
+   ],
+   "title": "Three contracts"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "The snapshot reads from a replica at a bounded rate, so production barely notices",
+    "Streaming starts at LSN B with event-ID dedup absorbing the snapshot overlap",
+    "A kill mid-bootstrap resumes from the checkpoint; the checksum at the boundary proves it"
+   ],
+   "title": "Throttled bootstrap"
+  }
+ ],
+ "diagram_type": "dataflow",
+ "flows": [
+  {
+   "classification": "one txn",
+   "from": "oltp",
+   "id": "f-txn",
+   "label": "business + outbox",
+   "to": "outbox",
+   "variant": "security"
+  },
+  {
+   "classification": "stable schema",
+   "from": "outbox",
+   "id": "f-read",
+   "label": "outbox rows",
+   "to": "cdc",
+   "variant": "emphasis",
+   "labelDy": 25,
+   "route": "straight",
+   "fromSide": "bottom",
+   "toSide": "top"
+  },
+  {
+   "classification": "append-only",
+   "from": "cdc",
+   "id": "f-events",
+   "label": "events",
+   "to": "events",
+   "variant": "emphasis"
+  },
+  {
+   "classification": "upserts + tombstones",
+   "from": "cdc",
+   "id": "f-state",
+   "label": "entity state",
+   "to": "state",
+   "variant": "dashed"
+  },
+  {
+   "classification": "bounded rate",
+   "from": "snapshot",
+   "id": "f-snap",
+   "label": "bulk rows at LSN B",
+   "to": "indexer",
+   "variant": "dashed",
+   "route": "top-channel",
+   "fromSide": "top",
+   "toSide": "top"
+  },
+  {
+   "classification": "from LSN B",
+   "from": "events",
+   "id": "f-stream",
+   "label": "stream + dedup",
+   "to": "indexer",
+   "variant": "emphasis",
+   "route": "straight",
+   "fromSide": "right",
+   "toSide": "left",
+   "labelDx": -109,
+   "labelDy": -39
+  },
+  {
+   "classification": "seed / repair",
+   "from": "state",
+   "id": "f-seed",
+   "label": "full state scan",
+   "to": "indexer",
+   "variant": "dashed"
+  },
+  {
+   "classification": "upserts + deletes",
+   "from": "indexer",
+   "id": "f-index",
+   "label": "apply to index",
+   "to": "index",
+   "variant": "emphasis"
+  }
+ ],
+ "meta": {
+  "output": "ch12-stream-processing/diagrams/sol3-cdc-pipeline.html",
+  "quality_profile": "showcase",
+  "title": "CDC pipeline: outbox events, compacted state, and a snapshot at LSN B",
+  "viewBox": [
+   1080,
+   690
+  ]
+ },
+ "nodes": [
+  {
+   "id": "oltp",
+   "label": "OLTP record",
+   "row": 1,
+   "stage": 0,
+   "sublabel": "single leader",
+   "tag": "decides order",
+   "type": "database"
+  },
+  {
+   "id": "snapshot",
+   "label": "Consistent snapshot",
+   "row": 0,
+   "stage": 0,
+   "sublabel": "at LSN B",
+   "tag": "throttled",
+   "type": "database"
+  },
+  {
+   "id": "outbox",
+   "label": "Outbox table",
+   "row": 1,
+   "stage": 1,
+   "sublabel": "same txn",
+   "tag": "public contract",
+   "type": "database"
+  },
+  {
+   "id": "cdc",
+   "label": "CDC relay",
+   "row": 2,
+   "stage": 1,
+   "sublabel": "outbox router",
+   "tag": "Debezium-style",
+   "type": "backend"
+  },
+  {
+   "id": "events",
+   "label": "Outbox events",
+   "row": 1,
+   "stage": 2,
+   "sublabel": "keyed by event id",
+   "tag": "append-only",
+   "type": "messagebus"
+  },
+  {
+   "id": "state",
+   "label": "Entity state",
+   "row": 3,
+   "stage": 2,
+   "sublabel": "keyed by entity key",
+   "tag": "compacted",
+   "type": "messagebus"
+  },
+  {
+   "id": "indexer",
+   "label": "Indexer",
+   "row": 1,
+   "stage": 3,
+   "sublabel": "dedup + apply",
+   "tag": "idempotent",
+   "type": "backend"
+  },
+  {
+   "id": "index",
+   "label": "Search index",
+   "row": 1,
+   "stage": 4,
+   "sublabel": "derived view",
+   "tag": "follower",
+   "type": "database"
+  }
+ ],
+ "stages": [
+  {
+   "label": "Record"
+  },
+  {
+   "label": "Capture"
+  },
+  {
+   "label": "Stream"
+  },
+  {
+   "label": "Build"
+  },
+  {
+   "label": "Serve"
+  }
+ ],
+ "schema_version": 1
+}

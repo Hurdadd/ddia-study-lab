@@ -1,0 +1,173 @@
+{
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "Fresh input enters only through the INSERT-first transaction",
+    "UNIQUE(request_id), debit, credit and the log row commit together",
+    "One atomic append per request; everything downstream replays it"
+   ],
+   "title": "One atomic write"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "A lost reply never means a lost commit: retry reuses the same id",
+    "Same id plus same payload returns the stored result, moving nothing",
+    "Same id plus new payload is rejected; new id plus same payload is allowed"
+   ],
+   "title": "Lost-reply discipline"
+  },
+  {
+   "dot": "orange",
+   "items": [
+    "The balance view is rebuilt from the log alone, by separate code",
+    "Replay must equal live state; any gap is a bug, not lag",
+    "Lag is bounded and measured; silent divergence is corruption"
+   ],
+   "title": "Independent replay"
+  }
+ ],
+ "diagram_type": "dataflow",
+ "flows": [
+  {
+   "id": "post",
+   "from": "clientw",
+   "to": "api",
+   "label": "POST + retries",
+   "classification": "fresh input",
+   "variant": "emphasis",
+   "route": "straight"
+  },
+  {
+   "id": "txn",
+   "from": "api",
+   "to": "ledger",
+   "label": "one atomic txn",
+   "classification": "single commit",
+   "variant": "emphasis",
+   "route": "straight"
+  },
+  {
+   "id": "commit",
+   "from": "ledger",
+   "to": "api",
+   "label": "commit ok / stored row",
+   "classification": "commit proof",
+   "variant": "default",
+   "route": "bottom-channel",
+   "labelDy": 30
+  },
+  {
+   "id": "logrows",
+   "from": "ledger",
+   "to": "projector",
+   "label": "log rows",
+   "classification": "ordered rows",
+   "variant": "dashed",
+   "route": "straight"
+  },
+  {
+   "id": "rebuild",
+   "from": "projector",
+   "to": "balances",
+   "label": "recomputed",
+   "classification": "derived state",
+   "variant": "default",
+   "route": "straight",
+   "labelDy": -28
+  },
+  {
+   "id": "reads",
+   "from": "balances",
+   "to": "stmt",
+   "label": "reads",
+   "classification": "may lag",
+   "variant": "dashed",
+   "labelDy": 52
+  }
+ ],
+ "meta": {
+  "output": "ch13-streaming-philosophy/diagrams/sol1-transfer-thread.html",
+  "quality_profile": "showcase",
+  "title": "Transfer write path, read path and replay",
+  "viewBox": [
+   1080,
+   560
+  ]
+ },
+ "nodes": [
+  {
+   "id": "clientw",
+   "type": "external",
+   "label": "Client",
+   "sublabel": "submits + retries",
+   "tag": "input",
+   "stage": 0,
+   "row": 0
+  },
+  {
+   "id": "api",
+   "type": "backend",
+   "label": "Transfer API",
+   "sublabel": "INSERT-first",
+   "tag": "endpoint",
+   "stage": 1,
+   "row": 0
+  },
+  {
+   "id": "ledger",
+   "type": "database",
+   "label": "Ledger DB",
+   "sublabel": "requests + log",
+   "tag": "system of record",
+   "stage": 2,
+   "row": 0
+  },
+  {
+   "id": "projector",
+   "type": "backend",
+   "label": "Replay job",
+   "sublabel": "separate code",
+   "tag": "idempotent",
+   "stage": 3,
+   "row": 0
+  },
+  {
+   "id": "balances",
+   "type": "database",
+   "label": "Balance view",
+   "sublabel": "derived",
+   "tag": "rebuilt",
+   "stage": 4,
+   "row": 0
+  },
+  {
+   "id": "stmt",
+   "type": "backend",
+   "label": "Statement reads",
+   "sublabel": "served reads",
+   "tag": "may lag",
+   "stage": 3,
+   "row": 1
+  }
+ ],
+ "schema_version": 1,
+ "stages": [
+  {
+   "label": "Write"
+  },
+  {
+   "label": "Commit"
+  },
+  {
+   "label": "Record"
+  },
+  {
+   "label": "Replay"
+  },
+  {
+   "label": "Read"
+  }
+ ]
+}

@@ -1,0 +1,165 @@
+{
+ "activations": [
+  {
+   "from": 155,
+   "participant": "monitor",
+   "to": 222,
+   "type": "backend"
+  },
+  {
+   "from": 183,
+   "participant": "oncall",
+   "to": 222,
+   "type": "external"
+  },
+  {
+   "from": 315,
+   "participant": "monitor",
+   "to": 410,
+   "type": "backend"
+  },
+  {
+   "from": 343,
+   "participant": "tracker",
+   "to": 410,
+   "type": "backend"
+  },
+  {
+   "from": 371,
+   "participant": "oncall",
+   "to": 410,
+   "type": "external"
+  }
+ ],
+ "cards": [
+  {
+   "dot": "rose",
+   "items": [
+    "Fast burn means 2% of the 30-day budget gone in 1 hour",
+    "It pages a human \u2014 the only correct response is a runbook action",
+    "Freeze releases, roll back, then verify the burn is flat"
+   ],
+   "title": "Fast-burn page"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "Slow burn means 10% of budget in 6 hours \u2014 a ticket, not a page",
+    "Investigate inside the shift: slice p99 by region, version, hit/miss",
+    "Fix the biggest cohort first, then re-slice"
+   ],
+   "title": "Slow-burn ticket"
+  },
+  {
+   "dot": "cyan",
+   "items": [
+    "The SLO is the internal objective with a zero-budget policy",
+    "The SLA is the customer contract with remedies, looser than the SLO",
+    "A number with no consequence is wallpaper, not an SLO"
+   ],
+   "title": "SLO versus SLA"
+  }
+ ],
+ "diagram_type": "sequence",
+ "messages": [
+  {
+   "from": "monitor",
+   "id": "fast-page",
+   "label": "page: fast burn, 2% in 1 hour",
+   "note": "budget bleeding \u2014 runbook now",
+   "to": "oncall",
+   "variant": "emphasis",
+   "y": 160
+  },
+  {
+   "from": "oncall",
+   "id": "rollback",
+   "label": "freeze releases, roll back",
+   "note": "the alert ends in an action",
+   "to": "release",
+   "variant": "emphasis",
+   "y": 188
+  },
+  {
+   "from": "release",
+   "id": "flat",
+   "label": "rolled back, burn flat",
+   "note": "verify before unfreezing",
+   "to": "oncall",
+   "variant": "return",
+   "y": 216
+  },
+  {
+   "from": "monitor",
+   "id": "slow-ticket",
+   "label": "ticket: slow burn, 10% in 6 hours",
+   "note": "investigate inside this shift",
+   "to": "tracker",
+   "variant": "dashed",
+   "y": 320
+  },
+  {
+   "from": "tracker",
+   "id": "slice",
+   "label": "p99 sliced by cohort",
+   "note": "region, version, cache hit/miss",
+   "to": "oncall",
+   "variant": "default",
+   "y": 348
+  },
+  {
+   "from": "oncall",
+   "id": "fixed",
+   "label": "biggest cohort fixed, burn green",
+   "note": "close the loop on the ticket",
+   "to": "monitor",
+   "variant": "return",
+   "y": 376
+  }
+ ],
+ "meta": {
+  "column_fit": "spread",
+  "output": ".archify/sequence-ch2-sol2-burn-page-20261014-184354/sol2-step1-burn-page.html",
+  "quality_profile": "showcase",
+  "title": "Burn Alerts: Fast-Burn Page, Slow-Burn Ticket"
+ },
+ "participants": [
+  {
+   "id": "monitor",
+   "label": "Burn Monitor",
+   "sublabel": "budget math",
+   "type": "backend"
+  },
+  {
+   "id": "oncall",
+   "label": "On-Call",
+   "sublabel": "paged human",
+   "type": "external"
+  },
+  {
+   "id": "release",
+   "label": "Release Train",
+   "sublabel": "rollback switch",
+   "type": "backend"
+  },
+  {
+   "id": "tracker",
+   "label": "Tickets",
+   "sublabel": "slow-burn queue",
+   "type": "backend"
+  }
+ ],
+ "schema_version": 1,
+ "segments": [
+  {
+   "from": 150,
+   "label": "Fast-burn page",
+   "to": 230
+  },
+  {
+   "from": 310,
+   "label": "Slow-burn ticket",
+   "to": 390
+  }
+ ]
+}

@@ -1,0 +1,218 @@
+{
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "Key insert and local effect commit in ONE transaction",
+    "ACK always follows the commit, never precedes it",
+    "Known-key redelivery skips the effect and ACKs safely"
+   ],
+   "title": "Commit-then-ACK"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "ACK never deletes the key: only horizon expiry does",
+    "A 6-month replay past a 30-day horizon looks brand new",
+    "External sends are at-least-once: receivers must be idempotent"
+   ],
+   "title": "Horizon bounds the promise"
+  }
+ ],
+ "diagram_type": "lifecycle",
+ "lanes": [
+  {
+   "id": "main",
+   "label": "Message handling"
+  },
+  {
+   "id": "recovery",
+   "label": "Redelivery"
+  },
+  {
+   "id": "dedup",
+   "label": "Dedup + horizon"
+  },
+  {
+   "id": "terminal",
+   "label": "Terminal exits"
+  }
+ ],
+ "meta": {
+  "output": "ch8-transactions/diagrams/sol3b-consumer-states.html",
+  "quality_profile": "showcase",
+  "title": "Ch8 Sol3b: consumer states, dedup horizon, recovery"
+ },
+ "schema_version": 2,
+ "states": [
+  {
+   "col": 0,
+   "id": "delivered",
+   "label": "Delivered",
+   "lane": "main",
+   "step": "01",
+   "sublabel": "broker hands over",
+   "tag": "at-least-once",
+   "type": "start"
+  },
+  {
+   "col": 1,
+   "id": "processing",
+   "label": "Processing",
+   "lane": "main",
+   "step": "02",
+   "sublabel": "transaction open",
+   "tag": "key + effect",
+   "type": "active"
+  },
+  {
+   "col": 2,
+   "id": "committed",
+   "label": "Committed",
+   "lane": "main",
+   "step": "03",
+   "sublabel": "key + effect durable",
+   "tag": "durable",
+   "type": "active"
+  },
+  {
+   "col": 3,
+   "id": "acked",
+   "label": "Acked",
+   "lane": "main",
+   "step": "04",
+   "sublabel": "broker may still redeliver",
+   "tag": "not a delete",
+   "type": "waiting"
+  },
+  {
+   "col": 2,
+   "id": "redelivered",
+   "label": "Redelivered",
+   "lane": "recovery",
+   "sublabel": "crash 1, 2 or 3",
+   "tag": "re-enter",
+   "type": "active"
+  },
+  {
+   "col": 3,
+   "id": "key_live",
+   "label": "Key live",
+   "lane": "dedup",
+   "sublabel": "skip effect, ACK",
+   "tag": "UNIQUE guard",
+   "type": "waiting"
+  },
+  {
+   "col": 4,
+   "id": "key_expired",
+   "label": "Key expired",
+   "lane": "dedup",
+   "sublabel": "past 30d horizon",
+   "tag": "gone",
+   "type": "waiting"
+  },
+  {
+   "col": 1,
+   "id": "discarded_poison",
+   "label": "Poison discarded",
+   "lane": "terminal",
+   "sublabel": "payload mismatch",
+   "tag": "terminal",
+   "type": "failure"
+  },
+  {
+   "col": 3,
+   "id": "effect_duplicated",
+   "label": "Effect duplicated",
+   "lane": "terminal",
+   "sublabel": "no dedup, or past horizon",
+   "tag": "terminal",
+   "type": "failure"
+  },
+  {
+   "col": 2,
+   "id": "applied_once",
+   "label": "Applied once",
+   "lane": "terminal",
+   "sublabel": "exactly-once inside horizon",
+   "tag": "terminal",
+   "type": "success"
+  }
+ ],
+ "transitions": [
+  {
+   "from": "delivered",
+   "to": "processing"
+  },
+  {
+   "from": "processing",
+   "label": "atomic key + effect",
+   "to": "committed"
+  },
+  {
+   "from": "processing",
+   "label": "payload mismatch",
+   "to": "discarded_poison",
+   "variant": "security"
+  },
+  {
+   "from": "processing",
+   "label": "crash 1",
+   "to": "redelivered",
+   "variant": "security"
+  },
+  {
+   "from": "committed",
+   "label": "effect applied once",
+   "to": "applied_once",
+   "variant": "emphasis"
+  },
+  {
+   "from": "committed",
+   "label": "ACK after commit",
+   "to": "acked"
+  },
+  {
+   "from": "committed",
+   "label": "crash 2",
+   "to": "redelivered",
+   "variant": "dashed"
+  },
+  {
+   "from": "acked",
+   "label": "crash 3",
+   "to": "redelivered",
+   "variant": "dashed"
+  },
+  {
+   "from": "redelivered",
+   "label": "key unknown: apply",
+   "to": "processing",
+   "variant": "dashed"
+  },
+  {
+   "from": "redelivered",
+   "label": "key known: skip",
+   "to": "key_live",
+   "variant": "dashed"
+  },
+  {
+   "from": "key_live",
+   "label": "safe ACK",
+   "to": "acked"
+  },
+  {
+   "from": "key_live",
+   "label": "past 30d horizon",
+   "to": "key_expired",
+   "variant": "dashed"
+  },
+  {
+   "from": "key_expired",
+   "label": "6-month replay re-applies",
+   "to": "effect_duplicated",
+   "variant": "security"
+  }
+ ]
+}

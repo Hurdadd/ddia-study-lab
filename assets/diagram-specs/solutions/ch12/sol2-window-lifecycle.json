@@ -1,0 +1,199 @@
+{
+ "cards": [
+  {
+   "dot": "cyan",
+   "items": [
+    "The window opens on event time and accumulates timestamped searches and clicks",
+    "Either side may arrive first; the per-session buffers hold both until they meet",
+    "A restart replays the input log by event time, so the rebuilt window is identical"
+   ],
+   "title": "Event-time accumulation"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "The watermark is a threshold per upstream partition, advanced by the minimum",
+    "An idle partition is parked after a timeout so it cannot hold every window hostage",
+    "Parking is explicit and metered, never a silent exclusion"
+   ],
+   "title": "Watermark discipline"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "Inside allowed lateness a laggard publishes a correction that retracts the old value",
+    "Beyond the horizon it is dropped and counted, with an alert when the fraction grows",
+    "The lateness budget comes from the measured lateness distribution, not a guess"
+   ],
+   "title": "Two late policies"
+  }
+ ],
+ "diagram_type": "lifecycle",
+ "lanes": [
+  {
+   "id": "main",
+   "label": "Join window"
+  },
+  {
+   "id": "waiting",
+   "label": "Watermark wait"
+  },
+  {
+   "id": "recovery",
+   "label": "Restart + replay"
+  },
+  {
+   "id": "terminal",
+   "label": "Terminal outcomes"
+  }
+ ],
+ "meta": {
+  "output": "ch12-stream-processing/diagrams/sol2-window-lifecycle.html",
+  "quality_profile": "showcase",
+  "title": "Search-click window: buffer both sides, close by watermark, correct or drop"
+ },
+ "schema_version": 2,
+ "states": [
+  {
+   "col": 0,
+   "id": "open",
+   "label": "Window Open",
+   "lane": "main",
+   "step": "01",
+   "sublabel": "[t0, t1) event time",
+   "tag": "fixed range",
+   "type": "start"
+  },
+  {
+   "col": 1,
+   "id": "buffering",
+   "label": "Buffering",
+   "lane": "main",
+   "step": "02",
+   "sublabel": "searches + clicks by session",
+   "tag": "two-sided",
+   "type": "active"
+  },
+  {
+   "col": 2,
+   "id": "watermarked",
+   "label": "Watermark Passed",
+   "lane": "main",
+   "step": "03",
+   "sublabel": "no more pre-t1 expected",
+   "tag": "threshold",
+   "type": "decision"
+  },
+  {
+   "col": 3,
+   "id": "emitted",
+   "label": "Result Emitted",
+   "lane": "main",
+   "step": "04",
+   "sublabel": "clicked or unclicked",
+   "tag": "first value",
+   "type": "success"
+  },
+  {
+   "col": 1,
+   "id": "idle",
+   "label": "Idle Parked",
+   "lane": "waiting",
+   "sublabel": "partition timed out idle",
+   "tag": "metered",
+   "type": "waiting"
+  },
+  {
+   "col": 3,
+   "id": "grace",
+   "label": "Lateness Open",
+   "lane": "waiting",
+   "sublabel": "allowed lateness budget",
+   "tag": "measured",
+   "type": "waiting"
+  },
+  {
+   "col": 1,
+   "id": "replay",
+   "label": "Replaying",
+   "lane": "recovery",
+   "sublabel": "input log by event time",
+   "tag": "deterministic",
+   "type": "active"
+  },
+  {
+   "col": 2,
+   "id": "dropped",
+   "label": "Laggard Dropped",
+   "lane": "terminal",
+   "sublabel": "counted + alerted",
+   "tag": "terminal",
+   "type": "failure"
+  },
+  {
+   "col": 4,
+   "id": "corrected",
+   "label": "Correction Published",
+   "lane": "terminal",
+   "sublabel": "retract + republish",
+   "tag": "terminal",
+   "type": "success"
+  }
+ ],
+ "transitions": [
+  {
+   "from": "open",
+   "to": "buffering"
+  },
+  {
+   "from": "buffering",
+   "label": "watermark passes end",
+   "to": "watermarked"
+  },
+  {
+   "from": "watermarked",
+   "label": "close window",
+   "to": "emitted"
+  },
+  {
+   "from": "buffering",
+   "label": "partition idle",
+   "to": "idle",
+   "variant": "dashed"
+  },
+  {
+   "from": "idle",
+   "label": "stream resumes",
+   "to": "buffering"
+  },
+  {
+   "from": "buffering",
+   "label": "job restarts",
+   "to": "replay",
+   "variant": "dashed"
+  },
+  {
+   "from": "replay",
+   "label": "replay by event time",
+   "to": "buffering",
+   "variant": "emphasis"
+  },
+  {
+   "from": "emitted",
+   "label": "open lateness",
+   "to": "grace"
+  },
+  {
+   "from": "grace",
+   "label": "laggard inside",
+   "to": "corrected",
+   "variant": "emphasis"
+  },
+  {
+   "from": "grace",
+   "label": "beyond horizon",
+   "to": "dropped",
+   "variant": "security"
+  }
+ ]
+}

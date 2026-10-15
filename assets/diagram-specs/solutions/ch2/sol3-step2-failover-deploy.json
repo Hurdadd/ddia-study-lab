@@ -1,0 +1,195 @@
+{
+ "activations": [
+  {
+   "from": 155,
+   "participant": "lb",
+   "to": 222,
+   "type": "cloud"
+  },
+  {
+   "from": 155,
+   "participant": "api",
+   "to": 222,
+   "type": "backend"
+  },
+  {
+   "from": 236,
+   "participant": "standby",
+   "to": 314,
+   "type": "database"
+  },
+  {
+   "from": 236,
+   "participant": "primary",
+   "to": 314,
+   "type": "database"
+  },
+  {
+   "from": 315,
+   "participant": "deploy",
+   "to": 410,
+   "type": "backend"
+  },
+  {
+   "from": 315,
+   "participant": "api",
+   "to": 410,
+   "type": "backend"
+  }
+ ],
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "Health checks fail, the balancer drains the dark AZ",
+    "Survivors absorb the peak \u2014 that is what N+1 was bought for",
+    "No human replumbs traffic in the critical path"
+   ],
+   "title": "Drain, then absorb"
+  },
+  {
+   "dot": "orange",
+   "items": [
+    "The standby promotes and the epoch bumps from 7 to 8",
+    "The old primary is fenced: epoch-7 writes are rejected",
+    "Split brain is impossible when only one epoch writes"
+   ],
+   "title": "Promote plus fence"
+  },
+  {
+   "dot": "cyan",
+   "items": [
+    "Expand: nullable column, both binaries run at once",
+    "Migrate: backfill and dual-read with comparison",
+    "Contract: drop the old column only when no old binary remains"
+   ],
+   "title": "Expand, migrate, contract"
+  }
+ ],
+ "diagram_type": "sequence",
+ "messages": [
+  {
+   "from": "lb",
+   "id": "az-dark",
+   "label": "AZ-b goes dark, drain it",
+   "note": "health checks fail, stop routing",
+   "to": "api",
+   "variant": "emphasis",
+   "y": 160
+  },
+  {
+   "from": "api",
+   "id": "absorb",
+   "label": "drained: survivors take the peak",
+   "note": "N+1 capacity pays off",
+   "to": "lb",
+   "variant": "return",
+   "y": 188
+  },
+  {
+   "from": "standby",
+   "id": "promote",
+   "label": "promote, fence old primary",
+   "note": "epoch 7 to 8",
+   "to": "primary",
+   "variant": "security",
+   "y": 240
+  },
+  {
+   "from": "primary",
+   "id": "stale-write",
+   "label": "write with stale epoch 7",
+   "note": "split-brain attempt",
+   "to": "standby",
+   "variant": "dashed",
+   "y": 272
+  },
+  {
+   "from": "standby",
+   "id": "reject",
+   "label": "rejected: fenced",
+   "note": "only epoch 8 writes",
+   "to": "primary",
+   "variant": "return",
+   "y": 304
+  },
+  {
+   "from": "deploy",
+   "id": "expand",
+   "label": "expand: add nullable column",
+   "note": "old and new binaries coexist",
+   "to": "api",
+   "variant": "default",
+   "y": 360
+  },
+  {
+   "from": "deploy",
+   "id": "migrate",
+   "label": "migrate: backfill, dual-read",
+   "note": "compare before switching",
+   "to": "api",
+   "variant": "default",
+   "y": 388
+  },
+  {
+   "from": "deploy",
+   "id": "contract",
+   "label": "contract: drop old column",
+   "note": "rollback means routing back first",
+   "to": "api",
+   "variant": "emphasis",
+   "y": 416
+  }
+ ],
+ "meta": {
+  "column_fit": "spread",
+  "output": ".archify/sequence-ch2-sol3-failover-deploy-20261014-184354/sol3-step2-failover-deploy.html",
+  "quality_profile": "showcase",
+  "title": "AZ Failover Plus Rolling Deploy: Fence the Past, Expand the Future"
+ },
+ "participants": [
+  {
+   "id": "lb",
+   "label": "Load Balancer",
+   "sublabel": "health checks",
+   "type": "cloud"
+  },
+  {
+   "id": "api",
+   "label": "API Fleet",
+   "sublabel": "surviving AZs",
+   "type": "backend"
+  },
+  {
+   "id": "standby",
+   "label": "New Primary",
+   "sublabel": "was sync standby",
+   "type": "database"
+  },
+  {
+   "id": "primary",
+   "label": "Old Primary",
+   "sublabel": "fenced, epoch 7",
+   "type": "database"
+  },
+  {
+   "id": "deploy",
+   "label": "Deployer",
+   "sublabel": "rolling release",
+   "type": "backend"
+  }
+ ],
+ "schema_version": 1,
+ "segments": [
+  {
+   "from": 150,
+   "label": "Lose an AZ, fence the past",
+   "to": 316
+  },
+  {
+   "from": 350,
+   "label": "Deploy without stopping",
+   "to": 428
+  }
+ ]
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check the capstone's local navigation, target indices and frozen diagram receipts."""
+"""Check the capstone's local navigation, target indices and frozen diagram export/specification hashes."""
 from pathlib import Path
 from html.parser import HTMLParser
 from urllib.parse import urlsplit,unquote
@@ -37,11 +37,10 @@ acceptance=json.loads((ROOT/'final-project/acceptance.json').read_text())
 assert len(acceptance)==16 and len({x['id'] for x in acceptance})==16
 assert all(x['status']=='planned' for x in acceptance),'Blueprint must not claim unexecuted tests passed'
 for d in json.loads((ROOT/'final-project/diagram-manifest.json').read_text()):
- r=json.loads((ROOT/d['receipt']).read_text())
- assert r['ok'] and all(x=='pass' for x in r['gates'].values()),d['slug']
+ assert all(x=='pass' for x in d['verified_gates'].values()),d['slug']
  actual=hashlib.sha256((ROOT/d['output']).read_bytes()).hexdigest()
- assert r['artifact']['sha256']==actual,f'Stale diagram receipt: {d["slug"]}'
- assert r['specification']['sha256']==hashlib.sha256((ROOT/d['candidate']).read_bytes()).hexdigest()
+ assert d['artifact_sha256']==actual,f'Stale diagram export: {d["slug"]}'
+ assert d['specification_sha256']==hashlib.sha256((ROOT/d['candidate']).read_bytes()).hexdigest()
 workshop=json.loads((ROOT/'final-project/workshop.json').read_text())
 assert len(workshop['adrs'])==15 and len(workshop['assumptions'])==12
 assert [d['id'] for d in workshop['adrs'] if d['status']=='accepted']==['ADR-001']
@@ -49,7 +48,7 @@ for d in workshop['adrs']:
  assert all(len(d[k])==2 and all(d[k]) for k in ['context','options','choice','reason','assumptions','validation','revisit'])
  assert (ROOT/'final-project/adrs'/(d['id']+'.md')).exists()
 print('PASS: 15 ADR records, 12 assumptions, and only audience scope accepted')
-print('PASS: local links/anchors, 11 diagrams, 14 chapter mappings, 16 planned tests, 9 current Archify receipts')
+print('PASS: local links/anchors, 11 diagrams, 14 chapter mappings, 16 planned tests, 9 frozen export/specification hash pairs')
 
 recovery=json.loads((ROOT/'final-project/recovery.json').read_text())
 assert [(c['rpo_seconds'],c['rto_seconds']) for c in recovery['cases']]==[(0,120),(300,1800),(900,14400),(0,14400)]

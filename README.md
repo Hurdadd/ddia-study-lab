@@ -4,7 +4,12 @@
 
 **A distributed-systems study lab. An AI platform design workshop.**
 
-Persian + English · 14 chapters · 15 ADRs · Interactive flows · AGPL-3.0-only
+<a href="#build-understanding-before-infrastructure"><img src="assets/badges/status.svg" alt="Status: design prototype"></a>
+<a href="LICENSE"><img src="assets/badges/license.svg" alt="License: AGPL-3.0-only"></a>
+<a href="https://own-the-stack.vercel.app/"><img src="assets/badges/languages.svg" alt="Documentation: Persian and English"></a>
+<a href="https://own-the-stack.vercel.app/"><img src="assets/badges/website.svg" alt="Website: public"></a>
+
+14 chapters · 15 ADRs · Architecture & UML · Interactive walkthroughs
 
 [**Explore the live site ↗**](https://own-the-stack.vercel.app/) &nbsp; · &nbsp;
 [**Enter the capstone**](https://own-the-stack.vercel.app/final-project/index.html#overview) &nbsp; · &nbsp;
@@ -100,14 +105,16 @@ Committed HTML works as-is. After editing the capstone sources:
 
 ```sh
 python3 assets/build_final_project.py
+python3 assets/check_publication.py
 python3 assets/check_final_project.py
 python3 assets/structcheck.py index.html final-project/index.html
 python3 assets/build_site.py
+python3 assets/check_publication.py --export
 ```
 
 The allowlisted `public/` export excludes credentials, local history, review
 captures, generator state and tool caches. Frozen diagram exports and nine
-candidate/receipt pairs are checked by SHA-256; Archify is optional for regeneration.
+export/specification hash pairs are checked by SHA-256; Archify is optional for regeneration.
 
 For browser checks, start the local server, then use Node.js and installed Chrome:
 
@@ -155,7 +162,7 @@ there is no CLA or mandatory copyright assignment. Repository access is by invit
 
 **Website: public. GitHub repository: private.** The production site opens without
 Vercel login. Preview/generated deployment URLs retain Standard Protection.
-See [deployment notes](docs/DEPLOYMENT.md) and [changelog](CHANGELOG.md).
+See [deployment notes](docs/HOSTING.md) and [changelog](CHANGELOG.md).
 
 Original work is © 2026 **hurdad ashouri**, licensed under
 [**GNU AGPL-3.0-only**](LICENSE). Preserve notices and comply with applicable

@@ -1,0 +1,170 @@
+{
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "The request is framed, checksummed and fsynced before anything else",
+    "Raw append is not durability: framing plus CRC plus force plus recovery is",
+    "A truncated tail is discarded; a corrupt record never applies"
+   ],
+   "title": "Durable first"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "The decision is taken once and stored before any output publishes",
+    "Restart re-reads the decision; it never re-decides on new balances",
+    "Reserved funds sit in a pending ledger: visible, never vanished"
+   ],
+   "title": "Decide once"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "Each shard's leader owns its leg; no 2PC spans shards",
+    "Partial publish recovers by replay; destinations dedup on the same ID",
+    "Final convergence is not atomic visibility: readers may see legs land separately"
+   ],
+   "title": "No atomic commit"
+  }
+ ],
+ "diagram_type": "workflow",
+ "edges": [
+  {
+   "id": "e1",
+   "from": "req",
+   "to": "frame",
+   "variant": "emphasis"
+  },
+  {
+   "id": "e2",
+   "from": "frame",
+   "to": "decide",
+   "label": "valid frame",
+   "variant": "emphasis"
+  },
+  {
+   "id": "e3",
+   "from": "decide",
+   "to": "reserve",
+   "label": "approved",
+   "variant": "emphasis"
+  },
+  {
+   "id": "e4",
+   "from": "reserve",
+   "to": "publishall",
+   "variant": "emphasis"
+  },
+  {
+   "id": "crash",
+   "from": "publishall",
+   "to": "restart",
+   "label": "crash mid-publish",
+   "role": "error",
+   "variant": "security",
+   "route": "bottom-channel"
+  },
+  {
+   "id": "reread",
+   "from": "restart",
+   "to": "decide",
+   "label": "re-read",
+   "role": "branch",
+   "variant": "dashed"
+  },
+  {
+   "id": "replay",
+   "from": "restart",
+   "to": "publishall",
+   "label": "replay missing",
+   "role": "branch",
+   "variant": "dashed"
+  }
+ ],
+ "lanes": [
+  {
+   "id": "intake",
+   "label": "Request intake"
+  },
+  {
+   "id": "decide",
+   "label": "Durable decision"
+  },
+  {
+   "id": "publish",
+   "label": "Publish + recover"
+  }
+ ],
+ "mainPath": [
+  "req",
+  "frame",
+  "decide",
+  "reserve",
+  "publishall"
+ ],
+ "meta": {
+  "output": "ch13-streaming-philosophy/diagrams/sol3-step1-durable-decision.html",
+  "quality_profile": "showcase",
+  "title": "Durable decision with crash recovery"
+ },
+ "nodes": [
+  {
+   "id": "req",
+   "lane": "intake",
+   "col": 0,
+   "type": "external",
+   "label": "Payment req",
+   "sublabel": "id pay-1",
+   "width": 132
+  },
+  {
+   "id": "frame",
+   "lane": "intake",
+   "col": 1,
+   "type": "backend",
+   "label": "Frame + fsync",
+   "sublabel": "len, CRC, force",
+   "width": 132
+  },
+  {
+   "id": "restart",
+   "lane": "publish",
+   "col": 1,
+   "type": "backend",
+   "label": "Restart",
+   "sublabel": "same files",
+   "width": 132
+  },
+  {
+   "id": "decide",
+   "lane": "decide",
+   "col": 2,
+   "type": "backend",
+   "label": "Decide once",
+   "sublabel": "store APPROVED",
+   "tag": "never re-decide",
+   "width": 132
+  },
+  {
+   "id": "reserve",
+   "lane": "decide",
+   "col": 3,
+   "type": "database",
+   "label": "Reserve funds",
+   "sublabel": "pending ledger",
+   "width": 132
+  },
+  {
+   "id": "publishall",
+   "lane": "publish",
+   "col": 3,
+   "type": "messagebus",
+   "label": "Publish legs",
+   "sublabel": "dst, fee, settle",
+   "tag": "same ID",
+   "width": 132
+  }
+ ],
+ "schema_version": 2
+}

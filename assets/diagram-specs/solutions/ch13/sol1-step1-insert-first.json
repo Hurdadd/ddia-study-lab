@@ -1,0 +1,166 @@
+{
+ "activations": [
+  {
+   "from": 180,
+   "participant": "api",
+   "to": 470,
+   "type": "backend"
+  },
+  {
+   "from": 205,
+   "participant": "db",
+   "to": 330,
+   "type": "database"
+  },
+  {
+   "from": 355,
+   "participant": "db",
+   "to": 420,
+   "type": "database"
+  }
+ ],
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "INSERT of request_id is the FIRST statement inside the transfer transaction",
+    "UNIQUE(request_id) turns a retry into a key conflict, not a second transfer",
+    "Debit, credit and the input-log row commit atomically with the request row"
+   ],
+   "title": "INSERT-first"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "The commit succeeded but the 200 OK never reached the client",
+    "The retry carries the SAME id with the SAME payload",
+    "The API returns the STORED result; balances do not move again"
+   ],
+   "title": "Lost reply + retry"
+  },
+  {
+   "dot": "orange",
+   "items": [
+    "Same id with a DIFFERENT payload is rejected, never applied",
+    "Same payload with a NEW id is an independent intentional transfer",
+    "Payload hash stored beside the id makes the comparison exact"
+   ],
+   "title": "Payload binding"
+  }
+ ],
+ "diagram_type": "sequence",
+ "messages": [
+  {
+   "from": "client",
+   "id": "post-transfer",
+   "label": "POST id=req-7, A->B 200",
+   "to": "api",
+   "variant": "emphasis",
+   "y": 160
+  },
+  {
+   "from": "api",
+   "id": "insert-request",
+   "label": "INSERT request req-7 (UNIQUE)",
+   "to": "db",
+   "variant": "emphasis",
+   "y": 190
+  },
+  {
+   "from": "api",
+   "id": "debit-credit-log",
+   "label": "debit A + credit B + log row",
+   "to": "db",
+   "variant": "emphasis",
+   "y": 220
+  },
+  {
+   "from": "db",
+   "id": "commit-ok",
+   "label": "commit ok",
+   "to": "api",
+   "variant": "return",
+   "y": 250
+  },
+  {
+   "from": "api",
+   "id": "reply-lost",
+   "label": "200 OK + result (LOST)",
+   "note": "at-least-once delivery: the client cannot tell commit from failure",
+   "to": "client",
+   "variant": "dashed",
+   "y": 285
+  },
+  {
+   "from": "client",
+   "id": "retry",
+   "label": "retry SAME id + SAME payload",
+   "to": "api",
+   "variant": "emphasis",
+   "y": 325
+  },
+  {
+   "from": "api",
+   "id": "insert-conflict",
+   "label": "INSERT req-7 -> conflict, read row",
+   "to": "db",
+   "variant": "default",
+   "y": 355
+  },
+  {
+   "from": "db",
+   "id": "stored-row",
+   "label": "FOUND: SUCCESS, stored result",
+   "to": "api",
+   "variant": "return",
+   "y": 385
+  },
+  {
+   "from": "api",
+   "id": "dedup-reply",
+   "label": "200 same result (dedup)",
+   "to": "client",
+   "variant": "return",
+   "y": 420
+  }
+ ],
+ "meta": {
+  "output": "ch13-streaming-philosophy/diagrams/sol1-step1-insert-first.html",
+  "quality_profile": "showcase",
+  "title": "INSERT-first transfer with lost-reply retry",
+  "column_fit": "spread"
+ },
+ "participants": [
+  {
+   "id": "client",
+   "label": "Client",
+   "sublabel": "same-id retries",
+   "type": "external"
+  },
+  {
+   "id": "api",
+   "label": "Transfer API",
+   "sublabel": "id+payload+result",
+   "type": "backend"
+  },
+  {
+   "id": "db",
+   "label": "Ledger DB",
+   "sublabel": "requests + log",
+   "type": "database"
+  }
+ ],
+ "schema_version": 1,
+ "segments": [
+  {
+   "from": 150,
+   "label": "Submit",
+   "to": 260
+  },
+  {
+   "from": 275,
+   "label": "Lost reply + retry",
+   "to": 440
+  }
+ ]
+}

@@ -17,12 +17,12 @@ numbered lesson navigation and native disclosures. Test Persian RTL, English LTR
 The POV is a local educational simulation; never imply it runs a backend.
 
 Frozen Archify HTML must be regenerated through its provenance workflow rather than
-hand-edited. The manifest selects nine candidate/receipt pairs checked by SHA-256.
+hand-edited. The manifest selects nine export/specification hash pairs checked by SHA-256.
 The optional Archify generator is not required to serve committed diagrams.
 
 ## CI template
 
 `.github/ci-templates/checks.yml` contains the reproducible GitHub Actions job.
-It is inactive because the current GitHub OAuth credential lacks the `workflow` scope.
+It is supplied as an inactive template. Enabling a GitHub Actions workflow requires the appropriate repository permissions.
 A maintainer with that permission can move it to `.github/workflows/checks.yml`.
 Local checks are executable now; no remote CI pass is claimed.

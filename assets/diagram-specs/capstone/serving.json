@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Route inference under explicit budgets and capacity",
+    "output": "final-project/diagrams/serving.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "client",
+      "type": "external",
+      "label": "AI Application",
+      "sublabel": "versioned request",
+      "pos": [
+        40,
+        240
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "gateway",
+      "type": "security",
+      "label": "Model Gateway",
+      "sublabel": "reserve quota first",
+      "pos": [
+        400,
+        240
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "budget",
+      "type": "database",
+      "label": "Budget Ledger",
+      "sublabel": "atomic reservation",
+      "pos": [
+        400,
+        50
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "provider",
+      "type": "external",
+      "label": "Provider API",
+      "sublabel": "timeout + usage",
+      "pos": [
+        820,
+        240
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "queue",
+      "type": "messagebus",
+      "label": "Local Queue",
+      "sublabel": "bounded token backlog",
+      "pos": [
+        400,
+        460
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "engine",
+      "type": "backend",
+      "label": "Model Server",
+      "sublabel": "vLLM / accelerator",
+      "pos": [
+        820,
+        460
+      ],
+      "size": [
+        160,
+        64
+      ]
+    },
+    {
+      "id": "gpu",
+      "type": "cloud",
+      "label": "GPU Resources",
+      "sublabel": "memory + utilization",
+      "pos": [
+        820,
+        660
+      ],
+      "size": [
+        160,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "client-to-gateway",
+      "to": "gateway",
+      "label": "request",
+      "variant": "default",
+      "from": "client"
+    },
+    {
+      "id": "gateway-to-budget",
+      "to": "budget",
+      "label": "reserve",
+      "variant": "security",
+      "from": "gateway"
+    },
+    {
+      "id": "gateway-to-provider",
+      "to": "provider",
+      "label": "remote route",
+      "variant": "default",
+      "from": "gateway"
+    },
+    {
+      "id": "gateway-to-queue",
+      "to": "queue",
+      "label": "local route",
+      "variant": "default",
+      "from": "gateway"
+    },
+    {
+      "id": "queue-to-engine",
+      "to": "engine",
+      "label": "dispatch",
+      "variant": "default",
+      "from": "queue"
+    },
+    {
+      "id": "engine-to-gpu",
+      "to": "gpu",
+      "label": "inference",
+      "variant": "default",
+      "from": "engine"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Capacity and billing",
+      "items": [
+        "Local serving is a later GPU-backed implementation phase.",
+        "Reserve before dispatch, settle usage after completion; ambiguous charges stay pending.",
+        "A failed request may still have incurred provider cost.",
+        "Stream failure after first output is surfaced; do not silently append a second model response.",
+        "Measure TTFT, inter-token latency, throughput, queue delay, and errors at declared load."
+      ]
+    }
+  ]
+}

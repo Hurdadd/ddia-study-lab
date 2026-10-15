@@ -1,0 +1,216 @@
+{
+ "cards": [
+  {
+   "dot": "cyan",
+   "items": [
+    "Only the joining node's ranges stream over the wire: ~9% of keys for 10 to 11, never a full rehash",
+    "Bulk copy first, then catch up on writes until lag is near zero, and only then flip ownership",
+    "In-flight requests during the flip are forwarded or safely retried — no stranded writes"
+   ],
+   "title": "Minimal remap on join"
+  },
+  {
+   "dot": "emerald",
+   "items": [
+    "A 2x node takes 2x virtual nodes (ring) or 2x logical shards (fixed count): shares follow capacity",
+    "Weights change only the new node's portion; every other key stays exactly where it was",
+    "Virtual nodes also smooth the ring: 100 per node keeps the worst load near 1.2x the mean"
+   ],
+   "title": "Weights without rehash"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "Data movement and routing updates are separate events: the map version flips after the data arrives",
+    "Clients cache the map with a short TTL; a stale cache reads from the old owner, which forwards",
+    "A leave mirrors a join: only the departed node's ranges are rehomed, replicas promote locally"
+   ],
+   "title": "Movement versus routing"
+  }
+ ],
+ "diagram_type": "dataflow",
+ "flows": [
+  {
+   "classification": "ownership",
+   "from": "map0",
+   "id": "map-move",
+   "label": "ranges owned by 11",
+   "to": "move0",
+   "variant": "emphasis",
+   "labelAt": [
+    207,
+    100
+   ]
+  },
+  {
+   "classification": "catch-up",
+   "from": "move0",
+   "id": "move-cut",
+   "label": "lag near zero",
+   "to": "cut",
+   "variant": "emphasis",
+   "labelAt": [
+    423,
+    100
+   ]
+  },
+  {
+   "classification": "cutover",
+   "from": "cut",
+   "id": "cut-serve",
+   "label": "map v41 to v42",
+   "to": "serve",
+   "variant": "emphasis",
+   "labelAt": [
+    638,
+    100
+   ]
+  },
+  {
+   "classification": "routing",
+   "from": "rmap",
+   "id": "rmap-stale",
+   "label": "map cached briefly",
+   "to": "stale",
+   "variant": "default",
+   "labelAt": [
+    207,
+    429
+   ]
+  },
+  {
+   "classification": "forward",
+   "from": "stale",
+   "id": "stale-rcut",
+   "label": "stale reads forwarded",
+   "to": "rcut",
+   "variant": "default",
+   "labelAt": [
+    423,
+    429
+   ]
+  },
+  {
+   "classification": "version",
+   "from": "rcut",
+   "id": "rcut-rserve",
+   "label": "leave rehomes only its ranges",
+   "to": "rserve",
+   "variant": "default",
+   "labelAt": [
+    638,
+    429
+   ]
+  },
+  {
+   "classification": "weight",
+   "from": "rcut",
+   "id": "rcut-cut",
+   "label": "same atomic flip",
+   "to": "cut",
+   "variant": "dashed",
+   "labelAt": [
+    530,
+    300
+   ]
+  }
+ ],
+ "meta": {
+  "output": "ch7-sharding/diagrams/sol2-step2-join-handoff.html",
+  "quality_profile": "showcase",
+  "title": "Node Join — Minimal Remap and Staged Handoff",
+  "viewBox": [
+   1080,
+   560
+  ]
+ },
+ "nodes": [
+  {
+   "id": "map0",
+   "label": "Stable map",
+   "row": 0,
+   "stage": 0,
+   "sublabel": "10 nodes, ring + vnodes",
+   "tag": "keys stay put",
+   "type": "backend"
+  },
+  {
+   "id": "move0",
+   "label": "New ranges move",
+   "row": 0,
+   "stage": 1,
+   "sublabel": "near 9% of keys",
+   "tag": "stream, then catch up",
+   "type": "database"
+  },
+  {
+   "id": "cut",
+   "label": "Flip ownership",
+   "row": 0,
+   "stage": 2,
+   "sublabel": "atomic map update",
+   "tag": "forward in flight",
+   "type": "backend"
+  },
+  {
+   "id": "serve",
+   "label": "Serve on 11",
+   "row": 0,
+   "stage": 3,
+   "sublabel": "no full rehash",
+   "tag": "balanced load",
+   "type": "backend"
+  },
+  {
+   "id": "rmap",
+   "label": "Routing cache",
+   "row": 2,
+   "stage": 0,
+   "sublabel": "versioned map",
+   "tag": "short TTL",
+   "type": "backend"
+  },
+  {
+   "id": "stale",
+   "label": "Stale window",
+   "row": 2,
+   "stage": 1,
+   "sublabel": "old owner answers",
+   "tag": "forwards, never strands",
+   "type": "security"
+  },
+  {
+   "id": "rcut",
+   "label": "Weighted shares",
+   "row": 2,
+   "stage": 2,
+   "sublabel": "2x node, 2x ranges",
+   "tag": "others untouched",
+   "type": "database"
+  },
+  {
+   "id": "rserve",
+   "label": "Node leaves",
+   "row": 2,
+   "stage": 3,
+   "sublabel": "its ranges rehomed",
+   "tag": "near 10% move",
+   "type": "backend"
+  }
+ ],
+ "schema_version": 1,
+ "stages": [
+  {
+   "label": "Map"
+  },
+  {
+   "label": "Move"
+  },
+  {
+   "label": "Cutover"
+  },
+  {
+   "label": "Serve"
+  }
+ ]
+}

@@ -1,0 +1,146 @@
+{
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "The checker replays the authoritative log with separate code",
+    "It recomputes to a stated checkpoint, never to whatever is newest",
+    "No shared functions with the derivation under audit"
+   ],
+   "title": "Independent replay"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "Live state is read at the same checkpoint before comparing",
+    "A behind-but-consistent view is lag, proved by catching up",
+    "A same-checkpoint difference is corruption, never lag"
+   ],
+   "title": "Same checkpoint"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "Detection only pages; repair stays gated behind a human",
+    "An incomplete input log bounds what the checker can prove",
+    "A bug shared by both code paths stays invisible: say so"
+   ],
+   "title": "Honest limits"
+  }
+ ],
+ "diagram_type": "workflow",
+ "edges": [
+  {
+   "from": "inputlog",
+   "id": "e1",
+   "label": "replay",
+   "to": "checker",
+   "variant": "emphasis"
+  },
+  {
+   "from": "checker",
+   "id": "e2",
+   "label": "expected",
+   "to": "compare",
+   "variant": "default"
+  },
+  {
+   "from": "livedb",
+   "id": "e3",
+   "label": "actual",
+   "to": "compare",
+   "variant": "default"
+  },
+  {
+   "from": "compare",
+   "id": "e4",
+   "label": "diff?",
+   "to": "verdict",
+   "variant": "emphasis"
+  },
+  {
+   "from": "verdict",
+   "id": "rerun",
+   "label": "re-run",
+   "role": "branch",
+   "to": "checker",
+   "variant": "dashed"
+  }
+ ],
+ "lanes": [
+  {
+   "id": "replay",
+   "label": "Replay to checkpoint"
+  },
+  {
+   "id": "compare",
+   "label": "Same-checkpoint compare"
+  },
+  {
+   "id": "verdict",
+   "label": "Lag vs corruption"
+  }
+ ],
+ "mainPath": [
+  "inputlog",
+  "checker",
+  "compare",
+  "verdict"
+ ],
+ "meta": {
+  "output": "ch13-streaming-philosophy/diagrams/sol4-step1-checker-runbook.html",
+  "quality_profile": "showcase",
+  "title": "Audit checker runbook"
+ },
+ "nodes": [
+  {
+   "col": 0,
+   "id": "inputlog",
+   "label": "Input log",
+   "lane": "replay",
+   "sublabel": "through checkpoint",
+   "tag": "authoritative",
+   "type": "database",
+   "width": 132
+  },
+  {
+   "col": 1,
+   "id": "checker",
+   "label": "Recompute",
+   "lane": "replay",
+   "sublabel": "separate code",
+   "tag": "independent",
+   "type": "backend",
+   "width": 132
+  },
+  {
+   "col": 1,
+   "id": "livedb",
+   "label": "Live state",
+   "lane": "compare",
+   "sublabel": "same checkpoint",
+   "type": "database",
+   "width": 132
+  },
+  {
+   "col": 2,
+   "id": "compare",
+   "label": "Compare",
+   "lane": "compare",
+   "sublabel": "field by field",
+   "type": "backend",
+   "width": 132
+  },
+  {
+   "col": 3,
+   "id": "verdict",
+   "label": "Verdict",
+   "lane": "verdict",
+   "sublabel": "lag vs mismatch",
+   "tag": "repair gated",
+   "type": "backend",
+   "width": 132
+  }
+ ],
+ "schema_version": 2
+}

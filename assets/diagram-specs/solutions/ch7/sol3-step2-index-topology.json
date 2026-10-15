@@ -1,0 +1,265 @@
+{
+ "boundaries": [
+  {
+   "kind": "region",
+   "label": "sharded store: 4 base shards, 2 index shards",
+   "wraps": [
+    "base0",
+    "base1",
+    "base2",
+    "base3",
+    "idxa",
+    "idxb"
+   ]
+  }
+ ],
+ "cards": [
+  {
+   "dot": "cyan",
+   "items": [
+    "Four base shards own records by id; two index shards own postings by hashed term",
+    "The router holds both maps: id to base shard, term to index shard",
+    "The outbox relay carries versioned index writes asynchronously; crashes replay it"
+   ],
+   "title": "Topology"
+  },
+  {
+   "dot": "emerald",
+   "items": [
+    "Local write: one base shard, index entry in the same commit",
+    "Global write: base commit plus one outbox event per term, applied to each owning index shard",
+    "One record, two terms: up to 3 shards written — count base and index shards separately"
+   ],
+   "title": "Write path"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "Single-term reads stay cheap globally (1 index shard); local reads always scatter to 4",
+    "Two-term AND intersects postings over the network, then fetches records by id",
+    "Every id is revalidated against its base shard: a recorded delete always beats a stale posting"
+   ],
+   "title": "Read path and tripwires"
+  }
+ ],
+ "components": [
+  {
+   "id": "client",
+   "label": "Reader / Writer",
+   "pos": [
+    40,
+    300
+   ],
+   "size": [
+    130,
+    70
+   ],
+   "sublabel": "knows record id",
+   "type": "external"
+  },
+  {
+   "id": "router",
+   "label": "Request router",
+   "pos": [
+    260,
+    300
+   ],
+   "size": [
+    150,
+    70
+   ],
+   "sublabel": "base + term maps",
+   "tag": "shard-aware",
+   "type": "cloud"
+  },
+  {
+   "id": "base0",
+   "label": "Base shard 0",
+   "pos": [
+    440,
+    120
+   ],
+   "size": [
+    150,
+    70
+   ],
+   "sublabel": "records by id",
+   "type": "database"
+  },
+  {
+   "id": "base1",
+   "label": "Base shard 1",
+   "pos": [
+    620,
+    120
+   ],
+   "size": [
+    150,
+    70
+   ],
+   "sublabel": "records by id",
+   "type": "database"
+  },
+  {
+   "id": "base2",
+   "label": "Base shard 2",
+   "pos": [
+    800,
+    120
+   ],
+   "size": [
+    150,
+    70
+   ],
+   "sublabel": "records by id",
+   "type": "database"
+  },
+  {
+   "id": "base3",
+   "label": "Base shard 3",
+   "pos": [
+    980,
+    120
+   ],
+   "size": [
+    150,
+    70
+   ],
+   "sublabel": "records by id",
+   "type": "database"
+  },
+  {
+   "id": "outbox",
+   "label": "Outbox relay",
+   "pos": [
+    230,
+    480
+   ],
+   "size": [
+    150,
+    70
+   ],
+   "sublabel": "versioned events",
+   "tag": "async",
+   "type": "messagebus"
+  },
+  {
+   "id": "idxa",
+   "label": "Index shard A",
+   "pos": [
+    560,
+    480
+   ],
+   "size": [
+    170,
+    70
+   ],
+   "sublabel": "terms, hash split",
+   "type": "database"
+  },
+  {
+   "id": "idxb",
+   "label": "Index shard B",
+   "pos": [
+    770,
+    480
+   ],
+   "size": [
+    170,
+    70
+   ],
+   "sublabel": "terms, hash split",
+   "type": "database"
+  },
+  {
+   "id": "monitor",
+   "label": "Tripwire monitor",
+   "pos": [
+    980,
+    480
+   ],
+   "size": [
+    150,
+    70
+   ],
+   "sublabel": "fan-out + lag",
+   "tag": "alerts",
+   "type": "security"
+  }
+ ],
+ "connections": [
+  {
+   "from": "client",
+   "id": "client-router",
+   "label": "keyed request",
+   "to": "router",
+   "variant": "emphasis"
+  },
+  {
+   "from": "router",
+   "fromSide": "top",
+   "id": "router-base",
+   "label": "to owning shard",
+   "to": "base1",
+   "toSide": "bottom",
+   "variant": "emphasis"
+  },
+  {
+   "from": "router",
+   "fromSide": "bottom",
+   "id": "router-idxa",
+   "label": "term lookup",
+   "to": "idxa",
+   "toSide": "top",
+   "variant": "default"
+  },
+  {
+   "from": "router",
+   "fromSide": "bottom",
+   "id": "router-idxb",
+   "label": "second term",
+   "to": "idxb",
+   "toSide": "top",
+   "variant": "dashed"
+  },
+  {
+   "from": "base1",
+   "fromSide": "bottom",
+   "id": "base-outbox",
+   "label": "CDC events",
+   "to": "outbox",
+   "toSide": "top",
+   "variant": "dashed"
+  },
+  {
+   "from": "outbox",
+   "id": "outbox-idxa",
+   "label": "index writes",
+   "to": "idxa",
+   "variant": "dashed"
+  },
+  {
+   "from": "outbox",
+   "id": "outbox-idxb",
+   "label": "index writes",
+   "to": "idxb",
+   "variant": "dashed"
+  },
+  {
+   "from": "router",
+   "fromSide": "right",
+   "id": "router-monitor",
+   "label": "fan-out + lag metrics",
+   "to": "monitor",
+   "toSide": "left",
+   "variant": "dashed"
+  }
+ ],
+ "diagram_type": "architecture",
+ "meta": {
+  "output": "ch7-sharding/diagrams/sol3-step2-index-topology.html",
+  "quality_profile": "showcase",
+  "title": "Secondary Index Topology — Four Base Shards, Two Index Shards"
+ },
+ "schema_version": 1
+}

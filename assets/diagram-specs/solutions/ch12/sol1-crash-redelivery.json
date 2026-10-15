@@ -1,0 +1,237 @@
+{
+ "activations": [
+  {
+   "participant": "a",
+   "from": 163,
+   "to": 325,
+   "type": "backend"
+  },
+  {
+   "participant": "a",
+   "from": 370,
+   "to": 420,
+   "type": "backend"
+  },
+  {
+   "participant": "b",
+   "from": 430,
+   "to": 540,
+   "type": "backend"
+  },
+  {
+   "participant": "db",
+   "from": 190,
+   "to": 540,
+   "type": "database"
+  }
+ ],
+ "cards": [
+  {
+   "dot": "rose",
+   "items": [
+    "Crash between apply and commit leaves no trace; ordered replay re-applies and converges",
+    "A lost ack only redelivers already-checkpointed offsets, which the guard skips",
+    "Both cases are harmless for the same reason: the checkpoint moves only with the effect"
+   ],
+   "title": "Redelivery is harmless"
+  },
+  {
+   "dot": "emerald",
+   "items": [
+    "Ownership moves as revoke, abort, then assign with a bumped epoch",
+    "The new owner resumes strictly from the committed checkpoint, never from a guess",
+    "Exactly-once here means effectively-once inside these three boundaries"
+   ],
+   "title": "Ordered resume"
+  },
+  {
+   "dot": "orange",
+   "items": [
+    "A presumed-dead owner may still be alive and writing; epoch mismatch rejects it",
+    "Without fencing, two writers interleave totals and checkpoints and silently corrupt",
+    "Fencing is a write-path condition, not an optimization"
+   ],
+   "title": "Fence the stale"
+  }
+ ],
+ "diagram_type": "sequence",
+ "messages": [
+  {
+   "from": "broker",
+   "id": "m-deliver",
+   "label": "deliver o101-o104",
+   "to": "a",
+   "variant": "emphasis",
+   "y": 168
+  },
+  {
+   "from": "a",
+   "id": "m-apply",
+   "label": "apply: totals += 4",
+   "to": "db",
+   "variant": "default",
+   "y": 198
+  },
+  {
+   "from": "a",
+   "id": "m-crash",
+   "label": "CRASH before commit",
+   "note": "uncommitted effect discarded",
+   "to": "broker",
+   "variant": "dashed",
+   "y": 228
+  },
+  {
+   "from": "broker",
+   "id": "m-redeliver",
+   "label": "redeliver o101-o104 in order",
+   "note": "same partition replays the same order",
+   "to": "a",
+   "variant": "emphasis",
+   "y": 258
+  },
+  {
+   "from": "a",
+   "id": "m-commit1",
+   "label": "txn: totals + ckpt o104",
+   "note": "effect and checkpoint commit together",
+   "to": "db",
+   "variant": "emphasis",
+   "y": 288
+  },
+  {
+   "from": "db",
+   "id": "m-ok1",
+   "label": "committed",
+   "to": "a",
+   "variant": "return",
+   "y": 318
+  },
+  {
+   "from": "db",
+   "id": "m-ok-lost",
+   "label": "committed (ack lost on the wire)",
+   "to": "a",
+   "variant": "return",
+   "y": 348
+  },
+  {
+   "from": "broker",
+   "id": "m-redeliver2",
+   "label": "redeliver o103-o104",
+   "to": "a",
+   "variant": "emphasis",
+   "y": 378
+  },
+  {
+   "from": "a",
+   "id": "m-skip",
+   "label": "skip: offsets <= ckpt o104",
+   "note": "idempotent guard, no double count",
+   "to": "db",
+   "variant": "dashed",
+   "y": 408
+  },
+  {
+   "from": "broker",
+   "id": "m-revoke",
+   "label": "revoke P1, assign to B at epoch 2",
+   "to": "b",
+   "variant": "security",
+   "y": 438
+  },
+  {
+   "from": "b",
+   "id": "m-readckpt",
+   "label": "read ckpt: resume at o105",
+   "to": "db",
+   "variant": "default",
+   "y": 468
+  },
+  {
+   "from": "a",
+   "id": "m-stale",
+   "label": "late write at epoch 1",
+   "note": "caller epoch != owner epoch",
+   "to": "db",
+   "variant": "security",
+   "y": 498
+  },
+  {
+   "from": "db",
+   "id": "m-fenced",
+   "label": "REJECT: fenced",
+   "to": "a",
+   "variant": "return",
+   "y": 528
+  },
+  {
+   "from": "b",
+   "id": "m-commit2",
+   "label": "txn: totals + ckpt o105",
+   "to": "db",
+   "variant": "emphasis",
+   "y": 558
+  }
+ ],
+ "meta": {
+  "column_fit": "spread",
+  "output": "ch12-stream-processing/diagrams/sol1-crash-redelivery.html",
+  "quality_profile": "showcase",
+  "title": "Crash, lost ack, rebalance: redelivery meets the checkpoint guard",
+  "viewBox": [
+   1080,
+   690
+  ]
+ },
+ "participants": [
+  {
+   "id": "producer",
+   "label": "Producers",
+   "sublabel": "keyed clicks",
+   "type": "external"
+  },
+  {
+   "id": "broker",
+   "label": "Broker",
+   "sublabel": "topic clicks, P1",
+   "type": "messagebus"
+  },
+  {
+   "id": "a",
+   "label": "Consumer A",
+   "sublabel": "owner, epoch 1",
+   "type": "backend"
+  },
+  {
+   "id": "b",
+   "label": "Consumer B",
+   "sublabel": "new owner, epoch 2",
+   "type": "backend"
+  },
+  {
+   "id": "db",
+   "label": "Record DB",
+   "sublabel": "totals + checkpoints",
+   "type": "database"
+  }
+ ],
+ "schema_version": 1,
+ "segments": [
+  {
+   "from": 150,
+   "to": 330,
+   "label": "Crash before commit"
+  },
+  {
+   "from": 340,
+   "to": 425,
+   "label": "Lost ack"
+  },
+  {
+   "from": 435,
+   "to": 545,
+   "label": "Rebalance + fence"
+  }
+ ]
+}

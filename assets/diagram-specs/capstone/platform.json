@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "One platform. Five capabilities.",
+    "output": "final-project/diagrams/platform.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "operator",
+      "type": "external",
+      "label": "Operator",
+      "sublabel": "incident / API",
+      "pos": [
+        40,
+        250
+      ],
+      "size": [
+        120,
+        64
+      ]
+    },
+    {
+      "id": "control",
+      "type": "backend",
+      "label": "Control API",
+      "sublabel": "tenant + app + policy",
+      "pos": [
+        280,
+        250
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "runtime",
+      "type": "backend",
+      "label": "Agent Runtime",
+      "sublabel": "durable steps + epoch",
+      "pos": [
+        580,
+        250
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "tools",
+      "type": "security",
+      "label": "Tool Gateway",
+      "sublabel": "authorize every call",
+      "pos": [
+        900,
+        250
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Record Store",
+      "sublabel": "runs + steps + outbox",
+      "pos": [
+        280,
+        440
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "release",
+      "type": "security",
+      "label": "Eval / Release",
+      "sublabel": "tested version only",
+      "pos": [
+        280,
+        60
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "model",
+      "type": "backend",
+      "label": "Model Gateway",
+      "sublabel": "budget + route + trace",
+      "pos": [
+        580,
+        60
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "context",
+      "type": "database",
+      "label": "Live Context",
+      "sublabel": "versioned retrieval",
+      "pos": [
+        900,
+        440
+      ],
+      "size": [
+        150,
+        64
+      ]
+    },
+    {
+      "id": "telemetry",
+      "type": "external",
+      "label": "Telemetry Tools",
+      "sublabel": "logs / metrics / traces",
+      "pos": [
+        900,
+        60
+      ],
+      "size": [
+        150,
+        64
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "operator-to-control",
+      "to": "control",
+      "label": "HTTPS",
+      "variant": "default",
+      "from": "operator"
+    },
+    {
+      "id": "control-to-runtime",
+      "to": "runtime",
+      "label": "start run",
+      "variant": "default",
+      "from": "control"
+    },
+    {
+      "id": "runtime-to-tools",
+      "to": "tools",
+      "label": "scoped call",
+      "variant": "default",
+      "from": "runtime"
+    },
+    {
+      "id": "control-to-db",
+      "to": "db",
+      "label": "commit",
+      "variant": "default",
+      "from": "control"
+    },
+    {
+      "id": "release-to-control",
+      "to": "control",
+      "label": "promote",
+      "variant": "default",
+      "from": "release"
+    },
+    {
+      "id": "runtime-to-model",
+      "to": "model",
+      "label": "infer",
+      "variant": "default",
+      "from": "runtime"
+    },
+    {
+      "id": "tools-to-context",
+      "to": "context",
+      "label": "retrieve",
+      "variant": "security",
+      "from": "tools"
+    },
+    {
+      "id": "tools-to-telemetry",
+      "to": "telemetry",
+      "label": "query",
+      "variant": "security",
+      "from": "tools"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Design boundaries",
+      "items": [
+        "Control API and workers use one source of truth for durable state.",
+        "Model Gateway hides provider credentials and enforces server-side budgets.",
+        "The investigator is the first application; platform APIs also serve other agents.",
+        "This is a target design, not an implemented production deployment."
+      ]
+    }
+  ]
+}

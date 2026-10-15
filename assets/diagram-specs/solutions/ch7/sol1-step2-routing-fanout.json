@@ -1,0 +1,210 @@
+{
+ "cards": [
+  {
+   "dot": "cyan",
+   "items": [
+    "The write path appends each reading to its sensor's owning shard: owner = sensor id modulo 8",
+    "A one-sensor month is a single range scan on one shard: fan-out 1, no merge step",
+    "The price sits on the hot sensor: 40% of all writes land on one shard, visible in the day-15 column"
+   ],
+   "title": "The chosen path: sensor:timestamp"
+  },
+  {
+   "dot": "emerald",
+   "items": [
+    "Hashing the full key spreads every write evenly: monthly max share near 13%, day-15 near 13%",
+    "Ordering is lost, so one sensor's month becomes 8 point-lookup batches across all shards",
+    "Choose it when writes dominate and per-sensor scans are rare; otherwise the merge cost eats the win"
+   ],
+   "title": "The scattered alternative: hash(full key)"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "Monthly totals hide instantaneous skew: timestamp-range looks even yet takes 100% of today on one shard",
+    "Retention drops whole old months; repartition splits the hot range instead of rehashing the world",
+    "Alert when one shard's instantaneous share passes 3x the mean"
+   ],
+   "title": "Measure both clocks"
+  }
+ ],
+ "diagram_type": "dataflow",
+ "flows": [
+  {
+   "classification": "write path",
+   "from": "w",
+   "id": "w-map",
+   "label": "append with sensor key",
+   "to": "map",
+   "variant": "emphasis",
+   "labelAt": [
+    208,
+    100
+   ]
+  },
+  {
+   "classification": "ownership",
+   "from": "map",
+   "id": "map-shard",
+   "label": "owner = sensor % 8",
+   "to": "shard",
+   "variant": "emphasis",
+   "labelAt": [
+    422,
+    100
+   ]
+  },
+  {
+   "classification": "range scan",
+   "from": "shard",
+   "id": "shard-q",
+   "label": "one range scan, fan-out 1",
+   "to": "q",
+   "variant": "emphasis",
+   "labelAt": [
+    638,
+    100
+   ]
+  },
+  {
+   "classification": "write path",
+   "from": "wh",
+   "id": "wh-maph",
+   "label": "same readings in",
+   "to": "maph",
+   "variant": "default",
+   "labelAt": [
+    208,
+    429
+   ]
+  },
+  {
+   "classification": "scatter",
+   "from": "maph",
+   "id": "maph-shardh",
+   "label": "order lost in hashing",
+   "to": "shardh",
+   "variant": "default",
+   "labelAt": [
+    422,
+    429
+   ]
+  },
+  {
+   "classification": "gather",
+   "from": "shardh",
+   "id": "shardh-qh",
+   "label": "ask all 8, then merge",
+   "to": "qh",
+   "variant": "default",
+   "labelAt": [
+    638,
+    429
+   ]
+  }
+ ],
+ "meta": {
+  "output": "ch7-sharding/diagrams/sol1-step2-routing-fanout.html",
+  "quality_profile": "showcase",
+  "title": "Time-Series Query Routing — One Sensor, One Month",
+  "viewBox": [
+   1080,
+   560
+  ]
+ },
+ "nodes": [
+  {
+   "id": "w",
+   "label": "Append a reading",
+   "row": 0,
+   "stage": 0,
+   "sublabel": "sensor + timestamp",
+   "tag": "every second",
+   "type": "backend"
+  },
+  {
+   "id": "map",
+   "label": "Key sensor:timestamp",
+   "row": 0,
+   "stage": 1,
+   "sublabel": "range per sensor",
+   "tag": "owner = sensor % 8",
+   "type": "backend",
+   "width": 150
+  },
+  {
+   "id": "shard",
+   "label": "Owner shard",
+   "row": 0,
+   "stage": 2,
+   "sublabel": "one shard per sensor",
+   "tag": "hot sensor = hot shard",
+   "type": "database"
+  },
+  {
+   "id": "q",
+   "label": "One-sensor month scan",
+   "row": 0,
+   "stage": 3,
+   "sublabel": "single range scan",
+   "tag": "fan-out 1",
+   "type": "backend",
+   "width": 160
+  },
+  {
+   "id": "wh",
+   "label": "Append a reading",
+   "row": 2,
+   "stage": 0,
+   "sublabel": "same write load",
+   "tag": "hot sensor still hot",
+   "type": "backend",
+   "width": 150
+  },
+  {
+   "id": "maph",
+   "label": "Hash the full key",
+   "row": 2,
+   "stage": 1,
+   "sublabel": "sensor:time:seq",
+   "tag": "order lost",
+   "type": "backend",
+   "width": 150
+  },
+  {
+   "id": "shardh",
+   "label": "Scattered shards",
+   "row": 2,
+   "stage": 2,
+   "sublabel": "even spread",
+   "tag": "max share near 13%",
+   "type": "database",
+   "width": 150
+  },
+  {
+   "id": "qh",
+   "label": "One-sensor month gather",
+   "row": 2,
+   "stage": 3,
+   "sublabel": "point lookups x8",
+   "tag": "fan-out 8",
+   "type": "backend",
+   "width": 170
+  }
+ ],
+ "schema_version": 1,
+ "stages": [
+  {
+   "label": "Write"
+  },
+  {
+   "label": "Map"
+  },
+  {
+   "label": "Shard"
+  },
+  {
+   "label": "Query"
+  }
+ ]
+}

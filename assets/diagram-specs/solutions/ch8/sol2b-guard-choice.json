@@ -1,0 +1,261 @@
+{
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "Check and INSERT share one transaction behind one guard",
+    "The guard is a lock on an existing row or a constraint on the write",
+    "Refusal (409) is an answer, not a failure"
+   ],
+   "title": "Guard at the boundary"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "UNIQUE fits discrete fixed slots; intervals need overlap, not equality",
+    "SERIALIZABLE works but every abort retries the WHOLE transaction",
+    "A hot room serializes: budget backoff, jitter and a retry cap"
+   ],
+   "title": "Know the costs"
+  }
+ ],
+ "diagram_type": "workflow",
+ "edges": [
+  {
+   "from": "req",
+   "id": "e-req",
+   "to": "begin",
+   "variant": "default"
+  },
+  {
+   "from": "begin",
+   "id": "e-rail-a",
+   "label": "hot room",
+   "to": "railA",
+   "variant": "security"
+  },
+  {
+   "from": "begin",
+   "id": "e-rail-b",
+   "label": "prefer",
+   "to": "railB",
+   "variant": "emphasis"
+  },
+  {
+   "from": "railA",
+   "id": "e-a-check",
+   "to": "check",
+   "variant": "default"
+  },
+  {
+   "from": "railB",
+   "id": "e-b-check",
+   "to": "check",
+   "variant": "default"
+  },
+  {
+   "from": "check",
+   "id": "e-decide",
+   "to": "decide",
+   "variant": "default"
+  },
+  {
+   "from": "decide",
+   "id": "e-free",
+   "label": "no overlap",
+   "to": "insert",
+   "variant": "emphasis"
+  },
+  {
+   "from": "decide",
+   "id": "e-clash",
+   "label": "overlaps",
+   "role": "error",
+   "to": "refuse",
+   "variant": "security"
+  },
+  {
+   "from": "insert",
+   "id": "e-done",
+   "to": "done",
+   "variant": "emphasis"
+  },
+  {
+   "from": "insert",
+   "id": "e-abort",
+   "label": "40001 at COMMIT",
+   "role": "branch",
+   "to": "retry",
+   "variant": "dashed"
+  },
+  {
+   "from": "retry",
+   "id": "e-retry",
+   "role": "return",
+   "to": "begin",
+   "variant": "dashed"
+  }
+ ],
+ "groups": [
+  {
+   "fromCol": 1,
+   "id": "guard",
+   "label": "Write boundary",
+   "lane": "guard",
+   "toCol": 5,
+   "variant": "emphasis"
+  },
+  {
+   "fromCol": 4,
+   "id": "refusals",
+   "label": "Refuse, do not double-book",
+   "lane": "client",
+   "toCol": 5,
+   "variant": "security"
+  }
+ ],
+ "lanes": [
+  {
+   "id": "client",
+   "label": "Guest + app"
+  },
+  {
+   "id": "guard",
+   "label": "Write boundary"
+  },
+  {
+   "id": "load",
+   "label": "Contention + retry"
+  }
+ ],
+ "mainPath": [
+  "req",
+  "begin",
+  "railA",
+  "check",
+  "decide",
+  "insert",
+  "done"
+ ],
+ "meta": {
+  "output": "ch8-transactions/diagrams/sol2b-guard-choice.html",
+  "quality_profile": "showcase",
+  "title": "Ch8 Sol2b: guard choice at the write boundary"
+ },
+ "nodes": [
+  {
+   "col": 0,
+   "id": "req",
+   "label": "Booking request",
+   "lane": "client",
+   "sublabel": "room R, [start, end)",
+   "type": "external",
+   "width": 160
+  },
+  {
+   "col": 1,
+   "id": "begin",
+   "label": "BEGIN",
+   "lane": "guard",
+   "sublabel": "one txn per attempt",
+   "type": "database",
+   "width": 160
+  },
+  {
+   "col": 2,
+   "id": "railA",
+   "label": "Rail A: room lock",
+   "lane": "guard",
+   "sublabel": "FOR UPDATE on rooms",
+   "type": "security",
+   "width": 160
+  },
+  {
+   "col": 2,
+   "id": "railB",
+   "label": "Rail B: exclusion",
+   "lane": "load",
+   "sublabel": "EXCLUDE (room =, during &&)",
+   "type": "database",
+   "width": 160
+  },
+  {
+   "col": 3,
+   "id": "check",
+   "label": "Overlap check",
+   "lane": "guard",
+   "sublabel": "new range vs committed",
+   "type": "backend",
+   "width": 160
+  },
+  {
+   "col": 4,
+   "id": "decide",
+   "label": "Overlap?",
+   "lane": "guard",
+   "sublabel": "predicate, not equality",
+   "tag": "invariant gate",
+   "type": "backend",
+   "width": 160
+  },
+  {
+   "col": 4,
+   "id": "refuse",
+   "label": "409 conflict",
+   "lane": "client",
+   "sublabel": "choose another slot",
+   "type": "security",
+   "width": 160
+  },
+  {
+   "col": 5,
+   "id": "insert",
+   "label": "INSERT + COMMIT",
+   "lane": "guard",
+   "sublabel": "200 booked",
+   "type": "database",
+   "width": 160
+  },
+  {
+   "col": 5,
+   "id": "done",
+   "label": "Confirmed",
+   "lane": "client",
+   "sublabel": "booking id issued",
+   "type": "frontend",
+   "width": 160
+  },
+  {
+   "col": 5,
+   "id": "retry",
+   "label": "Retry whole txn",
+   "lane": "load",
+   "sublabel": "bounded + backoff",
+   "type": "messagebus",
+   "width": 160
+  }
+ ],
+ "phases": [
+  {
+   "fromCol": 0,
+   "id": "decide",
+   "label": "Decide",
+   "toCol": 1
+  },
+  {
+   "fromCol": 2,
+   "id": "enforce",
+   "label": "Enforce",
+   "toCol": 4,
+   "variant": "emphasis"
+  },
+  {
+   "fromCol": 5,
+   "id": "settle",
+   "label": "Settle",
+   "toCol": 5,
+   "variant": "dashed"
+  }
+ ],
+ "schema_version": 2
+}

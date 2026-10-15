@@ -1,0 +1,230 @@
+{
+ "activations": [
+  {
+   "participant": "broker",
+   "from": 160,
+   "to": 580,
+   "type": "messagebus"
+  },
+  {
+   "participant": "cons",
+   "from": 160,
+   "to": 580,
+   "type": "backend"
+  },
+  {
+   "participant": "store",
+   "from": 190,
+   "to": 580,
+   "type": "database"
+  }
+ ],
+ "cards": [
+  {
+   "dot": "rose",
+   "items": [
+    "Crash 1: before COMMIT commits nothing; redelivery applies once",
+    "Crash 2: after COMMIT, before ACK; redelivery hits the key",
+    "Crash 3: after ACK, before cleanup; the key must STILL be there"
+   ],
+   "title": "Three crash points"
+  },
+  {
+   "dot": "emerald",
+   "items": [
+    "Key insert + local effect commit atomically, ACK follows",
+    "Redelivery with a known key skips the effect and ACKs",
+    "Same key + different payload is rejected, never applied"
+   ],
+   "title": "Commit-then-ACK"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "ACK is not a delete permit: cleanup needs the horizon",
+    "Past the horizon a replay looks brand new and re-applies",
+    "External sends are at-least-once: idempotent receivers required"
+   ],
+   "title": "Horizon bounds the promise"
+  }
+ ],
+ "diagram_type": "sequence",
+ "messages": [
+  {
+   "from": "broker",
+   "id": "d-m1",
+   "label": "deliver m1 (+100)",
+   "to": "cons",
+   "variant": "default",
+   "y": 160
+  },
+  {
+   "from": "cons",
+   "id": "m1-crash",
+   "label": "CRASH before COMMIT: nothing durable",
+   "to": "store",
+   "variant": "security",
+   "y": 188
+  },
+  {
+   "from": "broker",
+   "id": "d-m1b",
+   "label": "redeliver m1",
+   "to": "cons",
+   "variant": "dashed",
+   "y": 216
+  },
+  {
+   "from": "cons",
+   "id": "m1-commit",
+   "label": "INSERT key m1 + ledger +100; COMMIT",
+   "to": "store",
+   "variant": "default",
+   "y": 244
+  },
+  {
+   "from": "cons",
+   "id": "m1-ack",
+   "label": "ACK m1",
+   "to": "broker",
+   "variant": "return",
+   "y": 272
+  },
+  {
+   "from": "broker",
+   "id": "d-m2",
+   "label": "deliver m2 (+50)",
+   "to": "cons",
+   "variant": "default",
+   "y": 300
+  },
+  {
+   "from": "cons",
+   "id": "m2-commit",
+   "label": "INSERT key m2 + ledger +50; COMMIT",
+   "to": "store",
+   "variant": "default",
+   "y": 328
+  },
+  {
+   "from": "cons",
+   "id": "m2-crash",
+   "label": "CRASH before ACK: ack never sent",
+   "to": "broker",
+   "variant": "security",
+   "y": 356
+  },
+  {
+   "from": "broker",
+   "id": "d-m2b",
+   "label": "redeliver m2",
+   "to": "cons",
+   "variant": "dashed",
+   "y": 384
+  },
+  {
+   "from": "cons",
+   "id": "m2-dedup",
+   "label": "key m2 known: DEDUP HIT, skip effect",
+   "to": "store",
+   "variant": "return",
+   "y": 412
+  },
+  {
+   "from": "cons",
+   "id": "m2-ack",
+   "label": "ACK m2",
+   "to": "broker",
+   "variant": "return",
+   "y": 440
+  },
+  {
+   "from": "broker",
+   "id": "d-m3",
+   "label": "deliver m3 (+25)",
+   "to": "cons",
+   "variant": "default",
+   "y": 468
+  },
+  {
+   "from": "cons",
+   "id": "m3-commit",
+   "label": "INSERT key m3 + ledger +25; COMMIT",
+   "to": "store",
+   "variant": "default",
+   "y": 496
+  },
+  {
+   "from": "cons",
+   "id": "m3-ack",
+   "label": "ACK m3, then CRASH before cleanup",
+   "to": "broker",
+   "variant": "security",
+   "y": 524
+  },
+  {
+   "from": "broker",
+   "id": "d-m3b",
+   "label": "redeliver m3: key still live -> DEDUP HIT",
+   "to": "cons",
+   "variant": "dashed",
+   "y": 552
+  },
+  {
+   "from": "cons",
+   "id": "m3-poison",
+   "label": "same key, DIFFERENT payload: REJECT + alert",
+   "to": "store",
+   "variant": "security",
+   "y": 580
+  }
+ ],
+ "meta": {
+  "output": "ch8-transactions/diagrams/sol3a-crash-points.html",
+  "quality_profile": "showcase",
+  "title": "Ch8 Sol3a: three crash points, commit-then-ACK",
+  "viewBox": [
+   1080,
+   690
+  ],
+  "column_fit": "spread"
+ },
+ "participants": [
+  {
+   "id": "broker",
+   "label": "Queue",
+   "sublabel": "at-least-once redelivery",
+   "type": "messagebus"
+  },
+  {
+   "id": "cons",
+   "label": "Consumer",
+   "sublabel": "idempotent worker",
+   "type": "backend"
+  },
+  {
+   "id": "store",
+   "label": "Local store",
+   "sublabel": "keys + ledger, one txn",
+   "type": "database"
+  }
+ ],
+ "schema_version": 1,
+ "segments": [
+  {
+   "from": 150,
+   "to": 292,
+   "label": "Crash 1: before commit"
+  },
+  {
+   "from": 310,
+   "to": 482,
+   "label": "Crash 2: after commit, before ACK"
+  },
+  {
+   "from": 500,
+   "to": 592,
+   "label": "Crash 3: after ACK + poison check"
+  }
+ ]
+}

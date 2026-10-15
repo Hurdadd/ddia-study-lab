@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "A new owner resumes; the stale owner is rejected",
+    "output": "final-project/diagrams/crash-recovery.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1080,
+      650
+    ],
+    "column_fit": "spread"
+  },
+  "participants": [
+    {
+      "id": "old",
+      "type": "backend",
+      "label": "Worker A",
+      "sublabel": "epoch 7"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Run Store",
+      "sublabel": "conditional commit"
+    },
+    {
+      "id": "new",
+      "type": "backend",
+      "label": "Worker B",
+      "sublabel": "epoch 8"
+    },
+    {
+      "id": "tool",
+      "type": "external",
+      "label": "Tool API",
+      "sublabel": "operation key"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "old",
+      "to": "db",
+      "y": 165,
+      "label": "claim run: epoch 7",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m1",
+      "from": "old",
+      "to": "tool",
+      "y": 194,
+      "label": "call operation K",
+      "variant": "default"
+    },
+    {
+      "id": "m2",
+      "from": "tool",
+      "to": "old",
+      "y": 223,
+      "label": "result; worker pauses",
+      "variant": "return"
+    },
+    {
+      "id": "m3",
+      "from": "new",
+      "to": "db",
+      "y": 252,
+      "label": "expired lease: claim epoch 8",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m4",
+      "from": "db",
+      "to": "new",
+      "y": 281,
+      "label": "last durable step",
+      "variant": "return"
+    },
+    {
+      "id": "m5",
+      "from": "new",
+      "to": "tool",
+      "y": 310,
+      "label": "retry operation K",
+      "variant": "default"
+    },
+    {
+      "id": "m6",
+      "from": "tool",
+      "to": "new",
+      "y": 339,
+      "label": "same result if idempotent",
+      "variant": "return"
+    },
+    {
+      "id": "m7",
+      "from": "old",
+      "to": "db",
+      "y": 368,
+      "label": "commit with epoch 7",
+      "variant": "security"
+    },
+    {
+      "id": "m8",
+      "from": "db",
+      "to": "old",
+      "y": 397,
+      "label": "reject stale owner",
+      "variant": "return"
+    },
+    {
+      "id": "m9",
+      "from": "new",
+      "to": "db",
+      "y": 426,
+      "label": "commit with epoch 8",
+      "variant": "emphasis"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Contract",
+      "items": [
+        "Lease expiry allows a new claimant; epoch checking prevents stale state commits.",
+        "Every guarded write atomically compares the current owner epoch.",
+        "External side effects also need idempotency or fencing enforced by that sink.",
+        "Without that external contract, a timeout remains an unknown outcome."
+      ]
+    }
+  ]
+}

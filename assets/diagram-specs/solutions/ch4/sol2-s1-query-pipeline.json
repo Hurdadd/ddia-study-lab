@@ -1,0 +1,158 @@
+{
+  "cards": [
+    {
+      "dot": "emerald",
+      "items": [
+        "Partition prune first: last year's predicate discards older blocks unopened",
+        "Column prune second: only day, pid and amount lanes are read",
+        "The SELECT list is the pruning contract, not a comment"
+      ],
+      "title": "Skip before reading"
+    },
+    {
+      "dot": "orange",
+      "items": [
+        "Five categories fit a bitmap: AND category and weekday bits, fetch few amounts",
+        "High-cardinality ids use dictionary plus run-length, never raw bitmaps",
+        "A hot product crowds one sort block and weakens range pruning"
+      ],
+      "title": "Filter by cardinality"
+    }
+  ],
+  "diagram_type": "dataflow",
+  "flows": [
+    {
+      "from": "facts",
+      "fromSide": "right",
+      "id": "scan-parts",
+      "label": "all year blocks",
+      "to": "partprune",
+      "toSide": "left",
+      "variant": "emphasis"
+    },
+    {
+      "from": "partprune",
+      "fromSide": "right",
+      "id": "last-year",
+      "label": "last-year blocks",
+      "to": "bitmap",
+      "toSide": "left",
+      "variant": "emphasis"
+    },
+    {
+      "from": "dimprod",
+      "fromSide": "top",
+      "id": "cat-bits",
+      "label": "category bits",
+      "to": "bitmap",
+      "toSide": "bottom",
+      "variant": "default"
+    },
+    {
+      "from": "dimdate",
+      "fromSide": "bottom",
+      "id": "wd-bits",
+      "label": "weekday bits",
+      "to": "bitmap",
+      "toSide": "top",
+      "variant": "default",
+      "labelAt": [
+        530,
+        201
+      ]
+    },
+    {
+      "from": "bitmap",
+      "fromSide": "right",
+      "id": "survivors",
+      "label": "amounts of surviving rows",
+      "to": "groupby",
+      "toSide": "left",
+      "variant": "emphasis",
+      "labelAt": [
+        640,
+        322
+      ]
+    }
+  ],
+  "meta": {
+    "locale": "en",
+    "output": "ch4-storage-retrieval/diagrams/sol2-s1-query-pipeline.html",
+    "quality_profile": "showcase",
+    "subtitle": "Partition prune, column prune, bitmap filter (teaching sketch)",
+    "title": "Sales query pipeline: skip, then read little",
+    "viewBox": [
+      980,
+      600
+    ]
+  },
+  "nodes": [
+    {
+      "id": "facts",
+      "label": "Partitioned fact files",
+      "row": 1,
+      "stage": 0,
+      "sublabel": "by year + month",
+      "type": "database",
+      "width": 150
+    },
+    {
+      "id": "partprune",
+      "label": "Partition prune",
+      "row": 1,
+      "stage": 1,
+      "sublabel": "keep last year blocks",
+      "type": "backend"
+    },
+    {
+      "id": "dimdate",
+      "label": "dim_date",
+      "row": 0,
+      "stage": 2,
+      "sublabel": "day, weekday, year",
+      "type": "database"
+    },
+    {
+      "id": "bitmap",
+      "label": "Bitmap filter",
+      "row": 1,
+      "stage": 2,
+      "sublabel": "category AND weekday",
+      "tag": "low cardinality",
+      "type": "backend",
+      "width": 140
+    },
+    {
+      "id": "dimprod",
+      "label": "dim_product",
+      "row": 2,
+      "stage": 2,
+      "sublabel": "pid, category",
+      "type": "database"
+    },
+    {
+      "id": "groupby",
+      "label": "Group by + sum",
+      "row": 1,
+      "stage": 3,
+      "sublabel": "category, weekday",
+      "type": "backend",
+      "width": 140
+    }
+  ],
+  "schema_version": 1,
+  "stages": [
+    {
+      "label": "Fact storage"
+    },
+    {
+      "label": "Prune"
+    },
+    {
+      "label": "Filter"
+    },
+    {
+      "label": "Aggregate"
+    }
+  ]
+}

@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Business state and its event commit together",
+    "output": "final-project/diagrams/commit-capture.html",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1080,
+      650
+    ],
+    "column_fit": "spread"
+  },
+  "participants": [
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "Source API",
+      "sublabel": "stable projection"
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "record + outbox"
+    },
+    {
+      "id": "cdc",
+      "type": "backend",
+      "label": "CDC",
+      "sublabel": "slot + checkpoint"
+    },
+    {
+      "id": "log",
+      "type": "messagebus",
+      "label": "Event Log",
+      "sublabel": "entity partitions"
+    },
+    {
+      "id": "sink",
+      "type": "backend",
+      "label": "Projector",
+      "sublabel": "versioned sink"
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "Sink Store",
+      "sublabel": "durable state"
+    }
+  ],
+  "messages": [
+    {
+      "id": "m0",
+      "from": "api",
+      "to": "db",
+      "y": 165,
+      "label": "BEGIN: change + outbox",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m1",
+      "from": "db",
+      "to": "api",
+      "y": 194,
+      "label": "COMMIT acknowledged",
+      "variant": "return"
+    },
+    {
+      "id": "m2",
+      "from": "cdc",
+      "to": "db",
+      "y": 223,
+      "label": "decode committed WAL",
+      "variant": "default"
+    },
+    {
+      "id": "m3",
+      "from": "db",
+      "to": "cdc",
+      "y": 252,
+      "label": "event + source cursor",
+      "variant": "return"
+    },
+    {
+      "id": "m4",
+      "from": "cdc",
+      "to": "log",
+      "y": 281,
+      "label": "publish entity-key event",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m5",
+      "from": "log",
+      "to": "cdc",
+      "y": 310,
+      "label": "durable broker ack",
+      "variant": "return"
+    },
+    {
+      "id": "m6",
+      "from": "cdc",
+      "to": "db",
+      "y": 339,
+      "label": "advance slot progress",
+      "variant": "dashed"
+    },
+    {
+      "id": "m7",
+      "from": "log",
+      "to": "sink",
+      "y": 368,
+      "label": "deliver event",
+      "variant": "default"
+    },
+    {
+      "id": "m8",
+      "from": "sink",
+      "to": "store",
+      "y": 397,
+      "label": "conditional version write",
+      "variant": "emphasis"
+    },
+    {
+      "id": "m9",
+      "from": "sink",
+      "to": "log",
+      "y": 426,
+      "label": "commit after durable sink",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Contract",
+      "items": [
+        "No business API dual write to a broker or vector index.",
+        "Connector and broker failures can cause redelivery.",
+        "An event can become durable before its source cursor is checkpointed.",
+        "The search effect is idempotent, not an atomic DB + Kafka + index transaction."
+      ]
+    }
+  ]
+}

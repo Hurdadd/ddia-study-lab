@@ -16,3 +16,7 @@ Nunito and Vazirmatn are requested from Google Fonts; they are not bundled here.
 Playwright is an optional Apache-2.0 development dependency, installed from npm with
 its own notices. External references remain under their original terms.
 Before any future public release, review source quotations and third-party rights.
+
+Static SVG metadata badges in `assets/badges/` were rendered by
+[Shields.io](https://shields.io/); generation URLs are retained in SVG comments.
+They describe project metadata and do not represent CI or benchmark results.

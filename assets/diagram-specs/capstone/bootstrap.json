@@ -1,0 +1,120 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Bootstrap a fresh context generation without a gap",
+    "output": "final-project/diagrams/bootstrap.html",
+    "quality_profile": "showcase"
+  },
+  "lanes": [
+    {
+      "id": "main",
+      "label": "Ordered procedure"
+    }
+  ],
+  "mainPath": [
+    "s0",
+    "s1",
+    "s2",
+    "s3",
+    "s4",
+    "s5"
+  ],
+  "nodes": [
+    {
+      "id": "s0",
+      "lane": "main",
+      "col": 0,
+      "type": "backend",
+      "label": "Bind Snapshot",
+      "sublabel": "snapshot + cursor B",
+      "width": 140
+    },
+    {
+      "id": "s1",
+      "lane": "main",
+      "col": 1,
+      "type": "backend",
+      "label": "Seed Shadow",
+      "sublabel": "immutable manifest",
+      "width": 140
+    },
+    {
+      "id": "s2",
+      "lane": "main",
+      "col": 2,
+      "type": "backend",
+      "label": "Replay Delta",
+      "sublabel": "after B, dedup",
+      "width": 140
+    },
+    {
+      "id": "s3",
+      "lane": "main",
+      "col": 3,
+      "type": "backend",
+      "label": "Compare State",
+      "sublabel": "same declared cut",
+      "width": 140
+    },
+    {
+      "id": "s4",
+      "lane": "main",
+      "col": 4,
+      "type": "security",
+      "label": "Switch Pointer",
+      "sublabel": "CAS + current ACL",
+      "width": 140
+    },
+    {
+      "id": "s5",
+      "lane": "main",
+      "col": 5,
+      "type": "backend",
+      "label": "Retire Old",
+      "sublabel": "drain readers first",
+      "width": 140
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "from": "s0",
+      "to": "s1"
+    },
+    {
+      "id": "e1",
+      "from": "s1",
+      "to": "s2"
+    },
+    {
+      "id": "e2",
+      "from": "s2",
+      "to": "s3"
+    },
+    {
+      "id": "e3",
+      "from": "s3",
+      "to": "s4",
+      "label": "equal cut"
+    },
+    {
+      "id": "e4",
+      "from": "s4",
+      "to": "s5"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Exit conditions",
+      "items": [
+        "Bind the MVCC snapshot to the logical stream; a separately sampled LSN is insufficient.",
+        "Buffer post-boundary events while loading the snapshot.",
+        "For multiple source shards, B is a vector of independent cursors.",
+        "Abort and restart if the snapshot is lost, a cursor expires, or comparison fails.",
+        "A bootstrap coordinator and per-partition barriers are implementation work."
+      ]
+    }
+  ]
+}

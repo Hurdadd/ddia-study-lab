@@ -1,0 +1,289 @@
+{
+ "boundaries": [
+  {
+   "kind": "region",
+   "label": "AZ-a failure domain: everything inside dies together",
+   "wraps": [
+    "api-a"
+   ]
+  },
+  {
+   "kind": "region",
+   "label": "AZ-b failure domain: everything inside dies together",
+   "wraps": [
+    "api-b"
+   ]
+  },
+  {
+   "kind": "region",
+   "label": "AZ-c failure domain: everything inside dies together",
+   "wraps": [
+    "api-c"
+   ]
+  },
+  {
+   "kind": "region",
+   "label": "State failure domain: fencing and RPO/RTO live here",
+   "wraps": [
+    "db-primary",
+    "db-standby",
+    "queue",
+    "backup"
+   ]
+  }
+ ],
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "Three AZs, each alone carrying the full 231/s teaching peak",
+    "Losing one AZ leaves two survivors with 463/s of headroom",
+    "N+1 is a stated cost decision, not free headroom"
+   ],
+   "title": "N+1 capacity"
+  },
+  {
+   "dot": "orange",
+   "items": [
+    "One crown, one writer: the primary plus its sync standby",
+    "Failover promotes the standby and bumps the epoch",
+    "The fenced old primary gets its stale-epoch writes rejected"
+   ],
+   "title": "Crown and fencing"
+  },
+  {
+   "dot": "cyan",
+   "items": [
+    "Order and outbox row commit in one transaction",
+    "The replicated queue feeds inventory, risk and notifications",
+    "Checkpointed consumers; poison messages go to dead-letter"
+   ],
+   "title": "Queue and outbox"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "Sync standby serving in seconds is high availability",
+    "Snapshot plus WAL restoring in minutes is backup with RPO/RTO",
+    "A second region is disaster recovery \u2014 a different promise"
+   ],
+   "title": "HA versus backup versus DR"
+  }
+ ],
+ "components": [
+  {
+   "id": "client",
+   "label": "Client",
+   "pos": [
+    40,
+    60
+   ],
+   "size": [
+    190,
+    76
+   ],
+   "sublabel": "order writes, peak 231/s",
+   "type": "external"
+  },
+  {
+   "id": "lb",
+   "label": "Load Balancer",
+   "pos": [
+    500,
+    60
+   ],
+   "size": [
+    240,
+    76
+   ],
+   "sublabel": "health-checks every instance",
+   "type": "cloud"
+  },
+  {
+   "id": "api-a",
+   "label": "API in AZ-a",
+   "pos": [
+    40,
+    220
+   ],
+   "size": [
+    210,
+    76
+   ],
+   "sublabel": "stateless, no session state",
+   "tag": "drained if AZ-a dies",
+   "type": "backend"
+  },
+  {
+   "id": "api-b",
+   "label": "API in AZ-b",
+   "pos": [
+    475,
+    220
+   ],
+   "size": [
+    210,
+    76
+   ],
+   "sublabel": "stateless, no session state",
+   "tag": "main serving row",
+   "type": "backend"
+  },
+  {
+   "id": "api-c",
+   "label": "API in AZ-c",
+   "pos": [
+    910,
+    220
+   ],
+   "size": [
+    210,
+    76
+   ],
+   "sublabel": "stateless, no session state",
+   "tag": "drained if AZ-c dies",
+   "type": "backend"
+  },
+  {
+   "id": "db-primary",
+   "label": "DB Primary",
+   "pos": [
+    40,
+    410
+   ],
+   "size": [
+    230,
+    76
+   ],
+   "sublabel": "sync standby ACKs writes",
+   "tag": "crown: exactly one writer",
+   "type": "database"
+  },
+  {
+   "id": "db-standby",
+   "label": "DB Sync Standby",
+   "pos": [
+    410,
+    410
+   ],
+   "size": [
+    230,
+    76
+   ],
+   "sublabel": "promotes on failover",
+   "tag": "epoch 8 after promote",
+   "type": "database"
+  },
+  {
+   "id": "queue",
+   "label": "Replicated Queue",
+   "pos": [
+    700,
+    410
+   ],
+   "size": [
+    230,
+    76
+   ],
+   "sublabel": "3 consumers, checkpointed",
+   "tag": "poison to dead-letter",
+   "type": "messagebus"
+  },
+  {
+   "id": "backup",
+   "label": "Backup Store",
+   "pos": [
+    40,
+    520
+   ],
+   "size": [
+    230,
+    76
+   ],
+   "sublabel": "snapshot plus WAL",
+   "tag": "RPO 1 min, RTO 5 min",
+   "type": "database"
+  }
+ ],
+ "connections": [
+  {
+   "from": "client",
+   "fromSide": "right",
+   "id": "orders-in",
+   "label": "order writes at peak",
+   "to": "lb",
+   "toSide": "left",
+   "variant": "emphasis"
+  },
+  {
+   "from": "lb",
+   "fromSide": "bottom",
+   "id": "route-main",
+   "label": "healthy instance route",
+   "to": "api-b",
+   "toSide": "top",
+   "variant": "emphasis"
+  },
+  {
+   "from": "lb",
+   "fromSide": "bottom",
+   "id": "route-a",
+   "label": "spillover route",
+   "to": "api-a",
+   "toSide": "top",
+   "variant": "default"
+  },
+  {
+   "from": "lb",
+   "fromSide": "bottom",
+   "id": "route-c",
+   "label": "spillover route",
+   "to": "api-c",
+   "toSide": "top",
+   "variant": "default"
+  },
+  {
+   "from": "api-b",
+   "fromSide": "bottom",
+   "id": "write-primary",
+   "label": "write, standby ACKs",
+   "to": "db-primary",
+   "toSide": "top",
+   "variant": "emphasis"
+  },
+  {
+   "from": "db-primary",
+   "fromSide": "right",
+   "id": "sync-copy",
+   "label": "sync copy, epoch fence",
+   "to": "db-standby",
+   "toSide": "left",
+   "variant": "security"
+  },
+  {
+   "from": "api-b",
+   "fromSide": "bottom",
+   "id": "outbox-events",
+   "label": "outbox events per order",
+   "to": "queue",
+   "toSide": "top",
+   "variant": "default"
+  },
+  {
+   "from": "db-primary",
+   "fromSide": "bottom",
+   "id": "snap-wal",
+   "label": "snapshot plus WAL",
+   "to": "backup",
+   "toSide": "top",
+   "variant": "default"
+  }
+ ],
+ "diagram_type": "architecture",
+ "meta": {
+  "output": ".archify/architecture-ch2-sol3-az-topology-20261014-184354/sol3-step1-az-topology.html",
+  "quality_profile": "showcase",
+  "title": "Three-AZ Order Path: Stateless Rows, Fenced State"
+ },
+ "schema_version": 1
+}

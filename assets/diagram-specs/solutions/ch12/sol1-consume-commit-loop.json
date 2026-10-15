@@ -1,0 +1,220 @@
+{
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "Poll, fence-check, guarded apply, atomic commit, then repeat on the next batch",
+    "The checkpoint is written in the same transaction as the totals it describes",
+    "Replay is always ordered per partition, so the offset comparison stays sound"
+   ],
+   "title": "The commit loop"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "Rebalance aborts the open transaction before ownership moves",
+    "A stale owner keeps its epoch and its writes are rejected on commit",
+    "An offset jump past retention is an alert and a re-seed, never a silent skip"
+   ],
+   "title": "Abort, fence, alert"
+  },
+  {
+   "dot": "orange",
+   "items": [
+    "Local state plus the transaction cover counting; external side effects need their own idempotency",
+    "A dedup horizon bounds the checkpoint memory; older replay must re-seed from scratch",
+    "A partition-count change migrates the dedup identity under a routing version, not in place"
+   ],
+   "title": "Known boundaries"
+  }
+ ],
+ "diagram_type": "workflow",
+ "edges": [
+  {
+   "from": "poll",
+   "label": "batch",
+   "role": "main",
+   "to": "fence"
+  },
+  {
+   "from": "fence",
+   "label": "epoch = owner",
+   "role": "main",
+   "to": "apply"
+  },
+  {
+   "from": "apply",
+   "label": "offset > last",
+   "role": "main",
+   "to": "commit"
+  },
+  {
+   "from": "commit",
+   "label": "all or nothing",
+   "role": "main",
+   "to": "ack"
+  },
+  {
+   "from": "fence",
+   "label": "epoch mismatch",
+   "role": "error",
+   "to": "stale",
+   "variant": "security"
+  },
+  {
+   "from": "commit",
+   "label": "rebalance aborts txn",
+   "role": "error",
+   "to": "rejoin",
+   "variant": "security"
+  },
+  {
+   "from": "poll",
+   "label": "offset out of range",
+   "role": "error",
+   "to": "jump",
+   "variant": "security"
+  },
+  {
+   "from": "stale",
+   "label": "ownership moved",
+   "role": "branch",
+   "to": "migrate",
+   "variant": "dashed"
+  }
+ ],
+ "groups": [],
+ "lanes": [
+  {
+   "id": "consume",
+   "label": "Consume + Fence"
+  },
+  {
+   "id": "store",
+   "label": "Record DB"
+  },
+  {
+   "id": "exceptions",
+   "label": "Rebalance + Repair",
+   "variant": "exception"
+  }
+ ],
+ "mainPath": [
+  "poll",
+  "fence",
+  "apply",
+  "commit",
+  "ack"
+ ],
+ "meta": {
+  "output": "ch12-stream-processing/diagrams/sol1-consume-commit-loop.html",
+  "quality_profile": "showcase",
+  "title": "Consume-commit loop: the assembly that holds exactly-once together"
+ },
+ "nodes": [
+  {
+   "col": 0,
+   "id": "poll",
+   "label": "Poll partition",
+   "lane": "consume",
+   "sublabel": "ordered batch",
+   "type": "messagebus",
+   "width": 150
+  },
+  {
+   "col": 1,
+   "id": "fence",
+   "label": "Fence check",
+   "lane": "consume",
+   "sublabel": "epoch = owner?",
+   "type": "security",
+   "width": 150
+  },
+  {
+   "col": 2,
+   "id": "apply",
+   "label": "Idempotent apply",
+   "lane": "consume",
+   "sublabel": "offset > last?",
+   "type": "backend",
+   "width": 150
+  },
+  {
+   "col": 3,
+   "id": "commit",
+   "label": "Atomic commit",
+   "lane": "store",
+   "sublabel": "totals + ckpt",
+   "type": "database",
+   "width": 150
+  },
+  {
+   "col": 5,
+   "id": "ack",
+   "label": "Advance",
+   "lane": "consume",
+   "sublabel": "repeat per batch",
+   "type": "messagebus",
+   "width": 130
+  },
+  {
+   "col": 1,
+   "id": "stale",
+   "label": "Stale owner",
+   "lane": "exceptions",
+   "sublabel": "write fenced",
+   "type": "security",
+   "width": 140
+  },
+  {
+   "col": 3,
+   "id": "rejoin",
+   "label": "Rebalance abort",
+   "lane": "exceptions",
+   "sublabel": "txn rolled back",
+   "type": "security",
+   "width": 150
+  },
+  {
+   "col": 0,
+   "id": "jump",
+   "label": "Offset jump",
+   "lane": "exceptions",
+   "sublabel": "alert + re-seed",
+   "type": "security",
+   "width": 140
+  },
+  {
+   "col": 2,
+   "id": "migrate",
+   "label": "Partition move",
+   "lane": "exceptions",
+   "sublabel": "versioned routing",
+   "type": "backend",
+   "width": 150
+  }
+ ],
+ "phases": [
+  {
+   "fromCol": 0,
+   "id": "read",
+   "label": "Poll",
+   "toCol": 0
+  },
+  {
+   "fromCol": 1,
+   "id": "guardapply",
+   "label": "Guard + apply",
+   "toCol": 2,
+   "variant": "emphasis"
+  },
+  {
+   "fromCol": 3,
+   "id": "commitph",
+   "label": "Commit",
+   "toCol": 5,
+   "variant": "dashed"
+  }
+ ],
+ "schema_version": 2
+}

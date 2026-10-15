@@ -34,3 +34,12 @@ third-party component has its own compatible terms. No copyright assignment or C
 is required. Sign your commits with `git commit -s` to certify the [DCO](DCO).
 
 The maintainer reviews changes before merge. See GOVERNANCE and CODE_OF_CONDUCT.
+
+## Publication boundary
+
+Run `python3 assets/check_publication.py` before committing and
+`python3 assets/check_publication.py --export` after building the website.
+Only public documentation belongs in Git. Keep personal notes, chat transcripts,
+agent context, machine paths and raw tool reports outside the repository. The
+static export uses an explicit Markdown allowlist. Diagram specifications and
+artifact hashes are public; local review transcripts and receipts are not.

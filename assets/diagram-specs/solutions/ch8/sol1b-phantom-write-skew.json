@@ -1,0 +1,190 @@
+{
+ "activations": [
+  {
+   "from": 160,
+   "participant": "sessA",
+   "to": 330,
+   "type": "backend"
+  },
+  {
+   "from": 190,
+   "participant": "sessB",
+   "to": 330,
+   "type": "backend"
+  },
+  {
+   "from": 160,
+   "participant": "pg",
+   "to": 560,
+   "type": "database"
+  }
+ ],
+ "cards": [
+  {
+   "dot": "amber",
+   "items": [
+    "COUNT(*) twice in one RC transaction: 2, then 3 after a rival INSERT",
+    "REPEATABLE READ re-reads the start snapshot: stable at 2",
+    "Predicates, not just rows, need protection"
+   ],
+   "title": "Phantom"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "Both snapshots contain {Alice, Bob}: each sees cover and goes off call",
+    "On-call set ends EMPTY: the >=1 invariant breaks under SI",
+    "At SERIALIZABLE one transaction gets 40001 and retries whole"
+   ],
+   "title": "Write skew"
+  },
+  {
+   "dot": "emerald",
+   "items": [
+    "PG snapshot isolation already stops phantoms on re-read",
+    "Write skew survives SI: only serializability (or explicit locks) stops it",
+    "Name the product AND the version: PG 18, not the SQL minimum"
+   ],
+   "title": "Product vs standard"
+  }
+ ],
+ "diagram_type": "sequence",
+ "messages": [
+  {
+   "from": "sessA",
+   "id": "p-count1",
+   "label": "BEGIN: SELECT COUNT(*) FROM bookings -> 2",
+   "to": "pg",
+   "variant": "default",
+   "y": 160
+  },
+  {
+   "from": "sessB",
+   "id": "p-insert",
+   "label": "INSERT R:10-11; COMMIT",
+   "to": "pg",
+   "variant": "default",
+   "y": 190
+  },
+  {
+   "from": "sessA",
+   "id": "p-count2",
+   "label": "recount -> 3: PHANTOM under READ COMMITTED",
+   "to": "pg",
+   "variant": "emphasis",
+   "y": 220
+  },
+  {
+   "from": "sessA",
+   "id": "p-rr",
+   "label": "RR: recount from snapshot -> 2, no phantom",
+   "to": "pg",
+   "variant": "return",
+   "y": 250
+  },
+  {
+   "from": "sessA",
+   "id": "w-snap-a",
+   "label": "Alice: snapshot shows {Alice, Bob} on call",
+   "to": "pg",
+   "variant": "default",
+   "y": 300
+  },
+  {
+   "from": "sessB",
+   "id": "w-snap-b",
+   "label": "Bob: snapshot shows {Alice, Bob} on call",
+   "to": "pg",
+   "variant": "default",
+   "y": 330
+  },
+  {
+   "from": "sessA",
+   "id": "w-off-a",
+   "label": "cover present: Alice goes off call; COMMIT",
+   "to": "pg",
+   "variant": "default",
+   "y": 360
+  },
+  {
+   "from": "sessB",
+   "id": "w-off-b",
+   "label": "Bob goes off call too: on-call EMPTY",
+   "to": "pg",
+   "variant": "emphasis",
+   "y": 390
+  },
+  {
+   "from": "sessA",
+   "id": "s-commit-a",
+   "label": "SERIALIZABLE re-run: Alice commits",
+   "to": "pg",
+   "variant": "default",
+   "y": 440
+  },
+  {
+   "from": "sessB",
+   "id": "s-abort-b",
+   "label": "Bob: 40001 abort, retries whole txn",
+   "to": "pg",
+   "variant": "security",
+   "y": 470
+  },
+  {
+   "from": "sessB",
+   "id": "s-retry-b",
+   "label": "retry: Alice gone, Bob stays on call",
+   "to": "pg",
+   "variant": "return",
+   "y": 500
+  }
+ ],
+ "meta": {
+  "output": "ch8-transactions/diagrams/sol1b-phantom-write-skew.html",
+  "quality_profile": "showcase",
+  "title": "Ch8 Sol1b: phantom, write skew, serializable",
+  "viewBox": [
+   1080,
+   660
+  ],
+  "column_fit": "spread"
+ },
+ "participants": [
+  {
+   "id": "sessA",
+   "label": "Session A",
+   "sublabel": "reader / Alice",
+   "type": "backend"
+  },
+  {
+   "id": "sessB",
+   "label": "Session B",
+   "sublabel": "inserter / Bob",
+   "type": "backend"
+  },
+  {
+   "id": "pg",
+   "label": "PostgreSQL 18",
+   "sublabel": "documented rules only",
+   "type": "database"
+  }
+ ],
+ "schema_version": 1,
+ "segments": [
+  {
+   "from": 150,
+   "label": "Phantom: recount inside one transaction",
+   "to": 262
+  },
+  {
+   "from": 290,
+   "label": "Write skew: the snapshot lies to both",
+   "to": 402
+  },
+  {
+   "from": 430,
+   "label": "Serializable: exactly one committer",
+   "to": 512
+  }
+ ]
+}

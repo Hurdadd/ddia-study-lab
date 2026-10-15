@@ -1,0 +1,183 @@
+{
+ "cards": [
+  {
+   "dot": "emerald",
+   "items": [
+    "One framed, checksummed, fsynced append opens the payment",
+    "The decision is stored before any leg publishes: never re-decided",
+    "Reservation keeps in-flight money in a visible pending ledger"
+   ],
+   "title": "Decide, then publish"
+  },
+  {
+   "dot": "amber",
+   "items": [
+    "One outbox fans three legs carrying the same payment ID",
+    "Each destination dedups on that ID: replays are ignored",
+    "Fee and settle legs land through the same dedup rule"
+   ],
+   "title": "Same ID, three legs"
+  },
+  {
+   "dot": "rose",
+   "items": [
+    "A crash after some publishes replays only the missing legs",
+    "Final balances converge; readers may see legs land separately",
+    "Money is conserved: the checker sums to the funded total"
+   ],
+   "title": "Crash-safe fan-out"
+  }
+ ],
+ "diagram_type": "dataflow",
+ "flows": [
+  {
+   "classification": "atomic intake",
+   "from": "payreq",
+   "id": "append",
+   "label": "append",
+   "route": "straight",
+   "to": "srclog",
+   "variant": "emphasis"
+  },
+  {
+   "classification": "durable row",
+   "from": "srclog",
+   "id": "row",
+   "label": "row",
+   "route": "straight",
+   "to": "srcproc",
+   "variant": "emphasis"
+  },
+  {
+   "classification": "durable verdict",
+   "from": "srcproc",
+   "id": "store",
+   "label": "store first",
+   "to": "decision",
+   "variant": "emphasis",
+   "labelAt": [
+    530,
+    320
+   ]
+  },
+  {
+   "classification": "approved",
+   "from": "decision",
+   "id": "approved",
+   "label": "approved",
+   "to": "outbox",
+   "variant": "emphasis"
+  },
+  {
+   "classification": "same-ID leg",
+   "from": "outbox",
+   "id": "dstleg",
+   "label": "dst leg",
+   "to": "dstlog",
+   "variant": "default",
+   "labelDy": -30
+  },
+  {
+   "classification": "same-ID leg",
+   "from": "outbox",
+   "id": "feeleg",
+   "label": "fee leg",
+   "route": "straight",
+   "to": "feelog",
+   "variant": "default",
+   "labelDy": 30
+  }
+ ],
+ "meta": {
+  "output": "ch13-streaming-philosophy/diagrams/sol3-multishard-payment.html",
+  "quality_profile": "showcase",
+  "title": "Multishard payment without atomic commit",
+  "viewBox": [
+   1080,
+   560
+  ]
+ },
+ "nodes": [
+  {
+   "id": "payreq",
+   "label": "Pay req",
+   "row": 1,
+   "stage": 0,
+   "sublabel": "id pay-1",
+   "tag": "intake",
+   "type": "external"
+  },
+  {
+   "id": "srclog",
+   "label": "Source log",
+   "row": 1,
+   "stage": 1,
+   "sublabel": "framed+fsync",
+   "tag": "durable",
+   "type": "database"
+  },
+  {
+   "id": "srcproc",
+   "label": "Source CPU",
+   "row": 1,
+   "stage": 2,
+   "sublabel": "decide+reserve",
+   "tag": "pending kept",
+   "type": "backend"
+  },
+  {
+   "id": "decision",
+   "label": "Decision",
+   "row": 0,
+   "stage": 2,
+   "sublabel": "APPROVED once",
+   "tag": "never re-decide",
+   "type": "database"
+  },
+  {
+   "id": "outbox",
+   "label": "Outbox",
+   "row": 1,
+   "stage": 3,
+   "sublabel": "same ID x3",
+   "tag": "fan-out",
+   "type": "messagebus"
+  },
+  {
+   "id": "dstlog",
+   "label": "Dst log",
+   "row": 0,
+   "stage": 4,
+   "sublabel": "credits",
+   "tag": "dedup",
+   "type": "database"
+  },
+  {
+   "id": "feelog",
+   "label": "Fee log",
+   "row": 1,
+   "stage": 4,
+   "sublabel": "credits",
+   "tag": "dedup",
+   "type": "database"
+  }
+ ],
+ "schema_version": 1,
+ "stages": [
+  {
+   "label": "Request"
+  },
+  {
+   "label": "Log"
+  },
+  {
+   "label": "Decide"
+  },
+  {
+   "label": "Publish"
+  },
+  {
+   "label": "Land"
+  }
+ ]
+}
