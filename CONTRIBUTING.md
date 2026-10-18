@@ -1,7 +1,7 @@
 # Contributing
 
 Thank you for helping improve Own the Stack, maintained by hurdad ashouri.
-The repository is currently private; access and public release are separate decisions.
+The repository is public; contributions via issues and PRs are welcome.
 
 1. Open an issue describing the reader’s problem, expected behavior and scope.
 2. For an architectural change, propose or supersede an ADR before changing claims.

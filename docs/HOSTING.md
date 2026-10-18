@@ -1,7 +1,7 @@
 # Hosting
 
 The production educational website is public at https://own-the-stack.vercel.app/.
-The GitHub repository remains private. The site is a static export, with no AI
+The GitHub repository is public. The site is a static export, with no AI
 backend, production tenant data, or model credentials.
 
 Build: `python3 assets/build_site.py`. Output: `public/`.

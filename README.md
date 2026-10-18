@@ -6,9 +6,9 @@
 
 <a href="#build-understanding-before-infrastructure"><img src="assets/badges/status.svg" alt="Status: design prototype"></a> <a href="LICENSE"><img src="assets/badges/license.svg" alt="License: AGPL-3.0-only"></a> <a href="https://own-the-stack.vercel.app/"><img src="assets/badges/languages.svg" alt="Documentation: Persian and English"></a> <a href="https://own-the-stack.vercel.app/"><img src="assets/badges/website.svg" alt="Website: public"></a>
 
-14 chapters · 15 ADRs · Architecture & UML · Interactive walkthroughs
+14 chapters · 113 interactive diagrams · 47 exercises · 15 ADRs · 1 capstone
 
-[**Explore the live site ↗**](https://own-the-stack.vercel.app/) &nbsp; · &nbsp; [**Enter the capstone**](https://own-the-stack.vercel.app/final-project/index.html#overview) &nbsp; · &nbsp; [**Play the developer POV**](https://own-the-stack.vercel.app/final-project/index.html#outcome)
+[**Explore the live site ↗**](https://own-the-stack.vercel.app/) &nbsp;·&nbsp; [**Enter the capstone**](https://own-the-stack.vercel.app/final-project/index.html#overview) &nbsp;·&nbsp; [**Start at Chapter 1**](https://own-the-stack.vercel.app/ch1-tradeoffs/index.html)
 
 Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd)**
 
@@ -20,37 +20,78 @@ Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd
 
 **از خواندن سیستم‌های توزیع‌شده تا طراحی پلتفرم AI خودت.**
 
-اینجا فقط ابزارها را کنار هم نمی‌چینیم: اول مسئلهٔ توسعه‌دهنده را می‌فهمیم، بار و هزینه را تخمین می‌زنیم، برای تصمیم‌ها دلیل می‌آوریم و مسیر اجرا و بازیابی را رسم می‌کنیم. سایت برای همه باز است؛ مخزن GitHub فعلاً خصوصی می‌ماند.
+اینجا فقط ابزارها را کنار هم نمی‌چینیم: اول مسئلهٔ توسعه‌دهنده را می‌فهمیم، بار و هزینه را تخمین می‌زنیم، برای تصمیم‌ها دلیل می‌آوریم و مسیر اجرا و بازیابی را رسم می‌کنیم. هر فصل فارسی و انگلیسی است، هر نمودار روایت مدرس دارد، و هر عدد یا یک منبع دارد یا یک فرضِ شفاف.
 
 </div>
 
-## Build understanding before infrastructure
+## Why this repo exists
 
-Own the Stack connects fourteen chapters of distributed-systems study to one
-reusable AI platform design. A developer should be able to define an AI app,
-submit a run, inspect its evidence and trace, and understand how it recovers when
-something fails. **Incident Investigator** is the first proposed application.
+Most distributed-systems notes stop at definitions. Most AI-platform repos start at infrastructure. This lab connects the two ends:
 
-> **What you can use today:** the bilingual educational website, design workshop,
-> calculators, architecture/UML diagrams and local animated walkthroughs.
-> The platform APIs, workers, database, CDC, model serving, real evaluations and
-> disaster-recovery automation are **not implemented yet**.
+1. **Learn the foundations** — 14 chapters of *Designing Data-Intensive Applications (2nd Edition)*, each distilled to its trade-offs with interactive diagrams and a teacher-style walkthrough.
+2. **Practice defending decisions** — a capstone workshop that turns those chapters into one coherent AI-platform design: requirements → estimates → ADRs → animated request flow → recovery drills → portfolio evidence.
+3. **Stay honest about scope** — everything proposed is labeled *proposed*; everything measured is labeled *measured*. No fake benchmarks, no implied production system.
 
-## Start your journey
+> **What you can use today:** the bilingual educational website, design workshop, calculators, architecture/UML diagrams and local animated walkthroughs. The platform APIs, workers, database, CDC, model serving, real evaluations and disaster-recovery automation are **not implemented yet**.
+
+## What you get
+
+| | |
+| :--- | :--- |
+| 📚 **14 bilingual chapters** | Persian + English, each with an at-a-glance table, frequent interview questions, common mistakes and a 5-minute checklist |
+| 📊 **113 interactive diagrams** | Dataflows, lifecycles, UML and decision trees — every one followed by a step-by-step narration, as if a teacher stood at the board |
+| 🧪 **47 reviewed exercises** | Leveled, prioritized, with interview briefs — plus a [2026 assessment & Senior/Staff path](https://own-the-stack.vercel.app/exercise-audit.html) |
+| 🏗️ **Capstone: Own the Stack** | One AI platform, five capabilities, fifteen ADRs with rationale, alternatives, validation and revisit triggers |
+| 🧮 **Editable estimates** | Workload & cost arithmetic with 12 explicit assumptions and limits — change the numbers, see what breaks |
+| 🛟 **Recovery with reasons** | Failure-specific RPO/RTO targets with derivation budgets and planned drills, not slogans |
+| 🎭 **Developer POV** | A synthetic seven-scene journey through the proposed platform, including worker interruption and resume |
+
+## The 14-chapter roadmap
+
+| # | Chapter | Core question | Diagrams |
+| :--- | :--- | :--- | :---: |
+| 01 | [Trade-offs in data systems](ch1-tradeoffs/index.html) | Why do checkout, search and reporting need different tools? | 8 |
+| 02 | [Nonfunctional requirements](ch2-nonfunctional/index.html) | How do latency, failure tolerance and growth get measured? | 6 |
+| 03 | [Data models & query languages](ch3-data-models/index.html) | Tables, documents, graphs or event logs — which fits? | 8 |
+| 04 | [Storage & retrieval](ch4-storage-retrieval/index.html) | How is one order found fast and millions aggregated? | 6 |
+| 05 | [Encoding & evolution](ch5-encoding-evolution/index.html) | How do old and new app versions keep talking? | 6 |
+| 06 | [Replication](ch6-replication/index.html) | How do copies converge — and where do conflicts come from? | 6 |
+| 07 | [Sharding](ch7-sharding/index.html) | How is data split across servers without hot spots? | 6 |
+| 08 | [Transactions](ch8-transactions/index.html) | Who gets the last seat — and how is that decided fairly? | 8 |
+| 09 | [The trouble with distributed systems](ch9-distributed-trouble/index.html) | The response never arrived — did it happen or not? | 9 |
+| 10 | [Consistency & consensus](ch10-consensus/index.html) | After the leader fails, how do nodes agree on the next one? | 10 |
+| 11 | [Batch processing](ch11-batch-processing/index.html) | From raw files to a complete nightly report — reliably? | 12 |
+| 12 | [Stream processing](ch12-stream-processing/index.html) | Duplicates, late events, live counts — how to stay correct? | 10 |
+| 13 | [A philosophy of streaming systems](ch13-streaming-philosophy/index.html) | How do derived views stay rebuildable and trustworthy? | 11 |
+| 14 | [Doing the right thing](ch14-doing-right/index.html) | Bias, surveillance, consent — what is the data *for*? | 10 |
+
+Prefer the guided path? [Open the roadmap on the live site ↗](https://own-the-stack.vercel.app/#chapters) · [Exercise audit & study path ↗](https://own-the-stack.vercel.app/exercise-audit.html)
+
+## The capstone in 6 steps
 
 | Step | Explore | What you get |
 | :--- | :--- | :--- |
-| **01 · Understand** | [Project overview](https://own-the-stack.vercel.app/final-project/index.html#overview) | The developer, the problem, inputs/outputs and the first slice |
-| **02 · Estimate** | [Workload & cost](https://own-the-stack.vercel.app/final-project/index.html#estimates) | Editable arithmetic, 12 assumptions and explicit limits |
-| **03 · Decide** | [Architecture decisions](https://own-the-stack.vercel.app/final-project/index.html#decisions) | 15 ADRs with alternatives, rationale, validation and revisit triggers |
-| **04 · Follow** | [Animated request flow](https://own-the-stack.vercel.app/final-project/index.html#architecture) | Trace a proposed request across the platform boundaries |
-| **05 · Recover** | [RPO & RTO](https://own-the-stack.vercel.app/final-project/index.html#recovery) | Failure-specific targets, recovery budgets and planned drills |
-| **06 · Experience** | [Developer POV](https://own-the-stack.vercel.app/final-project/index.html#outcome) | A synthetic seven-scene journey, including worker interruption and resume |
+| **01 · Understand** | [Project overview](final-project/index.html#overview) | The developer, the problem, inputs/outputs and the first slice |
+| **02 · Estimate** | [Workload & cost](final-project/index.html#estimates) | Editable arithmetic, 12 assumptions and explicit limits |
+| **03 · Decide** | [Architecture decisions](final-project/index.html#decisions) | 15 ADRs with alternatives, rationale, validation and revisit triggers |
+| **04 · Follow** | [Animated request flow](final-project/index.html#architecture) | Trace a proposed request across the platform boundaries |
+| **05 · Recover** | [RPO & RTO](final-project/index.html#recovery) | Failure-specific targets, recovery budgets and planned drills |
+| **06 · Experience** | [Developer POV](final-project/index.html#outcome) | A synthetic seven-scene journey, including worker interruption and resume |
 
-Want the foundations first? [Open the fourteen chapters](https://own-the-stack.vercel.app/#chapters).
-For interview context, [browse the attributed evidence](https://own-the-stack.vercel.app/final-project/index.html#company-evidence): one official exercise and seven candidate accounts, with limitations shown.
+For interview context, [browse the attributed evidence](final-project/index.html#company-evidence): one official exercise and seven candidate accounts, with limitations shown.
 
 ## One platform, five capabilities
+
+```mermaid
+flowchart LR
+    DEV([AI-app developer]) --> GW[Model Gateway<br/>budgets · deadlines · adapters]
+    DEV --> CTX[Live Context<br/>versioned retrieval · CDC]
+    CTX --> RT[Durable Runtime<br/>persisted runs · retries · fencing]
+    RT --> INV[AI Investigator<br/>read-only · evidence + uncertainty]
+    RT --> EVAL[Evaluation & Release<br/>frozen versions · trials · promotion]
+    GW --> RT
+    CTX --> INV
+```
 
 | Capability | Proposed responsibility |
 | :--- | :--- |
@@ -60,9 +101,7 @@ For interview context, [browse the attributed evidence](https://own-the-stack.ve
 | **Evaluation & Release** | Frozen versions, datasets, trials and evidence-led promotion |
 | **Model Gateway** | Provider adapters, budgets, deadlines, usage and a later local-serving phase |
 
-The design starts with a small end-to-end slice. A cited-answer app should later
-reuse the same core. Foundation-model training and a multi-GPU training scheduler
-are outside the first slice.
+The design starts with a small end-to-end slice. A cited-answer app should later reuse the same core. Foundation-model training and a multi-GPU training scheduler are outside the first slice.
 
 ## Recovery, with a reason behind every number
 
@@ -73,9 +112,7 @@ are outside the first slice.
 | Whole-region loss | **≤15 min** | **≤4 h** | Cold cross-region recovery; current IAM |
 | Derived retrieval index | **0** authoritative data lost | **≤4 h** | Source intact; one-million-document scenario |
 
-**Selected design objectives, not measured results or hosting SLAs.** Only the
-audience decision is accepted; technical ADRs remain proposed.
-[Read the contracts](final-project/recovery.json) · [See the drill guide](docs/RECOVERY.md)
+**Selected design objectives, not measured results or hosting SLAs.** Only the audience decision is accepted; technical ADRs remain proposed. [Read the contracts](final-project/recovery.json) · [See the drill guide](docs/RECOVERY.md)
 
 ## Try it locally
 
@@ -87,11 +124,7 @@ cd own-the-stack
 python3 -m http.server 8766 --bind 127.0.0.1
 ```
 
-Open **[localhost:8766](http://127.0.0.1:8766/)**. Cloning requires access to the
-private repository; the [hosted website](https://own-the-stack.vercel.app/) is public.
-Fonts load from Google Fonts with local fallbacks. Calculators and animations
-send no model/platform requests. Motion is user-controlled, with pause, stepping,
-keyboard support and reduced-motion behavior.
+Open **[localhost:8766](http://127.0.0.1:8766/)**. Fonts load from Google Fonts with local fallbacks. Calculators and animations send no model/platform requests. Motion is user-controlled, with pause, stepping, keyboard support and reduced-motion behavior.
 
 <details>
 <summary><strong>Development & verification</strong></summary>
@@ -107,9 +140,7 @@ python3 assets/build_site.py
 python3 assets/check_publication.py --export
 ```
 
-The allowlisted `public/` export excludes credentials, local history, review
-captures, generator state and tool caches. Frozen diagram exports and nine
-export/specification hash pairs are checked by SHA-256; Archify is optional for regeneration.
+The allowlisted `public/` export excludes credentials, local history, review captures, generator state and tool caches. Frozen diagram exports and nine export/specification hash pairs are checked by SHA-256; Archify is optional for regeneration.
 
 For browser checks, start the local server, then use Node.js and installed Chrome:
 
@@ -118,13 +149,9 @@ npm ci
 npm run test:browser
 ```
 
-Set `BASE_URL` for another origin. For Playwright Chromium, run
-`npx playwright install chromium` and set `PW_CHANNEL=chromium`.
-Screenshots stay in the ignored review directory.
+Set `BASE_URL` for another origin. For Playwright Chromium, run `npx playwright install chromium` and set `PW_CHANNEL=chromium`. Screenshots stay in the ignored review directory.
 
-The Actions job is supplied at `.github/ci-templates/checks.yml` and is currently
-**inactive**: enabling it requires a credential with `workflow` scope.
-See [DEVELOPMENT](docs/DEVELOPMENT.md) for details.
+CI is supplied at `.github/ci-templates/checks.yml` and is currently **inactive**: enabling it requires a credential with `workflow` scope. See [DEVELOPMENT](docs/DEVELOPMENT.md) for details.
 
 </details>
 
@@ -141,6 +168,16 @@ docs/            development, recovery, deployment and third-party notices
 
 </details>
 
+## Honesty box: proposed vs. implemented
+
+| ✅ Implemented & usable | 🔧 Proposed, not built |
+| :--- | :--- |
+| 14 bilingual chapters, 113 diagrams, 47 exercises | Platform APIs, workers, database, CDC pipelines |
+| 15 ADRs, estimates, recovery budgets, drill guide | Model serving, real evaluations, DR automation |
+| Animated request flow & synthetic developer POV | Measured SLOs, benchmarks, production deployment |
+
+Numbers carry units, formulas and assumptions — or they are labeled as open. Interview evidence separates the [one official exercise](https://www.anthropic.com/engineering/AI-resistant-technical-evaluations) from candidate accounts, with scope and limits attached. Industry articles are never presented as proof of an interview.
+
 ## Help shape the project
 
 | Contribute | Understand the rules | Report a problem |
@@ -148,26 +185,15 @@ docs/            development, recovery, deployment and third-party notices
 | [Contributing](CONTRIBUTING.md) | [Code of conduct](CODE_OF_CONDUCT.md) | [Support](SUPPORT.md) |
 | [DCO sign-off](DCO) | [Governance](GOVERNANCE.md) | [Security policy](SECURITY.md) |
 
-Keep proposals separate from implemented behavior and estimates separate from
-observations. Attribute company/interview claims and preserve uncertainty.
-Contributions require maintainer review and a `Signed-off-by` line under the DCO;
-there is no CLA or mandatory copyright assignment. Repository access is by invitation.
+Keep proposals separate from implemented behavior and estimates separate from observations. Attribute company/interview claims and preserve uncertainty. Contributions require maintainer review and a `Signed-off-by` line under the DCO; there is no CLA or mandatory copyright assignment. Public contributions are welcome via issues and PRs.
 
 ## Availability & ownership
 
-**Website: public. GitHub repository: private.** The production site opens without
-Vercel login. Preview/generated deployment URLs retain Standard Protection.
-See [deployment notes](docs/HOSTING.md) and [changelog](CHANGELOG.md).
+**Website and GitHub repository: public.** The production site opens without Vercel login. Preview/generated deployment URLs retain Standard Protection. See [deployment notes](docs/HOSTING.md) and [changelog](CHANGELOG.md).
 
-Original work is © 2026 **hurdad ashouri**, licensed under
-[**GNU AGPL-3.0-only**](LICENSE). Preserve notices and comply with applicable
-source-sharing obligations when distributing or modifying covered work.
+Original work is © 2026 **hurdad ashouri**, licensed under [**GNU AGPL-3.0-only**](LICENSE). Preserve notices and comply with applicable source-sharing obligations when distributing or modifying covered work.
 
-The study refers to *Designing Data-Intensive Applications, 2nd Edition*, by
-Martin Kleppmann and Chris Riccomini. Book, font, diagram-component and linked-account
-rights remain with their owners. See [NOTICE](NOTICE) and
-[third-party notices](docs/THIRD_PARTY_NOTICES.md). This independent project is not
-affiliated with O’Reilly or the companies mentioned in the evidence register.
+The study refers to *Designing Data-Intensive Applications, 2nd Edition*, by Martin Kleppmann and Chris Riccomini. Book, font, diagram-component and linked-account rights remain with their owners. See [NOTICE](NOTICE) and [third-party notices](docs/THIRD_PARTY_NOTICES.md). This independent project is not affiliated with O'Reilly or the companies mentioned in the evidence register.
 
 ---
 

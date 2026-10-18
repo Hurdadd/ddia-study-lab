@@ -13,4 +13,4 @@ The default branch is `main`. Prefer reviewed PRs; emergency corrections require
 follow-up explanation and checks. Releases describe the educational artifact and its
 actual tested behavior, not completion of the proposed platform. Public visibility,
 new external services, paid resources and changes to license terms need explicit
-maintainer authorization. The website is public by the maintainer’s explicit request; the GitHub repository remains private.
+maintainer authorization. The website and the GitHub repository are public by the maintainer's explicit request.

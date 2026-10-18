@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 — 2026-10-18 (public release)
+
+- Made the GitHub repository public after a full content audit: no credentials,
+  secrets, private paths or personal data in tracked files or history
+  (`check_publication.py` PASS over 557 files; `.env*` and `.vercel/` ignored).
+- Rebuilt the README: live-site hero, 14-chapter roadmap with diagram counts,
+  mermaid platform map, 6-step capstone guide, honesty box (proposed vs.
+  implemented) and relative links that work on GitHub, Vercel and localhost.
+- Aligned GOVERNANCE, SECURITY, CONTRIBUTING, HOSTING, RECOVERY and the
+  capstone signature note with public repository access.
+
 ## 0.1.0 — 2026-10-15 (private initial release)
 
 - Fourteen bilingual study chapters and an AI-platform design workshop.

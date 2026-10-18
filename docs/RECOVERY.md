@@ -47,7 +47,7 @@ an RTO miss. Archive timeout alone and an untested replica do not prove recovery
 
 The recoverable source is the last verified pushed Git commit; unpushed work is outside
 that boundary. Source RPO = 0 relative to that commit. Manual redeploy target = 30m,
-not drilled, and not a hosting SLA. Clone the private repository, run the checks and
+not drilled, and not a hosting SLA. Clone the repository, run the checks and
 static export, verify all-deployment authentication in the intended Vercel project,
 then deploy and test authenticated content and anonymous denial.
 
