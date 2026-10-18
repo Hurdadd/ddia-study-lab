@@ -14,16 +14,6 @@ Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd
 
 </div>
 
----
-
-<div dir="rtl">
-
-**از خواندن سیستم‌های توزیع‌شده تا طراحی پلتفرم AI خودت.**
-
-اینجا فقط ابزارها را کنار هم نمی‌چینیم: اول مسئلهٔ توسعه‌دهنده را می‌فهمیم، بار و هزینه را تخمین می‌زنیم، برای تصمیم‌ها دلیل می‌آوریم و مسیر اجرا و بازیابی را رسم می‌کنیم. هر فصل فارسی و انگلیسی است، هر نمودار روایت مدرس دارد، و هر عدد یا یک منبع دارد یا یک فرضِ شفاف.
-
-</div>
-
 ## Why this repo exists
 
 Most distributed-systems notes stop at definitions. Most AI-platform repos start at infrastructure. This lab connects the two ends:
