@@ -4,6 +4,8 @@
 
 **A distributed-systems study lab. An AI platform design workshop.**
 
+Learn *Designing Data-Intensive Applications* (2nd ed.) with **113 interactive diagrams** in **Persian and English** — chapter notes, step-by-step narration, 47 exercises and an interview pack.
+
 <a href="#build-understanding-before-infrastructure"><img src="assets/badges/status.svg" alt="Status: design prototype"></a> <a href="LICENSE"><img src="assets/badges/license.svg" alt="License: AGPL-3.0-only"></a> <a href="https://own-the-stack.vercel.app/"><img src="assets/badges/languages.svg" alt="Documentation: Persian and English"></a> <a href="https://own-the-stack.vercel.app/"><img src="assets/badges/website.svg" alt="Website: public"></a>
 
 14 chapters · 113 interactive diagrams · 47 exercises · 15 ADRs · 1 capstone
@@ -11,6 +13,8 @@
 [**Explore the live site ↗**](https://own-the-stack.vercel.app/) &nbsp;·&nbsp; [**Enter the capstone**](https://own-the-stack.vercel.app/final-project/index.html#overview) &nbsp;·&nbsp; [**Start at Chapter 1**](https://own-the-stack.vercel.app/ch1-tradeoffs/index.html)
 
 Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd)**
+
+⭐ If this helps you learn, [star the repo](https://github.com/Hurdadd/own-the-stack) and share it with someone preparing for system-design interviews.
 
 </div>
 

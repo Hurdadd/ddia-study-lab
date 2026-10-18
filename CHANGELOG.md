@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1 — 2026-10-18
+
+- Removed the site-wide `X-Robots-Tag: noindex` header left over from the private
+  phase so search engines can index the public site.
+- Added Open Graph / Twitter card metadata, a canonical URL and a 1200×630 share
+  image (`assets/og-image.png`).
+- Added "Star on GitHub" links to the site header, hero and footer.
+- Added a search-friendly summary line and a star/share note to the README.
+
 ## 0.2.0 — 2026-10-18 (public release)
 
 - Made the GitHub repository public after a full content audit: no credentials,
