@@ -75,7 +75,7 @@
         "a_en": "Message 10 (n3 answering v7): it is the only read answered from inside the write set.",
         "a_fa": "پیام ۱۰ (پاسخ v7 از n3): تنها خواندنی است که از داخل مجموعه نوشتن پاسخ گرفته.",
         "q_en": "Which single message carries freshness from the write set to the read set?",
-        "q_fa": "کدام تک‌پیام تازگی را از مجموعه نوشتن به مجموعه خواندن می‌رساند?"
+        "q_fa": "کدام تک‌پیام تازگی را از مجموعه نوشتن به مجموعه خواندن می‌رساند؟"
       },
       "source": "assets/diagram-specs/solutions/ch6/sol3-step1-quorum-holds.json"
     },
@@ -117,7 +117,7 @@
         "a_en": "No line: 3+3>5 holds in every act. Freshness breaks on the premises (ACK durability, bridge memory, one membership), never on the sum.",
         "a_fa": "هیچ خطی: 3+3>5 در هر سه پرده برقرار است. تازگی روی فرض‌ها می‌شکند (durability ACK، حافظه پل، یک membership) هرگز روی جمع.",
         "q_en": "Which line of the demo breaks w + r > n?",
-        "q_fa": "کدام خط دمو w + r > n را می‌شکند?"
+        "q_fa": "کدام خط دمو w + r > n را می‌شکند؟"
       },
       "source": "assets/diagram-specs/solutions/ch6/sol3-step2-assumptions-break.json"
     },
@@ -159,7 +159,7 @@
         "a_en": "max=v8, min=v6, behind={n3@n6, n4/n5@v7}: divergence in versions, because seconds would need a log order that does not exist.",
         "a_fa": "بیشینه ۸، کمینه ۶، عقب‌مانده‌ها {n3 با ۶ و n4/n5 با ۷}: واگرایی در نسخه‌ها، چون ثانیه ترتیب لاگی می‌خواهد که نیست.",
         "q_en": "The probe returns one v8 and four older versions. What does the monitor report?",
-        "q_fa": "probe یک v8 و چهار نسخه قدیمی‌تر برمی‌گرداند. مانیتور چه گزارش می‌دهد?"
+        "q_fa": "probe یک v8 و چهار نسخه قدیمی‌تر برمی‌گرداند. مانیتور چه گزارش می‌دهد؟"
       },
       "source": "assets/diagram-specs/solutions/ch6/sol3-staleness-monitor.json"
     }
@@ -184,14 +184,14 @@
       "a_fa": "باید با هم هم‌پوشانی داشته باشند نه فقط با خودشان: هنگام جابه‌جایی quorumهایی بخواه که هم مجموعه قدیم و هم جدید را قطع کنند (joint quorum / اکثریت توسعه‌یافته) تا هیچ نوشته‌ای جایی ننشیند که خواندن هیچ‌وقت نگاهش نکند. خواندن و نوشتن در گذار کار می‌کنند به قیمت quorumهای بزرگ‌تر؛ فقط وقتی هر replica membership تازه را تأیید کرد مجموعه قدیم بازنشسته می‌شود.",
       "level": "staff",
       "q_en": "How should old and new quorums overlap during concurrent rebalancing?",
-      "q_fa": "در rebalancing هم‌زمان، quorum قدیم و جدید چگونه باید هم‌پوشانی داشته باشند?"
+      "q_fa": "در rebalancing هم‌زمان، quorum قدیم و جدید چگونه باید هم‌پوشانی داشته باشند؟"
     },
     {
       "a_en": "It does not: repair copies the max version outward, which heals laggards but promises nothing about the next read's set. Linearizability needs the read itself to intersect a fresh write (or a fencing token on the read path); background copying is hygiene, not a guarantee.",
       "a_fa": "نمی‌دهد: repair نسخه بیشینه را به بیرون کپی می‌کند که عقب‌مانده‌ها را شفا می‌دهد ولی درباره مجموعه خواندن بعدی قولی نمی‌دهد. linearizability می‌خواهد خود خواندن با نوشته تازه قطع کند (یا token fencing در مسیر خواندن)؛ کپی پس‌زمینه بهداشت است نه تضمین.",
       "level": "staff",
       "q_en": "Does background read repair alone give linearizability?",
-      "q_fa": "آیا read repair پس‌زمینه به‌تنهایی linearizability می‌دهد?"
+      "q_fa": "آیا read repair پس‌زمینه به‌تنهایی linearizability می‌دهد؟"
     }
   ],
   "interview_q_en": "For n=5,w=3,r=3, explain quorum intersection and its limits. Analyze partial writes, lost ACKs, stale replacement and changing membership; define useful version probes and divergence monitoring.",
