@@ -6,15 +6,15 @@
 
 Learn *Designing Data-Intensive Applications* (2nd ed.) with **113 interactive diagrams** in **Persian and English** — chapter notes, step-by-step narration, 47 exercises and an interview pack.
 
-<a href="#build-understanding-before-infrastructure"><img src="assets/badges/status.svg" alt="Status: design prototype"></a> <a href="LICENSE"><img src="assets/badges/license.svg" alt="License: AGPL-3.0-only"></a> <a href="https://own-the-stack.vercel.app/"><img src="assets/badges/languages.svg" alt="Documentation: Persian and English"></a> <a href="https://own-the-stack.vercel.app/"><img src="assets/badges/website.svg" alt="Website: public"></a>
+<a href="#build-understanding-before-infrastructure"><img src="assets/badges/status.svg" alt="Status: design prototype"></a> <a href="LICENSE"><img src="assets/badges/license.svg" alt="License: AGPL-3.0-only"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/languages.svg" alt="Documentation: Persian and English"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/website.svg" alt="Website: public"></a>
 
 14 chapters · 113 interactive diagrams · 47 exercises · 15 ADRs · 1 capstone
 
-[**Explore the live site ↗**](https://own-the-stack.vercel.app/) &nbsp;·&nbsp; [**Enter the capstone**](https://own-the-stack.vercel.app/final-project/index.html#overview) &nbsp;·&nbsp; [**Start at Chapter 1**](https://own-the-stack.vercel.app/ch1-tradeoffs/index.html)
+[**Explore the live site ↗**](https://ddia-study-lab.vercel.app/) &nbsp;·&nbsp; [**Enter the capstone**](https://ddia-study-lab.vercel.app/final-project/index.html#overview) &nbsp;·&nbsp; [**Start at Chapter 1**](https://ddia-study-lab.vercel.app/ch1-tradeoffs/index.html)
 
 Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd)**
 
-⭐ If this helps you learn, [star the repo](https://github.com/Hurdadd/own-the-stack) and share it with someone preparing for system-design interviews.
+⭐ If this helps you learn, [star the repo](https://github.com/Hurdadd/ddia-study-lab) and share it with someone preparing for system-design interviews.
 
 </div>
 
@@ -34,7 +34,7 @@ Most distributed-systems notes stop at definitions. Most AI-platform repos start
 | :--- | :--- |
 | 📚 **14 bilingual chapters** | Persian + English, each with an at-a-glance table, frequent interview questions, common mistakes and a 5-minute checklist |
 | 📊 **113 interactive diagrams** | Dataflows, lifecycles, UML and decision trees — every one followed by a step-by-step narration, as if a teacher stood at the board |
-| 🧪 **47 reviewed exercises** | Leveled, prioritized, with interview briefs — plus a [2026 assessment & Senior/Staff path](https://own-the-stack.vercel.app/exercise-audit.html) |
+| 🧪 **47 reviewed exercises** | Leveled, prioritized, with interview briefs — plus a [2026 assessment & Senior/Staff path](https://ddia-study-lab.vercel.app/exercise-audit.html) |
 | 🏗️ **Capstone: Own the Stack** | One AI platform, five capabilities, fifteen ADRs with rationale, alternatives, validation and revisit triggers |
 | 🧮 **Editable estimates** | Workload & cost arithmetic with 12 explicit assumptions and limits — change the numbers, see what breaks |
 | 🛟 **Recovery with reasons** | Failure-specific RPO/RTO targets with derivation budgets and planned drills, not slogans |
@@ -59,7 +59,7 @@ Most distributed-systems notes stop at definitions. Most AI-platform repos start
 | 13 | [A philosophy of streaming systems](ch13-streaming-philosophy/index.html) | How do derived views stay rebuildable and trustworthy? | 11 |
 | 14 | [Doing the right thing](ch14-doing-right/index.html) | Bias, surveillance, consent — what is the data *for*? | 10 |
 
-Prefer the guided path? [Open the roadmap on the live site ↗](https://own-the-stack.vercel.app/#chapters) · [Exercise audit & study path ↗](https://own-the-stack.vercel.app/exercise-audit.html)
+Prefer the guided path? [Open the roadmap on the live site ↗](https://ddia-study-lab.vercel.app/#chapters) · [Exercise audit & study path ↗](https://ddia-study-lab.vercel.app/exercise-audit.html)
 
 ## The capstone in 6 steps
 
@@ -113,8 +113,8 @@ The design starts with a small end-to-end slice. A cited-answer app should later
 Python **3.10+** is enough. No API key or database is required.
 
 ```sh
-git clone https://github.com/Hurdadd/own-the-stack.git
-cd own-the-stack
+git clone https://github.com/Hurdadd/ddia-study-lab.git
+cd ddia-study-lab
 python3 -m http.server 8766 --bind 127.0.0.1
 ```
 
@@ -187,7 +187,7 @@ Keep proposals separate from implemented behavior and estimates separate from ob
 
 Original work is © 2026 **hurdad ashouri**, licensed under [**GNU AGPL-3.0-only**](LICENSE). Preserve notices and comply with applicable source-sharing obligations when distributing or modifying covered work.
 
-The study refers to *Designing Data-Intensive Applications, 2nd Edition*, by Martin Kleppmann and Chris Riccomini. Book, font, diagram-component and linked-account rights remain with their owners. See [NOTICE](NOTICE) and [third-party notices](docs/THIRD_PARTY_NOTICES.md). This independent project is not affiliated with O'Reilly or the companies mentioned in the evidence register.
+This is an independent, unofficial study project, not affiliated with or endorsed by the authors or O'Reilly. The study refers to *Designing Data-Intensive Applications, 2nd Edition*, by Martin Kleppmann and Chris Riccomini. Book, font, diagram-component and linked-account rights remain with their owners. See [NOTICE](NOTICE) and [third-party notices](docs/THIRD_PARTY_NOTICES.md). This independent project is not affiliated with O'Reilly or the companies mentioned in the evidence register.
 
 ---
 
@@ -195,6 +195,6 @@ The study refers to *Designing Data-Intensive Applications, 2nd Edition*, by Mar
 
 **Learn the trade-offs. Defend the decisions. Own the stack.**
 
-[Visit the lab ↗](https://own-the-stack.vercel.app/)
+[Visit the lab ↗](https://ddia-study-lab.vercel.app/)
 
 </div>

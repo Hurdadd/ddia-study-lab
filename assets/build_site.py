@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Build a static allowlisted deployment, never copy workspace metadata."""
 from pathlib import Path
-import shutil
+import shutil,sys
+sys.path.insert(0,str(Path(__file__).resolve().parent))
 ROOT=Path(__file__).resolve().parent.parent
 OUT=ROOT/'public'
 if OUT.exists(): shutil.rmtree(OUT)
@@ -17,8 +18,10 @@ public_docs=['docs/DEVELOPMENT.md','docs/HOSTING.md','docs/RECOVERY.md','docs/SO
 public_docs += [f'final-project/adrs/ADR-{n:03}.md' for n in range(1,16)]
 for name in public_docs:
  q=OUT/name;q.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(ROOT/name,q)
-for name in ['index.html','exercise-audit.html','README.md','CONTRIBUTING.md','CODE_OF_CONDUCT.md','SECURITY.md','GOVERNANCE.md','SUPPORT.md','AUTHORS.md','CHANGELOG.md','NOTICE','LICENSE','DCO']:
+for name in ['index.html','exercise-audit.html','README.md','CONTRIBUTING.md','CODE_OF_CONDUCT.md','SECURITY.md','GOVERNANCE.md','SUPPORT.md','AUTHORS.md','CHANGELOG.md','NOTICE','LICENSE','DCO','robots.txt']:
  shutil.copy2(ROOT/name,OUT/name)
+import seo_meta
+seo_meta.apply(OUT)
 assert not list(OUT.rglob('.env*'))
 assert not (OUT/'PRODUCT.md').exists()
 assert not (OUT/'HANDOFF_EXERCISE_SOLUTIONS_FA.md').exists()
