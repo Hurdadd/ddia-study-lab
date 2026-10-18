@@ -1,6 +1,6 @@
 # Hosting
 
-The production educational website is public at https://own-the-stack.vercel.app/.
+The production educational website is public at https://ddia-study-lab.vercel.app/.
 The GitHub repository is public. The site is a static export, with no AI
 backend, production tenant data, or model credentials.
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 — 2026-10-18
+
+- Renamed the repository to `ddia-study-lab` and the site to
+  `ddia-study-lab.vercel.app` so "DDIA" is in the name and URL; the old
+  `own-the-stack.vercel.app` host now redirects permanently.
+- Added `robots.txt`, a generated `sitemap.xml` and per-page title, description,
+  canonical, Open Graph / Twitter tags and JSON-LD (`assets/seo_meta.py`, applied
+  by `build_site.py`) for all chapters, solutions, the capstone and the audit.
+- Added `WebSite` and `Course` structured data and a keyword-first title on the
+  home page.
+
 ## 0.2.1 — 2026-10-18
 
 - Removed the site-wide `X-Robots-Tag: noindex` header left over from the private
