@@ -12,24 +12,24 @@
       "rpo_seconds": 0,
       "rto_seconds": 120,
       "scope": [
-        "run و step تأییدشده؛ DB و دیسک سالم‌اند.",
-        "Acknowledged run/step state; database and disk survive."
+        "run و step تأییدشده؛ DB و دیسک سالم می‌مونن.",
+        "The acknowledged run and step state, and a database and disk that survive."
       ],
       "why": [
-        "پایلوت ابزار خواندنی دارد؛ ادامهٔ اجرا نباید از ابتدا run تازه بسازد. دو دقیقه زمانِ قابل‌آزمون برای تشخیص و claim مجدد است.",
-        "The pilot uses read-only tools; recovery must resume the same run. Two minutes is a testable detection/reclaim budget."
+        "پایلوت ابزار خواندنی داره؛ ادامهٔ اجرا نباید از صفر run تازه بسازه. دو دقیقه، بودجهٔ قابل‌آزمونِ تشخیص و claim مجدده.",
+        "The pilot only uses read-only tools, so resuming must not start a brand-new run. Two minutes is a testable budget for detecting the failure and reclaiming the lease."
       ],
       "budget": [
         "تشخیص ۱۵ + lease حداکثر ۳۰ + claim تا ۱۵ + replay تا ۳۰ + آزمون نتیجه تا ۳۰ = ۱۲۰ ثانیه.",
         "Detect 15 + lease up to 30 + claim 15 + replay 30 + validation 30 = 120 seconds."
       ],
       "requires": [
-        "commit پایدار با fsync و synchronous_commit روشن، دیسک سالم، epoch/CAS برای رد مالک قدیمی، ثبت نتیجهٔ step و idempotency.",
-        "Durable commits with fsync/synchronous_commit enabled, intact disk, epoch/CAS fencing, recorded step results, and idempotency."
+        "commit پایدار با fsync و synchronous_commit روشن، دیسک سالم، epoch/CAS برای ردِ مالک قدیمی، ثبت نتیجهٔ step و idempotency.",
+        "Durable commits with fsync and synchronous_commit on, an intact disk, epoch/CAS to fence the old owner, recorded step results, and idempotency."
       ],
       "test": [
-        "پس از commit پاسخ‌داده‌شده worker را kill کن؛ همان run_id ادامه یابد، همهٔ commitهای تأییدشده باقی بمانند و canary سرتاسری تا ۱۲۰s موفق شود.",
-        "Kill a worker after an acknowledged commit; retain the same run ID and all acknowledged state, and pass an end-to-end canary within 120s."
+        "بعد از commit پاسخ‌داده‌شده، worker رو kill کن؛ همون run_id ادامه پیدا کنه، همهٔ commitهای تأییدشده بمونن و canary سرتاسری تا ۱۲۰s قبول بشه.",
+        "Kill the worker right after an acknowledged commit: the same run_id continues, every acknowledged commit survives, and the end-to-end canary passes within 120s."
       ]
     },
     {
@@ -41,24 +41,24 @@
       "rpo_seconds": 300,
       "rto_seconds": 1800,
       "scope": [
-        "پایلوت با حداکثر ۱۰GB دادهٔ مرجع؛ restore از محل مستقل.",
-        "Pilot with at most 10GB of authoritative data; restore from independent storage."
+        "پایلوت با حداکثر ۱۰GB دادهٔ مرجع؛ و restore از یه محلِ مستقل.",
+        "A pilot with at most 10GB of authoritative data, and a restore from independent storage."
       ],
       "why": [
-        "برای دادهٔ مصنوعیِ قابل‌بازتولید، از‌دست‌رفتن حداکثر پنج دقیقه را موقتاً می‌پذیریم؛ backup روزانه به‌تنهایی این هدف را برآورده نمی‌کند.",
-        "For reproducible synthetic pilot data, provisionally accept up to five minutes of loss; daily backups alone cannot meet this target."
+        "برای دادهٔ مصنوعیِ قابل‌بازتولید، موقتاً از‌دست‌رفتنِ حداکثر پنج دقیقه رو می‌پذیریم؛ backup روزانه به‌تنهایی این هدف رو برآورده نمی‌کنه.",
+        "For reproducible synthetic pilot data we provisionally accept losing up to five minutes; a daily backup on its own can't meet this target."
       ],
       "budget": [
-        "تشخیص ۳ + جداسازی/تأمین ۵ + دریافت backup تا ۶ + replay تا ۶ + اعتبارسنجی ۵ + بازگشایی ۵ = ۳۰ دقیقه. انتقال ۱۰GB با ۵۰MB/s تقریباً ۲۰۰s از این بودجه است.",
+        "تشخیص ۳ + جداسازی/تأمین ۵ + دریافت backup تا ۶ + replay تا ۶ + اعتبارسنجی ۵ + بازگشایی ۵ = ۳۰ دقیقه. انتقال ۱۰GB با ۵۰MB/s تقریباً ۲۰۰s از همین بودجه رو می‌خوره.",
         "Detect 3 + isolate/provision 5 + restore download 6 + replay 6 + validate 5 + reopen 5 = 30 minutes. Transferring 10GB at 50MB/s uses about 200s of this budget."
       ],
       "requires": [
-        "base backup روزانه + WAL پیوستهٔ قابل‌بازیابی در storage مستقل؛ آخرین نقطهٔ پیوستهٔ بازیابی هر دقیقه بررسی شود و gap از ۳۰۰s نگذرد. archive_timeout به‌تنهایی تضمین نیست.",
-        "Daily base backup plus recoverable continuous WAL in independent storage; verify the contiguous recovery point every minute and keep its gap within 300s. archive_timeout alone is not a guarantee."
+        "base backup روزانه + WAL پیوستهٔ قابل‌بازیابی در storage مستقل؛ آخرین نقطهٔ پیوستهٔ بازیابی هر دقیقه بررسی بشه و gap از ۳۰۰s نگذره. تنظیمِ archive_timeout به‌تنهایی تضمین نیست.",
+        "A daily base backup plus continuous recoverable WAL in independent storage; check the last contiguous recovery point every minute and keep the gap under 300s. Setting archive_timeout on its own is no guarantee."
       ],
       "test": [
-        "DB آزمایشی را از دیسک خالی برگردان؛ آخرین canary قابل‌بازیابی با journal مقایسه شود؛ policy، blob و حذف‌ها پیش از پاسخ‌گویی تطبیق داده شوند.",
-        "Restore a disposable database onto an empty disk; compare the recovered canary with the journal and reconcile policy, blobs, and deletions before serving."
+        "DB آزمایشی رو از دیسک خالی برگردان؛ آخرین canary قابل‌بازیابی رو با journal مقایسه کن؛ و policy، blob و حذف‌ها رو قبل از پاسخ‌گویی تطبیق بده.",
+        "Restore a throwaway database onto an empty disk, compare the last recoverable canary against the journal, and reconcile policy, blobs, and deletions before you serve traffic."
       ]
     },
     {
@@ -70,24 +70,24 @@
       "rpo_seconds": 900,
       "rto_seconds": 14400,
       "scope": [
-        "پایلوت آموزشی؛ بازیابی سرد در ناحیهٔ دیگر، بدون تعهد مالی یا ابزارِ اثرگذار.",
+        "پایلوت آموزشی؛ بازیابیِ سرد در ناحیهٔ دیگر، بدون تعهدِ مالی یا ابزارِ اثرگذار.",
         "Teaching pilot; cold recovery in another region, without financial commitments or side-effecting tools."
       ],
       "why": [
-        "warm standby دائمی را برای پایلوت توجیه نکرده‌ایم. چهار ساعت outage و پانزده دقیقه دادهٔ مصنوعی، فرضِ تحمل کسب‌وکار است و قبل از دادهٔ واقعی باید بازنگری شود.",
-        "A permanent warm standby is not yet justified. Four hours of downtime and fifteen minutes of synthetic data are explicit tolerance assumptions to revisit before real workloads."
+        "warm standby دائمی رو برای پایلوت توجیه نکردیم. چهار ساعت outage و پانزده دقیقه دادهٔ مصنوعی، فرضِ روشنِ تحملِ کسب‌وکاره و قبل از دادهٔ واقعی باید بازنگری بشه.",
+        "We haven't justified a permanent warm standby for the pilot. Four hours of downtime and fifteen minutes of synthetic data are explicit business-tolerance assumptions, and they get revisited before any real workload."
       ],
       "budget": [
         "تشخیص/triage ۳۰ + دسترسی/تأمین ۶۰ + restore/replay ۶۰ + صحت و policy تا ۶۰ + route تا ۳۰ = ۲۴۰ دقیقه.",
         "Detect/triage 30 + access/provision 60 + restore/replay 60 + correctness/policy 60 + routing 30 = 240 minutes."
       ],
       "requires": [
-        "نسخهٔ مستقلِ cross-region از backup و WAL و manifest artifact؛ gap پیوستهٔ بازیابی ≤۹۰۰s؛ کلید و IaC خارج ناحیهٔ خراب؛ IAM معتبر و fencing writer قدیمی.",
-        "Independent cross-region backups/WAL and artifact manifests with a contiguous recovery gap ≤900s; keys and IaC outside the failed region, current IAM, and old-writer fencing."
+        "نسخهٔ مستقلِ cross-region از backup و WAL و manifest artifact؛ gap پیوستهٔ بازیابی ≤۹۰۰s؛ کلید و IaC بیرون ناحیهٔ خراب؛ IAM معتبر و fencing برای writer قدیمی.",
+        "An independent cross-region copy of backups, WAL, and artifact manifests; a contiguous recovery gap ≤900s; keys and IaC living outside the failed region; current IAM, and fencing for the old writer."
       ],
       "test": [
-        "دسترسی ناحیهٔ اولیه را قطع و با دسترسی بازیابی جدا restore کن؛ اگر policy فعلی یا fence قابل‌اثبات نیست، fail closed بمان و RTO را ناموفق ثبت کن.",
-        "Isolate the primary region and restore using separate recovery access. If current policy or fencing cannot be proven, fail closed and record the RTO miss."
+        "دسترسی ناحیهٔ اولیه رو قطع کن و با دسترسی بازیابیِ جدا restore کن؛ اگه policy فعلی یا fence قابل‌اثبات نیست، fail closed بمون و RTO رو ناموفق ثبت کن.",
+        "Cut off the primary region and restore through separate recovery access. If you can't prove the current policy or the fence, fail closed and record the RTO as missed."
       ]
     },
     {
@@ -99,31 +99,31 @@
       "rpo_seconds": 0,
       "rto_seconds": 14400,
       "scope": [
-        "فقط لایهٔ retrieval؛ منبع مرجع و guard حذف/ACL سالم‌اند؛ سناریوی یک میلیون سند E04.",
-        "Retrieval layer only; authoritative data and deletion/ACL guards survive; E04’s million-document scenario."
+        "فقط لایهٔ retrieval؛ منبعِ مرجع و guard حذف/ACL سالم می‌مونن؛ سناریوی یک میلیون سند E04.",
+        "The retrieval layer only; the authoritative data and the deletion/ACL guards survive, in E04's million-document scenario."
       ],
       "why": [
-        "index را از منبع بازمی‌سازیم؛ RPO صفر برای منبع است، نه تضمینِ تازگیِ view. سایر سرویس‌ها ممکن است زودتر سالم باشند.",
-        "Rebuild the index from its source. Zero RPO refers to source data, not view freshness; other services may recover sooner."
+        "index رو از منبع بازمی‌سازیم؛ RPO صفر برای منبعه، نه تضمینِ تازگیِ view. بقیهٔ سرویس‌ها ممکنه زودتر سالم بشن.",
+        "We rebuild the index from its source. Zero RPO is a promise about the source, not about how fresh the view is; other services may well be healthy sooner."
       ],
       "budget": [
-        "seed≈۲٫۷۷۸h + catch-up≈۰٫۵۵۶h + اعتبارسنجی ۰٫۵h ≈۳٫۸۳۴h؛ در هدف ۴h حدود ۱۰ دقیقه حاشیه می‌ماند.",
+        "seed≈۲٫۷۷۸h + catch-up≈۰٫۵۵۶h + اعتبارسنجی ۰٫۵h ≈۳٫۸۳۴h؛ توی هدف ۴h حدود ۱۰ دقیقه حاشیه می‌مونه.",
         "Seed≈2.778h + catch-up≈0.556h + validation 0.5h ≈3.834h; a 4h target leaves roughly 10 minutes of headroom."
       ],
       "requires": [
-        "همان E04–E07: seed=۱۰۰ سند/s، ورود ۵ تغییر/s و replay=۳۰ تغییر/s؛ snapshot ثابت، WAL کافی و publish اتمی نسل معتبر.",
-        "E04–E07: seed 100 docs/s, arrivals 5 changes/s, replay 30 changes/s; stable snapshot, sufficient WAL, and atomic publication of a validated generation."
+        "همان E04–E07: seed=۱۰۰ سند/s، ورود ۵ تغییر/s و replay=۳۰ تغییر/s؛ به‌علاوهٔ snapshot ثابت، WAL کافی و publish اتمیِ نسل معتبر.",
+        "The same E04–E07 numbers: seed 100 docs/s, arrivals 5 changes/s, replay 30 changes/s, plus a stable snapshot, enough WAL, and atomic publication of a validated generation."
       ],
       "test": [
-        "index را در آزمایشگاه دور بینداز؛ نسل تازه باید checksum، deletion و ACL فعلی را بگذراند. افزایش بار یا μ≤λ یعنی از‌دست‌رفتن این هدف.",
-        "Discard the test index and rebuild; require checksum, deletion, and current ACL checks. Higher load or μ≤λ invalidates this target."
+        "index رو توی آزمایشگاه دور بنداز؛ نسل تازه باید checksum، deletion و ACL فعلی رو بگذرونه. بارِ بیشتر، یا μ≤λ، یعنی این هدف از دست رفته.",
+        "Throw the test index away and rebuild it; the fresh generation has to pass checksum, deletion, and current-ACL checks. More load, or μ≤λ, and this target is gone."
       ]
     }
   ],
   "site": {
-    "rpo": "0 relative to the last verified pushed commit; local uncommitted work is excluded",
+    "rpo": "0 relative to the last verified pushed commit; local uncommitted work stays outside this claim.",
     "rto_seconds": 1800,
-    "status": "manual redeploy objective, not a Vercel or GitHub service guarantee"
+    "status": "A manual redeploy objective, not a Vercel or GitHub service guarantee."
   },
   "sources": [
     "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/introduction.html",
