@@ -1,28 +1,28 @@
 {
   "alternatives": [
     {
-      "en": "Keep everything, encrypted, with per-user crypto-shredding: deletion becomes key destruction — instant and restore-safe — but per-user key management, re-keying on breach, and a leaked key silently defeat the deletion. Worth it when legal deadlines are tight and the key service is already hardened; otherwise the sweep plus tombstones is simpler to audit.",
-      "fa": "نگه داشتن همه‌چیز به‌صورت رمز با shredding کلید per-user: حذف می‌شود نابودی کلید — فوری و restore-امن — ولی مدیریت کلید per-user، بازکلیدزنی موقع رخنه و کلید لو رفته که بی‌صدا حذف را خنثی می‌کند. وقتی مهلت‌ها تنگ‌اند و سرویس کلید از قبل سخت شده می‌ارزد؛ وگرنه sweep به‌علاوه tombstone برای ممیزی ساده‌تر است."
+      "en": "Keep everything, encrypted, with per-user crypto-shredding: deletion becomes key destruction — instant and restore-safe — but per-user key management, re-keying after a breach, and one leaked key quietly undo the deletion. Worth it when the legal deadlines are tight and the key service is already hardened; otherwise the sweep plus tombstones is simpler to audit.",
+      "fa": "همه‌چیز رو نگه دار، ولی رمز: shredding کلید per-user. حذف می‌شه نابودیِ کلید — فوری و restore-امن — ولی مدیریت کلید per-user، بازکلیدزنی موقع رخنه و کلیدِ لو رفته که بی‌صدا حذف رو خنثی می‌کنه، بهای سنگینشه. وقتی مهلت‌ها تنگه و سرویس کلید از قبل سفت شده می‌ارزه؛ وگرنه sweep به‌علاوهٔ tombstone برای ممیزی ساده‌تره."
     },
     {
-      "en": "Plain full restores with no tombstone gate: faster recovery drills and simpler backup tooling, but any restore past a deletion resurrects users — the exact failure the demo's restore probe exists to prevent. Acceptable only for data with no erasure duty; personal data is not that data.",
-      "fa": "restore کامل ساده بدون دروازه tombstone: تمرین بازیابی سریع‌تر و ابزار بکاپ ساده‌تر، ولی هر restore بعد از حذف کاربرها را زنده می‌کند — دقیقاً همان خرابی که آزمون restore دمو برای جلوگیری‌اش هست. فقط برای داده بدون تکلیف حذف قابل قبول است؛ داده شخصی آن داده نیست."
+      "en": "Plain full restores with no tombstone gate: faster recovery drills and simpler backup tooling, but any restore that runs past a deletion brings the users back — the exact failure the demo's restore probe exists to prevent. Fine only for data with no erasure duty; personal data is not that data.",
+      "fa": "restore کاملِ ساده بدون دروازهٔ tombstone: تمرین بازیابی سریع‌تر و ابزار بکاپ ساده‌تر، ولی هر restore که بعد از یه حذف اتفاق بیفته، کاربرهای حذف‌شده رو زنده می‌کنه — دقیقاً همون خرابی که آزمون restore دمو برای جلوگیری ازش ساخته شده. فقط برای دادهٔ بدون تکلیف حذف قابل قبوله؛ داده شخصی اون داده نیست."
     }
   ],
-  "answer_en": "Write the data/purpose/retention/delete table first — with illustrative days, never legal ones — then run one idempotent sweeper over every copy: live rows, derived views, log tombstones, backup expiry. Legal holds block the sweep per matter; aggregates publish only at k>=5; restores replay through the tombstones; audit carries hashes, never raw PII. Read breach exposure off the real inventory, including what was never collected.",
-  "answer_fa": "اول جدول داده/مقصود/نگهداری/حذف را بنویس — با روزهای نمایشی، هرگز حقوقی — بعد یک sweeper ایدم‌پوتنت را روی هر کپی بگردان: ردیف‌های زنده، نماهای مشتق، tombstoneهای لاگ و انقضای بکاپ. holdهای حقوقی per-matter جلوی sweep را می‌گیرند؛ aggregateها فقط با k≥۵ منتشر می‌شوند؛ restoreها از میان tombstoneها بازپخش می‌کنند؛ ممیزی hash حمل می‌کند، هرگز PII خام نه. مواجهه رخنه را از موجودی واقعی بخوان، شامل آنچه هیچ‌وقت جمع نشد.",
+  "answer_en": "Write the data/purpose/retention/delete table first — with illustrative days, never legal ones — then run one idempotent sweeper over every copy: live rows, derived views, log tombstones, backup expiry. Legal holds block the sweep per matter; aggregates publish only at k>=5; restores replay through the tombstones; the audit carries hashes, never raw PII. And read breach exposure off the real inventory, including what you never collected in the first place.",
+  "answer_fa": "اول جدول داده/مقصود/نگهداری/حذف رو بنویس — با روزهای نمایشی، هرگز حقوقی — بعد یه sweeper ایدم‌پوتنت رو بگردون روی هر کپی: ردیف‌های زنده، نماهای مشتق، tombstoneهای لاگ و انقضای بکاپ. holdهای حقوقی per-matter جلوی sweep رو می‌گیرن؛ aggregateها فقط با k≥۵ منتشر می‌شن؛ restoreها از میان tombstoneها بازپخش می‌کنن؛ و ممیزی hash حمل می‌کنه، هرگز PII خام نه. مواجههٔ رخنه رو از موجودی واقعی بخون — از جمله آنچه هیچ‌وقت جمع نشد.",
   "assumptions": [
     {
-      "en": "A shop with orders, profiles, clickstream and sessions; every retention day below is ILLUSTRATIVE teaching (آموزشی), sized per product with legal interpretation in production.",
-      "fa": "فروشگاهی با سفارش، پروفایل، clickstream و session؛ هر روز نگهداری پایین نمایشی و آموزشی است (آموزشی) و در پروداکشن per-product با تفسیر حقوقی اندازه می‌خورد."
+      "en": "A shop with orders, profiles, clickstream and sessions. Every retention day below is ILLUSTRATIVE teaching (آموزشی) — in production you size them per product, with legal interpretation on top.",
+      "fa": "یه فروشگاه با سفارش، پروفایل، clickstream و session؛ هر روز نگهداری که پایین می‌بینی نمایشی و آموزشیه (آموزشی) — تو پروداکشن per-product با تفسیر حقوقی تنظیم می‌شه."
     },
     {
-      "en": "Legal holds arrive per matter with an owner and an expiry review; a held row survives the sweep and the restore alike.",
-      "fa": "holdهای حقوقی per-matter با مالک و بازبینی انقضا می‌آیند؛ ردیف held هم از sweep و هم از restore جان سالم می‌برد."
+      "en": "Legal holds arrive per matter, each with an owner and an expiry review. A held row survives both the sweep and the restore.",
+      "fa": "holdهای حقوقی per-matter یکی‌یکی میان، هرکدوم با یه مالک و یه بازبینی انقضا؛ ردیف held از sweep و از restore هر دو جان سالم می‌بره."
     },
     {
-      "en": "Backups expire by retention and are destroyed, not archived; the demo models the sweep, the hold, the aggregates and the restore in memory.",
-      "fa": "بکاپ‌ها با نگهداری منقضی و نابود می‌شوند، نه بایگانی؛ دمو sweep و hold و aggregateها و restore را در حافظه مدل می‌کند."
+      "en": "Backups hit their retention date and get destroyed, never archived. The demo models the sweep, the hold, the aggregates and the restore in memory.",
+      "fa": "بکاپ‌ها وقتی نگهداری‌شون تموم شه، نابود می‌شن — بایگانی نمی‌شن؛ دمو هم sweep و hold و aggregateها و restore رو تو حافظه مدل می‌کنه."
     }
   ],
   "code": {
@@ -34,49 +34,49 @@
     "run_fa": "javac PurgePolicyDemo.java && java PurgePolicyDemo — فقط استاندارد جاوا، فوری و قطعی.",
     "status": "verified"
   },
-  "design_en": "<p>Tables: <code>retention(kind, days_illustrative, owner)</code>, <code>tombstones(id, purged_at)</code>, <code>holds(id, matter, owner, review_at)</code>, <code>audit_purges(hash(id), actor, at)</code>. Sweeper loop per row: <code>if age &gt; retention and no live hold → tombstone id, purge derived keys, append log tombstone, hash into audit</code>; resweeps must change nothing. Aggregates publish only cells with <code>n&gt;=5</code> (teaching k); corrections rerun suppression. Restore path: snapshot rows <code>LEFT ANTI JOIN tombstones</code> — tombstoned ids never re-enter; snapshots older than retention are destroyed, never replayed. Audit reads prove every claim; raw PII never lands in any log.</p>",
-  "design_fa": "<p>جدول‌ها: <code>retention(kind, days_illustrative, owner)</code> و <code>tombstones(id, purged_at)</code> و <code>holds(id, matter, owner, review_at)</code> و <code>audit_purges(hash(id), actor, at)</code>. حلقه sweeper per-row: <code>اگر سن &gt; نگهداری و hold زنده نیست → tombstone شناسه، پاک‌سازی کلیدهای مشتق، الصاق tombstone لاگ و hash در ممیزی</code>؛ sweepهای دوباره نباید چیزی عوض کنند. aggregateها فقط سلول‌های <code>n&gt;=5</code> (k آموزشی) را منتشر می‌کنند؛ اصلاحیه‌ها suppression را دوباره می‌زنند. مسیر restore: ردیف‌های snapshot با <code>LEFT ANTI JOIN tombstones</code> — شناسه‌های tombstoneشده هیچ‌وقت برنمی‌گردند؛ snapshotهای قدیمی‌تر از نگهداری نابود می‌شوند، هرگز بازپخش نه. خواندن‌های ممیزی هر ادعا را ثابت می‌کنند؛ PII خام هیچ‌وقت در هیچ لاگی نمی‌نشیند.</p>",
+  "design_en": "<p>Tables: <code>retention(kind, days_illustrative, owner)</code>, <code>tombstones(id, purged_at)</code>, <code>holds(id, matter, owner, review_at)</code>, <code>audit_purges(hash(id), actor, at)</code>. Sweeper loop per row: <code>if age &gt; retention and no live hold → tombstone id, purge derived keys, append log tombstone, hash into audit</code>; resweeps must change nothing. Aggregates publish only cells with <code>n&gt;=5</code> (teaching k); corrections rerun suppression. Restore path: snapshot rows <code>LEFT ANTI JOIN tombstones</code> — tombstoned ids never re-enter; snapshots older than retention are destroyed, never replayed. Audit reads prove every claim; raw PII never lands in any log. One sweep, every copy, a proof for each — that is the whole job.</p>",
+  "design_fa": "<p>جدول‌ها: <code>retention(kind, days_illustrative, owner)</code> و <code>tombstones(id, purged_at)</code> و <code>holds(id, matter, owner, review_at)</code> و <code>audit_purges(hash(id), actor, at)</code>. حلقه sweeper per-row: <code>اگر سن &gt; نگهداری و hold زنده نیست → tombstone شناسه، پاک‌سازی کلیدهای مشتق، الصاق tombstone لاگ و hash در ممیزی</code>؛ sweepهای دوباره نباید چیزی عوض کنن. aggregateها فقط سلول‌های <code>n&gt;=5</code> (k آموزشی) رو منتشر می‌کنن؛ اصلاحیه‌ها suppression رو دوباره می‌زنن. مسیر restore: ردیف‌های snapshot با <code>LEFT ANTI JOIN tombstones</code> — شناسه‌های tombstoneشده هیچ‌وقت برنمی‌گردن؛ snapshotهای قدیمی‌تر از نگهداری نابود می‌شن، هرگز بازپخش نه. خواندن‌های ممیزی هر ادعا رو ثابت می‌کنن؛ PII خام هیچ‌وقت تو هیچ لاگی نمی‌شینه.</p>",
   "diagrams": [
     {
       "caption_en": "One sweep across every copy: mechanisms, guards, governed ends",
-      "caption_fa": "یک sweep روی هر کپی: سازوکارها، نگهبان‌ها و پایان‌های حکمرانی‌شده",
+      "caption_fa": "یه sweep روی همهٔ کپی‌ها: سازوکارها، نگهبان‌ها و پایان‌های حکمرانی‌شده",
       "file": "diagrams/sol4a-purge-pipeline.html",
       "kind_en": "dataflow",
       "kind_fa": "جریان داده",
       "made": "archify",
       "narration": {
-        "failure_en": "Trace what each missing edge would cost: no hold list means the sweep eats evidence under matter review; no tombstone ids means the restore replays the deleted; no expiry means backups pile up past retention. Then trace the two governed ends that need no sweep: counts-only into Aggregates and hash receipts into Audit.",
-        "failure_fa": "اول هزینه هر یال گمشده را دنبال کن: بدون فهرست hold یعنی sweep مدرک زیر بررسی را می‌خورد؛ بدون شناسه‌های tombstone یعنی restore حذف‌شده‌ها را بازپخش می‌کند؛ بدون انقضا یعنی بکاپ‌ها بعد از نگهداری تلنبار می‌شوند. بعد دو پایان حکمرانی‌شده بی‌نیاز از sweep را دنبال کن: فقط-شمارش به aggregateها و رسیدهای hash به ممیزی.",
-        "guarantee_en": "The figure shows every copy's purge mechanism and the two guards (hold, tombstones). Retention days and the restore drill live in the next two figures.",
-        "guarantee_fa": "شکل سازوکار پاک‌سازی هر کپی و دو نگهبان (hold و tombstoneها) را نشان می‌دهد. روزهای نگهداری و تمرین restore در دو شکل بعدی‌اند.",
-        "nonguarantee_en": "It sets no legal deadline and runs no restore — the table and the sequence do that.",
-        "nonguarantee_fa": "نه مهلت حقوقی می‌گذارد و نه restore اجرا می‌کند — جدول و توالی آن کار را می‌کنند.",
+        "failure_en": "Trace what each missing edge would cost: no hold list means the sweep eats evidence under matter review; no tombstone ids means the restore replays the deleted; no expiry means backups pile up past retention. Then trace the two governed ends that need no sweep at all: counts-only into Aggregates, hash receipts into Audit.",
+        "failure_fa": "اول هزینهٔ هر یال گمشده رو دنبال کن: بدون فهرست hold یعنی sweep مدرکِ زیر بررسی رو می‌خوره؛ بدون شناسه‌های tombstone یعنی restore حذف‌شده‌ها رو بازپخش می‌کنه؛ بدون انقضا یعنی بکاپ‌ها بعد از نگهداری تلنبار می‌شن. بعد دو پایان حکمرانی‌شدهٔ بی‌نیاز از sweep رو دنبال کن: فقط-شمارش به aggregateها و رسیدهای hash به ممیزی.",
+        "guarantee_en": "The figure shows every copy's purge mechanism and the two guards (hold, tombstones). The retention days and the restore drill live in the next two figures.",
+        "guarantee_fa": "شکل سازوکار پاک‌سازی هر کپی و دو نگهبان (hold و tombstoneها) رو نشون می‌ده. روزهای نگهداری و تمرین restore تو دو شکل بعدی‌ان.",
+        "nonguarantee_en": "It sets no legal deadline and runs no restore — the table and the sequence take care of that.",
+        "nonguarantee_fa": "نه مهلت حقوقی می‌ذاره و نه restore اجرا می‌کنه — جدول و توالی اون کار رو می‌کنن.",
         "point_en": "The decision node is the sweeper: three incoming lists (expired rows, derived keys, holds) and one rule — age past retention with no live hold. Everything downstream is proof, not choice.",
-        "point_fa": "گره تصمیم sweeper است: سه فهرست ورودی (ردیف‌های منقضی، کلیدهای مشتق و holdها) و یک قاعده — سن بعد از نگهداری بدون hold زنده. هرچه پایین‌دست است مدرک است نه انتخاب.",
+        "point_fa": "گرهٔ تصمیم sweeperه: سه فهرست ورودی (ردیف‌های منقضی، کلیدهای مشتق و holdها) و یک قاعده — سن بعد از نگهداری، بدون hold زنده. هرچه پایین‌دسته مدرکه، نه انتخاب.",
         "scenario_en": "The quarterly sweep starts. Read left to right across the four stages: stores, the purge job, deletion proof, governed ends.",
-        "scenario_fa": "sweep فصلی شروع می‌شود. چهار stage را چپ‌به‌راست بخوان: فروشگاه‌ها، job پاک‌سازی، proof حذف و پایان‌های حکمرانی‌شده.",
+        "scenario_fa": "sweep فصلی شروع می‌شه. چهار stage رو چپ‌به‌راست بخون: فروشگاه‌ها، job پاک‌سازی، proof حذف و پایان‌های حکمرانی‌شده.",
         "steps": [
           {
-            "en": "Stores: order record, derived cache plus index, and the append-only log — the three copies the sweep must close, each with its teaching retention tag.",
-            "fa": "فروشگاه‌ها: مرجع سفارش، کش و ایندکس مشتق و لاگ فقط‌افزودنی — سه کپی که sweep باید ببندد، هرکدام با برچسب نگهداری آموزشی‌اش."
+            "en": "Stores: the order record, the derived cache plus index, and the append-only log — the three copies the sweep has to close, each with its teaching retention tag.",
+            "fa": "فروشگاه‌ها: مرجع سفارش، کش و ایندکس مشتق و لاگ فقط‌افزودنی — سه کپی که sweep باید ببنده، هرکدوم با برچسب نگهداری آموزشی خودش."
           },
           {
-            "en": "Purge job: the idempotent sweeper takes expired rows and derived keys, checked against the per-matter hold list — the held row survives here.",
-            "fa": "job پاک‌سازی: sweeper ایدم‌پوتنت ردیف‌های منقضی و کلیدهای مشتق را می‌گیرد با بررسی در برابر فهرست hold per-matter — ردیف held این‌جا می‌ماند."
+            "en": "Purge job: the idempotent sweeper takes the expired rows and the derived keys, checked against the per-matter hold list — the held row survives here.",
+            "fa": "job پاک‌سازی: sweeper ایدم‌پوتنت ردیف‌های منقضی و کلیدهای مشتق رو می‌گیره، با بررسی در برابر فهرست hold per-matter — ردیف held این‌جا می‌مونه."
           },
           {
-            "en": "Deletion proof: tombstone ids, backup expiry plus destruction, and the appended log tombstone — three proofs the restore will need.",
-            "fa": "proof حذف: شناسه‌های tombstone، انقضای بکاپ به‌علاوه نابودی و tombstone الصاقی لاگ — سه مدرکی که restore لازم خواهد داشت."
+            "en": "Deletion proof: the tombstone ids, backup expiry plus destruction, and the appended log tombstone — three proofs the restore will need.",
+            "fa": "proof حذف: شناسه‌های tombstone، انقضای بکاپ به‌علاوهٔ نابودی و tombstone الصاقیِ لاگ — سه مدرکی که restore لازم خواهد داشت."
           },
           {
-            "en": "Governed ends: counts-only aggregates (k>=5 or suppressed), hash-only audit receipts, and the restore gate that replays through tombstones.",
-            "fa": "پایان‌های حکمرانی‌شده: aggregateهای فقط-شمارش (k≥۵ وگرنه suppressed)، رسیدهای hash-فقط ممیزی و دروازه restore که از میان tombstoneها بازپخش می‌کند."
+            "en": "Governed ends: counts-only aggregates (k>=5 or suppressed), hash-only audit receipts, and the restore gate that replays through the tombstones.",
+            "fa": "پایان‌های حکمرانی‌شده: aggregateهای فقط-شمارش (k≥۵ وگرنه suppressed)، رسیدهای hash-فقطِ ممیزی و دروازهٔ restore که از میان tombstoneها بازپخش می‌کنه."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "The hold list: without it the sweep cannot tell evidence from expired rows, and a deleted hold is how evidence dies quietly.",
-        "a_fa": "فهرست hold: بدون آن sweep نمی‌تواند مدرک را از ردیف منقضی تشخیص دهد و hold پاک‌شده همان راه مرگ بی‌صدای مدرک است.",
+        "a_en": "The hold list: without it the sweep can't tell evidence from expired rows, and a deleted hold is exactly how evidence dies quietly.",
+        "a_fa": "فهرست hold: بدون اون sweep نمی‌تونه مدرک رو از ردیف منقضی تشخیص بده، و hold پاک‌شده همون راه مرگ بی‌صدای مدرکه.",
         "q_en": "Which single input, if dropped, turns the sweep from purge into evidence destruction?",
         "q_fa": "کدام ورودی اگر بیفتد sweep را از پاک‌سازی به نابودی مدرک تبدیل می‌کند؟"
       },
@@ -84,44 +84,44 @@
     },
     {
       "caption_en": "Sweep first, then a restore that cannot resurrect",
-      "caption_fa": "اول sweep بعد restoreای که نمی‌تواند زنده کند",
+      "caption_fa": "اول sweep، بعد restoreای که نمی‌تونه زنده کنه",
       "file": "diagrams/sol4b-restore-replay.html",
       "kind_en": "sequence",
       "kind_fa": "توالی",
       "made": "archify",
       "narration": {
-        "failure_en": "Replay the two failures on the figure: skip the tombstone consult (message 6) and the deleted rows flow straight into the live store; replay a snapshot older than retention and there is no gate left to stop it. Then replay the hold path: u2-order was never tombstoned, so it returns lawfully.",
-        "failure_fa": "دو خرابی را روی شکل بازپخش کن: مشورت tombstone (پیام ۶) را رد کن و ردیف‌های حذف‌شده مستقیم به فروشگاه زنده می‌ریزند؛ snapshot قدیمی‌تر از نگهداری را بازپخش کن و هیچ دروازه‌ای برای ایستادنش نمانده. بعد مسیر hold را بازپخش کن: u2-order هیچ‌وقت tombstone نشد، پس قانونی برمی‌گردد.",
-        "guarantee_en": "The figure shows the sweep-then-restore order and the tombstone consult on every replay. It does not show aggregate suppression or breach math.",
-        "guarantee_fa": "شکل ترتیب sweep-بعد-restore و مشورت tombstone در هر بازپخش را نشان می‌دهد. suppression aggregate و حساب رخنه را نشان نمی‌دهد.",
-        "nonguarantee_en": "Aggregate subtlety and the never-collected list live in the assembly table.",
-        "nonguarantee_fa": "ظرافت aggregate و فهرست هیچ‌وقت-جمع‌نشده در جدول اسمبل‌اند.",
-        "point_en": "The decision message is the tombstone consult: the backup asks which ids are deleted before returning a single row. A restore without that question is the resurrection bug.",
-        "point_fa": "پیام تصمیم همان مشورت tombstone است: بکاپ قبل از برگرداندن حتی یک ردیف می‌پرسد کدام شناسه‌ها حذف شده‌اند. restore بدون آن سؤال همان باگ زنده کردن است.",
+        "failure_en": "Replay the two failures on the figure: skip the tombstone consult (message 6) and the deleted rows flow straight into the live store; replay a snapshot older than retention and there is no gate left to stop it. Then replay the hold path: u2-order was never tombstoned, so it comes back lawfully.",
+        "failure_fa": "دو خرابی رو روی شکل بازپخش کن: مشورت tombstone (پیام ۶) رو رد کن و ردیف‌های حذف‌شده مستقیم به فروشگاه زنده می‌ریزن؛ snapshot قدیمی‌تر از نگهداری رو بازپخش کن و هیچ دروازه‌ای برای ایستادنش نمی‌مونه. بعد مسیر hold رو بازپخش کن: u2-order هیچ‌وقت tombstone نشد، پس قانونی برمی‌گرده.",
+        "guarantee_en": "The figure shows the sweep-then-restore order and the tombstone consult on every replay. It does not show the aggregate suppression or the breach math.",
+        "guarantee_fa": "شکل ترتیب sweep-بعد-restore و مشورت tombstone در هر بازپخش رو نشون می‌ده. suppression aggregate و حساب رخنه رو نشون نمی‌ده.",
+        "nonguarantee_en": "The aggregate subtlety and the never-collected list live in the assembly table.",
+        "nonguarantee_fa": "ظرافت aggregate و فهرست هیچ‌وقت-جمع‌نشده تو جدول اسمبل‌ان.",
+        "point_en": "The decision message is the tombstone consult: the backup asks which ids are deleted before it returns a single row. A restore without that question is the resurrection bug.",
+        "point_fa": "پیام تصمیم همون مشورت tombstoneه: بکاپ قبل از برگردوندن حتی یه ردیف می‌پرسه کدوم شناسه‌ها حذف شدن. restore بدون اون سؤال، همون باگ زنده کردنه.",
         "scenario_en": "The sweep has run; now the operator restores a 180-day-old snapshot. Read top to bottom: the sweep band, then the replay band.",
-        "scenario_fa": "sweep اجرا شده؛ حالا اپراتور snapshot صدوهشتادروزه را برمی‌گرداند. بالا‌به‌پایین بخوان: نوار sweep بعد نوار بازپخش.",
+        "scenario_fa": "sweep اجرا شده؛ حالا اپراتور snapshot صدوهشتادروزه رو برمی‌گردونه. بالا‌به‌پایین بخون: نوار sweep، بعد نوار بازپخش.",
         "steps": [
           {
-            "en": "Sweep band: hold-checked sweep, tombstones for u1 and u3, durable watermarks, hashed audit receipts — the proof the replay will consult.",
-            "fa": "نوار sweep: sweep با بررسی hold، tombstone برای u1 و u3، watermarkهای پایدار و رسیدهای hash ممیزی — همان مدرکی که بازپخش مشورتش می‌کند."
+            "en": "Sweep band: the hold-checked sweep, tombstones for u1 and u3, durable watermarks, hashed audit receipts — the proof the replay will consult.",
+            "fa": "نوار sweep: sweep با بررسی hold، tombstone برای u1 و u3، watermarkهای پایدار و رسیدهای hash ممیزی — همون مدرکی که بازپخش مشورتش می‌کنه."
           },
           {
             "en": "Replay request: the operator asks for the 180-day snapshot; the backup does not answer directly — it replays through the tombstones first.",
-            "fa": "درخواست بازپخش: اپراتور snapshot صدوهشتادروزه را می‌خواهد؛ بکاپ مستقیم جواب نمی‌دهد — اول از میان tombstoneها بازپخش می‌کند."
+            "fa": "درخواست بازپخش: اپراتور snapshot صدوهشتادروزه رو می‌خواد؛ بکاپ مستقیم جواب نمی‌ده — اول از میان tombstoneها بازپخش می‌کنه."
           },
           {
-            "en": "The consult: u1 and u3 are deleted, skip them — the security-colored message, the only question standing between backup and resurrection.",
-            "fa": "مشورت: u1 و u3 حذف شده‌اند، ردشان کن — پیام امنیتی‌رنگ، تنها سؤالی که میان بکاپ و زنده کردن ایستاده."
+            "en": "The consult: u1 and u3 are deleted, skip them — the security-colored message, the only question standing between the backup and resurrection.",
+            "fa": "مشورت: u1 و u3 حذف شدن، ردشون کن — پیام امنیتی‌رنگ، تنها سؤالی که میان بکاپ و زنده کردن ایستاده."
           },
           {
             "en": "Live rows only: u5 returns, the operator hears zero resurrected, and the restore itself is recorded in hashes — proof without PII.",
-            "fa": "فقط ردیف‌های زنده: u5 برمی‌گردد، اپراتور صفر زنده‌شده می‌شنود و خود restore با hash ثبت می‌شود — مدرک بدون PII."
+            "fa": "فقط ردیف‌های زنده: u5 برمی‌گرده، اپراتور صفر زنده‌شده می‌شنوه و خود restore با hash ثبت می‌شه — مدرک بدون PII."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "The tombstone consult: deleting it lets the backup answer from the snapshot alone, and the two deleted ids flow back into the live store.",
-        "a_fa": "مشورت tombstone: حذفش می‌گذارد بکاپ فقط از snapshot جواب بدهد و دو شناسه حذف‌شده به فروشگاه زنده برمی‌گردند.",
+        "a_en": "The tombstone consult: delete it and the backup answers from the snapshot alone, and the two deleted ids flow back into the live store.",
+        "a_fa": "مشورت tombstone: حذفش می‌گذاره بکاپ فقط از snapshot جواب بده و دو شناسهٔ حذف‌شده به فروشگاه زنده برمی‌گردن.",
         "q_en": "Which single message, if skipped, resurrects u1 and u3?",
         "q_fa": "کدام تک‌پیام اگر رد شود u1 و u3 را زنده می‌کند؟"
       },
@@ -129,44 +129,44 @@
     },
     {
       "caption_en": "Retention, mechanism and proof per copy, plus the breach read-off",
-      "caption_fa": "نگهداری، سازوکار و مدرک per-copy به‌علاوه خوانش رخنه",
+      "caption_fa": "نگهداری، سازوکار و مدرک per-copy، به‌علاوهٔ خوانش رخنه",
       "file": "diagrams/sol4-purge-breach-table.html",
       "kind_en": "assembly table",
       "kind_fa": "جدول اسمبل",
       "made": "hand",
       "narration": {
-        "failure_en": "Trace the rose cell first: the re-identifiable aggregate is the one row that stays dangerous after purging — small cells are suppressed, not published. Then trace the breach band: whatever was never collected cannot leak, which is the cheapest row in the whole table.",
-        "failure_fa": "اول خانه صورتی را دنبال کن: aggregate قابل بازشناسایی همان ردیفی است که بعد از پاک‌سازی خطرناک می‌ماند — سلول‌های کوچک suppressed می‌شوند نه منتشر. بعد نوار رخنه را دنبال کن: هرچه هیچ‌وقت جمع نشده نمی‌تواند لو برود، که ارزان‌ترین ردیف کل جدول است.",
-        "guarantee_en": "The figure composes both step diagrams into one verdict per copy and prices the breach off the inventory. Days stay illustrative throughout.",
-        "guarantee_fa": "شکل هر دو نمودار گام را در یک حکم per-copy ترکیب می‌کند و رخنه را از روی موجودی قیمت می‌زند. روزها سرتاسر نمایشی می‌مانند.",
+        "failure_en": "Trace the rose cell first: the re-identifiable aggregate is the one row that stays dangerous after purging — small cells are suppressed, not published. Then trace the breach band: whatever you never collected cannot leak, and that is the cheapest row in the whole table.",
+        "failure_fa": "اول خانهٔ صورتی رو دنبال کن: aggregate قابل بازشناسایی همون ردیفیه که بعد از پاک‌سازی خطرناک می‌مونه — سلول‌های کوچک suppressed می‌شن نه منتشر. بعد نوار رخنه رو دنبال کن: هرچه هیچ‌وقت جمع نشده نمی‌تونه لو بره، که ارزان‌ترین ردیف کل جدوله.",
+        "guarantee_en": "The figure composes both step diagrams into one verdict per copy and prices the breach off the inventory. The days stay illustrative throughout.",
+        "guarantee_fa": "شکل هر دو نمودار گام رو در یک حکم per-copy ترکیب می‌کنه و رخنه رو از روی موجودی قیمت می‌زنه. روزها سرتاسر نمایشی می‌مونن.",
         "nonguarantee_en": "Legal deadlines and basis choices are absent — the consent audit owns them.",
-        "nonguarantee_fa": "مهلت‌های حقوقی و انتخاب مبنا غایب‌اند — مال ممیزی رضایت‌اند.",
+        "nonguarantee_fa": "مهلت‌های حقوقی و انتخاب مبنا غایب‌ان — مال ممیزی رضایت‌ان.",
         "point_en": "The decision column is the mechanism: each row names how its copy dies (sweeper, tombstone, expiry, suppression). A row with no mechanism is the finding.",
-        "point_fa": "ستون تصمیم همان سازوکار است: هر ردیف می‌گوید کپی‌اش چطور می‌میرد (sweeper، tombstone، انقضا و suppression). ردیف بدون سازوکار همان یافته است.",
+        "point_fa": "ستون تصمیم همون سازوکاره: هر ردیف می‌گه کپی‌اش چطور می‌میره (sweeper، tombstone، انقضا و suppression). ردیف بدون سازوکار، خودش یافتهٔ ماست.",
         "scenario_en": "Six copies down the left, mechanism and proof across. Read row by row, then the breach band and the starred footnote.",
-        "scenario_fa": "شش کپی پایین چپ و سازوکار و مدرک در عرض. سطر‌به‌سطر بخوان، بعد نوار رخنه و پانوشت ستاره‌دار.",
+        "scenario_fa": "شش کپی پایین چپ، سازوکار و مدرک در عرض. سطر‌به‌سطر بخون، بعد نوار رخنه و پانوشت ستاره‌دار.",
         "steps": [
           {
-            "en": "Record, views, log: the sweeper deletes expired rows, purges derived keys, and appends the log tombstone — same boxes as the dataflow, now one row each.",
-            "fa": "مرجع، نماها و لاگ: sweeper ردیف‌های منقضی را پاک می‌کند، کلیدهای مشتق را purge می‌کند و tombstone لاگ را الصاق می‌کند — همان جعبه‌های جریان داده، حالا هرکدام یک ردیف."
+            "en": "Record, views, log: the sweeper deletes the expired rows, purges the derived keys and appends the log tombstone — the same boxes as the dataflow, now one row each.",
+            "fa": "مرجع، نماها و لاگ: sweeper ردیف‌های منقضی رو پاک می‌کنه، کلیدهای مشتق رو purge می‌کنه و tombstone لاگ رو الصاق می‌کنه — همون جعبه‌های جریان داده، حالا هرکدوم یه ردیف."
           },
           {
             "en": "Backups and aggregates: old snapshots expire plus destruction; small cells suppress — the rose cell admits aggregates are not automatically anonymous.",
-            "fa": "بکاپ‌ها و aggregateها: snapshotهای قدیم انقضا به‌علاوه نابودی؛ سلول‌های کوچک suppress — خانه صورتی اعتراف می‌کند aggregateها خودکار ناشناس نیستند."
+            "fa": "بکاپ‌ها و aggregateها: snapshotهای قدیم انقضا به‌علاوهٔ نابودی؛ سلول‌های کوچک suppress — خانهٔ صورتی اعتراف می‌کنه aggregateها خودکار ناشناس نیستن."
           },
           {
-            "en": "Audit and breach: hashes only, never raw PII — the log itself is the proof; the breach band prices exposure off the inventory, starring what was never collected.",
-            "fa": "ممیزی و رخنه: فقط hash، هرگز PII خام — خود لاگ مدرک است؛ نوار رخنه مواجهه را از روی موجودی قیمت می‌زند با ستاره روی آنچه هیچ‌وقت جمع نشد."
+            "en": "Audit and breach: hashes only, never raw PII — the log itself is the proof; the breach band prices the exposure off the inventory, starring what was never collected.",
+            "fa": "ممیزی و رخنه: فقط hash، هرگز PII خام — خود لاگ مدرکه؛ نوار رخنه مواجهه رو از روی موجودی قیمت می‌زنه با ستاره روی آنچه هیچ‌وقت جمع نشد."
           },
           {
-            "en": "Footnote: the starred days are illustrative teaching numbers — the table refuses to state law, and sends deadlines to counsel.",
-            "fa": "پانوشت: روزهای ستاره‌دار اعداد آموزشی نمایشی‌اند — جدول از گفتن قانون خودداری می‌کند و مهلت‌ها را به وکیل می‌فرستد."
+            "en": "Footnote: the starred days are illustrative teaching numbers — the table refuses to state law and sends the deadlines to counsel.",
+            "fa": "پانوشت: روزهای ستاره‌دار اعداد آموزشی نمایشی‌ان — جدول از گفتن قانون خودداری می‌کنه و مهلت‌ها رو به وکیل می‌فرسته."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "The aggregates row: suppression is the mechanism, the suppressed-cell list is the proof, and the rose color warns it stays re-identifiable without that step.",
-        "a_fa": "ردیف aggregateها: suppression سازوکار است، فهرست سلول suppressed مدرک است و رنگ صورتی هشدار می‌دهد بدون آن گام بازشناسایی‌پذیر می‌ماند.",
+        "a_en": "The aggregates row: suppression is the mechanism, the suppressed-cell list is the proof, and the rose colour warns it stays re-identifiable without that step.",
+        "a_fa": "ردیف aggregateها: suppression سازوکاره، فهرست سلول suppressed مدرکه و رنگ صورتی هشدار می‌ده بدون اون گام بازشناسایی‌پذیر می‌مونه.",
         "q_en": "Which row stays dangerous even after a perfect sweep, and what is its guard?",
         "q_fa": "کدام ردیف حتی بعد از sweep بی‌نقص خطرناک می‌ماند و نگهبانش چیست؟"
       }
@@ -175,39 +175,39 @@
   "failures": [
     {
       "en": "Restore without the tombstone consult: the backup answers from the snapshot alone and deleted users flow back into the live store. The consult is not optimization — it is the resurrection guard, and the demo asserts skipped=2, resurrected=0.",
-      "fa": "restore بدون مشورت tombstone: بکاپ فقط از snapshot جواب می‌دهد و کاربرهای حذف‌شده به فروشگاه زنده برمی‌گردند. مشورت بهینه‌سازی نیست — نگهبان زنده کردن است و دمو assert می‌کند skipped=2 و resurrected=0."
+      "fa": "restore بدون مشورت tombstone: بکاپ فقط از snapshot جواب می‌ده و کاربرهای حذف‌شده به فروشگاه زنده برمی‌گردن. این مشورت بهینه‌سازی نیست — نگهبانِ زنده‌کردنه، و دمو assert می‌کنه skipped=2، resurrected=0."
     },
     {
-      "en": "A released hold with no second actor and no audit note: the next sweep lawfully deletes evidence under a closed matter — or worse, under an open one misfiled as closed. Guard: hold release needs a second actor plus an audit entry, and sweeps refuse rows whose hold review is overdue.",
-      "fa": "آزادسازی hold بدون عامل دوم و یادداشت ممیزی: sweep بعدی مدرک را قانونی پاک می‌کند زیر پرونده بسته — یا بدتر، زیر پرونده بازی که بسته ثبت شده. نگهبان: آزادسازی hold عامل دوم به‌علاوه ورودی ممیزی می‌خواهد و sweepها ردیف‌هایی که بازبینی holdشان عقب افتاده رد می‌کنند."
+      "en": "A released hold with no second actor and no audit note: the next sweep lawfully deletes evidence under a closed matter — or worse, under an open one misfiled as closed. Guard: releasing a hold needs a second actor plus an audit entry, and sweeps refuse rows whose hold review is overdue.",
+      "fa": "آزادسازی hold بدون عامل دوم و بدون یادداشت ممیزی: sweep بعدی مدرک رو قانونی پاک می‌کنه، زیر یه پروندهٔ بسته — یا بدتر، زیر پرونده‌ای که باز بوده و بسته ثبت شده. نگهبان: آزادسازی hold عامل دوم به‌علاوهٔ یه ورودی ممیزی می‌خواد، و sweepها ردیف‌هایی که بازبینی holdشون عقب افتاده رو رد می‌کنن."
     },
     {
       "en": "Aggregate drift below k after a correction: a published cell of 12 shrinks to 4 when rows are fixed, and the published aggregate quietly becomes re-identifiable. Guard: corrections rerun suppression before anything republishes.",
-      "fa": "افت aggregate زیر k بعد از اصلاح: سلول منتشرشده ۱۲تایی با اصلاح ردیف‌ها ۴تایی می‌شود و aggregate منتشرشده بی‌صدا بازشناسایی‌پذیر می‌شود. نگهبان: اصلاحیه‌ها suppression را دوباره می‌زنند قبل از هر بازانتشار."
+      "fa": "افت aggregate زیر k بعد از اصلاح: سلول منتشرشدهٔ ۱۲تایی با اصلاح ردیف‌ها ۴تایی می‌شه و aggregate منتشرشده بی‌صدا بازشناسایی‌پذیر می‌شه. نگهبان: اصلاحیه‌ها suppression رو دوباره می‌زنن، قبل از هر بازانتشار."
     },
     {
       "en": "Sweeper crash mid-sweep: half the copies purged, half pending, and the retry must not double-tombstone or skip. Guard: tombstone-first, idempotent resweep — the demo's second sweep printing 0 is the whole protocol in one number.",
-      "fa": "crash دادن sweeper وسط sweep: نیمی از کپی‌ها پاک و نیمی در انتظار و retry نباید دو بار tombstone بزند یا رد شود. نگهبان: اول tombstone و resweep ایدم‌پوتنت — چاپ ۰ sweep دوم دمو کل قرارداد است در یک عدد."
+      "fa": "crash دادن sweeper وسط sweep: نیمی از کپی‌ها پاک، نیمی در انتظار، و retry نباید دوبار tombstone بزنه یا رد کنه. نگهبان: اول tombstone و resweep ایدم‌پوتنت — چاپ ۰ در sweep دومِ دمو، کل قرارداد در یه عدده."
     }
   ],
   "followups": [
     {
-      "a_en": "It replays through the tombstones: u1 and u3 are skipped (skipped=2), u5 returns as live, resurrected=0 — exactly the demo's restore probe. Backups older than retention never reach the replay at all: they are destroyed, and the destruction record is the proof. A restore that bypasses the consult is the resurrection bug, caught by asserting resurrected=0 on every drill.",
-      "a_fa": "از میان tombstoneها بازپخش می‌کند: u1 و u3 رد می‌شوند (skipped=2) و u5 به‌عنوان زنده برمی‌گردد و resurrected=0 — دقیقاً آزمون restore دمو. بکاپ‌های قدیمی‌تر از نگهداری اصلاً به بازپخش نمی‌رسند: نابود می‌شوند و رکورد نابودی مدرک است. restoreای که مشورت را دور بزند همان باگ زنده کردن است که با assert کردن resurrected=0 در هر تمرین گرفته می‌شود.",
+      "a_en": "It replays through the tombstones: u1 and u3 are skipped (skipped=2), u5 comes back as live, resurrected=0 — exactly the demo's restore probe. Backups older than retention never reach the replay at all: they get destroyed, and the destruction record is the proof. And a restore that bypasses the consult is the resurrection bug — catch it by asserting resurrected=0 on every drill.",
+      "a_fa": "از میان tombstoneها بازپخش می‌کنه: u1 و u3 رد می‌شن (skipped=2) و u5 به‌عنوان زنده برمی‌گرده و resurrected=0 — دقیقاً آزمون restore دمو. بکاپ‌های قدیمی‌تر از نگهداری اصلاً به بازپخش نمی‌رسن: نابود می‌شن و رکورد نابودی، مدرکه. و restoreای که مشورت رو دور بزنه همان باگ زنده کردنه — با assert کردن resurrected=0 در هر تمرین گرفته می‌شه.",
       "level": "staff",
       "q_en": "How does restoring a six-month-old backup avoid resurrecting deleted users?",
       "q_fa": "restore بکاپ شش‌ماهه چطور جلوی برگشت کاربران حذف‌شده رو می‌گیره؟"
     },
     {
-      "a_en": "The hold wins, every time: the sweeper refuses rows with a live hold no matter how expired, and rows with an overdue hold review are refused too until a human re-dates them. Retention is a schedule; a hold is an order — schedules yield to orders, and the refusal is audit-logged.",
-      "a_fa": "hold همیشه می‌برد: sweeper ردیف‌های با hold زنده را رد می‌کند هرچقدر هم منقضی، و ردیف‌های با بازبینی عقب‌افتاده را هم تا انسان دوباره تاریخ بزند رد می‌کند. نگهداری برنامه است؛ hold دستور است — برنامه به دستور راه می‌دهد و رد شدن در ممیزی ثبت می‌شود.",
+      "a_en": "The hold wins, every time: the sweeper refuses rows with a live hold no matter how expired, and rows whose hold review is overdue are refused too until a human re-dates them. Retention is a schedule; a hold is an order — schedules yield to orders, and that refusal is audit-logged.",
+      "a_fa": "hold همیشه می‌بره: sweeper ردیف‌های با hold زنده رو رد می‌کنه، هرچقدر هم منقضی، و ردیف‌هایی که بازبینی holdشون عقب افتاده رو هم تا یه آدم دوباره تاریخ بزنه رد می‌کنه. نگهداری برنامه‌ست؛ hold دستوره — برنامه به دستور راه می‌ده و این رد شدن هم تو ممیزی ثبت می‌شه.",
       "level": "senior",
       "q_en": "Retention says delete, a legal hold says keep. Which wins, and where is that recorded?",
       "q_fa": "نگهداری می‌گوید پاک کن و hold حقوقی می‌گوید نگه دار؛ کدام می‌برد و کجا ثبت می‌شود؟"
     },
     {
-      "a_en": "It does not get the raw profile back: keeping personal data 'just in case' is the maximization the policy exists to forbid. The lawful paths are re-collecting with fresh purpose and basis, querying a held aggregate that already answers the question, or a new hold with matter and owner — 'maybe useful later' is never a hold.",
-      "a_fa": "پروفایل خام را پس نمی‌گیرد: نگه داشتن داده شخصی «شاید لازم شد» همان بیشینه‌سازی است که سیاست برای منعش هست. راه‌های قانونی: جمع‌آوری دوباره با مقصود و مبنای تازه، پرسش از aggregate نگه‌داشته‌شده‌ای که جواب را دارد، یا hold تازه با matter و مالک — «شاید بعداً مفید» هرگز hold نیست.",
+      "a_en": "It does not get the raw profile back: keeping personal data 'just in case' is the maximization the policy exists to forbid. The lawful paths are re-collecting with a fresh purpose and basis, querying a held aggregate that already answers the question, or opening a new hold with matter and owner — 'maybe useful later' is never a hold.",
+      "a_fa": "پروفایل خام رو پس نمی‌گیره: نگه داشتن داده شخصی «شاید لازم شد» همون بیشینه‌سازیه که سیاست برای منعش هست. راه‌های قانونی: جمع‌آوری دوباره با مقصود و مبنای تازه، پرسش از aggregate نگه‌داشته‌شده‌ای که جواب رو داره، یا hold تازه با matter و مالک — «شاید بعداً مفید» هرگز hold نیست.",
       "level": "senior",
       "q_en": "Fraud review needs a purged profile six months later. Do you bring it back?",
       "q_fa": "بازبینی تقلب شش ماه بعد پروفایل پاک‌شده را می‌خواهد؛ برمی‌گردانی‌اش؟"
@@ -217,20 +217,20 @@
   "interview_q_fa": "داستان از این قراره که برای فروشگاه جدول data و purpose و retention و delete طراحی می‌کنی. purge دوره‌ای، legal hold، aggregate قابل بازشناسایی، backup restore و audit بدون ذخیره PII اضافه رو پوشش بده. حذف رو تو cache و search و model data پیگیری کن و سناریوی رخنه رو با موجودی واقعی داده بسنج.",
   "lab_en": "<p>For a hypothetical service (e.g. an online shop with targeted ads) write the \"what data, why needed, kept how long, what happens after\" table; design a periodic purge script (retention plus purge plus aggregate); and write the breach scenario: \"what didn't leak because we never had it\". Finally, apply diagram 10's decision tree to three real data items of that same service.</p>",
   "lab_fa": "<p>برای یه سرویس فرضی (مثلاً فروشگاه آنلاین با تبلیغ هدفمند) جدول «چه داده‌ای، چرا لازمه، تا کی نگه می‌داریم، بعدش چی می‌شه» بنویس؛ یه اسکریپت پاک‌سازی دوره‌ای (retention و purge و aggregate) طراحی کن؛ و سناریوی رخنه رو بنویس: «چی لو نرفت چون اصلاً نداشتیمش». آخرش درخت تصمیم نمودار 10 رو روی سه قلم داده واقعی همون سرویس اعمال کن.</p>",
-  "mental_en": "Data you do not have cannot leak, cannot be stolen, and no government can force you to hand it over. So purge is two things: a sweep that closes every copy, and a proof that it did — tombstones for the restore, hashes for the auditor, suppression for the aggregates. The hold and the tombstones are the two guards; everything else is schedule.",
-  "mental_fa": "داده‌ای که نداری لو نمی‌رود، دزدیده نمی‌شود و هیچ دولتی نمی‌تواند وادارت کند تحویلش دهی. پس پاک‌سازی دو چیز است: sweepای که هر کپی را می‌بندد و مدرکی که بستنش را ثابت می‌کند — tombstone برای restore، hash برای حسابرس و suppression برای aggregateها. hold و tombstoneها دو نگهبان‌اند؛ بقیه برنامه است.",
+  "mental_en": "Data you don't have can't leak, can't be stolen, and no government can force you to hand it over. So purging is two things: a sweep that closes every copy, and a proof that it closed them — tombstones for the restore, hashes for the auditor, suppression for the aggregates. You get two guards: the hold and the tombstones. Everything else is schedule.",
+  "mental_fa": "داده‌ای که نداری لو نمی‌ره، دزدیده نمی‌شه و هیچ دولتی نمی‌تونه وادارت کنه تحویلش بدی. پس پاک‌سازی دو چیزه: یه sweep که هر کپی رو می‌بنده، و یه مدرک که بسته‌شدنش رو ثابت می‌کنه — tombstone برای restore، hash برای حسابرس و suppression برای aggregateها. دو نگهبان داری: hold و tombstoneها. بقیه‌اش برنامه‌ست.",
   "mistakes": [
     {
-      "en": "Quoting the sample retention days as legal requirements ('the regulation says 365 days for orders'). The days are illustrative teaching numbers; real deadlines need legal interpretation per product and jurisdiction.",
-      "fa": "نقل روزهای نمونه نگهداری به‌عنوان الزام قانونی («مقرره می‌گوید سفارش‌ها ۳۶۵ روز»). روزها اعداد آموزشی نمایشی‌اند؛ مهلت‌های واقعی per-product و per-jurisdiction تفسیر حقوقی می‌خواهند."
+      "en": "Quoting the sample retention days as legal requirements ('the regulation says 365 days for orders'). These days are illustrative teaching numbers; real deadlines need legal interpretation per product and jurisdiction.",
+      "fa": "نقل روزهای نمونهٔ نگهداری به‌عنوان الزام قانونی («مقرره می‌گه سفارش‌ها ۳۶۵ روز»). این روزها اعداد آموزشی نمایشی‌ان؛ مهلت‌های واقعی per-product و per-jurisdiction تفسیر حقوقی می‌خوان."
     },
     {
-      "en": "Treating aggregates as automatically anonymous. A cell of 3 re-identifies; suppression at k, rerun on corrections, and a suppressed-cell list are the mechanism — not the word 'aggregate'.",
-      "fa": "خودکار ناشناس دانستن aggregateها. سلول ۳تایی بازشناسایی می‌کند؛ suppression در k و اجرای دوباره موقع اصلاح و فهرست سلول suppressed سازوکارند — نه کلمه aggregate."
+      "en": "Treating aggregates as automatically anonymous. A cell of 3 re-identifies; suppression at k, a rerun on corrections and a suppressed-cell list are the mechanism — not the word 'aggregate'.",
+      "fa": "خودکار ناشناس دانستن aggregateها. سلول ۳تایی بازشناسایی می‌کنه؛ سازوکار، suppression در k و اجرای دوباره موقع اصلاح و فهرست سلول suppressedه — نه خودِ کلمهٔ aggregate."
     },
     {
       "en": "Purging only the live row and calling it deletion. Caches, indexes, the log, backups, training extracts and audit trails each need their own mechanism — an undeleted copy is a future breach row.",
-      "fa": "فقط ردیف زنده را پاک کردن و اسمش را حذف گذاشتن. کش، ایندکس، لاگ، بکاپ، عصاره‌های آموزش و ردهای ممیزی هرکدام سازوکار خودشان را می‌خواهند — کپی پاک‌نشده ردیف رخنه آینده است."
+      "fa": "فقط ردیف زنده رو پاک کردن و اسمش رو حذف گذاشتن. کش، ایندکس، لاگ، بکاپ، عصاره‌های آموزش و ردهای ممیزی هرکدوم سازوکار خودشون رو می‌خوان — کپی پاک‌نشده، ردیف رخنهٔ آینده‌ست."
     }
   ],
   "number": 4,
@@ -241,40 +241,40 @@
   ],
   "steps": [
     {
-      "en": "Inventory first: one row per data kind with purpose, illustrative retention, and what happens after — delete, aggregate, or hold. No row without an owner; no 'maybe useful later' rows at all.",
-      "fa": "اول موجودی: per-kind یک ردیف با مقصود، نگهداری نمایشی و سرنوشت بعد — حذف، aggregate یا hold. هیچ ردیفی بدون مالک؛ هیچ ردیف «شاید بعداً مفید» اصلاً.",
+      "en": "Inventory first: one row per data kind with purpose, illustrative retention, and what happens afterwards — delete, aggregate or hold. No row without an owner, and no 'maybe useful later' rows at all.",
+      "fa": "اول موجودی: per-kind یه ردیف با مقصود، نگهداری نمایشی و سرنوشتِ بعدش — حذف، aggregate یا hold. هیچ ردیفی بدون مالک؛ و ردیفِ «شاید بعداً مفید» اصلاً نداریم.",
       "t_en": "Table before tooling",
       "t_fa": "اول جدول بعد ابزار"
     },
     {
       "en": "Sweep idempotently: expired rows tombstoned, derived keys purged, log tombstone appended — all hold-checked, so u2-order survives. Resweep and demand zero new purges; that zero is the protocol's signature.",
-      "fa": "ایدم‌پوتنت sweep بزن: ردیف‌های منقضی tombstone، کلیدهای مشتق purge و tombstone لاگ الصاق — همه با بررسی hold، پس u2-order می‌ماند. دوباره sweep بزن و صفر پاک جدید بخواه؛ همان صفر امضای قرارداد است.",
+      "fa": "sweep ایدم‌پوتنت بزن: ردیف‌های منقضی tombstone، کلیدهای مشتق purge و tombstone لاگ الصاق — همه با بررسی hold، پس u2-order می‌مونه. دوباره sweep بزن و صفر پاک تازه بخواه؛ همون صفر، امضای قرارداده.",
       "t_en": "Sweep, then resweep to zero",
       "t_fa": "sweep بزن بعد تا صفر دوباره"
     },
     {
-      "en": "Govern the leftovers: aggregates publish only at n>=5 with suppression rerun on corrections; audit carries hashes of ids, never raw PII — the proof must not become a new copy of the data.",
-      "fa": "باقیمانده را حکمرانی کن: aggregateها فقط با n≥۵ منتشر با suppression دوباره موقع اصلاح؛ ممیزی hash شناسه‌ها را حمل می‌کند، هرگز PII خام نه — مدرک نباید خودش کپی تازه داده شود.",
+      "en": "Govern the leftovers: aggregates publish only at n>=5 with suppression rerun on corrections; the audit carries hashes of ids, never raw PII — your proof must not turn into a new copy of the data.",
+      "fa": "باقی‌مونده رو حکمرانی کن: aggregateها فقط با n≥۵ منتشر، با suppression دوباره موقع اصلاح؛ ممیزی hash شناسه‌ها رو حمل می‌کنه، هرگز PII خام نه — مدرک نباید خودش بشه یه کپی تازه از داده.",
       "t_en": "Aggregates and audit stay lean",
       "t_fa": "aggregate و ممیزی لاغر می‌مانند"
     },
     {
-      "en": "Restore through the tombstones: the 180-day snapshot replays, u1 and u3 are skipped, u5 returns live — resurrected=0. Snapshots older than retention are destroyed, never replayed.",
-      "fa": "از میان tombstoneها restore کن: snapshot صدوهشتادروزه بازپخش می‌شود، u1 و u3 رد می‌شوند و u5 زنده برمی‌گردد — resurrected=0. snapshotهای قدیمی‌تر از نگهداری نابود می‌شوند، هرگز بازپخش نه.",
+      "en": "Restore through the tombstones: the 180-day snapshot replays, u1 and u3 are skipped, u5 comes back live — resurrected=0. Snapshots older than retention get destroyed, never replayed.",
+      "fa": "از میان tombstoneها restore کن: snapshot صدوهشتادروزه بازپخش می‌شه، u1 و u3 رد می‌شن و u5 زنده برمی‌گرده — resurrected=0. snapshotهای قدیمی‌تر از نگهداری نابود می‌شن، هرگز بازپخش نه.",
       "t_en": "Gated restore, zero resurrected",
       "t_fa": "restore دروازه‌دار با صفر زنده‌شده"
     },
     {
-      "en": "Price the breach off the inventory: orders and profiles present per table, precise location never collected so it cannot leak. The cheapest privacy control is the data you never held.",
-      "fa": "رخنه را از روی موجودی قیمت بزن: سفارش‌ها و پروفایل‌ها per-table حاضر و موقعیت دقیق هیچ‌وقت جمع نشده پس نمی‌تواند لو برود. ارزان‌ترین کنترل حریم داده‌ای است که هیچ‌وقت نداشتی.",
+      "en": "Price the breach off the inventory: orders and profiles are there per table, and precise location was never collected so it cannot leak. The cheapest privacy control is the data you never held.",
+      "fa": "رخنه رو از روی موجودی قیمت بزن: سفارش‌ها و پروفایل‌ها per-table حاضرن، و موقعیت دقیق هیچ‌وقت جمع نشده پس نمی‌تونه لو بره. ارزان‌ترین کنترل، داده‌ایه که هیچ‌وقت نداشتی.",
       "t_en": "Breach math from inventory",
       "t_fa": "حساب رخنه از روی موجودی"
     }
   ],
-  "tests_en": "<p>Invariants per sweep: resweep purges 0, gated restore resurrects 0, held rows survive sweep and restore, no published cell below k. Operational metrics: sweep lag past retention, age of the oldest unexpired tombstone, hold-review overdue list — alert on any of the three.</p>",
-  "tests_fa": "<p>invariantهای per-sweep: sweep دوباره ۰ پاک، restore دروازه‌دار ۰ زنده‌شده، ردیف‌های held از sweep و restore سالم، هیچ سلول منتشرشده زیر k. معیارهای عملیاتی: lag ی sweep بعد از نگهداری، سن قدیمی‌ترین tombstone منقضی‌نشده و فهرست بازبینی عقب‌افتاده hold — روی هر سه هشدار بده.</p>",
-  "worked_en": "<p>Teaching run (illustrative days: order 365, clickstream 90, session 30): u1-order (400d) and u3-click (120d) purged; u2-order (400d) held back by legal hold; u4-session and u5-profile fresh and kept. Resweep: 0 new purges. Aggregates: n=12 publishable, n=3 suppressed. Restore of the 180-day snapshot: 2 tombstoned skipped, 1 live replayed, 0 resurrected. Audit: two hashes, zero raw PII.</p>",
-  "worked_fa": "<p>اجرای آموزشی (روزهای نمایشی: سفارش ۳۶۵، clickstream نود و session سی): u1-order (۴۰۰ روزه) و u3-click (۱۲۰ روزه) پاک شدند؛ u2-order (۴۰۰ روزه) با hold حقوقی نگه داشته شد؛ u4-session و u5-profile تازه و نگه‌داشته. sweep دوباره: ۰ پاک تازه. aggregateها: ۱۲تایی منتشرشدنی و ۳تایی suppressed. restore ی snapshot صدوهشتادروزه: ۲ tombstoneشده رد و ۱ زنده بازپخش و ۰ زنده‌شده. ممیزی: دو hash و صفر PII خام.</p>",
-  "reasoning_fa": "<p>retention را از purpose و الزام و کمترین دادهٔ لازم به دست می‌آوریم؛ ۳۰/۹۰ روز یا هفت سال در نمونه‌ها قانون عمومی نیستند. purge باید idempotent باشد چون crash و retry طبیعی‌اند. aggregate خودکار ناشناس نیست: گروه کوچک یا join با دادهٔ دیگر می‌تواند فرد را معلوم کند. restore باید پیش از سرو داده، registry حذف را replay کند تا backup قدیمی کاربر حذف‌شده را برنگرداند؛ RTO باید همین مرحله را نیز حساب کند.</p>",
-  "reasoning_en": "<p>Derive retention from purpose, obligations and minimum necessary data; example periods are not universal legal rules. Purges must be idempotent because crashes and retries occur. Aggregates can remain identifiable through small groups or joins. Before serving a restored backup, replay the deletion registry so deleted users do not reappear; include this stage in RTO.</p>"
+  "tests_en": "<p>Invariants per sweep: resweep purges 0, gated restore resurrects 0, held rows survive sweep and restore, no published cell below k. Operational metrics: sweep lag past retention, the age of the oldest unexpired tombstone, the hold-review overdue list — alert on any of the three.</p>",
+  "tests_fa": "<p>invariantهای per-sweep: sweep دوباره ۰ پاک، restore دروازه‌دار ۰ زنده‌شده، ردیف‌های held از sweep و restore سالم، و هیچ سلول منتشرشده زیر k. معیارهای عملیاتی: lagِ sweep بعد از نگهداری، سنِ قدیمی‌ترین tombstone منقضی‌نشده و فهرست بازبینی عقب‌افتادهٔ hold — روی هر سه هشدار بده.</p>",
+  "worked_en": "<p>Teaching run (illustrative days: order 365, clickstream 90, session 30): u1-order (400d) and u3-click (120d) purged; u2-order (400d) held back by legal hold; u4-session and u5-profile fresh and kept. Resweep: 0 new purges. Aggregates: n=12 publishable, n=3 suppressed. Restore of the 180-day snapshot: 2 tombstoned skipped, 1 live replayed, 0 resurrected. Audit: two hashes, zero raw PII — and that zero is the number the whole protocol hangs on.</p>",
+  "worked_fa": "<p>اجرای آموزشی (روزهای نمایشی: سفارش ۳۶۵، clickstream نود و session سی): u1-order (۴۰۰ روزه) و u3-click (۱۲۰ روزه) پاک شدن؛ u2-order (۴۰۰ روزه) با hold حقوقی نگه داشته شد؛ u4-session و u5-profile تازه و نگه‌داشته. sweep دوباره: ۰ پاک تازه. aggregateها: ۱۲تایی منتشرشدنی و ۳تایی suppressed. restore ی snapshot صدوهشتادروزه: ۲ tombstoneشده رد و ۱ زنده بازپخش و ۰ زنده‌شده. ممیزی: دو hash و صفر PII خام — و همین صفرِ زنده‌شده، امضای قرارداده.</p>",
+  "reasoning_fa": "<p>retention رو از purpose و الزام و کمترین دادهٔ لازم درمیاریم؛ ۳۰/۹۰ روز یا هفت سال تو نمونه‌ها قانون عمومی نیستن. purge باید idempotent باشه، چون crash و retry طبیعی‌ان. aggregate خودکار ناشناس نیست: گروه کوچک یا join با دادهٔ دیگه می‌تونه فرد رو معلوم کنه. و restore باید پیش از سرو داده، registry حذف رو replay کنه تا backup قدیمی کاربر حذف‌شده رو برنگردونه — RTO هم باید همین مرحله رو حساب کنه.</p>",
+  "reasoning_en": "<p>Retention comes from purpose, obligations and the minimum necessary data; the sample periods aren't universal legal rules. A purge has to be idempotent, because crashes and retries happen. An aggregate isn't anonymous by itself: a small group or a join with other data can pin down a person. And before you serve a restored backup, replay the deletion registry so deleted users don't reappear — count that stage in your RTO too.</p>"
 }
