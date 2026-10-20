@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two systems, no shared commit — DDIA Chapter 8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Dual-system claim: both orders break">
+<title>Dual-system claim: both orders break</title>
+<text x="620" y="56" font-size="30" font-weight="900" text-anchor="middle">Two systems, no shared commit: both orders break</text>
+<text x="620" y="90" font-size="16" text-anchor="middle">a crash between the two steps decides oversell vs undersell</text>
+<g>
+<rect x="30" y="112" width="570" height="500" rx="16" fill="#fffdf7"/>
+<text x="315" y="150" font-size="18" font-weight="800" text-anchor="middle">ORDER A: deduct ledger, then clear hold</text>
+<text x="60" y="192" font-size="15">1. reserve: KV counter +2 (DECR)</text>
+<text x="60" y="232" font-size="15">2. payment succeeds</text>
+<text x="60" y="272" font-size="15">3. ledger 10 -&gt; 8 (deduct)</text>
+<text x="60" y="312" font-size="15" font-weight="800">4. CRASH before clearing the hold</text>
+<rect x="60" y="336" width="510" height="110" rx="12" fill="#f6d2d2"/>
+<text x="315" y="372" font-size="17" font-weight="900" text-anchor="middle">UNDERSELL</text>
+<text x="315" y="402" font-size="15" text-anchor="middle">ledger lost 2, hold stuck: a lost sale</text>
+<text x="315" y="428" font-size="14" text-anchor="middle">the buyer was charged, the shelf looks empty</text>
+</g>
+<g>
+<rect x="640" y="112" width="570" height="500" rx="16" fill="#fffdf7"/>
+<text x="935" y="150" font-size="18" font-weight="800" text-anchor="middle">ORDER B: clear hold, then deduct ledger</text>
+<text x="670" y="192" font-size="15">1. reserve: KV counter +2 (DECR)</text>
+<text x="670" y="232" font-size="15">2. payment succeeds</text>
+<text x="670" y="272" font-size="15">3. hold cleared: KV counter back to 0</text>
+<text x="670" y="312" font-size="15" font-weight="800">4. CRASH before the ledger deduct</text>
+<rect x="670" y="336" width="510" height="110" rx="12" fill="#f6d2d2"/>
+<text x="935" y="372" font-size="17" font-weight="900" text-anchor="middle">OVERSELL</text>
+<text x="935" y="402" font-size="15" text-anchor="middle">ledger still 10, units gone: sold air</text>
+<text x="935" y="428" font-size="14" text-anchor="middle">two buyers can now claim the same unit</text>
+</g>
+<text x="620" y="642" font-size="14" text-anchor="middle">same crash, opposite order, opposite failure: the commit was never atomic</text>
+</svg>
+</div>
+</body>
+</html>

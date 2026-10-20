@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bounded pool with SKIP LOCKED — DDIA Chapter 8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Bounded pool with SKIP LOCKED and single refiller">
+<title>Bounded pool with SKIP LOCKED and single refiller</title>
+<text x="620" y="56" font-size="30" font-weight="900" text-anchor="middle">One database: bounded pool + SKIP LOCKED + single refiller</text>
+<text x="620" y="90" font-size="16" text-anchor="middle">reserve and claim share one local transaction: all or nothing</text>
+<g>
+<rect x="40" y="120" width="220" height="76" rx="12" fill="#fffdf7"/>
+<text x="150" y="150" font-size="16" font-weight="800" text-anchor="middle">Buyer checkout</text>
+<text x="150" y="176" font-size="14" text-anchor="middle">wants 3 units</text>
+<text x="278" y="162" font-size="20" text-anchor="middle">-&gt;</text>
+<rect x="300" y="120" width="300" height="76" rx="12" fill="#fffdf7"/>
+<text x="450" y="150" font-size="16" font-weight="800" text-anchor="middle">Ready pool (cap 1000)</text>
+<text x="450" y="176" font-size="14" text-anchor="middle">SKIP LOCKED takes 3</text>
+<text x="618" y="162" font-size="20" text-anchor="middle">-&gt;</text>
+<rect x="640" y="120" width="260" height="76" rx="12" fill="#e3ecf9"/>
+<text x="770" y="150" font-size="16" font-weight="800" text-anchor="middle">ONE transaction</text>
+<text x="770" y="176" font-size="14" text-anchor="middle">reserve + claim</text>
+<text x="918" y="162" font-size="20" text-anchor="middle">-&gt;</text>
+<rect x="940" y="120" width="260" height="76" rx="12" fill="#fffdf7"/>
+<text x="1070" y="150" font-size="16" font-weight="800" text-anchor="middle">Ledger, same DB</text>
+<text x="1070" y="176" font-size="14" text-anchor="middle">deduct on success</text>
+</g>
+<g>
+<rect x="30" y="240" width="215" height="70" rx="12" fill="#fffdf7"/>
+<text x="137" y="268" font-size="15" font-weight="800" text-anchor="middle">Available</text>
+<text x="137" y="292" font-size="13" text-anchor="middle">row sits in pool</text>
+<rect x="265" y="240" width="215" height="70" rx="12" fill="#fffdf7"/>
+<text x="372" y="268" font-size="15" font-weight="800" text-anchor="middle">Reserved</text>
+<text x="372" y="292" font-size="13" text-anchor="middle">hold, few minutes</text>
+<rect x="500" y="240" width="215" height="70" rx="12" fill="#bfe6c9"/>
+<text x="607" y="268" font-size="15" font-weight="800" text-anchor="middle">Claimed</text>
+<text x="607" y="292" font-size="13" text-anchor="middle">ledger deducted</text>
+<rect x="735" y="240" width="215" height="70" rx="12" fill="#fffdf7"/>
+<text x="842" y="268" font-size="15" font-weight="800" text-anchor="middle">Released</text>
+<text x="842" y="292" font-size="13" text-anchor="middle">pay failed: row back</text>
+<rect x="970" y="240" width="240" height="70" rx="12" fill="#f3e3bd"/>
+<text x="1090" y="268" font-size="15" font-weight="800" text-anchor="middle">Replenishing</text>
+<text x="1090" y="292" font-size="13" text-anchor="middle">1 refills, rest wait</text>
+<text x="252" y="280" font-size="18" text-anchor="middle">-&gt;</text>
+<text x="487" y="280" font-size="18" text-anchor="middle">-&gt;</text>
+<text x="722" y="280" font-size="18" text-anchor="middle">-&gt;</text>
+</g>
+<g>
+<rect x="30" y="340" width="1180" height="250" rx="16" fill="#fffdf7"/>
+<text x="60" y="380" font-size="16" font-weight="800">Why each move exists</text>
+<text x="60" y="412" font-size="14">One row per unit, pool capped: no single hot counter, scan stays fast.</text>
+<text x="60" y="442" font-size="14">READ COMMITTED: no gap lock blocks the refill on an empty table.</text>
+<text x="60" y="472" font-size="14">Composite PK on the filter columns: one lock per row, not two.</text>
+<text x="60" y="502" font-size="14">Same lock order everywhere (pool first, then holds): no deadlock cycle.</text>
+<text x="60" y="532" font-size="14">Empty pool means wait for the refill, never a false sold-out.</text>
+<text x="60" y="562" font-size="14">UNION ALL batches multi-item carts into one round trip.</text>
+</g>
+</svg>
+</div>
+</body>
+</html>

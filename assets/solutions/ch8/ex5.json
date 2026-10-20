@@ -1,0 +1,247 @@
+{
+  "number": 5,
+  "slug": "table-less-outbox",
+  "interview_q_fa": "فرض کن یه بازارِ بلیت داری و قانونِ جدید اینه: هیچ جدولِ outboxی اضافه نمی‌کنی. هر خرید باید هم state رو بچرخونه هم یه event منتشر کنه — اتمیک. مسیرِ commit رو از write_to_outbox و pg_logical_emit_message تا Kafka بکش؛ بعد بگو اگه تراکنش rollback بشه چی می‌مونه، و اگه کانکتور وسطِ راه بمیره چی.",
+  "interview_q_en": "Picture this: a ticket marketplace where the new rule is no extra outbox table. Every purchase must flip state AND publish an event, atomically. Draw the commit path — from write_to_outbox and pg_logical_emit_message to Kafka — then say what survives a rollback, and what happens when the connector dies mid-stream.",
+  "answer_fa": "اتمیکی رو از commitِ دیتابیس می‌گیری، نه از یه جدول. داخلِ یه تراکنش، هم business row رو آپدیت می‌کنی هم با pg_logical_emit_message پیام رو می‌نویسی؛ یه COMMIT هر دو رو با هم می‌کنه. rollback بزنی هیچ eventی وجود نداره و commit کنی هر دو هستن. بعد Debezium از WAL می‌خونه، یه SMT کاستوم با prefix تاپیک و کلید و trace context رو درمیاره و Kafka می‌گیره. ولی حواس باشه: تحویل at-least-onceئه — تکراری نخوردنش با dedup گردنِ مصرف‌کننده‌ست، نه گردنِ کانکتور.",
+  "answer_en": "The atomicity comes from the database commit, not from a table. In one transaction you update the business row and write the message into the WAL with pg_logical_emit_message; a single COMMIT makes both durable. Roll back and the event never existed; commit and both are there. Debezium then tails the WAL, a custom SMT pulls topic, key and trace context out of the prefix, and Kafka carries it. Remember: delivery is at-least-once — suppressing duplicates is the consumer's job, not the connector's.",
+  "assumptions": [
+    {
+      "fa": "PostgreSQL با logical decoding و pg_logical_emit_message، Debezium روی یه Kafka Connect جدا، و یه مصرف‌کننده که dedup بلده. هر چیز دیگه‌ای (پارتیشن‌بندی جدول، احراز هویت) بیرون از scope این تمرینه.",
+      "en": "PostgreSQL with logical decoding and pg_logical_emit_message, Debezium on a separate Kafka Connect, and a consumer that can deduplicate. Everything else (table partitioning, authorization) is out of scope here."
+    },
+    {
+      "fa": "اعداد این حل آموزشی‌ان، نه بنچمارک: ترافیکِ فرضی چند صد خرید در ثانیه و یه کانکتور. اندازهٔ واقعی WAL و نرخ تکرار را باید با ترافیکِ خودت اندازه بگیری.",
+      "en": "The numbers here are teaching inputs, never benchmarks: an assumed few hundred purchases per second and one connector. Real WAL size and duplicate rate must be measured against your own traffic."
+    },
+    {
+      "fa": "پیام داخل prefix حمل می‌شه: تاپیک، کلید و هدرها. بدون این قرارداد، WAL یه جریانِ بی‌نام می‌شه که کانکتور نمی‌تونه درست مسیریابی کنه.",
+      "en": "The message travels inside the prefix: topic, key and headers. Without that contract the WAL is an anonymous stream the connector cannot route."
+    }
+  ],
+  "mental_fa": "فرض کن دفترِ فروش و بلندگوی رادیو تو یه اتاقن. دفتر یه دفتره، بلندگو یه دفترِ دیگه. اگه بنویسی تو دفتر و بعد بری بلندگو رو روشن کنی، بین این دو تا یه لحظه هست که یکی هست و اون یکی نیست — هر crash تو همون لحظه، یه فاجعه‌ست. راه‌حل این نیست که بلندگو رو نگه داری؛ راه‌حل اینه که هر دو نوشتن رو تو یه تراکنش بنویسی، یا هر دو می‌مونن یا هیچ‌کدوم. و نکتهٔ قشنگش اینه: رادیو لازم نیست چیزی جدا نگه داره — از خودِ دفترِ تراکنش‌ها خبردار می‌شه. اون دفترِ دوم، همون WALئه.",
+  "mental_en": "Picture a sales ledger and a PA speaker in one room. The ledger is a book; the speaker is another book. Write in the ledger, then walk over and switch on the speaker, and there is a moment where one exists and the other does not — any crash in that moment is a disaster. The fix is not to babysit the speaker; the fix is to write both inside one transaction, so either both land or neither does. And the neat part: the speaker does not need a second book at all. It reads the ledger's own transaction log. That second book is the WAL.",
+  "steps": [
+    {
+      "t_fa": "دو نوشتنِ جدا از هم را قاطی نکن",
+      "t_en": "Do not split the two writes",
+      "fa": "اول مشکل را درست صورت‌بندی کن: یه dual write یعنی state تو دیتابیس commit می‌شه و event جداگانه منتشر می‌شه. بین این دو تا یه پنجره هست. crash داخل پنجره یعنی state هست و event نیست (سفارش ثبت شد ولی کسی خبردار نشد) یا برعکس (event رفت ولی state نه). هیچ‌کدوم از این دو، با retry ساده درست نمی‌شه.",
+      "en": "Start by framing the problem correctly: a dual write commits the state in the database and publishes the event separately. There is a window between them. A crash inside that window means the state exists and the event does not (the order landed and nobody heard) or the reverse (the event went out and the state did not). Neither heals with a naive retry."
+    },
+    {
+      "t_fa": "اتمیکی را داخل همان تراکنش پیدا کن",
+      "t_en": "Find the atomicity inside the same transaction",
+      "fa": "راه درست: همون تراکنشی که business row رو آپدیت می‌کنه، با pg_logical_emit_message پیام رو هم توی WAL می‌نویسه. یه COMMIT هر دو رو با هم می‌کنه. rollback یعنی هیچ state و هیچ event. یعنی دیتابیس خودش اتمیکی رو رایگان بهت داده — لازم نیست چیزی بسازی.",
+      "en": "The fix: the same transaction that updates the business row also writes the message into the WAL with pg_logical_emit_message. One COMMIT makes both durable. A rollback means no state and no event. The database hands you atomicity for free — there is nothing to build."
+    },
+    {
+      "t_fa": "مسیر انتشار را بکش",
+      "t_en": "Draw the publication path",
+      "fa": "بعد مسیر را بکش: Postgres از WAL استریم می‌دهد (logical decoding)، Debezium رکورد را می‌گیرد، یه Single Message Transform کاستوم از prefix تاپیک، کلید و هدر و trace context را درمی‌آورد و می‌فرستد Kafka، و مصرف‌کننده می‌خواند. Schema Registry در مسیر است تا هیچ تولیدکننده‌ای نتواند دورش بزند — رویداد قبل از ورود به WAL اعتبارسنجی می‌شود.",
+      "en": "Then draw the path: Postgres streams from the WAL (logical decoding), Debezium takes the record, a custom Single Message Transform pulls topic, key, headers and trace context out of the prefix and lands it in Kafka, and a consumer reads it. A Schema Registry sits in the path so no producer can bypass validation — the event is checked before it ever reaches the WAL."
+    },
+    {
+      "t_fa": "نگه‌داشتن WAL را در نظر بگیر",
+      "t_en": "Keep the WAL bounded",
+      "fa": "حواس باشه replication slot تنظیم می‌کند WAL تا کِی نگه داشته شود. اگه کانکتور بمیره یا عقب بیفتد، WAL روی دیسک رشد می‌کند. راه‌حل گزارش‌شده: جدول heartbeat که با UPDATE دوره‌ای slot را جلو می‌برد، به‌علاوهٔ livenessProbe که کانکتور را خودکار ری‌استارت می‌کند و segmentهای نگه‌داشته‌شده را از slot دوباره پخش می‌کند.",
+      "en": "Watch the replication slot: it decides how long the WAL is retained. If the connector dies or falls behind, the WAL grows on disk. The reported fix: a heartbeat table that advances the slot with a periodic UPDATE, plus a livenessProbe that restarts the connector automatically and replays the retained WAL from the slot."
+    },
+    {
+      "t_fa": "تکراری‌ها را گردن مصرف‌کننده بگذار",
+      "t_en": "Leave duplicates to the consumer",
+      "fa": "و بالاخره صادق باش: این مسیر at-least-once است. اگه کانکتور بعد از publish و قبل از ack بمیره، همان رکورد دوباره پخش می‌شود. پس مصرف‌کننده باید با event id (یا یک inbox دیتابیسی) تکراری‌ها را ببیند و اثر را یه بار اعمال کند. ادعای exactly-once در سطح تحویل، اشتباه رایجی است.",
+      "en": "Finally, be honest: this path is at-least-once. If the connector dies after publishing and before acknowledging, that record is replayed. So the consumer must recognize repeats by event id (or use a database inbox) and apply the effect once. Claiming exactly-once delivery is a classic mistake."
+    }
+  ],
+  "design_fa": "<p>اجزا: <code>App</code> با یه کتابخانهٔ outbox که رویداد را serialize و در برابر Schema Registry اعتبارسنجی می‌کند؛ <code>Postgres</code> با جدول‌های کاری (مثلاً <code>orders(order_id, status, paid_at)</code>) و logical decoding؛ کانکتور <code>Debezium</code> روی یه Kafka Connect ایزوله در کوبرنتیز؛ یه <code>Single Message Transform</code> کاستوم؛ <code>Kafka</code>؛ و مصرف‌کننده.</p><p>جدول outbox وجود ندارد. پیام به‌صورت <code>pg_logical_emit_message(prefix, payload)</code> در همان تراکنش نوشته می‌شود؛ prefix خودش قرارداد مسیریابی است (تاپیک، کلید، هدرها و trace context). مسیر خواندن: مصرف‌کننده از تاپیک می‌خواند و با event id تکراری‌ها را می‌بیند. مسیر نوشتن: <code>UPDATE orders ... ; SELECT pg_logical_emit_message(...) ; COMMIT</code>.</p><p>مرزها: اتصال کانکتور به دیتابیس فقط برای logical replication است؛ کانکتور هیچ‌وقت مستقیم در دیتابیس نمی‌نویسد. replay slot و جدول heartbeat در کنار دیتابیس‌اند و باید در همان بکاپ‌ها باشند، وگرنه بازیابی نمی‌تواند از سر جای قبلی ادامه دهد.</p>",
+  "design_en": "<p>Components: an <code>App</code> with an outbox library that serializes the event and validates it against the Schema Registry; <code>Postgres</code> with business tables (say <code>orders(order_id, status, paid_at)</code>) and logical decoding; a <code>Debezium</code> connector on an isolated Kafka Connect in Kubernetes; a custom <code>Single Message Transform</code>; <code>Kafka</code>; and a consumer.</p><p>There is no outbox table. The message is written with <code>pg_logical_emit_message(prefix, payload)</code> inside the same transaction, and the prefix is the routing contract itself (topic, key, headers, trace context). Read path: the consumer reads the topic and recognizes repeats by event id. Write path: <code>UPDATE orders ... ; SELECT pg_logical_emit_message(...) ; COMMIT</code>.</p><p>Boundaries: the connector's database access is logical replication only — it never writes to your tables. The replication slot and the heartbeat table sit beside the database and must be in the same backups, otherwise recovery cannot resume from the previous position.</p>",
+  "worked_fa": "<p>اعداد آموزشی: با یه تراکنش، دو نوشتن با هم می‌مانند یا هیچ‌کدام — شبیه‌ساز شش سنجش دارد. <code>P1</code> commit: business=paid و wal=1. <code>P2</code> rollback: business=0 و wal=0. <code>P3</code> کانکتور بعد از publish و قبل از ack می‌میرد: دو بار تحویل، یک بار اثر (dedup) و یک تکراری. <code>P4</code> کانکتور قبل از publish می‌میرد: یک بار تحویل، بدون هدررو. <code>P5</code> هیچ جدول outboxی وجود ندارد. <code>P6</code> با heartbeat، بعد از ۵۰ تراکنش هیچ رکورد WAL باقی نمی‌ماند.</p><p>یعنی ادعای درست اینه: اتمیکیِ state و event از commit میاد، تحویل at-least-onceئه، و فضای WAL با heartbeat مهار می‌شه. عددهای واقعی خودت را از همین سه جا بگیر: نرخ تکراری مصرف‌کننده، اندازهٔ WAL و lag کانکتور.</p>",
+  "worked_en": "<p>Teaching numbers: with one transaction, the two writes land together or not at all — the simulator has six checks. <code>P1</code> commit: business=paid, wal=1. <code>P2</code> rollback: business=0, wal=0. <code>P3</code> connector dies after publish and before ack: delivered twice, applied once, one duplicate. <code>P4</code> connector dies before publish: delivered once, nothing lost. <code>P5</code> no outbox table exists. <code>P6</code> with the heartbeat, no WAL record is retained after 50 transactions.</p><p>So the honest claim is: atomicity of state and event comes from the commit, delivery is at-least-once, and WAL space is bounded by the heartbeat. Take your own three numbers from the same three places: the consumer's duplicate rate, the WAL footprint and the connector lag.</p>",
+  "alternatives": [
+    {
+      "fa": "جدول outbox کلاسیک: یه جدول دیگه که هم state و هم event درش نوشته می‌شه و یه job اون رو می‌خونه و منتشر می‌کنه. اتمیکی‌اش هم درسته، ولی قفل روی همون جدول، تأخیرِ polling و کارِ تمیزکردنِ جدول رو هم داره. اینجا قانونِ مسئله اضافه کردن جدول رو ممنوع کرده، پس گزینه‌ست نه راه‌حل.",
+      "en": "The classic outbox table: one more table where both the state and the event are written, plus a job that polls and publishes it. Its atomicity is correct too, but it brings row-lock contention on that table, polling delay and a cleanup job. Here the rules of the exercise forbid adding a table, so this is an option, not the answer."
+    },
+    {
+      "fa": "dual write با جبران: state رو بنویس، منتشر کن، بعد چک کن. تنها راه درستش اینه که هر دو طرف state رو دوباره بخونن و اختلاف رو reconcile کنی — که خودش یه سیستم توزیع‌شدهٔ دیگه با همان مشکلات است.",
+      "en": "Dual write with compensation: write the state, publish, then check. The only sound version is to re-read both sides and reconcile the difference — which is another distributed system with the same problems."
+    },
+    {
+      "fa": "2PC بین دیتابیس و بروکر: اتمیکی می‌دهد ولی coordinator تک‌نقطهٔ خرابی است و participant قفل نگه می‌دارد. وقتی می‌شود مرزِ تراکنش را دور یک دیتابیس کشید، پروتکل توزیع‌شده فقط هزینهٔ بیهوده است.",
+      "en": "2PC between the database and the broker: it buys atomicity but the coordinator is a single point of failure and participants hold locks. When the transaction boundary fits around one database, a distributed protocol is pure overhead."
+    }
+  ],
+  "failures": [
+    {
+      "fa": "کانکتور بعد از publish و قبل از ack می‌میرد: همان رکورد دوباره پخش می‌شود. اثر باید یک‌بار اعمال شود، پس event id را در payload یا هدر بگذار و مصرف‌کننده را idempotent کن.",
+      "en": "The connector dies after publishing and before acknowledging: the record is replayed. The effect must be applied once, so carry an event id in the payload or header and make the consumer idempotent."
+    },
+    {
+      "fa": "تراکنش rollback می‌شود: نه state می‌ماند نه event — این دقیقاً همان چیزی است که dual write نمی‌تواند بگوید. در گزارش‌های production این را «atomicity از commit» می‌نامند.",
+      "en": "The transaction rolls back: neither state nor event survives — exactly what a dual write cannot promise. In production reports this is called \"atomicity from the commit\"."
+    },
+    {
+      "fa": "کانکتور قبل از publish می‌میرد یا عقب می‌افتد: WAL همه‌چیز را نگه داشته، پس چیزی گم نمی‌شود؛ از slot دوباره پخش می‌شود. ولی اگه slot جلو نرود، WAL روی دیسک رشد می‌کند — heartbeat همان کاری است که جلویش را می‌گیرد.",
+      "en": "The connector dies or falls behind before publishing: the WAL still holds everything, so nothing is lost and it is replayed from the slot. But if the slot never advances, the WAL grows on disk — that is what the heartbeat prevents."
+    },
+    {
+      "fa": "اسکیمای رویداد عوض می‌شود: رویدادهای در جریان با اسکیمای جدید نمی‌خوانند. باید از Schema Registry با compatibility mode روشن، نسخه‌بندی subject و مسیریابی SMT استفاده کنی.",
+      "en": "The event schema changes: in-flight events no longer read. You need a Schema Registry with an explicit compatibility mode, versioned subjects and SMT routing."
+    },
+    {
+      "fa": "مصرف‌کننده رویداد بد می‌خوره: چون تحویل at-least-once است، poison message برمی‌گردد و دوباره پخش می‌شود. باید DLQ و سیاست retry جدا داشته باشی، وگرنه یک رویداد خراب کل تاپیک را می‌بندد.",
+      "en": "The consumer chokes on a poison event: because delivery is at-least-once, the bad message comes back and is replayed. You need a dead-letter path and a separate retry policy, otherwise one bad event blocks the whole topic."
+    }
+  ],
+  "code": {
+    "lang": "java",
+    "status": "verified",
+    "run_fa": "javac OutboxSim.java && java OutboxSim — فقط استاندارد جاوا، قطعی و فوری.",
+    "run_en": "javac OutboxSim.java && java OutboxSim — stdlib Java only, deterministic, instant.",
+    "expected_fa": "هر ۶ سنجش سبز: P1 commit هر دو را با هم نگه می‌دارد؛ P2 rollback هر دو را پاک می‌کند؛ P3 replay تکراری می‌سازد و مصرف‌کننده dedup می‌کند؛ P4 crash پیش از publish چیزی گم نمی‌کند؛ P5 هیچ جدول outboxی نیست؛ P6 heartbeat نگه‌داشت WAL را مهار می‌کند. (خروجی واقعی همین محیط)",
+    "expected_en": "PASS P1 commit keeps state and event -- business=paid wal=1\nPASS P2 rollback erases both -- business=0 wal=0\nPASS P3 replay duplicates delivery, consumer dedups -- delivered=2 applied=1 duplicates=1\nPASS P4 crash before publish loses nothing -- delivered=1 applied=1\nPASS P5 no outbox table exists -- tables=1 (business only), no outbox table to lock or clean\nPASS P6 heartbeat bounds WAL retention -- wal records retained=0 after 50 transactions\n----\nchecks run=6 passed=6 failed=0",
+    "code": "import java.util.*;\n\n/**\n * Teaching demo: table-less transactional outbox (the SeatGeek / Debezium pattern).\n *\n * Part 1 shows why a dual write breaks: the state is committed in the database\n * and the event is published by a separate call, so a crash between the two\n * leaves one without the other.\n * Part 2 shows the fix: inside ONE database transaction the app updates the\n * business row and emits the event with pg_logical_emit_message, so the WAL\n * entry and the state land in the same COMMIT. The pipeline is at-least-once\n * (a connector crash replays the WAL), so the consumer deduplicates.\n *\n * Deterministic: no threads, no clock, no randomness.\n */\npublic class OutboxSim {\n    static int passed = 0, failed = 0;\n\n    static void check(String name, boolean cond, String detail) {\n        System.out.println((cond ? \"PASS \" : \"FAIL \") + name + \" -- \" + detail);\n        if (cond) passed++; else failed++;\n    }\n\n    // ---------- the database: one business table, plus the WAL ----------\n    static class Db {\n        final Map<String, String> business = new LinkedHashMap<>(); // the ONLY table\n        final List<String> wal = new ArrayList<>();                  // logical decoding stream\n        final List<Integer> lsns = new ArrayList<>();               // absolute LSN per record\n        List<String> pending = null;\n        Map<String, String> pendingBusiness = null;\n\n        void begin() {\n            pending = new ArrayList<>();\n            pendingBusiness = new LinkedHashMap<>();\n        }\n\n        void update(String key, String value) {\n            pendingBusiness.put(key, value);\n        }\n\n        void emit(String prefix, String event) {\n            pending.add(prefix + \"|\" + event);\n        }\n\n        void commit() {\n            business.putAll(pendingBusiness);\n            for (String message : pending) {\n                wal.add(message);\n                lsns.add(lsns.size() + wal.size() - pending.size());\n            }\n            pending = null;\n            pendingBusiness = null;\n        }\n\n        void rollback() {\n            pending = null;\n            pendingBusiness = null;\n        }\n\n        // WAL records already acknowledged by the replication slot may be discarded\n        void truncateUpTo(int slotLsn) {\n            while (!lsns.isEmpty() && lsns.get(0) < slotLsn) {\n                lsns.remove(0);\n                wal.remove(0);\n            }\n        }\n\n        int tableCount() {\n            return 1; // business table only: no outbox table exists\n        }\n    }\n\n    // ---------- the connector: Debezium tailing the WAL ----------\n    static class Connector {\n        final Db db;\n        final List<String> broker = new ArrayList<>(); // Kafka side\n        final Set<Integer> published = new HashSet<>(); // in-memory marks, lost on crash\n        int slotLsn = 0;                               // replication slot: acknowledged records\n        boolean crashed = false;\n\n        Connector(Db db) {\n            this.db = db;\n        }\n\n        // Debezium reads every record after the slot and publishes it\n        void pollAndPublish() {\n            if (crashed) return;\n            for (int i = 0; i < db.wal.size(); i++) {\n                int lsn = db.lsns.get(i);\n                if (lsn < slotLsn || published.contains(lsn)) continue;\n                broker.add(db.wal.get(i));\n                published.add(lsn);\n            }\n        }\n\n        // the acknowledgement that advances the slot\n        void ack() {\n            int max = slotLsn - 1;\n            for (int lsn : published) max = Math.max(max, lsn);\n            slotLsn = max + 1;\n        }\n\n        // crash between publish and ack: the in-memory marks are gone, the slot is not\n        void crashBeforeAck() {\n            crashed = true;\n            published.clear();\n        }\n\n        void restart() {\n            crashed = false;\n        }\n\n        // Debezium advances the slot with periodic heartbeat-table writes,\n        // which is what bounds WAL retention on disk\n        void heartbeat() {\n            ack();\n        }\n    }\n\n    // ---------- the consumer: at-least-once delivery, dedup by event id ----------\n    static class Consumer {\n        final Set<String> seen = new HashSet<>();\n        int applied = 0;\n        int duplicates = 0;\n\n        void consume(List<String> records) {\n            for (String record : records) {\n                String eventId = record.substring(record.indexOf('|') + 1);\n                if (seen.add(eventId)) applied++;\n                else duplicates++;\n            }\n        }\n    }\n\n    public static void main(String[] args) {\n        // P1: one COMMIT keeps state and event together\n        Db db = new Db();\n        db.begin();\n        db.update(\"order-1\", \"paid\");\n        db.emit(\"orders\", \"evt-1:order-1:paid\");\n        db.commit();\n        check(\"P1 commit keeps state and event\",\n                \"paid\".equals(db.business.get(\"order-1\")) && db.wal.size() == 1,\n                \"business=paid wal=1\");\n\n        // P2: a rollback erases both, so no phantom event exists\n        Db db2 = new Db();\n        db2.begin();\n        db2.update(\"order-2\", \"paid\");\n        db2.emit(\"orders\", \"evt-2:order-2:paid\");\n        db2.rollback();\n        check(\"P2 rollback erases both\",\n                db2.business.isEmpty() && db2.wal.isEmpty(),\n                \"business=0 wal=0\");\n\n        // P3: connector crash after publish, before ack -> replay -> duplicate delivery\n        Db db3 = new Db();\n        Connector c3 = new Connector(db3);\n        db3.begin();\n        db3.update(\"order-3\", \"paid\");\n        db3.emit(\"orders\", \"evt-3:order-3:paid\");\n        db3.commit();\n        c3.pollAndPublish();\n        c3.crashBeforeAck();\n        c3.restart();\n        c3.pollAndPublish(); // replay from the slot\n        Consumer consumer = new Consumer();\n        consumer.consume(c3.broker);\n        check(\"P3 replay duplicates delivery, consumer dedups\",\n                c3.broker.size() == 2 && consumer.applied == 1 && consumer.duplicates == 1,\n                \"delivered=\" + c3.broker.size() + \" applied=\" + consumer.applied\n                        + \" duplicates=\" + consumer.duplicates);\n\n        // P4: connector crash before publish -> the WAL still carries the event\n        Db db4 = new Db();\n        Connector c4 = new Connector(db4);\n        db4.begin();\n        db4.update(\"order-4\", \"paid\");\n        db4.emit(\"orders\", \"evt-4:order-4:paid\");\n        db4.commit();\n        c4.crashBeforeAck();\n        c4.restart();\n        c4.pollAndPublish();\n        Consumer consumer4 = new Consumer();\n        consumer4.consume(c4.broker);\n        check(\"P4 crash before publish loses nothing\",\n                c4.broker.size() == 1 && consumer4.applied == 1,\n                \"delivered=\" + c4.broker.size() + \" applied=\" + consumer4.applied);\n\n        // P5: there is no outbox table to lock, poll or clean up\n        check(\"P5 no outbox table exists\",\n                db.tableCount() == 1,\n                \"tables=1 (business only), no outbox table to lock or clean\");\n\n        // P6: heartbeat advances the slot, so WAL retention stays bounded\n        Db db6 = new Db();\n        Connector c6 = new Connector(db6);\n        for (int i = 0; i < 50; i++) {\n            db6.begin();\n            db6.update(\"order-\" + i, \"paid\");\n            db6.emit(\"orders\", \"evt-6-\" + i);\n            db6.commit();\n            c6.pollAndPublish();\n            c6.heartbeat();\n            db6.truncateUpTo(c6.slotLsn);\n        }\n        check(\"P6 heartbeat bounds WAL retention\",\n                db6.wal.size() == 0,\n                \"wal records retained=\" + db6.wal.size() + \" after 50 transactions\");\n\n        System.out.println(\"----\");\n        System.out.println(\"checks run=\" + (passed + failed) + \" passed=\" + passed + \" failed=\" + failed);\n    }\n}\n"
+  },
+  "tests_fa": "<p>invariantهای هر سنجش: در P1 سطر business برابر paid و یک رکورد WAL؛ در P2 هر دو صفر؛ در P3 دو تحویل ولی یک اثر و یک تکراری؛ در P4 یک تحویل؛ در P5 فقط یک جدول؛ در P6 صفر رکورد WAL نگه‌داشته‌شده.</p><p>راهنمای اجرای محلی روی PostgreSQL واقعی: با <code>wal_level=logical</code> یک publication بساز، <code>pg_logical_emit_message('orders|evt-1', payload)</code> را داخل یه تراکنش واقعی صدا بزن، و با <code>pg_logical_slot_get_changes</code> جریان را بخوان. بعد کانکتور را وسط کار متوقف کن تا رکورد دوباره پخش شود و نرخ تکراری مصرف‌کننده را اندازه بگیر. سه عدد را نگه دار: نرخ تکراری، اندازهٔ WAL و lag کانکتور — همین‌ها بودجهٔ retry و فضای دیسک تو را می‌سازند.</p>",
+  "tests_en": "<p>Per-check invariants: P1 has a business row of paid and one WAL record; P2 has both at zero; P3 delivers twice but applies once with one duplicate; P4 delivers once; P5 has a single table; P6 retains zero WAL records.</p><p>Local-run guide on a real PostgreSQL: set <code>wal_level=logical</code>, create a publication, call <code>pg_logical_emit_message('orders|evt-1', payload)</code> inside a real transaction and read the stream with <code>pg_logical_slot_get_changes</code>. Then stop the connector mid-flight so a record is replayed and measure the consumer's duplicate rate. Track three numbers: duplicate rate, WAL footprint and connector lag — they size your retry budget and disk.</p>",
+  "followups": [
+    {
+      "q_fa": "کانکتور بعد از اینکه پیام رو منتشر کرد ولی قبل از ack از دست رفت چی می‌شه؟",
+      "q_en": "The connector dies after publishing but before acknowledging. What happens?",
+      "a_fa": "همون رکورد دوباره از slot پخش می‌شه، پس تحویل at-least-onه. اثر باید یه‌بار اعمال بشه: event id بذار توی payload یا هدر و مصرف‌کننده رو idempotent کن (یا یه inbox دیتابیسی بذار). دقت کن: این تکرار از خودِ طراحی میاد، نه از باگ؛ پس باید توی بودجهٔ retry و طراحی idempotency دیده بشه.",
+      "a_en": "The record is replayed from the slot, so delivery is at-least-once. The effect must be applied once: carry an event id in the payload or header and make the consumer idempotent (or give it a database inbox). Note this repeat is by design, not a bug — it belongs in your retry budget and idempotency story.",
+      "level": "senior"
+    },
+    {
+      "q_fa": "مصرف‌کننده می‌گه کلید یکتا نداره و نمی‌تونه dedup کنه. چیکار می‌کنی؟",
+      "q_en": "The consumer says it has no unique key and cannot deduplicate. What do you do?",
+      "a_fa": "کلید رو خودت بساز: شناسهٔ رویداد رو از قبل در prefix یا payload بفرست (مثلاً order_id به‌علاوهٔ نسخه یا یه UUID)، و اگه مصرف‌کننده اصلاً وضعیت نگه نمی‌داره، یه جدول inbox بذار که (event_id) را یک‌باره insert می‌کند و تکراری را رد می‌کند. اون‌وقت «یک‌بار اثر» رو دیتابیس نگه می‌داره نه حافظهٔ مصرف‌کننده.",
+      "a_en": "You mint the key: carry a stable event id in the prefix or payload (say order_id plus a version, or a UUID), and if the consumer keeps no state at all, give it an inbox table that inserts (event_id) once and rejects repeats. Then \"exactly-once effect\" is held by the database, not by consumer memory.",
+      "level": "staff"
+    },
+    {
+      "q_fa": "اسکیمای رویداد رو عوض می‌کنی و رویدادهای در جریان با اسکیمای جدید نمی‌خونن. راه‌حل؟",
+      "q_en": "You change the event schema and in-flight events no longer read. What now?",
+      "a_fa": "سازگاری رو در خودِ قرارداد بگذار: Schema Registry با compatibility mode صریح (مثلاً BACKWARD) به‌علاوهٔ نسخه‌بندی subject، و پیام کاستوم SMT که نسخهٔ قدیمی را ترجمه می‌کند. یعنی پیام کهنه تا ته عمرش معتبر می‌مونه؛ به‌علاوهٔ اینکه کانکتور را با schema registry رجیستر کنی و تغییر اسکیما را مثل یه مهاجرت بررسی کنی، نه مثل یه deploy.",
+      "a_en": "Put compatibility in the contract: a Schema Registry with an explicit compatibility mode (say BACKWARD) plus versioned subjects, and a custom SMT that translates the old version. Old messages stay valid for their whole lifetime; register the connector against the registry, and review a schema change like a migration rather than a deploy.",
+      "level": "staff"
+    }
+  ],
+  "mistakes": [
+    {
+      "fa": "ادعای exactly-once در سطح تحویل: این مسیر at-least-once است و بازپخش واقعی است. آنچه می‌توانی تضمین کنی «یک‌بار اثر» است، آن هم با dedup مصرف‌کننده.",
+      "en": "Claiming exactly-once delivery: this path is at-least-once and the replay is real. What you can promise is a once-applied effect, and only with consumer-side deduplication."
+    },
+    {
+      "fa": "نادیده گرفتن رشد WAL: replication slot وقتی کانکتور عقب بیفتد WAL را نگه می‌دارد و دیسک را پر می‌کند. جدول heartbeat همان چیزی است که جلویش را می‌گیرد — بدون آن، مهاجرت شما یک بمب ساعتی است.",
+      "en": "Ignoring WAL growth: the replication slot retains the WAL while the connector falls behind and fills the disk. The heartbeat table is what prevents that — without it your migration is a timed bomb."
+    },
+    {
+      "fa": "گفتن «اتمیکی رو خود Postgres حل کرد، پس دیگه هیچ کاری لازم نیست»: اتمیکیِ state و event حل شده، ولی تحویل، schema، فضای WAL و رفتار مصرف‌کننده هنوز زنده‌اند و هر کدام می‌توانند مصاحبه را خراب کنند.",
+      "en": "Saying \"Postgres solved atomicity, so nothing else is needed\": the atomicity of state and event is solved, but delivery, schema, WAL space and consumer behaviour are all still alive and any of them can sink the interview answer."
+    }
+  ],
+  "diagrams": [
+    {
+      "file": "diagrams/sol5a-outbox-commit-paths.html",
+      "made": "hand",
+      "kind_fa": "دو مسیر commit",
+      "kind_en": "two commit paths",
+      "caption_fa": "دو مسیر: dual write می‌شکند، یه تراکنش نمی‌شکند",
+      "caption_en": "Two paths: the dual write breaks, the single transaction does not",
+      "height": 640,
+      "narration": {
+        "scenario_fa": "دو ستون کنار هم: سمت چپ مسیر dual write و سمت راست مسیر outbox بدون جدول. هر ستون چهار قدم داره و هر دو با یه crash روبه‌رو می‌شن.",
+        "scenario_en": "Two columns side by side: on the left the dual write, on the right the table-less outbox. Each column has four steps, and both meet a crash.",
+        "steps": [
+          {
+            "fa": "ستون چپ: اول business table آپدیت و commit می‌شه، بعد یه فراخوانی جداگانه رویداد را منتشر می‌کنه.",
+            "en": "Left column: first the business table is updated and committed, then a separate call publishes the event."
+          },
+          {
+            "fa": "ستون چپ: بین این دو قدم یه crash میاد — نتیجه state هست و event نیست، یعنی سفارش ثبت شد ولی کسی خبردار نشد.",
+            "en": "Left column: a crash lands between the two steps — the result is state without an event, an order nobody heard about."
+          },
+          {
+            "fa": "ستون راست: همان تراکنش هم business row را آپدیت می‌کند هم با pg_logical_emit_message پیام را می‌نویسد.",
+            "en": "Right column: the same transaction updates the business row and writes the message with pg_logical_emit_message."
+          },
+          {
+            "fa": "جعبه‌های پایین حکم را می‌دهند: سمت چپ state بدون event، سمت راست state و event با یک COMMIT.",
+            "en": "The bottom boxes give the verdicts: on the left state without an event, on the right state and event in one COMMIT."
+          }
+        ],
+        "point_fa": "نقطهٔ تصمیم همون مرز transaction است: هر چیزی که داخلش باشد با هم می‌ماند.",
+        "point_en": "The decision point is the transaction boundary: whatever is inside it lands together.",
+        "failure_fa": "همون crash را در ستون راست ببین: این‌جا پیام داخل WAL است و با replay برمی‌گردد، پس چیزی گم نمی‌شود — فقط تکرار می‌شود.",
+        "failure_en": "See the same crash in the right column: there the message sits in the WAL and comes back on replay, so nothing is lost — it is only repeated.",
+        "guarantee_fa": "شکل فقط دربارهٔ اتمیکیِ state و event حرف می‌زند؛ دربارهٔ تحویل هیچی نمی‌گوید.",
+        "guarantee_en": "The figure speaks only about the atomicity of state and event; it says nothing about delivery.",
+        "nonguarantee_fa": "اندازهٔ WAL، تأخیر انتشار و رفتار مصرف‌کننده را نشان نمی‌دهد.",
+        "nonguarantee_en": "It does not show WAL size, publication latency or consumer behaviour."
+      },
+      "selfcheck": {
+        "q_fa": "چرا dual write با یه retry ساده درست نمی‌شه؟",
+        "q_en": "Why does a dual write not heal with a simple retry?",
+        "a_fa": "چون بعد از crash معلوم نیست کدوم طرف انجام شده. retry کردنِ انتشار ممکنه دو تا event بفرسته و retry کردنِ state ممکنه دوباره‌نویسی کنه. مسئله «کدوم طرف» است، نه «کدوم پیام». جوابش یه مرز transaction است، نه یه تلاش دوباره.",
+        "a_en": "Because after the crash you do not know which side happened. Retrying the publish may send two events; retrying the state may write again. The problem is which side, not which message. The answer is a transaction boundary, not another attempt."
+      }
+    },
+    {
+      "file": "diagrams/seatgeek-outbox.html",
+      "made": "archify",
+      "source": "assets/diagram-specs/solutions/ch8/seatgeek-outbox.json",
+      "kind_fa": "توالی: از اپ تا کافکا",
+      "kind_en": "sequence: app to Kafka",
+      "caption_fa": "مسیر کامل: اپ، رجیستری، دیتابیس، Debezium، SMT و کافکا",
+      "caption_en": "The whole path: app, registry, database, Debezium, SMT and Kafka",
+      "height": 640,
+      "narration": {
+        "scenario_fa": "شش بازیگر روی خط بالا، چپ‌به‌راست: اپ، رجیستری اسکیما، دیتابیس، Debezium، SMT، کافکا و مصرف‌کننده. خط پایین مسیر داده است.",
+        "scenario_en": "Six actors across the top, left to right: app, schema registry, database, Debezium, SMT, Kafka and consumer. The lower band is the data path.",
+        "steps": [
+          {
+            "fa": "اول اپ رویداد را با رجیستری اسکیما serialize و اعتبارسنجی می‌کند؛ هیچ تولیدکننده‌ای نمی‌تواند دورش بزند.",
+            "en": "First the app serializes and validates the event against the schema registry; no producer can bypass it."
+          },
+          {
+            "fa": "بعد در یک تراکنش، جدول‌های کاری آپدیت و پیام با pg_logical_emit_message نوشته می‌شود؛ یک COMMIT هر دو را با هم می‌کند.",
+            "en": "Then, in one transaction, the business tables are updated and the message is written with pg_logical_emit_message; one COMMIT makes both durable."
+          },
+          {
+            "fa": "دیتابیس از WAL استریم می‌دهد، Debezium رکورد را می‌گیرد و به SMT می‌دهد.",
+            "en": "The database streams from the WAL, Debezium takes the record and hands it to the SMT."
+          },
+          {
+            "fa": "SMT تاپیک، کلید و trace context را از prefix درمی‌آورد و به کافکا می‌فرستد؛ مصرف‌کننده می‌خواند.",
+            "en": "The SMT pulls topic, key and trace context out of the prefix, sends it to Kafka, and the consumer reads it."
+          }
+        ],
+        "point_fa": "نقطهٔ تصمیم همان تراکنش وسط است: state و event یا با هم، یا هیچ‌کدام.",
+        "point_en": "The decision point is that middle transaction: state and event together, or neither.",
+        "failure_fa": "اگه کانکتور بعد از publish و قبل از ack بمیره، همان رکورد دوباره پخش می‌شه؛ اینجا dedup روی دوش مصرف‌کننده‌ست.",
+        "failure_en": "If the connector dies after publishing and before acknowledging, the record is replayed; deduplication is the consumer's job.",
+        "guarantee_fa": "شکل نشان می‌دهد اتمیکی از کجا می‌آید و مسیر انتشار چطور شکل می‌گیرد.",
+        "guarantee_en": "The figure shows where the atomicity comes from and how the publication path is built.",
+        "nonguarantee_fa": "دربارهٔ فضای WAL، سلامت کانکتور و بودجهٔ retry ساکت است — آن‌ها در متن می‌آیند.",
+        "nonguarantee_en": "It is silent on WAL space, connector health and retry budget — those live in the text."
+      },
+      "selfcheck": {
+        "q_fa": "کانکتور بعد از publish و قبل از ack می‌میره؛ دقیقاً چی تکرار می‌شه؟",
+        "q_en": "The connector dies after publish and before ack. What exactly repeats?",
+        "a_fa": "همان رکورد WAL دوباره از slot پخش می‌شه، چون slot هنوز جلو نرفته. پس یک رویداد دوباره به کافکا می‌رسه. اگه مصرف‌کننده event id رو ببینه و اثر رو دوباره نزنه، مشکلی پیش نمیاد.",
+        "a_en": "The same WAL record is replayed from the slot, because the slot never advanced. One event reaches Kafka twice. If the consumer recognizes the event id and does not apply the effect twice, nothing breaks."
+      }
+    }
+  ],
+  "reasoning_fa": "<p>چرا این مدل به این تمرین می‌خوره: مسئله «دو نوشتنِ جدا» است و تنها چیزی که این دو را به هم گره می‌زند، یک commit مشترک است. جدول outbox هم دقیقاً همین کار را می‌کند، پس وقتی قانونِ مسئله جدولِ اضافه را ممنوع کرده، گزینهٔ درست جابه‌جا کردن مرز است: به‌جای نوشتن در یک جدولِ دوم، از لاگِ خودِ دیتابیس استفاده کن.</p><p>واحدها: WAL و replication slot را با بایت و بایت‌بر‌ثانیه بسنج، نه با «پیام». تکرار را با نسبت پیام‌های تکراری به کل پیام‌ها بسنج. همهٔ عددهای این حل آموزشی‌اند و باید با اندازه‌گیری خودت جایگزین شوند.</p><p>اگر فرض‌ها عوض شوند چه می‌شود: اگر دیتابیس logical decoding نداشته باشد (مثلاً یک موتور NoSQL)، این راه نمی‌ماند و یا باید به جدول outbox برگردی یا CDC سطح فایل بسازی. اگر مصرف‌کننده اصلاً dedup نکند، تضمین «یک‌بار اثر» از بین می‌رود و آن‌وقت باید به یک inbox دیتابیسی تکیه کنی. اگر ترافیک از حدِ یک کانکتور بگذره، بحث مقیاس و partitioning می‌شه، نه اتمیکی.</p>",
+  "reasoning_en": "<p>Why this model fits: the problem is two separate writes, and the only thing that ties them together is a shared commit. A classic outbox table does exactly the same job, so when the rules forbid an extra table the right move is to move the boundary — instead of a second table, use the database's own log.</p><p>Units: measure the WAL and the replication slot in bytes and bytes per second, not in \"messages\". Measure repeats as duplicate messages over total messages. Every number in this solution is a teaching input and must be replaced by your own measurements.</p><p>How changed assumptions move the decision: if the database has no logical decoding (say a NoSQL engine), this route does not survive and you either fall back to an outbox table or build file-level CDC. If the consumer cannot deduplicate at all, the once-applied guarantee disappears and an inbox table becomes mandatory. If traffic outgrows one connector, the conversation turns to scale and partitioning, not atomicity.</p>",
+  "sources": [
+    "seatgeek",
+    "outbox",
+    "cdc",
+    "kafka"
+  ],
+  "lab_fa": "<p>روی یه PostgreSQL واقعی با <code>wal_level=logical</code> یه publication بساز و یه slot منطقی بساز. داخل یه تراکنش واقعی، <code>pg_logical_emit_message('orders|evt-1', payload)</code> را صدا بزن و جریان را با <code>pg_logical_slot_get_changes</code> بخوان. بعد Debezium را روی Kafka Connect بالا بیاور، کانکتور را وسط کار متوقف کن و بازپخش را ببین. سه چیز را اندازه بگیر: نرخ تکراری مصرف‌کننده، فضای WAL روی دیسک و lag کانکتور. یک heartbeat بساز و قبل و بعد از آن، اندازهٔ WAL را مقایسه کن. آخرش رویداد تکراری را به یک مصرف‌کنندهٔ idempotent بده و اثر را بشمار.</p>",
+  "lab_en": "<p>On a real PostgreSQL with <code>wal_level=logical</code>, create a publication and a logical slot. Inside a real transaction call <code>pg_logical_emit_message('orders|evt-1', payload)</code> and read the stream with <code>pg_logical_slot_get_changes</code>. Then bring up Debezium on Kafka Connect, stop the connector mid-flight and watch the replay. Measure three things: the consumer's duplicate rate, the WAL footprint on disk and connector lag. Build a heartbeat table and compare WAL size before and after it. Finally, feed a duplicate event to an idempotent consumer and count the applied effects.</p>"
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two commit paths: dual write vs table-less outbox — DDIA Chapter 8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="Two commit paths: dual write breaks, one transaction does not">
+<title>Two commit paths: dual write breaks, one transaction does not</title>
+<text x="620" y="56" font-size="30" font-weight="900" text-anchor="middle">Two commit paths: dual write breaks, one transaction does not</text>
+<text x="620" y="90" font-size="16" text-anchor="middle">atomicity comes from the database commit, not from the pipeline</text>
+<g>
+<rect x="30" y="112" width="570" height="500" rx="16" fill="#fffdf7"/>
+<text x="315" y="150" font-size="18" font-weight="800" text-anchor="middle">PATH A: dual write (state, then publish)</text>
+<text x="60" y="192" font-size="15">1. BEGIN; update business tables</text>
+<text x="60" y="232" font-size="15">2. COMMIT: the state is durable</text>
+<text x="60" y="272" font-size="15">3. publish to the broker (separate call)</text>
+<text x="60" y="312" font-size="15" font-weight="800">4. CRASH before the publish lands</text>
+<rect x="60" y="336" width="510" height="110" rx="12" fill="#f6d2d2"/>
+<text x="315" y="372" font-size="17" font-weight="900" text-anchor="middle">STATE WITHOUT EVENT</text>
+<text x="315" y="402" font-size="15" text-anchor="middle">the order exists, nobody hears about it</text>
+<text x="315" y="428" font-size="14" text-anchor="middle">the same crash the other way round gives an event with no state</text>
+</g>
+<g>
+<rect x="640" y="112" width="570" height="500" rx="16" fill="#fffdf7"/>
+<text x="935" y="150" font-size="18" font-weight="800" text-anchor="middle">PATH B: table-less outbox (one transaction)</text>
+<text x="670" y="192" font-size="15">1. BEGIN; update business tables</text>
+<text x="670" y="232" font-size="15">2. pg_logical_emit_message(prefix, event)</text>
+<text x="670" y="272" font-size="15">3. COMMIT: state and WAL entry together</text>
+<text x="670" y="312" font-size="15" font-weight="800">4. crash anywhere: the WAL carries the event</text>
+<rect x="670" y="336" width="510" height="110" rx="12" fill="#d8efdc"/>
+<text x="935" y="372" font-size="17" font-weight="900" text-anchor="middle">STATE AND EVENT, ONE COMMIT</text>
+<text x="935" y="402" font-size="15" text-anchor="middle">rollback erases both, commit keeps both</text>
+<text x="935" y="428" font-size="14" text-anchor="middle">no outbox table, no lock, no cleanup job</text>
+</g>
+<text x="620" y="642" font-size="14" text-anchor="middle">the pipeline stays at-least-once: the consumer deduplicates, the commit stays atomic</text>
+</svg>
+</div>
+</body>
+</html>

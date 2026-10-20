@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The whole inventory fix on one page — DDIA Chapter 8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&amp;family=Vazirmatn:wght@300;400;500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f7f2e8;display:flex;justify-content:center}
+.stage{width:100%;max-width:1280px;padding:16px}
+svg{width:100%;height:auto;display:block;background:#f7f2e8;border-radius:24px}
+svg text{font-family:'Nunito','Vazirmatn',system-ui,sans-serif;fill:#302828}
+</style>
+</head>
+<body>
+<div class="stage">
+<svg width="100%" viewBox="0 0 1240 660" role="img" aria-label="The whole inventory fix: moves and guards">
+<title>The whole inventory fix: moves and guards</title>
+<text x="620" y="52" font-size="30" font-weight="900" text-anchor="middle">The whole fix on one page: every move and its guard</text>
+<text x="620" y="84" font-size="16" text-anchor="middle">from hot-counter contention to a safe cutover</text>
+<g>
+<rect x="40" y="104" width="560" height="72" rx="12" fill="#fffdf7"/>
+<text x="60" y="132" font-size="15" font-weight="800">1. One row per unit, pool capped at 1000</text>
+<text x="60" y="158" font-size="13">kills the hot counter; the SKIP LOCKED scan stays fast</text>
+<rect x="640" y="104" width="560" height="72" rx="12" fill="#bfe6c9"/>
+<text x="660" y="132" font-size="15" font-weight="800">Guard: cap sized from peak flash-sale bursts</text>
+<text x="660" y="158" font-size="13">big enough to absorb bursts, small enough to scan</text>
+<rect x="40" y="188" width="560" height="72" rx="12" fill="#fffdf7"/>
+<text x="60" y="216" font-size="15" font-weight="800">2. READ COMMITTED + composite primary key</text>
+<text x="60" y="242" font-size="13">no supremum gap lock; filter columns in the PK: 1 lock/row</text>
+<rect x="640" y="188" width="560" height="72" rx="12" fill="#bfe6c9"/>
+<text x="660" y="216" font-size="15" font-weight="800">Guard: observe locks, do not assume the default</text>
+<text x="660" y="242" font-size="13">SHOW ENGINE INNODB STATUS before and after</text>
+<rect x="40" y="272" width="560" height="72" rx="12" fill="#fffdf7"/>
+<text x="60" y="300" font-size="15" font-weight="800">3. Same lock order: pool DELETE, then hold INSERT</text>
+<text x="60" y="326" font-size="13">reserve and claim can never hold locks in a cycle</text>
+<rect x="640" y="272" width="560" height="72" rx="12" fill="#bfe6c9"/>
+<text x="660" y="300" font-size="15" font-weight="800">Guard: one refill owner; the rest wait, no stampede</text>
+<text x="660" y="326" font-size="13">empty pool = wait, never a false sold-out</text>
+<rect x="40" y="356" width="560" height="72" rx="12" fill="#fffdf7"/>
+<text x="60" y="384" font-size="15" font-weight="800">4. Tag connections, measure who holds them</text>
+<text x="60" y="410" font-size="13">comment tags in SQL, aggregated at the proxy layer</text>
+<rect x="640" y="356" width="560" height="72" rx="12" fill="#bfe6c9"/>
+<text x="660" y="384" font-size="15" font-weight="800">Guard: clean the checkout path first</text>
+<text x="660" y="410" font-size="13">fewer reads and transactions before bigger pools</text>
+<rect x="40" y="440" width="560" height="72" rx="12" fill="#fffdf7"/>
+<text x="60" y="468" font-size="15" font-weight="800">5. Shadow dual-write, then switch the source of truth</text>
+<text x="60" y="494" font-size="13">compare on live traffic, roll out pod by pod</text>
+<rect x="640" y="440" width="560" height="72" rx="12" fill="#bfe6c9"/>
+<text x="660" y="468" font-size="15" font-weight="800">Guard: kill-switch back to the old system</text>
+<text x="660" y="494" font-size="13">no in-flight migration: both systems live side by side</text>
+</g>
+<text x="620" y="548" font-size="14" text-anchor="middle">Lesson: shrink the transaction boundary to one database before reaching for 2PC.</text>
+<text x="620" y="574" font-size="14" text-anchor="middle">And when CPU is fine but queues grow, instrument the plumbing, not the engine.</text>
+<text x="620" y="620" font-size="13" text-anchor="middle">Numbers above are teaching sizes (آموزشی): replace the cap and timings with product measurements.</text>
+</svg>
+</div>
+</body>
+</html>
