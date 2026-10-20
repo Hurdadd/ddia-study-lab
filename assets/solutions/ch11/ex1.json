@@ -1,32 +1,32 @@
 {
   "alternatives": [
     {
-      "en": "Pure in-memory hash with no spill path: fastest while the working set fits, but the first oversized input kills the job with <span class=\"ltr\">OOM</span> instead of slowing it down. Keep it only behind a measured cardinality guard with a spill fallback.",
-      "fa": "تجمیع hash کاملاً درون‌حافظه بدون مسیر spill: تا وقتی working set جا شود سریع‌ترین است، ولی اولین ورودیِ بزرگ‌تر job را با <span class=\"ltr\">OOM</span> می‌کشد نه کُندش می‌کند. فقط پشت نگهبانِ cardinalityِ اندازه‌گیری‌شده با fallback به spill نگهش دار."
+      "en": "Pure in-memory hash with no spill path: the fastest thing you can run while the working set fits, but the first oversized input kills the job with <span class=\"ltr\">OOM</span> instead of slowing it down. Keep it only behind a measured cardinality guard, with a spill fallback.",
+      "fa": "تجمیع hash کاملاً درون‌حافظه، بدون مسیر spill: تا وقتی working set جا بشه سریع‌ترین گزینه‌ست، ولی اولین ورودیِ بزرگ‌تر job رو با <span class=\"ltr\">OOM</span> می‌کشه نه کُندش. نگهش دار فقط پشت نگهبانِ cardinalityِ اندازه‌گیری‌شده و با fallback به spill."
     },
     {
-      "en": "Sketch plus heap (e.g. count-min with a top-K heap): tiny bounded memory and one pass, but answers are approximate with a stated error bound. Wins only when the interview explicitly allows an approximate top-100.",
-      "fa": "sketch به‌علاوه heap (مثلاً count-min با heapِ top-K): حافظه کوچک کران‌دار و یک pass، ولی جواب‌ها تقریبی با کران خطای اعلام‌شده‌اند. فقط وقتی می‌برد که مصاحبه صریح top-100 تقریبی را مجاز کرده باشد."
+      "en": "Sketch plus heap (say count-min with a top-K heap): tiny bounded memory and a single pass, but the answers are approximate with a stated error bound. It only wins when the interview explicitly allows an approximate top-100.",
+      "fa": "sketch به‌علاوه heap (مثلاً count-min با heapِ top-K): حافظه کوچک کران‌دار و فقط یک pass، ولی جواب‌ها تقریبی‌ان با کران خطای اعلام‌شده. می‌بره فقط وقتی مصاحبه صریحاً top-100 تقریبی رو مجاز کرده باشه."
     }
   ],
-  "answer_en": "Default to external sort when the working set may exceed RAM: bounded chunk in memory, sorted runs spilled to disk, k-way merge streams the counts — it always finishes and degrades with I/O instead of dying. Keep hash aggregation while distinct keys comfortably fit RAM. Reach for a sketch only when an approximate top-100 is explicitly allowed. The top trade-off is time versus certainty: sort pays extra I/O to guarantee completion.",
-  "answer_fa": "وقتی working set ممکن است از RAM بگذرد، پیش‌فرض external sort است: chunk کران‌دار در حافظه، runهای مرتب spilled روی دیسک، ادغام k-way که شمارش را جاری می‌کند — همیشه تمام می‌شود و به‌جای مردن با I/O کُند می‌شود. تجمیع hash را نگه دار تا وقتی کلیدهای متمایز راحت در RAM جا می‌شوند. به sketch فقط وقتی دست ببر که top-100 تقریبی صریح مجاز شده باشد. تریدآف اصلی زمان در برابر قطعیت است: sort برای تضمینِ تمام شدن I/O اضافه می‌پردازد.",
+  "answer_en": "Here's the thing: when the working set may exceed RAM, make external sort your default. Keep one bounded chunk in memory, spill the sorted runs to disk, and let a k-way merge stream the counts — that path always finishes, and when RAM runs out it slows down with I/O instead of dying. Stick with hash aggregation while the distinct keys comfortably fit in RAM. Reach for a sketch only when an approximate top-100 is explicitly allowed. The top trade-off is time versus certainty: sort pays extra I/O to buy the guarantee of finishing. Remember the rule: hash while it fits, sort once it doesn't.",
+  "answer_fa": "قضیه اینه که وقتی working set ممکنه از RAM بگذره، پیش‌فرضت external sort باشه: یه chunk کران‌دار توی حافظه، runهای مرتب که روی دیسک spill می‌شن، و ادغام k-way که شمارش رو جاری می‌کنه. این مسیر همیشه تموم می‌شه — به‌جای مردن، با I/O کُند می‌شه. تجمیع hash رو نگه دار تا وقتی کلیدهای متمایز راحت توی RAM جا می‌شن. دست فقط وقتی ببر که top-100 تقریبی صریح مجاز شده باشه. تریدآف اصلی زمان در برابر قطعیته: sort برای اینکه تضمین کنه تموم می‌شه، I/O اضافه می‌پردازه. — یادت باشه: hash تا وقتی جا می‌شه، sort از لحظه‌ای که جا نمی‌شه.",
   "assumptions": [
     {
-      "en": "Teaching log: 200,000 lines with 19,782 distinct URLs (skewed popularity), from the runnable demo below — not a production benchmark.",
-      "fa": "لاگ آموزشی: ۲۰۰٬۰۰۰ خط با ۱۹٬۷۸۲ URL متمایز (محبوبیت چوله)، از دموی قابل‌اجرای پایین — نه بنچمارک پروداکشن."
+      "en": "Picture a teaching log: 200,000 lines with 19,782 distinct URLs (skewed popularity). All of it comes from the runnable demo below — not a production benchmark.",
+      "fa": "فرض کن یه لاگ آموزشی داریم: ۲۰۰٬۰۰۰ خط با ۱۹٬۷۸۲ URL متمایز (محبوبیت چوله). همه‌اش از دموی قابل‌اجرای پایین میاد — نه بنچمارک پروداکشن."
     },
     {
-      "en": "Memory cap stated up front: one 20,000-line chunk in RAM; anything past it must spill to temp files.",
-      "fa": "سقف حافظه از اول اعلام‌شده: یک chunk بیست‌هزارخطی در RAM؛ هرچه بیشتر شود باید به فایل موقت spill شود."
+      "en": "The memory cap is stated up front: one 20,000-line chunk in RAM. Anything past that has to spill to temp files.",
+      "fa": "سقف حافظه از اول اعلام شده: یه chunk بیست‌هزارخطی توی RAM می‌نشینه؛ هرچی از این بیشتر بشه باید به فایل موقت spill بشه."
     },
     {
-      "en": "Exact top-5 required; the approximate variant is a separate regime with its own error budget.",
-      "fa": "top-5 دقیق لازم است؛ حالت تقریبی رژیم جداست با بودجه خطای خودش."
+      "en": "You need an exact top-5; the approximate variant is a separate regime with its own error budget.",
+      "fa": "top-5 دقیق لازمه؛ حالت تقریبی یه رژیم جداست با بودجهٔ خطای خودش."
     },
     {
-      "en": "Single machine with local temp disk; distributed shuffle belongs to the next exercises.",
-      "fa": "تک‌ماشین با دیسک موقت محلی؛ shuffle توزیع‌شده مال تمرین‌های بعدی است."
+      "en": "Here's the thing: a single machine with local temp disk — distributed shuffle belongs to the next exercises.",
+      "fa": "قضیه اینه که: تک‌ماشین با دیسک موقت محلی داریم؛ shuffle توزیع‌شده مال تمرین‌های بعدیه."
     }
   ],
   "code": {
@@ -38,54 +38,54 @@
     "run_fa": "javac TopUrlsDemo.java && java TopUrlsDemo — فقط استاندارد جاوا، فایل‌های موقت خودکار پاک می‌شوند.",
     "status": "verified"
   },
-  "design_en": "<p><b>Stages:</b> <code>extract</code> (URL per line) → <code>partition-or-chunk</code> (bounded RAM) → <code>spill store</code> (sorted runs on temp disk) → <code>merge</code> (k-way, one line per run in RAM) → <code>rank</code> (top-K heap).</p><p><b>Config:</b> one explicit <code>chunk_cap</code> (lines or bytes); spill directory with free-space reserve; deterministic seed for the teaching generator.</p><p><b>Contracts:</b> runs are sorted and checksummed; the merge holds O(runs) lines, never O(urls); the ranker keeps K entries; both paths emit identical top-K for identical input.</p>",
-  "design_fa": "<p><b>مرحله‌ها:</b> <code>extract</code> (URL هر خط) ← <code>partition-or-chunk</code> (RAM کران‌دار) ← <code>spill store</code> (runهای مرتب روی دیسک موقت) ← <code>merge</code> (k-way با یک خط به‌ازای هر run در RAM) ← <code>rank</code> (heapِ top-K).</p><p><b>پیکربندی:</b> یک <code>chunk_cap</code> صریح (خط یا بایت)؛ دایرکتوری spill با رزرو فضای آزاد؛ seed قطعی برای سازنده آموزشی.</p><p><b>قراردادها:</b> runها مرتب و checksummedاند؛ ادغام O(run) خط نگه می‌دارد نه O(url)؛ ranker فقط K ورودی نگه می‌دارد؛ هر دو مسیر برای ورودی یکسان top-K یکسان می‌دهند.</p>",
+  "design_en": "<p><b>Stages:</b> <code>extract</code> (URL per line) → <code>partition-or-chunk</code> (bounded RAM) → <code>spill store</code> (sorted runs on temp disk) → <code>merge</code> (k-way, one line per run in RAM) → <code>rank</code> (top-K heap).</p><p><b>Config:</b> one explicit <code>chunk_cap</code> (lines or bytes) — that single cap is what keeps the rest of the design small; spill directory with free-space reserve; deterministic seed for the teaching generator.</p><p><b>Contracts:</b> runs are sorted and checksummed; the merge holds O(runs) lines, never O(urls); the ranker keeps K entries; both paths emit identical top-K for identical input — and that last one is what makes the benchmark fair.</p>",
+  "design_fa": "<p><b>مرحله‌ها:</b> <code>extract</code> (URL هر خط) ← <code>partition-or-chunk</code> (RAM کران‌دار) ← <code>spill store</code> (runهای مرتب روی دیسک موقت) ← <code>merge</code> (k-way با یک خط به‌ازای هر run در RAM) ← <code>rank</code> (heapِ top-K).</p><p><b>پیکربندی:</b> یک <code>chunk_cap</code> صریح (خط یا بایت) — همین سقفی است که بقیهٔ طراحی را کوچک نگه می‌دارد؛ دایرکتوری spill با رزرو فضای آزاد؛ seed قطعی برای سازنده آموزشی.</p><p><b>قراردادها:</b> runها مرتب و checksummedاند؛ ادغام O(run) خط نگه می‌دارد نه O(url)؛ ranker فقط K ورودی نگه می‌دارد؛ هر دو مسیر برای ورودی یکسان top-K یکسان می‌دهند — و همین آخری است که بنچمارک را منصفانه می‌کند.</p>",
   "diagrams": [
     {
-      "caption_en": "Hash aggregation with a memory cap: hot partitions stay, cold ones spill",
-      "caption_fa": "تجمیع hash با سقف حافظه: پارتیشن داغ می‌ماند، سرد spill می‌شود",
+      "caption_en": "Hash aggregation with a memory cap: the hot ones stay, the cold ones spill",
+      "caption_fa": "تجمیع hash با سقف حافظه: داغ می‌ماند، سرد spill می‌شود",
       "file": "diagrams/sol1-step1-hash-spill.html",
       "height": 640,
       "kind_en": "dataflow",
       "kind_fa": "جریان‌داده",
       "made": "archify",
       "narration": {
-        "failure_en": "Without the spill edge the diagram lies: past the cap the job OOMs instead of slowing. Trace the dashed arrow and name what pays (disk I/O) and what is preserved (exact counts).",
-        "failure_fa": "بدون یال spill شکل دروغ می‌گوید: بعد از سقف، job به‌جای کُند شدن OOM می‌شود. پیکان خط‌چین را دنبال کن و بگو چه چیزی می‌پردازد (I/O دیسک) و چه چیزی حفظ می‌شود (شمارش دقیق).",
-        "guarantee_en": "The figure shows where memory ends and disk begins, and that both branches reconverge on one ranker. It does not prove any universal threshold — the spill point stays environment-specific.",
-        "guarantee_fa": "شکل نشان می‌دهد حافظه کجا تمام و دیسک کجا شروع می‌شود و هر دو شاخه روی یک ranker همگرا می‌شوند. هیچ آستانه عمومی را ثابت نمی‌کند — نقطه spill محیط‌خاص می‌ماند.",
-        "nonguarantee_en": "It says nothing about distributed shuffle, skewed hot keys across workers, or approximate sketches — those are the next steps, not this figure.",
-        "nonguarantee_fa": "درباره shuffle توزیع‌شده، کلیدهای داغ چوله روی workerها یا sketchهای تقریبی چیزی نمی‌گوید — آن‌ها گام‌های بعدی‌اند نه این شکل.",
-        "point_en": "The decision point is the partitioner: its cap routes each partition to RAM or to disk, and the cap is a stated config, not a discovered constant.",
-        "point_fa": "نقطه تصمیم partitioner است: سقفش هر پارتیشن را به RAM یا دیسک می‌فرستد و سقف یک پیکربندی اعلام‌شده است نه ثابتِ کشف‌شده.",
-        "scenario_en": "A log that may exceed RAM needs top URLs. Read left to right: one stream enters, the cap splits it into resident and spilled branches, one ranker closes.",
-        "scenario_fa": "لاگی که ممکن است از RAM بگذرد top URL می‌خواهد. چپ‌به‌راست بخوان: یک جریان وارد می‌شود، سقف آن را به شاخه مقیم و spilled تقسیم می‌کند و یک ranker می‌بندد.",
+        "failure_en": "Without the spill edge the diagram lies: past the cap the job OOMs instead of slowing down. Trace the dashed arrow and say what pays (disk I/O) and what is preserved (exact counts).",
+        "failure_fa": "بدون یال spill، شکل داره دروغ می‌گه: بعد از سقف، job به‌جای کُند شدن OOM می‌شه. پیکان خط‌چین رو دنبال کن و بگو چی می‌پردازه (I/O دیسک) و چی حفظ می‌شه (شمارش دقیق).",
+        "guarantee_en": "The figure shows where memory ends and disk begins, and how both branches reconverge on one ranker. It proves no universal threshold — the spill point stays environment-specific.",
+        "guarantee_fa": "شکل نشون می‌ده حافظه کجا تموم می‌شه و دیسک کجا شروع می‌شه و هر دو شاخه روی یه ranker همگرا می‌شن. ولی هیچ آستانهٔ عمومی رو ثابت نمی‌کنه — نقطهٔ spill محیط‌خاص می‌مونه.",
+        "nonguarantee_en": "It says nothing about a distributed shuffle, skewed hot keys across workers, or approximate sketches — those are the next steps, not this figure.",
+        "nonguarantee_fa": "دربارهٔ shuffle توزیع‌شده، کلیدهای داغِ چوله روی workerها یا sketchهای تقریبی هیچی نمی‌گه — اون‌ها گام‌های بعدی‌ان، نه این شکل.",
+        "point_en": "The decision point is the partitioner: its cap sends each partition to RAM or to disk, and that cap is a stated config, not a discovered constant.",
+        "point_fa": "نقطهٔ تصمیم همون پارتیشنره: سقفش هر پارتیشن رو می‌فرسته سمت RAM یا دیسک، و این سقف یه پیکربندی اعلام‌شده‌ست نه یه ثابتِ کشف‌شده.",
+        "scenario_en": "Picture a log that may not fit in RAM, and you need the top URLs. Read the figure left to right: one stream comes in, the cap splits it into a resident branch and a spilled one, and one ranker closes the whole thing.",
+        "scenario_fa": "فرض کن یه لاگ داری که شاید از RAM بزنه بیرون و top URL می‌خوای. شکل رو چپ‌به‌راست بخون: یه جریان وارد می‌شه، سقف اون رو به دو شاخهٔ مقیم و spilled تقسیم می‌کنه و در آخر یه ranker می‌بنده.",
         "steps": [
           {
-            "en": "Source and extract: the immutable log yields one URL per line — the same input both paths share.",
-            "fa": "منبع و استخراج: لاگ immutable به‌ازای هر خط یک URL می‌دهد — همان ورودی مشترک هر دو مسیر."
+            "en": "First the source and the extract: the immutable log gives one URL per line — the same input both paths share.",
+            "fa": "اول منبع و استخراج: لاگ immutable به‌ازای هر خط یه URL می‌ده — همون ورودی مشترکِ هر دو مسیر."
           },
           {
-            "en": "Partitioner with a cap: hot partitions aggregate in RAM counters, cold ones leave as sorted spill files.",
-            "fa": "پارتیشنر با سقف: پارتیشن‌های داغ در شمارنده‌های RAM تجمیع می‌شوند و سردها به‌صورت فایل spill مرتب می‌روند."
+            "en": "Then the partitioner with its cap: hot partitions pile up in RAM counters, cold ones leave as sorted spill files.",
+            "fa": "بعد پارتیشنر با سقف: پارتیشن‌های داغ توی شمارنده‌های RAM تجمیع می‌شن و سردها به‌صورت فایل spill مرتب بیرون می‌رن."
           },
           {
-            "en": "One ranker: partial counts plus merged spill counts become a single exact top-K.",
-            "fa": "یک ranker: شمارش‌های جزئی به‌علاوه شمارش‌های ادغام‌شده spill یک top-K دقیق واحد می‌شوند."
+            "en": "Last, one ranker: partial counts plus merged spill counts collapse into a single exact top-K.",
+            "fa": "آخر یه ranker: شمارش‌های جزئی به‌علاوه شمارش‌های ادغام‌شدهٔ spill، یه top-K دقیقِ واحد می‌شن."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "RAM counters for hot partitions, sorted spill files for cold ones, one ranker summing both into an exact top-K.",
-        "a_fa": "شمارنده‌های RAM برای پارتیشن‌های داغ، فایل‌های spill مرتب برای سردها و یک ranker که هر دو را به top-K دقیق جمع می‌کند.",
-        "q_en": "Where does the hash path keep state, and what happens past the cap?",
-        "q_fa": "مسیر hash حالت را کجا نگه می‌دارد و بعد از سقف چه می‌شود؟"
+        "a_en": "RAM counters for the hot partitions, sorted spill files for the cold ones, and one ranker that folds both into an exact top-K.",
+        "a_fa": "شمارنده‌های RAM برای پارتیشن‌های داغ، فایل‌های spill مرتب برای سردها، و یه ranker که هر دو رو به یه top-K دقیق جمع می‌کنه.",
+        "q_en": "Where does the hash path keep its state, and what happens past the cap?",
+        "q_fa": "مسیر hash حالتش رو کجا نگه می‌داره و بعد از سقف چه می‌شه؟"
       },
       "source": "assets/diagram-specs/solutions/ch11/sol1-step1-hash-spill.json"
     },
     {
-      "caption_en": "External sort with a bounded chunk: runs spill, the merge streams",
-      "caption_fa": "مرتب‌سازی بیرونی با chunk کران‌دار: runها spill می‌شوند و ادغام جاری است",
+      "caption_en": "External sort with a bounded chunk: the runs spill, the merge streams",
+      "caption_fa": "مرتب‌سازی بیرونی با chunk کران‌دار: runها spill می‌شن و ادغام جاریه",
       "file": "diagrams/sol1-step2-external-sort.html",
       "height": 640,
       "kind_en": "dataflow",
@@ -93,41 +93,41 @@
       "made": "archify",
       "narration": {
         "failure_en": "A disk-full spill fails the job mid-run: the reserve and the run counter catch it. A silently truncated run would corrupt counts — checksums close that hole.",
-        "failure_fa": "spill با دیسک پر وسط اجرا job را می‌اندازد: رزرو و شمارنده run می‌گیرندش. run کوتاه‌شده بی‌صدا شمارش را خراب می‌کند — checksum آن سوراخ را می‌بندد.",
-        "guarantee_en": "The figure shows RAM holding exactly one chunk plus one line per run — O(runs), never O(urls). It does not promise speed: the bottleneck visibly moves to sequential disk rates.",
-        "guarantee_fa": "شکل نشان می‌دهد RAM دقیقاً یک chunk به‌علاوه یک خط به‌ازای هر run نگه می‌دارد — O(run) و هرگز O(url) نه. سرعت را قول نمی‌دهد: گلوگاه آشکارا به نرخ ترتیبی دیسک می‌رود.",
+        "failure_fa": "اگه دیسک وسط spill پر بشه، job می‌افته: رزرو فضا و شمارندهٔ run می‌گیرنش. run کوتاه‌شده بی‌صدا شمارش رو خراب می‌کنه — checksum اون سوراخ رو می‌بنده.",
+        "guarantee_en": "The figure shows RAM holding exactly one chunk plus one line per run — O(runs), never O(urls). It doesn't promise speed: the bottleneck visibly moves to sequential disk rates.",
+        "guarantee_fa": "شکل نشون می‌ده RAM دقیقاً یه chunk به‌علاوه یه خط به‌ازای هر run نگه می‌داره — O(run)، هرگز O(url). سرعت رو قول نمی‌ده: گلوگاه آشکارا می‌ره سراغ نرخ ترتیبی دیسک.",
         "nonguarantee_en": "It covers one machine only: distributed merge, stragglers and object-store spills are outside this frame.",
-        "nonguarantee_fa": "فقط یک ماشین را پوشش می‌دهد: ادغام توزیع‌شده، stragglerها و spill روی object store بیرون این قاب‌اند.",
-        "point_en": "The decision point is the chunk size: bigger chunks mean fewer runs and a cheaper merge, tuned against RAM, never guessed.",
-        "point_fa": "نقطه تصمیم اندازه chunk است: chunk بزرگ‌تر یعنی run کمتر و ادغام ارزان‌تر، تنظیم‌شده با RAM و هرگز حدسی.",
-        "scenario_en": "The same log, now through the sort path. Follow the five stages: extract, sort one chunk, spill runs, merge-count, rank.",
-        "scenario_fa": "همان لاگ ولی از مسیر sort. پنج مرحله را دنبال کن: استخراج، مرتب‌سازی یک chunk، spill runها، ادغام-شمارش، رتبه‌بندی.",
+        "nonguarantee_fa": "فقط یه ماشین رو پوشش می‌ده: ادغام توزیع‌شده، stragglerها و spill روی object store بیرون این قاب‌ان.",
+        "point_en": "The decision point is the chunk size: bigger chunks mean fewer runs and a cheaper merge, tuned against RAM and never guessed.",
+        "point_fa": "نقطهٔ تصمیم اندازهٔ chunkه: chunk بزرگ‌تر یعنی run کمتر و ادغام ارزان‌تر — با RAM تنظیم می‌شه، هرگز حدسی نیست.",
+        "scenario_en": "Same log, now through the sort path. Follow the five stages: extract, sort one chunk, spill the runs, merge and count, rank.",
+        "scenario_fa": "همون لاگ، ولی این‌بار از مسیر sort. پنج مرحله رو دنبال کن: استخراج، مرتب‌سازی یه chunk، spill کردن runها، ادغام-شمارش و رتبه‌بندی.",
         "steps": [
           {
-            "en": "Chunk sort: each bounded chunk is sorted in RAM, written out, forgotten.",
-            "fa": "مرتب‌سازی chunk: هر chunk کران‌دار در RAM مرتب، نوشته و فراموش می‌شود."
+            "en": "Chunk sort: each bounded chunk gets sorted in RAM, written out, then forgotten.",
+            "fa": "مرتب‌سازی chunk: هر chunk کران‌دار توی RAM مرتب می‌شه، نوشته می‌شه و فراموش می‌شه."
           },
           {
-            "en": "Run files: disk holds every sorted run; total traffic stays linear in input.",
-            "fa": "فایل‌های run: دیسک همه runهای مرتب را نگه می‌دارد؛ ترافیک کل خطی با ورودی می‌ماند."
+            "en": "Run files: the disk holds every sorted run, and the total traffic stays linear in the input.",
+            "fa": "فایل‌های run: دیسک همهٔ runهای مرتب رو نگه می‌داره؛ ترافیک کل خطی با ورودی می‌مونه."
           },
           {
             "en": "Merge plus count: one line per run in RAM, equal neighbours counted on the fly, then ranked.",
-            "fa": "ادغام به‌علاوه شمارش: یک خط به‌ازای هر run در RAM، همسایه‌های برابر همان‌جا شمرده و بعد رتبه‌بندی می‌شوند."
+            "fa": "ادغام به‌علاوه شمارش: یه خط به‌ازای هر run توی RAM، همسایه‌های برابر همون‌جا شمرده می‌شن و بعد رتبه‌بندی."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "One chunk plus one line per run: O(runs) memory, linear disk traffic, completion guaranteed.",
-        "a_fa": "یک chunk به‌علاوه یک خط به‌ازای هر run: حافظه O(run)، ترافیک دیسک خطی و تمام شدن تضمینی.",
+        "a_en": "One chunk plus one line per run: O(runs) memory, linear disk traffic, and it always finishes.",
+        "a_fa": "یه chunk به‌علاوه یه خط به‌ازای هر run: حافظه O(run)، ترافیک دیسک خطی و تموم شدن تضمینی.",
         "q_en": "What exactly lives in RAM during the merge, and what bounds it?",
-        "q_fa": "هنگام ادغام دقیقاً چه چیزی در RAM است و سقفش چیست؟"
+        "q_fa": "توی ادغام دقیقاً چی توی RAM نشسته و سقفش چیه؟"
       },
       "source": "assets/diagram-specs/solutions/ch11/sol1-step2-external-sort.json"
     },
     {
-      "caption_en": "Same top-K, three regimes: pick by working set, not by habit",
-      "caption_fa": "یک top-K، سه رژیم: با working set انتخاب کن نه عادت",
+      "caption_en": "One top-K, three regimes: pick by working set, not by habit",
+      "caption_fa": "یک top-K، سه رژیم: با working set انتخاب کن، نه با عادت",
       "file": "diagrams/sol1-hash-vs-sort.html",
       "height": 640,
       "kind_en": "decision table",
@@ -135,84 +135,84 @@
       "made": "hand",
       "narration": {
         "failure_en": "Read the pink cell first: hash past RAM does not get slow, it dies. The table's job is making that row impossible to misread as a performance dip.",
-        "failure_fa": "اول سلول صورتی را بخوان: hash بعد از RAM کُند نمی‌شود، می‌میرد. کار جدول این است که آن سطر با افت کارایی اشتباه خوانده نشود.",
+        "failure_fa": "اول سلول صورتی رو بخون: hash بعد از RAM کُند نمی‌شه، می‌میره. کار جدول همینه که نذاری اون سطر رو اشتباهی با افت کارایی بخونی.",
         "guarantee_en": "The table composes both step diagrams plus the approximate regime: each row names its winner and its price. It proves no numbers — the demo below carries the evidence.",
-        "guarantee_fa": "جدول هر دو نمودار گام را به‌علاوه رژیم تقریبی ترکیب می‌کند: هر سطر برنده و قیمتش را نام می‌برد. عددی اثبات نمی‌کند — مدرک با دموی پایین است.",
+        "guarantee_fa": "این جدول هر دو نمودارِ گام رو به‌علاوهٔ رژیم تقریبی ترکیب می‌کنه: هر سطر برنده و قیمتش رو نام می‌بره. ولی عددی اثبات نمی‌کنه — مدرک با دموی پایین می‌مونه.",
         "nonguarantee_en": "Cell sizes are not benchmarks and thresholds are not portable: your cap, disk and cardinality decide your row.",
-        "nonguarantee_fa": "اندازه سلول‌ها بنچمارک نیست و آستانه‌ها قابل‌حمل نیستند: سقف، دیسک و cardinality تو سطر تو را مشخص می‌کند.",
+        "nonguarantee_fa": "اندازهٔ سلول‌ها بنچمارک نیست و آستانه‌ها قابل‌حمل نیستن: سقف، دیسک و cardinality تو سطرِ تو رو مشخص می‌کنن.",
         "point_en": "The decision point is the row, not the column: regime first (fits, exceeds, approximate), method second.",
-        "point_fa": "نقطه تصمیم سطر است نه ستون: اول رژیم (جا می‌شود، می‌گذرد، تقریبی) بعد روش.",
-        "scenario_en": "Three regimes down the rows, three methods across the columns. Green wins the row; pink fails or risks failing.",
-        "scenario_fa": "سه رژیم در سطرها و سه روش در ستون‌ها. سبز برنده سطر است؛ صورتی شکست می‌خورد یا ریسک شکست دارد.",
+        "point_fa": "نقطهٔ تصمیم سطره، نه ستون: اول رژیم (جا می‌شه، می‌زنه بیرون، تقریبی)، بعد روش.",
+        "scenario_en": "Three regimes down the rows, three methods across the columns. Green wins the row; pink fails, or risks failing.",
+        "scenario_fa": "سه رژیم توی سطرها، سه روش توی ستون‌ها. سبز برندهٔ اون سطره؛ صورتی یا شکست می‌خوره یا ریسک شکست داره.",
         "steps": [
           {
             "en": "Fits in RAM: hash wins with one exact pass; sort works but pays I/O; sketches are overkill.",
-            "fa": "جا شدن در RAM: hash با یک pass دقیق می‌برد؛ sort کار می‌کند ولی I/O می‌پردازد؛ sketch زیاده‌روی است."
+            "fa": "وقتی جا می‌شه: hash با یه pass دقیق می‌بره؛ sort کار می‌کنه ولی I/O می‌پردازه؛ sketch زیاده‌رویه."
           },
           {
-            "en": "Exceeds RAM: hash spills or OOMs; sort wins by always finishing; sketches stay optional.",
-            "fa": "گذر از RAM: hash spill می‌کند یا OOM می‌شود؛ sort با همیشه تمام شدن می‌برد؛ sketch اختیاری می‌ماند."
+            "en": "Exceeds RAM: hash spills or OOMs; sort wins because it always finishes; sketches stay optional.",
+            "fa": "وقتی از RAM می‌زنه بیرون: hash یا spill می‌کنه یا OOM می‌شه؛ sort به‌خاطر همیشه تموم شدن می‌بره؛ sketch اختیاری می‌مونه."
           },
           {
             "en": "Approximate top-100: the sketch wins on tiny memory once an error budget is granted.",
-            "fa": "top-100 تقریبی: sketch با حافظه کوچک می‌برد وقتی بودجه خطا داده شده باشد."
+            "fa": "وقتی top-100 تقریبی مجازه: sketch با حافظهٔ کوچک می‌بره، به شرط اینکه بودجهٔ خطا داده شده باشه."
           }
         ]
       },
       "selfcheck": {
         "a_en": "The row decides: fits goes hash, exceeds goes sort, approximate-allowed goes sketch — measured per environment.",
-        "a_fa": "سطر تصمیم می‌گیرد: جا شدن hash، گذر sort، تقریبیِ مجاز sketch — اندازه‌گیری‌شده per-environment.",
+        "a_fa": "سطر تصمیم می‌گیره: جا شدن hash، گذر sort، تقریبیِ مجاز sketch — و همه‌اش per-environment اندازه‌گیری‌شده.",
         "q_en": "Which axis of the table do you read first, and why?",
-        "q_fa": "کدام محور جدول را اول می‌خوانی و چرا؟"
+        "q_fa": "اول کدوم محور جدول رو می‌خونی و چرا؟"
       }
     }
   ],
   "failures": [
     {
-      "en": "OOM misread as slowness: the hash job dies instead of degrading. Guard with an explicit cap, a spill path, and an alert on spill ratio — treat OOM as a wrong answer, not a slow one.",
-      "fa": "خواندن OOM به‌جای کُندی: jobِ hash به‌جای افت می‌میرد. نگهبان سقف صریح، مسیر spill و هشدار روی نسبت spill است — OOM را جواب غلط بدان نه جواب کُند."
+      "en": "Misreading OOM as slowness: the hash job dies instead of degrading. Guard with an explicit cap, a spill path, and an alert on the spill ratio — and remember OOM is a wrong answer, not a slow one.",
+      "fa": "خواندن OOM به‌جای کُندی: jobِ hash به‌جای افت می‌میرد. نگهبان‌ها: سقف صریح، مسیر spill و هشدار روی نسبت spill — و یادت باشه OOM یه جواب غلطه، نه یه جواب کُند."
     },
     {
-      "en": "Disk-full mid-spill: runs stop landing and the merge reads a truncated set. Guard with a spill-space reserve, per-run checksums, and fail-fast instead of silent truncation.",
-      "fa": "پر شدن دیسک وسط spill: runها نمی‌نشینند و ادغام مجموعه ناقص می‌خواند. نگهبان رزرو فضای spill، checksum per-run و fail-fast به‌جای کوتاه‌شدن بی‌صداست."
+      "en": "Disk-full mid-spill: the runs stop landing and the merge reads a truncated set. Guard with a spill-space reserve, per-run checksums, and fail-fast instead of silent truncation.",
+      "fa": "پر شدن دیسک وسط spill: runها دیگه نمی‌نشینن و ادغام یه مجموعه ناقص می‌خونه. نگهبان: رزرو فضای spill، checksum per-run و fail-fast به‌جای کوتاه‌شدن بی‌صدا."
     },
     {
-      "en": "Unequal benchmark: different inputs, caps or K across the two paths make the comparison meaningless. Guard by fixing input, cap and K, and asserting identical top-K before timing.",
-      "fa": "بنچمارک نابرابر: ورودی، سقف یا K متفاوت روی دو مسیر مقایسه را بی‌معنا می‌کند. نگهبان فیکس کردن ورودی، سقف و K و assert کردن top-K یکسان قبل از زمان‌گیری است."
+      "en": "An unequal benchmark: different inputs, caps or K across the two paths make the comparison meaningless. Guard by fixing the input, the cap and K, asserting the identical top-K, and only then timing.",
+      "fa": "بنچمارک نابرابر: ورودی، سقف یا K متفاوت روی دو مسیر، مقایسه رو بی‌معنا می‌کنه. نگهبان: اول ورودی، سقف و K رو فیکس کن، top-K یکسان رو assert کن، بعد برو سراغ زمان‌گیری."
     }
   ],
   "followups": [
     {
-      "a_en": "Relax exactness, not memory discipline: a count-min sketch with a top-K heap (or sampling first, then exact-counting the survivors) trades a bounded error for tiny memory. Name the error budget in the same units as the report, keep the cap and the equality check on samples, and say which queries the approximation must never serve (billing, abuse thresholds).",
-      "a_fa": "دقت را شل کن نه انضباط حافظه را: sketchِ count-min با heapِ top-K (یا اول نمونه‌برداری بعد شمارش دقیق بازمانده‌ها) خطای کران‌دار را با حافظه کوچک معاوضه می‌کند. بودجه خطا را با همان واحد گزارش نام ببر، سقف و چک برابری روی نمونه‌ها را نگه دار و بگو تقریب حق سرو کدام کوئری‌ها را ندارد (صورت‌حساب، آستانه‌های سوءاستفاده).",
+      "a_en": "Relax the exactness, not the memory discipline: a count-min sketch with a top-K heap (or sampling first, then exact-counting the survivors) trades a bounded error for tiny memory. Name the error budget in the same units as the report, keep the cap and the equality check on samples, and say which queries the approximation must never serve (billing, abuse thresholds).",
+      "a_fa": "دقت رو شل کن، نه انضباط حافظه رو: sketchِ count-min با heapِ top-K (یا اول نمونه‌برداری، بعد شمارش دقیق بازمانده‌ها) خطای کران‌دار رو با حافظه کوچک عوض می‌کنه. بودجه خطا رو با همون واحد گزارش نام ببر، سقف و چک برابری روی نمونه‌ها رو نگه دار و بگو تقریب حق سرو کدوم کوئری‌ها رو نداره (صورت‌حساب، آستانه‌های سوءاستفاده).",
       "level": "senior",
       "q_en": "If you only need an approximate top-100, which constraint do you relax?",
       "q_fa": "حالا فقط top-100 تقریبی بخوای، کدوم قید رو شل می‌کنی؟"
     },
     {
-      "a_en": "Change one variable at a time and re-report the row: 10x lines with the same cardinality only lengthen the sort path linearly, while 10x distinct keys move the hash path from the first row to the second. The honest answer re-runs the equal-output benchmark instead of extrapolating.",
-      "a_fa": "هر بار یک متغیر را عوض کن و سطر را دوباره گزارش بده: ۱۰ برابر خط با cardinality ثابت فقط مسیر sort را خطی طولانی می‌کند، ولی ۱۰ برابر کلید متمایز مسیر hash را از سطر اول به دوم می‌برد. جواب صادق بنچمارک خروجی‌برابر را دوباره اجرا می‌کند نه برون‌یابی.",
+      "a_en": "Change one variable at a time and re-report the row: 10x lines with the same cardinality only lengthen the sort path linearly, while 10x distinct keys push the hash path from the first row into the second. The honest answer re-runs the equal-output benchmark instead of extrapolating.",
+      "a_fa": "هر بار فقط یک متغیر رو عوض کن و سطر رو دوباره گزارش بده: ۱۰ برابر خط با cardinality ثابت فقط مسیر sort رو خطی طولانی می‌کنه، ولی ۱۰ برابر کلید متمایز مسیر hash رو از سطر اول می‌بره به دوم. جواب صادق اینه که بنچمارک خروجی‌برابر رو دوباره اجرا کنی، نه اینکه برون‌یابی کنی.",
       "level": "senior",
       "q_en": "Input grows tenfold but distinct keys stay flat — what changes?",
-      "q_fa": "ورودی ده برابر شود ولی کلیدهای متمایز ثابت بمانند — چه چیزی عوض می‌شود؟"
+      "q_fa": "ورودی ده برابر بشه ولی کلیدهای متمایز ثابت بمونن — چی عوض می‌شه؟"
     }
   ],
   "interview_q_en": "Picture this, your logs don't fit in RAM and you've got to find the top URLs. You compare hash aggregation against external sort, and you spell out cardinality, your RAM cap, spill behavior, I/O cost, and approximate counting. You run a fair benchmark with equal outputs under one stated memory cap, and you report the breaking point for your own setup only.",
   "interview_q_fa": "فرض کن لاگت از RAM بزرگ‌تره و قراره top URLها رو دربیاری. حساب کن hash aggregation کجا جواب می‌ده و کجا external sort. یادت باشه cardinality، سقف RAM، spill، هزینه I/O و approximate counting رو شفاف کنی. بنچمارکتت هم باید ورودی و خروجی برابر با memory cap مشخص داشته باشه، و آستانه شکست رو فقط برای همون محیط خودت گزارش کنی.",
-  "mental_en": "Counting is grouping equal keys together. Hashing groups them in RAM with one counter per distinct key; sorting groups them on disk by bringing equals side by side. The working set — distinct keys times per-entry overhead — decides which grouping fits.",
-  "mental_fa": "شمارش یعنی کنار هم آوردن کلیدهای برابر. hash آن‌ها را در RAM با یک شمارنده به‌ازای هر کلید متمایز گروه می‌کند؛ sort با کنار هم آوردن برابرها روی دیسک گروه می‌کند. working set — کلیدهای متمایز ضربدر سربار هر ورودی — مشخص می‌کند کدام گروه‌بندی جا می‌شود.",
+  "mental_en": "Picture a pile of keys and one job: finding the equals. Hashing does it in RAM, with a counter per distinct key, so more distinct keys means more memory. Sorting does it on disk, lining the equals up side by side. The working set — distinct keys times the per-entry overhead — is what tells you which of the two actually fits.",
+  "mental_fa": "شمارش رو این‌جوری ببین: یه انبوه کلید داری و می‌خوای بفهمی کدوم‌ها برابرن. hash می‌گه هر کلید یه شمارنده توی RAM داره، پس هرچه کلید متمایز بیشتر بشه، حافظه هم بیشتر می‌شه. sort راه دیگه‌ست: برابرها رو روی دیسک کنار هم می‌چینه. حالا working set — یعنی کلیدهای متمایز ضربدر سربار هر ورودی — تعیین می‌کنه کدوم راه اصلاً جا می‌شه.",
   "mistakes": [
     {
-      "en": "Quoting a universal distinct-URL threshold ('hash breaks at N million URLs'). The spill point depends on entry overhead, heap cap and disk on that machine — measure it per environment, never quote it as a constant.",
-      "fa": "نقل آستانه عمومی برای URL متمایز («hash در N میلیون URL می‌شکند»). نقطه spill به سربار ورودی، سقف heap و دیسک همان ماشین وابسته است — per-environment اندازه بگیر و هرگز ثابت نقل نکن."
+      "en": "Quoting a universal distinct-URL threshold ('hash breaks at N million URLs'). The spill point depends on the entry overhead, the heap cap and the disk on that machine — measure it per environment, never quote it as a constant.",
+      "fa": "نقل آستانه عمومی برای URL متمایز («hash در N میلیون URL می‌شکند»): نقطهٔ spill به سربار ورودی، سقف heap و دیسک همون ماشین وابسته‌ست — per-environment اندازه بگیر و هرگز ثابت نقل نکن."
     },
     {
-      "en": "Treating OOM as ordinary slowness. A hash job past RAM does not finish late — it dies. Design the spill path and the alert before the big input arrives.",
-      "fa": "خواندن OOM به‌جای کُندی عادی. jobِ hash بعد از RAM دیر تمام نمی‌شود — می‌میرد. مسیر spill و هشدار را قبل از رسیدن ورودی بزرگ طراحی کن."
+      "en": "Treating OOM as ordinary slowness. A hash job past RAM doesn't finish late — it dies. Design the spill path and the alert before the big input arrives.",
+      "fa": "خواندن OOM به‌جای کُندی عادی: jobِ hash بعد از RAM دیر تموم نمی‌شه — می‌میره. مسیر spill و هشدار رو قبل از رسیدن ورودی بزرگ طراحی کن."
     },
     {
-      "en": "Benchmarking unequal work: different inputs, memory caps or K, then declaring a winner. Fix input, cap and K first; assert identical outputs; only then compare time.",
-      "fa": "بنچمارک کار نابرابر: ورودی، سقف حافظه یا K متفاوت و بعد اعلام برنده. اول ورودی، سقف و K را فیکس کن؛ خروجی یکسان را assert کن؛ بعد زمان را مقایسه کن."
+      "en": "Benchmarking unequal work: different inputs, memory caps or K, then declaring a winner. Fix the input, the cap and K first, assert the identical outputs, and only then compare time.",
+      "fa": "بنچمارک کار نابرابر: ورودی، سقف حافظه یا K متفاوت، بعد اعلام برنده. اول ورودی، سقف و K رو فیکس کن، خروجی یکسان رو assert کن، بعد زمان رو مقایسه کن."
     }
   ],
   "number": 1,
@@ -223,40 +223,40 @@
   ],
   "steps": [
     {
-      "en": "Multiply distinct keys by per-entry overhead: that product is the working set, and it — not total lines — decides whether hash fits.",
-      "fa": "کلیدهای متمایز را در سربار هر ورودی ضرب کن: آن حاصل working set است و همان — نه جمع خط‌ها — مشخص می‌کند hash جا می‌شود یا نه.",
-      "t_en": "Name the working set",
-      "t_fa": "نام‌گذاری working set"
+      "en": "First things first: multiply the distinct keys by the per-entry overhead. That product is the working set, and it's the working set — not the total line count — that decides whether hash fits in RAM.",
+      "fa": "قبل از هر چیز: کلیدهای متمایز رو در سربار هر ورودی ضرب کن. این حاصل همون working set‌ه و همین — نه جمع خط‌ها — تصمیم می‌گیره hash جا می‌شه یا نه.",
+      "t_en": "Start with the working set",
+      "t_fa": "اول working set رو حساب کن"
     },
     {
-      "en": "Route hot partitions to RAM counters and cold ones to sorted spill files; both reconverge on one ranker with exact counts.",
-      "fa": "پارتیشن‌های داغ را به شمارنده‌های RAM و سردها را به فایل‌های spill مرتب بفرست؛ هر دو با شمارش دقیق روی یک ranker همگرا می‌شوند.",
+      "en": "Then route the hot partitions into RAM counters and the cold ones into sorted spill files. Both paths end up on one ranker, with exact counts.",
+      "fa": "بعدش پارتیشن‌های داغ رو بفرست سراغ شمارنده‌های RAM و سردها رو سراغ فایل‌های spill مرتب. آخرش هر دو با شمارش دقیق روی یک ranker همگرا می‌شن.",
       "t_en": "Hash with a spill escape",
-      "t_fa": "hash با راه فرار spill"
+      "t_fa": "hash، ولی با راه فرارِ spill"
     },
     {
-      "en": "Sort bounded chunks, spill runs, k-way merge with O(runs) lines in RAM, count adjacent equals, rank top-K.",
-      "fa": "chunkهای کران‌دار را مرتب کن، runها را spill کن، با O(run) خط در RAM ادغام k-way کن، برابرهای مجاور را بشمار و top-K را رتبه بده.",
+      "en": "Now the sort path: sort the bounded chunks, spill the runs, k-way merge with O(runs) lines in RAM, count the adjacent equals, and rank the top-K.",
+      "fa": "حالا نوبت مسیر sort: chunkهای کران‌دار رو مرتب کن، runها رو spill کن، با O(run) خط توی RAM ادغام k-way کن، برابرهای مجاور رو بشمار و top-K رو رتبه بده.",
       "t_en": "Sort that always finishes",
-      "t_fa": "sort که همیشه تمام می‌شود"
+      "t_fa": "sort که همیشه تموم می‌شه"
     },
     {
-      "en": "Fix input, cap and K; assert identical top-K on both paths; then compare time and spill bytes — the demo below does exactly this.",
-      "fa": "ورودی، سقف و K را فیکس کن؛ top-K یکسان هر دو مسیر را assert کن؛ بعد زمان و بایت spill را مقایسه کن — دموی پایین دقیقاً همین را می‌کند.",
+      "en": "Slow down here: fix the input, the cap and K, assert that both paths print the same top-K, and only then compare time and spill bytes. The demo below does exactly that.",
+      "fa": "اینجا نباید عجله کنی: ورودی، سقف و K رو فیکس کن، top-K یکسان هر دو مسیر رو assert کن و بعد تازه زمان و بایت spill رو مقایسه کن. دموی پایین دقیقاً همین رو می‌کنه.",
       "t_en": "Benchmark equal outputs",
-      "t_fa": "بنچمارک خروجی برابر"
+      "t_fa": "بنچمارک با خروجی برابر"
     },
     {
-      "en": "If only an approximate top-100 is asked, grant an error budget and pick a sketch or sample-then-count: tiny memory for bounded error.",
-      "fa": "اگر فقط top-100 تقریبی خواسته شد، بودجه خطا بده و sketch یا نمونه‌برداری-بعد-شمارش بردار: حافظه کوچک در برابر خطای کران‌دار.",
+      "en": "If the ask is only an approximate top-100, hand it an error budget and pick a sketch or sample-then-count: tiny memory in exchange for a bounded error.",
+      "fa": "اگه فقط top-100 تقریبی خواسته شد، بهش بودجه خطا بده و sketch یا نمونه‌برداری-بعد-شمارش رو بردار: حافظه کوچک در برابر خطای کران‌دار.",
       "t_en": "Approximation relaxes exactness",
-      "t_fa": "تقریب دقت را شل می‌کند"
+      "t_fa": "تقریب، دقت رو شل می‌کنه"
     }
   ],
-  "tests_en": "Assert identical top-K across paths on shared input; assert merge RAM stays O(runs) by capping the chunk and counting open readers; record spill bytes and wall time per run; alert when spill ratio crosses the tuned threshold; re-run the equality check after any cap or format change.",
-  "tests_fa": "روی ورودی مشترک top-K یکسان هر دو مسیر را assert کن؛ با سقف chunk و شمارش readerهای باز assert کن RAM ادغام O(run) می‌ماند؛ بایت spill و زمان هر اجرا را ثبت کن؛ وقتی نسبت spill از آستانه تنظیم‌شده گذشت هشدار بده؛ بعد از هر تغییر سقف یا فرمت چک برابری را دوباره اجرا کن.",
-  "worked_en": "<p>Demo numbers (teaching, this environment): 200,000 lines, 19,782 distinct, chunk cap 20,000 → 10 runs, 1,517,486 spilled bytes. Both paths print <code>/p/0:7453</code>, <code>/p/1:1842</code>, <code>/p/2:1287</code>, <code>/p/3:1066</code>, <code>/p/4:913</code>; <code>equal_top5=true</code>.</p><p>Interpretation: equality first (same answer), then cost (spill bytes and time). Move the cap or the cardinality and re-run — the row, not the anecdote, is the finding.</p>",
-  "worked_fa": "<p>عددهای دمو (آموزشی، همین محیط): ۲۰۰٬۰۰۰ خط، ۱۹٬۷۸۲ متمایز، سقف chunk بیست‌هزار ← ۱۰ run و ۱٬۵۱۷٬۴۸۶ بایت spill. هر دو مسیر <code>/p/0:7453</code>، <code>/p/1:1842</code>، <code>/p/2:1287</code>، <code>/p/3:1066</code>، <code>/p/4:913</code> چاپ می‌کنند؛ <code>equal_top5=true</code>.</p><p>تفسیر: اول برابری (جواب یکسان) بعد هزینه (بایت spill و زمان). سقف یا cardinality را عوض کن و دوباره اجرا کن — یافته سطر است نه حکایت.</p>",
-  "reasoning_fa": "<p>hash aggregation برای U کلید متمایز، state متناسب U می‌خواهد؛ زیادشدن تعداد خطوط با U ثابت همان رشد حافظه را ندارد. external sort با chunk محدود، بقیه را روی دیسک می‌برد و IO را به جای RAM می‌پردازد. ۲۰۰هزار خط و chunk بیست‌هزار باعث spill قابل مشاهده می‌شود؛ این اعداد آستانهٔ عمومی نیستند. زمان را همراه peak memory و حجم temporary بنویس تا طرح سریع‌تر ولی خارج از بودجه برنده معرفی نشود.</p>",
-  "reasoning_en": "<p>Hash aggregation holds state proportional to distinct keys U; more lines with fixed U do not have the same memory growth. External sorting bounds RAM by spilling chunks and paying disk I/O. Two hundred thousand lines and 20k-line chunks force visible spills, not a universal threshold. Compare time with peak memory and temporary bytes so an over-budget design does not win on speed alone.</p>"
+  "tests_en": "On the shared input, assert that both paths emit the same top-K; with the chunk cap and a count of open readers, assert that merge RAM stays O(runs); record spill bytes and wall time per run; alert when the spill ratio crosses the tuned threshold; re-run the equality check after any cap or format change.",
+  "tests_fa": "روی ورودی مشترک، top-K یکسانِ هر دو مسیر رو assert کن؛ با سقف chunk و شمارش readerهای باز assert کن RAM ادغام O(run) می‌مونه؛ بایت spill و زمان هر اجرا رو ثبت کن؛ وقتی نسبت spill از آستانه تنظیم‌شده گذشت هشدار بده؛ بعد از هر تغییر سقف یا فرمت، چک برابری رو دوباره اجرا کن.",
+  "worked_en": "<p>Demo numbers (teaching, this environment): 200,000 lines, 19,782 distinct, chunk cap 20,000 → 10 runs, 1,517,486 spilled bytes. Both paths print <code>/p/0:7453</code>, <code>/p/1:1842</code>, <code>/p/2:1287</code>, <code>/p/3:1066</code>, <code>/p/4:913</code>; <code>equal_top5=true</code>.</p><p>Interpretation: equality first (same answer), then cost (spill bytes and time). Move the cap or the cardinality and re-run — the row, not the anecdote, is the finding. The row in the table is your answer; the story is just decoration.</p>",
+  "worked_fa": "<p>عددهای دمو (آموزشی، همین محیط): ۲۰۰٬۰۰۰ خط، ۱۹٬۷۸۲ متمایز، سقف chunk بیست‌هزار ← ۱۰ run و ۱٬۵۱۷٬۴۸۶ بایت spill. هر دو مسیر <code>/p/0:7453</code>، <code>/p/1:1842</code>، <code>/p/2:1287</code>، <code>/p/3:1066</code>، <code>/p/4:913</code> چاپ می‌کنند؛ <code>equal_top5=true</code>.</p><p>تفسیر: اول برابری (جواب یکسان)، بعد هزینه (بایت spill و زمان). سقف یا cardinality را عوض کن و دوباره اجرا کن — یافته سطر است نه حکایت. — سطرِ جدول جواب توست، نه خاطره.</p>",
+  "reasoning_fa": "<p>چرا این مدل به این تمرین می‌خوره: hash aggregation برای U کلید متمایز، state متناسب U می‌خواهد؛ زیادشدن تعداد خطوط با U ثابت همان رشد حافظه را ندارد. external sort با chunk محدود، بقیه را روی دیسک می‌برد و IO را به جای RAM می‌پردازد. ۲۰۰هزار خط و chunk بیست‌هزار باعث spill قابل مشاهده می‌شود؛ این اعداد آستانهٔ عمومی نیستند. زمان را همراه peak memory و حجم temporary بنویس تا طرح سریع‌تر ولی خارج از بودجه، برنده معرفی نشود.</p>",
+  "reasoning_en": "<p>Why this model fits: hash aggregation holds state proportional to distinct keys U; more lines with fixed U do not have the same memory growth. External sorting bounds RAM by spilling chunks and paying disk I/O. Two hundred thousand lines and 20k-line chunks force visible spills, not a universal threshold. Compare time with peak memory and temporary bytes, so a design that blows the budget doesn't win on speed alone.</p>"
 }

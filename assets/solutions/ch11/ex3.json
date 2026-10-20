@@ -1,28 +1,28 @@
 {
   "alternatives": [
     {
-      "en": "Range partitioning: each reducer owns a key range, so output comes out globally sorted. Wins when downstream needs total order; loses on skew, because one range can hold half the data with no hash to spread it.",
-      "fa": "پارتیشن‌بندی بازه‌ای: هر reducer مالک یک بازه کلید است پس خروجی سراسری مرتب می‌آید. وقتی پایین‌دست ترتیب کلی می‌خواهد می‌برد؛ روی چولگی می‌بازد چون یک بازه می‌تواند نصف داده را بگیرد بدون hash که پخشش کند."
+      "en": "Range partitioning: each reducer owns a key range, so the output comes out globally sorted. It wins when downstream needs a total order, and it loses on skew, because one range can hold half the data with no hash to spread it.",
+      "fa": "پارتیشن‌بندی بازه‌ای: هر reducer مالک یه بازهٔ کلیده، پس خروجی سراسری مرتب میاد. وقتی پایین‌دست ترتیب کلی می‌خواد می‌بره؛ ولی روی چولگی می‌بازه، چون یه بازه می‌تونه نصف داده رو بگیره بدون hash که پخشش کنه."
     },
     {
-      "en": "Broadcast the small side and skip the shuffle entirely when one input fits in every worker's RAM. Wins by deleting network, combiner and merge; stops winning the day the 'small' side stops fitting.",
-      "fa": "پخش سمت کوچک و حذف کامل shuffle وقتی یک ورودی در RAM هر worker جا می‌شود. با حذف شبکه، combiner و ادغام می‌برد؛ روزی که سمت «کوچک» جا نشود دیگر نمی‌برد."
+      "en": "Broadcast the small side and skip the shuffle entirely when one input fits in every worker's RAM. It wins by deleting the network, the combiner and the merge; it stops winning the day the 'small' side stops fitting.",
+      "fa": "پخش سمت کوچک و حذف کامل shuffle، وقتی یه ورودی توی RAM هر worker جا می‌شه. با حذف شبکه، combiner و ادغام می‌بره؛ روزی که سمت «کوچک» جا نشه، دیگه نمی‌بره."
     }
   ],
-  "answer_en": "Partition with one stable function everywhere (floorMod(hash, R)), sort locally in each mapper, write one sorted mPrR file per partition, and k-way merge per partition in the reducer — same-key records land together in bounded memory. Pre-aggregate with a combiner where the function allows, checksum every intermediate file, and recompute only lost mappers from immutable splits under fresh attempt ids. The top trade-off is network and skew: shuffle moves every record once, and a hot key can swamp one reducer.",
-  "answer_fa": "با یک تابع پایدار همه‌جا پارتیشن کن (floorMod(hash, R))، در هر mapper محلی مرتب کن، به‌ازای هر پارتیشن یک فایل مرتب mPrR بنویس و به‌ازای هر پارتیشن در reducer ادغام k-way کن — رکوردهای هم‌کلید با حافظه کران‌دار کنار هم می‌نشینند. هرجا تابع اجازه دهد با combiner پیش‌تجمیع کن، هر فایل میانی را checksum بزن و فقط mapperهای گمشده را از splitهای immutable با attempt id تازه دوباره اجرا کن. تریدآف اصلی شبکه و چولگی است: shuffle هر رکورد را یک‌بار جابه‌جا می‌کند و کلید داغ می‌تواند یک reducer را غرق کند.",
+  "answer_en": "Here's the shape of it: partition with one stable function everywhere (floorMod(hash, R)), sort locally in each mapper, write one sorted mPrR file per partition, and k-way merge per partition in the reducer — same-key records land together in bounded memory. Pre-aggregate with a combiner where the function allows, checksum every intermediate file, and recompute only the lost mappers from immutable splits under fresh attempt ids. The top trade-off is network and skew: the shuffle moves every record once, and a hot key can swamp one reducer. One shared function is what makes the whole thing work.",
+  "answer_fa": "نکته‌ش اینجاست: با یه تابع پایدار همه‌جا پارتیشن کن (floorMod(hash, R))، توی هر mapper محلی مرتب کن، به‌ازای هر پارتیشن یه فایل مرتب mPrR بنویس و به‌ازای هر پارتیشن توی reducer ادغام k-way کن — رکوردهای هم‌کلید با حافظه کران‌دار کنار هم می‌نشینن. هرجا تابع اجازه داد با combiner پیش‌تجمیع کن، هر فایل میانی رو checksum بزن و فقط mapperهای گمشده رو از splitهای immutable با attempt id تازه دوباره اجرا کن. تریدآف اصلی شبکه و چولگیه: shuffle هر رکورد رو یک‌بار جابه‌جا می‌کنه و کلید داغ می‌تونه یه reducer رو غرق کنه. — یه تابع مشترک، کل shuffle رو می‌سازه.",
   "assumptions": [
     {
-      "en": "Teaching shuffle: 2 mappers, 3 partitions, 12 keys × 25 values (300 records) — colocation and recompute are observable, not benchmarks.",
-      "fa": "shuffle آموزشی: ۲ mapper و ۳ پارتیشن با ۱۲ کلید و ۲۵ مقدار (۳۰۰ رکورد) — هم‌مکانی و محاسبه دوباره قابل‌مشاهده‌اند نه بنچمارک."
+      "en": "A teaching shuffle: 2 mappers, 3 partitions, 12 keys × 25 values (300 records) — colocation and recompute are observable, not benchmarks.",
+      "fa": "shuffle آموزشی: ۲ mapper و ۳ پارتیشن با ۱۲ کلید و ۲۵ مقدار (۳۰۰ رکورد) — هم‌مکانی و محاسبهٔ دوباره قابل‌مشاهده‌ان، نه بنچمارک."
     },
     {
-      "en": "Partition function floorMod(hash, R), identical on all workers and versioned with the job; changing it reshuffles everything.",
-      "fa": "تابع پارتیشن floorMod(hash, R) که روی همه workerها یکسان و با job نسخه‌بندی شده؛ عوض کردنش همه‌چیز را دوباره shuffle می‌کند."
+      "en": "The partition function floorMod(hash, R) is identical on every worker and versioned with the job — change it and you reshuffle everything.",
+      "fa": "تابع پارتیشن floorMod(hash, R) روی همهٔ worker‌ها یکسانه و با job نسخه‌بندی شده؛ عوض کردنش یعنی دوباره shuffle کردنِ همه‌چیز."
     },
     {
-      "en": "Mappers are deterministic and side-effect free, so rerun replays the same records — stated as a precondition, verified by the demo.",
-      "fa": "mapperها قطعی و بدون side effectاند پس اجرای دوباره همان رکوردها را بازپخش می‌کند — به‌عنوان پیش‌شرط اعلام و با دمو راستی‌آزمایی شده."
+      "en": "The mappers are deterministic and side-effect free, so a rerun replays the same records — stated as a precondition and verified by the demo.",
+      "fa": "mapper‌ها قطعی و بدون side effect هستن، پس اجرای دوباره همون رکورد‌ها رو بازپخش می‌کنه — به‌عنوان پیش‌شرط اعلام‌شده و با دمو راستی‌آزمایی‌شده."
     }
   ],
   "code": {
@@ -34,12 +34,12 @@
     "run_fa": "javac ShuffleDemo.java && java ShuffleDemo — فقط استاندارد جاوا.",
     "status": "verified"
   },
-  "design_en": "<p><b>Files:</b> one sorted checksummed file per (mapper, partition) named <code>mPrR</code>; the file set is the shuffle contract the reducer fetches.</p><p><b>Attempts:</b> every mapper run carries an attempt id; a retry rewrites whole files under a fresh id and never appends to the failed one's.</p><p><b>Reducer:</b> fetches one partition's files from all mappers, k-way merges with one line per file in RAM, groups equal keys; combiner pre-aggregates associative work (counts, sums — never a bare average) before any byte crosses the network.</p>",
-  "design_fa": "<p><b>فایل‌ها:</b> یک فایل مرتب checksummed به‌ازای هر (mapper, partition) با نام <code>mPrR</code>؛ مجموعه فایل همان قرارداد shuffle است که reducer fetch می‌کند.</p><p><b>attemptها:</b> هر اجرای mapper یک attempt id دارد؛ retry کل فایل‌ها را با id تازه بازنویسی می‌کند و هرگز به فایل شکست‌خورده الصاق نمی‌کند.</p><p><b>reducer:</b> فایل‌های یک پارتیشن را از همه mapperها fetch می‌کند، با یک خط به‌ازای هر فایل در RAM ادغام k-way می‌کند و کلیدهای برابر را گروه می‌کند؛ combiner کار انجمنی (شمارش، جمع — هرگز میانگین تنها) را قبل از عبور هر بایت از شبکه پیش‌تجمیع می‌کند.</p>",
+  "design_en": "<p><b>Files:</b> one sorted checksummed file per (mapper, partition) named <code>mPrR</code>; the file set is the shuffle contract the reducer fetches.</p><p><b>Attempts:</b> every mapper run carries an attempt id; a retry rewrites whole files under a fresh id and never appends to the failed one's.</p><p><b>Reducer:</b> fetches one partition's files from all mappers, k-way merges with one line per file in RAM, groups equal keys; the combiner pre-aggregates associative work (counts, sums — never a bare average) before any byte crosses the network.</p>",
+  "design_fa": "<p><b>فایل‌ها:</b> یک فایل مرتب checksummed به‌ازای هر (mapper, partition) با نام <code>mPrR</code>؛ مجموعهٔ فایل همون قرارداد shuffle است که reducer fetch می‌کنه.</p><p><b>attemptها:</b> هر اجرای mapper یه attempt id داره؛ retry کل فایل‌ها رو با id تازه بازنویسی می‌کنه و هرگز به فایل شکست‌خورده الصاق نمی‌کنه.</p><p><b>reducer:</b> فایل‌های یه پارتیشن رو از همهٔ mapperها fetch می‌کنه، با یه خط به‌ازای هر فایل توی RAM ادغام k-way می‌کنه و کلیدهای برابر رو گروه می‌کنه؛ combiner کار انجمنی (شمارش، جمع — هرگز میانگین تنها) رو قبل از عبور هر بایت از شبکه پیش‌تجمیع می‌کنه.</p>",
   "diagrams": [
     {
       "caption_en": "Same partition function on every mapper, sorted mPrR files out",
-      "caption_fa": "یک تابع پارتیشن روی همه mapperها و فایل‌های مرتب mPrR بیرون",
+      "caption_fa": "یه تابع پارتیشن روی همهٔ mapperها، فایل‌های مرتب mPrR بیرون",
       "file": "diagrams/sol3-step1-partition-sort.html",
       "height": 640,
       "kind_en": "dataflow",
@@ -47,41 +47,41 @@
       "made": "archify",
       "narration": {
         "failure_en": "Two workers with different partition functions silently scatter one key across reducers: grouping breaks with no error. The stable tag on the partitioner is the guard — version the function with the job.",
-        "failure_fa": "دو worker با تابع پارتیشن متفاوت بی‌صدا یک کلید را روی reducerها می‌پاشند: گروه‌بندی بدون خطا می‌شکند. برچسب stable روی پارتیشنر نگهبان است — تابع را با job نسخه‌بندی کن.",
-        "guarantee_en": "The figure shows the single shared function, the local sorts, and the named file contract. It does not show fetching, merging, or failure — those are the next steps.",
-        "guarantee_fa": "شکل تابع مشترک واحد، sortهای محلی و قرارداد نام فایل را نشان می‌دهد. fetch، ادغام یا خرابی را نشان نمی‌دهد — آن‌ها گام‌های بعدی‌اند.",
-        "nonguarantee_en": "Network volume, skew and combiner math are outside this frame.",
-        "nonguarantee_fa": "حجم شبکه، چولگی و ریاضی combiner بیرون این قاب‌اند.",
+        "failure_fa": "دو worker با تابع پارتیشن متفاوت بی‌صدا یه کلید رو روی reducerها می‌پاشن: گروه‌بندی بدون خطا می‌شکنه. برچسب stable روی پارتیشنر نگهبان است — تابع رو با job نسخه‌بندی کن.",
+        "guarantee_en": "The figure shows the single shared function, the local sorts and the named file contract. It doesn't show fetching, merging, or failure — those are the next steps.",
+        "guarantee_fa": "شکل تابع مشترکِ واحد، sortهای محلی و قرارداد نام فایل رو نشون می‌ده. fetch، ادغام یا خرابی رو نشون نمی‌ده — اون‌ها گام‌های بعدی‌ان.",
+        "nonguarantee_en": "The network volume, the skew and the combiner math are outside this frame.",
+        "nonguarantee_fa": "حجم شبکه، چولگی و ریاضیِ combiner بیرون این قاب‌ان.",
         "point_en": "The decision point is the partitioner box: one function, every worker, versioned — colocation is a property of agreement, not luck.",
-        "point_fa": "نقطه تصمیم جعبه پارتیشنر است: یک تابع، همه workerها و نسخه‌بندی‌شده — هم‌مکانی خاصیت توافق است نه شانس.",
+        "point_fa": "نقطهٔ تصمیم جعبهٔ پارتیشنره: یه تابع، همهٔ workerها و نسخه‌بندی‌شده — هم‌مکانی خاصیتِ توافقه، نه شانس.",
         "scenario_en": "Immutable splits enter two mappers; one shared partitioner routes every record; sorted files land per partition.",
-        "scenario_fa": "splitهای immutable وارد دو mapper می‌شوند؛ یک پارتیشنر مشترک هر رکورد را می‌فرستد و فایل‌های مرتب به‌ازای هر پارتیشن می‌نشینند.",
+        "scenario_fa": "splitهای immutable وارد دو mapper می‌شن؛ یه پارتیشنر مشترک هر رکورد رو می‌فرسته و فایل‌های مرتب به‌ازای هر پارتیشن می‌نشینن.",
         "steps": [
           {
-            "en": "Read splits: each mapper owns immutable lines, nothing shared.",
-            "fa": "خواندن splitها: هر mapper مالک خط‌های immutable است و هیچ‌چیز مشترک نیست."
+            "en": "Read the splits first: each mapper owns immutable lines, nothing is shared.",
+            "fa": "اول خواندن splitها: هر mapper مالک خط‌های immutableه و هیچ‌چیز مشترک نیست."
           },
           {
-            "en": "Partition identically: floorMod(hash, R) on both mappers, same key to same partition.",
-            "fa": "پارتیشن یکسان: floorMod(hash, R) روی هر دو mapper و کلید یکسان به پارتیشن یکسان."
+            "en": "Then partition identically: floorMod(hash, R) on both mappers, same key to the same partition.",
+            "fa": "بعد پارتیشن یکسان: floorMod(hash, R) روی هر دو mapper و کلید یکسان به پارتیشن یکسان."
           },
           {
-            "en": "Sort and write: one sorted checksummed mPrR file per partition — the fetchable contract.",
-            "fa": "مرتب‌سازی و نوشتن: یک فایل مرتب checksummedِ mPrR به‌ازای هر پارتیشن — قرارداد قابل fetch."
+            "en": "Then sort and write: one sorted checksummed mPrR file per partition — the fetchable contract.",
+            "fa": "آخر مرتب‌سازی و نوشتن: یه فایل مرتب checksummedِ mPrR به‌ازای هر پارتیشن — همون قرارداد قابل fetch."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "Identical splits in, same function everywhere, sorted mPrR files out — agreement is what colocates.",
-        "a_fa": "splitهای یکسان داخل، تابع یکسان همه‌جا و فایل‌های مرتب mPrR بیرون — توافق است که هم‌مکان می‌کند.",
-        "q_en": "What single agreement makes same-key colocation certain?",
-        "q_fa": "کدام توافق واحد هم‌مکانی کلید یکسان را قطعی می‌کند؟"
+        "a_en": "Identical splits in, the same function everywhere, sorted mPrR files out — the agreement is what colocates.",
+        "a_fa": "splitهای یکسان داخل، تابع یکسان همه‌جا و فایل‌های مرتب mPrR بیرون — تواقه که هم‌مکان می‌کنه.",
+        "q_en": "Which single agreement makes the same-key colocation certain?",
+        "q_fa": "کدوم توافقِ واحد هم‌مکانیِ کلید یکسان رو قطعی می‌کنه؟"
       },
       "source": "assets/diagram-specs/solutions/ch11/sol3-step1-partition-sort.json"
     },
     {
       "caption_en": "One mapper attempt: write, commit, or recompute from lineage",
-      "caption_fa": "یک attemptِ mapper: نوشتن، commit یا محاسبه دوباره از lineage",
+      "caption_fa": "یه attemptِ mapper: نوشتن، commit یا محاسبهٔ دوباره از lineage",
       "file": "diagrams/sol3-step2-mapper-attempt.html",
       "height": 640,
       "kind_en": "lifecycle",
@@ -89,131 +89,131 @@
       "made": "archify",
       "narration": {
         "failure_en": "A crash in running and a corrupt staged file both land on retrying — but with different evidence (lost process versus checksum mismatch). A retry that reuses the failed file name would let two attempts both look committed: fresh ids close that hole.",
-        "failure_fa": "کرش حین اجرا و فایل staged خراب هر دو روی retrying می‌نشینند — ولی با مدرک متفاوت (پردازش ازدست‌رفته در برابر عدم‌تطابق checksum). retry که نام فایل شکست‌خورده را دوباره استفاده کند می‌گذارد دو attempt هر دو committed به نظر برسند: idهای تازه آن سوراخ را می‌بندند.",
-        "guarantee_en": "The figure shows every mapper state and the two distinct roads back to running. It does not show the reducer side — fetch and merge live in the assembly.",
-        "guarantee_fa": "شکل همه حالت‌های mapper و دو راه متفاوت برگشت به اجرا را نشان می‌دهد. سمت reducer را نشان نمی‌دهد — fetch و ادغام در اسمبلی‌اند.",
-        "nonguarantee_en": "Retry budgets and cross-job lineage are policy outside this lifecycle.",
-        "nonguarantee_fa": "بودجه retry و lineage بین-job سیاست بیرون این چرخه است.",
-        "point_en": "The decision points are the two security edges into retrying: crash versus corruption — same destination, different evidence, same fresh-id rule.",
-        "point_fa": "نقطه‌های تصمیم دو یال امنیتی به retryingاند: کرش در برابر خرابی — مقصد یکسان، مدرک متفاوت و قاعده id تازه یکسان.",
-        "scenario_en": "Follow one mapper attempt left to right; failures detour down to the retry controller and return with a fresh id.",
-        "scenario_fa": "یک attemptِ mapper را چپ‌به‌راست دنبال کن؛ خرابی‌ها به کنترلر retry پایین می‌روند و با id تازه برمی‌گردند.",
+        "failure_fa": "کرش حین اجرا و فایل staged خراب، هر دو می‌نشینن روی retrying — ولی با مدرک متفاوت (پردازش ازدست‌رفته در برابر عدم‌تطابق checksum). اگه retry نام فایل شکست‌خورده رو دوباره استفاده کنه، دو attempt هر دو committed به نظر می‌رسن: idهای تازه اون سوراخ رو می‌بندن.",
+        "guarantee_en": "The figure shows every mapper state and the two distinct roads back to running. It doesn't show the reducer side — fetch and merge live in the assembly.",
+        "guarantee_fa": "شکل همهٔ حالت‌های mapper و دو راه متفاوت برگشت به اجرا رو نشون می‌ده. سمت reducer رو نشون نمی‌ده — fetch و ادغام توی اسمبلی‌ان.",
+        "nonguarantee_en": "The retry budgets and the cross-job lineage are policy outside this lifecycle.",
+        "nonguarantee_fa": "بودجهٔ retry و lineage بین-job، سیاستِ بیرون این چرخه‌ست.",
+        "point_en": "The decision points are the two safety edges into retrying: crash versus corruption — same destination, different evidence, same fresh-id rule.",
+        "point_fa": "نقطه‌های تصمیم دو یال امنیتی به retryingاند: کرش در برابر خرابی — مقصد یکسان، مدرک متفاوت و قاعدهٔ id تازهٔ یکسان.",
+        "scenario_en": "Follow one mapper attempt from left to right; failures detour down to the retry controller and come back with a fresh id.",
+        "scenario_fa": "یه attemptِ mapper رو چپ‌به‌راست دنبال کن؛ خرابی‌ها به کنترلر retry پایین می‌رن و با id تازه برمی‌گردن.",
         "steps": [
           {
-            "en": "Scheduled to running to staged: split assigned, records partitioned and sorted, mPrR files plus checksums written.",
-            "fa": "از scheduled به running به staged: split تخصیص یافت، رکوردها پارتیشن و مرتب شدند و فایل‌های mPrR به‌علاوه checksum نوشته شدند."
+            "en": "Scheduled to running to staged: the split is assigned, the records are partitioned and sorted, and the mPrR files plus checksums are written.",
+            "fa": "از scheduled به running به staged: split تخصیص یافت، رکوردها پارتیشن و مرتب شدن و فایل‌های mPrR به‌علاوهٔ checksum نوشته شدن."
           },
           {
-            "en": "Two roads to retrying: crash while running, or a checksum mismatch on staged files — lineage rerun either way.",
-            "fa": "دو راه به retrying: کرش حین اجرا یا عدم‌تطابق checksum روی فایل‌های staged — هر دو با اجرای دوباره lineage."
+            "en": "Two roads to retrying: a crash while running, or a checksum mismatch on the staged files — lineage rerun either way.",
+            "fa": "دو راه به retrying: کرش حین اجرا یا عدم‌تطابق checksum روی فایل‌های staged — هر دو با اجرای دوبارهٔ lineage."
           },
           {
             "en": "Committed on fetch completion; failed only when the retry budget is spent.",
-            "fa": "commit با کامل شدن fetch؛ failed فقط وقتی بودجه retry تمام شود."
+            "fa": "commit با کامل شدن fetch؛ failed فقط وقتی بودجهٔ retry تموم بشه."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "Crash and corruption both retry with fresh ids from the immutable split; only budget exhaustion is terminal.",
-        "a_fa": "کرش و خرابی هر دو با id تازه از split immutable تلاش می‌کنند؛ فقط تمام شدن بودجه terminal است.",
-        "q_en": "Which two events send an attempt back, and what must differ on return?",
-        "q_fa": "کدام دو رویداد attempt را برمی‌گردانند و موقع برگشت چه چیزی باید فرق کند؟"
+        "a_en": "A crash and a corruption both retry with fresh ids from the immutable split; only budget exhaustion is terminal.",
+        "a_fa": "کرش و خرابی هر دو با id تازه از split immutable تلاش می‌کنن؛ فقط تموم شدن بودجه terminal هست.",
+        "q_en": "Which two events send an attempt back, and what must differ on the way back?",
+        "q_fa": "کدوم دو رویداد attempt رو برمی‌گردونن و موقع برگشت چی باید فرق کنه؟"
       },
       "source": "assets/diagram-specs/solutions/ch11/sol3-step2-mapper-attempt.json"
     },
     {
       "caption_en": "Mini shuffle end to end: fetch, merge, group, recompute the lost",
-      "caption_fa": "shuffle مینی سرتاسری: fetch، ادغام، گروه و محاسبه دوباره گمشده",
+      "caption_fa": "shuffle مینی سرتاسری: fetch، ادغام، گروه و محاسبهٔ دوبارهٔ گمشده",
       "file": "diagrams/sol3-shuffle-assembly.html",
       "height": 640,
       "kind_en": "dataflow",
       "kind_fa": "جریان‌داده",
       "made": "archify",
       "narration": {
-        "failure_en": "Follow the dashed pair: fetch detects the bad checksum, exactly one mapper reruns from its split, rewritten files re-enter through the same fetch. Rerunning the whole job here would be the expensive mistake.",
-        "failure_fa": "جفت خط‌چین را دنبال کن: fetch checksum بد را می‌گیرد، دقیقاً یک mapper از split خودش دوباره اجرا می‌شود و فایل‌های بازنویسی‌شده از همان fetch برمی‌گردند. اجرای دوباره کل job این‌جا اشتباه پرهزینه است.",
-        "guarantee_en": "The assembly composes both steps: same mappers, same files, same merge — plus the scoped recovery both steps implied. Numbers stay with the demo.",
-        "guarantee_fa": "اسمبلی هر دو گام را ترکیب می‌کند: همان mapperها، همان فایل‌ها و همان ادغام — به‌علاوه بازیابی محدودی که هر دو گام تلویح داشتند. عددها با دمو می‌مانند.",
-        "nonguarantee_en": "Hot-key salting factors and combiner applicability per function are designed per workload, not fixed here.",
-        "nonguarantee_fa": "فاکتور salt کلید داغ و کاربرد combiner به‌ازای هر تابع per-workload طراحی می‌شوند نه این‌جا ثابت.",
-        "point_en": "The decision point is the rerun box: scoped to the lost mapper, fed by immutable lineage, re-entering standard fetch.",
-        "point_fa": "نقطه تصمیم جعبه rerun است: محدود به mapper گمشده، تغذیه‌شده از lineage immutable و ورود دوباره به fetch استاندارد.",
+        "failure_en": "Follow the dashed pair: fetch detects the bad checksum, exactly one mapper reruns from its split, and the rewritten files re-enter through the same fetch. Rerunning the whole job here would be the expensive mistake.",
+        "failure_fa": "جفت خط‌چین رو دنبال کن: fetch checksum بد رو می‌گیره، دقیقاً یه mapper از split خودش دوباره اجرا می‌شه و فایل‌های بازنویسی‌شده از همون fetch برمی‌گردن. اجرای دوبارهٔ کل job این‌جا اشتباه پرهزینه‌ست.",
+        "guarantee_en": "The assembly composes both steps: the same mappers, the same files and the same merge — plus the scoped recovery both steps implied. The numbers stay with the demo.",
+        "guarantee_fa": "اسمبلی هر دو گام رو ترکیب می‌کنه: همون mapperها، همون فایل‌ها و همون ادغام — به‌علاوهٔ بازیابی محدودی که هر دو گام تلویح داشتن. عددها با دموی پایین می‌مونن.",
+        "nonguarantee_en": "The hot-key salt factors and the combiner's applicability per function are designed per workload, not fixed here.",
+        "nonguarantee_fa": "فاکتور salt کلید داغ و کاربرد combiner به‌ازای هر تابع per-workload طراحی می‌شن، نه این‌جا ثابت.",
+        "point_en": "The decision point is the rerun box: scoped to the lost mapper, fed by immutable lineage, re-entering the standard fetch.",
+        "point_fa": "نقطهٔ تصمیم جعبهٔ rerune: محدود به mapper گمشده، تغذیه‌شده از lineage immutable و برگشت به fetch استاندارد.",
         "scenario_en": "Splits become grouped partitions in one frame, with the loss-and-rerun detour drawn dashed.",
-        "scenario_fa": "splitها در یک قاب به پارتیشن‌های گروه‌شده تبدیل می‌شوند و انحراف گم‌شدن-و-اجرای‌دوباره خط‌چین کشیده شده.",
+        "scenario_fa": "splitها توی یه قاب به پارتیشن‌های گروه‌شده تبدیل می‌شن و انحرافِ گم‌شدن-و-اجرای‌دوباره خط‌چین کشیده شده.",
         "steps": [
           {
-            "en": "Mappers partition, sort and combine; sorted mPrR files flow to fetch.",
-            "fa": "mapperها پارتیشن، sort و combine می‌کنند؛ فایل‌های مرتب mPrR به fetch می‌روند."
+            "en": "The mappers partition, sort and combine; the sorted mPrR files flow to fetch.",
+            "fa": "اول mapperها پارتیشن، sort و combine می‌کنن؛ فایل‌های مرتب mPrR به fetch می‌رن."
           },
           {
             "en": "Fetch merges one partition's files with one line per file in RAM: same keys together.",
-            "fa": "fetch فایل‌های یک پارتیشن را با یک خط به‌ازای هر فایل در RAM ادغام می‌کند: کلیدهای یکسان کنار هم."
+            "fa": "بعد fetch فایل‌های یه پارتیشن رو با یه خط به‌ازای هر فایل توی RAM ادغام می‌کنه: کلیدهای یکسان کنار هم."
           },
           {
-            "en": "On checksum failure only the lost mapper reruns; its files rejoin the same fetch.",
-            "fa": "با شکست checksum فقط mapper گمشده دوباره اجرا می‌شود؛ فایل‌هایش به همان fetch برمی‌گردند."
+            "en": "On a checksum failure only the lost mapper reruns; its files rejoin the same fetch.",
+            "fa": "آخر با شکست checksum فقط mapper گمشده دوباره اجرا می‌شه؛ فایل‌هاش به همون fetch برمی‌گردن."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "Fetch, k-way merge, grouped output — plus exactly one mapper rerun on file loss.",
-        "a_fa": "fetch، ادغام k-way و خروجی گروه‌شده — به‌علاوه دقیقاً یک اجرای دوباره mapper روی گم شدن فایل.",
+        "a_en": "Fetch, the k-way merge and the grouped output — plus exactly one mapper rerun on the file loss.",
+        "a_fa": "fetch، ادغام k-way و خروجی گروه‌شده — به‌علاوهٔ دقیقاً یه اجرای دوبارهٔ mapper روی گم شدن فایل.",
         "q_en": "After a file corrupts, what reruns and what stays?",
-        "q_fa": "بعد از خراب شدن فایل، چه چیزی دوباره اجرا می‌شود و چه چیزی می‌ماند؟"
+        "q_fa": "بعد از خراب شدن فایل، چی دوباره اجرا می‌شه و چی می‌مونه؟"
       },
       "source": "assets/diagram-specs/solutions/ch11/sol3-shuffle-assembly.json"
     }
   ],
   "failures": [
     {
-      "en": "Corrupt intermediate file: bytes on disk no longer match the checksum. Guard by failing that partition's fetch and rerunning only the owning mapper from its split — never the whole job.",
-      "fa": "فایل میانی خراب: بایت‌های دیسک دیگر با checksum نمی‌خوانند. نگهبان انداختن fetch آن پارتیشن و اجرای دوباره فقط mapper مالک از split خودش است — هرگز کل job نه."
+      "en": "A corrupt intermediate file: the bytes on disk no longer match the checksum. Guard by failing that partition's fetch and rerunning only the owning mapper from its split — never the whole job.",
+      "fa": "فایل میانی خراب: بایت‌های دیسک دیگه با checksum نمی‌خونن. نگهبان: انداختن fetch اون پارتیشن و اجرای دوبارهٔ فقط mapper مالک از split خودش — هرگز کل job، نه."
     },
     {
-      "en": "Mapper crash mid-write: a partial mPrR file looks complete at a glance. Guard with attempt ids plus checksums: the retry rewrites whole files under a fresh id, and fetch refuses unchecked files.",
-      "fa": "کرش mapper وسط نوشتن: فایل mPrR ناقص در نگاه اول کامل به نظر می‌رسد. نگهبان attempt id به‌علاوه checksum است: retry کل فایل‌ها را با id تازه بازنویسی می‌کند و fetch فایل چک‌نشده را رد می‌کند."
+      "en": "A mapper crash mid-write: a partial mPrR file looks complete at a glance. Guard with attempt ids plus checksums: the retry rewrites whole files under a fresh id, and fetch refuses unchecked files.",
+      "fa": "کرش mapper وسط نوشتن: فایل mPrR ناقص، در نگاه اول کامل به نظر می‌رسه. نگهبان: attempt id به‌علاوهٔ checksum. retry کل فایل‌ها رو با id تازه بازنویسی می‌کنه و fetch فایل چک‌نشده رو رد می‌کنه."
     },
     {
-      "en": "Nondeterministic mapper or outside side effects: rerun replays different records or repeats external writes. Guard by construction — deterministic mapping, no outside writes — because no retry protocol fixes a mapper that lies.",
-      "fa": "mapper غیرقطعی یا side effect بیرونی: اجرای دوباره رکوردهای متفاوت بازپخش می‌کند یا نوشتن‌های بیرونی را تکرار می‌کند. نگهبان با ساخت است — نگاشت قطعی و بدون نوشتن بیرونی — چون هیچ پروتکل retry mapper دروغ‌گو را درست نمی‌کند."
+      "en": "A nondeterministic mapper or outside side effects: the rerun replays different records or repeats external writes. Guard by construction — deterministic mapping, no outside writes — because no retry protocol fixes a mapper that lies.",
+      "fa": "mapper غیرقطعی یا side effect بیرونی: اجرای دوباره رکوردهای متفاوت بازپخش می‌کنه یا نوشتن‌های بیرونی رو تکرار می‌کنه. نگهبانش ساخت خودشه — نگاشت قطعی و بدون نوشتن بیرونی — چون هیچ پروتکل retry، mapper دروغ‌گو رو درست نمی‌کنه."
     },
     {
-      "en": "Partition function changed mid-job: old and new files disagree on key placement and grouping silently breaks. Guard by versioning the function with the job and refusing mixed-version fetches.",
-      "fa": "عوض شدن تابع پارتیشن وسط job: فایل‌های قدیم و جدید روی جای کلید اختلاف دارند و گروه‌بندی بی‌صدا می‌شکند. نگهبان نسخه‌بندی تابع با job و رد fetchهای چندنسخه‌ای است."
+      "en": "The partition function changed mid-job: the old and new files disagree on key placement and grouping silently breaks. Guard by versioning the function with the job and refusing mixed-version fetches.",
+      "fa": "عوض شدن تابع پارتیشن وسط job: فایل‌های قدیم و جدید روی جای کلید اختلاف دارن و گروه‌بندی بی‌صدا می‌شکنه. نگهبان: نسخه‌بندی تابع با job و رد fetchهای چندنسخه‌ای."
     }
   ],
   "followups": [
     {
-      "a_en": "Split the hot key with salt: append a random shard suffix at map time so its records spread over many reducers, aggregate per (key, salt), then combine the shards in a second lightweight pass. Price it openly — extra shuffle pass plus final combine — and monitor the top-key share so the salt factor follows measurement, not superstition.",
-      "a_fa": "کلید داغ را با salt بشکن: موقع map پسوند shard تصادفی بچسبان تا رکوردهایش روی reducerهای زیادی پخش شوند، به‌ازای (key, salt) تجمیع کن و بعد shardها را در pass سبک دوم combine کن. قیمتش را علنی بگو — pass shuffle اضافه به‌علاوه combine نهایی — و سهم کلید اول را رصد کن تا فاکتور salt از اندازه‌گیری بیاید نه خرافه.",
+      "a_en": "Split the hot key with salt: append a random shard suffix at map time so its records spread over many reducers, aggregate per (key, salt), then combine the shards in a second lightweight pass. Price it openly — one extra shuffle pass plus the final combine — and watch the top-key share so the salt factor follows the measurement, not superstition.",
+      "a_fa": "کلید داغ رو با salt بشکن: موقع map پسوند shard تصادفی بچسبون تا رکوردهایش روی reducerهای زیادی پخش بشن، به‌ازای (key, salt) تجمیع کن و بعد shardها رو توی یه pass سبک دوم combine کن. قیمتش رو علنی بگو — pass shuffle اضافه به‌علاوهٔ combine نهایی — و سهم کلید اول رو رصد کن تا فاکتور salt از اندازه‌گیری بیاد، نه از خرافه.",
       "level": "staff",
       "q_en": "One key holds half your records. How do you save your reducer from the hotspot?",
       "q_fa": "یه key نصف داده رو داشته باشه، چطور reducer رو از hotspot نجات می‌دی؟"
     },
     {
-      "a_en": "Only with sum-plus-count, never a bare average: the combiner may emit partial sums and counts (associative), while the reducer divides at the end. A combiner that averages averages is wrong by construction — prove associativity for each function before allowing it to combine.",
-      "a_fa": "فقط با جمع-به‌علاوه-شمارش و هرگز میانگین تنها: combiner می‌تواند جمع و شمارش جزئی بدهد (انجمنی) و reducer آخر تقسیم می‌کند. combiner که میانگینِ میانگین‌ها بگیرد ذاتاً غلط است — به‌ازای هر تابع انجمنی بودن را قبل از اجازه combine اثبات کن.",
+      "a_en": "Only with sum-plus-count, never a bare average: the combiner may emit partial sums and counts (associative), and the reducer does the dividing at the end. A combiner that averages averages is wrong by construction — prove associativity for each function before you let it combine.",
+      "a_fa": "فقط با جمع-به‌علاوه-شمارش، و هرگز میانگین تنها: combiner می‌تونه جمع و شمارش جزئی بده (انجمنی) و reducer آخر تقسیم می‌کنه. combiner که میانگینِ میانگین‌ها بگیره ذاتاً غلطه — به‌ازای هر تابع، انجمنی بودن رو قبل از اجازهٔ combine اثبات کن.",
       "level": "senior",
       "q_en": "When is a combiner wrong, and what do you combine instead?",
-      "q_fa": "combiner کی غلط است و به‌جایش چه چیزی را combine می‌کنی؟"
+      "q_fa": "combiner کی غلطه و به‌جایش چی رو combine می‌کنی؟"
     }
   ],
   "interview_q_en": "Here's the thing, you're building the shuffle for a group-by. You design identical partitioning, mapper-local sorting, and the reducer merge. You work through hot keys, network volume, the combiner, and checksums on intermediate files. Then one mapper's output corrupts, so you say exactly what you rerun and which lineage makes it safe.",
   "interview_q_fa": "قضیه اینه که می‌خوای shuffle برای group-by بسازی. partition یکسان، sort محلی و merge تو reducer رو طراحی کن. حساب کن hot key، حجم شبکه، combiner و checksum فایل میانی چی می‌شن. حالا خروجی یه mapper خراب می‌شه؛ بگو دقیقاً چی رو بر اساس کدوم lineage دوباره اجرا می‌کنی.",
-  "mental_en": "A shuffle is a distributed sort: every worker speaks the same partition language, each sorts its own slice, and the reducer merges slices the way a merge sort merges runs. Agreement first, movement second.",
-  "mental_fa": "shuffle یک sort توزیع‌شده است: هر worker یک زبان پارتیشن حرف می‌زند، هرکدام تکه خودش را مرتب می‌کند و reducer تکه‌ها را مثل mergesort که runها را ادغام می‌کند، ادغام می‌کند. اول توافق بعد جابه‌جایی.",
+  "mental_en": "A shuffle is a distributed sort. Picture every worker speaking the same partition language, sorting its own slice, while the reducer merges the slices the way a merge sort merges runs. Agreement first, movement second.",
+  "mental_fa": "shuffle یعنی یه sort توزیع‌شده. تصور کن هر worker یه زبانِ پارتیشن حرف می‌زنه، هرکدوم تکهٔ خودش رو مرتب می‌کنه و reducer تکه‌ها رو ادغام می‌کنه — دقیقاً مثل mergesort که runها رو ادغام می‌کنه. ترتیبش اینه: اول توافق، بعد جابه‌جایی.",
   "mistakes": [
     {
-      "en": "Rerunning the whole job for one lost file. Lineage names the exact mapper; scoped rerun is the whole point of immutable splits plus attempt isolation.",
-      "fa": "اجرای دوباره کل job برای یک فایل گمشده. lineage دقیقاً mapper را نام می‌برد؛ اجرای محدود کل نکته splitهای immutable به‌علاوه انزوای attempt است."
+      "en": "Rerunning the whole job for one lost file. The lineage names the exact mapper; scoped rerun is the whole point of immutable splits plus attempt isolation.",
+      "fa": "اجرای دوبارهٔ کل job برای یه فایل گمشده: lineage دقیقاً mapper رو نام می‌بره؛ اجرای محدود کل نکتهٔ splitهای immutable به‌علاوهٔ انزوای attempt است."
     },
     {
       "en": "Reusing file names across attempts so two runs of one mapper both look current. Fresh attempt ids per retry; fetch accepts exactly one committed generation.",
-      "fa": "استفاده دوباره از نام فایل بین attemptها طوری که دو اجرای یک mapper هر دو جاری به نظر برسند. id تازه به‌ازای هر retry؛ fetch دقیقاً یک نسل committed را می‌پذیرد."
+      "fa": "استفادهٔ دوباره از نام فایل بین attemptها، طوری که دو اجرای یه mapper هر دو جاری به نظر برسن. id تازه به‌ازای هر retry؛ fetch دقیقاً یه نسل committed رو می‌پذیره."
     },
     {
-      "en": "Side effects inside the mapper (external writes, non-idempotent calls). Replay then repeats the outside world — keep mappers pure or rerun is unsafe by definition.",
-      "fa": "side effect داخل mapper (نوشتن بیرونی، فراخوانی غیر-idempotent). بازپخش آن‌وقت دنیای بیرون را تکرار می‌کند — mapperها را خالص نگه دار وگرنه rerun تعریفاً ناامن است."
+      "en": "Side effects inside the mapper (external writes, non-idempotent calls). Replay then repeats the outside world — keep the mappers pure or the rerun is unsafe by definition.",
+      "fa": "side effect داخل mapper (نوشتن بیرونی، فراخوانی غیر-idempotent): بازپخش اون‌وقت دنیای بیرون رو تکرار می‌کنه — mapperها رو خالص نگه دار، وگرنه rerun تعریفاً ناامنه."
     }
   ],
   "number": 3,
@@ -225,39 +225,39 @@
   "steps": [
     {
       "en": "Fix one partition function on every worker and version it with the job: same key, same partition, every mapper, every run.",
-      "fa": "یک تابع پارتیشن را روی همه workerها فیکس و با job نسخه‌بندی کن: کلید یکسان، پارتیشن یکسان، هر mapper و هر اجرا.",
+      "fa": "یه تابع پارتیشن رو روی همهٔ workerها فیکس کن و با job نسخه‌بندی کن: کلید یکسان، پارتیشن یکسان، هر mapper و هر اجرا.",
       "t_en": "One function everywhere",
-      "t_fa": "یک تابع همه‌جا"
+      "t_fa": "یه تابع، همه‌جا"
     },
     {
       "en": "Sort each partition slice inside the mapper and write one checksummed mPrR file per partition — the fetchable contract.",
-      "fa": "هر تکه پارتیشن را داخل mapper مرتب کن و یک فایل checksummedِ mPrR به‌ازای هر پارتیشن بنویس — قرارداد قابل fetch.",
+      "fa": "هر تکهٔ پارتیشن رو داخل mapper مرتب کن و یه فایل checksummedِ mPrR به‌ازای هر پارتیشن بنویس — همون قرارداد قابل fetch.",
       "t_en": "Sort locally, write files",
       "t_fa": "مرتب‌سازی محلی و نوشتن فایل"
     },
     {
-      "en": "Fetch one partition's files from all mappers and k-way merge with one line per file in RAM: same keys arrive together, sorted.",
-      "fa": "فایل‌های یک پارتیشن را از همه mapperها fetch کن و با یک خط به‌ازای هر فایل در RAM ادغام k-way کن: کلیدهای یکسان کنار هم و مرتب می‌رسند.",
+      "en": "Fetch one partition's files from all mappers and k-way merge them with one line per file in RAM: same keys arrive together, sorted.",
+      "fa": "بعد فایل‌های یه پارتیشن رو از همهٔ mapperها fetch کن و با یه خط به‌ازای هر فایل توی RAM ادغام k-way کن: کلیدهای یکسان کنار هم و مرتب می‌رسن.",
       "t_en": "Fetch and merge per partition",
       "t_fa": "fetch و ادغام به‌ازای هر پارتیشن"
     },
     {
-      "en": "Pre-aggregate with a combiner where associativity holds, and checksum every file so corruption is detected, never silent.",
-      "fa": "هرجا انجمنی بودن برقرار است با combiner پیش‌تجمیع کن و هر فایل را checksum بزن تا خرابی شناسایی شود نه بی‌صدا.",
+      "en": "Pre-aggregate with a combiner where associativity holds, and checksum every file so corruption gets detected, never silent.",
+      "fa": "هرجا انجمنی بودن برقراره با combiner پیش‌تجمیع کن و هر فایل رو checksum بزن تا خرابی شناسایی بشه، نه بی‌صدا.",
       "t_en": "Combiner and checksums",
       "t_fa": "combiner و checksumها"
     },
     {
-      "en": "On loss, rerun only the owning mapper from its immutable split under a fresh attempt id; deterministic replay makes the rewrite equal the lost file.",
-      "fa": "روی گم شدن، فقط mapper مالک را از split immutable خودش با attempt id تازه دوباره اجرا کن؛ بازپخش قطعی بازنویسی را برابر فایل گمشده می‌کند.",
+      "en": "On a loss, rerun only the owning mapper from its immutable split under a fresh attempt id; deterministic replay makes the rewrite equal the lost file.",
+      "fa": "روی گم شدن، فقط mapper مالک رو از split immutable خودش با attempt id تازه دوباره اجرا کن؛ بازپخش قطعی، بازنویسی رو برابر فایل گمشده می‌کنه.",
       "t_en": "Scoped lineage rerun",
       "t_fa": "اجرای محدود از lineage"
     }
   ],
-  "tests_en": "Assert colocation (every key lands on floorMod(hash, R)) and sortedness per partition after every run; inject corruption and assert identical regrouped output; assert attempt ids are unique per retry and fetch refuses unchecked files; measure shuffle bytes and top-key share per job.",
-  "tests_fa": "بعد از هر اجرا هم‌مکانی (هر کلید روی floorMod(hash, R) می‌نشیند) و مرتب بودن هر پارتیشن را assert کن؛ خرابی تزریق کن و خروجی گروه‌شده یکسان را assert کن؛ assert کن idهای attempt به‌ازای هر retry یکتایند و fetch فایل چک‌نشده را رد می‌کند؛ بایت shuffle و سهم کلید اول هر job را بسنج.",
-  "worked_en": "<p>Demo numbers (teaching, this environment): 2 mappers, 3 partitions, 300 records. Before corruption each reduce holds 100 records over 4 keys with <code>colocated=true sorted=true</code>; <code>m1r2.txt</code> is corrupted; mapper 1 reruns as attempt 1 from its split; after recompute the same invariants hold.</p><p>Interpretation: recovery is scoped (one mapper) and verified (same predicates before and after), not narrated.</p>",
-  "worked_fa": "<p>عددهای دمو (آموزشی، همین محیط): ۲ mapper و ۳ پارتیشن با ۳۰۰ رکورد. قبل از خرابی هر reduce صد رکورد روی ۴ کلید با <code>colocated=true sorted=true</code> دارد؛ <code>m1r2.txt</code> خراب می‌شود؛ mapper شماره ۱ به‌عنوان attempt شماره ۱ از split خودش دوباره اجرا می‌شود و بعد از محاسبه دوباره همان ناورداها برقرارند.</p><p>تفسیر: بازیابی محدود است (یک mapper) و راستی‌آزمایی‌شده (همان گزاره‌ها قبل و بعد)، نه روایت‌شده.</p>",
-  "reasoning_fa": "<p>hash(key) mod R همهٔ مقدارهای یک key را به reducer یکسان می‌فرستد؛ برای همین تابع و نسخهٔ آن باید روی همهٔ mapperها یکسان باشد. سه partition و دو mapper فقط مسیرها را واضح می‌کند. sort ترتیب داخل partition را می‌دهد و با partitioning یک کار نمی‌کند. deterministic و بدون side effect بودن mapper باعث می‌شود retry همان داده را تولید کند؛ اگر خروجی تکراری attemptها هم‌زمان پذیرفته شود، این کافی نیست و commit manifest یک attempt لازم است.</p>",
-  "reasoning_en": "<p>Hash(key) mod R colocates a key’s values, requiring identical versioned partition functions on all mappers. Three partitions and two mappers expose the paths. Sorting orders records within a partition and serves a different purpose. Deterministic, side-effect-free mappers reproduce output on retry, but publication must still select one attempt through a commit manifest.</p>"
+  "tests_en": "After every run, assert the colocation (every key lands on floorMod(hash, R)) and the sortedness of each partition; inject corruption and assert the regrouped output comes out identical; assert the attempt ids are unique per retry and that fetch refuses unchecked files; measure the shuffle bytes and the top-key share per job.",
+  "tests_fa": "بعد از هر اجرا، هم‌مکانی (هر کلید روی floorMod(hash, R) می‌نشینه) و مرتب بودن هر پارتیشن رو assert کن؛ خرابی تزریق کن و خروجی گروه‌شدهٔ یکسان رو assert کن؛ assert کن idهای attempt به‌ازای هر retry یکتاییَن و fetch فایل چک‌نشده رو رد می‌کنه؛ بایت shuffle و سهم کلید اول هر job رو بسنج.",
+  "worked_en": "<p>Demo numbers (teaching, this environment): 2 mappers, 3 partitions, 300 records. Before corruption each reduce holds 100 records over 4 keys with <code>colocated=true sorted=true</code>; <code>m1r2.txt</code> is corrupted; mapper 1 reruns as attempt 1 from its split; after recompute the same invariants hold.</p><p>Interpretation: recovery is scoped (one mapper) and verified (same predicates before and after), not narrated. One file was lost, one mapper reran — that is the whole recovery story.</p>",
+  "worked_fa": "<p>عددهای دمو (آموزشی، همین محیط): ۲ mapper و ۳ پارتیشن با ۳۰۰ رکورد. قبل از خرابی هر reduce صد رکورد روی ۴ کلید با <code>colocated=true sorted=true</code> داره؛ <code>m1r2.txt</code> خراب می‌شه؛ mapper شماره ۱ به‌عنوان attempt شماره ۱ از split خودش دوباره اجرا می‌شه و بعد از محاسبهٔ دوباره همون ناورداها برقرارن.</p><p>تفسیر: بازیابی محدوده (یه mapper) و راستی‌آزمایی‌شده (همون گزاره‌ها قبل و بعد)، نه روایت‌شده. — یه فایل گم شد، یه mapper دوباره اجرا شد؛ همین.</p>",
+  "reasoning_fa": "<p>چرا این مدل به این تمرین می‌خوره: hash(key) mod R همهٔ مقدارهای یه key رو به reducer یکسان می‌فرسته؛ برای همین تابع و نسخهٔ اون باید روی همهٔ mapperها یکسان باشه. سه partition و دو mapper فقط مسیرها رو واضح می‌کنن. sort ترتیب داخل partition رو می‌ده و با partitioning یه کار نمی‌کنه. deterministic و بدون side effect بودن mapper باعث می‌شه retry همون داده رو تولید کنه؛ ولی اگه خروجی تکراریِ attemptها هم‌زمان پذیرفته بشه، این کافی نیست و یه commit manifest که یک attempt رو انتخاب کنه لازم می‌شه.</p>",
+  "reasoning_en": "<p>Why this model fits: hash(key) mod R colocates a key's values, which means the partition function and its version have to be identical on all mappers. Three partitions and two mappers simply expose the paths. Sorting orders records within a partition and serves a different purpose. Deterministic, side-effect-free mappers reproduce the output on retry, but if duplicate attempt outputs are accepted at the same time, that is not enough — a commit manifest has to select one attempt.</p>"
 }
