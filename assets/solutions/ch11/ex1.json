@@ -186,8 +186,8 @@
       "a_en": "Relax exactness, not memory discipline: a count-min sketch with a top-K heap (or sampling first, then exact-counting the survivors) trades a bounded error for tiny memory. Name the error budget in the same units as the report, keep the cap and the equality check on samples, and say which queries the approximation must never serve (billing, abuse thresholds).",
       "a_fa": "دقت را شل کن نه انضباط حافظه را: sketchِ count-min با heapِ top-K (یا اول نمونه‌برداری بعد شمارش دقیق بازمانده‌ها) خطای کران‌دار را با حافظه کوچک معاوضه می‌کند. بودجه خطا را با همان واحد گزارش نام ببر، سقف و چک برابری روی نمونه‌ها را نگه دار و بگو تقریب حق سرو کدام کوئری‌ها را ندارد (صورت‌حساب، آستانه‌های سوءاستفاده).",
       "level": "senior",
-      "q_en": "If only an approximate top-100 is required, which constraint can be relaxed?",
-      "q_fa": "اگر فقط top-100 تقریبی لازم باشد، کدام قید را می‌توان سبک‌تر کرد؟"
+      "q_en": "If you only need an approximate top-100, which constraint do you relax?",
+      "q_fa": "حالا فقط top-100 تقریبی بخوای، کدوم قید رو شل می‌کنی؟"
     },
     {
       "a_en": "Change one variable at a time and re-report the row: 10x lines with the same cardinality only lengthen the sort path linearly, while 10x distinct keys move the hash path from the first row to the second. The honest answer re-runs the equal-output benchmark instead of extrapolating.",
@@ -197,8 +197,8 @@
       "q_fa": "ورودی ده برابر شود ولی کلیدهای متمایز ثابت بمانند — چه چیزی عوض می‌شود؟"
     }
   ],
-  "interview_q_en": "Compute top URLs for a log larger than RAM. Compare hash aggregation, external sort, spilling and approximate counts; design a benchmark with equal outputs under a stated memory cap, and report the failure threshold for that environment.",
-  "interview_q_fa": "برای لاگی بزرگ‌تر از RAM، top URLها را حساب کن. تجمیع hash، مرتب‌سازی بیرونی، spill و شمارش تقریبی را مقایسه کن؛ بنچمارکی با خروجی برابر زیر سقف حافظه اعلام‌شده طراحی کن و آستانه شکست همان محیط را گزارش بده.",
+  "interview_q_en": "Picture this, your logs don't fit in RAM and you've got to find the top URLs. You compare hash aggregation against external sort, and you spell out cardinality, your RAM cap, spill behavior, I/O cost, and approximate counting. You run a fair benchmark with equal outputs under one stated memory cap, and you report the breaking point for your own setup only.",
+  "interview_q_fa": "فرض کن لاگت از RAM بزرگ‌تره و قراره top URLها رو دربیاری. حساب کن hash aggregation کجا جواب می‌ده و کجا external sort. یادت باشه cardinality، سقف RAM، spill، هزینه I/O و approximate counting رو شفاف کنی. بنچمارکتت هم باید ورودی و خروجی برابر با memory cap مشخص داشته باشه، و آستانه شکست رو فقط برای همون محیط خودت گزارش کنی.",
   "mental_en": "Counting is grouping equal keys together. Hashing groups them in RAM with one counter per distinct key; sorting groups them on disk by bringing equals side by side. The working set — distinct keys times per-entry overhead — decides which grouping fits.",
   "mental_fa": "شمارش یعنی کنار هم آوردن کلیدهای برابر. hash آن‌ها را در RAM با یک شمارنده به‌ازای هر کلید متمایز گروه می‌کند؛ sort با کنار هم آوردن برابرها روی دیسک گروه می‌کند. working set — کلیدهای متمایز ضربدر سربار هر ورودی — مشخص می‌کند کدام گروه‌بندی جا می‌شود.",
   "mistakes": [

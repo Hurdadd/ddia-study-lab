@@ -187,8 +187,8 @@
       "a_en": "Split the hot key with salt: append a random shard suffix at map time so its records spread over many reducers, aggregate per (key, salt), then combine the shards in a second lightweight pass. Price it openly — extra shuffle pass plus final combine — and monitor the top-key share so the salt factor follows measurement, not superstition.",
       "a_fa": "کلید داغ را با salt بشکن: موقع map پسوند shard تصادفی بچسبان تا رکوردهایش روی reducerهای زیادی پخش شوند، به‌ازای (key, salt) تجمیع کن و بعد shardها را در pass سبک دوم combine کن. قیمتش را علنی بگو — pass shuffle اضافه به‌علاوه combine نهایی — و سهم کلید اول را رصد کن تا فاکتور salt از اندازه‌گیری بیاید نه خرافه.",
       "level": "staff",
-      "q_en": "One key accounts for half the records. How do you prevent a reducer hotspot?",
-      "q_fa": "یک key نصف داده را دارد؛ چگونه reducer را از hotspot نجات می‌دهی؟"
+      "q_en": "One key holds half your records. How do you save your reducer from the hotspot?",
+      "q_fa": "یه key نصف داده رو داشته باشه، چطور reducer رو از hotspot نجات می‌دی؟"
     },
     {
       "a_en": "Only with sum-plus-count, never a bare average: the combiner may emit partial sums and counts (associative), while the reducer divides at the end. A combiner that averages averages is wrong by construction — prove associativity for each function before allowing it to combine.",
@@ -198,8 +198,8 @@
       "q_fa": "combiner کی غلط است و به‌جایش چه چیزی را combine می‌کنی؟"
     }
   ],
-  "interview_q_en": "Design partitioning, mapper-local sorting and reducer merge for group-by. Analyze hot keys, network volume, combiners and checksums. Recompute lost intermediate output from immutable lineage using isolated attempts.",
-  "interview_q_fa": "پارتیشن، sort محلی mapper و ادغام reducer را برای group-by طراحی کن. کلید داغ، حجم شبکه، combiner و checksum فایل میانی را تحلیل کن. خروجی میانی گمشده را از lineage immutable با attemptهای منزوی دوباره حساب کن.",
+  "interview_q_en": "Here's the thing, you're building the shuffle for a group-by. You design identical partitioning, mapper-local sorting, and the reducer merge. You work through hot keys, network volume, the combiner, and checksums on intermediate files. Then one mapper's output corrupts, so you say exactly what you rerun and which lineage makes it safe.",
+  "interview_q_fa": "قضیه اینه که می‌خوای shuffle برای group-by بسازی. partition یکسان، sort محلی و merge تو reducer رو طراحی کن. حساب کن hot key، حجم شبکه، combiner و checksum فایل میانی چی می‌شن. حالا خروجی یه mapper خراب می‌شه؛ بگو دقیقاً چی رو بر اساس کدوم lineage دوباره اجرا می‌کنی.",
   "mental_en": "A shuffle is a distributed sort: every worker speaks the same partition language, each sorts its own slice, and the reducer merges slices the way a merge sort merges runs. Agreement first, movement second.",
   "mental_fa": "shuffle یک sort توزیع‌شده است: هر worker یک زبان پارتیشن حرف می‌زند، هرکدام تکه خودش را مرتب می‌کند و reducer تکه‌ها را مثل mergesort که runها را ادغام می‌کند، ادغام می‌کند. اول توافق بعد جابه‌جایی.",
   "mistakes": [

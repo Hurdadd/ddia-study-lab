@@ -187,8 +187,8 @@
       "a_en": "Exactly one CAS winner: both jobs race conditional writes on the pointer key with their manifest version; the store orders them, one succeeds, the loser observes the winner's version, re-validates (or re-runs) against it, and retries the publish — never overwrites blindly. Readers are undisturbed throughout because every manifest, old and new, stays complete and pinned reads never straddle.",
       "a_fa": "دقیقاً یک برنده CAS: هر دو job نوشتن‌های شرطی روی کلید pointer با نسخه manifest خودشان مسابقه می‌دهند؛ store مرتبشان می‌کند، یکی موفق می‌شود و بازنده نسخه برنده را می‌بیند، در برابرش دوباره اعتبارسنجی (یا دوباره اجرا) می‌کند و انتشار را retry می‌کند — هرگز کورکورانه بازنویسی نه. خواننده‌ها تمام مدت دست‌نخورده‌اند چون هر manifest قدیم و جدید کامل می‌ماند و خواندن‌های pinشده هرگز سوار نمی‌شوند.",
       "level": "staff",
-      "q_en": "Two jobs concurrently publish to the same output name. Which version wins?",
-      "q_fa": "دو job هم‌زمان روی یک نام خروجی publish کنند؛ کدام نسخه برنده می‌شود؟"
+      "q_en": "Two jobs publish to the same output name at once. Which version wins?",
+      "q_fa": "دو job هم‌زمان روی یه نام خروجی publish کنن، کدوم نسخه برنده می‌شه؟"
     },
     {
       "a_en": "Use a versioned pointer plus CAS: write the new manifest under a fresh versioned key, then conditionally flip the pointer from the expected old version to the new one. If the store offers no CAS at all, narrow the writer to a single publisher (lease or queue) and say so — a claimed atom you do not have is worse than a documented bottleneck.",
@@ -198,8 +198,8 @@
       "q_fa": "object store هیچ rename اتمی ندارد. اتم انتشار چیست؟"
     }
   ],
-  "interview_q_en": "Design versioned attempt outputs and a job manifest for a multi-task job on immutable input. Inject mid-write and pre-publication crashes. Readers must see one complete pinned version; choose a storage-appropriate atomic pointer or CAS with safe cleanup and retry.",
-  "interview_q_fa": "خروجی attempt نسخه‌دار و manifest job را برای job چندtaskی روی ورودی immutable طراحی کن. کرش وسط نوشتن و قبل از انتشار تزریق کن. خواننده باید یک نسخه کامل pinشده ببیند؛ pointer اتمی یا CAS متناسب با storage با پاک‌سازی و retry امن انتخاب کن.",
+  "interview_q_en": "Honestly, you've got a multi-task job over immutable inputs. You design versioned attempt outputs plus a manifest. You inject a crash mid-write and another one just before publish. Remember, your readers must always see one complete pinned version, so you pick your CAS or atomic pointer, cleanup, and retry to match your storage.",
+  "interview_q_fa": "داستان از این قراره که یه job چندtaskی روی ورودی immutable داری. attempt output جدا و manifest نسخه‌دار طراحی کن. crash وسط write و قبل از publish تزریق کن. یادت باشه خواننده باید همیشه یه نسخه کامل و ثابت ببینه؛ CAS و atomic pointer و cleanup و retry رو متناسب با همون storage خودت انتخاب کن.",
   "mental_en": "Commit is not publish: tasks finish invisibly like votes in a sealed box, and one pointer flip opens the box. Everything before the flip can be retried and cleaned; everything after it must already be whole.",
   "mental_fa": "commit یعنی انتشار نیست: taskها نامرئی تمام می‌شوند مثل رأی‌ها در صندوق مهرشده و یک چرخش pointer صندوق را باز می‌کند. همه‌چیز قبل از چرخش قابل retry و تمیزکاری است؛ همه‌چیز بعدش باید از قبل کامل باشد.",
   "mistakes": [
