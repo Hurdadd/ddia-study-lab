@@ -1,32 +1,32 @@
 {
   "alternatives": [
     {
-      "en": "B-tree when reads dominate: each lookup costs a predictable 3-4 page fetches and ranges walk the leaf chain with no compaction stalls. Cost: random writes rewrite whole pages, splits and write-ahead logging add their own overhead.",
-      "fa": "وقتی خواندن غالب است B-tree: هر جست‌وجو ۳ تا ۴ صفحهٔ قابل‌پیش‌بینی می‌خواند و rangeها زنجیرهٔ برگ را بدون توقف compaction می‌پیمایند. هزینه: نوشتن‌های تصادفی کل صفحه را بازنویسی می‌کنند و split و WAL هم سربار خودشان را دارند."
+      "en": "B-tree when reads dominate: each lookup costs a predictable 3-4 page fetches, and ranges walk the leaf chain with no compaction stall in the way. The cost: random writes rewrite whole pages, and splits plus write-ahead logging carry their own overhead.",
+      "fa": "وقتی خواندن غالب است، B-tree برنده است: هر جست‌وجو ۳ تا ۴ صفحهٔ قابل‌پیش‌بینی می‌خونه و rangeها زنجیرهٔ برگ رو بدون توقف compaction می‌پیمایند. هزینه‌اش اینه: نوشتن‌های تصادفی کل صفحه رو بازنویسی می‌کنن و split و WAL هم سربار خودشون رو دارن."
     },
     {
-      "en": "Hash-indexed log (Bitcask style) for pure point lookups whose key set fits RAM: O(1) reads, sequential writes. Cost: no range queries and a full-log rebuild after restart.",
-      "fa": "لاگ با ایندکس hash (سبک Bitcask) برای خواندن نقطه‌ایِ خالص که مجموعهٔ کلیدها در RAM جا شود: خواندن O(1) و نوشتن ترتیبی. هزینه: بدون range query و بازسازی کل لاگ بعد از restart."
+      "en": "A hash-indexed log (Bitcask style) when you only do point lookups and the key set fits in RAM: O(1) reads, sequential writes. The cost: no range queries, and after a restart you rebuild the whole log.",
+      "fa": "لاگ با ایندکس hash (سبک Bitcask) برای وقتی که فقط خواندن نقطه‌ای داری و مجموعهٔ کلیدها در RAM جا می‌شه: خواندن O(1) و نوشتن ترتیبی. هزینه: range query نداره و بعد از restart باید کل لاگ رو از نو بسازی."
     }
   ],
-  "answer_en": "Pick <span class=\"ltr\">LSM</span> for the write-heavy side: every write is a sequential append (<span class=\"ltr\">WAL</span> with <span class=\"ltr\">fsync</span> for durability, then the in-memory <span class=\"ltr\">memtable</span>), so write throughput stays high; the price is background <span class=\"ltr\">compaction</span> and reads that may check several segments. A <span class=\"ltr\">B-tree</span> rewrites the record's page in place: point reads and range scans are more predictable (3-4 levels deep) but random writes cost more. The top trade-off: <span class=\"ltr\">LSM</span> buys cheap writes with write amplification at compaction time and read amplification across segments.",
-  "answer_fa": "برای سمتِ نوشتن‌محور <span class=\"ltr\">LSM</span> را بردار: هر نوشتن یک append ترتیبی است (<span class=\"ltr\">WAL</span> با <span class=\"ltr\">fsync</span> برای durability و بعد <span class=\"ltr\">memtable</span> در حافظه)، پس بازده نوشتن بالا می‌ماند؛ بهایش <span class=\"ltr\">compaction</span> پس‌زمینه و خواندن‌هایی است که شاید چند سگمنت را بگردند. <span class=\"ltr\">B-tree</span> صفحهٔ رکورد را همان‌جا بازنویسی می‌کند: خواندن نقطه‌ای و range قابل‌پیش‌بینی‌تر است (عمق ۳ تا ۴ سطح) ولی نوشتن تصادفی گران‌تر تمام می‌شود. مهم‌ترین trade-off: <span class=\"ltr\">LSM</span> نوشتن ارزان را با write amplification هنگام compaction و read amplification روی سگمنت‌ها معاوضه می‌کند.",
+  "answer_en": "The write-heavy side goes to <span class=\"ltr\">LSM</span>: every write is a sequential append (<span class=\"ltr\">WAL</span> with <span class=\"ltr\">fsync</span> for durability, then the in-memory <span class=\"ltr\">memtable</span>), so write throughput stays high. You pay for that in the background: <span class=\"ltr\">compaction</span> has to churn, and a read may walk several segments. <span class=\"ltr\">B-tree</span> takes the other road: it rewrites the record's page in place, so point reads and range scans stay predictable (3-4 levels deep) — but random writes cost more. The top trade-off: <span class=\"ltr\">LSM</span> buys cheap writes and pays in write amplification at compaction time plus read amplification across segments. — Cheap writes always land on somebody's bill.",
+  "answer_fa": "قضیه اینه که سمت نوشتن‌محور <span class=\"ltr\">LSM</span> می‌بره: هر نوشتن یه append ترتیبیه (<span class=\"ltr\">WAL</span> با <span class=\"ltr\">fsync</span> برای durability و بعد <span class=\"ltr\">memtable</span> تو حافظه)، پس بازده نوشتن بالا می‌مونه. بهایش اینه: <span class=\"ltr\">compaction</span> باید تو پس‌زمینه بچرخه و هر خواندن ممکنه چند سگمنت رو بگرده. <span class=\"ltr\">B-tree</span> راه دیگه‌ست: صفحهٔ رکورد رو همون‌جا بازنویسی می‌کنه، پس خواندن نقطه‌ای و range قابل‌پیش‌بینی‌تره (عمق ۳ تا ۴ سطح) ولی نوشتن تصادفی گرون‌تر درمیاد. مهم‌ترین معاوضه: <span class=\"ltr\">LSM</span> نوشتن ارزان رو با write amplification موقع compaction و read amplification روی سگمنت‌ها می‌خره. — نوشتن ارزان همیشه یه جایی از حساب می‌ره بیرون.",
   "assumptions": [
     {
-      "en": "Workload is a teaching mix: roughly 80% writes, 20% point reads plus occasional range scans. Real ratios come from your access log, not from this page.",
-      "fa": "بارکاری یک ترکیب آموزشی است: حدود ۸۰٪ نوشتن، ۲۰٪ خواندن نقطه‌ای به‌علاوه rangeهای گاه‌به‌گاه. نسبت واقعی از لاگ دسترسی تو می‌آید، نه از این صفحه."
+      "en": "The workload is a teaching mix: roughly 80% writes, 20% point reads, plus the occasional range scan. Your real ratios come from your own access log, not from this page.",
+      "fa": "بارکاری یه ترکیب آموزشیه: حدود ۸۰٪ نوشتن، ۲۰٪ خواندن نقطه‌ای، به‌علاوهٔ rangeهای گاه‌به‌گاه. نسبت واقعی رو از لاگ دسترسی خودت درمیاری، نه از این صفحه."
     },
     {
-      "en": "Teaching sizes: 4 KB pages, memtable flush at a few MB, branching factor in the hundreds. They illustrate the shapes, not your capacity plan.",
-      "fa": "اندازه‌های آموزشی: صفحه ۴ کیلوبایت، flush حافظه در چند مگابایت، branching factor چندصدتایی. این‌ها شکل را نشان می‌دهند، نه plan ظرفیت تو."
+      "en": "Teaching sizes: 4 KB pages, memtable flush at a few MB, branching factor in the hundreds. They show you the shapes — they don't hand you a capacity plan.",
+      "fa": "اندازه‌های آموزشی: صفحه ۴ کیلوبایت، flush حافظه در چند مگابایت، branching factor چندصدتایی. این‌ها فقط شکل رو نشون می‌دن، نه plan ظرفیت تو رو."
     },
     {
-      "en": "Durability means the <span class=\"ltr\">WAL fsync</span> before the ack. The memtable and the per-segment indexes are speed structures, not durability.",
-      "fa": "یعنی <span class=\"ltr\">WAL fsync</span> پیش از ack. حافظه و ایندکس هر سگمنت ساختار سرعت‌اند، نه durability."
+      "en": "Durability means the <span class=\"ltr\">WAL fsync</span> before the ack. Remember: the memtable and the per-segment indexes are speed structures, not durability.",
+      "fa": "یعنی <span class=\"ltr\">WAL fsync</span> پیش از ack. حواست باشه: حافظه و ایندکس هر سگمنت ساختار سرعت‌ان، نه durability."
     },
     {
-      "en": "Single-node engine comparison. Replication, partitioning and crash recovery across machines belong to later chapters.",
-      "fa": "مقایسهٔ موتور تک‌گره. رپلیکیشن، پارتیشن‌بندی و recovery بین ماشین‌ها مال فصل‌های بعد است."
+      "en": "Here's the thing: this is a single-node engine comparison. Replication, partitioning and crash recovery across machines belong to later chapters.",
+      "fa": "نکته‌ش اینجاست: اینجا فقط موتور تک‌گره رو مقایسه می‌کنیم. رپلیکیشن، پارتیشن‌بندی و recovery بین ماشین‌ها مال فصل‌های بعده."
     }
   ],
   "code": {
@@ -38,40 +38,40 @@
     "run_fa": "javac LsmToy.java && java LsmToy — فقط کتابخانه استاندارد، فوری. دنباله put را عوض کن تا سناریوی کرش خودت را بازپخش کنی.",
     "status": "verified"
   },
-  "design_en": "<p>Parts: append-only checksummed <span class=\"ltr\">WAL</span> with <span class=\"ltr\">fsync</span> per write (or group commit); sorted <span class=\"ltr\">memtable</span> with sequence numbers; <span class=\"ltr\">manifest</span> of live segments updated atomically; one sparse index plus one Bloom filter per segment; a background compactor. Write path: <span class=\"ltr\">put</span> to log fsync to memtable to ack. Read path: memtable to Bloom to sparse index to segments newest to oldest; ranges use a merging iterator over the sorted segments. Delete: a tombstone carrying a fresh seq that kills older versions at merge.</p>",
-  "design_fa": "<p>اجزا: <span class=\"ltr\">WAL</span> فقط‌افزودنی و checksumدار با <span class=\"ltr\">fsync</span> به‌ازای هر نوشتن (یا group commit)؛ <span class=\"ltr\">memtable</span> مرتب با شمارهٔ ترتیبی؛ <span class=\"ltr\">manifest</span> مجموعهٔ سگمنت‌های زنده با به‌روزرسانی اتمی؛ به‌ازای هر سگمنت یک sparse index و یک Bloom filter؛ compactکنندهٔ پس‌زمینه. مسیر نوشتن: <span class=\"ltr\">put</span> ← fsync لاگ ← حافظه ← ack. مسیر خواندن: حافظه ← Bloom ← sparse index ← سگمنت‌ها از جدید به قدیم؛ range با iterator ادغامی روی سگمنت‌های مرتب. حذف: tombstone باقیمانده با seq تازه که در merge نسخه‌های قدیمی را می‌کشد.</p>",
+  "design_en": "<p>Here's the parts list: an append-only checksummed <span class=\"ltr\">WAL</span> with <span class=\"ltr\">fsync</span> per write (or group commit); a sorted <span class=\"ltr\">memtable</span> with sequence numbers; a <span class=\"ltr\">manifest</span> of live segments updated atomically; one sparse index plus one Bloom filter per segment; and a background compactor.</p><p>Write path: <span class=\"ltr\">put</span> to log to fsync to memtable to ack. Read path: memtable to Bloom to sparse index to segments newest to oldest; ranges use a merging iterator over the sorted segments. Delete: a tombstone carrying a fresh seq that kills older versions at merge.</p>",
+  "design_fa": "<p>بذار اسم‌ها رو ردیف کنیم: <span class=\"ltr\">WAL</span> فقط‌افزودنی و checksumدار با <span class=\"ltr\">fsync</span> به‌ازای هر نوشتن (یا group commit)؛ <span class=\"ltr\">memtable</span> مرتب با شمارهٔ ترتیبی؛ <span class=\"ltr\">manifest</span> مجموعهٔ سگمنت‌های زنده با به‌روزرسانی اتمی؛ به‌ازای هر سگمنت یک sparse index و یک Bloom filter؛ و یک compactکنندهٔ پس‌زمینه.</p><p>مسیر نوشتن: <span class=\"ltr\">put</span> ← fsync لاگ ← حافظه ← ack. مسیر خواندن: حافظه ← Bloom ← sparse index ← سگمنت‌ها از جدید به قدیم؛ range با iterator ادغامی روی سگمنت‌های مرتب. حذف: tombstone باقیمانده با seq تازه که در merge نسخه‌های قدیمی را می‌کشد.</p>",
   "failures": [
     {
-      "en": "Crash between flush and manifest: before, the memtable plus WAL hold the writes; after restart, the unlisted SSTable file is ignored and WAL replay rebuilds the memtable. Recovery: replay checksummed records, drop the corrupt tail, re-register only manifested files.",
-      "fa": "کرش بین flush و manifest: قبلش حافظه به‌علاوه WAL نوشتن‌ها را دارند؛ بعد از restart فایل SSTable ثبت‌نشده نادیده گرفته می‌شود و بازپخش WAL حافظه را بازمی‌سازد. recovery: بازپخش رکوردهای سالم‌سنجی‌شده، دور ریختن دم خراب، ثبت فقط فایل‌های داخل manifest."
+      "en": "Crash between flush and manifest: before the crash the memtable plus the WAL hold the writes; after restart the unlisted SSTable file is ignored and the WAL replay rebuilds the memtable. Recovery: replay the checksummed records, drop the corrupt tail, and re-register only the files the manifest names.",
+      "fa": "کرش بین flush و manifest: قبل از کرش، حافظه به‌علاوهٔ WAL نوشتن‌ها رو دارن؛ بعد از restart فایل SSTable ثبت‌نشده نادیده گرفته می‌شه و بازپخش WAL حافظه رو بازمی‌سازه. recovery: رکوردهای سالم‌سنجی‌شده رو بازپخش کن، دم خراب رو دور بریز، و فقط فایل‌های داخل manifest رو ثبت کن."
     },
     {
-      "en": "Tombstone dropped too early: a compaction that does not include the oldest segment must keep the tombstone, otherwise the surviving older copy resurrects the deleted key. Rule: drop a tombstone only when merging the oldest segment holding that key, or after a stated grace period with no older copies.",
-      "fa": "حذف زودهنگام tombstone: compactionای که قدیمی‌ترین سگمنت را شامل نمی‌شود باید tombstone را نگه دارد، وگرنه کپی قدیمیِ باقی‌مانده کلید حذف‌شده را زنده می‌کند. قاعده: tombstone را فقط هنگام ادغام با قدیمی‌ترین سگمنتِ دارای آن کلید دور بریز، یا بعد از یک مهلت اعلام‌شده که کپی قدیمی‌تری نیست."
+      "en": "Tombstone dropped too early: a compaction that doesn't include the oldest segment has to keep the tombstone, otherwise the surviving older copy resurrects the deleted key. Rule: drop a tombstone only while merging the oldest segment holding that key, or after a stated grace period with no older copies around.",
+      "fa": "حذف زودهنگام tombstone: compactionای که قدیمی‌ترین سگمنت رو شامل نمی‌شه باید tombstone رو نگه داره، وگرنه کپی قدیمیِ باقی‌مانده کلید حذف‌شده رو زنده می‌کنه و رکورد از قبر برمی‌گرده. قاعده: tombstone رو فقط وقتی دور بریز که داری با قدیمی‌ترین سگمنتِ دارای اون کلید merge می‌کنی، یا بعد از یه مهلت اعلام‌شده که دیگه کپی قدیمی‌تری نیست."
     },
     {
-      "en": "Compaction falls behind a write spike: memtables pile up, segment count grows, read amplification and space amplification spike together. Mitigation: throttle writes, prefer leveled merging, alert on pending compaction bytes before reads degrade.",
-      "fa": "عقب افتادن compaction از موج نوشتن: حافظه‌ها تلنبار می‌شوند، تعداد سگمنت‌ها رشد می‌کند و read و space amplification با هم اوج می‌گیرند. چاره: throttle نوشتن، ترجیح leveled، هشدار روی بایت‌های compaction معوق پیش از افت خواندن."
+      "en": "Compaction falls behind a write spike: memtables pile up, the segment count grows, and read plus space amplification spike together. Mitigation: throttle the writes, prefer leveled merging, and alert on the pending compaction bytes before your reads start to suffer.",
+      "fa": "عقب افتادن compaction از موج نوشتن: حافظه‌ها تلنبار می‌شن، تعداد سگمنت‌ها بالا می‌ره و read و space amplification با هم اوج می‌گیرن. چاره: throttle نوشتن، ترجیح leveled، و هشدار روی بایت‌های compaction معوق — قبل از این‌که خواندنت بیفته."
     }
   ],
   "followups": [
     {
-      "a_en": "The old value comes back. A tombstone only suppresses the copies the merge actually sees: if the oldest segment holding that key is not part of this compaction, an older copy survives downstream and the next read finds it again. Keep the tombstone until a merge covers the key's full range, or until a stated grace period plus an anti-entropy check proves no older copy exists.",
-      "a_fa": "مقدار قدیمی برمی‌گردد. tombstone فقط کپی‌هایی را سرکوب می‌کند که merge واقعاً دیده است: اگر قدیمی‌ترین سگمنتِ دارای آن کلید در این compaction نباشد، یک کپی قدیمی پایین‌تر زنده می‌ماند و خواندن بعدی دوباره پیدایش می‌کند. tombstone را نگه دار تا mergeای کل بازهٔ کلید را پوشش دهد، یا تا یک مهلت اعلام‌شده به‌علاوه بررسی ضدنقیض ثابت کند کپی قدیمی‌تری نیست.",
+      "a_en": "The old value comes back — the record resurrects itself. A tombstone only suppresses the copies the merge actually sees: if the oldest segment holding that key isn't part of this compaction, an older copy survives further down and the next read finds it again. So keep the tombstone until a merge covers the key's full range, or until a stated grace period plus an anti-entropy check proves no older copy is left.",
+      "a_fa": "مقدار قدیمی برمی‌گرده — همون «زنده شدن» دوباره. tombstone فقط کپی‌هایی رو سرکوب می‌کنه که merge واقعاً دیده؛ اگه قدیمی‌ترین سگمنتِ دارای اون کلید توی این compaction نباشه، یه کپی قدیمی پایین‌تر زنده می‌مونه و خواندن بعدی دوباره پیداش می‌کنه. یعنی tombstone رو نگه دار تا mergeای که کل بازهٔ کلید رو پوشش می‌ده، یا تا یه مهلت اعلام‌شده به‌علاوهٔ یه بررسی ضدنقیض که ثابت کنه کپی قدیمی‌تری نیست.",
       "level": "senior",
       "q_en": "When you drop a tombstone during compaction, when does an old value come back to life?",
       "q_fa": "اگه tombstone رو وسط compaction بندازی دور، کی رکورد قدیمی زنده برمی‌گرده؟"
     },
     {
-      "a_en": "Throughput drops but nothing is lost: unacknowledged writes stay in the client retry path, acknowledged ones are already fsynced. The danger is declaring victory too early — batching fsyncs (group commit) trades a bounded staleness window for throughput, and that window must be written in the durability contract.",
-      "a_fa": "بازده می‌افتد ولی چیزی گم نمی‌شود: نوشتن‌های بدون ack در مسیر retry کلاینت می‌مانند و ackشده‌ها fsync شده‌اند. خطر، زود جشن گرفتن است — دسته‌بندی fsyncها (group commit) یک پنجرهٔ staleness محدود را با بازده معاوضه می‌کند و آن پنجره باید در قرارداد durability نوشته شود.",
+      "a_en": "Throughput drops, but nothing is lost: the unacknowledged writes stay in the client's retry path and the acknowledged ones are already fsynced. The real danger is celebrating too early — batching fsyncs (group commit) trades a bounded staleness window for throughput, and you have to write that window into the durability contract, otherwise you're quietly lying to the client.",
+      "a_fa": "بازده می‌افته ولی چیزی گم نمی‌شه: نوشتن‌های بدون ack توی مسیر retry کلاینت می‌مونن و ackشده‌ها fsync شدن. خطر اصلی زود جشن گرفتنه — دسته‌بندی fsyncها (group commit) یه پنجرهٔ staleness محدود رو با بازده معاوضه می‌کنه، و اون پنجره باید توی قرارداد durability نوشته بشه، وگرنه داری بی‌صدا به کلاینت دروغ می‌گی.",
       "level": "senior",
       "q_en": "What does batching WAL fsyncs (group commit) trade away?",
       "q_fa": "دسته‌بندی fsyncهای WAL (group commit) چه چیزی را معاوضه می‌کند؟"
     },
     {
-      "a_en": "Watch the backlog, not the averages: pending compaction bytes, segment count per level, and read p99 together tell you the stall is coming. Size-tiered absorbs bursts then pays in big merges; leveled pays continuously and reads stay flat. Pick by which bill your workload can afford, and put the backlog metric on the dashboard before the incident.",
-      "a_fa": "به صف نگاه کن نه میانگین: بایت‌های compaction معوق، تعداد سگمنت هر سطح و p99 خواندن با هم خبر می‌دهند توقف نزدیک است. size-tiered موج را جذب می‌کند و بعد با mergeهای بزرگ پس می‌دهد؛ leveled مداوم می‌پردازد و خواندن تخت می‌ماند. بر اساس این‌که بارکاری‌ات کدام صورت‌حساب را می‌تواند بدهد انتخاب کن و متریک صف را پیش از حادثه روی داشبورد بگذار.",
+      "a_en": "Watch the backlog, not the averages: pending compaction bytes, the segment count per level and read p99 together tell you the stall is coming. Size-tiered soaks up the burst and then pays it back in big merges; leveled keeps paying steadily and your reads stay flat. Pick the one whose bill your workload can afford, and get the backlog metric onto the dashboard before the incident, not after.",
+      "a_fa": "به صف نگاه کن، نه به میانگین: بایت‌های compaction معوق، تعداد سگمنت هر سطح و p99 خواندن با هم خبر می‌دن که توقف داره میاد. size-tiered موج رو جذب می‌کنه و بعد با mergeهای بزرگ پس می‌ده؛ leveled مداوم کار می‌کنه و خوندن تخت می‌مونه. انتخابت رو بر اساس این بگیر که بارکاری‌ات کدوم صورت‌حساب رو می‌تونه بده، و متریک صف رو پیش از حادثه روی داشبورد بگذار.",
       "level": "staff",
       "q_en": "How do you detect and choose between compaction strategies under a write spike?",
       "q_fa": "زیر موج نوشتن استراتژی compaction را چطور تشخیص و انتخاب می‌کنی؟"
@@ -81,20 +81,20 @@
   "interview_q_fa": "فرض کن یه workload داری که نوشتنش حسابی زیاده. point read و range read هم داری. حالا بگو LSM و B-tree کدوم به کارت میاد و چرا. مسیر write رو بکش: WAL، memtable، SSTable، compaction و tombstone. حساب کن اگه crash دقیقاً بین flush و ثبت manifest بترکه چی می‌شه. آخرش بگو کی write amplification و read amplification و space amplification بالا می‌ره و خرجش رو کی می‌ده.",
   "lab_en": "<p>Start from section 1's two bash functions and build step by step, friend. First an in-memory hash index that rebuilds itself after restart. Then a memtable that flushes into a sorted file (a simple SSTable) with newest-to-oldest reads. Then merge two segments: the newest value wins and deletes use tombstones. Finish with a test: a million random writes, total disk bytes over raw data as write amplification, and 10k point reads timed against one range query.</p>",
   "lab_fa": "<p>با همون دو تا تابع bash بخش ۱ شروع کن و قدم‌به‌قدم جلو برو. اول hash index توی حافظه بساز که بعد از restart خودش رو بازسازی کنه. بعد memtable بذار که با flush می‌ره توی یه فایل مرتب (یه <span class=\"ltr\">SSTable</span> ساده) و خوندن از جدید به قدیمه. بعد دو تا سگمنت رو merge کن: تازه‌ترین مقدار می‌مونه و حذف با tombstone. آخرش یه آزمایش بنویس: یک میلیون نوشتن تصادفی، بعد مجموع بایت‌های نوشته‌شده روی دیسک تقسیم‌بر دادهٔ خام یعنی write amplification، و مقایسهٔ زمان ۱۰ هزار خواندن نقطه‌ای در برابر یه range query.</p>",
-  "mental_en": "There are two ways to change data on disk: keep appending to the end like a notebook and tidy up later (LSM), or walk to the record's exact slot and rewrite it there (B-tree). The notebook makes writes sequential and cheap and pushes the work to the background; the rewrite keeps reads straightforward and pays at write time.",
-  "mental_fa": "دو راه برای عوض کردن داده روی دیسک هست: یا مثل دفترچه فقط به آخر اضافه کن و بعداً مرتب و تمیز کن (LSM)، یا برو سر جای دقیق رکورد و همان‌جا بازنویسی کن (B-tree). دفترچه نوشتن را ترتیبی و ارزان می‌کند و کار را به پس‌زمینه می‌اندازد؛ بازنویسی خواندن را سرراست نگه می‌دارد و هزینه را موقع نوشتن می‌پردازد.",
+  "mental_en": "Two ways to change data on disk. Either you keep appending to the end like a notebook and tidy it up later (LSM), or you walk to the record's exact slot and rewrite it there (B-tree). The notebook makes writes sequential and cheap and pushes the heavy work into the background; the rewrite keeps reads straightforward and pays at write time.",
+  "mental_fa": "ببین، دو راه برای عوض کردن داده روی دیسک داری. یا مثل دفترچه فقط به آخرش صفحه اضافه کنی و بعداً مرتب و تمیزش کنی (این می‌شه LSM)، یا برو سر جای دقیق رکورد و همون‌جا بازنویسیش کنی (این می‌شه B-tree). دفترچه نوشتن رو ترتیبی و ارزان می‌کنه و کار سنگین رو هل می‌ده سمت پس‌زمینه؛ بازنویسی خوندن رو سرراست نگه می‌داره و هزینه رو موقع نوشتن می‌گیره.",
   "mistakes": [
     {
-      "en": "Calling the memtable durable. RAM is lost on crash; only the fsynced WAL prefix survives. Replay, not memory, is the recovery story.",
-      "fa": "بادوام خواندن حافظه. RAM با کرش می‌رود؛ فقط پیشوند fsyncشدهٔ WAL می‌ماند. قصهٔ recovery بازپخش است، نه حافظه."
+      "en": "Treating the memtable as durable. RAM dies with the crash; only the fsynced WAL prefix survives. Recovery is a replay story, not a memory story.",
+      "fa": "حافظه رو بادوام فرض کردن. RAM با کرش می‌ره؛ فقط پیشوند fsyncشدهٔ WAL می‌مونه. قصهٔ recovery بازپخشِ لاگه، نه حافظه."
     },
     {
-      "en": "Treating a tombstone as an instant delete. The key stays readable from older segments and keeps costing space until a covering compaction removes it.",
-      "fa": "حذف فوری دانستن tombstone. کلید از سگمنت‌های قدیمی خوانا می‌ماند و فضا مصرف می‌کند تا compaction پوششی حذفش کند."
+      "en": "Treating a tombstone as an instant delete. The key is still readable from the older segments and keeps costing you space until a covering compaction comes along and removes it.",
+      "fa": "tombstone رو حذف فوری فرض کردن. کلید از سگمنت‌های قدیمی خوانا می‌مونه و فضا مصرف می‌کنه تا یه compaction پوششی بیاد و حذفش کنه."
     },
     {
-      "en": "Reporting a benchmark without fsync mode, cache state and data-to-RAM ratio. An fsync-free, fully cached run measures nothing about production durability or disk behavior.",
-      "fa": "گزارش بنچ‌مارک بدون حالت fsync، وضعیت کش و نسبت داده به RAM. اجرای بدون fsync و کاملاً کش‌شده هیچ‌چیز درباره durability یا رفتار دیسک در پروداکشن نمی‌گوید."
+      "en": "Reporting a benchmark without the fsync mode, the cache state and the data-to-RAM ratio. A run without fsync and fully cached tells you nothing about durability, or about how the disk behaves in production.",
+      "fa": "بنچ‌مارک بدون گفتن حالت fsync، وضعیت کش و نسبت داده به RAM. یه اجرای بدون fsync و کاملاً کش‌شده هیچ‌چیز دربارهٔ durability یا رفتار دیسک توی پروداکشن نمی‌گه."
     }
   ],
   "number": 1,
@@ -105,40 +105,40 @@
   ],
   "steps": [
     {
-      "en": "The <span class=\"ltr\">WAL append + fsync</span> is the durability write; the memtable update is the visibility write. Ack the client only after the fsync, never after the RAM update alone.",
-      "fa": "نوشتنِ durability همان <span class=\"ltr\">WAL append + fsync</span> است؛ به‌روزرسانی حافظه نوشتنِ visibility است. به کلاینت فقط بعد از fsync جواب بده، هرگز فقط بعد از به‌روزرسانی RAM.",
+      "en": "Every write lands twice, and you must not mix the two up. The durability write is the <span class=\"ltr\">WAL append + fsync</span>; the memtable update is the visibility write. Ack the client only after the fsync, never after the RAM update alone. — An ack means \"this write survived\", not \"this write is sitting in memory\".",
+      "fa": "هر نوشتن دو جا می‌نشیند و نباید قاطی‌شان کنی. نوشتنِ durability همون <span class=\"ltr\">WAL append + fsync</span> هست؛ به‌روزرسانی حافظه هم نوشتنِ visibility. به کلاینت رو فقط بعد از fsync جواب بده، هرگز فقط بعد از به‌روزرسانی RAM. — ack یعنی «این نوشتن دوام آورد»، نه «این نوشتن توی حافظه نشست».",
       "t_en": "Every write lands twice",
       "t_fa": "هر نوشتن دو جا می‌نشیند"
     },
     {
-      "en": "When the memtable passes a few megabytes it is written out sorted as one immutable <span class=\"ltr\">SSTable</span> — the newest segment — and a fresh memtable takes over. Every read checks the memtable first, then segments newest to oldest.",
-      "fa": "وقتی حافظه از چند مگابایت گذشت، مرتب روی دیسک به‌صورت یک <span class=\"ltr\">SSTable</span> تغییرناپذیر نوشته می‌شود — جدیدترین سگمنت — و یک حافظهٔ تازه کار را تحویل می‌گیرد. هر خواندن اول حافظه، بعد سگمنت‌ها از جدید به قدیم را می‌گردد.",
+      "en": "When the memtable passes a few megabytes it is written out sorted as one immutable <span class=\"ltr\">SSTable</span> — the newest segment — and a fresh memtable takes over. Every read checks the memtable first, then walks the segments newest to oldest. — You only open a segment when you have to.",
+      "fa": "وقتی حافظه از چند مگابایت گذشت، مرتب روی دیسک به‌صورت یک <span class=\"ltr\">SSTable</span> تغییرناپذیر نوشته می‌شه — تازه‌ترین سگمنت — و یه حافظهٔ نو کار رو تحویل می‌گیره. هر خواندن اول حافظه رو نگاه می‌کنه، بعد سگمنت‌ها رو از جدید به قدیم. — سگمنتی را باز نمی‌کنی مگر وقتی لازم شد.",
       "t_en": "Flush turns RAM into a file",
       "t_fa": "flush حافظه را فایل می‌کند"
     },
     {
-      "en": "Compaction reads segments side by side like mergesort: for duplicate keys only the newest version survives, and a <span class=\"ltr\">tombstone</span> tells the merge to drop the older values. Size-tiered merging favors write throughput, leveled merging favors reads and space.",
-      "fa": "compaction سگمنت‌ها را مثل mergesort کنار هم می‌خواند: برای کلید تکراری فقط تازه‌ترین نسخه می‌ماند و <span class=\"ltr\">tombstone</span> به merge می‌گوید نسخه‌های قدیمی را دور بریزد. ادغام size-tiered به نفع بازده نوشتن است، leveled به نفع خواندن و فضا.",
+      "en": "Compaction reads segments side by side like mergesort: for duplicate keys only the newest version survives, and a <span class=\"ltr\">tombstone</span> tells the merge to drop the older values. Size-tiered merging favors write throughput, leveled merging favors reads and space. — Clean up early and the next read comes cheaper.",
+      "fa": "compaction سگمنت‌ها رو مثل mergesort کنار هم می‌خونه: برای کلید تکراری فقط تازه‌ترین نسخه می‌مونه و <span class=\"ltr\">tombstone</span> به merge می‌گه نسخه‌های قدیمی رو دور بریزه. ادغام size-tiered به نفع بازده نوشته، leveled به نفع خوندن و فضا. — هرچه زودتر جمع کنی، خواندنِ بعدی ارزون‌تر می‌شه.",
       "t_en": "Compaction merges and cleans",
       "t_fa": "compaction ادغام و تمیز می‌کند"
     },
     {
-      "en": "A flushed file that is not yet in the <span class=\"ltr\">manifest</span> is simply ignored on restart; the checksummed <span class=\"ltr\">WAL</span> replays the memtable and its corrupt tail is dropped. No half-visible state ever serves reads.",
-      "fa": "فایل flushشده‌ای که هنوز در <span class=\"ltr\">manifest</span> ثبت نشده موقع restart نادیده گرفته می‌شود؛ <span class=\"ltr\">WAL</span> سالم‌سنجی‌شده حافظه را بازپخش می‌کند و دمِ خرابش دور ریخته می‌شود. هیچ حالت نصفه‌ای به خواندن‌ها سرویس نمی‌دهد.",
+      "en": "A flushed file that is not yet in the <span class=\"ltr\">manifest</span> is simply ignored on restart; the checksummed <span class=\"ltr\">WAL</span> replays the memtable and its corrupt tail is dropped. No half-visible state ever serves reads. — The manifest can fail and the WAL can still save you; that's why you keep both.",
+      "fa": "فایلی که flush شده ولی هنوز توی <span class=\"ltr\">manifest</span> ثبت نشده، موقع restart نادیده گرفته می‌شه؛ <span class=\"ltr\">WAL</span> سالم‌سنجی‌شده حافظه رو بازپخش می‌کنه و دمِ خرابش دور ریخته می‌شه. هیچ حالت نصفه‌ای به خواندن‌ها سرویس نمی‌ده. — manifest می‌تونه خراب بشه و WAL نجاتت بده؛ برای همین هر دو لازم‌اند.",
       "t_en": "Crash between flush and manifest",
       "t_fa": "کرش بین flush و manifest"
     },
     {
-      "en": "Write amplification (disk bytes per user byte: high at LSM compaction, ~1-2x page rewrites in a B-tree), read amplification (several segments versus 3-4 page depth), space amplification (old plus new until merged versus pages plus WAL). Teaching ratios, not benchmarks. Verdict: write-heavy goes LSM, predictable reads and ranges go B-tree.",
-      "fa": "write amplification (بایت دیسک به‌ازای بایت کاربر: در compaction بالا، در B-tree بازنویسی صفحه ~۱ تا ۲ برابر)، read amplification (چند سگمنت در برابر عمق ۳ تا ۴ صفحه)، space amplification (قدیم به‌علاوه جدید تا ادغام، در برابر صفحات به‌علاوه WAL). نسبت‌های آموزشی‌اند، نه بنچ‌مارک. حکم: نوشتن‌محور LSM، خواندن قابل‌پیش‌بینی و rangeها B-tree.",
+      "en": "Count three amplifications: write amplification (disk bytes per user byte: high at LSM compaction, ~1-2x page rewrites in a B-tree), read amplification (several segments versus 3-4 page depth), space amplification (old plus new until merged versus pages plus WAL). Teaching ratios, not benchmarks. Verdict: write-heavy goes LSM, predictable reads and ranges go B-tree. — Count the cards, then make up your mind.",
+      "fa": "سه تا amplification را بشمار: write amplification (بایت دیسک به‌ازای بایت کاربر: توی compaction بالا، توی B-tree بازنویسی صفحه ~۱ تا ۲ برابر)، read amplification (چند سگمنت در برابر عمق ۳ تا ۴ صفحه)، space amplification (قدیم به‌علاوه جدید تا ادغام، در برابر صفحات به‌علاوه WAL). نسبت‌ها آموزشی‌ان، نه بنچ‌مارک. حکم: نوشتن‌محور LSM، خواندن قابل‌پیش‌بینی و rangeها B-tree. — تعداد کارت‌ها رو بشمار، خودت قضاوت کن.",
       "t_en": "Count the three amplifications",
       "t_fa": "سه amplification را بشمار"
     }
   ],
-  "tests_en": "Verify: the newest seq always wins; a deleted key is absent after a merge that includes its tombstone; WAL replay equals the pre-crash memtable. Measure: disk bytes over raw bytes (write amplification), p95 point-read latency versus segment count, and pending compaction bytes as operational debt.",
-  "tests_fa": "راستی‌آزمایی: تازه‌ترین seq همیشه می‌برد؛ کلید حذف‌شده بعد از merge شامل tombstone غایب است؛ بازپخش WAL برابر حافظهٔ پیش از کرش است. اندازه بگیر: بایت دیسک ÷ بایت خام (write amplification)، تأخیر p95 خواندن نقطه‌ای در برابر تعداد سگمنت‌ها، و بایت‌های compaction معوق به‌عنوان بدهی عملیاتی.",
-  "worked_en": "<p>Teaching demo from this environment: segments <code>[u1=a2, u2=b]</code> and <code>[u2=&lt;tombstone&gt;, u3=c]</code> merge to <code>{u1=a2, u3=c}</code> — the u2 delete applies exactly because the tombstone is newer. WAL replay gives the same map. Teaching arithmetic: one million 100-byte writes are 100 MB of raw data; at a teaching write amplification of 10x that is about 1 GB of disk bytes. A point read checks the memtable plus at most N segments, and a Bloom filter at ~10 bits per key gives ~1% false positives (the chapter's rule of thumb).</p>",
-  "worked_fa": "<p>دموی آموزشی همین محیط: دو سگمنت <code>[u1=a2, u2=b]</code> و <code>[u2=&lt;tombstone&gt;, u3=c]</code> ادغام می‌شوند به <code>{u1=a2, u3=c}</code> — حذف u2 دقیقاً چون tombstone تازه‌تر است اعمال می‌شود. بازپخش WAL هم همان را می‌دهد. حساب آموزشی: یک میلیون نوشتن ۱۰۰ بایتی یعنی ۱۰۰ مگابایت دادهٔ خام؛ با write amplification آموزشی ۱۰ برابری ≈ ۱ گیگابایت بایت دیسک. خواندن نقطه‌ای حافظه + حداکثر N سگمنت را می‌گردد و Bloom با ~۱۰ بیت به‌ازای کلید ≈ ۱٪ مثبت کاذب می‌دهد (قاعدهٔ سرانگشتی فصل).</p>",
+  "tests_en": "Verify: the newest seq always wins; a deleted key is absent after a merge that includes its tombstone; WAL replay equals the pre-crash memtable. Measure: disk bytes over raw bytes (write amplification), p95 point-read latency versus segment count, and the pending compaction bytes as operational debt. — If those three checks aren't green, your engine isn't trustworthy yet.",
+  "tests_fa": "راستی‌آزمایی: تازه‌ترین seq همیشه می‌بره؛ کلید حذف‌شده بعد از merge شامل tombstone غایبه؛ بازپخش WAL برابر حافظهٔ پیش از کرش درمیاد. اندازه بگیر: بایت دیسک ÷ بایت خام (write amplification)، تأخیر p95 خواندن نقطه‌ای در برابر تعداد سگمنت‌ها، و بایت‌های compaction معوق به‌عنوان بدهی عملیاتی. — اگه این سه تا سبز نشن، موتورت هنوز قابل‌اعتماد نیست.",
+  "worked_en": "<p>Teaching demo from this environment: segments <code>[u1=a2, u2=b]</code> and <code>[u2=&lt;tombstone&gt;, u3=c]</code> merge to <code>{u1=a2, u3=c}</code> — the u2 delete applies exactly because the tombstone is newer. WAL replay gives the same map.</p><p>Teaching arithmetic: one million 100-byte writes are 100 MB of raw data; at a teaching write amplification of 10x that is about 1 GB of disk bytes. A point read checks the memtable plus at most N segments, and a Bloom filter at ~10 bits per key gives ~1% false positives (the chapter's rule of thumb). — Ten times the raw data, ten times the disk bill: that is what write amplification means.</p>",
+  "worked_fa": "<p>دموی آموزشی همین محیط: دو سگمنت <code>[u1=a2, u2=b]</code> و <code>[u2=&lt;tombstone&gt;, u3=c]</code> ادغام می‌شن به <code>{u1=a2, u3=c}</code> — حذف u2 دقیقاً چون tombstone تازه‌تره اعمال می‌شه. بازپخش WAL همون نقشه رو می‌بینه.</p><p>حساب آموزشی: یک میلیون نوشتن ۱۰۰ بایتی یعنی ۱۰۰ مگابایت دادهٔ خام؛ با write amplification آموزشی ۱۰ برابری ≈ ۱ گیگابایت بایت دیسک. خواندن نقطه‌ای حافظه + حداکثر N سگمنت رو می‌گیره و Bloom با ~۱۰ بیت به‌ازای کلید ≈ ۱٪ مثبت کاذب می‌ده (قاعدهٔ سرانگشتی فصل). — یعنی ده برابر دادهٔ خام، ده برابر خرج دیسک؛ همین یعنی write amplification.</p>",
   "diagrams": [
     {
       "file": "diagrams/sol1-s1-write-path.html",
@@ -151,14 +151,14 @@
       "height": 640,
       "narration": {
         "failure_en": "Trace a crash before the fsync: the put reached neither WAL nor memtable, so no ack went out and nothing is replayed. After the fsync, the same crash replays the record back into the memtable.",
-        "failure_fa": "کرش پیش از fsync را دنبال کن: put نه به WAL رسید نه به حافظه، پس نه ack رفت نه چیزی بازپخش می‌شود. بعد از fsync همان کرش رکورد را به حافظه برمی‌گرداند.",
+        "failure_fa": "کرش پیش از fsync را دنبال کن: put نه به WAL رسید نه به حافظه، نه ack رفت نه چیزی بازپخش می‌شود. بعد از fsync همان کرش رکورد را برمی‌گرداند توی حافظه.",
         "guarantee_en": "The figure guarantees the write order: durability first, visibility second, cleanup in the background. It does not size anything.",
-        "guarantee_fa": "شکل ترتیب نوشتن را تضمین می‌کند: اول durability، بعد visibility، تمیزکاری در پس‌زمینه. هیچ‌اندازه‌ای نمی‌دهد.",
+        "guarantee_fa": "شکل ترتیب نوشتن رو تضمین می‌کنه: اول durability، بعد visibility، تمیزکاری توی پس‌زمینه. هیچ‌اندازه‌ای نمی‌ده.",
         "nonguarantee_en": "It says nothing about reads, amplification ratios, or which compaction strategy fits your workload.",
-        "nonguarantee_fa": "درباره خواندن‌ها، نسبت‌های amplification یا استراتژی compaction مناسب بارکاری تو چیزی نمی‌گوید.",
+        "nonguarantee_fa": "دربارهٔ خواندن‌ها، نسبت‌های amplification یا این‌که بارکاری تو چه استراتژی compactionای می‌خواهد، چیزی نمی‌گوید.",
         "point_en": "The durability point is the WAL fsync: everything acked is in the log, everything else may be lost.",
         "point_fa": "نقطهٔ durability همان fsync لاگ است: هرچه ack شده در لاگ است، بقیه شاید رفته باشد.",
-        "scenario_en": "A write surge hits the order store. Start at the Client put on the left and walk every append one put triggers.",
+        "scenario_en": "A write surge hits the order store. Start at the client put on the left and walk every append that one put sets off.",
         "scenario_fa": "موج نوشتن به انبار سفارش می‌خورد. از put کلاینت در چپ شروع کن و هر appendای که یک put راه می‌اندازد قدم بزن.",
         "steps": [
           {
@@ -176,8 +176,8 @@
         ]
       },
       "selfcheck": {
-        "a_en": "The WAL fsync, because the ack rule in the diagram allows the ack only after the log is durable.",
-        "a_fa": "fsync لاگ، چون قاعدهٔ ack در شکل اجازهٔ ack را فقط بعد از بادوام شدن لاگ می‌دهد.",
+        "a_en": "The WAL fsync, because the ack rule in the diagram only allows the ack once the log is durable.",
+        "a_fa": "fsync لاگ — چون قاعدهٔ ack توی شکل می‌گوید جواب دادن فقط بعد از بادوام شدن لاگ مجاز است.",
         "q_en": "Which arrow must complete before the client gets its ack?",
         "q_fa": "کدام پیکان باید کامل شود تا کلاینت ack بگیرد؟"
       }
@@ -197,7 +197,7 @@
         "guarantee_en": "The figure guarantees the commit point: only a manifested file is readable. It does not cover replication or multi-node recovery.",
         "guarantee_fa": "شکل نقطهٔ commit را تضمین می‌کند: فقط فایل داخل manifest خواناست. رپلیکیشن یا recovery چندگره‌ای را پوشش نمی‌دهد.",
         "nonguarantee_en": "It says nothing about compaction strategy, amplification, or how often to flush.",
-        "nonguarantee_fa": "درباره استراتژی compaction، amplification یا بسامد flush چیزی نمی‌گوید.",
+        "nonguarantee_fa": "دربارهٔ استراتژی compaction، amplification یا بسامد flush چیزی نمی‌گوید.",
         "point_en": "The commit point is the manifest record landing. The flush alone commits nothing.",
         "point_fa": "نقطهٔ commit نشستن رکورد manifest است. flush به‌تنهایی هیچ‌چیز را commit نمی‌کند.",
         "scenario_en": "A flush finished and the process died before recording it. Read top to bottom: steady writes, the crash window, then restart.",
@@ -218,7 +218,7 @@
         ]
       },
       "selfcheck": {
-        "a_en": "It is ignored: only files named by the manifest serve reads, and the WAL replay already rebuilt their contents.",
+        "a_en": "It is ignored: only the files named by the manifest serve reads, and the WAL replay has already rebuilt their contents.",
         "a_fa": "نادیده گرفته می‌شود: فقط فایل‌های نام‌برده در manifest به خواندن سرو می‌دهند و بازپخش WAL محتوایشان را بازسازی کرده است.",
         "q_en": "After restart, what happens to the flushed-but-unlisted SSTable file?",
         "q_fa": "بعد از restart چه بر سر فایل SSTable flushشدهٔ ثبت‌نشده می‌آید؟"
@@ -238,7 +238,7 @@
         "guarantee_en": "The figure guarantees the shape of the trade: appends versus rewrites and where each amplification lands. It does not guarantee any ratio for your engine — those are teaching numbers.",
         "guarantee_fa": "شکل شکلِ معاوضه را تضمین می‌کند: appendها در برابر بازنویسی‌ها و جای هر amplification. هیچ نسبتی را برای موتور تو تضمین نمی‌کند — آن‌ها اعداد آموزشی‌اند.",
         "nonguarantee_en": "It says nothing about replication, cross-node recovery, or which compaction strategy your workload needs.",
-        "nonguarantee_fa": "درباره رپلیکیشن، recovery بین گره‌ها یا این‌که بارکاری تو کدام استراتژی compaction را می‌خواهد چیزی نمی‌گوید.",
+        "nonguarantee_fa": "دربارهٔ رپلیکیشن، recovery بین گره‌ها یا این‌که بارکاری تو کدام استراتژی compaction را می‌خواهد چیزی نمی‌گوید.",
         "point_en": "The commit point is the manifest record: only a listed SSTable is durable and readable. Everything before it is either in the WAL or lost.",
         "point_fa": "نقطهٔ commit ثبت manifest است: فقط SSTable فهرست‌شده بادوام و خواناست. هرچه پیش از آن است یا در WAL است یا رفته است.",
         "scenario_en": "A write surge hits an order store at peak hour. Start at the top-left arrow of the blue panel and walk every append a single put triggers.",
@@ -263,13 +263,13 @@
         ]
       },
       "selfcheck": {
-        "a_en": "WAL fsync, because durability lives in the log, not in RAM. A memtable-only write disappears with the process.",
-        "a_fa": "fsync لاگ، چون durability در لاگ است نه RAM. نوشتنِ فقط-حافظه با پراسس می‌رود.",
+        "a_en": "The WAL fsync, because durability lives in the log, not in RAM. A memtable-only write disappears with the process.",
+        "a_fa": "fsync لاگ — چون durability توی لاگ زندگی می‌کنه، نه توی RAM. نوشتنِ فقط-حافظه با پراسس می‌ره.",
         "q_en": "A put updated the memtable but the process crashed before the WAL fsync. Is the write durable?",
         "q_fa": "یک put حافظه را به‌روز کرد ولی پراسس پیش از fsync لاگ کرش کرد. آیا نوشتن بادوام است؟"
       }
     }
   ],
-  "reasoning_fa": "<p>LSM نوشته‌ها را جمع و به‌ترتیب روی دیسک می‌ریزد تا IO تصادفی کمتر شود؛ هزینه به compaction و read amplification منتقل می‌شود. B-tree برای lookup و range با ساختار مرتب مناسب است ولی تغییر pageها هزینهٔ write دارد. ترکیب ۸۰٪ write و page چهارهزاربایتی سناریوی مقایسه‌اند، نه قانون انتخاب موتور. با تغییر ترکیب به خواندن غالب، نتیجه را دوباره با latency و amplification اندازه بگیر؛ ACK بعد از fsync برای حفظ نوشتهٔ تأییدشده ضروری است.</p>",
-  "reasoning_en": "<p>LSM batches sorted disk writes to reduce random I/O, paying in compaction and read amplification. B-trees support ordered lookups and ranges with page-update cost. An 80% write mix and 4 KB pages define a comparison scenario, not a universal choice. Re-measure latency and amplification for read-heavy workloads. Fsync before ACK protects acknowledged writes.</p>"
+  "reasoning_fa": "<p>چرا این مدل می‌خوره: مسئله «کدام ضرر رو قبول می‌کنی»ه — ضررِ نوشتن، یا ضررِ خواندن. LSM نوشته‌ها رو جمع و به‌ترتیب روی دیسک می‌ریزه تا IO تصادفی کمتر بشه؛ هزینه به compaction و read amplification منتقل می‌شه. B-tree برای lookup و range ساختار مرتب داره، ولی هر تغییر page هزینهٔ write داره.</p><p>واحدها: بایت دیسک به‌ازای بایت کاربر، و سگمنت به‌ازای سگمنت — نه «حس می‌کنم سریع‌تر شد». ترکیب ۸۰٪ write و page چهارهزاربایتی سناریوی مقایسه‌ان، نه قانون انتخاب موتور. با تغییر ترکیب به خواندن غالب، نتیجه رو دوباره با latency و amplification اندازه بگیر؛ ACK بعد از fsync برای حفظ نوشتهٔ تأییدشده ضروریه. — اول بگو کدام ضرر را قبول می‌کنی، بعد اسم موتور را بگو.</p>",
+  "reasoning_en": "<p>Why this model fits the exercise: the question is which pain you're willing to take — write pain or read pain. LSM batches sorted disk writes to reduce random I/O, paying in compaction and read amplification. B-trees support ordered lookups and ranges with page-update cost.</p><p>Units: disk bytes per user byte, and segments per segment — not \"it felt faster\". An 80% write mix and 4 KB pages define a comparison scenario, not a universal choice. Re-measure latency and amplification for read-heavy workloads. Fsync before ACK protects acknowledged writes. — Say which pain you accept first, then name the engine.</p>"
 }
