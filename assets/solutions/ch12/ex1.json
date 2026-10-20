@@ -1,32 +1,32 @@
 {
   "alternatives": [
     {
-      "en": "Event-ID dedup table instead of offset guards: store each applied <span class=\"ltr\">event_id</span> under a UNIQUE constraint and rely on the constraint to reject replays. Wins when replay is unordered or offsets are unavailable (compacted logs); costs one extra write plus a unique index per event, and the table itself needs a retention horizon.",
-      "fa": "جدول dedup با <span class=\"ltr\">event_id</span> به‌جای نگهبان offset: هر <span class=\"ltr\">event_id</span> اعمال‌شده با قید <span class=\"ltr\">UNIQUE</span> ذخیره می‌شود و بازپخش با همان قید رد می‌شود. وقتی بازپخش نامرتب است یا offset در دست نیست (لاگ فشرده) می‌برد؛ قیمتش یک write اضافه به‌علاوه ایندکس یکتاست و خود جدول هم افق نگهداری می‌خواهد."
+      "en": "An event-ID dedup table instead of offset guards: store each applied <span class=\"ltr\">event_id</span> under a UNIQUE constraint and let the constraint turn replays away. This one wins when the replay comes back unordered or offsets simply aren't there (compacted logs). What it costs: one extra write, plus a unique index per event, and the table needs a retention horizon of its own.",
+      "fa": "یه جدول dedup با <span class=\"ltr\">event_id</span> به‌جای نگهبان offset: هر <span class=\"ltr\">event_id</span> اعمال‌شده زیر قید <span class=\"ltr\">UNIQUE</span> می‌نشیند و همون قید بازپخش را رد می‌کند. وقتی بازپخش نامرتب برمی‌گردد یا اصلاً offset نداری (لاگ فشرده)، این برنده می‌شود. قیمتش هم روشن است: یه write اضافه، به‌علاوهٔ ایندکس یکتا برای هر event، و یه افق نگهداری برای خود جدول."
     },
     {
-      "en": "Fully transactional streaming (Kafka transactions, Flink checkpoints) with every effect inside the framework: wins when the sink participates in the same transaction; loses the moment the database is external, because the framework cannot roll back a foreign commit.",
-      "fa": "استریمینگ کاملاً تراکنشی (تراکنش کافکا، checkpoint فلینک) با همه اثرها درون فریم‌ورک: وقتی sink در همان تراکنش شرکت می‌کند می‌برد؛ لحظه‌ای که پایگاه داده بیرونی است می‌بازد چون فریم‌ورک نمی‌تواند commit خارجی را rollback کند."
+      "en": "Fully transactional streaming (Kafka transactions, Flink checkpoints) with every effect inside the framework. It wins as long as the sink joins the same transaction. The moment your database lives outside, it loses: a framework cannot roll back a commit that happened somewhere else.",
+      "fa": "استریمینگ کاملاً تراکنشی (تراکنش کافکا، checkpoint فلینک) که همهٔ اثرها داخل خود فریم‌ورک‌اند. تا وقتی sink توی همان تراکنش شرکت می‌کند، می‌برد. ولی همین که پایگاه داده بیرونی می‌شود، می‌بازد — فریم‌ورک نمی‌تواند commitِ یه جای دیگه را rollback کند."
     },
     {
-      "en": "At-least-once counting with an approximate sketch (HyperLogLog): wins when the product needs a rate, not an exact audit; loses every correctness argument this exercise makes.",
-      "fa": "شمارش at-least-once با sketch تقریبی (<span class=\"ltr\">HyperLogLog</span>): وقتی محصول نرخ می‌خواهد نه حسابرسی دقیق می‌برد؛ همه استدلال صحت این تمرین را می‌بازد."
+      "en": "At-least-once counting with an approximate sketch (HyperLogLog). Fine when the product wants a rate and not an exact audit. What it gives up is every correctness argument this exercise stands on.",
+      "fa": "شمارش at-least-once با sketch تقریبی (<span class=\"ltr\">HyperLogLog</span>). وقتی محصول نرخ می‌خواهد و نه حسابرسی دقیق، جواب خوبی می‌دهد. ولی همهٔ استدلال صحتِ این تمرین را از دست می‌دهد."
     }
   ],
-  "answer_en": "Key clicks by user id so each user lives on exactly one partition; consume at-least-once and make the sink idempotent by committing the totals and the per-(topic, partition) checkpoint in ONE database transaction guarded by an offset comparison; fence stale owners with group epochs so only the current owner writes. Trade-off: effectively-once counting for the price of per-partition ordering, head-of-line blocking, and one checkpoint write per batch.",
-  "answer_fa": "کلیک‌ها را با کلید user id پارتیشن‌بندی کن تا هر کاربر دقیقاً روی یک پارتیشن زندگی کند؛ با تحویل at-least-once مصرف کن و sink را idempotent کن با commit کردن totalها و checkpoint per-(topic, partition) در فقط یک تراکنش پایگاه داده با نگهبان مقایسه offset؛ مالکان کهنه را با epoch گروه fence کن تا فقط مالک فعلی بنویسد. بده‌بستان: شمارش effectively-once به قیمت ترتیب per-partition، انسداد سر صف و یک checkpoint-write به‌ازای هر batch.",
+  "answer_en": "Key the clicks by user id so each user lives on exactly one partition. Expect at-least-once delivery and make the sink idempotent: commit the totals and the per-(topic, partition) checkpoint in ONE database transaction, guarded by an offset comparison. Fence stale owners with group epochs so only the current owner writes. The trade-off: effectively-once counting, paid for with per-partition ordering, head-of-line blocking and one checkpoint write per batch. — Remember that one: exactly-once means one effect, not one delivery.",
+  "answer_fa": "ببین رفیق، کلیک‌ها را با کلید user id بفرست تا هر کاربر دقیقاً روی یک پارتیشن زندگی کند. تحویل at-least-once را بپذیر و sink را idempotent کن: totalها و checkpointِ per-(topic, partition) را تو یک تراکنش پایگاه داده commit کن، با یک نگهبان مقایسه offset. مالک‌های کهنه را با epoch گروه fence کن تا فقط مالک فعلی بنویسد. بده‌بستان هم اینجاست: شمارش effectively-once، به قیمت ترتیب per-partition، انسداد سر صف و یک checkpoint-write به‌ازای هر batch. — و این را نگه دار: exactly-once یعنی یه بار اثر، نه یه بار تحویل.",
   "assumptions": [
     {
-      "en": "Three partitions, key = user id, fixed key-to-partition routing (versioned if it ever changes). Teaching scale: about 10k clicks/s across the topic, checkpoint once per batch or per second — a teaching number, not a benchmark.",
-      "fa": "سه پارتیشن، کلید = user id، مسیریابی ثابت key-to-partition (نسخه‌دار اگر روزی عوض شود). مقیاس آموزشی: حدود 10k کلیک بر ثانیه روی تاپیک و checkpoint به‌ازای هر batch یا هر ثانیه — عدد آموزشی است نه بنچمارک."
+      "en": "Picture three partitions, key = user id, and fixed key-to-partition routing (versioned, in case it ever changes). Teaching scale: about 10k clicks/s across the topic, and a checkpoint once per batch or per second — a teaching number, not a benchmark.",
+      "fa": "فرض کن سه پارتیشن داریم، کلید = user id، و مسیریابی ثابت key-to-partition (نسخه‌دار، اگه روزی عوض شد). مقیاس آموزشی: حدود 10k کلیک بر ثانیه روی تاپیک، و checkpoint به‌ازای هر batch یا هر ثانیه — عدد آموزشیه، نه بنچمارک."
     },
     {
-      "en": "The record database is transactional (teaching Postgres-like); the consumer group assigns one owner per partition; log replay is ordered inside each partition.",
-      "fa": "پایگاه داده مرجع تراکنشی است (آموزشی و شبه Postgres)؛ گروه مصرف‌کننده به هر پارتیشن یک مالک می‌دهد؛ بازپخش لاگ درون هر پارتیشن مرتب است."
+      "en": "The record database is transactional (teaching, Postgres-like). The consumer group assigns one owner per partition, and log replay stays ordered inside each partition.",
+      "fa": "پایگاه دادهٔ مرجع تراکنشیه (آموزشی و شبه Postgres). گروه مصرف‌کننده به هر پارتیشن یه مالک می‌ده، و بازپخش لاگ درون هر پارتیشن مرتبه."
     },
     {
-      "fa": "اثر بیرونی در مسیر شمارش نیست؛ checkpoint فعال تا وقتی state متناظر معتبر است حفظ می‌شود. بازپخش از قبلِ retention نیازمند بازسازی یا رد صریح است.",
-      "en": "No external effect is included. Retain active checkpoints while their corresponding state remains valid. Replay older than log retention requires rebuilding or explicit rejection."
+      "fa": "هیچ اثر بیرونی‌ای توی مسیر شمارش نیست. checkpoint فعال رو تا وقتی state متناظر معتبره نگه می‌داریم. بازپخش از قبلِ retention یعنی یا باید بازسازی کنی یا صریح ردش کنی.",
+      "en": "No external effect is part of the count. You keep active checkpoints as long as their matching state stays valid. Replaying anything older than log retention means rebuilding it or rejecting it explicitly."
     }
   ],
   "code": {
@@ -34,211 +34,211 @@
     "expected_en": "OK totals={u1=5, u2=6, u3=3, u4=2} checkpoints={0=4, 1=8, 2=1}; six scenario assertions pass. The extra u2 click at offset 8 is an explicit duplicate-within-batch test.",
     "expected_fa": "OK totals={u1=5, u2=6, u3=3, u4=2} checkpoints={0=4, 1=8, 2=1}؛ assertionهای شش سناریو پاس می‌شوند. کلیک اضافهٔ u2 در offset=8 آزمون تکرار داخل batch است.",
     "lang": "java",
-    "run_en": "javac ExactlyOnceCounter.java && java ExactlyOnceCounter — stdlib Java only, instant. Partitions are in-memory lists: this proves the sink logic, not a broker integration.",
-    "run_fa": "javac ExactlyOnceCounter.java && java ExactlyOnceCounter — فقط استاندارد جاوا و فوری. پارتیشن‌ها لیست درون‌حافظه‌اند: این منطق sink را اثبات می‌کند نه اتصال به بروکر را.",
+    "run_en": "javac ExactlyOnceCounter.java && java ExactlyOnceCounter — stdlib Java only, instant. The partitions are in-memory lists: this proves the sink logic, not a broker integration.",
+    "run_fa": "javac ExactlyOnceCounter.java && java ExactlyOnceCounter — فقط استاندارد جاوا، فوری. پارتیشن‌ها لیست درون‌حافظه‌اند: این منطق sink را ثابت می‌کند، نه اتصال به بروکر را.",
     "status": "verified"
   },
-  "design_en": "<p>Use click_counts(user_id,total) and consumer_checkpoints(topic,partition,last_offset,owner_epoch) with a composite key. A transaction first locks the checkpoint row and validates sink ownership, then applies ordered offsets newer than the checkpoint and commits effect plus checkpoint together. Same-epoch batches also serialize on this row. Broker ACK follows commit. Coordinate new-epoch installation at the database with group ownership; Kafka does not automatically fence database writes. The demo has one fixed topic, clicks.</p>",
-  "design_fa": "<p>جدول click_counts(user_id,total) و consumer_checkpoints(topic,partition,last_offset,owner_epoch) با کلید مرکب داریم. یک تراکنش ابتدا سطر checkpoint را قفل می‌کند و epoch معتبر sink را می‌سنجد؛ سپس offsetهای بعد از checkpoint را به‌ترتیب اعمال می‌کند و اثر و checkpoint را با هم commit می‌کند. هر batch همان epoch هم باید از همین قفل عبور کند. broker ACK پس از commit است. نصب epoch جدید باید در DB با مالکیت گروه هماهنگ شود؛ Kafka خودکار write پایگاه داده را fence نمی‌کند. کلید checkpoint شامل topic است؛ دمو فقط یک topic ثابت clicks دارد.</p>",
+  "design_en": "<p>You get two tables: click_counts(user_id,total) and consumer_checkpoints(topic,partition,last_offset,owner_epoch) with a composite key. In one transaction you lock the checkpoint row first and check that the epoch really belongs to the sink; then you apply the ordered offsets newer than the checkpoint and commit effect plus checkpoint together. Same-epoch batches serialize on that same row too. The broker ACK comes after the commit. You coordinate the new-epoch installation at the database with group ownership, because Kafka does not automatically fence database writes. The demo has one fixed topic, clicks.</p>",
+  "design_fa": "<p>دو جدول داری: click_counts(user_id,total) و consumer_checkpoints(topic,partition,last_offset,owner_epoch) با کلید مرکب. توی هر تراکنش اول سطر checkpoint را قفل می‌کنی و می‌سنجی که epoch واقعاً مال sink است؛ بعد offsetهای تازه‌تر از checkpoint را به‌ترتیب اعمال می‌کنی و اثر و checkpoint را با هم commit می‌کنی. batchهایی که همان epoch را دارند هم از همین قفل رد می‌شوند. broker ACK بعد از commit می‌آید. نصب epoch تازه را باید در DB با مالکیت گروه هماهنگ کنی، چون Kafka خودش write پایگاه داده را fence نمی‌کند. دمو یک topic ثابت به اسم clicks دارد.</p>",
   "diagrams": [
     {
-      "caption_en": "Keyed partitions, one owner each, and the atomic sink",
-      "caption_fa": "پارتیشن‌های کلیددار، هرکدام با یک مالک، و sink اتمیک",
+      "caption_en": "Key it, partition it, and the sink that writes atomically",
+      "caption_fa": "کلید، پارتیشن، و sinkی که اتمیک می‌نویسه",
       "file": "diagrams/sol1-counter-topology.html",
       "height": 700,
       "kind_en": "architecture",
       "kind_fa": "معماری",
       "made": "archify",
       "narration": {
-        "failure_en": "Trace a crash on this figure: the consumer's uncommitted work simply vanishes, and the next poll replays the same ordered offsets against a checkpoint that never moved without the effect. Trace a stale owner: its arrows carry the old epoch and die at the conditional write.",
-        "failure_fa": "crash را روی همین شکل دنبال کن: کار ثبت‌نشده مصرف‌کننده محو می‌شود و poll بعدی همان offsetهای مرتب را جلوی checkpointای می‌گذارد که بدون اثر جلو نرفته. مالک کهنه را دنبال کن: پیکان‌هایش epoch قدیم را حمل می‌کنند و سر write شرطی می‌میرند.",
-        "guarantee_en": "The figure shows where ordering lives (inside partitions), where atomicity lives (the sink transaction), and where fencing lives (the epoch condition). It does not prove the broker delivers in order — that is the log's own contract.",
-        "guarantee_fa": "شکل نشان می‌دهد ترتیب کجاست (درون پارتیشن‌ها)، اتمیک بودن کجاست (تراکنش sink) و fencing کجاست (شرط epoch). ثابت نمی‌کند بروکر مرتب تحویل می‌دهد — آن قرارداد خود لاگ است.",
-        "nonguarantee_en": "It says nothing about external side effects, poison records, or a partition-count change — those need their own branches in the next figures.",
-        "nonguarantee_fa": "درباره اثرهای بیرونی، رکوردهای سمی و تغییر تعداد پارتیشن چیزی نمی‌گوید — آن‌ها شاخه خودشان را در شکل‌های بعد می‌خواهند.",
-        "point_en": "The decision point is the sink transaction: effect and checkpoint commit together or not at all, conditional on the epoch.",
-        "point_fa": "نقطه تصمیم تراکنش sink است: اثر و checkpoint با هم commit می‌شوند یا هیچ‌کدام، مشروط به epoch.",
-        "scenario_en": "Clicks arrive keyed by user id on three partitions while two consumers split the work and one database counts. Read left to right: keyed appends, ordered reads, then the single transaction that makes redelivery harmless.",
-        "scenario_fa": "کلیک‌ها با کلید user id روی سه پارتیشن می‌آیند و دو مصرف‌کننده کار را تقسیم می‌کنند و یک پایگاه داده می‌شمارد. چپ‌به‌راست بخوان: الصاق کلیددار، خواندن مرتب، بعد تک‌تراکنشی که تحویل مجدد را بی‌اثر می‌کند.",
+        "failure_en": "Trace a crash on this figure: the consumer's uncommitted work vanishes, and the next poll replays the same ordered offsets against a checkpoint that never moved without its effect. Now trace a stale owner: its arrows carry the old epoch and die at the conditional write.",
+        "failure_fa": "تو همین شکل crash را دنبال کن: کارِ ثبت‌نشدهٔ مصرف‌کننده محو می‌شود و poll بعدی همان offsetهای مرتب را می‌گذارد جلوی checkpointای که بدون اثر جلو نرفته. مالک کهنه را هم دنبال کن: پیکان‌هایش epoch قدیم را حمل می‌کنند و سر write شرطی می‌میرند.",
+        "guarantee_en": "This figure shows you three things: where ordering lives (inside the partitions), where atomicity lives (the sink transaction) and where fencing lives (the epoch condition). It does not prove the broker delivers in order — that one is the log's own contract.",
+        "guarantee_fa": "این شکل سه‌تا رو روشن می‌کنه: ترتیب کجاست (درون پارتیشن‌ها)، اتمیک بودن کجاست (تراکنش sink) و fencing کجاست (شرط epoch). ولی ثابت نمی‌کنه که بروکر مرتب تحویل می‌ده — اون قرارداد خودِ لاگه.",
+        "nonguarantee_en": "It says nothing about external side effects, poison records or a change in the partition count — each of those gets its own branch in the next figures.",
+        "nonguarantee_fa": "دربارهٔ اثرهای بیرونی، رکوردهای سمی و تغییر تعداد پارتیشن هیچی نمی‌گوید — این‌ها شاخهٔ خودشون را در شکل‌های بعد دارند.",
+        "point_en": "The decision point is the sink transaction: effect and checkpoint commit together or not at all — and the epoch gets a vote.",
+        "point_fa": "نقطهٔ تصمیم همون تراکنش sink است: اثر و checkpoint یا با هم commit می‌شوند یا هیچ‌کدام، و همه‌چیز مشروط به epoch.",
+        "scenario_en": "Clicks arrive keyed by user id on three partitions; two consumers split the work and one database counts. Read from the left: keyed appends, ordered reads, then the single transaction that makes a redelivery harmless.",
+        "scenario_fa": "کلیک‌ها با کلید user id روی سه پارتیشن می‌آیند، دو مصرف‌کننده کار را تقسیم می‌کنند و یک پایگاه داده می‌شمارد. از چپ بخون: الصاق کلیددار، خواندن مرتب، بعد اون تک‌تراکنشی که تحویل مجدد رو بی‌اثر می‌کنه.",
         "steps": [
           {
-            "en": "Producers append with key = user id: each user lands on exactly one partition, so per-user offsets are totally ordered — but only inside that partition.",
-            "fa": "تولیدکننده‌ها با کلید user id الصاق می‌کنند: هر کاربر دقیقاً روی یک پارتیشن می‌نشیند، پس offsetهای per-user کاملاً مرتب‌اند — ولی فقط درون همان پارتیشن."
+            "en": "Producers append with key = user id, so every user lands on exactly one partition. Per-user offsets are therefore totally ordered — but only inside that one partition, not across the topic.",
+            "fa": "تولیدکننده‌ها با کلید user id الصاق می‌کنند و هر کاربر دقیقاً روی یک پارتیشن می‌نشیند. یعنی offsetهای per-user کاملاً مرتب‌اند — ولی فقط درون همون پارتیشن، نه در کل تاپیک."
           },
           {
-            "en": "Each partition has exactly one owner in the group; the owner reads its offsets in order and never compares them with another partition's.",
-            "fa": "هر پارتیشن دقیقاً یک مالک در گروه دارد؛ مالک offsetهایش را مرتب می‌خواند و هرگز با پارتیشن دیگر مقایسه‌شان نمی‌کند."
+            "en": "Every partition has exactly one owner in the group. That owner reads its offsets in order and never compares them with another partition's.",
+            "fa": "هر پارتیشن دقیقاً یک مالک توی گروه داره؛ مالک offsetهای خودش را مرتب می‌خونه و هیچ‌وقت با offset پارتیشن دیگه مقایسه‌شون نمی‌کنه."
           },
           {
-            "en": "The sink commits totals and the (topic, partition) checkpoint in one epoch-guarded transaction: redelivery replays against a memory that moved only with the effect.",
-            "fa": "sink مجموع‌ها و checkpointِ (topic, partition) را در یک تراکنش نگهبانی‌شده با epoch ثبت می‌کند: تحویل مجدد جلوی حافظه‌ای بازپخش می‌شود که فقط با اثر جلو رفته."
+            "en": "The sink commits the totals and the (topic, partition) checkpoint in one epoch-guarded transaction. A redelivery then replays against a memory that only ever moved together with the effect.",
+            "fa": "sink مجموع‌ها و checkpointِ (topic, partition) را تو یک تراکنش نگهبانی‌شده با epoch ثبت می‌کند، و تحویل مجدد جلوی حافظه‌ای بازپخش می‌شود که فقط همراهِ اثر جلو رفته."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "Because offsets order only inside one partition: the guard offset &gt; last is sound solely against the same partition's replay, and the checkpoint must name its (topic, partition).",
-        "a_fa": "چون offset فقط درون یک پارتیشن مرتب می‌کند: نگهبان offset بزرگ‌تر از قبلی فقط جلوی بازپخش همان پارتیشن درست است و checkpoint باید (topic, partition) خودش را نام ببرد.",
-        "q_en": "Why must the checkpoint name its topic and partition instead of living as one number per user?",
-        "q_fa": "چرا checkpoint باید topic و partition خودش را نام ببرد نه این‌که یک عدد per-user باشد؟"
+        "a_en": "Because an offset only sorts things inside one partition. The 'offset > last' guard is sound against that same partition's replay and nothing else, so the checkpoint has to name its (topic, partition). — A per-user number here is just a good-looking number that means nothing.",
+        "a_fa": "چون offset فقط توی یک پارتیشن مرتب می‌شه. نگهبانِ «offset بزرگ‌تر از قبلی» فقط جلوی بازپخش همون یه پارتیشن رو می‌گیره، یعنی checkpoint باید (topic, partition) خودش رو نام ببره. — یه عدد per-user اینجا یه شمارهٔ خوش‌ظاهرِ بی‌معنیه.",
+        "q_en": "Why does the checkpoint have to name its topic and partition instead of being one number per user?",
+        "q_fa": "چرا checkpoint باید topic و partition خودش را نام ببرد، به‌جای این‌که یه عدد per-user باشه؟"
       },
       "source": "assets/diagram-specs/solutions/ch12/sol1-counter-topology.json"
     },
     {
-      "caption_en": "Crash, lost ack, rebalance: redelivery meets the checkpoint guard",
-      "caption_fa": "crash، ack گم‌شده، rebalance: تحویل مجدد به نگهبان checkpoint می‌خورد",
+      "caption_en": "Crash, lost ack, rebalance: a redelivery walks into the checkpoint guard",
+      "caption_fa": "crash، ack گم‌شده، rebalance: تحویل مجدد می‌خوره به نگهبان checkpoint",
       "file": "diagrams/sol1-crash-redelivery.html",
       "height": 780,
       "kind_en": "sequence",
       "kind_fa": "توالی",
       "made": "archify",
       "narration": {
-        "failure_en": "Read the crash branch: apply without commit is followed by a redelivery of the same ordered offsets, and the totals do not move twice. Read the rebalance branch: the old owner's late write arrives with epoch 1 after ownership moved to epoch 2, and the database rejects it.",
-        "failure_fa": "شاخه crash را بخوان: apply بدون commit و بعد تحویل مجدد همان offsetهای مرتب، و totalها دو بار تکان نمی‌خورند. شاخه rebalance را بخوان: write دیررس مالک قدیم با epoch ۱ بعد از رفتن مالکیت به epoch ۲ می‌رسد و پایگاه داده ردش می‌کند.",
-        "guarantee_en": "The figure shows that every redelivery path ends at the same guard. It does not show poison records or offset jumps — those leave this happy path by design.",
-        "guarantee_fa": "شکل نشان می‌دهد هر مسیر تحویل مجدد به همان نگهبان می‌رسد. رکورد سمی و پرش offset را نشان نمی‌دهد — آن‌ها عامدانه از این مسیر خوش بیرون‌اند.",
-        "nonguarantee_en": "It assumes the broker replays the same partition in the same order — true for a log, false for a queue that reassigns single messages.",
-        "nonguarantee_fa": "فرض می‌کند بروکر همان پارتیشن را به همان ترتیب بازپخش می‌کند — برای لاگ درست است و برای صفی که تک‌پیام را دوباره تخصیص می‌دهد نادرست.",
-        "point_en": "The decision point is each re-read: offset &gt; stored decides count versus skip, and caller epoch = owner epoch decides accept versus fence.",
-        "point_fa": "نقطه تصمیم هر بازخوانی است: offset بزرگ‌تر از ذخیره‌شده شمردن یا skip را مشخص می‌کند و برابری epoch فراخوان با مالک، پذیرش یا fence را.",
-        "scenario_en": "One partition, two owners over time, three mishaps. Read top to bottom: a crash before commit, an ack lost on the wire, then ownership moving while the old owner is still alive.",
-        "scenario_fa": "یک پارتیشن، دو مالک در طول زمان، سه بدبیاری. بالا‌به‌پایین بخوان: crash قبل از commit، ack گم‌شده روی سیم، بعد جابه‌جایی مالکیت درحالی‌که مالک قدیم هنوز زنده است.",
+        "failure_en": "Read the crash branch: an apply without commit, then a redelivery of the same ordered offsets — and the totals don't move twice. Now the rebalance branch: the old owner's late write shows up with epoch 1 after ownership moved to epoch 2, and the database turns it down.",
+        "failure_fa": "شاخهٔ crash را بخون: apply بدون commit، بعد تحویل مجدد همون offsetهای مرتب — و totalها دو بار تکان نمی‌خورن. شاخهٔ rebalance رو هم بخون: write دیررسِ مالک قدیم با epoch ۱، بعد از این‌که مالکیت رفت به epoch ۲، می‌رسه و پایگاه داده ردش می‌کنه.",
+        "guarantee_en": "The figure shows that every redelivery path ends at the same guard. It skips poison records and offset jumps — those deliberately step out of this happy path.",
+        "guarantee_fa": "شکل نشان می‌ده هر مسیر تحویل مجدد به همون نگهبان می‌رسه. رکورد سمی و پرش offset رو نشان نمی‌ده — اون‌ها عامدانه از این مسیر خوش بیرون‌اند.",
+        "nonguarantee_en": "It assumes the broker replays that same partition in the same order. True for a log; false for a queue that hands single messages out again.",
+        "nonguarantee_fa": "اینجا فرض شده که بروکر همون پارتیشن رو با همون ترتیب بازپخش می‌کنه — برای لاگ درسته، برای صفی که تک‌پیام رو دوباره تخصیص می‌ده نادرسته.",
+        "point_en": "The decision point is every re-read: offset > stored means count it or skip it, and caller epoch = owner epoch means accept it or fence it.",
+        "point_fa": "نقطهٔ تصمیم، هر بازخوانیه: offset بزرگ‌تر از ذخیره‌شده یعنی بشمر، یعنی skip. و برابری epoch فراخوان با مالک یعنی بپذیر یا fence.",
+        "scenario_en": "One partition, two owners over time, three mishaps. Read it top to bottom: a crash before the commit, an ack lost on the wire, then ownership moving while the old owner is still alive.",
+        "scenario_fa": "یه پارتیشن، دو مالک در طول زمان، سه بدبیاری. از بالا بخون: crash قبل از commit، ack گم‌شده روی سیم، بعد جابه‌جایی مالکیت درحالی‌که مالک قدیم هنوز زنده‌ست.",
         "steps": [
           {
-            "en": "Crash branch: the broker redelivers offsets 101–104 in order; the transaction applies them once because the checkpoint never recorded a half-commit.",
-            "fa": "شاخه crash: بروکر offsetهای ۱۰۱ تا ۱۰۴ را مرتب تحویل می‌دهد؛ تراکنش فقط یک‌بار اعمالشان می‌کند چون checkpoint هیچ نیم-commitای ثبت نکرده."
+            "en": "Crash branch: the broker redelivers offsets 101–104 in order, and the transaction applies them exactly once — the checkpoint never recorded a half-commit.",
+            "fa": "شاخهٔ crash: بروکر offsetهای ۱۰۱ تا ۱۰۴ رو مرتب تحویل می‌ده؛ تراکنش فقط یه‌بار اعمالشون می‌کنه، چون checkpoint هیچ نیم‌commitای ثبت نکرده."
           },
           {
-            "en": "Lost-ack branch: the commit happened but the ack died, so offsets 103–104 come back and the guard skips them as already counted.",
-            "fa": "شاخه ack گم‌شده: commit شده ولی ack مرده، پس offsetهای ۱۰۳ و ۱۰۴ برمی‌گردند و نگهبان چون شمرده‌شده‌اند skipشان می‌کند."
+            "en": "Lost-ack branch: the commit happened but the ack died, so offsets 103–104 come back — and the guard skips them as already counted.",
+            "fa": "شاخهٔ ack گم‌شده: commit شده ولی ack مرده، و offsetهای ۱۰۳ و ۱۰۴ برمی‌گردن و نگهبان، چون قبلاً شمرده شدن، skipشون می‌کنه."
           },
           {
-            "en": "Rebalance branch: the new owner at epoch 2 resumes from checkpoint 104 while the old owner's epoch-1 write is fenced on arrival.",
-            "fa": "شاخه rebalance: مالک تازه با epoch ۲ از checkpoint ۱۰۴ ادامه می‌دهد و write دیررس مالک قدیم با epoch ۱ سر رسیدن فنس می‌شود."
+            "en": "Rebalance branch: the new owner at epoch 2 resumes from checkpoint 104, and the old owner's epoch-1 write gets fenced the moment it arrives.",
+            "fa": "شاخهٔ rebalance: مالک تازه با epoch ۲ از checkpoint ۱۰۴ ادامه می‌ده، و write دیررسِ مالک قدیم با epoch ۱ همون‌جا که می‌رسه فنس می‌شه."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "It is rejected by the epoch condition: ownership moved to epoch 2, so the epoch-1 write fails the guard and changes nothing.",
-        "a_fa": "با شرط epoch رد می‌شود: مالکیت به epoch ۲ رفته، پس write با epoch ۱ نگهبان را نمی‌گذرد و چیزی را عوض نمی‌کند.",
-        "q_en": "The old owner, presumed dead, wakes up and writes after the rebalance. What happens to its write?",
-        "q_fa": "مالک قدیم که مرده فرض شده بیدار می‌شود و بعد از rebalance می‌نویسد. write آن چه می‌شود؟"
+        "a_en": "The epoch condition turns it down: ownership moved to epoch 2, so the epoch-1 write fails the guard and changes nothing. — The zombie owner meets a locked door.",
+        "a_fa": "شرط epoch ردش می‌کنه: مالکیت رفته به epoch ۲، و write با epoch ۱ از نگهبان رد نمی‌شه و هیچی رو عوض نمی‌کنه. — مرده‌ای که برگشته، با درِ قفل‌شده روبه‌رو می‌شه.",
+        "q_en": "The old owner, presumed dead, wakes up and writes after the rebalance. What happens to that write?",
+        "q_fa": "مالک قدیمی که مرده فرض شده بیدار می‌شه و بعد از rebalance می‌نویسه. writeش چه می‌شه؟"
       },
       "source": "assets/diagram-specs/solutions/ch12/sol1-crash-redelivery.json"
     },
     {
-      "caption_en": "The consume-commit loop that holds exactly-once together",
-      "caption_fa": "حلقه consume-commit که exactly-once را نگه می‌دارد",
+      "caption_en": "The consume-commit loop that keeps exactly-once together",
+      "caption_fa": "حلقهٔ consume-commit که exactly-once رو نگه می‌داره",
       "file": "diagrams/sol1-consume-commit-loop.html",
       "height": 720,
       "kind_en": "workflow",
       "kind_fa": "گردش‌کار",
       "made": "archify",
       "narration": {
-        "failure_en": "After new sink ownership is installed, stale owners are rejected; checkpoint locks serialize same-epoch batches. Active checkpoints do not expire. Missing required log input triggers explicit recovery. Routing changes do not redefine old-log checkpoints.",
-        "failure_fa": "مالک کهنه پس از نصب epoch تازه در sink رد می‌شود؛ batchهای هم‌epoch با قفل checkpoint سریال می‌شوند. checkpoint فعال expire نمی‌شود و نبود بازهٔ لازم در لاگ به بازسازی صریح می‌انجامد. تغییر routing به معنای تعریف checkpoint تازه برای لاگ قبلی نیست.",
-        "guarantee_en": "The figure assembles the whole argument: partition-scoped order plus one atomic transaction plus epoch fencing equals effectively-once counting. It still excludes external effects and unbounded horizons — read those as boundaries, not gaps.",
-        "guarantee_fa": "شکل کل استدلال را سوار می‌کند: ترتیب پارتیشن‌محور به‌علاوه یک تراکنش اتمیک به‌علاوه fencing با epoch مساوی شمارش effectively-once است. اثرهای بیرونی و افق‌های بی‌کران را همچنان بیرون می‌گذارد — آن‌ها را مرز بخوان نه حفره.",
-        "nonguarantee_en": "It does not cover poison records (they leave through the DLQ branch of the text) nor the broker's own availability.",
-        "nonguarantee_fa": "رکوردهای سمی را پوشش نمی‌دهد (از شاخه DLQ متن بیرون می‌روند) و نه دسترس‌پذیری خود بروکر را.",
-        "point_en": "The loop's invariant: the checkpoint advances only inside the same transaction as the totals it describes.",
-        "point_fa": "ناوردای حلقه: checkpoint فقط درون همان تراکنشی جلو می‌رود که totalهای توصیف‌شده‌اش را دارد.",
-        "scenario_en": "The assembly: one loop every batch runs, with every failure given its own exit. Read the spine first, then each exception lane as the answer to one mishap.",
-        "scenario_fa": "اسمبل نهایی: یک حلقه که هر batch اجرایش می‌کند و هر خرابی خروجی خودش را دارد. اول ستون فقرات، بعد هر لاین استثنا به‌عنوان جواب یک بدبیاری.",
+        "failure_en": "Once the new sink ownership is installed, stale owners get rejected, and the checkpoint lock serializes same-epoch batches. Active checkpoints never expire. Missing log input triggers explicit recovery. And a routing change does not redefine the checkpoints of the old log.",
+        "failure_fa": "مالک کهنه، بعد از نصب epoch تازه در sink، رد می‌شه؛ batchهای هم‌epoch هم با قفل checkpoint سریال می‌شن. checkpoint فعال expire نمی‌شه و نبود بازهٔ لازم در لاگ به بازسازی صریح می‌رسه. و تغییر routing یعنی تعریف checkpoint تازه برای لاگ قبلی نیست.",
+        "guarantee_en": "The figure assembles the whole argument: partition-scoped order, plus one atomic transaction, plus epoch fencing, equals effectively-once counting. External effects and unbounded horizons stay outside — read them as boundaries, not gaps.",
+        "guarantee_fa": "شکل کلِ استدلال رو سوار می‌کنه: ترتیب پارتیشن‌محور + یه تراکنش اتمیک + fencing با epoch = شمارش effectively-once. اثرهای بیرونی و افق‌های بی‌کران همچنان بیرون می‌مونن — اون‌ها رو مرز بخون، نه حفره.",
+        "nonguarantee_en": "It doesn't cover poison records (they leave through the DLQ branch in the text) and it doesn't cover the broker's own availability.",
+        "nonguarantee_fa": "رکوردهای سمی رو پوشش نمی‌ده (از شاخهٔ DLQِ متن بیرون می‌رن) و نه دسترس‌پذیری خود بروکر رو.",
+        "point_en": "The loop's invariant: the checkpoint advances only inside the very same transaction as the totals it describes. — Both or neither.",
+        "point_fa": "ناوردای این حلقه: checkpoint فقط توی همون تراکنشی جلو می‌ره که totalهای توصیف‌شده‌اش رو داره. — یا هر دو، یا هیچ‌کدوم.",
+        "scenario_en": "The assembly: one loop that runs every batch, and every failure gets its own exit. Read the spine first, then walk each exception lane as the answer to one mishap.",
+        "scenario_fa": "اسمبل نهایی: یه حلقه که هر batch اجراش می‌کنه و هر خرابی خروجی خودش رو داره. اول ستون فقرات، بعد هر لاین استثنا به‌عنوان جواب یه بدبیاری.",
         "steps": [
           {
-            "en": "Spine: poll one partition, check the epoch, apply only newer offsets, commit totals and checkpoint together, repeat per batch.",
-            "fa": "ستون فقرات: poll یک پارتیشن، چک epoch، اعمال فقط offsetهای تازه‌تر، commit هم‌زمان total و checkpoint، تکرار به‌ازای هر batch."
+            "en": "Spine: poll one partition, check the epoch, apply only the newer offsets, commit totals and checkpoint together, repeat per batch.",
+            "fa": "ستون فقرات: poll یه پارتیشن، چک epoch، اعمال فقط offsetهای تازه‌تر، commit هم‌زمان total و checkpoint، تکرار به‌ازای هر batch."
           },
           {
-            "en": "Stale and migrate: a fenced owner stops writing, and its dedup identity moves under a versioned routing key instead of being edited in place.",
-            "fa": "کهنه و مهاجرت: مالک فنس‌شده از نوشتن می‌ایستد و هویت dedup آن زیر کلید مسیریابی نسخه‌دار جابه‌جا می‌شود به‌جای ویرایش درجا."
+            "en": "Stale and migrate: a fenced owner stops writing, and its dedup identity moves under a versioned routing key rather than being edited in place.",
+            "fa": "کهنه و مهاجرت: مالکِ فنس‌شده از نوشتن می‌ایسته و هویت dedupش زیر کلید مسیریابی نسخه‌دار جابه‌جا می‌شه، نه این‌که درجا ویرایش بشه."
           },
           {
-            "en": "Abort and alert: rebalances roll back the open transaction, and an offset jump past retention pages a human and re-seeds.",
-            "fa": "abort و هشدار: rebalanceها تراکنش باز را rollback می‌کنند و پرش offset از روی retention به انسان page می‌زند و re-seed می‌کند."
+            "en": "Abort and alert: a rebalance rolls back the open transaction, and an offset jump past retention pages a human and re-seeds.",
+            "fa": "abort و هشدار: rebalanceها تراکنش باز رو rollback می‌کنن و پرش offset از روی retention به آدم page می‌زنه و re-seed می‌کنه."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "Exactly the three named boundaries: order inside partitions, atomicity inside one transaction, and one writer per partition enforced by epochs. Outside them the word is aspirational.",
-        "a_fa": "دقیقاً همان سه مرز نام‌برده: ترتیب درون پارتیشن‌ها، اتمیک بودن درون یک تراکنش، و یک نویسنده per-partition با ضمانت epoch. بیرون آن‌ها این کلمه آرزوست.",
-        "q_en": "Name the three boundaries inside which this loop may honestly claim exactly-once.",
-        "q_fa": "سه مرزی را نام ببر که این حلقه فقط درونشان می‌تواند صادقانه ادعای exactly-once کند."
+        "a_en": "Exactly the three named boundaries: order inside the partitions, atomicity inside one transaction, and one writer per partition enforced by epochs. Outside those, the word is aspirational. — An exactly-once claim has three edges, not one nice sentence.",
+        "a_fa": "دقیقاً همون سه مرز نام‌برده: ترتیب درون پارتیشن‌ها، اتمیک بودن توی یه تراکنش، و یه نویسنده per-partition با ضمانت epoch. بیرون از این‌ها این کلمه فقط آرزوئه. — ادعای exactly-once سه تا مرز داره، نه یه جملهٔ خوشگل.",
+        "q_en": "Name the three boundaries inside which this loop can honestly claim exactly-once.",
+        "q_fa": "سه مرزی رو نام ببر که این حلقه فقط توی همونا می‌تونه صادقانه ادعای exactly-once کنه."
       },
       "source": "assets/diagram-specs/solutions/ch12/sol1-consume-commit-loop.json"
     }
   ],
   "failures": [
     {
-      "en": "Crash between apply and commit: nothing was committed, so ordered replay rebuilds the same totals; the demo's garbage +99 vanishes with the uncommitted attempt.",
-      "fa": "crash میان apply و commit: چیزی commit نشده پس بازپخش مرتب همان totalها را می‌سازد؛ +۹۹ اضافی دمو با تلاش ثبت‌نشده محو می‌شود."
+      "en": "Crash between apply and commit: nothing was committed, so the ordered replay rebuilds the same totals. The demo's garbage +99 vanishes with the attempt that never committed.",
+      "fa": "crash میان apply و commit: هیچی commit نشده، و بازپخشِ مرتب همان totalها را دوباره می‌سازد؛ +۹۹ اضافیِ دمو با همون تلاشِ ثبت‌نشده محو می‌شود."
     },
     {
-      "en": "Lost ack after commit: the broker redelivers already-checkpointed offsets; the guard skips every one (14 skips in the demo) and totals do not move.",
-      "fa": "ack گم‌شده بعد از commit: بروکر offsetهای checkpointشده را تحویل می‌دهد؛ نگهبان همه را skip می‌کند (۱۴ skip در دمو) و totalها تکان نمی‌خورند."
+      "en": "Lost ack after commit: the broker hands back offsets you already checkpointed. The guard skips every one of them (14 skips in the demo) and the totals don't move.",
+      "fa": "ack گم‌شده بعد از commit: بروکر offsetهایی را پس می‌دهد که قبلاً checkpoint شده‌اند؛ نگهبان همه را skip می‌کند (۱۴ skip در دمو) و totalها تکان نمی‌خورند."
     },
     {
-      "en": "Rebalance mid-batch: the open transaction rolls back, the new epoch-2 owner resumes from checkpoint 104, and only offset 4 (the genuinely new click) applies.",
-      "fa": "rebalance وسط batch: تراکنش باز rollback می‌شود، مالک تازه epoch-2 از checkpoint ۱۰۴ ادامه می‌دهد و فقط offset ۴ (کلیک واقعاً تازه) اعمال می‌شود."
+      "en": "Rebalance mid-batch: the open transaction rolls back, the new epoch-2 owner resumes from checkpoint 104, and only offset 4 — the genuinely new click — goes in.",
+      "fa": "rebalance وسط batch: تراکنش باز rollback می‌شود، مالک تازهٔ epoch-2 از checkpoint ۱۰۴ ادامه می‌دهد و فقط offset ۴ — کلیک واقعاً تازه — اعمال می‌شود."
     },
     {
-      "en": "Stale owner writes after revoke: presumed dead but alive, its epoch-1 commit fails the epoch condition and is fenced without touching totals.",
-      "fa": "write مالک کهنه بعد از revoke: مرده فرض شده ولی زنده، commit با epoch ۱ آن شرط epoch را نمی‌گذرد و بدون دست زدن به totalها فنس می‌شود."
+      "en": "Stale owner writes after revoke: presumed dead but actually alive, its epoch-1 commit fails the epoch condition, so it gets fenced without ever touching the totals.",
+      "fa": "write مالک کهنه بعد از revoke: مرده فرض شده ولی زنده است. commit با epoch ۱ از شرط epoch رد نمی‌شود، و بدون دست زدن به totalها فنس می‌شود."
     },
     {
-      "en": "Offset out of range after retention: the fetched offset no longer exists, so the consumer alerts and re-seeds from a snapshot instead of guessing a total.",
-      "fa": "offset خارج از بازه بعد از retention: offset خوانده‌شده دیگر نیست، پس مصرف‌کننده هشدار می‌دهد و از snapshot دوباره seed می‌کند به‌جای حدس زدن total."
+      "en": "Offset out of range after retention: the offset you fetched isn't there anymore. So the consumer alerts and re-seeds from a snapshot instead of guessing a total.",
+      "fa": "offset خارج از بازه بعد از retention: دیگه وجود ندارد، و مصرف‌کننده هشدار می‌دهد و از snapshot دوباره seed می‌کند به‌جای حدس زدن total."
     },
     {
-      "en": "Poison record that never applies: after bounded retries it moves to a dead-letter queue with a metric, and the partition advances past it explicitly.",
-      "fa": "رکورد سمی که هیچ‌وقت اعمال نمی‌شود: بعد از retryهای کران‌دار با متریک به صف نامه‌های مرده می‌رود و پارتیشن صریح از رویش رد می‌شود."
+      "en": "A poison record that never applies: after bounded retries it heads for a dead-letter queue with a metric attached, and the partition moves past it on purpose.",
+      "fa": "رکورد سمی که هیچ‌وقت اعمال نمی‌شود: بعد از retryهای کران‌دار، با یه متریک می‌رود توی صف نامه‌های مرده و پارتیشن آگاهانه از رویش رد می‌شود."
     }
   ],
   "followups": [
     {
-      "a_en": "A partition-count change does not itself redefine an existing (topic,partition) checkpoint. If the same intent is copied into both routes, offsets differ and cross-route dedup needs a stable event ID. Record an old-route boundary, drain through it and cut over; atomic total increments or a user-row lock control concurrent partition updates.",
-      "a_fa": "تغییر partition به‌تنهایی نسخهٔ checkpoint جدید نمی‌خواهد؛ هویت (topic,partition) هر لاگ حفظ می‌شود. اگر همان intent به دو مسیر کپی می‌شود، offsetهای متفاوت dedup مشترک نیستند و event_id پایدار لازم است. برای cutover، مرز مسیر قدیم را ثبت، تا آن مرز drain و مسیر تازه را فعال کن؛ افزایش اتمیک total یا قفل کاربر، هم‌زمانی چند پارتیشن را کنترل می‌کند.",
+      "a_en": "A partition-count change doesn't redefine an existing (topic,partition) checkpoint on its own. If the same intent now lives on two routes, the offsets differ and cross-route dedup needs a stable event ID. Record the old-route boundary, drain through it, then cut over. For concurrent partition updates, atomic total increments or a user-row lock keep the count honest.",
+      "a_fa": "تغییر تعداد partition به‌تنهایی checkpoint موجودِ (topic,partition) رو بازنویسی نمی‌کنه. ولی اگر همان intent بره روی دو مسیر، offsetها فرق می‌کنن و dedup بین مسیرها به یه event_id پایدار نیاز داره. مرز مسیر قدیم رو ثبت کن، تا همون مرز drain کن و بعد cutover کن. برای هم‌زمانی چند پارتیشن هم، افزایش اتمیک total یا قفل روی سطر کاربر کافیه.",
       "level": "staff",
       "q_en": "Partition count changes and a user moves. How do you migrate the dedup identity?",
       "q_fa": "تعداد partitionها عوض بشه و کاربر جابه‌جا بشه، dedup key رو چطور مهاجرت می‌دی؟"
     },
     {
-      "a_en": "Unprotected read-then-write can apply the same old snapshot twice. Lock or compare-and-swap the partition checkpoint within the effect transaction. Epoch checks reject stale owners; same-owner batches still need serialization.",
-      "a_fa": "دو مرحلهٔ read سپس write بدون قفل یا CAS می‌توانند snapshot قدیمی را دوبار اعمال کنند. checkpoint پارتیشن باید در همان تراکنش اثر قفل/شرط‌گذاری شود؛ epoch مالک کهنه را رد می‌کند ولی دو batch یک مالک هم به سریال‌سازی نیاز دارند.",
+      "a_en": "An unprotected read-then-write can apply the same old snapshot twice. Lock the partition checkpoint, or compare-and-swap it, inside the effect transaction. Epoch checks turn stale owners away; same-owner batches still need serializing.",
+      "a_fa": "خواندن-بعد-نوشتنِ بدون قفل یا CAS می‌تونه همون snapshot قدیمی رو دوبار اعمال کنه. checkpoint پارتیشن رو توی همون تراکنش اثر قفل کن یا compare-and-swap کن. epoch مالک کهنه رو رد می‌کنه، ولی دو batch از یه مالک باز هم سریال‌سازی می‌خوان.",
       "level": "senior",
-      "q_en": "Why isn't read-then-write of the total enough on its own? What exactly does the last_offset column check?",
-      "q_fa": "چرا خواندن-بعد-نوشتن total به‌تنهایی کافی نیست و ستون last_offset دقیقاً چه شرطی را چک می‌کند؟"
+      "q_en": "Why isn't read-then-write of the total enough on its own, and what exactly does the last_offset column check?",
+      "q_fa": "چرا خواندن-بعد-نوشتن total به‌تنهایی کافی نیست، و ستون last_offset دقیقاً چه شرطی رو چک می‌کنه؟"
     },
     {
-      "a_en": "Install new ownership through a sink ownership-transfer protocol. An old transaction must finish before transfer or fail its epoch check after transfer; Kafka group callbacks alone do not guarantee sink fencing.",
-      "a_fa": "مالک تازه epoch خود را با پروتکل انتقال مالکیت در sink ثبت می‌کند. تراکنش مالک قبلی باید پیش از انتقال تمام شود یا بعد از آن با epoch کهنه رد شود؛ صرف callback گروه Kafka تضمین sink نیست.",
+      "a_en": "You install the new ownership through a sink ownership-transfer protocol. An old transaction has to finish before the transfer, or fail its epoch check after it. Kafka group callbacks on their own don't fence the sink.",
+      "a_fa": "مالک تازه epoch خودش رو با پروتکل انتقال مالکیت در sink ثبت می‌کنه. تراکنش مالک قبلی باید پیش از انتقال تموم بشه یا بعد از اون با epoch کهنه رد بشه؛ صرف callback گروه Kafka تضمینِ sink نیست.",
       "level": "staff",
-      "q_en": "A network split leaves two consumers each believing it owns the partition. How does counting stay correct?",
-      "q_fa": "پارتیشن شبکه دو مصرف‌کننده می‌گذارد که هرکدام فکر می‌کنند مالک پارتیشن‌اند. شمارش چطور درست می‌ماند؟"
+      "q_en": "A network split leaves two consumers, each believing it owns the partition. How does the count stay correct?",
+      "q_fa": "پارتیشن شبکه دو مصرف‌کننده می‌ذاره که هرکدوم فکر می‌کنن مالک پارتیشن‌اند. شمارش چطور درست می‌مونه؟"
     }
   ],
   "interview_q_en": "Picture this, you're counting clicks from three Kafka partitions into a database. You commit each (topic,partition) effect and checkpoint together in one transaction. Remember, a per-user last_offset means something only with fixed key-to-partition routing. You walk through crashes, lost ACKs, rebalances, and stale consumers with fencing and ordered replay.",
   "interview_q_fa": "فرض کن از Kafka با سه partition می‌خونی و click count رو تو DB نگه می‌داری. اثر و checkpoint هر (topic,partition) رو تو یه تراکنش ذخیره کن. یادت باشه last_offset هر کاربر فقط با key-to-partition ثابت معنا داره. crash، گم‌شدن ACK، rebalance و consumer کهنه رو با fencing و replay مرتب تحلیل کن.",
   "lab_en": "<p>Use a three-partition clicks topic with fixed user_id routing. Create click_counts(user_id,total) and consumer_checkpoints(topic,partition,last_offset,owner_epoch) with a composite checkpoint key. Lock the partition checkpoint inside a transaction, validate the epoch, process ordered records newer than last_offset, and commit totals plus the last actually processed offset together; your broker ACK follows the commit. Serialize batches even within one epoch. Kafka group epochs don't automatically fence your database: ownership transfer must install a valid epoch at the sink. Test crashes, lost ACKs, replay, stale owners, and equal offsets in different partitions. Never expire active checkpoints by TTL; missing history or routing changes need explicit cutover, event IDs, and rebuilding.</p>",
   "lab_fa": "<p>تاپیک clicks با سه پارتیشن و routing ثابت user_id داری. جدول click_counts(user_id,total) و consumer_checkpoints(topic,partition,last_offset,owner_epoch) با کلید مرکب بساز. برای هر پارتیشن، سطر checkpoint رو تو تراکنش قفل کن، epoch رو چک کن، فقط رکوردهای مرتب بعد از last_offset رو اعمال کن و totalها و آخرین offset واقعاً پردازش‌شده رو با هم commit کن؛ ACK بروکر بعد از commit میاد. هم‌زمانی دو batch تو یه epoch رو هم باید با قفل و شرط تراکنشی کنترل کنی. epoch گروه Kafka خودکار DB رو fence نمی‌کنه: انتقال مالکیت باید epoch معتبر رو تو sink نصب کنه. crash، گم‌شدن ACK، replay، مالک کهنه و دو پارتیشن با offset یکسان رو تست کن. checkpoint فعال رو با TTL پاک نکن؛ نبود تاریخچه لازم یا تغییر routing به cutover، event_id و بازسازی صریح نیاز داره.</p>",
-  "mental_en": "The broker redelivers by design, so counting twice is the default outcome, not an accident. Exactly-once is built at the sink: a memory of what was already counted, scoped to exactly the place where the broker numbers things — the (topic, partition) pair.",
-  "mental_fa": "بروکر عامدانه تحویل مجدد می‌دهد، پس دو بار شمردن نتیجه پیش‌فرض است نه حادثه. exactly-once در sink ساخته می‌شود: حافظه‌ای از آن‌چه قبلاً شمرده شده با قلمرو دقیقاً همان‌جایی که بروکر شماره می‌زند — جفت (topic, partition).",
+  "mental_en": "The broker redelivers on purpose, so counting twice is the default, not an accident. Honestly, the fix gets built at the sink: a memory of what you already counted, scoped to exactly the place where the broker does the numbering — the (topic, partition) pair. — In other words, remember it under the same key the broker called it by.",
+  "mental_fa": "بروکر عامدانه دوباره تحویل می‌دهد، پس دو بار شمردن پیش‌فرض است نه حادثه. بذار ساده بگم: exactly-once را در sink می‌سازی — یه حافظه از این‌که چی را قبلاً شمردی، دقیقاً همون‌جایی که بروکر شماره می‌زند: جفت (topic, partition). — یعنی حافظه‌ات باید همون کلیدی را بگیرد که خودش صدا زده.",
   "mistakes": [
     {
-      "en": "Comparing offsets across partitions as if 104 on P0 meant anything next to 104 on P1. Offsets are per-partition sequences; cross-partition comparison is the original sin of this exercise.",
-      "fa": "مقایسه offset دو پارتیشن با هم انگار ۱۰۴ روی P0 کنار ۱۰۴ روی P1 معنایی دارد. offsetها دنباله per-partitionاند؛ مقایسه میان‌پارتیشنی گناه اولیه این تمرین است."
+      "en": "Comparing offsets across partitions, as if 104 on P0 meant anything next to 104 on P1. Offsets are per-partition sequences — cross-partition comparison is the original sin of this exercise.",
+      "fa": "مقایسهٔ offset دو پارتیشن با هم، انگار ۱۰۴ روی P0 کنار ۱۰۴ روی P1 معنایی دارد. offsetها دنبالهٔ per-partition‌اند؛ مقایسهٔ میان‌پارتیشنی گناه اولیهٔ این تمرینه."
     },
     {
-      "en": "Committing the offset before the effect (at-most-once counting) or in a separate transaction from the effect (reopening the crash window the design closed).",
-      "fa": "ثبت offset قبل از اثر (شمارش at-most-once) یا در تراکنش جدا از اثر (باز کردن پنجره crashای که طراحی بسته بود)."
+      "en": "Committing the offset before the effect (that's at-most-once counting) or in a separate transaction from the effect — which reopens exactly the crash window the design closed.",
+      "fa": "ثبت offset قبل از اثر (شمارش at-most-once) یا در تراکنشی جدا از اثر — یعنی دقیقاً همون پنجرهٔ crashای که طراحی بسته بود، دوباره باز می‌شه."
     },
     {
-      "en": "Assuming rebalances are instant: the old owner keeps a live batch and a live pen, so without epoch fencing its writes land after the new owner's.",
-      "fa": "فرض این‌که rebalanceها فوری‌اند: مالک قدیم batch زنده و قلم زنده دارد، پس بدون fencing با epoch نوشته‌هایش بعد از مالک تازه می‌نشیند."
+      "en": "Assuming rebalances are instant. The old owner still holds a live batch and a live pen, so without epoch fencing its writes land after the new owner's.",
+      "fa": "فرض این‌که rebalanceها فوری‌اند. مالک قدیم هنوز یه batch زنده و یه قلم زنده داره، و بدون fencing با epoch نوشته‌هاش بعد از مالک تازه می‌نشینن."
     },
     {
-      "en": "Claiming exactly-once while an external side effect (push, SMS, email) rides the same path without its own idempotency key — the broker's guarantee never crosses that boundary.",
-      "fa": "ادعای exactly-once درحالی‌که اثر بیرونی (push، SMS، ایمیل) بدون کلید idempotency خودش سوار همان مسیر است — تضمین بروکر هرگز از آن مرز رد نمی‌شود."
+      "en": "Claiming exactly-once while an external side effect (push, SMS, email) rides the same path without its own idempotency key. The broker's guarantee never crosses that boundary.",
+      "fa": "ادعای exactly-once درحالی‌که یه اثر بیرونی (push، SMS، ایمیل) بدون کلید idempotency خودش سوار همون مسیره. تضمین بروکر هیچ‌وقت از اون مرز رد نمی‌شه."
     }
   ],
   "number": 1,
@@ -250,40 +250,40 @@
   ],
   "steps": [
     {
-      "en": "Route every click by user id and treat offsets as partition-scoped: the same number on two partitions orders nothing, so the checkpoint key always carries its (topic, partition).",
-      "fa": "هر کلیک را با user id مسیریابی کن و offsetها را پارتیشن‌محور بدان: یک عدد روی دو پارتیشن هیچ ترتیبی نمی‌سازد، پس کلید checkpoint همیشه (topic, partition) خودش را حمل می‌کند.",
-      "t_en": "Route by key, scope offsets",
-      "t_fa": "مسیریابی با کلید، قلمرو offset"
+      "en": "Route every click by user id and treat offsets as partition-scoped. The same number on two partitions orders nothing, so the checkpoint key always carries its (topic, partition).",
+      "fa": "هر کلیک را با user id مسیر بده و offsetها را پارتیشن‌محور ببین. یه عدد روی دو پارتیشن هیچ ترتیبی نمی‌سازه، و کلید checkpoint همیشه (topic, partition) خودش رو حمل می‌کنه.",
+      "t_en": "Key it, and scope the offsets",
+      "t_fa": "با کلید مسیر بده، offset را پارتیشن‌محور ببین"
     },
     {
-      "en": "Lock and read the partition checkpoint. Offsets at or below it have already applied. Process records in order and advance the checkpoint only with the committed batch effects.",
-      "fa": "checkpoint هر پارتیشن را قفل و خواندن کن؛ هر offset کوچک‌تر یا مساوی آن قبلاً اعمال شده است. recordها را به‌ترتیب جلو ببر و قبل از تمام‌شدن اثرهای batch checkpoint را جلو نبر.",
-      "t_en": "Guard every re-execution",
-      "t_fa": "نگهبان برای هر اجرای مجدد"
+      "en": "Lock the partition checkpoint and read it. Anything at or below that offset already went in. Walk the records in order, and don't move the checkpoint until the batch effects are committed.",
+      "fa": "checkpoint هر پارتیشن را قفل کن و بخوان. هر offset کوچک‌تر یا مساوی آن، قبلاً اعمال شده. recordها را به‌ترتیب جلو ببر و تا وقتی اثرهای batch تمام نشده، checkpoint را جلو نبر.",
+      "t_en": "Guard every replay",
+      "t_fa": "برای هر اجرای دوباره یک نگهبان بگذار"
     },
     {
-      "en": "Commit the effect and its checkpoint in one epoch-guarded transaction, so a crash between apply and commit leaves no half-state and a lost ack replays against an honest memory.",
-      "fa": "اثر و checkpoint آن را در یک تراکنش نگهبانی‌شده با epoch ثبت کن تا crash میان apply و commit هیچ نیم‌حالتی نگذارد و ack گم‌شده جلوی حافظه‌ای صادق بازپخش شود.",
-      "t_en": "Commit effect with checkpoint",
-      "t_fa": "ثبت اتمیک اثر و checkpoint"
+      "en": "Commit the effect and its checkpoint in one epoch-guarded transaction. Then a crash between apply and commit leaves no half-state behind, and a lost ack replays against an honest memory.",
+      "fa": "نکته‌ش اینجاست: اثر و checkpoint آن را در یک تراکنش نگهبانی‌شده با epoch ثبت کن. این‌طوری crash میان apply و commit هیچ نیم‌حالتی نمی‌گذارد و ack گم‌شده جلوی حافظه‌ای صادق بازپخش می‌شود.",
+      "t_en": "Commit the effect with the checkpoint",
+      "t_fa": "اثر و checkpoint را با هم ثبت کن"
     },
     {
-      "en": "Install new ownership through a sink ownership-transfer protocol. An old transaction must finish before transfer or fail its epoch check after transfer; Kafka group callbacks alone do not guarantee sink fencing.",
-      "fa": "مالک تازه epoch خود را با پروتکل انتقال مالکیت در sink ثبت می‌کند. تراکنش مالک قبلی باید پیش از انتقال تمام شود یا بعد از آن با epoch کهنه رد شود؛ صرف callback گروه Kafka تضمین sink نیست.",
+      "en": "Install the new ownership through a sink ownership-transfer protocol. An old transaction has to finish before the transfer, or fail its epoch check after it. Kafka group callbacks alone don't fence the sink.",
+      "fa": "مالک تازه epoch خودش را با پروتکل انتقال مالکیت در sink ثبت می‌کند. تراکنش مالک قبلی یا باید پیش از انتقال تمام شود، یا بعد از آن با epoch کهنه رد شود؛ صرف callback گروه Kafka تضمینِ sink نیست.",
       "t_en": "Fence the stale writer",
-      "t_fa": "فنس کردن نویسنده کهنه"
+      "t_fa": "نویسنده کهنه را فنس کن"
     },
     {
-      "en": "Never expire active checkpoints by TTL. If the earliest available record is beyond the next required offset, input is missing: explicitly rebuild or recover rather than silently skip ahead.",
-      "fa": "checkpoint فعال را با TTL پاک نکن. اگر نخستین offset موجود در لاگ از offset بعدی موردنیاز جلوتر باشد، بخشی از ورودی گم است و باید rebuild یا بازیابی صریح شود؛ از آن نقطه حدس نزن.",
+      "en": "Never expire active checkpoints by TTL. If the earliest record still in the log sits beyond the next offset you need, then input is missing: rebuild or recover explicitly instead of silently skipping ahead.",
+      "fa": "checkpoint فعال را با TTL پاک نکن. اگر نخستین offset موجود در لاگ از offset بعدیِ موردنیاز جلوتر بود، یه تیکه از ورودی گم است و باید rebuild یا بازیابیِ صریح بشه. از آن نقطه حدس نزن.",
       "t_en": "Name the boundaries",
-      "t_fa": "نام بردن مرزها"
+      "t_fa": "مرزها را نام ببر"
     }
   ],
-  "tests_en": "<p>Invariants: each user's total equals the sum of its applied deltas; checkpoints are monotonic per partition; a kill -9 plus ordered replay never moves a total. Measure consumer lag per partition, the redelivery-skip rate, and the fenced-write counter; alert when skips grow (broker trouble) or fences fire (ownership trouble). Local-run guide for a real broker (guide only, not executed here): run Kafka locally, create topic <code>clicks</code> with 3 partitions, produce keyed clicks, kill the consumer mid-batch and watch the totals stay put.</p>",
-  "tests_fa": "<p>ناورداها: total هر کاربر برابر جمع دلتاهای اعمال‌شده آن است؛ checkpointها per-partition صعودی‌اند؛ kill -9 به‌علاوه بازپخش مرتب هیچ totalای را تکان نمی‌دهد. lag مصرف‌کننده per-partition، نرخ skip تحویل مجدد و شمارنده write فنس‌شده را بسنج؛ وقتی skipها رشد کنند (دردسر بروکر) یا fenceها شلیک شوند (دردسر مالکیت) هشدار بده. راهنمای اجرای محلی برای بروکر واقعی (فقط راهنما، این‌جا اجرا نشده): کافکا را محلی بالا بیاور، تاپیک <code>clicks</code> با ۳ پارتیشن بساز، کلیک کلیددار produce کن، مصرف‌کننده را وسط batch بکش و ببین totalها سر جایشان می‌مانند.</p>",
-  "worked_en": "<p>The demo places u2 at P1 offsets 0..3 and u3 at 4..6; the shared P1 checkpoint becomes 6. After rebalance, u2’s next click is offset 7 and raises its total to 5. Offset 0 in P0 and P2 represents independent records; replay uses each partition checkpoint. A simulated pre-commit crash has no effect, while lost ACKs redeliver without changing totals.</p>",
-  "worked_fa": "<p>در دمو u2 چهار کلیک در P1 با offsetهای ۰ تا ۳ و u3 سه کلیک در همان پارتیشن با offsetهای ۴ تا ۶ دارد؛ checkpoint مشترک P1 پس از batch برابر ۶ است. بعد از rebalance، کلیک تازهٔ u2 در offset=7 آن را به ۵ می‌رساند. offset=0 در P0 و P2 پیام‌های مستقل‌اند؛ replay هر پارتیشن با checkpoint خودش سنجیده می‌شود. crash شبیه‌سازی‌شده پیش از commit اثر ندارد؛ ACK گمشده باعث تکرار تحویل می‌شود ولی total تغییر نمی‌کند.</p>",
-  "reasoning_fa": "<p>offset شمارهٔ موقعیت در یک partition است؛ offset=5 در دو partition دو پیام مستقل است. checkpoint و total در یک commit لازم‌اند چون جداشدنشان بین دوباره‌شمردن و جاانداختن انتخاب تحمیل می‌کند. قفل checkpoint، دو batch همان epoch را هم سریال می‌کند؛ epoch فقط مالک کهنه را رد می‌کند و جای lock هم‌مالک نیست. ۱۰هزار کلیک/ثانیه ورودی ظرفیت است؛ اندازهٔ batch از سقف lag و هزینهٔ commit انتخاب می‌شود. checkpoint فعال تاریخ انقضا ندارد؛ عقب‌افتادن از retention لاگ به recovery نیاز دارد.</p>",
-  "reasoning_en": "<p>An offset is a position within one partition; offset 5 in two partitions identifies two independent records. Commit checkpoints and totals together to avoid double counting or omission. Lock the checkpoint to serialize same-epoch batches; epoch fencing alone only rejects stale owners. Ten thousand clicks/s is a capacity input; choose batch size from lag and commit cost. Active checkpoints do not expire; falling behind log retention requires recovery.</p>"
+  "tests_en": "<p>Invariants: each user's total equals the sum of its applied deltas; checkpoints are monotonic per partition; a kill -9 plus ordered replay never moves a total. Measure three things: consumer lag per partition, the redelivery-skip rate and the fenced-write counter. When skips grow, the broker is in trouble; when fences fire, ownership is. Local-run guide on a real broker (guide only, not executed here): run Kafka locally, create topic <code>clicks</code> with 3 partitions, produce keyed clicks, kill the consumer mid-batch and watch the totals stay put.</p>",
+  "tests_fa": "<p>ناورداها: total هر کاربر برابر جمع دلتاهای اعمال‌شدهٔ خودش است؛ checkpointها per-partition صعودی‌اند؛ kill -9 به‌علاوهٔ بازپخش مرتب هیچ totalی را تکان نمی‌دهد. اندازه بگیر: lag مصرف‌کننده per-partition، نرخ skipِ تحویل مجدد و شمارندهٔ write فنس‌شده. وقتی skipها رشد کردند، دردسر از سمت بروکر است؛ وقتی fenceها شلیک شدند، دردسر از سمت مالکیت. راهنمای اجرای محلی روی بروکر واقعی (فقط راهنماست، این‌جا اجرا نشده): کافکا را محلی بالا بیاور، تاپیک <code>clicks</code> با ۳ پارتیشن بساز، کلیک کلیددار produce کن، مصرف‌کننده را وسط batch بکش و ببین totalها سر جایشان می‌مانند.</p>",
+  "worked_en": "<p>In the demo u2 sits at P1 offsets 0..3 and u3 at 4..6, so the shared P1 checkpoint becomes 6. After the rebalance, u2's next click lands on offset 7 and takes its total to 5. Offset 0 in P0 and P2 is two independent records; replay is measured against each partition's own checkpoint. A simulated pre-commit crash changes nothing, while lost ACKs redeliver without moving the totals.</p>",
+  "worked_fa": "<p>توی دمو u2 چهار کلیک در P1 دارد با offsetهای ۰ تا ۳ و u3 سه کلیک در همان پارتیشن با offsetهای ۴ تا ۶؛ و checkpoint مشترک P1 بعد از batch می‌شود ۶. بعد از rebalance، کلیک تازهٔ u2 با offset=7 می‌آید و totalش را به ۵ می‌رساند. offset=0 در P0 و P2 دو پیام مستقل‌اند؛ replay هر پارتیشن با checkpoint خودش سنجیده می‌شود. crash شبیه‌سازی‌شده قبل از commit هیچ اثری ندارد؛ ACK گمشده تحویل را تکرار می‌کند ولی total تکان نمی‌خورد.</p>",
+  "reasoning_fa": "<p>offset فقط شمارهٔ موقعیت توی یک partition است؛ offset=5 توی دو partition یعنی دو پیام مستقل. checkpoint و total باید توی یک commit باشن، چون جدا کردنشون انتخاب بدی بین «دوباره شمردن» و «جا انداختن» رو تحمیل می‌کنه. قفل checkpoint دو batch با همون epoch رو هم سریال می‌کنه؛ epoch فقط مالک کهنه رو رد می‌کنه و جای lock هم‌مالک رو نمی‌گیره. ۱۰هزار کلیک/ثانیه یه ورودیِ ظرفیته؛ اندازهٔ batch رو از سقف lag و هزینهٔ commit انتخاب می‌کنی. checkpoint فعال تاریخ انقضا نداره؛ عقب‌افتادن از retention لاگ به recovery نیاز داره.</p>",
+  "reasoning_en": "<p>An offset is just a position inside one partition; offset 5 in two partitions means two independent records. Checkpoint and total have to land in one commit, because splitting them forces a choice between double counting and dropping. Locking the checkpoint also serializes two batches with the same epoch; epoch fencing only turns stale owners away and is no substitute for that lock. Ten thousand clicks/s is a capacity input, and you pick the batch size from the lag ceiling and the commit cost. Active checkpoints don't expire, and falling behind log retention means you need recovery.</p>"
 }
