@@ -1,32 +1,32 @@
 {
   "alternatives": [
     {
-      "en": "Dedup on the natural payload (from, to, amount, window): no client change, but two intentional identical transfers inside one window collapse into one — silently dropping a real payment. Reserve for cases where repeats are never legitimate; money is not one of them.",
-      "fa": "تکراریابی روی payload طبیعی (مبدأ، مقصد، مبلغ، پنجره): بدون تغییر کلاینت، ولی دو انتقال عمدی یکسان در یک پنجره به یکی فرومی‌روند — یک پرداخت واقعی بی‌صدا گم می‌شود. فقط وقتی نگه دار که تکرار هیچ‌وقت مشروع نیست؛ پول از آن‌ها نیست."
+      "en": "Dedup on the natural payload (from, to, amount, window): the client doesn't change at all, but two intentional identical transfers inside one window collapse into one — a real payment silently disappears. Keep it only when a repeat is never legitimate; money is not one of those cases.",
+      "fa": "تکراریابی روی payload طبیعی (مبدأ، مقصد، مبلغ، پنجره): کلاینت را دست نمی‌زنی، ولی دو انتقال عمدیِ یکسان در یک پنجره به یکی فرومی‌روند — یعنی یک پرداخت واقعی بی‌صدا گم می‌شود. فقط نگهش دار وقتی تکرار هیچ‌وقت مشروع نیست؛ پول از آن‌ها نیست."
     },
     {
-      "en": "Two-phase commit across balance service and ledger: pays coordination cost for a problem one database transaction already solves here. Promote to 2PC only when legs genuinely live in different systems — that is exercise 3, not this one.",
-      "fa": "commit دوفازی بین سرویس موجودی و دفترکل: هزینه هماهنگی برای مسئله‌ای که یک تراکنش پایگاه داده همین‌جا حلش می‌کند. فقط وقتی به 2PC ارتقا بده که legها واقعاً در سیستم‌های مختلف‌اند — آن تمرین ۳ است نه این."
+      "en": "Two-phase commit across the balance service and the ledger: you pay a coordination cost for a problem one database transaction already solves right here. Promote to 2PC only when the legs genuinely live in different systems — that's exercise 3, not this one.",
+      "fa": "commit دوفازی بین سرویس موجودی و دفترکل: هزینهٔ هماهنگی برای مسئله‌ای که یک تراکنش پایگاه داده همین‌جا حلش می‌کند. فقط وقتی به 2PC ارتقا بده که legها واقعاً در سیستم‌های مختلف زندگی می‌کنند — آن تمرین ۳ است، نه این یکی."
     }
   ],
-  "answer_en": "Commit the request row FIRST under UNIQUE(request_id) in the same transaction as debit, credit and the input-log row; bind payload and result to that ID. A retry with the same ID returns the stored result without moving money; the same ID with a new payload is rejected; the same payload with a new ID is a new intentional transfer. Rebuild balances from the log alone to prove replay. The trade-off: one extra row write and UNIQUE contention per ID for an exactly-once effect over at-least-once delivery.",
-  "answer_fa": "اول سطر درخواست را با <span class=\"ltr\">UNIQUE(request_id)</span> در همان تراکنش بدهی و بستانکاری و سطر لاگ ورودی commit کن؛ payload و نتیجه را به همان شناسه bind کن. retry با همان شناسه نتیجه ذخیره‌شده را برمی‌گرداند بدون حرکت پول؛ همان شناسه با payload تازه رد می‌شود؛ همان payload با شناسه تازه یک انتقال عمدی تازه است. بالانس‌ها را فقط از لاگ بازسازی کن تا replay اثبات شود. تریدآف: یک سطر نوشتن اضافه و رقابت UNIQUE به‌ازای هر شناسه در برابر اثر دقیقاً-یک‌بار روی تحویلِ حداقل-یک‌بار.",
+  "answer_en": "Here's the thing: write the request row FIRST under UNIQUE(request_id), inside the very transaction that commits the debit, the credit and the input-log row, and bind the payload and the result to that same ID. From then on, a retry with the same ID only returns the stored result and no money moves; the same ID with a new payload is rejected; the same payload with a new ID is a new intentional transfer. Rebuild the balances from the log alone so the replay signs its own correctness. The trade-off: one extra row write and UNIQUE contention per ID, in exchange for an exactly-once effect over at-least-once delivery. — the whole game is played on that one ID, not on the money.",
+  "answer_fa": "قضیه اینه که: سطر درخواست را با <span class=\"ltr\">UNIQUE(request_id)</span> اول می‌نویسی، در همان تراکنشی که بستانکاری و سطر لاگ ورودی را commit می‌کند؛ payload و نتیجه را هم به همان شناسه bind می‌کنی. از این به بعد، retry با همان شناسه فقط نتیجهٔ ذخیره‌شده را برمی‌گرداند و پول تکان نمی‌خورد؛ همان شناسه با payload تازه رد می‌شود؛ همان payload با شناسهٔ تازه یک انتقال عمدی تازه است. بالانس‌ها را فقط از لاگ بازسازی کن تا خودِ replay سندِ درستی‌اش را امضا کند. تریدآف هم روشن است: یک سطر نوشتن اضافه و رقابت UNIQUE به‌ازای هر شناسه، در برابر اثر دقیقاً-یک‌بار روی تحویلِ حداقل-یک‌بار. — کل بازی سرِ همین یک شناسه است، نه سرِ پول.",
   "assumptions": [
     {
-      "en": "Single-ledger scope: both accounts live in one database, so one transaction can bind request, moves and log. Cross-system legs are exercise 3.",
-      "fa": "دامنه تک‌دفترکل: هر دو حساب در یک پایگاه داده‌اند، پس یک تراکنش می‌تواند درخواست و حرکت‌ها و لاگ را bind کند. legهای بین‌سیستمی تمرین ۳ است."
+      "en": "Picture the scope: single-ledger. Both accounts live in one database, so one transaction can bind the request, the moves and the log. The cross-system legs are exercise 3.",
+      "fa": "فرض کن دامنه تک‌دفترکله: هر دو حساب توی یه پایگاه داده‌ان، پس یه تراکنش می‌تونه درخواست و حرکت‌ها و لاگ رو bind کنه. legهای بین‌سیستمی تمرین ۳ است."
     },
     {
-      "en": "Teaching numbers: A=1000, B=500, req-7 moves 200. Small integers keep the replay check readable; they are not benchmarks.",
-      "fa": "اعداد آموزشی: A=1000 و B=500 و req-7 دویست واحد می‌برد. اعداد کوچک بررسی replay را خوانا نگه می‌دارند؛ بنچمارک نیستند."
+      "en": "The teaching numbers: A=1000, B=500, and req-7 moves 200. Small integers keep the replay check readable — they are not benchmarks.",
+      "fa": "اعداد آموزشی: A=1000 و B=500 و req-7 دویست واحد می‌بره. اعداد کوچک بررسی replay رو خوانا نگه می‌دارن؛ بنچمارک نیستند."
     },
     {
-      "en": "At-least-once delivery: replies can be lost, clients retry with the same ID, and concurrently arriving duplicates are possible.",
-      "fa": "تحویل حداقل-یک‌بار: پاسخ می‌تواند گم شود، کلاینت‌ها با همان شناسه retry می‌کنند و رسیدن هم‌زمان تکراری‌ها ممکن است."
+      "en": "Here's the thing: delivery is at-least-once. A reply can get lost, clients retry with the same ID, and duplicates can arrive at the same time.",
+      "fa": "قضیه اینه که: تحویل حداقل-یک‌باره — پاسخ می‌تونه گم بشه، کلاینت‌ها با همون شناسه retry می‌کنن، و رسیدن هم‌زمانِ تکراری‌ها هم ممکنه."
     },
     {
-      "en": "One ID per user intent, generated by the client (UUID). The server never invents IDs for client retries.",
-      "fa": "یک شناسه به‌ازای هر نیت کاربر، ساخته کلاینت (UUID). سرور برای retryهای کلاینت شناسه نمی‌سازد."
+      "en": "One ID per user intent, generated by the client (UUID). The server never invents an ID for client retries.",
+      "fa": "و یه قانون ساده: به‌ازای هر نیت کاربر یه شناسه، ساختهٔ کلاینت (UUID). سرور برای retryهای کلاینت شناسه نمی‌سازه."
     }
   ],
   "code": {
@@ -34,185 +34,185 @@
     "expected_en": "DEDUP returns the stored result with balances unchanged by the retry; reused ID with new payload is REJECTED; new ID with same payload moves money again; replay equals live (A=600, B=900); OK. (actual output of this environment)",
     "expected_fa": "DEDUP نتیجه ذخیره‌شده را برمی‌گرداند و retry بالانس را عوض نمی‌کند؛ شناسه تکراری با payload تازه REJECT می‌شود؛ شناسه تازه با همان payload دوباره پول می‌برد؛ replay برابر حالت زنده است (A=600 و B=900)؛ OK. (خروجی واقعی همین محیط)",
     "lang": "java",
-    "run_en": "javac TransferDemo.java && java TransferDemo — stdlib Java only, instant.",
-    "run_fa": "javac TransferDemo.java && java TransferDemo — فقط استاندارد جاوا، فوری.",
+    "run_en": "javac TransferDemo.java && java TransferDemo — stdlib Java only, instant, no dependencies.",
+    "run_fa": "javac TransferDemo.java && java TransferDemo — فقط استاندارد جاوا، فوری و بدون وابستگی.",
     "status": "verified"
   },
-  "design_en": "<p><b>Tables:</b> <span class=\"ltr\">requests(request_id PK, payload, status, result)</span>, <span class=\"ltr\">accounts(id, balance)</span>, and the requests column doubling as the input log. <b>API:</b> <span class=\"ltr\">POST /transfers {request_id, from, to, amount}</span> returns <span class=\"ltr\">200 {result}</span>, <span class=\"ltr\">409</span> on ID reuse with a different payload, <span class=\"ltr\">202 pending</span> while a concurrent twin is still working. <b>Write path:</b> BEGIN, INSERT request row, check funds, UPDATE both accounts, result stored, COMMIT — one transaction. <b>Read path:</b> statement reads come from the balance view rebuilt from the log; they may lag the commit by a bounded, measured delay.</p>",
-  "design_fa": "<p><b>جدول‌ها:</b> <span class=\"ltr\">requests(request_id PK, payload, status, result)</span> و <span class=\"ltr\">accounts(id, balance)</span> که ستون درخواست‌ها هم نقش لاگ ورودی را دارد. <b>API:</b> <span class=\"ltr\">POST /transfers {request_id, from, to, amount}</span> با <span class=\"ltr\">200 {result}</span> و <span class=\"ltr\">409</span> برای استفاده دوباره شناسه با payload متفاوت و <span class=\"ltr\">202 pending</span> وقتی دوقلوی هم‌زمان هنوز در حال کار است. <b>مسیر نوشتن:</b> BEGIN، درج سطر درخواست، چک موجودی، UPDATE هر دو حساب، ذخیره نتیجه، COMMIT — یک تراکنش. <b>مسیر خواندن:</b> خواندن‌های صورت‌حساب از نمای بالانسِ بازسازی‌شده از لاگ می‌آیند؛ ممکن است با تأخیر کران‌دار و اندازه‌گیری‌شده از commit عقب باشند.</p>",
+  "design_en": "<p><b>Tables:</b> <span class=\"ltr\">requests(request_id PK, payload, status, result)</span>, <span class=\"ltr\">accounts(id, balance)</span>, and the requests column doubling as the input log. <b>API:</b> <span class=\"ltr\">POST /transfers {request_id, from, to, amount}</span> hands back <span class=\"ltr\">200 {result}</span>, answers <span class=\"ltr\">409</span> when the same ID comes back with a different payload, and answers <span class=\"ltr\">202 pending</span> while a concurrent twin is still working. <b>Write path:</b> BEGIN, INSERT request row, check funds, UPDATE both accounts, result stored, COMMIT — all of it one transaction. <b>Read path:</b> statement reads come from the balance view rebuilt from the log; they may lag the commit by a bounded, measured delay. — one extra row, one less transaction; that's the whole design.</p>",
+  "design_fa": "<p><b>جدول‌ها:</b> <span class=\"ltr\">requests(request_id PK, payload, status, result)</span> و <span class=\"ltr\">accounts(id, balance)</span> — و ستون درخواست‌ها هم‌زمان نقش لاگ ورودی را هم بازی می‌کند. <b>API:</b> <span class=\"ltr\">POST /transfers {request_id, from, to, amount}</span> که <span class=\"ltr\">200 {result}</span> می‌دهد، برای استفادهٔ دوبارهٔ شناسه با payload متفاوت <span class=\"ltr\">409</span> می‌دهد، و <span class=\"ltr\">202 pending</span> می‌دهد وقتی دوقلوی هم‌زمان هنوز دارد کار می‌کند. <b>مسیر نوشتن:</b> BEGIN، درج سطر درخواست، چک موجودی، UPDATE هر دو حساب، ذخیرهٔ نتیجه، COMMIT — همه در یک تراکنش. <b>مسیر خواندن:</b> خواندن‌های صورت‌حساب از نمای بالانسِ بازسازی‌شده از لاگ می‌آیند، یعنی ممکن است با تأخیر کران‌دار و اندازه‌گیری‌شده از commit عقب باشند. — یک سطر بیشتر و یک تراکنش کمتر: همین، تمام طراحی است.</p>",
   "diagrams": [
     {
-      "caption_en": "INSERT-first commit, then a lost reply answered from the stored row",
-      "caption_fa": "commit با INSERT-first و پاسخ گم‌شده از سطر ذخیره‌شده",
+      "caption_en": "An INSERT-first commit, and a lost reply answered from the stored row",
+      "caption_fa": "commit با INSERT-first؛ پاسخ گم‌شده از سطر ذخیره‌شده برمی‌گردد",
       "file": "diagrams/sol1-step1-insert-first.html",
       "height": 640,
       "kind_en": "sequence: submit + retry",
       "kind_fa": "توالی: ثبت + retry",
       "made": "archify",
       "narration": {
-        "failure_en": "Trace the client bug on the same figure: if the retry carried a NEW id, the second INSERT would succeed and money would move twice — the ledger cannot tell a retry from a new intent when the client changes the key. Same payload is not the dedup key; the ID is.",
-        "failure_fa": "باگ کلاینت را روی همان شکل دنبال کن: اگر retry شناسه تازه می‌آورد، INSERT دوم موفق می‌شد و پول دوبار می‌رفت — دفترکل وقتی کلاینت کلید را عوض کند retry را از نیت تازه تشخیص نمی‌دهد. payload یکسان کلید تکراریابی نیست؛ شناسه است.",
-        "guarantee_en": "The figure shows one ID applied once across submit, loss and retry. It does not stop a user from paying twice on purpose with two IDs.",
-        "guarantee_fa": "شکل نشان می‌دهد یک شناسه در ثبت و گم‌شدن و retry یک بار اعمال می‌شود. جلوی پرداخت عمدی دوبار با دو شناسه را نمی‌گیرد.",
-        "nonguarantee_en": "It says nothing about cross-system legs (exercise 3) or how far behind the balance view may lag — freshness is a separate contract.",
-        "nonguarantee_fa": "درباره legهای بین‌سیستمی (تمرین ۳) و این‌که نمای بالانس چقدر می‌تواند عقب باشد چیزی نمی‌گوید — تازگی قرارداد جداست.",
-        "point_en": "The UNIQUE constraint turns a retry into a key lookup: conflict means read the stored row, never touch the balances.",
-        "point_fa": "قید UNIQUE retry را به lookup کلید تبدیل می‌کند: conflict یعنی سطر ذخیره‌شده را بخوان، هرگز به بالانس‌ها دست نزن.",
-        "scenario_en": "A client submits transfer req-7, the reply is lost on the wire, and the client retries. Read the lifelines top to bottom through the Submit band, then the Lost reply + retry band.",
-        "scenario_fa": "کلاینتی انتقال req-7 را ثبت می‌کند، پاسخ روی سیم گم می‌شود و کلاینت retry می‌کند. خط‌های زندگی را از بالا به پایین اول در باند ثبت و بعد در باند پاسخ‌گمشده و retry بخوان.",
+        "failure_en": "Trace the client bug on the same figure: if the retry carried a NEW id, the second INSERT would succeed and the money would move twice — the ledger can't tell a retry from a new intent once the client changes the key. The same payload is not the dedup key; the ID is.",
+        "failure_fa": "باگ کلاینت را روی همان شکل دنبال کن: اگر retry شناسهٔ تازه می‌آورد، INSERT دوم موفق می‌شد و پول دوبار می‌رفت — دفترکل وقتی کلاینت کلید را عوض کند، retry را از نیت تازه تشخیص نمی‌دهد. payload یکسان کلید تکراریابی نیست؛ شناسه است.",
+        "guarantee_en": "The figure shows one ID applied exactly once across submit, loss and retry. It does not stop a user from paying twice on purpose with two IDs.",
+        "guarantee_fa": "شکل نشان می‌دهد یک شناسه در ثبت و گم‌شدن و retry فقط یک بار اعمال می‌شود. جلوی پرداخت عمدی دوبار با دو شناسه را نمی‌گیرد.",
+        "nonguarantee_en": "It says nothing about cross-system legs (exercise 3) or how far the balance view may lag — freshness is a separate contract.",
+        "nonguarantee_fa": "دربارهٔ legهای بین‌سیستمی (تمرین ۳) و این‌که نمای بالانس چقدر می‌تواند عقب باشد چیزی نمی‌گوید — تازگی، قرارداد جداست.",
+        "point_en": "The UNIQUE constraint turns a retry into a key lookup: a conflict means read the stored row, never touch the balances.",
+        "point_fa": "قید UNIQUE کار را راحت می‌کند: retry تبدیل به lookup کلید می‌شود — conflict یعنی سطر ذخیره‌شده را بخوان، هرگز به بالانس‌ها دست نزن.",
+        "scenario_en": "A client submits transfer req-7, the reply is lost on the wire, and the client retries. Read the lifelines from the top down: first the Submit band, then the Lost reply + retry band.",
+        "scenario_fa": "کلاینتی انتقال req-7 را ثبت می‌کند، پاسخ روی سیم گم می‌شود و کلاینت retry می‌کند. خط‌های زندگی را از بالا به پایین بخوان: اول باند ثبت، بعد باند پاسخ‌گمشده و retry.",
         "steps": [
           {
-            "en": "Top: POST id=req-7 reaches the API; inside one transaction the API INSERTs the request row, debits A, credits B and appends the log row, then commits.",
-            "fa": "بالا: POST با id=req-7 به API می‌رسد؛ API در یک تراکنش سطر درخواست را INSERT می‌کند، از A کم و به B اضافه می‌کند و سطر لاگ را می‌افزاید و بعد commit می‌کند."
+            "en": "Top: the POST with id=req-7 reaches the API; inside one transaction the API INSERTs the request row, debits A, credits B, appends the log row and then commits — all of it in one transaction.",
+            "fa": "بالا: POST با id=req-7 به API می‌رسد؛ API در یک تراکنش سطر درخواست را INSERT می‌کند، از A کم و به B اضافه می‌کند، سطر لاگ را می‌افزاید و بعد commit می‌کند — همه در یک تراکنش."
           },
           {
-            "en": "The 200 OK is LOST: the client cannot tell commit from failure, so the only safe move is retrying with the SAME id and SAME payload.",
-            "fa": "پاسخ 200 گم می‌شود: کلاینت commit را از شکست تشخیص نمی‌دهد، پس تنها حرکت امن retry با همان شناسه و همان payload است."
+            "en": "The 200 OK is LOST: the client can't tell a commit from a failure, so the only safe move is to retry with the SAME id and SAME payload.",
+            "fa": "پاسخ 200 گم می‌شود: کلاینت نمی‌تواند commit را از شکست تشخیص دهد، و تنها حرکت امن، retry با همان شناسه و همان payload است."
           },
           {
-            "en": "The retry's INSERT hits the UNIQUE conflict; the API reads the stored SUCCESS row and returns the same result — balances do not move again.",
-            "fa": "INSERTِ retry به conflict یکتایی می‌خورد؛ API سطر SUCCESS ذخیره‌شده را می‌خواند و همان نتیجه را برمی‌گرداند — بالانس‌ها دوباره تکان نمی‌خورند."
+            "en": "The retry's INSERT hits the UNIQUE conflict; the API reads the stored SUCCESS row and hands back the same result — the balances don't move a second time.",
+            "fa": "INSERTِ retry به conflict یکتایی می‌خورد؛ API سطر SUCCESS ذخیره‌شده را می‌خواند و همان نتیجه را برمی‌گرداند — بالانس‌ها یک بار هم تکان نمی‌خورند."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "INSERT (or conflict-check) the request row before touching balances; on conflict, return the stored result for the same payload or reject a changed payload.",
-        "a_fa": "قبل از دست زدن به بالانس‌ها سطر درخواست را INSERT (یا conflict-check) کن؛ روی conflict برای payload یکسان نتیجه ذخیره‌شده را برگردان یا payload عوض‌شده را رد کن.",
-        "q_en": "A retry arrives while the first attempt may or may not have committed. What does the API do before touching balances?",
-        "q_fa": "یک retry می‌رسد درحالی‌که تلاش اول ممکن است commit شده باشد یا نه. API قبل از دست زدن به بالانس‌ها چه می‌کند؟"
+        "a_en": "INSERT (or conflict-check) the request row before touching the balances; on a conflict, return the stored result for the same payload, or reject a changed payload.",
+        "a_fa": "قبل از دست زدن به بالانس‌ها سطر درخواست را INSERT (یا conflict-check) می‌کند؛ روی conflict، برای payload یکسان نتیجهٔ ذخیره‌شده را برمی‌گرداند یا payload عوض‌شده را رد می‌کند.",
+        "q_en": "A retry arrives while the first attempt may or may not have committed. What does the API do before it touches the balances?",
+        "q_fa": "یک retry می‌رسد درحالی‌که تلاش اول شاید commit شده باشد شاید نه. API قبل از دست زدن به بالانس‌ها چه می‌کند؟"
       },
       "source": "assets/diagram-specs/solutions/ch13/sol1-step1-insert-first.json"
     },
     {
-      "caption_en": "Same key retried over time; the balance steps once and stays flat",
-      "caption_fa": "کلید یکسان در طول زمان retry می‌شود؛ بالانس یک پله می‌رود و تخت می‌ماند",
+      "caption_en": "The same key retried over time; the balance steps once and stays flat",
+      "caption_fa": "همان کلید در طول زمان retry می‌شود؛ بالانس یک پله می‌رود و تخت می‌ماند",
       "file": "diagrams/sol1-step2-retry-timeline.html",
       "height": 640,
       "kind_en": "timeline: duplicates",
       "kind_fa": "خط زمانی: تکراری‌ها",
       "made": "hand",
       "narration": {
-        "failure_en": "Trace a new-ID retry on the middle lane: the balance would step a second time to 600 — the chart makes a client-side key bug visible as a second step instead of hiding it in prose.",
-        "failure_fa": "retry با شناسه تازه را روی لاین وسط دنبال کن: بالانس پله دوم تا ۶۰۰ می‌رفت — نمودار باگ کلیدی سمت کلاینت را به‌صورت پله دوم نمایان می‌کند نه پنهان در متن.",
-        "guarantee_en": "The figure shows exactly-once effect for one key across loss and retry. It does not bound how long the client waits before retrying.",
-        "guarantee_fa": "شکل اثر دقیقاً-یک‌بار یک کلید در گم‌شدن و retry را نشان می‌دهد. نمی‌گوید کلاینت چقدر صبر می‌کند بعد retry می‌زند.",
-        "nonguarantee_en": "It says nothing about concurrent same-ID arrivals racing each other — that serialization belongs to the sequence figure and the follow-up answer.",
-        "nonguarantee_fa": "درباره رسیدن هم‌زمان مسابقه‌ای همان شناسه چیزی نمی‌گوید — آن سریال‌سازی مال شکل توالی و پاسخ پیگیری است.",
-        "point_en": "The flat middle lane is the proof: after the commit step, every retry leaves the balance line horizontal.",
-        "point_fa": "لاین تخت وسط همان اثبات است: بعد از پله commit، هر retry خط بالانس را افقی نگه می‌دارد.",
-        "scenario_en": "The same req-7 story drawn against time. Top lane: the five attempts left to right. Middle lane: balance A stepping once, then flat. Bottom lane: the three ID rules.",
-        "scenario_fa": "همان داستان req-7 کشیده‌شده روی زمان. لاین بالا: پنج تلاش چپ‌به‌راست. لاین وسط: بالانس A که یک پله می‌رود بعد تخت. لاین پایین: سه قانون شناسه.",
+        "failure_en": "Trace a new-ID retry on the middle lane: the balance would step a second time down to 600 — the chart makes a client-side key bug visible as that second step instead of hiding it in prose.",
+        "failure_fa": "retry با شناسهٔ تازه را روی لاین وسط دنبال کن: بالانس پلهٔ دوم را تا ۶۰۰ می‌رفت — نمودار باگ کلیدی سمت کلاینت را به‌صورت پلهٔ دوم نشان می‌دهد، نه پنهان در متن.",
+        "guarantee_en": "The figure shows the exactly-once effect for one key across loss and retry. It doesn't bound how long the client waits before retrying.",
+        "guarantee_fa": "شکل اثر دقیقاً-یک‌بار برای یک کلید در گم‌شدن و retry را نشان می‌دهد. نمی‌گوید کلاینت چقدر صبر می‌کند بعد retry می‌زند.",
+        "nonguarantee_en": "It says nothing about concurrent same-ID arrivals racing each other — that serialization lives in the sequence figure and the follow-up answer.",
+        "nonguarantee_fa": "دربارهٔ رسیدن هم‌زمانِ مسابقه‌ای همان شناسه چیزی نمی‌گوید — آن سریال‌سازی مال شکل توالی و پاسخ پیگیری است.",
+        "point_en": "The flat middle lane is the proof: after the commit step, every retry leaves the balance line flat.",
+        "point_fa": "لاین تختِ وسط همان اثبات است: بعد از پلهٔ commit، هر retry خط بالانس را افقی نگه می‌دارد.",
+        "scenario_en": "The same req-7 story, this time drawn against time. Top lane: the five attempts left to right. Middle lane: balance A stepping once, then flat. Bottom lane: the three ID rules.",
+        "scenario_fa": "همان داستان req-7، این بار کشیده‌شده روی زمان. لاین بالا: پنج تلاش چپ‌به‌راست. لاین وسط: بالانس A که یک پله می‌رود و بعد تخت می‌ماند. لاین پایین: سه قانون شناسه.",
         "steps": [
           {
-            "en": "Top: submit, commit ok, reply LOST, retry with the same id and payload, stored result returned with no money moved.",
-            "fa": "بالا: ثبت، commit موفق، پاسخ گمشده، retry با همان شناسه و payload، و نتیجه ذخیره‌شده بدون حرکت پول."
+            "en": "Top: submit, commit ok, reply LOST, retry with the same id and payload, and the stored result comes back with no money moved.",
+            "fa": "بالا: ثبت، commit موفق، پاسخ گمشده، retry با همان شناسه و payload، و نتیجهٔ ذخیره‌شده بدون حرکت پول."
           },
           {
-            "en": "Middle: A steps 1000 to 800 at the commit and stays 800 through the retry — a second step here would mean a double-spend.",
-            "fa": "وسط: A موقع commit از ۱۰۰۰ به ۸۰۰ می‌رود و در retry همان ۸۰۰ می‌ماند — پله دوم یعنی خرج دوباره."
+            "en": "Middle: A steps 1000 to 800 at the commit and stays 800 through the retry — a second step there would mean a double-spend.",
+            "fa": "وسط: A موقع commit از ۱۰۰۰ به ۸۰۰ می‌رود و در retry همان ۸۰۰ می‌ماند — یعنی پلهٔ دوم همان خرج دوباره است."
           },
           {
-            "en": "Bottom: same id plus same payload dedups; same id plus new payload is rejected; new id plus same payload is a new transfer.",
-            "fa": "پایین: شناسه یکسان با payload یکسان dedup می‌شود؛ شناسه یکسان با payload تازه رد می‌شود؛ شناسه تازه با payload یکسان انتقال تازه است."
+            "en": "Bottom: the same id with the same payload dedups; the same id with a new payload is rejected; a new id with the same payload is a new transfer.",
+            "fa": "پایین: شناسهٔ یکسان با payload یکسان dedup می‌شود؛ شناسهٔ یکسان با payload تازه رد می‌شود؛ شناسهٔ تازه با payload یکسان انتقال تازه است."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "The middle balance lane: one step at commit, flat through every retry. Any second step is the double-spend made visible.",
-        "a_fa": "لاین وسط بالانس: یک پله موقع commit و تخت در همه retryها. هر پله دوم همان خرج دوباره نمایان‌شده است.",
-        "q_en": "Which lane of the figure proves the exactly-once effect, and what would a violation look like on it?",
-        "q_fa": "کدام لاین شکل اثر دقیقاً-یک‌بار را اثبات می‌کند و نقضش روی آن چه شکلی است؟"
+        "a_en": "The middle balance lane: one step at the commit, flat through every retry. Any second step is the double-spend made visible.",
+        "a_fa": "لاین وسطِ بالانس: یک پله موقع commit و تخت در همهٔ retryها. هر پلهٔ دوم همان خرج دوبارهٔ نمایان‌شده است.",
+        "q_en": "Which lane of the figure proves the exactly-once effect, and what would a violation look like there?",
+        "q_fa": "کدام لاین شکل اثر دقیقاً-یک‌بار را اثبات می‌کند و نقضش روی همان لاین چه شکلی است؟"
       }
     },
     {
-      "caption_en": "One atomic commit feeding the client reply and an independent replay",
-      "caption_fa": "یک commit اتمی که پاسخ کلاینت و replay مستقل را تغذیه می‌کند",
+      "caption_en": "One atomic commit feeding both the client reply and an independent replay",
+      "caption_fa": "یک commit اتمی که هم پاسخ کلاینت را می‌دهد هم replay مستقل را راه می‌اندازد",
       "file": "diagrams/sol1-transfer-thread.html",
       "height": 640,
       "kind_en": "dataflow: write + read + replay",
       "kind_fa": "جریان‌داده: نوشتن و خواندن و replay",
       "made": "archify",
       "narration": {
-        "failure_en": "Trace replay mismatch on the same figure: if the Replay job's output ever differs from the Ledger at the same log offset, the fault is a projection bug, not lag — lag only explains a behind-but-consistent view, and the lag board in exercise 4 watches exactly that.",
-        "failure_fa": "ناسازگاری replay را روی همان شکل دنبال کن: اگر خروجی کار replay در یک آفست یکسان لاگ با دفترکل فرق کند، عیب باگ projection است نه lag — lag فقط نمای عقب‌مانده ولی سازگار را توضیح می‌دهد و تابلوی lag در تمرین ۴ دقیقاً همان را می‌پاید.",
-        "guarantee_en": "The figure shows one commit feeding two independent consumers. It does not promise the balance view is fresh — reads may lag.",
-        "guarantee_fa": "شکل نشان می‌دهد یک commit دو مصرف‌کننده مستقل را تغذیه می‌کند. تازه بودن نمای بالانس را قول نمی‌دهد — خواندن‌ها ممکن است عقب باشند.",
-        "nonguarantee_en": "It says nothing about how the replay consumer scales or how ledgers in different systems agree — partitioning and multishard are later exercises.",
-        "nonguarantee_fa": "درباره مقیاس مصرف‌کننده replay یا توافق دفترکل‌های سیستم‌های مختلف چیزی نمی‌گوید — پارتیشن‌بندی و چندshardی تمرین‌های بعدی‌اند.",
-        "point_en": "One atomic commit, two consumers: the client reply reads the stored row, the replay job reads the log rows. Neither path writes fresh input.",
-        "point_fa": "یک commit اتمی و دو مصرف‌کننده: پاسخ کلاینت سطر ذخیره‌شده را می‌خواند و کار replay سطرهای لاگ را. هیچ‌کدام ورودی تازه نمی‌نویسند.",
-        "scenario_en": "The whole thread left to right: Write (client submits and retries), Commit (the INSERT-first API), Record (the ledger), Replay (the independent job rebuilding balances), Read (statement reads that may lag).",
-        "scenario_fa": "کل نخ چپ‌به‌راست: نوشتن (کلاینت ثبت و retry می‌کند)، commit (API با INSERT-first)، ثبت (دفترکل)، replay (کار مستقلی که بالانس‌ها را بازمی‌سازد) و خواندن (خواندن‌های صورت‌حساب که ممکن است عقب باشند).",
+        "failure_en": "Trace a replay mismatch on the same figure: if the Replay job's output ever differs from the Ledger at the same log offset, the fault is a projection bug, not lag — lag only explains a behind-but-consistent view, and the lag board in exercise 4 watches exactly that.",
+        "failure_fa": "ناسازگاری replay را روی همان شکل دنبال کن: اگر خروجی کار replay در یک آفست یکسانِ لاگ با دفترکل فرق کند، عیب باگ projection است نه lag — lag فقط نمای عقب‌مانده ولی سازگار را توضیح می‌دهد، و تابلوی lag در تمرین ۴ دقیقاً همان را می‌پاید.",
+        "guarantee_en": "The figure shows one commit feeding two independent consumers. It doesn't promise the balance view is fresh — reads may lag.",
+        "guarantee_fa": "شکل نشان می‌دهد یک commit دو مصرف‌کنندهٔ مستقل را راه می‌اندازد. تازه بودن نمای بالانس را قول نمی‌دهد — خواندن‌ها ممکن است عقب باشند.",
+        "nonguarantee_en": "It says nothing about how the replay consumer scales, or how ledgers in different systems agree — partitioning and multishard are later exercises.",
+        "nonguarantee_fa": "دربارهٔ مقیاس مصرف‌کنندهٔ replay یا توافق دفترکل‌های سیستم‌های مختلف چیزی نمی‌گوید — پارتیشن‌بندی و چندshardی، تمرین‌های بعدی‌اند.",
+        "point_en": "One atomic commit, two consumers: the client reply reads the stored row, the replay job reads the log rows. Neither path writes any fresh input.",
+        "point_fa": "یک commit اتمی و دو مصرف‌کننده: پاسخ کلاینت سطر ذخیره‌شده را می‌خواند، کار replay سطرهای لاگ را. هیچ‌کدام ورودی تازه نمی‌نویسند.",
+        "scenario_en": "Read the whole thread left to right: Write (the client submits and retries), Commit (the INSERT-first API), Record (the ledger), Replay (the independent job rebuilding balances), Read (statement reads that may lag).",
+        "scenario_fa": "کل نخ را چپ‌به‌راست بخوان: نوشتن (کلاینت ثبت و retry می‌کند)، commit (API با INSERT-first)، ثبت (دفترکل)، replay (کار مستقلی که بالانس‌ها را بازمی‌سازد) و خواندن (خواندن‌های صورت‌حساب که ممکن است عقب باشند).",
         "steps": [
           {
-            "en": "Client to API: POST plus same-id retries; API to Ledger: one atomic txn of request plus moves plus log; Ledger back: commit ok or the stored row on conflict.",
-            "fa": "کلاینت به API: ثبت با retryهای همان شناسه؛ API به دفترکل: یک تراکنش اتمی درخواست با حرکت‌ها با لاگ؛ دفترکل به API: commit موفق یا سطر ذخیره‌شده روی conflict."
+            "en": "Client to API: the POST plus same-id retries; API to Ledger: one atomic txn of request plus moves plus log; Ledger back: commit ok, or the stored row on a conflict.",
+            "fa": "کلاینت به API: ثبت با retryهای همان شناسه؛ API به دفترکل: یک تراکنش اتمی برای درخواست و حرکت‌ها و لاگ؛ دفترکل به API: commit موفق یا سطر ذخیره‌شده روی conflict."
           },
           {
-            "en": "Ledger to Replay job: log rows in order; job to Balance view: recomputed balances from the log alone.",
-            "fa": "دفترکل به کار replay: سطرهای لاگ به‌ترتیب؛ کار به نمای بالانس: بالانس‌های بازمحاسبه‌شده فقط از لاگ."
+            "en": "Ledger to Replay job: the log rows in order; job to Balance view: recomputed balances from the log alone — not a drop of fresh input.",
+            "fa": "دفترکل به کار replay: سطرهای لاگ به‌ترتیب؛ کار به نمای بالانس: بالانس‌های بازمحاسبه‌شده فقط از لاگ — بدون یک ذره ورودی تازه."
           },
           {
-            "en": "Balance view to statement reads: served reads that may lag the commit by a bounded delay — freshness is measured, not assumed.",
-            "fa": "نمای بالانس به خواندن‌های صورت‌حساب: خواندن‌های سروشده که ممکن است با تأخیر کران‌دار از commit عقب باشند — تازگی اندازه‌گیری می‌شود نه فرض."
+            "en": "Balance view to statement reads: the served reads, which may lag the commit by a bounded delay — freshness is measured, not assumed.",
+            "fa": "نمای بالانس به خواندن‌های صورت‌حساب: خواندن‌های سروشده که ممکن است با تأخیر کران‌دار از commit عقب باشند — تازگی اندازه‌گیری می‌شود، نه فرض."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "The client result (from the stored request row) and the replay job (from the log rows). Fresh input enters through neither.",
-        "a_fa": "نتیجه کلاینت (از سطر درخواست ذخیره‌شده) و کار replay (از سطرهای لاگ). ورودی تازه از هیچ‌کدام وارد نمی‌شود.",
-        "q_en": "Name the two independent consumers of the one atomic commit.",
-        "q_fa": "دو مصرف‌کننده مستقل آن یک commit اتمی را نام ببر."
+        "a_en": "The client result (from the stored request row) and the replay job (from the log rows). Fresh input comes in through neither of them.",
+        "a_fa": "نتیجهٔ کلاینت (از سطر درخواست ذخیره‌شده) و کار replay (از سطرهای لاگ). ورودی تازه از هیچ‌کدام وارد نمی‌شود.",
+        "q_en": "Name the two independent consumers of that one atomic commit.",
+        "q_fa": "دو مصرف‌کنندهٔ مستقلِ آن یک commit اتمی را نام ببر."
       },
       "source": "assets/diagram-specs/solutions/ch13/sol1-transfer-thread.json"
     }
   ],
   "failures": [
     {
-      "en": "Concurrent same-ID arrivals: both INSERTs race; the UNIQUE constraint admits exactly one. The loser must read the row — SUCCESS returns the stored result, PENDING returns 202 plus a poll location — and must never compute a second transfer.",
-      "fa": "رسیدن هم‌زمان همان شناسه: هر دو INSERT مسابقه می‌دهند؛ قید یکتایی دقیقاً یکی را می‌پذیرد. بازنده باید سطر را بخواند — SUCCESS نتیجه ذخیره‌شده را برمی‌گرداند و PENDING با ۲۰۲ و محل poll — و هرگز نباید انتقال دوم محاسبه کند."
+      "en": "Concurrent same-ID arrivals: both INSERTs race and the UNIQUE constraint lets exactly one through. The loser must read the row — SUCCESS hands back the stored result, PENDING hands back 202 plus a poll location — and must never compute a second transfer.",
+      "fa": "رسیدن هم‌زمان همان شناسه: هر دو INSERT مسابقه می‌دهند و قید یکتایی دقیقاً یکی را راه می‌دهد. بازنده باید سطر را بخواند — SUCCESS نتیجهٔ ذخیره‌شده را برمی‌گرداند، PENDING با ۲۰۲ و محل poll — و هرگز نباید انتقال دوم را محاسبه کند."
     },
     {
-      "en": "Crash between commit and reply: indistinguishable from a slow commit at the client. Guard is the same-ID retry plus the stored result; the client resolves doubt by querying the request ID, never by minting a new one.",
-      "fa": "crash بین commit و پاسخ: در کلاینت از commit کند قابل‌تشخیص نیست. نگهبان همان retry با شناسه یکسان با نتیجه ذخیره‌شده است؛ کلاینت تردید را با پرس‌وجوی شناسه درخواست حل می‌کند نه با ساختن شناسه تازه."
+      "en": "Crash between commit and reply: from the client's seat, a slow commit looks exactly like a failure. The guard is the same-ID retry plus the stored result; the client settles its doubt by querying the request ID, never by minting a new one.",
+      "fa": "crash بین commit و پاسخ: از بیرونِ کلاینت، commit کند از شکست قابل‌تشخیص نیست. نگهبان همان retry با شناسهٔ یکسان به‌علاوهٔ نتیجهٔ ذخیره‌شده است؛ کلاینت تردیدش را با پرس‌وجوی شناسهٔ درخواست حل می‌کند، نه با ساختن شناسهٔ تازه."
     },
     {
-      "en": "Replay consumer lag or stall: readers see stale balances. Guard with a bounded lag metric and alert; lag explains behind-but-consistent views only — same-offset differences are corruption (exercise 4).",
-      "fa": "lag یا توقف مصرف‌کننده replay: خواننده‌ها بالانس کهنه می‌بینند. نگهبان متریک lag کران‌دار با هشدار است؛ lag فقط نمای عقب‌مانده ولی سازگار را توضیح می‌دهد — اختلاف در آفست یکسان corruption است (تمرین ۴)."
+      "en": "Replay consumer lag or stall: readers see stale balances. The guard is a bounded lag metric plus an alert; lag explains behind-but-consistent views only — a same-offset difference is corruption (exercise 4).",
+      "fa": "lag یا توقف مصرف‌کنندهٔ replay: خواننده‌ها بالانس کهنه می‌بینند. نگهبانش یک متریک lag کران‌دار با هشدار است؛ lag فقط نمای عقب‌مانده ولی سازگار را توضیح می‌دهد — اختلاف در آفست یکسان یعنی corruption (تمرین ۴)."
     }
   ],
   "followups": [
     {
-      "a_en": "The UNIQUE constraint serializes them: one INSERT wins and runs the transfer; the other gets a key conflict and reads the row. If the row already says SUCCESS, return the stored result. If it still says PENDING (the winner is mid-transaction), return 202 pending with a poll location — and never start a second computation. The pending state needs a timeout: a crashed winner must eventually roll its row to FAILED so waiters stop polling.",
-      "a_fa": "قید یکتایی آن‌ها را سریال می‌کند: یک INSERT می‌برد و انتقال را اجرا می‌کند؛ دیگری conflict کلید می‌گیرد و سطر را می‌خواند. اگر سطر از قبل SUCCESS می‌گوید نتیجه ذخیره‌شده را برگردان. اگر هنوز PENDING می‌گوید (برنده وسط تراکنش است) ۲۰۲ در حال انجام با محل poll برگردان — و هرگز محاسبه دوم شروع نکن. حالت pending به timeout نیاز دارد: برنده crashکرده باید بالاخره سطرش را به FAILED بغلتاند تا منتظرها از poll دست بکشند.",
+      "a_en": "The UNIQUE constraint serializes them: one INSERT wins and runs the transfer, the other gets a key conflict and reads the row. If the row already says SUCCESS, hand back the stored result. If it still says PENDING (the winner is mid-transaction), hand back 202 pending with a poll location — and never start a second computation. The pending state needs a timeout too: a winner that crashed must eventually roll its row to FAILED so the waiters stop polling.",
+      "a_fa": "قید یکتایی کار را سریال می‌کند: یک INSERT می‌برد و انتقال را اجرا می‌کند؛ دیگری conflict کلید می‌گیرد و سطر را می‌خواند. اگر سطر از قبل SUCCESS می‌گوید، نتیجهٔ ذخیره‌شده را برگردان. اگر هنوز PENDING می‌گوید (یعنی برنده وسط تراکنش است)، ۲۰۲ در حال انجام با محل poll برگردان — و هرگز محاسبهٔ دوم را شروع نکن. حالت pending هم timeout می‌خواهد: برنده‌ای که crash کرده باید بالاخره سطرش را به FAILED بغلتاند تا منتظرها از poll دست بکشند.",
       "level": "senior",
       "q_en": "Two requests with the same ID arrive concurrently. How do you return success or pending?",
       "q_fa": "دو درخواست هم‌زمان با یه ID برسن؛ پاسخ موفق یا pending رو چطور تعیین می‌کنی؟"
     },
     {
-      "a_en": "It does not retry; the money already moved. The client recovers certainty by reading the request ID (GET /transfers/{id}) or its statement: the stored result is the receipt. Design rule: every mutating response includes the request ID, so a lost reply is always re-resolvable without a new intent.",
-      "a_fa": "retry نمی‌کند؛ پول قبلاً رفته. کلاینت با خواندن شناسه درخواست (GET /transfers/{id}) یا صورت‌حسابش قطعیت را برمی‌گرداند: نتیجه ذخیره‌شده همان رسید است. قاعده طراحی: هر پاسخ جهش‌دهنده شناسه درخواست را دارد تا پاسخ گمشده همیشه بدون نیت تازه قابل‌حل دوباره باشد.",
+      "a_en": "It doesn't retry — the money already moved and nothing is coming back. The client gets its certainty back by reading the request ID (GET /transfers/{id}) or its statement: the stored result is the receipt. Design rule: every mutating response carries the request ID, so a lost reply is always re-resolvable without a new intent.",
+      "a_fa": "retry نمی‌کند؛ پول رفته و برگشتی در کار نیست. کلاینت با خواندن شناسهٔ درخواست (GET /transfers/{id}) یا صورت‌حسابش دوباره مطمئن می‌شود: نتیجهٔ ذخیره‌شده همان رسید است. قاعدهٔ طراحی: هر پاسخ جهش‌دهنده شناسهٔ درخواست را همراه دارد، تا پاسخ گمشده همیشه بدون نیت تازه دوباره قابل‌حل باشد.",
       "level": "senior",
-      "q_en": "The client never retries after a lost reply. Is money lost?",
-      "q_fa": "کلاینت بعد از پاسخ گمشده هیچ‌وقت retry نمی‌کند. پول گم شده؟"
+      "q_en": "The client never retries after the reply is lost. Is the money lost?",
+      "q_fa": "کلاینت بعد از گم شدن پاسخ، هیچ‌وقت retry نمی‌کند. یعنی پول گم شده؟"
     }
   ],
   "interview_q_en": "Picture this, you're designing a transfer API between two accounts. You carry a request ID end to end, from client to DB. You bind payload and result to that ID; your UNIQUE constraint, debit and credit, and log commit together. You handle the lost commit response plus retry, and you rebuild balance projections independently from the log.",
   "interview_q_fa": "فرض کن API انتقال بین دو حساب داری. request ID رو از client تا DB ببر. payload و نتیجه رو به ID بچسبون؛ UNIQUE، debit و credit و log باید اتمیک باشن. پاسخ commit گم‌شده و retry رو تحلیل کن و projection موجودی رو مستقل از log بساز.",
-  "mental_en": "A post office with a receipt book: every letter gets a numbered receipt BEFORE any money moves, and the receipt already names the result. A lost copy of the receipt never re-sends the money — the clerk looks up the number and hands over the same receipt again. A different letter needs a new number; the same number on a different letter is forgery and gets rejected.",
-  "mental_fa": "اداره پست با دفتر رسید: هر نامه پیش از حرکت پول یک رسید شماره‌دار می‌گیرد و رسید از قبل نتیجه را نام می‌برد. گم‌شدن کپی رسید هرگز پول را دوباره نمی‌فرستد — کارمند شماره را پیدا می‌کند و همان رسید را دوباره می‌دهد. نامه متفاوت شماره تازه می‌خواهد؛ همان شماره روی نامه متفاوت جعل است و رد می‌شود.",
+  "mental_en": "Picture a post office with a receipt book: every letter gets a numbered receipt BEFORE any money moves, and the receipt already names the result. Lose the copy of a receipt and the money never goes out twice — the clerk looks up the number and hands over the same receipt again. A different letter needs a new number; the same number on a different letter is forgery and gets rejected. — the receipt isn't the letter; the receipt is what makes the letter un-repeatable.",
+  "mental_fa": "فرض کن یه اداره پست با دفتر رسید داری: هر نامه پیش از آن‌که پولی تکان بخوره یک رسید شماره‌دار می‌گیرد، و روی همان رسید از قبل نوشته شده نتیجه چیست. کپی رسید گم بشه، پول دوباره راه نمی‌افته — کارمند شماره را پیدا می‌کند و همان رسید را دوباره می‌دهد. نامهٔ متفاوت شمارهٔ تازه می‌خواهد؛ همان شماره روی نامهٔ متفاوت جعل است و رد می‌شود. — رسید خودِ نامه نیست؛ رسید کاری می‌کند که نامه تکرارناپذیر شود.",
   "mistakes": [
     {
-      "en": "Two bare UPDATEs with no request row: the retry cannot be distinguished from a new transfer, so money moves twice. The request row is the dedup key, not decoration.",
-      "fa": "دو UPDATE لخت بدون سطر درخواست: retry از انتقال تازه قابل‌تشخیص نیست، پس پول دوبار می‌رود. سطر درخواست کلید تکراریابی است نه تزئین."
+      "en": "Two bare UPDATEs with no request row: you can't tell a retry from a new transfer, so the money moves twice. The request row is the dedup key, not decoration.",
+      "fa": "دو UPDATE لخت بدون سطر درخواست: retry از انتقال تازه قابل‌تشخیص نیست و پول دوبار می‌رود. سطر درخواست کلید تکراریابی است نه تزئین."
     },
     {
-      "en": "Deduping on the payload instead of the ID: identical intentional transfers get swallowed. Same payload is allowed; same ID is once.",
-      "fa": "تکراریابی روی payload به‌جای شناسه: انتقال‌های عمدی یکسان بلعیده می‌شوند. payload یکسان مجاز است؛ شناسه یکسان یک‌بار است."
+      "en": "Deduping on the payload instead of the ID: identical intentional transfers get swallowed up. The same payload is allowed; the same ID means once.",
+      "fa": "تکراریابی روی payload به‌جای شناسه: انتقال‌های عمدیِ یکسان قورچاق می‌شوند. payload یکسان مجاز است؛ شناسهٔ یکسان یک‌بار."
     },
     {
-      "en": "Returning an error on the UNIQUE conflict instead of the stored result: the client cannot tell 'already done' from 'failed' and mints a new ID — causing the very double-spend the constraint was meant to stop.",
-      "fa": "برگرداندن خطا روی conflict یکتایی به‌جای نتیجه ذخیره‌شده: کلاینت «قبلاً انجام شده» را از «شکست خورده» تشخیص نمی‌دهد و شناسه تازه می‌سازد — و همان خرج دوباره‌ای را می‌سازد که قید برای جلوگیریش بود."
+      "en": "Returning an error on the UNIQUE conflict instead of the stored result: the client can't tell 'already done' from 'failed', so it mints a new ID — and you get the very double-spend the constraint was built to stop.",
+      "fa": "برگرداندن خطا روی conflict یکتایی به‌جای نتیجهٔ ذخیره‌شده: کلاینت «قبلاً انجام شده» را از «شکست خورده» تشخیص نمی‌دهد و شناسهٔ تازه می‌سازد — و همان خرج دوباره‌ای را می‌سازد که قید آمده بود جلویش را بگیرد."
     }
   ],
   "number": 1,
@@ -223,28 +223,28 @@
   ],
   "steps": [
     {
-      "en": "The API opens one transaction, INSERTs the request row first, then debits, credits and appends the log row, then commits. Uniqueness, money movement and the log share one atomic fate.",
-      "fa": "API یک تراکنش باز می‌کند، اول سطر درخواست را INSERT می‌کند، بعد بدهی و بستانکاری و سطر لاگ را می‌افزاید و commit می‌کند. یکتایی و حرکت پول و لاگ یک سرنوشت اتمی دارند.",
-      "t_en": "INSERT first, commit once",
-      "t_fa": "اول INSERT، یک‌بار commit"
+      "en": "One transaction, that's all: you INSERT the request row first, then debit, credit and append the log row, and you commit at the end. Uniqueness, money movement and the log share one atomic fate — all three or none.",
+      "fa": "بذار ساده بگم: یک تراکنش باز می‌کنی، اول سطر درخواست را INSERT می‌کنی، بعد بدهی و بستانکاری و سطر لاگ را می‌افزایی و آخرش commit می‌کنی. یکتایی و حرکت پول و لاگ یک سرنوشت اتمی دارند: یا هر سه، یا هیچ‌کدام.",
+      "t_en": "Insert the row, one commit",
+      "t_fa": "سطر اول، یک‌بار commit"
     },
     {
-      "en": "Commit succeeded but the reply died on the wire. The client retries with the same ID and payload; the UNIQUE conflict routes to the stored row, whose result is returned verbatim. Same ID with a changed payload is rejected; the same payload under a new ID is honored as a new intent.",
-      "fa": "commit موفق شد ولی پاسخ روی سیم مرد. کلاینت با همان شناسه و payload retry می‌کند؛ conflict یکتایی به سطر ذخیره‌شده می‌رسد که نتیجه‌اش عیناً برمی‌گردد. همان شناسه با payload عوض‌شده رد می‌شود؛ همان payload با شناسه تازه به‌عنوان نیت تازه پذیرفته می‌شود.",
-      "t_en": "Lost reply becomes a lookup",
-      "t_fa": "پاسخ گمشده می‌شود lookup"
+      "en": "Now the nasty case: the commit succeeded but the reply died on the wire. The client cannot tell commit from failure, so the only safe move is to retry with the same ID and the same payload. That retry trips the UNIQUE conflict and lands on the stored row, whose result comes back verbatim. The same ID with a changed payload is rejected; the same payload under a new ID is honored, because that is a new intent.",
+      "fa": "حالا بریم سراغ بدترین حالت: commit موفق شد ولی پاسخ روی سیم مرد. کلاینت نمی‌تواند commit را از شکست تشخیص دهد، پس تنها حرکت امن این است که با همان شناسه و همان payload دوباره retry می‌کند. این retry به conflict یکتایی می‌خورد و مستقیم می‌رود سراغ سطر ذخیره‌شده، و نتیجه عیناً برمی‌گردد. همان شناسه با payload عوض‌شده رد می‌شود؛ همان payload با شناسهٔ تازه پذیرفته می‌شود، چون نیت تازه است.",
+      "t_en": "A lost reply becomes a lookup",
+      "t_fa": "پاسخ گمشده می‌شود یک lookup"
     },
     {
-      "en": "A separate consumer reads only the input-log column and recomputes every balance. If replay at the same offset ever differs from live state, that is a projection bug, not lag — the demo's final OK line is exactly this check.",
-      "fa": "یک مصرف‌کننده جدا فقط ستون لاگ ورودی را می‌خواند و هر بالانس را بازمحاسبه می‌کند. اگر replay در آفست یکسان با حالت زنده فرق کند، آن باگ projection است نه lag — خط OK پایانی دمو دقیقاً همین بررسی است.",
-      "t_en": "Replay proves the ledger",
-      "t_fa": "replay دفترکل را اثبات می‌کند"
+      "en": "And a separate consumer reads only the input-log column and rebuilds every balance from scratch. If the replay ever differs from live state at the same offset, that is a projection bug, not lag — the demo's final OK line is exactly this check. — this is where the talk turns into numbers.",
+      "fa": "ببین، یک مصرف‌کنندهٔ جدا فقط ستون لاگ ورودی را می‌خواند و هر بالانس را از نو می‌سازد. اگر replay در یک آفست با حالت زنده فرق کند، آن باگ projection است نه lag — و خط OK پایانی دمو دقیقاً همین بررسی است. — اینجاست که حرف‌ها به عدد تبدیل می‌شوند.",
+      "t_en": "Replay audits the ledger",
+      "t_fa": "replay دفترکل را راستی‌آزمایی می‌کند"
     }
   ],
-  "tests_en": "Invariants: conservation of total funds; each request ID applied at most once; replay at any offset equals live state at that offset. Failure tests: drop the commit reply and retry (same and changed payloads); race two same-ID submits concurrently; stall the replay consumer and confirm readers see lag, not divergence. Metrics: dedup-hit rate, UNIQUE-conflict rate, replay lag in seconds with an alert bound.",
-  "tests_fa": "ناورداها: بقای جمع پول؛ هر شناسه درخواست حداکثر یک‌بار اعمال؛ replay در هر آفست برابر حالت زنده همان آفست. تست‌های خرابی: انداختن پاسخ commit و retry (با payload یکسان و عوض‌شده)؛ مسابقه دو ثبت هم‌زمان همان شناسه؛ متوقف کردن مصرف‌کننده replay و تأیید lag نه واگرایی برای خواننده‌ها. متریک‌ها: نرخ dedup-hit، نرخ conflict یکتایی و lag replay به ثانیه با کران هشدار.",
-  "worked_en": "<p>Teaching run with A=1000, B=500. <span class=\"ltr\">req-7</span> moves 200: commit replies (then the reply is dropped), retry returns <span class=\"ltr\">DEDUP</span> with balances still 800/700. Reusing <span class=\"ltr\">req-7</span> for 999 is REJECTED. A fresh <span class=\"ltr\">req-8</span> with the same 200 payload is honored: balances 600/900. Independent replay from the log gives 600/900 — equal, so OK.</p>",
-  "worked_fa": "<p>اجرای آموزشی با A=1000 و B=500. <span class=\"ltr\">req-7</span> دویست واحد می‌برد: commit پاسخ می‌دهد (بعد پاسخ انداخته می‌شود) و retry با <span class=\"ltr\">DEDUP</span> برمی‌گردد و بالانس‌ها همان ۸۰۰/۷۰۰ می‌مانند. استفاده دوباره <span class=\"ltr\">req-7</span> برای ۹۹۹ رد می‌شود. <span class=\"ltr\">req-8</span> تازه با همان payload دویست پذیرفته می‌شود: بالانس‌ها ۶۰۰/۹۰۰. replay مستقل از لاگ هم ۶۰۰/۹۰۰ می‌دهد — برابر، پس OK.</p>",
-  "reasoning_fa": "<p>request_id هویت intent کاربر است، پس در retry ثابت می‌ماند؛ hash payload جلوی استفادهٔ همان ID برای intent متفاوت را می‌گیرد. دو حساب در یک DB هستند تا debit و credit و نتیجه در یک تراکنش commit شوند؛ جمع ۱۰۰۰+۵۰۰=۱۵۰۰ باید پس از انتقال ۲۰۰ ثابت بماند. این اعداد کوچک مشاهدهٔ invariant را ساده می‌کنند. دو DB مستقل همین مرز اتمیک را ندارند و به طراحی تمرین چندshardی نیاز دارند.</p>",
-  "reasoning_en": "<p>A request ID identifies user intent and stays fixed across retries; a payload hash detects reusing it for a different intent. Both accounts share a database so debit, credit and result commit together. The initial 1000+500=1500 remains conserved after transferring 200; small numbers make the invariant inspectable. Independent databases do not share this atomic boundary.</p>"
+  "tests_en": "Invariants: the total money is conserved; each request ID is applied at most once; the replay at any offset equals the live state at that same offset. Failure tests: drop the commit reply and retry (same and changed payloads); race two same-ID submits concurrently; stall the replay consumer and confirm readers see lag, not divergence. Metrics: dedup-hit rate, UNIQUE-conflict rate, replay lag in seconds with an alert bound.",
+  "tests_fa": "ناورداها: بقای جمع پول؛ هر شناسه درخواست حداکثر یک‌بار اعمال؛ replay در هر آفست برابر حالت زندهٔ همان آفست. تست‌های خرابی: پاسخ commit را بنداز و retry کن (با payload یکسان و عوض‌شده)؛ دو ثبت هم‌زمان با یک شناسه را مسابقه بده؛ مصرف‌کنندهٔ replay را متوقف کن و ببین خواننده‌ها lag می‌بینند نه واگرایی. متریک‌ها: نرخ dedup-hit، نرخ conflict یکتایی و lag replay به ثانیه با کران هشدار.",
+  "worked_en": "<p>Teaching run with A=1000, B=500. <span class=\"ltr\">req-7</span> moves 200: the commit replies (then the reply is dropped), the retry returns <span class=\"ltr\">DEDUP</span> with the balances still 800/700. Reusing <span class=\"ltr\">req-7</span> for 999 is REJECTED. A fresh <span class=\"ltr\">req-8</span> with the same 200 payload is honored: balances 600/900. The independent replay from the log gives 600/900 — equal, so OK. — the money moved once; everything after that is just proof.</p>",
+  "worked_fa": "<p>اجرای آموزشی با A=1000 و B=500. <span class=\"ltr\">req-7</span> دویست واحد می‌برد: commit پاسخ می‌دهد (بعد پاسخ را می‌اندازند) و retry با <span class=\"ltr\">DEDUP</span> برمی‌گردد و بالانس‌ها همان ۸۰۰/۷۰۰ می‌مانند. استفادهٔ دوبارهٔ <span class=\"ltr\">req-7</span> برای ۹۹۹ رد می‌شود. <span class=\"ltr\">req-8</span> تازه با همان payload دویست پذیرفته می‌شود: بالانس‌ها ۶۰۰/۹۰۰. replay مستقل از لاگ هم ۶۰۰/۹۰۰ می‌دهد — برابر، یعنی OK. — پول یک بار حرکت کرد؛ بقیه‌اش فقط اثبات است.</p>",
+  "reasoning_fa": "<p>request_id هویت intent کاربر است و در retry ثابت می‌ماند؛ hash payload هم جلوی استفادهٔ همان ID برای intent متفاوت را می‌گیرد. دو حساب در یک DB هستند تا debit و credit و نتیجه در یک تراکنش commit شوند؛ جمع ۱۰۰۰+۵۰۰=۱۵۰۰ باید پس از انتقال ۲۰۰ ثابت بماند. این اعداد کوچک‌اند تا invariant را با چشم ببینی، نه با حدس. دو DB مستقل این مرز اتمیک را ندارند و طراحی چندshardی می‌خواهند — و آن، بحثِ یک طراحیِ دیگر است.</p>",
+  "reasoning_en": "<p>A request ID identifies user intent and stays fixed across retries; a payload hash catches you reusing it for a different intent. Both accounts share a database so the debit, the credit and the result commit together. The initial 1000+500=1500 stays conserved after moving 200; the small numbers let you eyeball the invariant instead of trusting it. Independent databases don't share that atomic boundary — and reaching past it is a different design problem.</p>"
 }

@@ -1,28 +1,28 @@
 {
   "alternatives": [
     {
-      "en": "Big-bang cutover (stop writes, migrate, restart): simplest to reason about, but needs a write outage and has no rollback except restoring from backup. Acceptable only for tiny catalogs with a declared maintenance window; otherwise the dual-view cost is the honest price of zero downtime.",
-      "fa": "cutover یک‌باره (توقف نوشتن، مهاجرت، شروع دوباره): ساده‌ترین برای استدلال، ولی قطعی نوشتن می‌خواهد و rollbackای جز برگشت از بکاپ ندارد. فقط برای کاتالوگ‌های کوچک با پنجره نگهداری اعلام‌شده قابل‌قبول است؛ وگرنه هزینه دو نما قیمت صادقانه دان‌تایم صفر است."
+      "en": "Big-bang cutover (stop writes, migrate, restart): the simplest thing to reason about, but it needs a write outage and it has no rollback except restoring from backup. Acceptable only for tiny catalogs with a declared maintenance window; otherwise the dual-view cost is the honest price of zero downtime.",
+      "fa": "cutover یک‌باره (توقف نوشتن، مهاجرت، شروع دوباره): ساده‌ترین حالت برای استدلال، ولی یک قطعی نوشتن می‌خواهد و rollbackای جز برگشت از بکاپ ندارد. فقط برای کاتالوگ‌های کوچک با پنجرهٔ نگهداری اعلام‌شده قابل‌قبول است؛ وگرنه هزینهٔ دو نما، قیمت صادقانهٔ دان‌تایم صفر است."
     },
     {
-      "en": "In-place row rewrite (ALTER TABLE + backfill in place): half the storage, but readers see a half-migrated schema and rollback means another rewrite. Prefer when the change is additive and backward-readable; keep dual views when the new shape is not old-readable.",
-      "fa": "بازنویسی درجا (ALTER TABLE با backfill درجا): نصف ذخیره‌سازی، ولی خواننده‌ها schema نیمه‌مهاجرت‌شده می‌بینند و rollback یعنی بازنویسی دیگر. وقتی تغییر افزایشی و backward-readable است ترجیح بده؛ وقتی شکل تازه old-readable نیست نماهای دوگانه را نگه دار."
+      "en": "In-place row rewrite (ALTER TABLE + backfill in place): half the storage, but the readers see a half-migrated schema and the rollback means another rewrite. Prefer it when the change is additive and backward-readable; keep the dual views when the new shape isn't old-readable.",
+      "fa": "بازنویسی درجا (ALTER TABLE با backfill درجا): نصف ذخیره‌سازی، ولی خواننده‌ها یک schema نیمه‌مهاجرت‌شده می‌بینند و rollback یعنی یک بازنویسی دیگر. وقتی تغییر افزایشی و backward-readable است ترجیحش بده؛ وقتی شکل تازه old-readable نیست، نماهای دوگانه را نگه دار."
     }
   ],
-  "answer_en": "Keep one shared input log and two independent projections: the old flat view keeps serving while the new table-plus-details view backfills, catches up, and passes shadow comparison at 0% live traffic. Shift reads by a reversible flag — 5%, 50%, 100% — only while mismatches stay zero and lag stays bounded; rollback is one flag flip because the old view never stopped serving. Retire the old view only after cutover criteria plus a hold period. The trade-off: double projection cost and storage during migration for zero-downtime rollback.",
-  "answer_fa": "یک لاگ ورودی مشترک با دو projection مستقل نگه دار: نمای تخت قدیم سرو می‌دهد درحالی‌که نمای تازه جدول‌به‌علاوه‌جزئیات backfill می‌کند و به نوک می‌رسد و مقایسه سایه را در ترافیک زنده صفر می‌گذراند. خواندن‌ها را با flag برگشت‌پذیر شیفت بده — ۵٪ و ۵۰٪ و ۱۰۰٪ — فقط تا وقتی mismatch صفر و lag کران‌دار است؛ rollback یک چرخش flag است چون نمای قدیم هیچ‌وقت از سرو نایستاد. نمای قدیم را فقط بعد از معیارهای cutover به‌علاوه دوره نگه‌داشت بازنشسته کن. تریدآف: دو برابر هزینه projection و ذخیره‌سازی در مهاجرت در برابر rollback بدون دان‌تایم.",
+  "answer_en": "Here's the thing: keep one shared input log and build two independent projections. The old flat view keeps serving while the new table-plus-details view backfills, catches up, and clears the shadow comparison at 0% live traffic. Then shift the reads with one reversible flag — 5%, 50%, 100% — and only while mismatches stay zero and lag stays bounded. The rollback is one flag flip, because the old view never stopped serving. Retire the old view only after the cutover criteria plus a hold period. The trade-off: double the projection cost and storage during the migration, in exchange for a rollback that costs no downtime. — as long as the old rail is still under the train, there is always a way back.",
+  "answer_fa": "قضیه اینه که: یک لاگ ورودی مشترک نگه دار و دو projection مستقل بساز. نمای تخت قدیم همین حالا سرو می‌دهد، درحالی‌که نمای تازه (جدول‌به‌علاوه‌جزئیات) backfill می‌کند، به نوک می‌رسد و مقایسهٔ سایه را با ترافیک زندهٔ صفر رد می‌کند. بعد خواندن‌ها را با یک flag برگشت‌پذیر شیفت بده — ۵٪ و ۵۰٪ و ۱۰۰٪ — آن‌هم فقط تا وقتی mismatch صفر و lag کران‌دار است. rollback یک چرخش flag است، چون نمای قدیم هیچ‌وقت از سرو نایستاد. نمای قدیم را هم فقط بعد از معیارهای cutover به‌علاوهٔ دورهٔ نگه‌داشت بازنشسته کن. تریدآف: دو برابر هزینهٔ projection و ذخیره‌سازی در مهاجرت، در برابر rollback بدون دان‌تایم. — تا وقتی ریل کهنه زیر پای قطار است، همیشه راه برگشت داری.",
   "assumptions": [
     {
-      "en": "Catalog scope: flat old schema (one row per product) versus new schema (row plus details row). Three teaching products: Lamp 30, Chair 120, Desk 250.",
-      "fa": "دامنه کاتالوگ: schema تخت قدیم (یک سطر به‌ازای هر محصول) در برابر schema تازه (سطر به‌علاوه سطر جزئیات). سه محصول آموزشی: چراغ ۳۰، صندلی ۱۲۰، میز ۲۵۰."
+      "en": "Picture the scope: a catalog. The flat old schema (one row per product) versus the new schema (row plus details row). Three teaching products: Lamp 30, Chair 120, Desk 250.",
+      "fa": "فرض کن دامنه کاتالوگه: schema تختِ قدیم (یک سطر به‌ازای هر محصول) در برابر schema تازه (سطر به‌علاوهٔ سطر جزئیات). سه محصول آموزشی: چراغ ۳۰، صندلی ۱۲۰، میز ۲۵۰."
     },
     {
-      "en": "The write path never moves during migration: all fresh input still lands in the shared log, and both projections consume it independently.",
-      "fa": "مسیر نوشتن در مهاجرت هیچ‌وقت جابه‌جا نمی‌شود: همه ورودی تازه هنوز در لاگ مشترک می‌نشیند و هر دو projection مستقل مصرفش می‌کنند."
+      "en": "The key point: the write path never moves during the migration. All fresh input still lands in the shared log, and both projections consume it independently.",
+      "fa": "قضیه اینه که: مسیر نوشتن در مهاجرت هیچ‌وقت جابه‌جا نمی‌شه — همهٔ ورودی تازه هنوز توی لاگ مشترک می‌نشینه و هر دو projection مستقل مصرفش می‌کنن."
     },
     {
-      "en": "Readers tolerate either schema during canary; the flag decides the percent. Rollback stays possible only while new writes remain old-readable.",
-      "fa": "خواننده‌ها در canary هر دو schema را تحمل می‌کنند؛ flag درصد را تعیین می‌کند. rollback فقط تا وقتی ممکن می‌ماند که نوشتن‌های تازه old-readable بمانند."
+      "en": "Readers tolerate either schema during the canary, and the flag decides the percent. Rollback stays possible only while the new writes remain old-readable.",
+      "fa": "خواننده‌ها توی canary هر دو schema رو تحمل می‌کنن؛ flag درصد رو تعیین می‌کنه. rollback فقط تا وقتی ممکن می‌مونه که نوشتن‌های تازه old-readable بمونن."
     }
   ],
   "code": {
@@ -30,144 +30,144 @@
     "expected_en": "Backfill 3+3; shadow finds 2 mismatches (p2, p3 details) so canary stays 0%; after fix mismatches are 0 and canary proceeds; rollback flips one flag with the old view intact; OK. (actual output of this environment)",
     "expected_fa": "backfill سه‌به‌علاوه‌سه؛ سایه ۲ mismatch می‌یابد (جزئیات p2 و p3) پس canary صفر می‌ماند؛ بعد از اصلاح mismatchها صفر و canary جلو می‌رود؛ rollback با یک flag و نمای قدیم سالم؛ OK. (خروجی واقعی همین محیط)",
     "lang": "java",
-    "run_en": "javac MigrationDemo.java && java MigrationDemo — stdlib Java only, instant.",
-    "run_fa": "javac MigrationDemo.java && java MigrationDemo — فقط استاندارد جاوا، فوری.",
+    "run_en": "javac MigrationDemo.java && java MigrationDemo — stdlib Java only, instant, no dependencies.",
+    "run_fa": "javac MigrationDemo.java && java MigrationDemo — فقط استاندارد جاوا، فوری و بدون وابستگی.",
     "status": "verified"
   },
-  "design_en": "<p><b>Components:</b> one append-only input log; two independent projectors (old-flat, new split); two views; one traffic flag (percent per view, flippable in one deploy). <b>API:</b> product-list reads carry no version — the router picks the view; writes always target the log shape both projectors understand. <b>Cutover criteria:</b> zero shadow mismatches over a full business cycle, new-view lag under the read SLO, plus a hold period at 100% before the old view is dropped. <b>Ownership:</b> the log owns the write path; neither view may accept direct writes.</p>",
-  "design_fa": "<p><b>اجزا:</b> یک لاگ ورودی فقط‌افزودنی؛ دو projector مستقل (تخت قدیم و شکافته تازه)؛ دو نما؛ یک flag ترافیک (درصد هر نما، قابل‌چرخش در یک انتشار). <b>API:</b> خواندن‌های لیست محصول نسخه ندارند — مسیریاب نما را انتخاب می‌کند؛ نوشتن‌ها همیشه به شکل لاگی می‌روند که هر دو projector می‌فهمند. <b>معیارهای cutover:</b> صفر mismatch سایه در یک چرخه کاری کامل، lag نمای تازه زیر SLO خواندن، به‌علاوه دوره نگه‌داشت در ۱۰۰٪ پیش از انداختن نمای قدیم. <b>مالکیت:</b> لاگ مالک مسیر نوشتن است؛ هیچ نمایی حق نوشتن مستقیم ندارد.</p>",
+  "design_en": "<p><b>Components:</b> one append-only input log; two independent projectors (old-flat, new split); two views; one traffic flag (percent per view, flippable in one deploy). <b>API:</b> product-list reads carry no version — the router picks the view; writes always target the log shape both projectors understand. <b>Cutover criteria:</b> zero shadow mismatches over a full business cycle, new-view lag under the read SLO, plus a hold period at 100% before the old view is dropped. <b>Ownership:</b> the log owns the write path; neither view may accept direct writes. — one write path, two views, and a single lever you can pull back with one move.</p>",
+  "design_fa": "<p><b>اجزا:</b> یک لاگ ورودی فقط‌افزودنی؛ دو projector مستقل (تخت قدیم و شکافتهٔ تازه)؛ دو نما؛ یک flag ترافیک (درصد هر نما، قابل‌چرخش در یک انتشار). <b>API:</b> خواندن‌های لیست محصول نسخه ندارند — مسیریاب خودش نما را انتخاب می‌کند؛ نوشتن‌ها همیشه به شکل لاگی می‌روند که هر دو projector می‌فهمند. <b>معیارهای cutover:</b> صفر mismatch سایه در یک چرخهٔ کاری کامل، lag نمای تازه زیر SLO خواندن، به‌علاوهٔ دورهٔ نگه‌داشت در ۱۰۰٪ پیش از انداختن نمای قدیم. <b>مالکیت:</b> لاگ مالک مسیر نوشتن است؛ هیچ نمایی حق نوشتن مستقیم ندارد. — یک مسیر نوشتن، دو نما، و یک اهرم که با یک حرکت برمی‌گردد.</p>",
   "diagrams": [
     {
-      "caption_en": "Backfill to cutover with rollback as a real state",
-      "caption_fa": "از backfill تا cutover با rollback به‌مثابه حالت واقعی",
+      "caption_en": "Backfill to cutover, with rollback as a real state",
+      "caption_fa": "از backfill تا cutover، با rollback به‌مثابه یک حالت واقعی",
       "file": "diagrams/sol2-step1-view-states.html",
       "height": 640,
       "kind_en": "lifecycle: migration states",
       "kind_fa": "چرخه‌حیات: حالت‌های مهاجرت",
       "made": "archify",
       "narration": {
-        "failure_en": "Trace a skipped shadow on the same figure: jumping from CatchUp straight to Canary means the first mismatch reaches real users — the Shadow wait state exists so bugs are found at 0% live, as the demo's injected details bug was.",
-        "failure_fa": "پرش از سایه را روی همان شکل دنبال کن: پریدن مستقیم از CatchUp به Canary یعنی اولین mismatch به کاربران واقعی می‌رسد — حالت انتظار Shadow هست تا باگ‌ها در ترافیک زنده صفر پیدا شوند، مثل باگ تزریقی جزئیات در دمو.",
-        "guarantee_en": "The figure shows every forward gate and the rollback exits. It does not prove the projections are correct — only the checker and the shadow compare do.",
-        "guarantee_fa": "شکل همه دروازه‌های جلو و خروجی‌های rollback را نشان می‌دهد. درستی projectionها را اثبات نمی‌کند — فقط checker و مقایسه سایه می‌کنند.",
-        "nonguarantee_en": "It says nothing about writes the new schema accepts but the old cannot represent — that rollback-killer is answered in the follow-up.",
-        "nonguarantee_fa": "درباره نوشتن‌هایی که schema تازه می‌پذیرد ولی قدیم نمی‌تواند نمایش دهد چیزی نمی‌گوید — آن قاتل rollback در پاسخ پیگیری است.",
-        "point_en": "Rollback is a box, not an apology: one flag flip returns 100% of reads to the old view because it never stopped serving.",
-        "point_fa": "rollback یک جعبه است نه عذرخواهی: یک چرخش flag صددرصد خواندن‌ها را به نمای قدیم برمی‌گرداند چون هیچ‌وقت از سرو نایستاد.",
-        "scenario_en": "A catalog moves from a flat view to a split view. Read the main rail left to right — Backfill, CatchUp, Canary, Cutover — with the Shadow gate underneath and the Rollback path one row down.",
-        "scenario_fa": "کاتالوگی از نمای تخت به نمای شکافته می‌رود. ریل اصلی را چپ‌به‌راست بخوان — Backfill و CatchUp و Canary و Cutover — با دروازه Shadow زیرش و مسیر Rollback یک سطر پایین‌تر.",
+        "failure_en": "Trace a skipped shadow on the same figure: jumping from CatchUp straight to Canary means the first mismatch lands on real users — the Shadow wait state exists so that bugs get found at 0% live, exactly like the demo's injected details bug.",
+        "failure_fa": "پرش از سایه را روی همان شکل دنبال کن: پریدن مستقیم از CatchUp به Canary یعنی اولین mismatch مستقیم به کاربران واقعی می‌رسد — حالت انتظار Shadow هست تا باگ‌ها در ترافیک زندهٔ صفر پیدا شوند، مثل باگ تزریقیِ جزئیات در دمو.",
+        "guarantee_en": "The figure shows every forward gate and every rollback exit. It does not prove the projections are correct — that's the checker's job, and the shadow compare.",
+        "guarantee_fa": "شکل همهٔ دروازه‌های جلو و خروجی‌های rollback را نشان می‌دهد. درستی projectionها را اثبات نمی‌کند — آن را فقط checker و مقایسهٔ سایه می‌کنند.",
+        "nonguarantee_en": "It says nothing about the writes the new schema accepts but the old cannot represent — that rollback-killer is answered in the follow-up.",
+        "nonguarantee_fa": "دربارهٔ نوشتن‌هایی که schema تازه می‌پذیرد ولی قدیم نمی‌تواند نمایششان دهد چیزی نمی‌گوید — آن قاتل rollback در پاسخ پیگیری است.",
+        "point_en": "Rollback is a box, not an apology: one flag flip returns 100% of the reads to the old view, because the old view never stopped serving.",
+        "point_fa": "rollback یک جعبه است، نه عذرخواهی: یک چرخش flag صددرصد خواندن‌ها را به نمای قدیم برمی‌گرداند، چون نمای قدیم هیچ‌وقت از سرو نایستاد.",
+        "scenario_en": "A catalog moves from a flat view to a split view. Read the main rail left to right — Backfill, CatchUp, Canary, Cutover — with the Shadow gate underneath it and the Rollback path one row down.",
+        "scenario_fa": "یک کاتالوگ از نمای تخت به نمای شکافته می‌رود. ریل اصلی را چپ‌به‌راست بخوان — Backfill و CatchUp و Canary و Cutover — با دروازه Shadow زیرش و مسیر Rollback یک سطر پایین‌تر.",
         "steps": [
           {
-            "en": "Backfill replays history into the new view, then CatchUp consumes to the tip; the old view serves 100% throughout.",
+            "en": "Backfill replays the history into the new view, then CatchUp consumes up to the tip; the old view serves 100% the whole way.",
             "fa": "Backfill تاریخچه را در نمای تازه بازپخش می‌کند و بعد CatchUp تا نوک مصرف می‌کند؛ نمای قدیم در همه‌حال صددرصد سرو می‌دهد."
           },
           {
-            "en": "Shadow compares every read at 0% live traffic; only zero mismatches open the Canary, which grows 5 to 50 to 100.",
-            "fa": "Shadow هر خواندن را در ترافیک زنده صفر مقایسه می‌کند؛ فقط صفر mismatch دروازه Canary را باز می‌کند که از ۵ به ۵۰ به ۱۰۰ می‌رسد."
+            "en": "Shadow compares every read at 0% live traffic; only zero mismatches open the Canary, and the Canary grows 5 to 50 to 100.",
+            "fa": "Shadow هر خواندن را در ترافیک زندهٔ صفر مقایسه می‌کند؛ فقط صفر mismatch دروازهٔ Canary را باز می‌کند، و Canary از ۵ به ۵۰ به ۱۰۰ می‌رسد."
           },
           {
-            "en": "Cutover decides on criteria, not courage; mismatch or SLO regression drops to Rollback, which flips the flag and lands RolledBack — fix, then re-enter at Canary, never at Cutover.",
-            "fa": "Cutover با معیار تصمیم می‌گیرد نه شجاعت؛ mismatch یا پسرفت SLO به Rollback می‌افتد که flag را می‌چرخاند و به RolledBack می‌رسد — اصلاح کن و بعد در Canary دوباره وارد شو، هرگز در Cutover."
+            "en": "Cutover decides on criteria, not on courage; a mismatch or an SLO regression drops you to Rollback, which flips the flag and lands in RolledBack — fix it, then re-enter at Canary, never at Cutover.",
+            "fa": "Cutover با معیار تصمیم می‌گیرد، نه با شجاعت؛ mismatch یا پسرفت SLO تو را می‌اندازد به Rollback، که flag را می‌چرخاند و به RolledBack می‌رسد — اصلاح کن و بعد در Canary دوباره وارد شو، هرگز در Cutover."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "Rollback: one flag flip to the old view, which is possible only because the old view served reads through the whole migration.",
-        "a_fa": "Rollback: یک چرخش flag به نمای قدیم که فقط چون نمای قدیم در کل مهاجرت خواندن سرو داده ممکن است.",
-        "q_en": "Which state is entered when the canary mismatches, and what makes that transition instant?",
-        "q_fa": "وقتی canary ناسازگار شود وارد کدام حالت می‌شویم و چه چیزی آن گذار را فوری می‌کند؟"
+        "a_en": "Rollback: one flag flip back to the old view, and that is possible only because the old view served the reads through the whole migration.",
+        "a_fa": "Rollback: یک چرخش flag به نمای قدیم — و این فقط چون نمای قدیم در تمام طول مهاجرت خواندن سرو داده ممکن است.",
+        "q_en": "Which state do you enter when the canary mismatches, and what makes that transition instant?",
+        "q_fa": "وقتی canary ناسازگار می‌شود وارد کدام حالت می‌شویم، و چه چیزی این گذار را فوری می‌کند؟"
       },
       "source": "assets/diagram-specs/solutions/ch13/sol2-step1-view-states.json"
     },
     {
-      "caption_en": "One log feeding two views with a reversible traffic flag",
-      "caption_fa": "یک لاگ که دو نما را با flag برگشت‌پذیر تغذیه می‌کند",
+      "caption_en": "One log feeding two views through a reversible traffic flag",
+      "caption_fa": "یک لاگ که با flag برگشت‌پذیر دو نما را تغذیه می‌کند",
       "file": "diagrams/sol2-dual-migration.html",
       "height": 640,
       "kind_en": "dataflow: dual views",
       "kind_fa": "جریان‌داده: نماهای دوگانه",
       "made": "archify",
       "narration": {
-        "failure_en": "Trace the planted bug on the same figure: the new projector drops details for price > 100, so the shadow compare at the router mismatches on p2 and p3 — the flag never moves past 0%, and users never see the bug. Without the shadow edge, the same bug would ride the canary to production.",
-        "failure_fa": "باگ کاشته‌شده را روی همان شکل دنبال کن: projector تازه جزئیات قیمت بالای ۱۰۰ را می‌اندازد، پس مقایسه سایه در مسیریاب روی p2 و p3 ناسازگار می‌شود — flag از صفر تکان نمی‌خورد و کاربران باگ را نمی‌بینند. بدون یال سایه، همان باگ سوار canary به پروداکشن می‌رفت.",
-        "guarantee_en": "The figure shows single write ownership with dual independent reads. It does not show retirement — the old view is dropped only after the hold period in the lifecycle.",
-        "guarantee_fa": "شکل مالکیت واحد نوشتن با خواندن‌های مستقل دوگانه را نشان می‌دهد. بازنشستگی را نشان نمی‌دهد — نمای قدیم فقط بعد از دوره نگه‌داشت در چرخه‌حیات انداخته می‌شود.",
-        "nonguarantee_en": "It says nothing about forward-compatibility of writes during canary — the follow-up answers when rollback dies.",
-        "nonguarantee_fa": "درباره سازگاری روبه‌جلوی نوشتن‌ها در canary چیزی نمی‌گوید — پاسخ پیگیری می‌گوید rollback کی می‌میرد.",
-        "point_en": "The write path never branches: one log in, two projections out, and only the read flag moves.",
-        "point_fa": "مسیر نوشتن هیچ‌وقت شاخه نمی‌شود: یک لاگ داخل، دو projection بیرون، و فقط flag خواندن جابه‌جا می‌شود.",
-        "scenario_en": "The assembly left to right: Input (the shared log), Project (old-flat and new-split projectors replaying it), Views (both serving), Route (the reversible flag), Serve (clients reading the flagged percent).",
-        "scenario_fa": "اسمبل چپ‌به‌راست: ورودی (لاگ مشترک)، projection (projectorهای تخت قدیم و شکافته تازه که بازپخشش می‌کنند)، نماها (هر دو سرو می‌دهند)، مسیر (flag برگشت‌پذیر) و سرو (کلاینت‌هایی که درصد flagشده را می‌خوانند).",
+        "failure_en": "Trace the planted bug on the same figure: the new projector drops details for price > 100, so the shadow compare at the router mismatches on p2 and p3 — the flag never moves past 0% and the users never see the bug. Without the shadow edge, that same bug would ride the canary all the way to production.",
+        "failure_fa": "باگ کاشته‌شده را روی همان شکل دنبال کن: projector تازه جزئیاتِ قیمت بالای ۱۰۰ را می‌اندازد، و مقایسهٔ سایه در مسیریاب روی p2 و p3 ناسازگار می‌شود — flag از صفر تکان نمی‌خورد و کاربران باگ را نمی‌بینند. بدون یال سایه، همان باگ سوار canary به پروداکشن می‌رفت.",
+        "guarantee_en": "The figure shows single write ownership with dual independent reads. It doesn't show the retirement — the old view is dropped only after the hold period in the lifecycle.",
+        "guarantee_fa": "شکل مالکیتِ واحدِ نوشتن در کنار خواندن‌های مستقل دوگانه را نشان می‌دهد. بازنشستگی را نشان نمی‌دهد — نمای قدیم فقط بعد از دورهٔ نگه‌داشت در چرخه‌حیات انداخته می‌شود.",
+        "nonguarantee_en": "It says nothing about the forward-compatibility of writes during the canary — the follow-up answers when the rollback dies.",
+        "nonguarantee_fa": "دربارهٔ سازگاری روبه‌جلوی نوشتن‌ها در canary چیزی نمی‌گوید — پاسخ پیگیری می‌گوید rollback کِی می‌میرد.",
+        "point_en": "The write path never branches: one log in, two projections out, and only the read flag moves. — that flag is your only lever.",
+        "point_fa": "مسیر نوشتن هیچ‌وقت شاخه نمی‌شود: یک لاگ داخل، دو projection بیرون، و فقط flag خواندن جابه‌جا می‌شود. — تنها اهرمِ تو، همین flag است.",
+        "scenario_en": "Read the assembly left to right: Input (the shared log), Project (the old-flat and new-split projectors replaying it), Views (both serving), Route (the reversible flag), Serve (the clients reading the flagged percent).",
+        "scenario_fa": "اسمبل را چپ‌به‌راست بخوان: ورودی (لاگ مشترک)، projection (projectorهای تخت قدیم و شکافتهٔ تازه که بازپخشش می‌کنند)، نماها (هر دو سرو می‌دهند)، مسیر (flag برگشت‌پذیر) و سرو (کلاینت‌هایی که درصد flagشده را می‌خوانند).",
         "steps": [
           {
-            "en": "Both projectors replay the same history plus the tip; neither accepts direct writes — the log owns the write path.",
-            "fa": "هر دو projector همان تاریخچه با نوک را بازپخش می‌کنند؛ هیچ‌کدام نوشتن مستقیم نمی‌پذیرند — لاگ مالک مسیر نوشتن است."
+            "en": "Both projectors replay the same history plus the tip; neither one accepts direct writes — the log owns the write path. — one writer, everyone else just reads.",
+            "fa": "هر دو projector همان تاریخچه با نوک را بازپخش می‌کنند؛ هیچ‌کدام نوشتن مستقیم نمی‌پذیرند — لاگ مالک مسیر نوشتن است. — یک نفر می‌نویسد، بقیه فقط می‌خوانند."
           },
           {
-            "en": "Old view and new view serve side by side; the router compares (shadow) and then shifts flagged percents 5, 50, 100.",
-            "fa": "نمای قدیم و تازه کنار هم سرو می‌دهند؛ مسیریاب مقایسه می‌کند (سایه) و بعد درصدهای flagشده ۵ و ۵۰ و ۱۰۰ را شیفت می‌دهد."
+            "en": "The old view and the new view serve side by side; the router compares (shadow) and then shifts the flagged percents 5, 50, 100.",
+            "fa": "نمای قدیم و تازه کنار هم سرو می‌دهند؛ مسیریاب مقایسه می‌کند (سایه) و بعد درصدهای flagشدهٔ ۵ و ۵۰ و ۱۰۰ را شیفت می‌دهد."
           },
           {
-            "en": "Any mismatch flips the flag to 100% old: rollback is instant because the old view and its projector never stopped.",
-            "fa": "هر mismatch flag را به صددرصد قدیم برمی‌گرداند: rollback فوری است چون نمای قدیم و projectorش هیچ‌وقت نایستادند."
+            "en": "Any mismatch flips the flag back to 100% old: the rollback is instant because the old view and its projector never stopped.",
+            "fa": "هر mismatch پرچم را به صددرصد قدیم برمی‌گرداند: rollback فوری است چون نمای قدیم و projectorش هیچ‌وقت نایستادند."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "The shared input log: flipping reads back needs no data movement because the old projection stayed current all along.",
-        "a_fa": "لاگ ورودی مشترک: برگرداندن خواندن‌ها هیچ جابه‌جایی داده نمی‌خواهد چون projection قدیم همیشه به‌روز مانده.",
-        "q_en": "Rollback moves no data. Which component makes that true?",
-        "q_fa": "rollback هیچ داده‌ای جابه‌جا نمی‌کند. کدام جزء این را درست می‌کند؟"
+        "a_en": "The shared input log: flipping the reads back needs no data movement, because the old projection stayed current all along.",
+        "a_fa": "لاگ ورودی مشترک: برگرداندن خواندن‌ها هیچ جابه‌جایی داده نمی‌خواهد، چون projection قدیم همیشه به‌روز مانده.",
+        "q_en": "The rollback moves no data. Which component makes that true?",
+        "q_fa": "rollback هیچ داده‌ای جابه‌جا نمی‌کند. کدام جزء این را ممکن می‌کند؟"
       },
       "source": "assets/diagram-specs/solutions/ch13/sol2-dual-migration.json"
     }
   ],
   "failures": [
     {
-      "en": "Bug in the new projection (dropped details): caught by shadow compare at 0% live. Guard is zero-mismatch gating before any canary percent — the demo injects exactly this bug.",
-      "fa": "باگ در projection تازه (افتادن جزئیات): با مقایسه سایه در ترافیک زنده صفر گرفته می‌شود. نگهبان دروازه صفر-mismatch پیش از هر درصد canary است — دمو دقیقاً همین باگ را تزریق می‌کند."
+      "en": "Bug in the new projection (dropped details): the shadow compare catches it at 0% live traffic. The guard is the zero-mismatch gate in front of every canary percent — the demo injects exactly this bug.",
+      "fa": "باگ در projection تازه (افتادن جزئیات): مقایسهٔ سایه در ترافیک زندهٔ صفر می‌گیردش. نگهبانش دروازهٔ صفر-mismatch پیش از هر درصد canary است — دمو دقیقاً همین باگ را تزریق می‌کند."
     },
     {
-      "en": "New-view lag beyond the read SLO: canary reads would serve stale rows as if they were fresh. Guard with a bounded lag metric per view; block the flag while either view is behind.",
-      "fa": "lag نمای تازه فراتر از SLO خواندن: خواندن‌های canary سطرهای کهنه را مثل تازه سرو می‌کنند. نگهبان متریک lag کران‌دار هر نماست؛ تا هر نما عقب است flag را بلوکه کن."
+      "en": "New-view lag beyond the read SLO: canary reads would serve stale rows as if they were fresh. Guard it with a bounded lag metric per view; block the flag while either view is behind.",
+      "fa": "lag نمای تازه فراتر از SLO خواندن: خواندن‌های canary سطرهای کهنه را مثل تازه سرو می‌کنند. نگهبانش یک متریک lag کران‌دار برای هر نما است؛ تا وقتی یکی از نماها عقب است، flag را بلوکه کن."
     },
     {
-      "en": "Old projector silently stalls mid-migration: rollback target goes stale. Guard by projecting both views from the same tip watermark and alerting when the old view falls behind — rollback is only instant while it is current.",
-      "fa": "توقف بی‌صدای projector قدیم وسط مهاجرت: هدف rollback کهنه می‌شود. نگهبان projection هر دو نما از watermark نوک یکسان با هشدار عقب‌ماندگی نمای قدیم است — rollback فقط تا وقتی فوری است که به‌روز باشد."
+      "en": "Old projector silently stalls mid-migration: the rollback target goes stale. Guard it by projecting both views from the same tip watermark, and alert when the old view falls behind — the rollback is only instant while it is current.",
+      "fa": "توقف بی‌صدای projector قدیم وسط مهاجرت: هدف rollback کهنه می‌شود و rollback دیگر فوری نیست. نگهبانش این است که هر دو نما از یک watermark نوکِ مشترک projection شوند، به‌علاوهٔ هشدار عقب‌ماندگی نمای قدیم — rollback فقط تا وقتی فوری است که به‌روز باشد."
     }
   ],
   "followups": [
     {
-      "a_en": "Not always. If the client only READ the new schema, rollback is still one flag flip. But if it WROTE data the old schema cannot represent (a new required field, a split the flat row cannot hold), flipping back either drops that data or serves it wrongly. Guard: during canary, writes must stay old-readable (new fields optional/ignored by the old projector), or carry a forward-fill job that backfills the new shape into the old view before any rollback. If neither holds, say so: rollback is broken from that write on, and the only way back is forward-fix.",
-      "a_fa": "نه همیشه. اگر کلاینت فقط schema تازه را خوانده باشد rollback هنوز یک چرخش flag است. ولی اگر داده‌ای نوشته که schema قدیم نمی‌تواند نمایش دهد (فیلد اجباری تازه یا شکافی که سطر تخت نمی‌گیرد)، برگشتن یا آن داده را می‌اندازد یا غلط سرو می‌کند. نگهبان: در canary نوشتن‌ها باید old-readable بمانند (فیلدهای تازه اختیاری و نادیده‌گرفته‌شده توسط projector قدیم) یا کار forward-fill باشد که شکل تازه را پیش از rollback به نمای قدیم برگرداند. اگر هیچ‌کدام نیست صریح بگو: rollback از آن نوشتن به بعد خراب است و تنها راه برگشت اصلاح روبه‌جلوست.",
+      "a_en": "Not always. If the client only READ the new schema, the rollback is still one flag flip. But if it WROTE data the old schema cannot represent (a new required field, a split the flat row cannot hold), flipping back either drops that data or serves it wrongly. Guard: during the canary, writes must stay old-readable (new fields optional and ignored by the old projector), or you carry a forward-fill job that backfills the new shape into the old view before any rollback. If neither holds, say so out loud: the rollback is broken from that write on, and the only way back is a forward-fix.",
+      "a_fa": "نه همیشه. اگر کلاینت فقط schema تازه را خوانده باشد، rollback هنوز یک چرخش flag است. ولی اگر داده‌ای نوشته باشد که schema قدیم نمی‌تواند نمایشش دهد (یک فیلد اجباری تازه، یا شکافی که سطر تخت نمی‌گیرد)، برگشتن یا آن داده را می‌اندازد یا غلط سرو می‌کند. نگهبان: در canary نوشتن‌ها باید old-readable بمانند (فیلدهای تازه اختیاری و نادیده‌گرفته‌شده توسط projector قدیم)، یا یک کار forward-fill داشته باشی که شکل تازه را پیش از rollback به نمای قدیم برگرداند. اگر هیچ‌کدام برقرار نیست، صریح بگو: rollback از آن نوشتن به بعد خراب است و تنها راه برگشت اصلاح روبه‌جلوست.",
       "level": "staff",
       "q_en": "A client writes data the old schema can't represent after reading the new schema. Is rollback still possible?",
       "q_fa": "کاربر بعد از خوندن schema جدید داده‌ای بنویسه که نسخه قدیم نمی‌فهمه؛ rollback هنوز ممکنه؟"
     },
     {
-      "a_en": "After the criteria hold: 100% new reads for a full business cycle with zero mismatches, lag inside SLO, and no rollback in the hold window. Then stop the old projector, keep its last snapshot for one more retention period (cheap insurance), and only then delete. Retiring on canary percentages alone — without the hold — strands you if a slow-burn bug surfaces a week later.",
-      "a_fa": "بعد از پایداری معیارها: خواندن صددرصد تازه در یک چرخه کاری کامل با صفر mismatch و lag داخل SLO و بدون rollback در پنجره نگه‌داشت. بعد projector قدیم را متوقف کن و آخرین snapshotش را یک دوره نگهداری دیگر نگه دار (بیمه ارزان) و فقط بعد حذف کن. بازنشستگی فقط با درصدهای canary — بدون نگه‌داشت — اگر باگ کندسوز یک هفته بعد سر بزند تو را بی‌پناه می‌گذارد.",
+      "a_en": "After the criteria hold: 100% new reads for a full business cycle with zero mismatches, lag inside the SLO, and no rollback inside the hold window. Then stop the old projector, keep its last snapshot for one more retention period (cheap insurance), and only then delete it. Retiring on canary percentages alone — without the hold — strands you if a slow-burn bug surfaces a week later.",
+      "a_fa": "بعد از این‌که معیارها پایدار ماندند: خواندن صددرصد تازه در یک چرخهٔ کاری کامل، با صفر mismatch، lag داخل SLO و بدون rollback در پنجرهٔ نگه‌داشت. بعد projector قدیم را متوقف کن، آخرین snapshotش را یک دورهٔ نگهداری دیگر نگه دار (بیمهٔ ارزان) و تازه آن‌وقت حذفش کن. بازنشستگی فقط با درصدهای canary — بدون دورهٔ نگه‌داشت — اگر باگ کندسوز یک هفته بعد سر بزند، تو را بی‌پناه می‌گذارد.",
       "level": "staff",
-      "q_en": "When exactly do you delete the old view?",
-      "q_fa": "دقیقاً کی نمای قدیم را حذف می‌کنی؟"
+      "q_en": "When exactly do you drop the old view for good?",
+      "q_fa": "دقیقاً کِی نمای قدیم را حذف می‌کنی؟"
     }
   ],
   "interview_q_en": "Think of it, you're migrating a catalog with one shared input log and independent old and new projections. You define backfill, catch-up, shadow reads, canary routing, rollback, and when you retire the old view. You inject a projection bug and lag; and you keep write ownership and compatibility explicit.",
   "interview_q_fa": "تصور کن schema کاتالوگ رو با یه log مرجع و دو projection قدیم و جدید مهاجرت می‌دی. backfill و catch-up، shadow read، canary، rollback و زمان حذف نسخه قدیم رو تعریف کن. bug تو projection جدید و lag تزریق کن؛ مالکیت compatibility و write path رو هم شفاف نگه دار.",
-  "mental_en": "Two rails while the train keeps running: the old rail carries every passenger while the new rail is laid beside it, tested with empty cars (shadow), then a few cars (canary), then all traffic. The old rail is torn up only after the new one has carried full load through a whole timetable — and until then, switching back is just points on the track.",
-  "mental_fa": "دو ریل درحالی‌که قطار همچنان می‌رود: ریل قدیم همه مسافرها را می‌برد درحالی‌که ریل تازه کنارش کشیده می‌شود، با واگن‌های خالی تست می‌شود (سایه)، بعد چند واگن (canary) و بعد کل ترافیک. ریل قدیم فقط بعد از این‌که تازه کل بار را در یک جدول زمانی کامل برد جمع می‌شود — و تا آن موقع برگشتن فقط سوزن ریل است.",
+  "mental_en": "Two rails side by side while the train keeps running: the old rail carries every passenger while the new rail is laid beside it, tested with empty cars (shadow), then a few cars (canary), then all the traffic. The old rail is torn up only after the new one has carried the full load through a whole timetable — and until then, switching back is just a set of points on the track.",
+  "mental_fa": "ببین، دو ریل کنار هم درحالی‌که قطار همچنان می‌رود: ریل قدیم همهٔ مسافرها را می‌برد، درحالی‌که ریل تازه کنارش کشیده می‌شود، اول با واگن‌های خالی تست می‌شود (سایه)، بعد با چند واگن (canary) و بعد با کل ترافیک. ریل قدیم فقط بعد از این‌که ریل تازه کل بار را در یک جدول زمانی کامل برد جمع می‌شود — و تا آن لحظه، برگشتن فقط سوزن ریل است.",
   "mistakes": [
     {
-      "en": "Migrating reads before the new view has replayed history: canary percentages over an incomplete view serve confident wrong answers. Backfill plus catch-up first, percentages second.",
-      "fa": "مهاجرت خواندن‌ها پیش از بازپخش تاریخچه توسط نمای تازه: درصدهای canary روی نمای ناقص جواب‌های غلط مطمئن سرو می‌کنند. اول backfill با catch-up، بعد درصدها."
+      "en": "Migrating the reads before the new view has replayed history: canary percentages over an incomplete view serve confident wrong answers. Backfill plus catch-up first, percentages second.",
+      "fa": "مهاجرت خواندن‌ها پیش از بازپخش تاریخچه توسط نمای تازه: درصدهای canary روی نمای ناقص، جواب‌های غلطِ مطمئن سرو می‌کنند. اول backfill با catch-up، بعد درصدها."
     },
     {
-      "en": "Letting views accept direct writes during migration: the projections diverge from the log and replay can no longer rebuild either view. All fresh input goes through the log, no exceptions.",
-      "fa": "گذاشتن نوشتن مستقیم در نماها حین مهاجرت: projectionها از لاگ واگرا می‌شوند و replay دیگر هیچ نمایی را بازنمی‌سازد. همه ورودی تازه از لاگ می‌رود، بدون استثنا."
+      "en": "Letting the views accept direct writes during the migration: the projections drift away from the log and the replay can no longer rebuild either view. All fresh input goes through the log, no exceptions.",
+      "fa": "گذاشتن نوشتن مستقیم در نماها حین مهاجرت: projectionها از لاگ واگرا می‌شوند و replay دیگر هیچ نمایی را بازنمی‌سازد. همهٔ ورودی تازه از لاگ می‌رود، بدون استثنا."
     },
     {
-      "en": "Retiring the old view at 100% canary without a hold period: rollback dies the same day a slow-burn bug needs it. Cutover criteria plus hold, then retire.",
-      "fa": "بازنشستگی نمای قدیم در canary صددرصد بدون دوره نگه‌داشت: rollback همان روزی می‌میرد که باگ کندسوز به آن نیاز دارد. اول معیارهای cutover با نگه‌داشت، بعد بازنشستگی."
+      "en": "Retiring the old view at 100% canary without a hold period: the rollback dies the same day a slow-burn bug needs it. Cutover criteria plus the hold, then retire.",
+      "fa": "بازنشستگی نمای قدیم در canary صددرصد بدون دورهٔ نگه‌داشت: rollback همان روزی می‌میرد که باگ کندسوز به آن نیاز دارد. اول معیارهای cutover با نگه‌داشت، بعد بازنشستگی."
     }
   ],
   "number": 2,
@@ -178,28 +178,28 @@
   ],
   "steps": [
     {
-      "en": "Both projectors consume the same log from the first offset: bulk history first, then streaming catch-up to the tip. The old view keeps serving 100% of reads the whole time; nothing about the write path changes.",
-      "fa": "هر دو projector همان لاگ را از اولین آفست مصرف می‌کنند: اول تاریخچه انبوه و بعد catch-up جریانی تا نوک. نمای قدیم همه‌حال صددرصد خواندن‌ها را سرو می‌دهد؛ هیچ‌چیز مسیر نوشتن عوض نمی‌شود.",
-      "t_en": "Backfill, then catch up",
-      "t_fa": "backfill و بعد catch-up"
+      "en": "Both projectors eat the same log from the very first offset: bulk history first, then streaming catch-up to the tip. The old view keeps serving 100% of the reads the whole way through, and nothing about the write path changes.",
+      "fa": "نکته‌ش اینه: هر دو projector همان لاگ را از اولین آفست مصرف می‌کنند — اول تاریخچهٔ انبوه، بعد catch-up جریانی تا نوک. نمای قدیم در تمام این مدت صددرصد خواندن‌ها را سرو می‌دهد و هیچ‌چیز در مسیر نوشتن تکان نمی‌خورد.",
+      "t_en": "Backfill first, catch up second",
+      "t_fa": "اول backfill، بعد catch-up"
     },
     {
-      "en": "Every read runs against both views but only the old answer is served; differences are counted as shadow mismatches. The canary percent stays 0 while mismatches are nonzero or either view's lag exceeds its bound — the demo's dropped-details bug dies exactly here.",
-      "fa": "هر خواندن روی هر دو نما اجرا می‌شود ولی فقط جواب قدیم سروشده می‌شود؛ اختلاف‌ها به‌عنوان mismatch سایه شمرده می‌شوند. درصد canary تا وقتی mismatch غیرصفر است یا lag هر نما از کرانش بگذرد صفر می‌ماند — باگ افتادن جزئیات دمو دقیقاً همین‌جا می‌میرد.",
-      "t_en": "Shadow before canary",
-      "t_fa": "سایه پیش از canary"
+      "en": "Now the scary part: every read runs against both views, but only the old answer is served, and the differences get counted as shadow mismatches. The canary percent stays at 0 while mismatches are nonzero or either view's lag exceeds its bound — the demo's dropped-details bug dies right here, where nobody can see it.",
+      "fa": "حالا بریم سراغ بخش ترسناک: هر خواندن روی هر دو نما اجرا می‌شود ولی فقط جواب قدیم سرو می‌شود، و اختلاف‌ها به‌عنوان mismatch سایه شمرده می‌شوند. درصد canary تا وقتی mismatch غیرصفر است یا lag یکی از نماها از کرانش بگذرد صفر می‌ماند — باگ افتادن جزئیات در دمو دقیقاً همین‌جا می‌میرد، بی‌آن‌که کسی ببیند.",
+      "t_en": "Shadow first, canary second",
+      "t_fa": "سایه قبل از canary"
     },
     {
-      "en": "The flag walks 5 to 50 to 100 on zero mismatches and bounded lag; any regression flips it to 100% old in one move. After criteria plus a hold period at 100%, stop the old projector, keep one snapshot through retention, then retire.",
-      "fa": "flag روی صفر mismatch و lag کران‌دار از ۵ به ۵۰ به ۱۰۰ می‌رود؛ هر پسرفتی آن را در یک حرکت به صددرصد قدیم برمی‌گرداند. بعد از معیارها به‌علاوه دوره نگه‌داشت در ۱۰۰٪، projector قدیم را متوقف کن و یک snapshot را در نگهداری نگه دار و بعد بازنشسته کن.",
-      "t_en": "Canary, cutover, retire late",
-      "t_fa": "canary و cutover و بازنشستگی دیر"
+      "en": "Honestly, this part is pure discipline: the flag walks 5 to 50 to 100 on zero mismatches and bounded lag, and any regression flips it to 100% old in one move. After the criteria plus a hold period at 100%, stop the old projector, keep one snapshot through retention, and only then retire it.",
+      "fa": "راستش، اینجا همه‌چیز به انضباط برمی‌گردد: flag روی صفر mismatch و lag کران‌دار از ۵ به ۵۰ به ۱۰۰ می‌رود، و هر پسرفتی آن را در یک حرکت به صددرصد قدیم برمی‌گرداند. بعد از معیارها به‌علاوهٔ دورهٔ نگه‌داشت در ۱۰۰٪، projector قدیم را متوقف کن، یک snapshot را در نگهداری نگه دار و تازه آن‌وقت بازنشسته‌اش کن.",
+      "t_en": "Canary, cutover, then a late retirement",
+      "t_fa": "canary و cutover و بازنشستگی دیرهنگام"
     }
   ],
-  "tests_en": "Invariants: old and new views agree on every key at the same log offset (shadow equality); the flag percent served always sums to 100; no write bypasses the log. Failure tests: inject a projection bug and confirm the canary never opens; stall one projector and confirm its view is fenced from reads; flip rollback mid-canary and confirm reads return in one flag move. Metrics: shadow mismatch rate, per-view lag against the tip watermark, percent served per view.",
-  "tests_fa": "ناورداها: توافق نمای قدیم و تازه روی هر کلید در آفست یکسان لاگ (برابری سایه)؛ جمع درصد سروشده همیشه ۱۰۰؛ هیچ نوشتنی لاگ را دور نمی‌زند. تست‌های خرابی: تزریق باگ projection و تأیید باز نشدن canary؛ متوقف کردن یک projector و تأیید فنس شدن نمای آن از خواندن؛ چرخاندن rollback وسط canary و تأیید برگشت خواندن‌ها در یک حرکت flag. متریک‌ها: نرخ mismatch سایه، lag هر نما نسبت به watermark نوک و درصد سروشده هر نما.",
-  "worked_en": "<p>Teaching run with three products. Both views backfill to 3 rows. Shadow compare finds 2 mismatches (p2 and p3 details dropped by the injected bug), so the canary stays 0%. After fixing the projector and replaying the same log, mismatches read 0 and the flag walks 5 to 50 to 100. A rollback drill flips one flag back to old with all 3 old rows intact.</p>",
-  "worked_fa": "<p>اجرای آموزشی با سه محصول. هر دو نما تا ۳ سطر backfill می‌شوند. مقایسه سایه ۲ mismatch می‌یابد (جزئیات p2 و p3 افتاده از باگ تزریقی)، پس canary صفر می‌ماند. بعد از اصلاح projector و بازپخش همان لاگ، mismatchها صفر می‌خوانند و flag از ۵ به ۵۰ به ۱۰۰ می‌رود. تمرین rollback با یک flag به قدیم برمی‌گردد و هر ۳ سطر قدیم سالم‌اند.</p>",
-  "reasoning_fa": "<p>shared log همهٔ تغییرها را به دو projection می‌رساند تا dual write مستقل شکاف نسازد. مقایسه در checkpoint مشترک لازم است چون نمای عقب‌مانده با نمای خراب فرق دارد. درصد canary فرض مدیریت ریسک است: مرحله را وقتی افزایش بده که mismatch، lag و خطای هر cohort داخل معیار باشد؛ گذشتن چند دقیقه به‌تنهایی کافی نیست. rollback فقط تا وقتی معتبر است که مسیر قدیم دادهٔ تازه را بفهمد؛ حذف زودهنگام فیلدها آن را می‌بندد.</p>",
-  "reasoning_en": "<p>A shared log feeds both projections without independent dual-write gaps. Compare at a common checkpoint to distinguish lag from corruption. Canary percentages manage exposure: advance only when mismatch, lag and per-cohort errors meet criteria, not merely after elapsed time. Rollback requires the old path to understand new data; early field removal closes that option.</p>"
+  "tests_en": "Invariants: the old and new views agree on every key at the same log offset (shadow equality); the percent served always sums to 100; no write bypasses the log. Failure tests: inject a projection bug and confirm the canary never opens; stall one projector and confirm its view is fenced off from reads; flip the rollback mid-canary and confirm the reads come back in one flag move. Metrics: shadow mismatch rate, per-view lag against the tip watermark, percent served per view.",
+  "tests_fa": "ناورداها: نمای قدیم و تازه روی هر کلید در آفست یکسانِ لاگ با هم توافق دارند (برابری سایه)؛ جمع درصدهای سروشده همیشه ۱۰۰ است؛ هیچ نوشتنی لاگ را دور نمی‌زند. تست‌های خرابی: باگ projection تزریق کن و ببین canary باز نمی‌شود؛ یک projector را متوقف کن و تأیید کن نمای آن از خواندن فنس شده؛ rollback را وسط canary بچرخان و تأیید کن خواندن‌ها در یک حرکتِ flag برمی‌گردند. متریک‌ها: نرخ mismatch سایه، lag هر نما نسبت به watermark نوک و درصد سروشدهٔ هر نما.",
+  "worked_en": "<p>Teaching run with three products. Both views backfill to 3 rows. The shadow compare finds 2 mismatches (p2 and p3 details dropped by the injected bug), so the canary stays at 0%. After fixing the projector and replaying the same log, the mismatches read 0 and the flag walks 5 to 50 to 100. A rollback drill flips one flag back to the old view with all 3 old rows intact.</p>",
+  "worked_fa": "<p>اجرای آموزشی با سه محصول. هر دو نما تا ۳ سطر backfill می‌شوند. مقایسهٔ سایه ۲ mismatch می‌یابد (جزئیات p2 و p3 افتاده از باگ تزریقی)، برای همین canary صفر می‌ماند. بعد از اصلاح projector و بازپخش همان لاگ، mismatchها صفر می‌خوانند و flag از ۵ به ۵۰ به ۱۰۰ می‌رود. تمرین rollback با یک چرخش flag به قدیم برمی‌گردد و هر ۳ سطر قدیم سالم‌اند. — باگ در سایه مُرد، نه در production.</p>",
+  "reasoning_fa": "<p>shared log همهٔ تغییرها را به دو projection می‌رساند تا dual write مستقل شکاف نسازد. مقایسه در checkpoint مشترک لازم است، چون نمای عقب‌مانده با نمای خراب فرق دارد و قاطی کردنشان یعنی page کردن الکی. درصد canary یک فرض مدیریت ریسک است: مرحله را وقتی بالا ببر که mismatch، lag و خطای هر cohort داخل معیار باشد؛ گذشتن چند دقیقه به‌تنهایی کافی نیست. rollback فقط تا وقتی معتبر است که مسیر قدیم دادهٔ تازه را بفهمد؛ حذف زودهنگام فیلدها آن در را می‌بندد.</p>",
+  "reasoning_en": "<p>A shared log feeds both projections without independent dual-write gaps. You compare at a common checkpoint to tell lag apart from corruption — mixing the two up means paging for nothing. The canary percentages are a risk-management assumption: move up only when mismatch, lag and per-cohort errors are inside the criteria, not merely because some minutes passed. Rollback holds only while the old path understands the new data; removing fields early closes that door.</p>"
 }

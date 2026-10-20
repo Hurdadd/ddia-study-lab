@@ -1,28 +1,28 @@
 {
   "alternatives": [
     {
-      "en": "Inline assertions inside the derivation pipeline: cheapest to run, but they share the same code and the same blind spots as the pipeline — a shared bug passes every assert. Keep asserts for fail-fast, but they are not an independent audit.",
-      "fa": "assertionهای داخل خط derivation: ارزان‌ترین اجرا، ولی همان کد و همان نقاط کور خط را دارند — باگ مشترک از هر assert رد می‌شود. assertها را برای fail-fast نگه دار، ولی حسابرسی مستقل نیستند."
+      "en": "Inline assertions inside the derivation pipeline: the cheapest thing to run, but they share the same code and the same blind spots as the pipeline — a shared bug slips past every assert. Keep the asserts for fail-fast, but they are not an independent audit.",
+      "fa": "assertionهای داخل خط derivation: ارزان‌ترین اجرا، ولی همان کد و همان نقاط کورِ خط را دارند — باگ مشترک از هر assert رد می‌شود. assertها را برای fail-fast نگه دار، ولی حسابرسیِ مستقل نیستند."
     },
     {
-      "en": "Full dual-run with vote (two independent derivations, page on any disagreement): strongest detection, roughly double compute plus a tie-break rule for when the two checkers disagree with each other. Reserve for money-moving ledgers; the single-checker-plus-lag-board here is the proportionate default.",
-      "fa": "اجرای دوگانه کامل با رأی (دو derivation مستقل و page روی هر اختلاف): قوی‌ترین تشخیص، تقریباً دو برابر محاسبه با قاعده تساوی‌شکن وقتی دو checker با هم اختلاف کنند. برای دفترکل‌های پول‌بر نگه دار؛ تک-checker با تابلوی lag این‌جا پیش‌فرض متناسب است."
+      "en": "Full dual-run with a vote (two independent derivations, page on any disagreement): the strongest detection, roughly double the compute, plus a tie-break rule for when the two checkers disagree with each other. Reserve it for money-moving ledgers; the single checker plus a lag board here is the proportionate default.",
+      "fa": "اجرای دوگانهٔ کامل با رأی (دو derivation مستقل و page روی هر اختلاف): قوی‌ترین تشخیص، تقریباً دو برابر محاسبه، به‌علاوهٔ قاعدهٔ تساوی‌شکن برای وقتی دو checker با هم اختلاف کنند. برای دفترکل‌های پول‌بر نگهش دار؛ تک-checker با تابلوی lag این‌جا پیش‌فرضِ متناسب است."
     }
   ],
-  "answer_en": "Run an independent checker that replays the authoritative log with separate code up to a stated checkpoint, reads actual state at that same checkpoint, and compares field by field. Behind-but-consistent means lag (track it on a board, do not page); same-checkpoint difference means corruption (page a human). Inject a missing update to prove detection works. Detection only pages — repair stays gated — and the checker honestly names what it cannot prove: an incomplete log or a bug shared by both code paths. The trade-off: replay compute and checkpoint bookkeeping for silent-corruption detection that inline asserts cannot give.",
-  "answer_fa": "یک checker مستقل اجرا کن که لاگ مرجع را با کد جدا تا checkpoint اعلام‌شده بازپخش می‌کند و state واقعی را در همان checkpoint می‌خواند و فیلدبه‌فیلد مقایسه می‌کند. عقب‌مانده ولی سازگار یعنی lag (روی تابلو رصدش کن و page نکن)؛ اختلاف در checkpoint یکسان یعنی corruption (به انسان page کن). یک update گمشده تزریق کن تا کارکرد تشخیص اثبات شود. تشخیص فقط page می‌کند — تعمیر پشت دروازه می‌ماند — و checker صادقانه می‌گوید چه چیزی را نمی‌تواند اثبات کند: لاگ ناقص یا باگ مشترک هر دو مسیر کد. تریدآف: محاسبه replay و دفترداری checkpoint در برابر تشخیص corruption خاموش که assertهای داخلی نمی‌دهند.",
+  "answer_en": "Run an independent checker that replays the authoritative log with separate code up to a stated checkpoint, reads the actual state at that same checkpoint, and compares field by field. Behind-but-consistent means lag (track it on a board, don't page); a same-checkpoint difference means corruption (page a human). Inject a missing update to prove the detection works. Detection only pages — the repair stays gated — and the checker honestly names what it cannot prove: an incomplete log, or a bug shared by both code paths. The trade-off: replay compute and checkpoint bookkeeping in exchange for catching the silent corruption that inline asserts cannot. — an audit is what makes the pager worth trusting.",
+  "answer_fa": "قضیه اینه که: یک checker مستقل اجرا کن که لاگ مرجع را با کد جدا تا checkpoint اعلام‌شده بازپخش می‌کند، state واقعی را در همان checkpoint می‌خواند و فیلدبه‌فیلد مقایسه می‌کند. عقب‌مانده ولی سازگار یعنی lag — روی تابلو رصدش کن و page نکن؛ اختلاف در checkpoint یکسان یعنی corruption — به انسان page کن. یک update گمشده تزریق کن تا کارکرد تشخیص اثبات شود. تشخیص فقط page می‌کند؛ تعمیر پشت دروازه می‌ماند. و checker صادقانه می‌گوید چه چیزی را نمی‌تواند اثبات کند: لاگ ناقص، یا باگ مشترکِ هر دو مسیر کد. تریدآف: محاسبهٔ replay و دفترداریِ checkpoint در برابر تشخیص corruption خاموش که assertهای داخلی نمی‌دهند. — حسابرسی همان چیزی است که pager را به‌جای شلوغ‌کردن، مفید می‌کند.",
   "assumptions": [
     {
-      "en": "Transfer history scope: four teaching transfers t1..t4 over accounts A=500, B=300, C=200. The derivation under audit silently drops t3.",
-      "fa": "دامنه تاریخچه انتقال: چهار انتقال آموزشی t1 تا t4 روی حساب‌های A=500 و B=300 و C=200. derivation تحت حسابرسی بی‌صدا t3 را می‌اندازد."
+      "en": "Picture the scope: the transfer history. Four teaching transfers t1..t4 over accounts A=500, B=300, C=200. And the sting: the derivation under audit silently drops t3.",
+      "fa": "فرض کن دامنه‌اش تاریخچهٔ انتقاله: چهار انتقال آموزشی t1 تا t4 روی حساب‌های A=500 و B=300 و C=200. و نکتهٔ تلخ: derivation تحت حسابرسی بی‌صدا t3 رو می‌ندازه."
     },
     {
-      "en": "The checker shares no code with the derivation: independently written recomputation from the same log, compared at one stated checkpoint (offset 4).",
-      "fa": "checker هیچ کدی با derivation ندارد: بازمحاسبه مستقل‌نوشته‌شده از همان لاگ که در یک checkpoint اعلام‌شده (آفست ۴) مقایسه می‌شود."
+      "en": "The rule here: the checker shares no code with the derivation. It's an independently written recomputation from the same log, compared at one stated checkpoint (offset 4).",
+      "fa": "قضیه اینه که: checker هیچ کدی با derivation نداره — یه بازمحاسبهٔ مستقل‌نوشته‌شده از همون لاگ، که توی یه checkpoint اعلام‌شده (آفست ۴) مقایسه می‌شه."
     },
     {
-      "en": "Checkpoints are log offsets both sides can name. A view that has not reached the checkpoint yet is behind, not corrupt.",
-      "fa": "checkpointها آفست‌های لاگ‌اند که هر دو طرف می‌توانند نام ببرند. نمایی که هنوز به checkpoint نرسیده عقب است نه خراب."
+      "en": "And one last thing: checkpoints are log offsets both sides can name. A view that hasn't reached the checkpoint yet is behind, not corrupt.",
+      "fa": "و یه نکتهٔ آخر: checkpointها آفست‌های لاگ‌ان که هر دو طرف می‌تونن نام ببرن. نمایی که هنوز به checkpoint نرسیده، عقب است، نه خراب."
     }
   ],
   "code": {
@@ -30,185 +30,185 @@
     "expected_en": "At checkpoint 4 the checker flags MISMATCH on A and C (silent t3); a checkpoint-2 view reads LAG, not corruption; a 3-entry log recomputes honestly from what it has; OK. (actual output of this environment)",
     "expected_fa": "در checkpoint ۴ checker روی A و C ناسازگاری flag می‌کند (t3 خاموش)؛ نمای checkpoint دو lag می‌خواند نه corruption؛ لاگ سه‌تایی صادقانه از همان که دارد بازمحاسبه می‌کند؛ OK. (خروجی واقعی همین محیط)",
     "lang": "java",
-    "run_en": "javac AuditDemo.java && java AuditDemo — stdlib Java only, instant.",
-    "run_fa": "javac AuditDemo.java && java AuditDemo — فقط استاندارد جاوا، فوری.",
+    "run_en": "javac AuditDemo.java && java AuditDemo — stdlib Java only, instant, no dependencies.",
+    "run_fa": "javac AuditDemo.java && java AuditDemo — فقط استاندارد جاوا، فوری و بدون وابستگی.",
     "status": "verified"
   },
-  "design_en": "<p><b>Components:</b> the authoritative input log with named offsets; the derivation under audit; the checker (separate binary, separate code); a lag board and a pager. <b>Protocol:</b> checker replays to checkpoint N, reads live state pinned at N, diffs field by field. Match plus lag zero is green; match with lag is a board entry; any same-checkpoint diff pages. <b>Repair gate:</b> detection never rewrites state — a human approves repair from the checker diff, and the repair itself replays through the log. <b>Schedule:</b> lag board continuous, checkpoint replay hourly, totals sum-check daily.</p>",
-  "design_fa": "<p><b>اجزا:</b> لاگ ورودی مرجع با آفست‌های نام‌دار؛ derivation تحت حسابرسی؛ checker (باینری جدا و کد جدا)؛ تابلوی lag و pager. <b>پروتکل:</b> checker تا checkpoint با شماره N بازپخش می‌کند و state زنده سنجاق‌شده در N را می‌خواند و فیلدبه‌فیلد diff می‌گیرد. تطابق با lag صفر سبز است؛ تطابق با lag ورودی تابلوست؛ هر diff در checkpoint یکسان page می‌کند. <b>دروازه تعمیر:</b> تشخیص هیچ‌وقت state را بازنویسی نمی‌کند — انسان تعمیر را از diff checker تأیید می‌کند و خود تعمیر از لاگ بازپخش می‌شود. <b>زمان‌بندی:</b> تابلوی lag پیوسته و replay checkpoint ساعتی و جمع‌بندی total روزانه.</p>",
+  "design_en": "<p><b>Components:</b> the authoritative input log with named offsets; the derivation under audit; the checker (separate binary, separate code); a lag board and a pager. <b>Protocol:</b> the checker replays to checkpoint N, reads the live state pinned at N, and diffs field by field. A match plus lag zero is green; a match with lag is a board entry; any same-checkpoint diff pages. <b>Repair gate:</b> detection never rewrites state — a human approves the repair from the checker diff, and the repair itself replays through the log. <b>Schedule:</b> the lag board runs continuous, the checkpoint replay is hourly, the totals sum-check is daily. — three cheap layers, and none of them quietly drops out of the job.</p>",
+  "design_fa": "<p><b>اجزا:</b> لاگ ورودی مرجع با آفست‌های نام‌دار؛ derivation تحت حسابرسی؛ checker (باینری جدا و کد جدا)؛ تابلوی lag و pager. <b>پروتکل:</b> checker تا checkpoint با شماره N بازپخش می‌کند و state زندهٔ سنجاق‌شده در N را می‌خواند و فیلدبه‌فیلد diff می‌گیرد. تطابق با lag صفر سبز است؛ تطابق با lag ورودی تابلوست؛ هر diff در checkpoint یکسان page می‌کند. <b>دروازهٔ تعمیر:</b> تشخیص هیچ‌وقت state را بازنویسی نمی‌کند — انسان تعمیر را از diffِ checker تأیید می‌کند و خودِ تعمیر از لاگ بازپخش می‌شود. <b>زمان‌بندی:</b> تابلوی lag پیوسته، replayِ checkpoint ساعتی، جمع‌بندیِ total روزانه. — سه لایهٔ ارزان، و هیچ‌کدام بی‌خبر از کار نمی‌افتد.</p>",
   "diagrams": [
     {
-      "caption_en": "Replay to a checkpoint, compare at the same point, verdict lag or mismatch",
-      "caption_fa": "بازپخش تا checkpoint و مقایسه در همان نقطه و verdict از جنس lag یا mismatch",
+      "caption_en": "Replay to a checkpoint, compare at the same point, get a verdict: lag or mismatch",
+      "caption_fa": "بازپخش تا checkpoint، مقایسه در همان نقطه، و verdict از جنس lag یا mismatch",
       "file": "diagrams/sol4-step1-checker-runbook.html",
       "height": 640,
       "kind_en": "workflow: checker runbook",
       "kind_fa": "گردش‌کار: ران‌بوک checker",
       "made": "archify",
       "narration": {
-        "failure_en": "Trace a drifting checkpoint on the same figure: if the checker compared 'latest live' against 'whatever replay reached', every normal lag would page as corruption — the pager would fire all day and the real t3 mismatch would drown in noise. Pinning both sides to N is what makes the verdict mean anything.",
-        "failure_fa": "رانش checkpoint را روی همان شکل دنبال کن: اگر checker «زنده‌ترین» را با «هرچه replay رسیده» مقایسه کند، هر lag عادی مثل corruption page می‌کند — pager تمام روز می‌خواند و mismatch واقعی t3 در نویز غرق می‌شود. سنجاق کردن هر دو طرف به N همان چیزی است که verdict را معنادار می‌کند.",
-        "guarantee_en": "The figure shows detection with honest routing to board or pager. It does not show repair — detection never rewrites state.",
-        "guarantee_fa": "شکل تشخیص با مسیریابی صادقانه به تابلو یا pager را نشان می‌دهد. تعمیر را نشان نمی‌دهد — تشخیص هیچ‌وقت state را بازنویسی نمی‌کند.",
-        "nonguarantee_en": "It says nothing about shared-bug blindness or incomplete logs — those limits are charted in the next figure.",
-        "nonguarantee_fa": "درباره کوری باگ مشترک یا لاگ‌های ناقص چیزی نمی‌گوید — آن حدود در شکل بعدی نمودار شده‌اند.",
-        "point_en": "The checkpoint is the contract: both sides name offset N before any comparison happens.",
-        "point_fa": "checkpoint همان قرارداد است: هر دو طرف پیش از هر مقایسه آفست N را نام می‌برند.",
-        "scenario_en": "One audit cycle left to right: the input log replays to checkpoint N, the checker recomputes with separate code, live state is read pinned at N, the compare diffs field by field, and the verdict routes to the lag board or the pager — then the cycle re-runs.",
-        "scenario_fa": "یک چرخه حسابرسی چپ‌به‌راست: لاگ ورودی تا checkpoint با شماره N بازپخش می‌شود و checker با کد جدا بازمحاسبه می‌کند و state زنده سنجاق‌شده در N خوانده می‌شود و مقایسه فیلدبه‌فیلد diff می‌گیرد و verdict به تابلوی lag یا pager می‌رود — بعد چرخه دوباره اجرا می‌شود.",
+        "failure_en": "Trace a drifting checkpoint on the same figure: if the checker compared 'latest live' against 'whatever replay reached', every normal lag would page as corruption — the pager would fire all day and the real t3 mismatch would drown in the noise. Pinning both sides to N is what makes the verdict mean anything.",
+        "failure_fa": "رانش checkpoint را روی همان شکل دنبال کن: اگر checker «زنده‌ترین» را با «هرچه replay رسیده» مقایسه کند، هر lag عادی مثل corruption page می‌کند — pager تمام روز می‌خواند و mismatch واقعیِ t3 در نویز غرق می‌شود. سنجاق کردن هر دو طرف به N همان چیزی است که verdict را معنادار می‌کند.",
+        "guarantee_en": "The figure shows detection with honest routing to the board or the pager. It does not show the repair — detection never rewrites state. — it tells you when to shout, not how to fix it.",
+        "guarantee_fa": "شکل تشخیص با مسیریابی صادقانه به تابلو یا pager را نشان می‌دهد. تعمیر را نشان نمی‌دهد — تشخیص هیچ‌وقت state را بازنویسی نمی‌کند. — این شکل می‌گوید کِی خبر بدهی، نه این‌که چه‌طور درست کنی.",
+        "nonguarantee_en": "It says nothing about the shared-bug blindness or the incomplete logs — those limits get charted in the next figure.",
+        "nonguarantee_fa": "دربارهٔ کوریِ باگ مشترک یا لاگ‌های ناقص چیزی نمی‌گوید — آن حدود در شکل بعدی نمودار شده‌اند.",
+        "point_en": "The checkpoint is the contract: both sides name offset N before any comparison happens. — without N, no verdict means anything.",
+        "point_fa": "checkpoint همان قرارداد است: هر دو طرف پیش از هر مقایسه آفست N را نام می‌برند. — بدون N، هیچ verdictی معنا ندارد.",
+        "scenario_en": "One audit cycle, left to right: the input log replays to checkpoint N, the checker recomputes with separate code, the live state is read pinned at N, the compare diffs field by field, and the verdict routes to the lag board or the pager — then the cycle runs again.",
+        "scenario_fa": "یک چرخهٔ حسابرسی، چپ‌به‌راست: لاگ ورودی تا checkpoint با شماره N بازپخش می‌شود، checker با کد جدا بازمحاسبه می‌کند، state زندهٔ سنجاق‌شده در N خوانده می‌شود، مقایسه فیلدبه‌فیلد diff می‌گیرد و verdict به تابلوی lag یا pager می‌رود — بعد چرخه دوباره اجرا می‌شود.",
         "steps": [
           {
-            "en": "Replay the authoritative log to the stated checkpoint with code that shares nothing with the derivation.",
-            "fa": "لاگ مرجع را تا checkpoint اعلام‌شده با کدی بازپخش کن که هیچ‌چیز با derivation ندارد."
+            "en": "Replay the authoritative log to the stated checkpoint with code that shares nothing at all with the derivation.",
+            "fa": "لاگ مرجع را تا checkpoint اعلام‌شده با کدی بازپخش کن که هیچ‌چیزِ مشترکی با derivation ندارد."
           },
           {
-            "en": "Read live state pinned at the same checkpoint and diff field by field: expected from replay, actual from the view.",
-            "fa": "state زنده سنجاق‌شده در همان checkpoint را بخوان و فیلدبه‌فیلد diff بگیر: موردانتظار از replay و واقعی از نما."
+            "en": "Read the live state pinned at the same checkpoint and diff it field by field: expected from the replay, actual from the view.",
+            "fa": "state زندهٔ سنجاق‌شده در همان checkpoint را بخوان و فیلدبه‌فیلد diff بگیر: موردانتظار از replay، واقعی از نما."
           },
           {
-            "en": "Behind-but-consistent routes to the lag board; any same-checkpoint difference pages a human; the cycle re-runs on schedule.",
-            "fa": "عقب‌مانده ولی سازگار به تابلوی lag می‌رود؛ هر اختلاف در checkpoint یکسان به انسان page می‌کند؛ چرخه سر زمان‌بندی دوباره اجرا می‌شود."
+            "en": "Behind-but-consistent routes to the lag board; any difference at the same checkpoint pages a human; the cycle re-runs on schedule.",
+            "fa": "عقب‌مانده ولی سازگار به تابلوی lag می‌رود؛ هر اختلاف در یک checkpoint، به انسان page می‌کند؛ چرخه سر زمان‌بندی دوباره اجرا می‌شود."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "Comparing latest-against-latest: normal lag would page as corruption all day, and the real mismatch would drown in noise.",
-        "a_fa": "مقایسه تازه‌ترین با تازه‌ترین: lag عادی تمام روز مثل corruption page می‌کرد و mismatch واقعی در نویز غرق می‌شد.",
-        "q_en": "What breaks if the checker compares without pinning both sides to one checkpoint?",
-        "q_fa": "اگر checker بدون سنجاق کردن هر دو طرف به یک checkpoint مقایسه کند چه می‌شکند؟"
+        "a_en": "Comparing latest-against-latest: normal lag would page as corruption all day, and the real mismatch would drown in the noise.",
+        "a_fa": "مقایسهٔ تازه‌ترین با تازه‌ترین: lag عادی تمام روز مثل corruption page می‌کرد و mismatch واقعی در نویز غرق می‌شد.",
+        "q_en": "What breaks if the checker compares without pinning both sides to a single checkpoint?",
+        "q_fa": "اگر checker بدون سنجاق کردن هر دو طرف به یک checkpoint مقایسه کند، چه می‌شکند؟"
       },
       "source": "assets/diagram-specs/solutions/ch13/sol4-step1-checker-runbook.json"
     },
     {
-      "caption_en": "Each check buys a detection; blind spots stay named",
-      "caption_fa": "هر بررسی یک تشخیص می‌خرد؛ نقاط کور نام‌برده می‌مانند",
+      "caption_en": "Each check buys a detection, and the blind spots stay named",
+      "caption_fa": "هر بررسی یک تشخیص می‌خرد، و نقاط کور نام‌برده می‌مانند",
       "file": "diagrams/sol4-step2-detection-chart.html",
       "height": 640,
       "kind_en": "chart: detection trade-offs",
       "kind_fa": "نمودار: تریدآف‌های تشخیص",
       "made": "hand",
       "narration": {
-        "failure_en": "Trace an automated repair on the same figure: nothing on the cost axis earns the right to rewrite state — the longest bar buys human judgment per incident, not a robot with a delete key. Detection and repair are different purchases.",
-        "failure_fa": "تعمیر خودکار را روی همان شکل دنبال کن: هیچ‌چیز روی محور هزینه حق بازنویسی state را نمی‌خرد — بلندترین میله قضاوت انسانی هر incident را می‌خرد نه رباتی با کلید حذف. تشخیص و تعمیر خریدهای متفاوتی‌اند.",
-        "guarantee_en": "The figure shows what each check costs and catches. It does not rank checks by importance — the lag board matters most on most days.",
-        "guarantee_fa": "شکل نشان می‌دهد هر بررسی چه هزینه دارد و چه می‌گیرد. بررسی‌ها را بر اساس اهمیت رتبه نمی‌کند — تابلوی lag در بیشتر روزها مهم‌ترین است.",
-        "nonguarantee_en": "It promises no detection for the two peach boxes: incomplete logs and shared bugs are outside every bar.",
-        "nonguarantee_fa": "برای دو جعبه هلویی هیچ تشخیصی وعده نمی‌دهد: لاگ‌های ناقص و باگ‌های مشترک بیرون هر میله‌اند.",
-        "point_en": "Longer bars buy different detections, never stronger proof: cost and certainty are separate axes, and the blind spots are drawn, not hidden.",
-        "point_fa": "میله‌های بلندتر تشخیص‌های متفاوت می‌خرند نه اثبات قوی‌تر: هزینه و قطعیت محورهای جدایند و نقاط کور کشیده شده‌اند نه پنهان.",
-        "scenario_en": "Four bars cheapest-first — lag board, checkpoint replay, totals sum-check, human shared-bug review — then the arrow warning that cost buys judgment, and the two peach blind spots no bar covers.",
-        "scenario_fa": "چهار میله ارزان‌ترین اول — تابلوی lag و replay checkpoint و جمع‌بندی total و بازبینی انسانی باگ مشترک — بعد پیکان هشدار که هزینه قضاوت می‌خرد و دو نقطه کور هلویی که هیچ میله‌ای پوشش نمی‌دهد.",
+        "failure_en": "Trace an automated repair on the same figure: nothing on the cost axis earns the right to rewrite state — the longest bar buys human judgment per incident, not a robot with a delete key. Detection and repair are two different purchases.",
+        "failure_fa": "تعمیر خودکار را روی همان شکل دنبال کن: هیچ‌چیز روی محور هزینه حقِ بازنویسی state را نمی‌خرد — بلندترین میله قضاوت انسانیِ هر incident را می‌خرد، نه رباتی با کلید حذف. تشخیص و تعمیر خریدهای متفاوتی‌اند.",
+        "guarantee_en": "The figure shows what each check costs and what it catches. It doesn't rank the checks by importance — the lag board matters most on most days.",
+        "guarantee_fa": "شکل نشان می‌دهد هر بررسی چه هزینه دارد و چه چیزی می‌گیرد. بررسی‌ها را بر اساس اهمیت رتبه نمی‌کند — تابلوی lag در بیشتر روزها مهم‌ترین است.",
+        "nonguarantee_en": "It promises no detection for the two peach boxes: the incomplete logs and the shared bugs sit outside every bar.",
+        "nonguarantee_fa": "برای دو جعبهٔ هلویی هیچ تشخیصی وعده نمی‌دهد: لاگ‌های ناقص و باگ‌های مشترک بیرون هر میله‌اند.",
+        "point_en": "The longer bars buy different detections, never stronger proof: cost and certainty are separate axes, and the blind spots are drawn, not hidden.",
+        "point_fa": "میله‌های بلندتر تشخیص‌های متفاوت می‌خرند، نه اثباتِ قوی‌تر: هزینه و قطعیت دو محور جدایند و نقاط کور کشیده شده‌اند، نه پنهان.",
+        "scenario_en": "Four bars, cheapest first — the lag board, the checkpoint replay, the totals sum-check and a human shared-bug review — then the arrow warning that cost buys judgment, and the two peach blind spots that no bar covers.",
+        "scenario_fa": "چهار میله، ارزان‌ترین اول — تابلوی lag، replayِ checkpoint، جمع‌بندی total و بازبینی انسانیِ باگ مشترک — بعد پیکانِ هشدار که هزینه قضاوت می‌خرد، و دو نقطهٔ کورِ هلویی که هیچ میله‌ای پوشش نمی‌دهد.",
         "steps": [
           {
-            "en": "Lag board (cheapest, continuous) catches behind-ness in minutes; checkpoint replay (hourly) catches silent drops like t3.",
-            "fa": "تابلوی lag (ارزان‌ترین و پیوسته) عقب‌ماندگی را در دقیقه‌ها می‌گیرد؛ replay checkpoint (ساعتی) افتادن‌های خاموش مثل t3 را می‌گیرد."
+            "en": "The lag board (cheapest, continuous) catches behind-ness within minutes; the checkpoint replay (hourly) catches silent drops like t3.",
+            "fa": "تابلوی lag (ارزان‌ترین و پیوسته) عقب‌ماندگی را در دقیقه‌ها می‌گیرد؛ replayِ checkpoint (ساعتی) افتادن‌های خاموش مثل t3 را می‌گیرد."
           },
           {
-            "en": "Totals sum-check (daily) catches slow drift; human review (per incident) is the only buyer for the shared-bug class.",
-            "fa": "جمع‌بندی total (روزانه) رانش کند را می‌گیرد؛ بازبینی انسانی (هر incident) تنها خریدار کلاس باگ مشترک است."
+            "en": "The totals sum-check (daily) catches slow drift; human review (per incident) is the only buyer for the shared-bug class.",
+            "fa": "جمع‌بندی total (روزانه) رانش کند را می‌گیرد؛ بازبینی انسانی (هر incident) تنها خریدارِ کلاسِ باگ مشترک است."
           },
           {
-            "en": "The two peach boxes — incomplete log, shared bug — sit outside every bar: named limits, not hidden ones.",
-            "fa": "دو جعبه هلویی — لاگ ناقص و باگ مشترک — بیرون هر میله‌اند: حدود نام‌برده نه پنهان."
+            "en": "The two peach boxes — the incomplete log and the shared bug — sit outside every bar: named limits, not hidden ones.",
+            "fa": "دو جعبهٔ هلویی — لاگ ناقص و باگ مشترک — بیرون هر میله‌اند: حدودِ نام‌برده، نه پنهان."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "The lag board: it runs continuously at the lowest cost and separates every benign behind-ness from real corruption.",
-        "a_fa": "تابلوی lag: پیوسته با کمترین هزینه اجرا می‌شود و هر عقب‌ماندگی بی‌خطر را از corruption واقعی جدا می‌کند.",
-        "q_en": "Which check runs most often for the least cost, and what does it protect the pager from?",
-        "q_fa": "کدام بررسی با کمترین هزینه بیشترین تکرار را دارد و pager را از چه چیزی محافظت می‌کند؟"
+        "a_en": "The lag board: it runs continuously at the lowest cost, and it separates every benign behind-ness from real corruption.",
+        "a_fa": "تابلوی lag: پیوسته با کمترین هزینه اجرا می‌شود و هر عقب‌ماندگیِ بی‌خطر را از corruption واقعی جدا می‌کند.",
+        "q_en": "Which check runs most often for the least cost, and what does it keep off the pager?",
+        "q_fa": "کدام بررسی با کمترین هزینه بیشترین تکرار را دارد، و pager را از چه چیزی محافظت می‌کند؟"
       }
     },
     {
-      "caption_en": "Same log in, separate recompute, one-checkpoint verdict",
-      "caption_fa": "همان لاگ داخل و بازمحاسبه جدا و verdict تک‌checkpoint",
+      "caption_en": "The same log in, a separate recompute, one-checkpoint verdict",
+      "caption_fa": "همان لاگ داخل، بازمحاسبهٔ جدا، و verdictِ تک‌checkpoint",
       "file": "diagrams/sol4-audit-loop.html",
       "height": 640,
       "kind_en": "dataflow: audit loop",
       "kind_fa": "جریان‌داده: حلقه حسابرسی",
       "made": "archify",
       "narration": {
-        "failure_en": "Trace auto-repair on the same figure: no edge leads from the verdict back into state — the loop ends at the pager and the lag board. A repair edge would need a human approval gate first; the demo prints mismatches and stops, exactly like the figure.",
-        "failure_fa": "تعمیر خودکار را روی همان شکل دنبال کن: هیچ یالی از verdict به state برنمی‌گردد — حلقه در pager و تابلوی lag تمام می‌شود. یال تعمیر اول به دروازه تأیید انسانی نیاز دارد؛ دمو mismatchها را چاپ می‌کند و می‌ایستد، دقیقاً مثل شکل.",
-        "guarantee_en": "The figure shows the full detection loop with honest exits. It proves nothing when the input log itself is incomplete — the follow-up says what dies then.",
-        "guarantee_fa": "شکل حلقه کامل تشخیص با خروجی‌های صادقانه را نشان می‌دهد. وقتی خود لاگ ورودی ناقص است هیچ‌چیز اثبات نمی‌کند — پاسخ پیگیری می‌گوید آن‌وقت چه می‌میرد.",
-        "nonguarantee_en": "It says nothing about repair mechanics or schedules beyond detection — repair replays through the log under human approval.",
-        "nonguarantee_fa": "درباره مکانیک یا زمان‌بندی تعمیر فراتر از تشخیص چیزی نمی‌گوید — تعمیر با تأیید انسانی از لاگ بازپخش می‌شود.",
-        "point_en": "Two computations enter, one verdict leaves: expected from the checker, actual from live state, compared at exactly one checkpoint.",
-        "point_fa": "دو محاسبه وارد می‌شوند و یک verdict بیرون می‌رود: موردانتظار از checker و واقعی از state زنده که در دقیقاً یک checkpoint مقایسه می‌شوند.",
-        "scenario_en": "The assembly: Source (one authoritative log), Recompute (checker replay plus the derivation under audit), Verdict (expected versus actual at checkpoint 4), Respond (pager for mismatch, board for lag).",
-        "scenario_fa": "اسمبل: منبع (یک لاگ مرجع) و بازمحاسبه (replay checker با derivation تحت حسابرسی) و verdict (موردانتظار در برابر واقعی در checkpoint ۴) و پاسخ (pager برای mismatch و تابلو برای lag).",
+        "failure_en": "Trace auto-repair on the same figure: no edge leads from the verdict back into state — the loop ends at the pager and the lag board. A repair edge would need a human approval gate first; the demo prints the mismatches and stops, exactly like the figure.",
+        "failure_fa": "تعمیر خودکار را روی همان شکل دنبال کن: هیچ یالی از verdict به state برنمی‌گردد — حلقه در pager و تابلوی lag تمام می‌شود. یال تعمیر اول به دروازهٔ تأیید انسانی نیاز دارد؛ دمو mismatchها را چاپ می‌کند و می‌ایستد، دقیقاً مثل شکل.",
+        "guarantee_en": "The figure shows the full detection loop with honest exits. It proves nothing when the input log itself is incomplete — the follow-up says what dies in that case.",
+        "guarantee_fa": "شکل حلقهٔ کامل تشخیص با خروجی‌های صادقانه را نشان می‌دهد. وقتی خودِ لاگ ورودی ناقص است هیچ‌چیز اثبات نمی‌کند — پاسخ پیگیری می‌گوید آن‌وقت چه می‌میرد.",
+        "nonguarantee_en": "It says nothing about the repair mechanics or the schedules beyond detection — the repair replays through the log under human approval.",
+        "nonguarantee_fa": "دربارهٔ مکانیک یا زمان‌بندی تعمیر فراتر از تشخیص چیزی نمی‌گوید — تعمیر با تأیید انسانی از لاگ بازپخش می‌شود.",
+        "point_en": "Two computations enter, one verdict leaves: expected from the checker, actual from the live state, compared at exactly one checkpoint.",
+        "point_fa": "دو محاسبه وارد می‌شوند و یک verdict بیرون می‌رود: موردانتظار از checker و واقعی از state زنده، که در دقیقاً یک checkpoint مقایسه می‌شوند.",
+        "scenario_en": "The assembly: Source (one authoritative log), Recompute (the checker replay plus the derivation under audit), Verdict (expected versus actual at checkpoint 4), Respond (the pager for a mismatch, the board for lag).",
+        "scenario_fa": "اسمبل: منبع (یک لاگ مرجع)، بازمحاسبه (replayِ checker در کنار derivation تحت حسابرسی)، verdict (موردانتظار در برابر واقعی در checkpoint ۴) و پاسخ (pager برای mismatch و تابلو برای lag).",
         "steps": [
           {
-            "en": "The same log feeds the checker (replay edge) and the derivation under audit (derivation edge) — one source, two code paths.",
-            "fa": "همان لاگ checker (یال replay) و derivation تحت حسابرسی (یال derivation) را تغذیه می‌کند — یک منبع و دو مسیر کد."
+            "en": "The same log feeds the checker (replay edge) and the derivation under audit (derivation edge) — one source, two separate code paths.",
+            "fa": "همان لاگ، checker (یال replay) و derivation تحت حسابرسی (یال derivation) را تغذیه می‌کند — یک منبع و دو مسیر کد."
           },
           {
-            "en": "Checker and live state meet at the verdict with expected and actual pinned to checkpoint 4 — the demo's t3 mismatch fires here.",
-            "fa": "checker و state زنده در verdict با موردانتظار و واقعی سنجاق‌شده در checkpoint ۴ به هم می‌رسند — mismatch t3 دمو همین‌جا شلیک می‌کند."
+            "en": "The checker and the live state meet at the verdict, with the expected and the actual pinned to checkpoint 4 — the demo's t3 mismatch fires here.",
+            "fa": "checker و state زنده در verdict، با موردانتظار و واقعیِ سنجاق‌شده در checkpoint ۴ به هم می‌رسند — mismatchِ t3 در دمو همین‌جا شلیک می‌کند."
           },
           {
-            "en": "Mismatch pages a human; lag lands on the board with its bound and trend — detection ends, gated repair begins.",
-            "fa": "mismatch به انسان page می‌کند؛ lag با کران و روندش روی تابلو می‌نشیند — تشخیص تمام می‌شود و تعمیر دروازه‌دار شروع می‌شود."
+            "en": "A mismatch pages a human; lag lands on the board with its bound and trend — detection ends, and the gated repair begins.",
+            "fa": "mismatch به انسان page می‌کند؛ lag با کران و روندش روی تابلو می‌نشیند — تشخیص تمام می‌شود و تعمیرِ دروازه‌دار شروع می‌شود."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "Replay edge versus derivation edge: both read the same log, but only the checker's path is written independently — that asymmetry is the audit.",
-        "a_fa": "یال replay در برابر یال derivation: هر دو همان لاگ را می‌خوانند ولی فقط مسیر checker مستقل نوشته شده — همان نامتقارنی حسابرسی است.",
-        "q_en": "Two edges leave the input log. What makes one of them an audit instead of a duplicate?",
-        "q_fa": "دو یال از لاگ ورودی بیرون می‌روند. چه چیزی یکی را حسابرسی می‌کند به‌جای تکراری؟"
+        "a_en": "Replay edge versus derivation edge: both read the same log, but only the checker's path is written independently — that asymmetry is the audit itself.",
+        "a_fa": "یال replay در برابر یال derivation: هر دو همان لاگ را می‌خوانند، ولی فقط مسیر checker مستقل نوشته شده — همان نامتقارنی، خودِ حسابرسی است.",
+        "q_en": "Two edges leave the input log. What makes one of them an audit instead of a plain duplicate?",
+        "q_fa": "دو یال از لاگ ورودی بیرون می‌روند. چه چیزی یکی را حسابرسی می‌کند، به‌جای این‌که تکراری‌اش کند؟"
       },
       "source": "assets/diagram-specs/solutions/ch13/sol4-audit-loop.json"
     }
   ],
   "failures": [
     {
-      "en": "Silent dropped update (t3): caught at the next checkpoint replay as a same-checkpoint mismatch on A and C. Guard is the scheduled independent replay — the demo injects exactly this.",
-      "fa": "update افتاده خاموش (t3): در replay checkpoint بعدی به‌مثابه mismatch در checkpoint یکسان روی A و C گرفته می‌شود. نگهبان replay مستقل زمان‌بندی‌شده است — دمو دقیقاً همین را تزریق می‌کند."
+      "en": "Silent dropped update (t3): the next checkpoint replay catches it as a same-checkpoint mismatch on A and C. The guard is the scheduled independent replay — the demo injects exactly this.",
+      "fa": "update افتادهٔ خاموش (t3): در replayِ checkpoint بعدی، به‌مثابه mismatch در checkpoint یکسان روی A و C گرفته می‌شود. نگهبانش replay مستقلِ زمان‌بندی‌شده است — دمو دقیقاً همین را تزریق می‌کند."
     },
     {
-      "en": "Checker runs against a newer log offset than live state has reached: every comparison pages falsely. Guard is pinning both reads to the stated checkpoint and treating anything behind as lag with a bound, never as corruption.",
-      "fa": "اجرای checker روی آفست لاگ تازه‌تر از رسیده state زنده: هر مقایسه به‌غلط page می‌کند. نگهبان سنجاق هر دو خواندن به checkpoint اعلام‌شده و رفتار با هر عقب‌ماندگی به‌مثابه lag کران‌دار است، هرگز corruption."
+      "en": "The checker runs against a newer log offset than the live state has reached: every comparison pages for nothing. The guard is pinning both reads to the stated checkpoint, and treating anything behind as lag with a bound — never as corruption.",
+      "fa": "اجرای checker روی آفست لاگِ تازه‌تر از state زنده‌ای که رسیده: هر مقایسه به‌غلط page می‌کند. نگهبانش سنجاق کردن هر دو خواندن به checkpoint اعلام‌شده است، و این‌که هر عقب‌ماندگی lag کران‌دار شمرده شود، هرگز corruption."
     },
     {
-      "en": "Checker outage (no verdicts for a cycle): silence looks like health. Guard is a freshness alert on the verdict stream itself — a missing audit is an incident, not a pass.",
-      "fa": "قطعی checker (بدون verdict در یک چرخه): سکوت مثل سلامتی به نظر می‌رسد. نگهبان هشدار تازگی روی خود جریان verdict است — حسابرسی گمشده incident است نه قبولی."
+      "en": "Checker outage (no verdicts for a cycle): the silence looks like health. The guard is a freshness alert on the verdict stream itself — a missing audit is an incident, not a pass.",
+      "fa": "قطعی checker (بدون verdict در یک چرخه): سکوت مثل سلامتی به نظر می‌رسد. نگهبانش هشدار تازگی روی خودِ جریان verdict است — حسابرسیِ گمشده incident است، نه قبولی."
     }
   ],
   "followups": [
     {
-      "a_en": "Then it can prove nothing beyond that prefix — and it must say so. Recomputation from a truncated log yields 'expected' values that are wrong through no fault of the derivation; comparing them pages falsely and teaches the team to ignore the pager. The honest design: the checker first verifies log completeness to the checkpoint (offset continuity, no gaps), and refuses to verdict — reporting 'unknown, log incomplete' — when the premise fails. An auditor that cannot verify its input audits nothing.",
-      "a_fa": "آن‌وقت فراتر از همان پیشوند هیچ‌چیز اثبات نمی‌کند — و باید همین را بگوید. بازمحاسبه از لاگ بریده مقادیر «موردانتظار» غلط می‌دهد بی‌تقصیر derivation؛ مقایسه‌شان به‌غلط page می‌کند و به تیم یاد می‌دهد pager را نادیده بگیرد. طراحی صادقانه: checker اول کامل بودن لاگ تا checkpoint را راستی‌آزمایی می‌کند (پیوستگی آفست و بدون شکاف) و وقتی پیش‌فرض شکست خورد از verdict خودداری می‌کند — «نامعلوم، لاگ ناقص» گزارش می‌دهد. حسابرسی که ورودی‌اش را راستی‌آزمایی نکند هیچ‌چیز را حسابرسی نمی‌کند.",
+      "a_en": "Then it can prove nothing beyond that prefix — and it has to say so out loud. Recomputation from a truncated log yields 'expected' values that are wrong through no fault of the derivation; comparing them pages falsely and teaches the team to ignore the pager. The honest design: the checker first verifies the log's completeness to the checkpoint (offset continuity, no gaps), and when that premise fails it refuses to verdict and reports 'unknown, log incomplete'. An auditor that cannot verify its input audits nothing.",
+      "a_fa": "آن‌وقت فراتر از همان پیشوند هیچ‌چیز اثبات نمی‌کند — و باید همین را بلند بگوید. بازمحاسبه از لاگِ بریده مقادیر «موردانتظار»ِ غلط می‌دهد، بی‌تقصیرِ derivation؛ مقایسه‌شان به‌غلط page می‌کند و به تیم یاد می‌دهد pager را نادیده بگیرد. طراحی صادقانه: checker اول کامل بودن لاگ تا checkpoint را راستی‌آزمایی می‌کند (پیوستگی آفست و بدون شکاف) و وقتی پیش‌فرض شکست خورد، از دادن verdict خودداری می‌کند و می‌گوید «نامعلوم، لاگ ناقص». حسابرسی که ورودی‌اش را راستی‌آزمایی نکند، هیچ‌چیز را حسابرسی نمی‌کند.",
       "level": "staff",
       "q_en": "The input log itself is incomplete. What can your auditor no longer prove?",
       "q_fa": "لاگ ورودی خودش ناقص باشه؛ auditor دیگه چی رو نمی‌تونه ثابت کنه؟"
     },
     {
-      "a_en": "It cannot — by construction. If both paths share the misreading (same library, same spec misunderstanding, same copied function), their outputs agree and the audit is green over a wrong state. Defenses are partial: write the checker from the spec, not from the pipeline code; rotate authorship; vary a Totals sum-check (a different computation that catches some shared bugs); and name the residual risk in the runbook instead of claiming full independence. Detection depth is proportional to genuine dissimilarity.",
-      "a_fa": "نمی‌تواند — از روی ساخت. اگر هر دو مسیر همان بدخوانی را داشته باشند (همان کتابخانه و همان بدفهمی spec و همان تابع کپی‌شده)، خروجی‌هایشان توافق می‌کنند و حسابرسی روی state غلط سبز است. دفاع‌ها جزئی‌اند: checker را از spec بنویس نه از کد خط؛ نویسندگی را بچرخان؛ جمع‌بندی total متفاوت بگذار (محاسبه دیگری که بعضی باگ‌های مشترک را می‌گیرد)؛ و ریسک باقی‌مانده را در ران‌بوک نام ببر به‌جای ادعای استقلال کامل. عمق تشخیص متناسب با ناهمسانی واقعی است.",
+      "a_en": "It cannot — by construction. If both paths share the same misreading (same library, same spec misunderstanding, same copied function), their outputs agree and the audit goes green over a wrong state. The defenses are partial: write the checker from the spec, not from the pipeline code; rotate the authorship; add a differently-shaped Totals sum-check (another computation that catches some shared bugs); and name the residual risk in the runbook instead of claiming full independence. The depth of your detection is proportional to the real dissimilarity.",
+      "a_fa": "نمی‌تواند — از روی ساخت. اگر هر دو مسیر همان بدخوانی را داشته باشند (همان کتابخانه، همان بدفهمیِ spec، همان تابع کپی‌شده)، خروجی‌هایشان توافق می‌کنند و حسابرسی روی state غلط سبز می‌شود. دفاع‌ها جزئی‌اند: checker را از spec بنویس، نه از کد خط؛ نویسندگی را بچرخان؛ یک جمع‌بندی total متفاوت بگذار (محاسبهٔ دیگری که بعضی باگ‌های مشترک را می‌گیرد)؛ و ریسک باقی‌مانده را در ران‌بوک نام ببر به‌جای ادعای استقلال کامل. عمق تشخیص متناسب با ناهمسانی واقعی است.",
       "level": "staff",
-      "q_en": "Derivation and checker share one Bug. Does the audit catch it?",
-      "q_fa": "derivation و checker یک باگ مشترک داشته باشند. حسابرسی می‌گیردش؟"
+      "q_en": "The derivation and the checker share one bug. Does the audit catch it?",
+      "q_fa": "derivation و checker یک باگ مشترک داشته باشند؛ حسابرسی می‌گیردش؟"
     }
   ],
   "interview_q_en": "Honestly, you build an independent auditor for a transfer or projection that replays your authoritative log to a stated checkpoint. You compare actual state at that same boundary, count mismatch and lag separately, inject a missing update, and explain shared-bug limits, cost, and safe repair.",
   "interview_q_fa": "حالا برای انتقال یا projection یه auditor مستقل طراحی کن که log مرجع رو تا checkpoint مشخص بازپخش می‌کنه. state واقعی رو تو همون مرز مقایسه کن، mismatch و lag رو جدا بشمار و missing update تزریق کن. حدود تشخیص bug مشترک، هزینه و repair امن رو توضیح بده.",
-  "mental_en": "A second cashier recounting the same tape with her own calculator: she does not trust the first cashier's totals, she replays every entry herself up to a circled line number, and compares line by line. A drawer that is merely behind schedule is late, not short. A drawer that disagrees on the circled line is short — and only a short drawer wakes the manager. But if the tape itself is missing pages, her recount proves nothing, and she says so out loud.",
-  "mental_fa": "صندوقدار دومی که همان نوار را با ماشین‌حساب خودش بازمی‌شمارد: به جمع‌های صندوقدار اول اعتماد نمی‌کند و هر ورودی را خودش تا شماره خط دایره‌شده بازپخش می‌کند و خط‌به‌خط مقایسه می‌کند. کشویی که فقط از برنامه عقب است دیر است نه کسری. کشویی که روی خط دایره‌شده اختلاف دارد کسری است — و فقط کشوی کسری مدیر را بیدار می‌کند. ولی اگر خود نوار صفحه کم داشته باشد، بازشماری‌اش هیچ‌چیز اثبات نمی‌کند و همین را بلند می‌گوید.",
+  "mental_en": "A second cashier recounting the same tape with her own calculator: she doesn't trust the first cashier's totals, she replays every entry herself up to a circled line number, and compares line by line. A drawer that is merely behind schedule is late, not short. A drawer that disagrees on the circled line is short — and only a short drawer wakes the manager. But if the tape itself is missing pages, her recount proves nothing, and she says that out loud. — being straight with the manager is part of the audit.",
+  "mental_fa": "فرض کن یه صندوقدار دوم داری که همان نوار را با ماشین‌حساب خودش بازمی‌شمارد: به جمع‌های صندوقدار اول اعتماد نمی‌کند و هر ورودی را خودش تا شمارهٔ خط دایره‌شده بازپخش می‌کند و خط‌به‌خط مقایسه می‌کند. کشویی که فقط از برنامه عقب است دیر است، نه کسری. کشویی که روی خط دایره‌شده اختلاف دارد کسری است — و فقط کشوی کسری مدیر را بیدار می‌کند. ولی اگر خود نوار صفحه کم داشته باشد، بازشماری‌اش هیچ‌چیز اثبات نمی‌کند، و همین را بلند می‌گوید. — صادق بودن با مدیر، خودش بخشی از حسابرسی است.",
   "mistakes": [
     {
-      "en": "Comparing latest-against-latest instead of same-checkpoint: normal replication lag pages as corruption, the team mutes the pager, and the real mismatch hides in the noise. Pin the checkpoint first, compare second.",
-      "fa": "مقایسه تازه‌ترین با تازه‌ترین به‌جای checkpoint یکسان: lag عادی replication مثل corruption page می‌کند و تیم pager را بی‌صدا می‌کند و mismatch واقعی در نویز پنهان می‌شود. اول checkpoint را سنجاق کن و بعد مقایسه کن."
+      "en": "Comparing latest-against-latest instead of at the same checkpoint: normal replication lag pages as corruption, the team mutes the pager, and the real mismatch hides in the noise. Pin the checkpoint first, compare second.",
+      "fa": "مقایسهٔ تازه‌ترین با تازه‌ترین به‌جای checkpoint یکسان: lag عادیِ replication مثل corruption page می‌کند، تیم pager را بی‌صدا می‌کند و mismatch واقعی در نویز پنهان می‌شود. اول checkpoint را سنجاق کن، بعد مقایسه کن."
     },
     {
-      "en": "Reusing the pipeline's own functions inside the checker: the audit becomes a duplicate, and shared bugs pass silently. Independence means separately written code from the spec, not a shared library call.",
-      "fa": "استفاده دوباره از تابع‌های خود خط داخل checker: حسابرسی تکراری می‌شود و باگ‌های مشترک بی‌صدا رد می‌شوند. استقلال یعنی کد جداگانه‌نوشته‌شده از spec نه فراخوانی کتابخانه مشترک."
+      "en": "Reusing the pipeline's own functions inside the checker: the audit becomes a duplicate, and the shared bugs pass silently. Independence means separately written code from the spec, not a shared library call.",
+      "fa": "استفادهٔ دوباره از تابع‌های خودِ خط داخل checker: حسابرسی تکراری می‌شود و باگ‌های مشترک بی‌صدا رد می‌شوند. استقلال یعنی کد جداگانه‌نوشته‌شده از spec، نه فراخوانیِ کتابخانهٔ مشترک."
     },
     {
-      "en": "Auto-repairing on detection: a checker bug or a lag spike then rewrites good state. Detection pages; a human approves; the repair replays through the log — in that order, always.",
-      "fa": "تعمیر خودکار روی تشخیص: آن‌وقت باگ checker یا جهش lag state خوب را بازنویسی می‌کند. تشخیص page می‌کند؛ انسان تأیید می‌کند؛ تعمیر از لاگ بازپخش می‌شود — همیشه به همین ترتیب."
+      "en": "Auto-repairing on detection: a checker bug or a lag spike then rewrites good state. Detection pages, a human approves, and the repair replays through the log — in that order, always.",
+      "fa": "تعمیر خودکار روی تشخیص: آن‌وقت باگِ checker یا جهش lag، state خوب را بازنویسی می‌کند. تشخیص page می‌کند؛ انسان تأیید می‌کند؛ تعمیر از لاگ بازپخش می‌شود — همیشه به همین ترتیب."
     }
   ],
   "number": 4,
@@ -219,28 +219,28 @@
   ],
   "steps": [
     {
-      "en": "The checker replays the authoritative log with independently written code, stopping exactly at the stated checkpoint (offset 4). It never imports the derivation's functions — shared code would share blind spots.",
-      "fa": "checker لاگ مرجع را با کد مستقل‌نوشته‌شده بازپخش می‌کند و دقیقاً در checkpoint اعلام‌شده (آفست ۴) می‌ایستد. تابع‌های derivation را هرگز import نمی‌کند — کد مشترک نقاط کور مشترک می‌آورد.",
-      "t_en": "Replay to the checkpoint",
-      "t_fa": "بازپخش تا checkpoint"
+      "en": "Here's the trick: the checker replays the authoritative log with code you wrote yourself, and stops exactly at the stated checkpoint (offset 4). It never imports the derivation's functions — shared code would share the blind spots. — two independent looks, not two copies of one look.",
+      "fa": "نکته‌ش اینه: checker لاگ مرجع را با کدی که خودت نوشته‌ای بازپخش می‌کند و دقیقاً در checkpoint اعلام‌شده (آفست ۴) می‌ایستد. تابع‌های derivation را هرگز import نمی‌کند — کد مشترک، نقاط کور مشترک می‌آورد. — دو نگاه مستقل، نه دو کپی از یک نگاه.",
+      "t_en": "Replay to the checkpoint, independently",
+      "t_fa": "بازپخش مستقل تا checkpoint"
     },
     {
-      "en": "Live state is read pinned at the same checkpoint and diffed field by field. A behind-but-consistent view is recorded as lag with a bound; only a same-checkpoint difference is a mismatch — the demo's dropped t3 fires on A and C exactly here.",
-      "fa": "state زنده سنجاق‌شده در همان checkpoint خوانده و فیلدبه‌فیلد diff گرفته می‌شود. نمای عقب‌مانده ولی سازگار به‌مثابه lag کران‌دار ثبت می‌شود؛ فقط اختلاف در checkpoint یکسان mismatch است — t3 افتاده دمو دقیقاً همین‌جا روی A و C شلیک می‌کند.",
-      "t_en": "Compare at one point",
-      "t_fa": "مقایسه در یک نقطه"
+      "en": "Now the delicate part: the live state is read pinned at the same checkpoint and diffed field by field. A behind-but-consistent view gets recorded as lag with a bound; only a same-checkpoint difference counts as a mismatch — the demo's dropped t3 fires on A and C exactly here. — being late is not a crime; being different is.",
+      "fa": "حالا بریم سراغ قسمت ظریف کار: state زندهٔ سنجاق‌شده در همان checkpoint خوانده و فیلدبه‌فیلد diff گرفته می‌شود. نمای عقب‌مانده ولی سازگار، به‌مثابه lag کران‌دار ثبت می‌شود؛ فقط اختلاف در checkpoint یکسان mismatch است — t3 افتادهٔ دمو دقیقاً همین‌جا روی A و C شلیک می‌کند. — دیر بودن جرم نیست؛ اختلاف جرم است.",
+      "t_en": "Compare at one point, field by field",
+      "t_fa": "مقایسه در یک نقطه، فیلدبه‌فیلد"
     },
     {
-      "en": "Mismatch routes to the pager and a human-approved repair that replays through the log; lag routes to the board with its trend. Cost grows from continuous board to hourly replay to daily sums to per-incident review — while an incomplete log or a shared bug stays outside every check, named explicitly.",
-      "fa": "mismatch به pager و تعمیر تأییدانسانی می‌رود که از لاگ بازپخش می‌شود؛ lag با روندش به تابلو می‌رود. هزینه از تابلوی پیوسته به replay ساعتی به جمع‌های روزانه به بازبینی هر incident رشد می‌کند — درحالی‌که لاگ ناقص یا باگ مشترک بیرون هر بررسی می‌ماند و صریح نام برده می‌شود.",
-      "t_en": "Route, repair gated",
-      "t_fa": "مسیریابی با تعمیر دروازه‌دار"
+      "en": "Honestly, this part is about order, not taste: a mismatch goes to the pager and to a human-approved repair that replays through the log, while lag lands on the board with its trend. The cost grows from a continuous board to an hourly replay to daily sums to a per-incident review — while an incomplete log or a shared bug stays outside every check, named out loud. — detection first, repair second; never the other way round.",
+      "fa": "راستش، اینجا بحثِ سلیقه نیست و بحثِ ترتیب است: mismatch می‌رود به pager و تعمیرِ تأییدِ انسانی که از لاگ بازپخش می‌شود؛ lag با روندش می‌نشیند روی تابلو. هزینه از تابلوی پیوسته به replay ساعتی به جمع‌های روزانه به بازبینی هر incident رشد می‌کند — درحالی‌که لاگ ناقص یا باگ مشترک بیرون هر بررسی می‌ماند و صریح نام برده می‌شود. — اول تشخیص، بعد تعمیر؛ نه برعکس.",
+      "t_en": "Route the verdict, gate the repair",
+      "t_fa": "مسیریابی، و تعمیرِ دروازه‌دار"
     }
   ],
-  "tests_en": "Invariants: checker and derivation agree at every completed checkpoint on healthy runs; every verdict names its checkpoint; no verdict without a completeness check on the log prefix. Failure tests: inject a dropped update and confirm the page; serve a stale view and confirm a board entry with no page; truncate the log and confirm 'unknown, log incomplete' instead of a verdict; silence the checker and confirm the freshness alert fires. Metrics: mismatch rate, lag distribution per view, time-to-detect per check tier, verdict freshness.",
-  "tests_fa": "ناورداها: توافق checker و derivation در هر checkpoint کامل در اجراهای سالم؛ هر verdict شناسه checkpointش را دارد؛ بدون بررسی کامل بودن پیشوند لاگ هیچ verdictای نیست. تست‌های خرابی: تزریق update افتاده و تأیید page؛ سرو نمای کهنه و تأیید ورودی تابلو بدون page؛ بریدن لاگ و تأیید «نامعلوم، لاگ ناقص» به‌جای verdict؛ ساکت کردن checker و تأیید شلیک هشدار تازگی. متریک‌ها: نرخ mismatch و توزیع lag هر نما و زمان تا تشخیص هر سطح بررسی و تازگی verdict.",
-  "worked_en": "<p>Teaching run with t1..t4 over A=500, B=300, C=200, checkpoint 4. The audited derivation silently drops t3, so live reads A=410, C=230 against recomputed A=360, C=280: MISMATCH on A and C. A checkpoint-2 view reads LAG (behind, not corrupt). A log truncated to 3 entries recomputes honestly from its prefix. Final line: OK.</p>",
-  "worked_fa": "<p>اجرای آموزشی با t1 تا t4 روی A=500 و B=300 و C=200 در checkpoint ۴. derivation تحت حسابرسی بی‌صدا t3 را می‌اندازد، پس زنده A=410 و C=230 می‌خواند در برابر بازمحاسبه‌شده A=360 و C=280: ناسازگاری روی A و C. نمای checkpoint دو lag می‌خواند (عقب نه خراب). لاگ بریده‌شده تا ۳ ورودی صادقانه از پیشوندش بازمحاسبه می‌کند. خط پایانی: OK.</p>",
-  "reasoning_fa": "<p>اگر checker و projection یک کد داشته باشند، یک bug مشترک می‌تواند هر دو را به یک جواب غلط برساند؛ محاسبهٔ مستقل شانس کشف را بالا می‌برد. مقایسه در offset=4 انتخاب آموزشی است چون t3 گم‌شده باید در هر دو طرف تا آن مرز پردازش شده باشد. اختلاف قبل از هم‌مرزشدن می‌تواند فقط lag باشد. checksum سریع است ولی محل خطا را نمی‌گوید؛ برای repair باید به bucket و سپس رکوردهای متفاوت برسیم.</p>",
-  "reasoning_en": "<p>Sharing derivation code with the checker can reproduce the same bug twice; independent recomputation improves detection. Offset 4 is chosen because both sides should have processed missing transfer t3 by then. Earlier differences may be lag. A checksum detects mismatch quickly but does not locate it; descend through buckets to records for repair.</p>"
+  "tests_en": "Invariants: the checker and the derivation agree at every completed checkpoint on healthy runs; every verdict names its checkpoint; there is no verdict without a completeness check on the log prefix. Failure tests: inject a dropped update and confirm the page; serve a stale view and confirm a board entry with no page; truncate the log and confirm 'unknown, log incomplete' instead of a verdict; silence the checker and confirm the freshness alert fires. Metrics: mismatch rate, lag distribution per view, time-to-detect per check tier, verdict freshness.",
+  "tests_fa": "ناورداها: توافق checker و derivation در هر checkpoint کامل در اجراهای سالم؛ هر verdict شناسهٔ checkpointش را دارد؛ بدون بررسی کامل بودن پیشوند لاگ هیچ verdictای صادر نمی‌شود. تست‌های خرابی: update افتاده تزریق کن و page را تأیید کن؛ نمای کهنه سرو کن و ورود تابلو بدون page را تأیید کن؛ لاگ را ببر و به‌جای verdict، «نامعلوم، لاگ ناقص» را تأیید کن؛ checker را ساکت کن و شلیک هشدار تازگی را تأیید کن. متریک‌ها: نرخ mismatch، توزیع lag هر نما، زمان تا تشخیص در هر سطح بررسی و تازگی verdict.",
+  "worked_en": "<p>Teaching run with t1..t4 over A=500, B=300, C=200, checkpoint 4. The audited derivation silently drops t3, so the live reads A=410, C=230 against the recomputed A=360, C=280: MISMATCH on A and C. A checkpoint-2 view reads LAG (behind, not corrupt). A log truncated to 3 entries recomputes honestly from its prefix. Final line: OK. — one update had slipped, and that one number gave the whole game away.</p>",
+  "worked_fa": "<p>اجرای آموزشی با t1 تا t4 روی A=500 و B=300 و C=200 در checkpoint ۴. derivation تحت حسابرسی بی‌صدا t3 را می‌اندازد، پس زنده A=410 و C=230 می‌خواند در برابر بازمحاسبه‌شده A=360 و C=280: ناسازگاری روی A و C. نمای checkpoint دو lag می‌خواند (عقب، نه خراب). لاگ بریده‌شده تا ۳ ورودی صادقانه از پیشوندش بازمحاسبه می‌کند. خط پایانی: OK. — یک update جا افتاده بود، و همین یک عدد دفترکل را لو داد.</p>",
+  "reasoning_fa": "<p>اگر checker و projection یک کد داشته باشند، یک باگ مشترک می‌تواند هر دو را به یک جواب غلط برساند؛ محاسبهٔ مستقل شانس کشف را بالا می‌برد. مقایسه در offset=4 یک انتخاب آموزشی است، چون t3 گم‌شده باید در هر دو طرف تا آن مرز پردازش شده باشد. اختلافِ قبل از هم‌مرزشدن می‌تواند فقط lag باشد. checksum سریع است ولی محل خطا را نمی‌گوید؛ برای repair باید تا bucket و بعد تا رکوردهای متفاوت پایین بروی. — سختیِ واقعی، تفکیک کردنِ دیری از خرابی است.</p>",
+  "reasoning_en": "<p>Sharing the derivation's code with the checker can reproduce the same bug twice; an independent recomputation improves the odds of catching it. Offset 4 is chosen because both sides should have processed the missing transfer t3 by then. A difference before that boundary may be nothing but lag. A checksum detects a mismatch quickly but doesn't locate it; for the repair you have to descend through the buckets to the individual records. — the hard part is telling lateness apart from corruption.</p>"
 }

@@ -1,28 +1,28 @@
 {
   "alternatives": [
     {
-      "en": "2PC across the three shards: real atomic visibility, but every payment pays cross-shard coordination and inherits the slowest shard's availability. Choose it only when readers must never observe a partial payment (rare); otherwise the staged protocol plus compensation is cheaper and more available.",
-      "fa": "2PC روی سه shard: رؤیت اتمیک واقعی، ولی هر پرداخت هزینه هماهنگی بین‌شاردی می‌دهد و دسترس‌پذیری کندترین shard را به ارث می‌برد. فقط وقتی انتخابش کن که خواننده‌ها هیچ‌وقت نباید پرداخت جزئی ببینند (نادر)؛ وگرنه پروتکل مرحله‌ای با جبران ارزان‌تر و دردسترس‌تر است."
+      "en": "2PC across the three shards: real atomic visibility, but every payment pays for cross-shard coordination and inherits the slowest shard's availability. Pick it only when readers must never observe a partial payment (rare); otherwise the staged protocol plus compensation is cheaper and far more available.",
+      "fa": "2PC روی سه shard: رؤیت اتمیک واقعی، ولی هر پرداخت هزینهٔ هماهنگی بین‌شاردی می‌دهد و دسترس‌پذیری کندترین shard را به ارث می‌برد. فقط وقتی انتخابش کن که خواننده‌ها هیچ‌وقت نباید پرداخت جزئی ببینند (نادر است)؛ وگرنه پروتکل مرحله‌ای با جبران، ارزان‌تر و در‌دسترس‌تر است."
     },
     {
-      "en": "Single-shard money (route every account through one ledger shard): keeps atomicity by refusing to shard, and caps throughput at one machine. Keep while the rate fits; shard by account the day it does not, and pay the protocol above.",
-      "fa": "پول تک‌شارد (عبور هر حساب از یک shard دفترکل): با shard نکردن اتمیک بودن را نگه می‌دارد و توان را به یک ماشین سقف می‌زند. تا وقتی نرخ می‌گنجد نگه دار؛ روزی که نگنجید بر اساس حساب shard کن و پروتکل بالا را بپرداز."
+      "en": "Single-shard money (route every account through one ledger shard): it keeps atomicity by refusing to shard, and it caps the throughput at one machine. Keep it while the rate fits; the day it doesn't, shard by account and pay for the protocol above.",
+      "fa": "پول تک‌شارد (عبور هر حساب از یک shard دفترکل): با shard نکردن اتمیک بودن را نگه می‌دارد و توان را روی یک ماشین سقف می‌زند. تا وقتی نرخ می‌گنجد نگهش دار؛ روزی که نگنجید، بر اساس حساب shard کن و هزینهٔ پروتکل بالا را بپرداز."
     }
   ],
-  "answer_en": "Persist the decision, reservation and output obligations in one framed, checksummed record, fsynced before ACK. Each destination rebuilds its leg effect and dedup from one durable log. Restart replays the stored decision and outputs without re-deciding. Count a leg as pending only until it has applied. This provides eventual convergence under recovery/delivery assumptions, not atomic visibility across independent shard reads.",
-  "answer_fa": "تصمیم، رزرو و تعهد انتشار legها را در یک رکورد قاب‌بندی‌شده و checksumدار، پیش از ACK با fsync ثبت کن. مقصد اثر و dedup همان leg را از یک لاگ پایدار بازسازی می‌کند. پس از restart، تصمیم دوباره گرفته نمی‌شود؛ همان خروجی‌ها با dedup بازپخش می‌شوند. pending هر leg فقط تا پیش از اعمال آن حساب می‌شود. این مدل همگرایی نهایی دارد؛ خواندن‌های مستقل shardها رؤیت اتمیک نمی‌دهند.",
+  "answer_en": "Here's the thing: keep the decision, the reservation and the publication obligations for the legs in one framed, checksummed record, fsynced before the ACK. Each destination rebuilds its leg effect and dedup from one durable log. Restart replays the stored decision and outputs without re-deciding. Count a leg as pending only until it has applied. So you get eventual convergence under the recovery and delivery assumptions — not atomic visibility across independent shard reads. — the money decides once; the rest is just delivery.",
+  "answer_fa": "قضیه اینه که: تصمیم، رزرو و تعهد انتشار legها را در یک رکورد قاب‌بندی‌شده و checksumدار ثبت کن — و قبل از ACK با fsync. مقصد اثر و dedup همان leg را از یک لاگ پایدار بازسازی می‌کند. بعد از restart، تصمیم دوباره گرفته نمی‌شود؛ همان خروجی‌ها با dedup بازپخش می‌شوند. pending هر leg فقط تا پیش از اعمال آن حساب می‌شود. یعنی همگرایی نهایی داری، اما خواندن‌های مستقل shardها رؤیت اتمیک نمی‌دهند. — پول یک بار تصمیم می‌گیرد؛ بقیه‌اش فقط پخش است.",
   "assumptions": [
     {
-      "en": "Three shards with one single-threaded processor each (source, destination, fee). Each shard's leader owns its leg; no transaction spans shards.",
-      "fa": "سه shard هرکدام با یک پردازنده تک‌نخ (مبدأ و مقصد و کارمزد). رهبر هر shard مالک leg خودش است؛ هیچ تراکنشی روی shardها کشیده نمی‌شود."
+      "en": "Picture it: three shards with one single-threaded processor each (source, destination, fee). Each shard's leader owns its leg, and no transaction spans shards.",
+      "fa": "فرض کن: سه shard، هرکدام با یه پردازندهٔ تک‌نخ (مبدأ و مقصد و کارمزد). رهبرِ هر shard مالکِ leg خودشه؛ هیچ تراکنشی روی shardها کشیده نمی‌شه."
     },
     {
-      "fa": "مبدأ ۱۰۰۰ و مقصد ۱۰۰ دارد؛ پرداخت ۲۰۰ با کارمزد ۵ است. invariant در مرز منطقی مشترک، مجموع موجودی‌ها به‌علاوه فقط legهای اعمال‌نشده برابر ۱۱۰۰ است.",
-      "en": "Source starts at 1000, destination at 100; payment is 200 plus fee 5. At a common logical boundary, balances plus only unapplied legs sum to 1100."
+      "fa": "مبدأ ۱۰۰۰ داره و مقصد ۱۰۰؛ پرداخت ۲۰۰ با کارمزد ۵ است. invariant توی مرز منطقیِ مشترک: مجموع موجودی‌ها به‌علاوهٔ فقط legهای اعمال‌نشده برابر ۱۱۰۰ می‌شه.",
+      "en": "The source starts at 1000 and the destination at 100; the payment is 200 plus a fee of 5. At a common logical boundary, the balances plus only the unapplied legs sum to 1100."
     },
     {
-      "en": "Disks can crash mid-write and processors can die mid-publish; the network may duplicate but not corrupt framed records (CRC rejects corruption).",
-      "fa": "دیسک‌ها می‌توانند وسط نوشتن crash کنند و پردازنده‌ها وسط انتشار بمیرند؛ شبکه ممکن است تکراری بدهد ولی رکوردهای قاب‌بندی‌شده را خراب نمی‌کند (CRC خرابی را رد می‌کند)."
+      "en": "The honest part: disks can crash mid-write and processors can die mid-publish. The network may duplicate records but it won't corrupt the framed ones (CRC rejects corruption).",
+      "fa": "قضیه اینه که: دیسک‌ها می‌تونن وسط نوشتن crash کنن و پردازنده‌ها وسط انتشار بمیرن؛ شبکه ممکنه تکراری بده ولی رکوردهای قاب‌بندی‌شده رو خراب نمی‌کنه (CRC خرابی رو رد می‌کنه)."
     }
   ],
   "code": {
@@ -30,185 +30,185 @@
     "expected_en": "PASS cut=0..3 recovered={src=795, dst=300, fee=5} pending=0, then PASS truncated suffix repaired; checksum corruption rejected. Fresh processors reconstruct every decision and effect from files; crash boundaries are simulated.",
     "expected_fa": "PASS برای cutهای ۰ تا ۳ با recovered={src=795, dst=300, fee=5} pending=0 و سپس تأیید ترمیم دم ناقص و رد checksum خراب. هر پردازندهٔ تازه تصمیم و اثر را از فایل‌ها می‌سازد؛ نقطه‌های crash شبیه‌سازی شده‌اند.",
     "lang": "java",
-    "run_en": "javac ShardPayDemo.java && java ShardPayDemo — stdlib Java only, instant (uses a temp dir).",
-    "run_fa": "javac ShardPayDemo.java && java ShardPayDemo — فقط استاندارد جاوا، فوری (از دایرکتوری موقت استفاده می‌کند).",
+    "run_en": "javac ShardPayDemo.java && java ShardPayDemo — stdlib Java only, instant (it uses a temp dir).",
+    "run_fa": "javac ShardPayDemo.java && java ShardPayDemo — فقط استاندارد جاوا، فوری (از یک دایرکتوری موقت استفاده می‌کند).",
     "status": "verified"
   },
-  "design_en": "<p>The src log records D(id,amount,fee,approved), the authority for decision, reservation and publication obligations. The dst and fee logs record C(id,amount); replay reconstructs both effects and dedup. Src records S(id) after publication. Frames contain length/payload/CRC with force(true) before ACK. Recovery truncates incomplete suffixes before later appends and stops on checksum mismatch. The demo models processor crashes with surviving files; power-loss durability and directory fsync for new files require separate filesystem testing.</p><p>The harness inspects logs at a common logical boundary and counts only unapplied legs as pending. This is not an atomic distributed balance API. Production pending/settled states, per-leg ACKs and reconciliation need persistent identities and explicit protocols.</p>",
-  "design_fa": "<p>لاگ src رکورد D(id,amount,fee,approved) دارد؛ همان رکورد مرجع تصمیم، کسر موجودی و تعهد ارسال است. لاگ‌های dst و fee هرکدام C(id,amount) دارند و replay همان رکورد هم effect و هم dedup را می‌سازد. src با S(id) پایان انتشار را ثبت می‌کند. framing شامل length/payload/CRC است و ACK بعد از force(true) می‌آید؛ دم ناقص پیش از append بعدی truncate می‌شود و checksum ناسازگار بازیابی را متوقف می‌کند. دمو crash پردازنده با فایل‌های باقی‌مانده را مدل می‌کند؛ دوام در قطع برق و directory fsync روی فایل‌های تازه نیاز به آزمون filesystem و runbook جدا دارد.</p><p>در harness می‌توان لاگ‌ها را در مرز منطقی مشترک خواند و فقط legهای اعمال‌نشده را pending دانست؛ این قابلیت، API اتمیک برای balanceهای توزیع‌شده نیست. در production باید وضعیت pending/settled، ACK هر leg و reconciliation را با شناسهٔ پایدار طراحی کرد.</p>",
+  "design_en": "<p>The src log records D(id,amount,fee,approved), the authority for the decision, the reservation and the publication obligations. The dst and fee logs record C(id,amount); the replay reconstructs both the effects and the dedup. Src records S(id) after publication. Frames contain length/payload/CRC with force(true) before ACK. Recovery truncates incomplete suffixes before later appends and stops on checksum mismatch. The demo models processor crashes with surviving files; power-loss durability and directory fsync for new files require separate filesystem testing.</p><p>The harness inspects the logs at a common logical boundary and counts only unapplied legs as pending. That is not an atomic distributed balance API. In production you have to design the pending/settled states, the per-leg ACKs and the reconciliation with persistent identities and explicit protocols. — the files talk, but in their own language.</p>",
+  "design_fa": "<p>لاگ src رکورد D(id,amount,fee,approved) دارد؛ همان رکورد مرجعِ تصمیم، کسر موجودی و تعهد ارسال است. لاگ‌های dst و fee هرکدام C(id,amount) دارند و replay همان رکورد هم effect و هم dedup را می‌سازد. src با S(id) پایان انتشار را ثبت می‌کند. framing شامل length/payload/CRC است و ACK بعد از force(true) می‌آید؛ دم ناقص پیش از append بعدی truncate می‌شود و checksum ناسازگار بازیابی را متوقف می‌کند. دمو crash پردازنده با فایل‌های باقی‌مانده را مدل می‌کند؛ دوام در قطع برق و directory fsync روی فایل‌های تازه نیاز به آزمون filesystem و runbook جدا دارد.</p><p>در harness می‌توانی لاگ‌ها را در مرز منطقی مشترک بخوانی و فقط legهای اعمال‌نشده را pending حساب کنی؛ این قابلیت، API اتمیک برای balanceهای توزیع‌شده نیست. در production باید وضعیت pending/settled، ACK هر leg و reconciliation را با شناسهٔ پایدار طراحی کنی. — فایل‌ها حرف می‌زنند، ولی به زبانِ خودشان.</p>",
   "diagrams": [
     {
-      "caption_en": "Frame, decide once, reserve, then publish with restart recovery",
-      "caption_fa": "قاب‌بندی و یک‌بار تصمیم و رزرو و بعد انتشار با بازیابی restart",
+      "caption_en": "Frame it, decide once, reserve, then publish with a restart recovery",
+      "caption_fa": "قاب‌بندی، یک‌بار تصمیم، رزرو، و بعد انتشار با بازیابی restart",
       "file": "diagrams/sol3-step1-durable-decision.html",
       "height": 640,
       "kind_en": "workflow: durable decision",
       "kind_fa": "گردش‌کار: تصمیم پایدار",
       "made": "archify",
       "narration": {
-        "failure_en": "A logical crash occurs after destination credit but before fee credit. Only fee 5 remains in transit. A fresh processor recovers the decision and prior credit from files and completes the fee. The figure’s logical decision/reservation/outbox concepts are reconstructed from one D record in the code.",
-        "failure_fa": "پس از credit مقصد و پیش از کارمزد crash منطقی رخ می‌دهد. فقط ۵ کارمزد در راه است؛ پردازندهٔ تازه تصمیم و credit قبلی را از فایل بازیابی و کارمزد را تکمیل می‌کند. مفاهیم منطقی decision/reservation/outbox شکل در کد از یک رکورد D بازسازی می‌شوند.",
-        "guarantee_en": "Shows durable decisions and idempotent replay. Economic totals require a common boundary and per-leg pending accounting; cross-shard atomic visibility is not guaranteed.",
-        "guarantee_fa": "تصمیم پایدار و replayِ idempotent را نشان می‌دهد. جمع اقتصادی فقط با مرز مشترک و pending هر leg سنجیده می‌شود؛ رؤیت اتمیک بین shardها تضمین نیست.",
-        "nonguarantee_en": "It says nothing about atomic visibility across shards — deliberately, because the protocol does not offer it.",
-        "nonguarantee_fa": "درباره رؤیت اتمیک بین shardها چیزی نمی‌گوید — عمداً، چون پروتکل آن را نمی‌دهد.",
-        "point_en": "The decision is a stored row read by every later step; restart replays publishes but never recomputes the verdict.",
-        "point_fa": "تصمیم یک سطر ذخیره‌شده است که هر گام بعدی می‌خواندش؛ restart انتشارها را بازپخش می‌کند ولی verdict را هرگز بازمحاسبه نمی‌کند.",
-        "scenario_en": "Payment pay-1 walks the runbook left to right: framed intake, one durable decision, funds reserved, three legs published — then a crash mid-publish, a restart, a re-read, and a replay of only the missing legs.",
-        "scenario_fa": "پرداخت pay-1 گردش‌کار را چپ‌به‌راست می‌رود: ورودی قاب‌بندی‌شده، یک تصمیم پایدار، رزرو پول و انتشار سه leg — بعد crash وسط انتشار و restart و بازخوانی و بازپخش فقط legهای گمشده.",
+        "failure_en": "A logical crash lands after the destination credit but before the fee credit. Only fee 5 is left in transit; a fresh processor recovers the decision and the earlier credit from the files and finishes the fee. The figure's logical decision/reservation/outbox concepts are reconstructed from one D record in the code.",
+        "failure_fa": "بعد از credit مقصد و پیش از کارمزد، crash منطقی رخ می‌دهد. فقط ۵ کارمزد در راه است؛ پردازندهٔ تازه تصمیم و credit قبلی را از فایل بازیابی می‌کند و کارمزد را تکمیل. مفاهیم منطقیِ decision/reservation/outbox در شکل، از یک رکورد D در کد بازسازی شده‌اند.",
+        "guarantee_en": "It shows durable decisions and an idempotent replay. The economic total needs a common boundary and per-leg pending accounting; cross-shard atomic visibility is not guaranteed. — the figure talks about durability, not about simultaneity.",
+        "guarantee_fa": "تصمیم پایدار و replayِ idempotent را نشان می‌دهد. جمع اقتصادی فقط با مرز مشترک و pending هر leg سنجیده می‌شود؛ رؤیت اتمیک بین shardها تضمین نیست. — شکل دربارهٔ دوام حرف می‌زند، نه دربارهٔ لحظه‌ای‌بودن.",
+        "nonguarantee_en": "It says nothing about atomic visibility across the shards — deliberately, because the protocol does not offer it.",
+        "nonguarantee_fa": "دربارهٔ رؤیت اتمیک بین shardها چیزی نمی‌گوید — عمداً، چون پروتکل آن را نمی‌دهد.",
+        "point_en": "The decision is a stored row that every later step reads; the restart replays the publishes but never recomputes the verdict. — decide once, replay a thousand times.",
+        "point_fa": "تصمیم یک سطرِ ذخیره‌شده است که هر گام بعدی می‌خواندش؛ restart انتشارها را بازپخش می‌کند ولی verdict را هرگز بازمحاسبه نمی‌کند. — یک بار تصمیم، هزار بار بازپخش.",
+        "scenario_en": "Payment pay-1 walks the runbook left to right: framed intake, one durable decision, funds reserved, three legs published — then a crash mid-publish, a restart, a re-read, and a replay of only the legs that never landed.",
+        "scenario_fa": "پرداخت pay-1 گردش‌کار را چپ‌به‌راست می‌رود: ورودی قاب‌بندی‌شده، یک تصمیم پایدار، رزرو پول و انتشار سه leg — بعد crash وسط انتشار، restart، بازخوانی و بازپخشِ فقط legهای گمشده.",
         "steps": [
           {
-            "en": "Frame plus fsync first: length, CRC32 and force make the append crash-durable; a raw file append would not.",
-            "fa": "اول قاب‌بندی با fsync: طول و CRC32 و force الصاق را در برابر crash پایدار می‌کنند؛ الصاق خام فایل این را نمی‌کند."
+            "en": "Frame plus fsync first: the length, the CRC32 and the force make the append crash-durable; a raw file append never would.",
+            "fa": "اول قاب‌بندی با fsync: طول و CRC32 و force، الصاق را در برابر crash پایدار می‌کنند؛ الصاق خامِ فایل این کار را نمی‌کند."
           },
           {
-            "en": "Decide once and store APPROVED, then reserve 205 into the pending ledger — in-flight money becomes a visible row.",
-            "fa": "یک‌بار تصمیم بگیر و APPROVED را ذخیره کن و بعد ۲۰۵ را در دفتر معلق رزرو کن — پول در حال انتقال یک سطر نمایان می‌شود."
+            "en": "Decide once and store APPROVED, then reserve 205 into the pending ledger — the in-flight money becomes a visible row, not a footnote.",
+            "fa": "یک‌بار تصمیم بگیر و APPROVED را ذخیره کن، بعد ۲۰۵ را در دفتر معلق رزرو کن — پول در حال انتقال یک سطرِ نمایان می‌شود."
           },
           {
-            "en": "Publish the legs; on crash, Restart re-reads the stored verdict and replays only the missing publishes — destinations dedup the repeats.",
-            "fa": "legها را منتشر کن؛ روی crash، Restart verdict ذخیره‌شده را بازمی‌خواند و فقط انتشارهای گمشده را بازپخش می‌کند — مقصدها تکرارها را dedup می‌کنند."
+            "en": "Publish the legs; on a crash, the Restart re-reads the stored verdict and replays only the publishes that never landed — the destinations dedup the repeats.",
+            "fa": "legها را منتشر کن؛ روی crash، Restart verdict ذخیره‌شده را بازمی‌خواند و فقط انتشارهای گمشده را بازپخش می‌کند — و مقصدها تکرارها را dedup می‌کنند."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "The re-read edge: restart loads the stored APPROVED/DECLINED instead of deciding again, so concurrent balance changes cannot flip the verdict.",
-        "a_fa": "یال بازخوانی: restart همان APPROVED/DECLINED ذخیره‌شده را بار می‌کند به‌جای تصمیم دوباره، پس تغییرهای هم‌زمان بالانس نمی‌توانند verdict را برگردانند.",
-        "q_en": "Which edge of the figure forbids deciding twice, and what breaks if it is removed?",
-        "q_fa": "کدام یال شکل تصمیم دوباره را ممنوع می‌کند و اگر برداشته شود چه می‌شکند؟"
+        "a_en": "The re-read edge: the restart loads the stored APPROVED/DECLINED instead of deciding again, so concurrent balance changes cannot flip the verdict.",
+        "a_fa": "یال بازخوانی: restart همان APPROVED/DECLINED ذخیره‌شده را بار می‌کند، نه این‌که دوباره تصمیم بگیرد؛ برای همین تغییرهای هم‌زمانِ بالانس نمی‌توانند verdict را برگردانند.",
+        "q_en": "Which edge of the figure forbids deciding twice, and what breaks if you remove it?",
+        "q_fa": "کدام یال شکل تصمیم دوباره را ممنوع می‌کند، و اگر برداشته شود چه می‌شکند؟"
       },
       "source": "assets/diagram-specs/solutions/ch13/sol3-step1-durable-decision.json"
     },
     {
-      "caption_en": "Decision, reservation and account records with honest visibility",
-      "caption_fa": "رکوردهای تصمیم و رزرو و حساب با رؤیت صادقانه",
+      "caption_en": "Decision, reservation and account records, with honest visibility",
+      "caption_fa": "رکوردهای تصمیم و رزرو و حساب، با رؤیت صادقانه",
       "file": "diagrams/sol3-step2-integrity-uml.html",
       "height": 640,
       "kind_en": "UML: integrity records",
       "kind_fa": "UML: رکوردهای درستی",
       "made": "hand",
       "narration": {
-        "failure_en": "A logical crash occurs after destination credit but before fee credit. Only fee 5 remains in transit. A fresh processor recovers the decision and prior credit from files and completes the fee. The figure’s logical decision/reservation/outbox concepts are reconstructed from one D record in the code.",
-        "failure_fa": "پس از credit مقصد و پیش از کارمزد crash منطقی رخ می‌دهد. فقط ۵ کارمزد در راه است؛ پردازندهٔ تازه تصمیم و credit قبلی را از فایل بازیابی و کارمزد را تکمیل می‌کند. مفاهیم منطقی decision/reservation/outbox شکل در کد از یک رکورد D بازسازی می‌شوند.",
-        "guarantee_en": "Shows durable decisions and idempotent replay. Economic totals require a common boundary and per-leg pending accounting; cross-shard atomic visibility is not guaranteed.",
-        "guarantee_fa": "تصمیم پایدار و replayِ idempotent را نشان می‌دهد. جمع اقتصادی فقط با مرز مشترک و pending هر leg سنجیده می‌شود؛ رؤیت اتمیک بین shardها تضمین نیست.",
-        "nonguarantee_en": "It says nothing about how fast legs converge — timeliness is measured separately, in exercise 4's lag board.",
-        "nonguarantee_fa": "درباره سرعت همگرایی legها چیزی نمی‌گوید — timeliness جداگانه اندازه‌گیری می‌شود، در تابلوی lag تمرین ۴.",
-        "point_en": "Pending money is a row: the reservation record keeps in-flight funds inside the accounting boundary at every instant.",
-        "point_fa": "پول معلق یک سطر است: رکورد رزرو پول در حال انتقال را در هر لحظه داخل مرز حسابداری نگه می‌دارد.",
-        "scenario_en": "Three records top to bottom of trust: the purple verdict written once, the yellow reservation holding in-flight money, the blue per-leg accounts — then the three visibility promises readers actually get.",
-        "scenario_fa": "سه رکورد از بالا به پایین اعتماد: verdict بنفش که یک‌بار نوشته می‌شود و رزرو زرد که پول در حال انتقال را نگه می‌دارد و حساب‌های آبی هر leg — بعد سه وعده رؤیتی که خواننده‌ها واقعاً می‌گیرند.",
+        "failure_en": "A logical crash lands after the destination credit but before the fee credit. Only fee 5 is left in transit; a fresh processor recovers the decision and the earlier credit from the files and finishes the fee. The figure's logical decision/reservation/outbox concepts are reconstructed from one D record in the code.",
+        "failure_fa": "بعد از credit مقصد و پیش از کارمزد، crash منطقی رخ می‌دهد. فقط ۵ کارمزد در راه است؛ پردازندهٔ تازه تصمیم و credit قبلی را از فایل بازیابی می‌کند و کارمزد را تکمیل. مفاهیم منطقیِ decision/reservation/outbox در شکل، از یک رکورد D در کد بازسازی شده‌اند.",
+        "guarantee_en": "It shows durable decisions and an idempotent replay. The economic total needs a common boundary and per-leg pending accounting; cross-shard atomic visibility is not guaranteed. — the figure talks about durability, not about simultaneity.",
+        "guarantee_fa": "تصمیم پایدار و replayِ idempotent را نشان می‌دهد. جمع اقتصادی فقط با مرز مشترک و pending هر leg سنجیده می‌شود؛ رؤیت اتمیک بین shardها تضمین نیست. — شکل دربارهٔ دوام حرف می‌زند، نه دربارهٔ لحظه‌ای‌بودن.",
+        "nonguarantee_en": "It says nothing about how fast the legs converge — timeliness is measured separately, on the lag board in exercise 4.",
+        "nonguarantee_fa": "دربارهٔ سرعت همگرایی legها چیزی نمی‌گوید — timeliness جداگانه اندازه‌گیری می‌شود، در تابلوی lag تمرین ۴.",
+        "point_en": "Pending money is a row: the reservation record keeps the in-flight funds inside the accounting boundary at every instant. — money nobody accounts for might as well not exist.",
+        "point_fa": "پول معلق یک سطر است: رکورد رزرو، پول در حال انتقال را در هر لحظه داخل مرز حسابداری نگه می‌دارد. — پولی که هیچ‌کس حسابش نکند، انگار وجود ندارد.",
+        "scenario_en": "Three records, top to bottom of trust: the purple verdict written once, the yellow reservation holding the in-flight money, the blue per-leg accounts — and then the three visibility promises the readers actually get.",
+        "scenario_fa": "سه رکورد از بالا به پایینِ اعتماد: verdict بنفش که یک‌بار نوشته می‌شود، رزرو زرد که پول در حال انتقال را نگه می‌دارد، و حساب‌های آبیِ هر leg — بعد سه وعدهٔ رؤیتی که خواننده‌ها واقعاً می‌گیرند.",
         "steps": [
           {
-            "en": "PaymentDecision: one row per payment ID, written once and never updated — restart re-reads it.",
-            "fa": "PaymentDecision: یک سطر هر شناسه پرداخت که یک‌بار نوشته و هرگز به‌روز نمی‌شود — restart بازخوانی‌اش می‌کند."
+            "en": "PaymentDecision: one row per payment ID, written once and never updated — the restart just re-reads it.",
+            "fa": "PaymentDecision: یک سطر برای هر شناسهٔ پرداخت که یک‌بار نوشته می‌شود و هرگز به‌روز نمی‌شود — restart فقط بازخوانی‌اش می‌کند."
           },
           {
-            "en": "PendingReservation: in-flight funds as a real row, released only by settle — a crash leaves it visible, never vanished.",
-            "fa": "PendingReservation: پول در حال انتقال به‌مثابه سطر واقعی که فقط با settle آزاد می‌شود — crash آن را نمایان می‌گذارد نه ناپدید."
+            "en": "PendingReservation: the in-flight funds as a real row, released only by settle — a crash leaves them visible, never vanished.",
+            "fa": "PendingReservation: پول در حال انتقال به‌مثابه یک سطر واقعی که فقط با settle آزاد می‌شود — crash آن را نمایان می‌گذارد، نه ناپدید."
           },
           {
-            "en": "Accounts plus visibility: legs land separately (normal), pending is always shown (accounted), and no atomic snapshot exists (convergence is not visibility).",
-            "fa": "حساب‌ها با رؤیت: legها جدا می‌نشینند (عادی) و معلق همیشه نشان داده می‌شود (حساب‌شده) و هیچ snapshot اتمیکی نیست (همگرایی رؤیت نیست)."
+            "en": "Accounts plus visibility: the legs land separately (normal), the pending is always shown (accounted), and no atomic snapshot exists (convergence is not visibility).",
+            "fa": "حساب‌ها با رؤیت: legها جدا می‌نشینند (عادی است)، معلق همیشه نشان داده می‌شود (حساب‌شده است)، و هیچ snapshot اتمیکی وجود ندارد (همگرایی، رؤیت نیست)."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "PendingReservation: it keeps crashed mid-publish money inside the accounting boundary so the sum check still conserves.",
-        "a_fa": "PendingReservation: پول crashکرده وسط انتشار را داخل مرز حسابداری نگه می‌دارد تا بررسی جمع هنوز بقا کند.",
-        "q_en": "A crash strands 205 units mid-publish. Which record keeps the sum check green, and how?",
-        "q_fa": "یک crash دویست‌وپنج واحد را وسط انتشار سرگردان می‌کند. کدام رکورد بررسی جمع را سبز نگه می‌دارد و چطور؟"
+        "a_en": "PendingReservation: it keeps the money that crashed mid-publish inside the accounting boundary, so the sum check still conserves.",
+        "a_fa": "PendingReservation: پولِ crashکرده وسط انتشار را داخل مرز حسابداری نگه می‌دارد تا بررسیِ جمع هنوز بقا کند.",
+        "q_en": "A crash strands 205 units mid-publish. Which record keeps the sum check green, and how does it do it?",
+        "q_fa": "یک crash دویست‌وپنج واحد را وسط انتشار سرگردان می‌کند. کدام رکورد بررسیِ جمع را سبز نگه می‌دارد، و چطور؟"
       }
     },
     {
-      "caption_en": "One ID fanning through three logs to a conserved total",
-      "caption_fa": "یک شناسه که از سه لاگ به جمع بقاشده می‌رسد",
+      "caption_en": "One ID fanning through three logs, all the way to a conserved total",
+      "caption_fa": "یک شناسه که از سه لاگ به یک جمعِ بقاشده می‌رسد",
       "file": "diagrams/sol3-multishard-payment.html",
       "height": 640,
       "kind_en": "dataflow: multishard legs",
       "kind_fa": "جریان‌داده: legهای چندshardی",
       "made": "archify",
       "narration": {
-        "failure_en": "A logical crash occurs after destination credit but before fee credit. Only fee 5 remains in transit. A fresh processor recovers the decision and prior credit from files and completes the fee. The figure’s logical decision/reservation/outbox concepts are reconstructed from one D record in the code.",
-        "failure_fa": "پس از credit مقصد و پیش از کارمزد crash منطقی رخ می‌دهد. فقط ۵ کارمزد در راه است؛ پردازندهٔ تازه تصمیم و credit قبلی را از فایل بازیابی و کارمزد را تکمیل می‌کند. مفاهیم منطقی decision/reservation/outbox شکل در کد از یک رکورد D بازسازی می‌شوند.",
-        "guarantee_en": "Shows durable decisions and idempotent replay. Economic totals require a common boundary and per-leg pending accounting; cross-shard atomic visibility is not guaranteed.",
-        "guarantee_fa": "تصمیم پایدار و replayِ idempotent را نشان می‌دهد. جمع اقتصادی فقط با مرز مشترک و pending هر leg سنجیده می‌شود؛ رؤیت اتمیک بین shardها تضمین نیست.",
-        "nonguarantee_en": "It says nothing about permanently unlandable legs — compensation for a closed destination is answered in the follow-up.",
-        "nonguarantee_fa": "درباره legهایی که برای همیشه نمی‌نشینند چیزی نمی‌گوید — جبران مقصد بسته‌شده در پاسخ پیگیری است.",
-        "point_en": "One ID, three logs, one conserved sum: the same payment ID keys the decision, every leg, and every dedup check.",
-        "point_fa": "یک شناسه و سه لاگ و یک جمع بقاشده: همان شناسه پرداخت کلید تصمیم و هر leg و هر بررسی dedup است.",
-        "scenario_en": "The assembly left to right: Request (pay-1 appended framed), Log (the durable source log), Decide (CPU plus stored verdict), Publish (one outbox, three same-ID legs), Land (destination and fee logs deduping).",
-        "scenario_fa": "اسمبل چپ‌به‌راست: درخواست (pay-1 قاب‌بندی‌شده الصاق می‌شود)، لاگ (لاگ پایدار مبدأ)، تصمیم (CPU با verdict ذخیره‌شده)، انتشار (یک outbox و سه leg همان‌شناسه) و نشستن (لاگ‌های مقصد و کارمزد با dedup).",
+        "failure_en": "A logical crash lands after the destination credit but before the fee credit. Only fee 5 is left in transit; a fresh processor recovers the decision and the earlier credit from the files and finishes the fee. The figure's logical decision/reservation/outbox concepts are reconstructed from one D record in the code.",
+        "failure_fa": "بعد از credit مقصد و پیش از کارمزد، crash منطقی رخ می‌دهد. فقط ۵ کارمزد در راه است؛ پردازندهٔ تازه تصمیم و credit قبلی را از فایل بازیابی می‌کند و کارمزد را تکمیل. مفاهیم منطقیِ decision/reservation/outbox در شکل، از یک رکورد D در کد بازسازی شده‌اند.",
+        "guarantee_en": "It shows durable decisions and an idempotent replay. The economic total needs a common boundary and per-leg pending accounting; cross-shard atomic visibility is not guaranteed. — the figure talks about durability, not about simultaneity.",
+        "guarantee_fa": "تصمیم پایدار و replayِ idempotent را نشان می‌دهد. جمع اقتصادی فقط با مرز مشترک و pending هر leg سنجیده می‌شود؛ رؤیت اتمیک بین shardها تضمین نیست. — شکل دربارهٔ دوام حرف می‌زند، نه دربارهٔ لحظه‌ای‌بودن.",
+        "nonguarantee_en": "It says nothing about the legs that can never land — compensation for a closed destination is answered in the follow-up.",
+        "nonguarantee_fa": "دربارهٔ legهایی که برای همیشه نمی‌نشینند چیزی نمی‌گوید — جبرانِ مقصدِ بسته‌شده در پاسخ پیگیری است.",
+        "point_en": "One ID, three logs, one conserved sum: the same payment ID keys the decision, every leg and every dedup check.",
+        "point_fa": "یک شناسه، سه لاگ و یک جمعِ بقاشده: همان شناسهٔ پرداخت کلیدِ تصمیم است، کلیدِ هر leg و کلیدِ هر بررسی dedup.",
+        "scenario_en": "Read the assembly left to right: Request (pay-1 appended framed), Log (the durable source log), Decide (the CPU plus the stored verdict), Publish (one outbox, three same-ID legs), Land (the destination and fee logs deduping).",
+        "scenario_fa": "اسمبل را چپ‌به‌راست بخوان: درخواست (pay-1 قاب‌بندی‌شده الصاق می‌شود)، لاگ (لاگ پایدار مبدأ)، تصمیم (CPU با verdict ذخیره‌شده)، انتشار (یک outbox و سه leg همان‌شناسه) و نشستن (لاگ‌های مقصد و کارمزد با dedup).",
         "steps": [
           {
-            "en": "Append the framed request, read the row, store the verdict first — decide before anything publishes.",
-            "fa": "درخواست قاب‌بندی‌شده را الصاق کن و سطر را بخوان و اول verdict را ذخیره کن — پیش از انتشار هرچیز تصمیم بگیر."
+            "en": "Append the framed request, read the row, store the verdict first — the decision comes before anything publishes. — the verdict first, then the play.",
+            "fa": "درخواست قاب‌بندی‌شده را الصاق کن، سطر را بخوان و اول verdict را ذخیره کن — پیش از هر انتشار، تصمیم گرفته شده. — اول داوری، بعد بازی."
           },
           {
-            "en": "Publish three same-ID legs from the outbox; each landing log dedups repeats on that ID.",
-            "fa": "سه leg همان‌شناسه را از outbox منتشر کن؛ هر لاگ نشستنی تکرارها را روی همان شناسه dedup می‌کند."
+            "en": "Publish three same-ID legs from the outbox; each landing log dedups the repeats on that same ID.",
+            "fa": "سه leg همان‌شناسه را از outbox منتشر کن؛ هر لاگِ نشستنی تکرارها را روی همان شناسه dedup می‌کند."
           },
           {
-            "en": "Sum every shard plus pending: 1100 before, during and after the crash — the demo's final OK line.",
-            "fa": "هر shard را با معلق جمع بزن: ۱۱۰۰ پیش و حین و بعد از crash — خط OK پایانی دمو."
+            "en": "Sum every shard plus the pending: 1100 before, during and after the crash — the demo's final OK line. — that one number is the final judge.",
+            "fa": "هر shard را با معلق جمع بزن: ۱۱۰۰ پیش و حین و بعد از crash — خط OK پایانی دمو. — همین یک عدد، داورِ نهایی است."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "The stored decision (re-read, never recomputed) plus per-leg dedup on the same ID: repeats are ignored, missing legs are replayed.",
-        "a_fa": "تصمیم ذخیره‌شده (بازخوانی، هرگز بازمحاسبه) با dedup هر leg روی همان شناسه: تکرارها نادیده گرفته و legهای گمشده بازپخش می‌شوند.",
-        "q_en": "After a mid-publish crash, what two mechanisms make the restart converge without double-applying?",
-        "q_fa": "بعد از crash وسط انتشار، کدام دو سازوکار restart را بدون اعمال دوباره همگرا می‌کنند؟"
+        "a_en": "The stored decision (re-read, never recomputed) plus the per-leg dedup on the same ID: the repeats get ignored and the missing legs get replayed.",
+        "a_fa": "تصمیم ذخیره‌شده (بازخوانی، هرگز بازمحاسبه) به‌علاوهٔ dedup هر leg روی همان شناسه: تکرارها نادیده گرفته می‌شوند و legهای گمشده بازپخش.",
+        "q_en": "After a mid-publish crash, which two mechanisms make the restart converge without double-applying?",
+        "q_fa": "بعد از crash وسط انتشار، کدام دو سازوکار باعث می‌شوند restart بدون اعمال دوباره همگرا شود؟"
       },
       "source": "assets/diagram-specs/solutions/ch13/sol3-multishard-payment.json"
     }
   ],
   "failures": [
     {
-      "fa": "crash منطقی بعد از credit مقصد: پردازندهٔ تازه تصمیم و dedup را از فایل می‌خواند و replay می‌کند؛ credit مقصد تکرار نمی‌شود و کارمزد باقی‌مانده اعمال می‌شود.",
-      "en": "A logical crash after destination credit is recovered by a fresh processor reading decisions and dedup from files. Replay does not credit the destination twice and applies the outstanding fee."
+      "fa": "crash منطقی بعد از credit مقصد: پردازندهٔ تازه تصمیم و dedup را از فایل می‌خواند و replay می‌کند؛ credit مقصد دوباره اعمال نمی‌شود و کارمزدِ باقی‌مانده اعمال می‌شود. — بازیابی، تکرارِ اثر نیست؛ تکرارِ کارِ اثر است.",
+      "en": "A logical crash after the destination credit is recovered by a fresh processor that reads the decisions and the dedup from the files. The replay does not credit the destination twice and it applies the outstanding fee. — recovery repeats the work, never the effect."
     },
     {
-      "fa": "نوشتن نیمه‌کاره در suffix با truncate پیش از append بعدی ترمیم می‌شود. checksum خراب، حتی در رکورد آخر، بی‌صدا حذف نمی‌شود: recovery متوقف می‌شود تا repair یا restore معتبر تصمیم بگیرد.",
-      "en": "Truncate an incomplete suffix before later appends. A checksum mismatch, even in the last frame, stops recovery rather than silently discarding possibly committed history; repair/restore needs a verified decision."
+      "fa": "نوشتن نیمه‌کاره در suffix با truncate پیش از append بعدی ترمیم می‌شود. checksum خراب، حتی در آخرین رکورد، بی‌صدا حذف نمی‌شود: recovery متوقف می‌شود تا repair یا restore معتبر تصمیم بگیرد. — دور انداختنِ تاریخچهٔ شکسته راحت‌تر از حدس زدن است، ولی حدس زدن غلط است.",
+      "en": "Truncate an incomplete suffix before the later appends. A checksum mismatch, even in the last frame, stops the recovery instead of silently discarding history that might have been committed; the repair or restore needs a verified decision. — throwing away a broken history is easier than guessing, but guessing is wrong."
     },
     {
-      "en": "Destination tries to spend an arriving leg before fee settles: it observes a partial payment. Guard is honest visibility semantics — legs are spendable per-leg only by explicit product rule, and pending reservation keeps the unsettled remainder accounted until settle or compensation.",
-      "fa": "تلاش مقصد برای خرج leg رسیده پیش از settle کارمزد: پرداخت جزئی مشاهده می‌شود. نگهبان معنای صادقانه رؤیت است — legها فقط با قاعده صریح محصول per-leg قابل‌خرج‌اند و رزرو معلق باقیمانده تسویه‌نشده را تا settle یا جبران حساب‌شده نگه می‌دارد."
+      "en": "The destination tries to spend an arriving leg before the fee settles: it observes a partial payment. The guard is honest visibility semantics — a leg is spendable per-leg only by an explicit product rule, and the pending reservation keeps the unsettled remainder accounted until settle or compensation.",
+      "fa": "تلاش مقصد برای خرج کردن leg رسیده پیش از settle کارمزد: پرداخت جزئی مشاهده می‌شود. نگهبانش معنای صادقانهٔ رؤیت است — legها فقط با قاعدهٔ صریح محصول per-leg قابل‌خرج‌اند، و رزرو معلق، باقیماندهٔ تسویه‌نشده را تا settle یا جبران حساب‌شده نگه می‌دارد."
     }
   ],
   "followups": [
     {
-      "a_en": "Reconcile previous legs by identity first; timeout does not establish non-application. Release never-credited reservations, but recover credited funds through an authorized durable compensating debit before refunding source. Compensation needs its own operation type/identity and dedup; reusing the original credit key can suppress it. If reversal is unavailable, retain an unresolved state and operational recovery. An unconditional 205 refund can create money.",
-      "a_fa": "ابتدا سرنوشت legهای قبلی را با شناسه‌هایشان reconcile کن؛ timeout به معنی اعمال‌نشدن نیست. مبلغی که هنوز هرگز credit نشده می‌تواند آزاد شود؛ مبلغ creditشده باید با debit جبرانیِ مجاز و بادوام در مقصد برگردد و سپس در مبدأ credit شود. compensation شناسه و نوع عملیات مستقل و dedup خودش را دارد؛ استفاده از همان کلید credit قبلی می‌تواند آن را اشتباه تکراری کند. اگر برگشت مجاز یا ممکن نیست، وضعیت unresolved و مسیر عملیاتی لازم است؛ refund بی‌قید ۲۰۵ می‌تواند پول خلق کند.",
+      "a_en": "Reconcile the earlier legs by identity first; a timeout never proves that something wasn't applied. Release the reservations that were never credited, but pull the credited money back with an authorized, durable compensating debit before you refund the source. Compensation needs its own operation type, its own identity and its own dedup; reusing the original credit key can quietly suppress it. If the reversal isn't available, keep an unresolved state and an operational recovery path. An unconditional 205 refund can create money out of nothing.",
+      "a_fa": "اول سرنوشت legهای قبلی را با شناسه‌هایشان reconcile کن؛ timeout به معنی اعمال‌نشدن نیست. مبلغی که هنوز هرگز credit نشده می‌تواند آزاد شود؛ اما مبلغ creditشده باید با یک debit جبرانیِ مجاز و بادوام در مقصد برگردد و بعد در مبدأ credit شود. compensation شناسه، نوع عملیات و dedup مستقل خودش را دارد؛ استفاده از همان کلید credit قبلی می‌تواند اشتباهی تکرارش کند. اگر برگشت مجاز یا ممکن نیست، یک وضعیت unresolved و مسیر عملیاتی لازم داری؛ refund بی‌قیدِ ۲۰۵ می‌تواند پول خلق کند.",
       "level": "staff",
       "q_en": "The destination account closes permanently. How do you resolve your pending transfer?",
       "q_fa": "مقصد برای همیشه بسته شده باشه؛ پرداخت pending رو چطور حل می‌کنی؟"
     },
     {
-      "a_en": "After complete recovery, integrity means one decision, at-most-once leg effects and economic conservation at a valid comparison boundary. The model does not provide atomic visibility. Shared snapshots require readers and writers to follow a common transaction/commit and snapshot protocol; naming consensus or 2PC alone is insufficient.",
-      "a_fa": "بعد از بازیابی کامل، integrity یعنی تصمیم واحد، اثر حداکثر یک‌بارهٔ هر leg و بقای اقتصادی در مرز مقایسهٔ معتبر. این مدل رؤیت اتمیک نمی‌دهد. برای دیدن یک snapshot مشترک باید خوانندگان و نویسندگان پروتکل تراکنش/commit و snapshot یکسانی داشته باشند؛ صرف افزودن نام consensus یا 2PC بدون قرارداد خواندن کافی نیست.",
+      "a_en": "After a complete recovery, integrity means one decision, at-most-once leg effects and economic conservation at a valid comparison boundary. The model does not give you atomic visibility. A shared snapshot needs the readers and the writers to follow a common transaction/commit and snapshot protocol; dropping the words consensus or 2PC into the design without a read contract is not enough.",
+      "a_fa": "بعد از بازیابی کامل، integrity یعنی تصمیمِ واحد، اثرِ حداکثر یک‌بارهٔ هر leg و بقای اقتصادی در یک مرز مقایسهٔ معتبر. این مدل رؤیت اتمیک نمی‌دهد. برای دیدن یک snapshot مشترک، خوانندگان و نویسندگان باید یک پروتکل تراکنش/commit و snapshot یکسان داشته باشند؛ صرفِ اضافه کردنِ کلمهٔ consensus یا 2PC بدون قراردادِ خواندن، کافی نیست.",
       "level": "staff",
-      "q_en": "After recovery, is the payment integral, atomic, or neither?",
-      "q_fa": "بعد از بازیابی، پرداخت integral است یا atomic یا هیچ‌کدام؟"
+      "q_en": "After the recovery, is the payment integral, atomic, or neither?",
+      "q_fa": "بعد از بازیابی، پرداخت integral است، atomic است، یا هیچ‌کدام؟"
     }
   ],
   "interview_q_en": "Here's the thing, you're designing source, destination, and fee transfers with three logs and deterministic processing. You pin down framed checksummed records with fsync, reserved funds, a persistent decision, an outbox, and dedup. You recover after publishing only some outputs. And you spell out the difference between pending funds, final integrity, and atomic visibility.",
   "interview_q_fa": "داستان از این قراره که انتقال مبدأ، مقصد و کارمزد رو با سه log و پردازش قطعی طراحی می‌کنی. رکورد framed با checksum و fsync، رزرو موجودی، تصمیم پایدار، outbox و dedup رو مشخص کن. crash بعد از انتشار بخشی از خروجی رو بازیابی کن و فرق integrity نهایی، pending state و رؤیت اتمیک رو بگو.",
-  "mental_en": "Three cashiers in three booths, one numbered ticket: the first cashier checks your wallet, stamps APPROVED on the ticket stub, and locks your cash in a glass box everyone can see. Runners carry copies of the same ticket to the other booths; any duplicate copy is torn up at the door. If a runner trips, a new runner re-reads the stub — he never re-decides — and only the undelivered copies go out again. The glass box opens only when every booth confirms.",
-  "mental_fa": "سه صندوقدار در سه باجه با یک بلیت شماره‌دار: صندوقدار اول کیفت را چک می‌کند و APPROVED را روی ته‌بلیت مهر می‌زند و پولت را در جعبه شیشه‌ای که همه می‌بینند قفل می‌کند. پیک‌ها کپی همان بلیت را به باجه‌های دیگر می‌برند؛ هر کپی تکراری دم در پاره می‌شود. اگر پیکی زمین بخورد، پیک تازه ته‌بلیت را بازمی‌خواند — هرگز دوباره تصمیم نمی‌گیرد — و فقط کپی‌های نرسیده دوباره می‌روند. جعبه شیشه‌ای فقط وقتی باز می‌شود که هر باجه تأیید کند.",
+  "mental_en": "Three cashiers in three booths, one numbered ticket: the first cashier checks your wallet, stamps APPROVED on the ticket stub, and locks your cash in a glass box everyone can see. Runners carry copies of that same ticket to the other booths, and any duplicate copy gets torn up at the door. If a runner trips, the next runner re-reads the stub — he never re-decides — and only the copies that never arrived go out again. The glass box opens only when every booth confirms. — three booths, one decision.",
+  "mental_fa": "ببین، سه صندوقدار در سه باجه با یک بلیت شماره‌دار: صندوقدار اول کیفت را چک می‌کند و APPROVED را روی ته‌بلیت مهر می‌زند و پولت را در جعبهٔ شیشه‌ای قفل می‌کند که همه می‌بینند. پیک‌ها کپی همان بلیت را به باجه‌های دیگر می‌برند؛ هر کپی تکراری دم در پاره می‌شود. اگر پیکی زمین بخورد، پیک تازه ته‌بلیت را بازمی‌خواند — هرگز دوباره تصمیم نمی‌گیرد — و فقط کپی‌های نرسیده دوباره راه می‌افتند. جعبهٔ شیشه‌ای هم فقط وقتی باز می‌شود که هر باجه تأیید کند. — سه باجه، یک تصمیم.",
   "mistakes": [
     {
-      "en": "Calling a raw file append durable: without framing, checksum, fsync and a recovery pass that discards torn tails, a crash mid-write invents money or loses it. Durability is the four-part protocol, not the append call.",
-      "fa": "پایدار خواندن الصاق خام فایل: بدون قاب‌بندی و checksum و fsync و گذر بازیابی که دم‌های پاره را می‌اندازد، crash وسط نوشتن پول می‌سازد یا گم می‌کند. پایداری همان پروتکل چهاربخشی است نه فراخوانی الصاق."
+      "en": "Calling a raw file append durable: without framing, a checksum, fsync and a recovery pass that discards torn tails, a crash mid-write invents money or loses it. Durability is that four-part protocol, not the append call.",
+      "fa": "پایدار خواندنِ الصاق خام فایل: بدون قاب‌بندی و checksum و fsync و یک گذر بازیابی که دم‌های پاره را می‌اندازد، crash وسط نوشتن پول می‌سازد یا گمش می‌کند. پایداری همان پروتکل چهاربخشی است، نه فراخوانیِ الصاق."
     },
     {
-      "en": "Reading final convergence as atomic visibility: balanced totals do not mean readers saw all legs together. Promise conserved plus accounted, and name partial observability explicitly.",
-      "fa": "اتمیک خواندن همگرایی نهایی: جمع‌های متوازن یعنی خواننده‌ها همه legها را با هم دیده‌اند نیست. بقاشده با حساب‌شده را وعده بده و مشاهده‌پذیری جزئی را صریح نام ببر."
+      "en": "Reading the final convergence as atomic visibility: balanced totals do not mean the readers saw all the legs together. Promise conserved plus accounted, and name the partial observability out loud.",
+      "fa": "اتمیک خواندنِ همگرایی نهایی: جمع‌های متوازن یعنی خواننده‌ها همهٔ legها را با هم دیده‌اند نیست. بقاشده با حساب‌شده را وعده بده و مشاهده‌پذیریِ جزئی را صریح نام ببر."
     },
     {
-      "en": "Leaving pending money out of the accounting: funds between reserve and settle belong to a visible reservation row. Unaccounted in-flight money breaks the sum check exactly when a crash needs it most.",
-      "fa": "بیرون گذاشتن پول معلق از حسابداری: پول بین رزرو و settle به سطر رزرو نمایان تعلق دارد. پول در حال انتقال حساب‌نشده بررسی جمع را دقیقاً وقتی می‌شکند که crash بیشترین نیاز را به آن دارد."
+      "en": "Leaving the pending money out of the accounting: the funds between reserve and settle belong to a visible reservation row. In-flight money that nobody accounts for breaks the sum check exactly when a crash needs it most.",
+      "fa": "بیرون گذاشتن پول معلق از حسابداری: پول بین رزرو و settle به سطر رزروِ نمایان تعلق دارد. پول در حال انتقالِ حساب‌نشده، بررسیِ جمع را دقیقاً وقتی می‌شکند که crash بیشترین نیاز را به آن دارد."
     }
   ],
   "number": 3,
@@ -219,30 +219,30 @@
   ],
   "steps": [
     {
-      "en": "Length identifies record boundaries, CRC detects corrupt payloads and force precedes ACK. Recovery truncates an incomplete suffix only; checksum mismatches or invalid lengths stop recovery. This demo tests processor restart with surviving files.",
-      "fa": "length مرز رکورد را مشخص می‌کند، CRC خرابی payload را می‌یابد و force پیش از ACK، داده را از buffer فرایند خارج می‌کند. recovery فقط suffix ناقص را truncate می‌کند؛ checksum خراب یا طول نامعتبر باعث توقف و بررسی می‌شود. این دمو دوام در crash پردازنده با دیسک باقی‌مانده را می‌آزماید.",
-      "t_en": "Frame, checksum, fsync",
-      "t_fa": "قاب‌بندی و checksum و fsync"
+      "en": "Here's the shape: the length marks the record boundary, the CRC catches a corrupt payload, and force before the ACK pushes the data out of the process buffer. Recovery truncates an incomplete suffix and nothing else; a checksum mismatch or an invalid length stops recovery and asks for a human. This demo tests a processor restart with the files that survived.",
+      "fa": "نکته‌ش اینه: length مرز رکورد را مشخص می‌کند، CRC خرابی payload را می‌یابد، و force پیش از ACK داده را از buffer فرایند بیرون می‌کشد. recovery فقط suffix ناقص را truncate می‌کند؛ checksum خراب یا طول نامعتبر باعث توقف و بررسی می‌شود. این دمو دوام در crash پردازنده با دیسک باقی‌مانده را می‌آزماید.",
+      "t_en": "Frame it, then fsync it",
+      "t_fa": "اول قاب‌بندی، بعد fsync"
     },
     {
-      "en": "One D record persists the decision, reservation amounts and required outputs. Replaying it reconstructs source debit and obligations, avoiding a gap between a decision log and separately stored state.",
-      "fa": "یک رکورد D تصمیم، مبلغ رزرو و خروجی‌های لازم را ثبت می‌کند. replay همان رکورد کسر موجودی و obligationها را بازسازی می‌کند؛ بنابراین شکاف میان لاگ تصمیم و state جدا نداریم.",
-      "t_en": "Decide once, reserve visibly",
-      "t_fa": "یک‌بار تصمیم و رزرو نمایان"
+      "en": "One D record holds the decision, the reservation amount and the outputs that are owed. Replaying it rebuilds the source debit and the obligations, so there is no gap between a decision log and state kept somewhere else. — one row, all the truth.",
+      "fa": "یک رکورد D تصمیم، مبلغ رزرو و خروجی‌های لازم را ثبت می‌کند. replay همان رکورد کسر موجودی و obligationها را بازسازی می‌کند، پس شکافی میان لاگ تصمیم و state جدا نمی‌ماند. — یک سطر، همهٔ حقیقت.",
+      "t_en": "Decide once, then reserve visibly",
+      "t_fa": "یک‌بار تصمیم، رزروِ نمایان"
     },
     {
-      "en": "Publish legs keyed by (shard,payment_id). Each C record reconstructs both credit and dedup; replay may resend all legs and destinations absorb repeats. Remove applied legs from in-transit value at the harness’s common logical boundary, not from arbitrary cross-shard reads.",
-      "fa": "legها با کلید (shard,payment_id) ارسال می‌شوند. مقصد از رکورد C هم اعتبار و هم dedup را بازسازی می‌کند؛ retry می‌تواند همهٔ legها را دوباره بفرستد و مقصد تکرار را حذف می‌کند. هر leg اعمال‌شده از مبلغ in-transit کم می‌شود؛ این جمع در مرز مشترک harness حساب می‌شود، نه از خواندن تصادفی چند shard.",
-      "t_en": "Publish, dedup, converge",
-      "t_fa": "انتشار و dedup و همگرایی"
+      "en": "The legs go out keyed by (shard,payment_id). Each C record rebuilds both the credit and the dedup, so a replay may resend every leg and the destination simply absorbs the repeats. Applied legs come out of the in-transit value at the harness's common logical boundary — not from some random read across shards.",
+      "fa": "legها با کلید (shard,payment_id) ارسال می‌شوند. مقصد از رکورد C هم اعتبار و هم dedup را بازسازی می‌کند، پس retry می‌تواند همهٔ legها را دوباره بفرستد و مقصد تکرارها را حذف می‌کند. هر leg اعمال‌شده از مبلغ in-transit کم می‌شود؛ این جمع در مرز مشترک harness حساب می‌شود، نه از خواندنِ تصادفیِ چند shard.",
+      "t_en": "Publish it, dedup it, converge",
+      "t_fa": "انتشار، dedup، همگرایی"
     }
   ],
-  "tests_en": "The demo asserts four logical crash boundaries, file-only recovery, duplicate replay, per-leg pending conservation, truncated-tail repair and checksum-corruption rejection. It does not test real SIGKILL, power loss or distributed networking.",
-  "tests_fa": "دمو چهار مرز crash منطقی قبل و بعد از legها، بازیابی از فایل بدون حافظهٔ قبلی، replay تکراری، conservation با pending هر leg، ترمیم دم ناقص و رد checksum خراب را assert می‌کند. این آزمون، SIGKILL واقعی یا قطع برق یا شبکهٔ توزیع‌شده نیست.",
-  "worked_en": "<p>After reservation: src=795, dst=100, fee=0, in-transit=205, total=1100. After destination credit: dst=300 and only fee 5 remains in transit; counting all 205 again double-counts money. Recovery applies the fee, yielding src=795,dst=300,fee=5,pending=0. A fresh processor reads files only; no prior process maps are copied.</p>",
-  "worked_fa": "<p>پس از رزرو، src=795 و dst=100 و fee=0 و مبلغ در راه ۲۰۵ است؛ جمع ۱۱۰۰ می‌شود. پس از credit مقصد، dst=300 و فقط ۵ کارمزد در راه است؛ نگه‌داشتن ۲۰۵ به‌عنوان پول در راه دوباره‌شماری است. پس از recovery و اعمال کارمزد، src=795,dst=300,fee=5 و pending=0 داریم. پردازندهٔ تازه فقط فایل می‌خواند؛ هیچ map از فرایند قبلی کپی نمی‌شود.</p>",
+  "tests_en": "The demo asserts four logical crash boundaries, file-only recovery, duplicate replay, per-leg pending conservation, truncated-tail repair and checksum-corruption rejection. It does not test a real SIGKILL, power loss or distributed networking — and the demo doesn't claim to.",
+  "tests_fa": "دمو چهار مرز crash منطقی قبل و بعد از legها، بازیابی از فایل بدون حافظهٔ قبلی، replay تکراری، conservation با pending هر leg، ترمیم دم ناقص و رد checksum خراب را assert می‌کند. این آزمون، SIGKILL واقعی یا قطع برق یا شبکهٔ توزیع‌شده نیست — و دمو ادعای بیشتری هم ندارد.",
+  "worked_en": "<p>After the reservation: src=795, dst=100, fee=0, in-transit=205, total=1100. After the destination credit: dst=300 and only fee 5 remains in transit; counting all 205 again double-counts the money. The recovery applies the fee, yielding src=795,dst=300,fee=5,pending=0. A fresh processor reads files only; no prior process maps are copied. — the total never moves, no matter how the money hops between shards.</p>",
+  "worked_fa": "<p>بعد از رزرو: src=795 و dst=100 و fee=0 و مبلغ در راه ۲۰۵؛ جمع ۱۱۰۰ می‌شود. بعد از credit مقصد: dst=300 و فقط ۵ کارمزد در راه است؛ نگه‌داشتن ۲۰۵ به‌عنوان پول در راه، دوباره‌شماریِ پول است. بعد از recovery و اعمال کارمزد: src=795,dst=300,fee=5 و pending=0. پردازندهٔ تازه فقط فایل می‌خواند؛ هیچ map از فرایند قبلی کپی نمی‌شود. — جمع، هر قدر هم بین shardها بگرده، تکان نمی‌خورد.</p>",
   "lab_fa": "<p>سه shard مبدأ، مقصد و کارمزد با پردازنده تک‌نخ و لاگ فایلی بساز. قرارداد فایل [length,payload,checksum]، fsync پیش از ACK، و recovery دم ناقص رو تعریف کن؛ خرابی میانی رو بی‌صدا دور ننداز. تصمیم و رزرو وجه و تعهد انتشار outbox باید از یه رکورد پایدار قابل بازسازی باشن. هر leg کلید (payment_id,leg_type) داره؛ مقصد اثر و dedup رو با هم پایدار می‌کنه. بعد از هر انتشار crash بده و پس از restart همون تصمیم ذخیره‌شده رو replay کن. مبلغ pending رو به تفکیک leg حساب کن تا پرداختی که تو مقصد اعمال شده دوباره تو pending شمرده نشه؛ جمع اقتصادی فقط تو یه مرز منطقی مشترک قابل سنجشه. همگرایی نهایی، رؤیت اتمیک بین shardها نمی‌ده؛ تأخیر بی‌نهایت و leg ناموفق به وضعیت محصول و پروتکل reconciliation و compensation مشخص نیاز داره.</p>",
   "lab_en": "<p>Build source, destination, and fee shards with single-thread processors and file logs. Define [length,payload,checksum], fsync-before-ACK, and truncated-tail recovery; never silently discard interior corruption. Reconstruct your decision, reservation, and outbox obligation from one durable record. Identify each leg by (payment_id,leg_type); persist destination dedup with its effect. Crash after each publication and replay the stored decision after restart. Track pending per leg so credited funds aren't counted again as pending; economic conservation needs a common logical observation boundary. Eventual convergence doesn't give you cross-shard atomic visibility. Indefinite delay or a permanently failed leg needs an explicit product state plus a reconciliation and compensation protocol.</p>",
-  "reasoning_fa": "<p>framing مرز رکورد، checksum خرابی بایت و fsync درخواست دوام پیش از ACK را مشخص می‌کنند؛ هیچ‌کدام به‌تنهایی تراکنش چندshardی نیست. تصمیم پایدار از تغییر نظر پس از restart جلوگیری می‌کند و dedup پایدار مانع دوباره‌اعمال‌شدن leg می‌شود. ۱۰۰۰+۱۰۰=۱۱۰۰ کل اولیه است؛ پس از اعتبار مقصد ۲۰۰، فقط کارمزد ۵ هنوز در راه است، نه تمام ۲۰۵. جمعِ خواندن‌های مستقل در لحظه‌های مختلف شاهد conservation نیست؛ در دمو از logهای بازیابی‌شده در مرز منطقی مشترک استفاده می‌کنیم.</p>",
-  "reasoning_en": "<p>Framing identifies record boundaries, checksums detect byte corruption and fsync requests durability before ACK; none creates a cross-shard transaction. Durable decisions prevent re-deciding after restart; durable dedup prevents duplicate legs. The initial total is 1000+100=1100. After crediting 200 to the destination, only fee 5 remains in transit, not all 205. Independent reads at different instants do not prove conservation; compare recovered logs at a common logical boundary.</p>"
+  "reasoning_fa": "<p>framing مرز رکورد، checksum خرابی بایت و fsync درخواست دوام پیش از ACK را مشخص می‌کنند؛ هیچ‌کدام به‌تنهایی یک تراکنش چندshardی نمی‌سازند. تصمیم پایدار از تغییرِ نظر بعد از restart جلوگیری می‌کند و dedup پایدار مانعِ دوباره‌اعمال‌شدن leg می‌شود. ۱۰۰۰+۱۰۰=۱۱۰۰ کل اولیه است؛ بعد از credit مقصد ۲۰۰ فقط کارمزد ۵ هنوز در راه است، نه تمام ۲۰۵. جمعِ خواندن‌های مستقل در لحظه‌های مختلف شاهد conservation نیست؛ در دمو از logهای بازیابی‌شده در مرز منطقی مشترک استفاده می‌کنیم.</p>",
+  "reasoning_en": "<p>Framing identifies the record boundaries, a checksum detects byte corruption, and fsync requests durability before the ACK; none of them creates a cross-shard transaction. A durable decision prevents re-deciding after a restart, and durable dedup prevents duplicate legs. The initial total is 1000+100=1100. After crediting 200 to the destination, only fee 5 remains in transit, not all 205. Independent reads taken at different instants do not prove conservation; compare the recovered logs at a common logical boundary.</p>"
 }
