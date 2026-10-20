@@ -149,8 +149,8 @@
       "a_en": "27. Each layer turns one incoming attempt into up to three downstream attempts, and the layers stack multiplicatively: 3 x 3 x 3. That is the worst case with no budget and no deadline cutting tails — the teaching number assumes every layer exhausts its attempts. In production you cap it with a shared retry budget (a fraction of traffic), per-attempt deadlines, and jittered backoff so the 27 never arrive in lockstep.",
       "a_fa": "۲۷. هر لایه یک تلاش ورودی را تا سه تلاش downstream می‌کند و لایه‌ها ضربی روی هم می‌نشینند: ۳×۳×۳. این بدترین حالت بدون بودجه و بدون deadline است که دم را ببرد — عدد آموزشی فرض می‌کند هر لایه تلاش‌هایش را تمام می‌کند. در پروداکشن با بودجهٔ مشترک retry (کسری از ترافیک)، deadline هر تلاش و backoff jitterدار سقفش می‌زنی تا ۲۷تایی هرگز هم‌قدم نرسند.",
       "level": "senior",
-      "q_en": "Three layers each make up to three attempts. What is the maximum number of downstream attempts?",
-      "q_fa": "سه لایه هر کدام سه بار retry کنند، حداکثر چند تلاش downstream داریم؟"
+      "q_en": "You've got three layers each making up to three attempts. What's your maximum downstream attempts?",
+      "q_fa": "حالا سه لایه داری که هر کدوم تا سه بار retry می‌کنن. حداکثر چند تلاش به downstream می‌رسه؟ حساب کن."
     },
     {
       "a_en": "The budget and the deadline, in that order — plus jitter. First the shared retry budget stops new attempts when the downstream is already sick (this is the only knob that sees global load). Then per-attempt deadlines cut each hanging try so one slow dependency cannot hold every worker. Jitter spreads the survivors so they do not arrive in lockstep, and load shedding drops the excess with an explicit error instead of queueing it. Without the budget, backoff alone just delays the same 27x stampede.",
@@ -167,8 +167,8 @@
       "level": "staff"
     }
   ],
-  "interview_q_en": "A counter or payment request, its commit, or its reply can each be lost. Show the history of every case, design request IDs with result lookup, payload binding and retention, then add deadlines, backoff with jitter and a retry budget.",
-  "interview_q_fa": "شمارنده یا پرداختی داریم که درخواست، commit یا پاسخ آن ممکن است گم شود. history هر حالت را نشان بده. پروتکل با request ID، نتیجهٔ lookup، binding به payload و نگهداری طراحی کن؛ بعد deadline، backoff با jitter و بودجهٔ retry را اضافه کن.",
+  "interview_q_en": "Picture this — you've got a counter or payment where the request, commit or reply can vanish. Trace each history. Design request ID, result lookup, payload binding and retention, then add deadlines, backoff with jitter and your retry budget.",
+  "interview_q_fa": "فرض کن یه شمارنده یا پرداخت داری که درخواست، commit یا پاسخش ممکنه گم بشه. history هر حالت رو نشون بده. پروتکل رو با request ID، result lookup، payload binding و retention طراحی کن؛ deadline، backoff+jitter و retry budget رو هم اضافه کن.",
   "mental_en": "The network owes you nothing after you send: silence is a fact about the reply, never a fact about the request. So stop asking 'did it fail?' — a question the wire cannot answer — and ask 'what does the result log say about this ID?' instead. Retries are then just polite re-askings of a question with a stored answer.",
   "mental_fa": "شبکه بعد از ارسال هیچ بدهی به تو ندارد: سکوت واقعیتی دربارهٔ پاسخ است، هرگز واقعیتی دربارهٔ درخواست نیست. پس دست از «شکست خورد؟» بردار — سؤالی که سیم نمی‌تواند جوابش دهد — و بپرس «لاگ نتیجه دربارهٔ این شناسه چه می‌گوید؟». آن‌وقت retryها فقط دوباره‌پرسیدن مؤدبانهٔ سؤالی‌اند که جواب ذخیره‌شده دارد.",
   "mistakes": [

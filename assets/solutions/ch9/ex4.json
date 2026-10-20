@@ -153,8 +153,8 @@
       "a_en": "Safety — and that is exactly why the answer is interesting. With zero effects there are zero duplications, so 'no message takes effect twice' holds vacuously; the dashboard light stays green. Liveness ('every valid message eventually takes effect') is dead: nothing progresses. The lesson: a safety light without a progress metric is a lie by omission — always pair them, and page on effected-per-minute hitting zero, not on safety alone.",
       "a_fa": "Safety — و دقیقاً به همین دلیل جواب جالب است. با صفر اثر، صفر تکراری هست، پس «هیچ پیامی دو بار اثر نمی‌کند» به‌صورت vacuous می‌ماند؛ چراغ داشبورد سبز می‌ماند. liveness («هر پیام معتبر بالاخره اثر می‌کند») مرده: هیچ‌چیز پیش نمی‌رود. درس: چراغ safety بدون معیار progress دروغ با حذف است — همیشه جفتشان کن و روی صفر شدن اثرکرده-در-دقیقه پیج بده، نه فقط روی safety.",
       "level": "senior",
-      "q_en": "The service rejects every message. Which property can appear healthy?",
-      "q_fa": "سیستم همهٔ پیام‌ها را رد کند؛ کدام خاصیت ظاهراً سالم می‌ماند؟"
+      "q_en": "Your service rejects every message. Which property can still look healthy?",
+      "q_fa": "حالا سیستم همه پیام‌ها رو رد می‌کنه؛ کدوم خاصیت ظاهراً سالم می‌مونه؟"
     },
     {
       "a_en": "Yes — the dedup-lost scenario is exactly the reverse: m1 is delivered, the crash wipes the dedup set, the redelivery applies m1 a second time (effects={m1=2}). Safety is violated — one message, two effects — while liveness holds, because m1 did take effect (twice). So the independence runs both ways: progress without safety (double-apply) and safety without progress (partition, reject-all). Any design review must ask for both counterexamples, not just the fashionable one.",
@@ -164,8 +164,8 @@
       "q_fa": "نشان دادی liveness تنها می‌شکند. آیا safety می‌تواند بشکند ولی progress ادامه داشته باشد؟"
     }
   ],
-  "interview_q_en": "Define no duplicate application effects as safety and eventual valid-message effects under recovery as liveness. Give counterexamples for permanent partitions, redelivery and missing dedup state.",
-  "interview_q_fa": "برای صف، safety «اثر پیام بیش از یک بار اعمال نشود» و liveness «پیام معتبر تحت بازیابی شبکه بالاخره اثر کند» تعریف کن. partition دائمی، redelivery و از دست رفتن dedup را تحلیل کن. برای هر ادعا یک counterexample و فرض زمانی روشن بده.",
+  "interview_q_en": "Honestly, you've got a queue to reason about. Define no duplicate application effects as safety and eventual valid-message effects under recovery as liveness. Cover permanent partitions, redelivery and missing dedup state. Give a counterexample and an explicit timing assumption for each claim.",
+  "interview_q_fa": "داستان از این قراره که یه صف داری. safety رو این‌طور تعریف کن: «اثر پیام بیش از یه بار اعمال نشه» و liveness رو این‌طور: «پیام معتبر تحت بازیابی شبکه بالاخره اثر کنه». partition دائمی، redelivery و گم‌شدن dedup رو تحلیل کن. برای هر ادعا یه counterexample و فرض زمانی روشن بده.",
   "mental_en": "Safety is a fence ('nothing bad ever happens') and liveness is a road ('something good eventually happens') — and a fence standing in a desert is not a road. Delivery counts trucks on the road; effects count cargo unloaded at the warehouse. A system can lose every truck (liveness dead, fence intact), unload one truck twice (fence broken, road busy), or wave every truck away at the gate (fence trivially intact, road empty). Judge the fence and the road separately, always.",
   "mental_fa": "safety نرده است («هیچ بدی هرگز رخ نمی‌دهد») و liveness جاده است («خوبی بالاخره رخ می‌دهد») — و نرده‌ای که در بیابان ایستاده جاده نیست. تحویل کامیون‌های جاده را می‌شمارد؛ اثر بار تخلیه‌شده در انبار را. سیستم می‌تواند هر کامیون را گم کند (جاده مرده و نرده سالم) یا یک کامیون را دو بار تخلیه کند (نرده شکسته و جاده شلوغ) یا هر کامیون را دم در برگرداند (نرده ظاهراً سالم و جاده خالی). نرده و جاده را همیشه جدا قضاوت کن.",
   "mistakes": [
