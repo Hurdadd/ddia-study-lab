@@ -47,6 +47,11 @@ for e in es:
  assert e['prompt'] and e['prompt_en'] and e['reason'] and e['reason_en'] and e['followup'] and e['followup_en']
  assert len(e['signals'])==len(e['signals_en'])==3
  assert len(chapter.reviews)==sum(x['chapter']==e['chapter'] for x in es)
+ # the audited follow-up question must still appear verbatim in the worked solution
+ solution=json.loads((ROOT/f"assets/solutions/ch{e['chapter']}/ex{e['number']}.json").read_text())
+ followups=solution.get('followups',[])
+ assert any(f.get('q_fa')==e['followup'] for f in followups),f"Follow-up drift: ch{e['chapter']}/ex{e['number']}"
+ assert any(f.get('q_en')==e['followup_en'] for f in followups),f"Follow-up drift (en): ch{e['chapter']}/ex{e['number']}"
 for path,page in list(parsed.items()):
  assert len(page.ids)==len(set(page.ids)),f'Duplicate IDs: {path}'
  for link in page.links:
