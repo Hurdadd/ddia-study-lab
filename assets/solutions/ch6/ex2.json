@@ -15,8 +15,8 @@
       "fa": "فاز دو دقیقاً یک add تازه هم‌زمان اضافه می‌کند (<code>milk@t3</code> آفلاین ساخته شده)؛ سناریوی آموزشی با آیتم‌های خنثی."
     }
   ],
-  "interview_q_en": "Start with two offline devices removing different known cart items and no new adds. Compare LWW, sibling union and an OR-Set with tagged adds/removals. Then introduce concurrent add/remove and choose product semantics.",
-  "interview_q_fa": "دو دستگاه سبد مشترک را آفلاین ویرایش می‌کنند: هر کدام یک آیتم شناخته‌شده را حذف می‌کند و هیچ add تازه‌ای وجود ندارد. LWW، union سادهٔ siblings و OR-Set با tag/tombstone را مقایسه کن. سپس add هم‌زمان با remove را اضافه کن و semantics مطلوب محصول را انتخاب کن.",
+  "interview_q_en": "Think of it, friend — two devices share a cart and both first observed milk:t1 and bread:t2. They go offline, each removes a different known item, with no fresh adds at all. Compare LWW, a plain sibling union, and an OR-Set with tags and tombstones. Then add a concurrent add racing a remove, and pick the product semantics you actually want.",
+  "interview_q_fa": "تصور کن دو تا دستگاه سبد مشترک دارن: هر دو اول milk:t1 و bread:t2 رو دیدن. بعد آفلاین می‌شن و هرکدوم یه آیتم شناخته‌شده رو حذف می‌کنه، بدون هیچ add تازه‌ای. حالا LWW و union سادهٔ siblings و OR-Set با tag و tombstone رو مقایسه کن. بعد add هم‌زمان با remove رو اضافه کن و semantics دلخواه محصول رو انتخاب کن.",
   "mental_en": "Give every add a name tag, and let a remove cross out only the tags it actually saw. Two devices crossing out different seen tags always agree afterwards — the only quarrel is the stranger who walked in wearing a fresh tag nobody saw.",
   "mental_fa": "به هر add یک tag نام بده و بگذار remove فقط tagهایی را خط بزند که واقعاً دیده. دو دستگاه که tagهای دیده متفاوت را خط زده‌اند همیشه بعدش توافق دارند — تنها دعوا غریبه‌ای است که با tag تازه‌ای که هیچ‌کس ندیده وارد شده.",
   "number": 2,
@@ -90,7 +90,7 @@
   "followups": [
     {
       "q_en": "A device has been offline for a year. When is it safe to collect tombstones?",
-      "q_fa": "دستگاهی یک سال آفلاین بوده؛ tombstone را چه زمانی می‌توان پاک کرد؟",
+      "q_fa": "یه دستگاه یه سال آفلاین بوده. tombstone رو کی می‌شه پاک کرد؟",
       "a_en": "Only when every live replica has seen the removal — causal stability — because collection means forgetting, and a replica that never saw the remove will reintroduce its live tags at the next sync. The year-offline device vetoes collection until it syncs (or is declared dead by an explicit membership change, which is itself a product-level call with its own risks). Never collect on a lone timer: elapsed time is not evidence of delivery.",
       "a_fa": "فقط وقتی هر replica زنده‌ای حذف را دیده باشد — causal stability — چون collection یعنی فراموشی و replicaای که حذف را ندیده در sync بعدی tagهای liveاش را برمی‌گرداند. دستگاه یک‌سال‌آفلاین تا sync نکرده (یا با تغییر membership صریح مرده اعلام نشده که خودش قرارداد سطح محصول با ریسک خودش است) collection را وتو می‌کند. هرگز با تایمر تنها جمع نکن: گذر زمان مدرک تحویل نیست.",
       "level": "senior"
@@ -117,8 +117,8 @@
       "fa": "منقضی کردن tombstoneها با سن. زمان تحویل را ثابت نمی‌کند؛ فقط causal stability می‌گذارد tombstone بدون زنده شدن بازنشسته شود."
     }
   ],
-  "lab_fa": "<p>دو دستگاه سبد {milk:t1, bread:t2} را دیده‌اند و آفلاین می‌شوند: A شیر و B نان را حذف می‌کند و هیچ add جدیدی نداریم. LWW کل سبد، نگه‌داشتن sibling با سیاست union صریح، و OR-Set با tag یکتای هر add و حذف tagهای مشاهده‌شده را مقایسه کن. نتیجه را در هر ترتیب ادغام و با پیام تکراری بررسی کن. سپس milk:t3 را هم‌زمان با حذف روی دستگاه دیگر اضافه کن: برای add-wins و remove-wins قرارداد جدا بنویس. برای tombstone GC، causal stability یا محدودیت معتبر عضویت/آفلاین‌بودن را مشخص کن و ورود دوبارهٔ replica قدیمی را بیازما؛ صرف انقضای تایمر دلیل امنی برای GC نیست.</p>",
-  "lab_en": "<p>Both devices observe {milk:t1, bread:t2}, then go offline: A removes milk and B removes bread, with no new adds. Compare whole-cart LWW, siblings with an explicit union policy, and an OR-Set with unique add tags and observed-tag removals. Check every merge order and duplicate delivery. Then add milk:t3 concurrently with another device's remove; specify separate add-wins and remove-wins contracts. Justify tombstone GC using causal stability or an enforced membership/offline bound, and test an old replica rejoining; a timer alone does not establish safe GC.</p>",
+  "lab_fa": "<p>دو دستگاه سبد <span class=\"ltr\">{milk:t1, bread:t2}</span> رو دیدن و آفلاین می‌شن: A شیر و B نون رو حذف می‌کنه و هیچ add جدیدی نداریم. LWW کل سبد و نگه‌داشتن sibling با سیاست union صریح و OR-Set با tag یکتای هر add و حذف tagهای دیده‌شده رو مقایسه کن. نتیجه رو توی هر ترتیب ادغام و با پیام تکراری چک کن. بعد <span class=\"ltr\">milk:t3</span> رو هم‌زمان با حذف دستگاه دیگه اضافه کن و برای add-wins و remove-wins قرارداد جدا بنویس. برای GC خون tombstone یا causal stability یا محدودیت معتبر عضویت و آفلاین بودن رو مشخص کن و برگشتن replica قدیمی رو هم بیازما؛ صرف انقضای تایمر دلیل امنی برای GC نیست.</p>",
+  "lab_en": "<p>Both devices observe <span class=\"ltr\">{milk:t1, bread:t2}</span>, then go offline: A removes milk and B removes bread, with no new adds. Compare whole-cart LWW, siblings with an explicit union policy, and an OR-Set with unique add tags plus observed-tag removals. Check every merge order and duplicate delivery. Then add <span class=\"ltr\">milk:t3</span> concurrently with the other device's remove, and write separate add-wins and remove-wins contracts. Justify tombstone GC with causal stability or an enforced membership/offline bound, and test an old replica rejoining — a bare timer never proves safe GC.</p>",
   "slug": "concurrent-cart",
   "diagrams": [
     {

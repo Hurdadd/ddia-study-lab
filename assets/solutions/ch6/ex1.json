@@ -62,8 +62,8 @@
   "tests_en": "In the lab deliberately reproduce all three anomalies: write plus immediate follower read, two reads from two replicas, and swapped causal order; then switch on each fix (leader, pin, barrier) and show the anomaly gone. Measure lag as a distribution, not one number, and alert on the fallback rate.",
   "followups": [
     {
-      "q_en": "If the primary fails after ACK, how does read-your-writes depend on replication durability?",
-      "q_fa": "اگر primary بعد از ACK خراب شود، read-your-writes چه وابستگی‌ای به replication durability دارد؟",
+      "q_en": "If the primary crashes right after ACK, how much does read-your-writes depend on replication durability?",
+      "q_fa": "اگه primary بعد از ACK بترکه، read-your-writes چقدر به durability replication وصله؟",
       "a_en": "Totally: read-your-writes promises the user's own write is readable, and an async primary can ACK a write it never replicated — the new leader simply never had it. With semisynchronous replication at least one follower holds every ACKed write, so routing own-write reads there (or to the promoted leader) keeps the promise. With fully async replication the honest answer names the loss window: ACKed-but-unreplicated writes can vanish, and no routing trick recovers them.",
       "a_fa": "کاملاً: read-your-writes قول می‌دهد نوشته خود کاربر خواندنی است و primary ناهمزمان می‌تواند نوشته‌ای را ACK کند که هیچ‌وقت تکثیر نکرده — leader تازه اصلاً آن را نداشته. با تکثیر نیمه‌هم‌زمان دست‌کم یک follower هر نوشته ACKشده را دارد پس مسیریابی خواندنِ نوشته خود به آنجا (یا leader ارتقایافته) قول را نگه می‌دارد. با تکثیر کاملاً ناهمزمان جواب صادق پنجره گم‌شدن را نام می‌برد: نوشته‌های ACKشده ولی تکثیرنشده می‌توانند ناپدید شوند و هیچ ترفند مسیریابی برشان نمی‌گرداند.",
       "level": "senior"
@@ -97,8 +97,8 @@
       "fa": "مقایسه timestamp ساعت دیواری به‌جای نسخه. ساعت‌ها بین ماشین‌ها skew دارند (آن فصل ۹ است)؛ فقط LSN یا version vector نوشته‌ها را مرتب می‌کند."
     }
   ],
-  "lab_fa": "<p>آزمایشگاه تکمیلی (تمرین ۱ در بخش تمرین‌ها): نصب replica، اندازه‌گیری lag، بازتولید عمدی هر سه ناهنجاری و پیاده‌سازی یک راه‌حل عملی برای هرکدام. بحث مصاحبه‌ای بالا فرض می‌کند replica هست؛ ساختن و سنجیدن آن کار آزمایشگاه است.</p>",
-  "lab_en": "<p>Extended lab (exercise 1 in the exercises section): install a replica, measure lag, deliberately reproduce all three anomalies, and implement one practical fix each. The interview discussion above assumes the replica exists; building and measuring it is lab work.</p>",
+  "lab_fa": "<p>یه اسکریپت ساده بنویس که روی پایگاه تک‌رهبر ناهمزمان (مثلاً PostgreSQL با یه read replica) می‌نویسه و فوری از follower می‌خونه. lag رو اندازه بگیر و بعد هر سه ناهنجاری رو عمداً بازتولید کن: خوندن نوشتهٔ خودت، عقب رفتن زمان (دو خوندن از دو replica) و به‌هم خوردن ترتیب علّی. برای هرکدوم یه راه‌حل عملی پیاده کن و نشون بده ناهنجاری رفع شده.</p>",
+  "lab_en": "<p>Write a small script against an async single-leader database (say PostgreSQL with one read replica): write, then immediately read from the follower. Measure the lag, then deliberately reproduce all three anomalies — reading your own writes, time moving backward (two reads from two replicas), and swapped causal order. Ship one practical fix per anomaly and show it gone.</p>",
   "answer_en": "Route reads by version, never by sleep: own-write reads go to the leader, repeats go to a pinned replica or one past a version barrier, and the barrier admits only replicas at <span class=\"ltr\">LSN</span> 7 or more. Lag has no upper bound, so the honest fallback is the leader. The price is leader load and read latency; after a primary failure the whole scheme rests on replication durability.",
   "answer_fa": "خواندن را با نسخه مسیریابی کن، هرگز با sleep: خواندنِ نوشته خود به leader می‌رود، تکرارها به replicaی پین‌شده یا عبوری از barrier نسخه می‌روند و barrier فقط replicaهای با <span class=\"ltr\">LSN</span> برابر ۷ یا بیشتر را می‌پذیرد. lag حد بالا ندارد پس fallback صادقانه leader است. قیمتش بار leader و تأخیر خواندن است؛ بعد از مرگ primary کل طرح روی durability تکثیر سوار است.",
   "assumptions": [
@@ -115,8 +115,8 @@
       "fa": "نصب و اندازه‌گیری replica مال آزمایشگاه تکمیلی است؛ بحث مصاحبه فرض می‌کند یک leader و دو follower هست."
     }
   ],
-  "interview_q_en": "After a profile edit, a read replica returns the old value. Show read-your-writes, monotonic-read and causal anomalies with short versioned histories. Compare primary routing, session stickiness and version/LSN barriers, and define the fallback for unbounded lag.",
-  "interview_q_fa": "بعد از ویرایش پروفایل، یک read replica مقدار قدیمی برمی‌گرداند. read-your-writes، monotonic reads و causal consistency را با history کوتاه نسخه‌دار نشان بده. routing به primary، session stickiness و version/LSN barrier را مقایسه کن و برای lag بی‌حد fallback تعریف کن.",
+  "interview_q_en": "Picture this, friend — a user edits their profile but a read replica still serves the old value. With a short history, show how read-your-writes, monotonic reads, and causal consistency break. Compare routing to the primary, session stickiness, and version/LSN barriers, and define a fallback for unbounded lag.",
+  "interview_q_fa": "فرض کن کاربر پروفایلش رو ویرایش می‌کنه ولی read replica هنوز مقدار قدیمی می‌ده. با یه history کوتاه نشون بده read-your-writes و monotonic reads و causal consistency چطور می‌شکنن. routing به primary و session stickiness و version یا LSN barrier رو مقایسه کن و برای lag بی‌حد هم fallback بذار.",
   "mental_en": "Think of lag as time travel: each follower lives slightly in the past, and the past has no fixed distance. A version number is the boarding pass — the router checks the pass, not the clock on the wall, because no fixed sleep can prove a follower caught up.",
   "mental_fa": "lag را سفر در زمان ببین: هر follower کمی در گذشته زندگی می‌کند و گذشته فاصله ثابت ندارد. شماره نسخه بلیت سوار شدن است — مسیریاب بلیت را چک می‌کند نه ساعت دیواری را، چون هیچ sleep ثابتی ثابت نمی‌کند follower رسیده است.",
   "number": 1,
