@@ -3,74 +3,74 @@
   "slug": "embedding-fanout",
   "interview_q_fa": "حفظ کن: لوگوی یه برند روی صد هزار محصول دیده می‌شه. reference و embedding و read model مشتق رو مقایسه کن؛ خرج خواندن، fan-out تغییر، stale data و شکست وسط batch update رو بگو و انتخابت رو با حد تازگی قابل قبول توجیه کن.",
   "interview_q_en": "Rule of thumb: one brand logo shows up on 100,000 products. Compare references, embedding, and a derived read model. Weigh read cost, update fan-out, stale reads, and dying halfway through a batch update — and justify your pick with an acceptable freshness bound.",
-  "answer_fa": "مرجع حقیقت جدول <span class=\"ltr\">brands</span> با نسخه <span class=\"ltr\">logo_v</span> است. ارجاع: خواندن کمی گران‌تر ولی تغییر فقط یک سطر. توکار: خواندن رایگان ولی هر تغییر ۱۰۰هزار نوشتن با پنجره ناسازگاری ده‌ها ثانیه‌ای — منتفی. <span class=\"ltr\">read model</span> نسخه‌دار از <span class=\"ltr\">outbox</span>: خواندن سریع با تازگی محدود (مثلاً ۵ ثانیه آموزشی) و بازیابی از مکان‌نمای نسخه.",
-  "answer_en": "The <span class=\"ltr\">brands</span> table with a <span class=\"ltr\">logo_v</span> version is the authority. Reference: slightly pricier reads, one-row changes. Embedding: free reads but 100K writes per change with a tens-of-seconds inconsistency window — ruled out. A versioned <span class=\"ltr\">read model</span> off the <span class=\"ltr\">outbox</span>: fast reads inside a freshness bound (e.g. 5 teaching seconds) with resume from a version cursor.",
+  "answer_fa": "مرجعِ حقیقت، جدول <span class=\"ltr\">brands</span> با نسخه <span class=\"ltr\">logo_v</span> است. ارجاع: خواندن یه‌کم گرون‌تر، ولی تغییر فقط یه سطر. توکار: خواندن رایگان، ولی هر تغییر ۱۰۰هزار نوشتن با پنجره ناسازگاری ده‌ها ثانیه‌ای — منتفی. <span class=\"ltr\">read model</span> نسخه‌دار از <span class=\"ltr\">outbox</span>: خواندن سریع با تازگی محدود (مثلاً ۵ ثانیه آموزشی) و بازیابی از مکان‌نمای نسخه. خلاصه: هر کپی یه بدهی داره — حسابش کن.",
+  "answer_en": "The <span class=\"ltr\">brands</span> table with a <span class=\"ltr\">logo_v</span> version is the authority. Reference: slightly pricier reads, one-row changes. Embedding: free reads, but 100K writes per change with a tens-of-seconds inconsistency window — ruled out. A versioned <span class=\"ltr\">read model</span> off the <span class=\"ltr\">outbox</span>: fast reads inside a freshness bound (e.g. 5 teaching seconds), and you can resume from a version cursor. The punchline: every copy is a debt — price it in.",
   "assumptions": [
     {
-      "fa": "اعداد آموزشی: ۱۰۰هزار محصول یک برند، ۸۰۰ خواندن صفحه در ثانیه، هزینه lookup برند ۱٫۵ms، نرخ backfill دوهزار در ثانیه.",
-      "en": "Teaching numbers: 100K products of one brand, 800 page reads/s, 1.5 ms brand lookup, 2K/s backfill rate."
+      "fa": "بذار ساده بگم: اعداد آموزشی اینن — ۱۰۰هزار محصول یک برند، ۸۰۰ خواندن صفحه در ثانیه، هزینهٔ lookup برند ۱٫۵ms و نرخ backfill دوهزار در ثانیه.",
+      "en": "Here's the thing: these are teaching numbers — 100K products of one brand, 800 page reads/s, a 1.5 ms brand lookup, and a 2K/s backfill rate."
     },
     {
-      "fa": "تغییر لوگو نادر (چند بار در سال) ولی باید در حد تازگی اعلام‌شده همه‌جا دیده شود.",
-      "en": "Logo changes are rare (a few per year) but must converge everywhere inside the stated freshness bound."
+      "fa": "تغییر لوگو نادره (چند بار در سال)، ولی هر وقت پیش بیاد باید توی حد تازگی اعلام‌شده همه‌جا دیده بشه.",
+      "en": "Logo changes are rare (a few per year), but each one has to converge everywhere inside the freshness bound you stated."
     },
     {
-      "fa": "خواندن‌ها <span class=\"ltr\">at-least-once</span> نیستند؛ نوشتن‌های مدل مشتق باید <span class=\"ltr\">idempotent</span> باشند.",
-      "en": "Derived-model writes repeat, so the applier must be <span class=\"ltr\">idempotent</span>."
+      "fa": "خواندن‌ها <span class=\"ltr\">at-least-once</span> نیستن؛ نوشتن‌های مدل مشتق باید <span class=\"ltr\">idempotent</span> باشن.",
+      "en": "Derived-model writes repeat, so the applier has to be <span class=\"ltr\">idempotent</span>."
     }
   ],
-  "mental_fa": "کپی یعنی بدهی: هر کپی یک مسیر به‌روزرسانی می‌خواهد. سؤال «خواندن سریع‌تر به چه قیمتی؟» را با «چند نوشتن به‌ازای هر تغییر و چه پنجره ناسازگاری؟» جواب بده.",
-  "mental_en": "A copy is a debt: every copy needs an update path. Answer 'faster reads at what price?' with 'how many writes per change, and how wide an inconsistency window?'",
+  "mental_fa": "بذار ساده بگم: کپی یعنی بدهی — هر کپی یه مسیر به‌روزرسانی می‌خواد. سؤال «خواندن سریع‌تر به چه قیمتی؟» رو با «چند نوشتن به‌ازای هر تغییر و چه پنجره ناسازگاری؟» جواب بده.",
+  "mental_en": "A copy is a debt: every copy needs an update path. Answer \"faster reads at what price?\" with \"how many writes per change, and how wide an inconsistency window?\"",
   "steps": [
     {
       "t_fa": "سه گزینه روی میز",
       "t_en": "Three options on the table",
-      "fa": "ارجاع (فقط <span class=\"ltr\">brand_id</span>، لوگو هنگام خواندن <span class=\"ltr\">hydrate</span>)، توکار (<span class=\"ltr\">logo_url</span> در هر محصول)، و نمای مشتق (کپی ناهمگام نسخه‌دار از <span class=\"ltr\">outbox</span> برند).",
-      "en": "Reference (<span class=\"ltr\">brand_id</span> only, logo <span class=\"ltr\">hydrated</span> at read), embedding (<span class=\"ltr\">logo_url</span> in every product), and a derived view (versioned async copy off the brand <span class=\"ltr\">outbox</span>)."
+      "fa": "ارجاع (فقط <span class=\"ltr\">brand_id</span>، لوگو موقع خواندن <span class=\"ltr\">hydrate</span> می‌شه)، توکار (<span class=\"ltr\">logo_url</span> توی هر محصول)، و نمای مشتق (کپی ناهمگامِ نسخه‌دار از <span class=\"ltr\">outbox</span> برند).",
+      "en": "Reference (<span class=\"ltr\">brand_id</span> only, the logo gets <span class=\"ltr\">hydrated</span> at read time), embedding (<span class=\"ltr\">logo_url</span> inside every product), and a derived view (a versioned async copy off the brand <span class=\"ltr\">outbox</span>)."
     },
     {
       "t_fa": "هزینه خواندن",
       "t_en": "Read cost",
-      "fa": "ارجاع: ۸۰۰ خواندن × ۱٫۵ms ≈ <b>۱٫۲ هسته-ثانیه بر ثانیه</b> مالیات آموزشی. توکار و نما: صفر — ولی قیمتشان در نوشتن است.",
-      "en": "Reference: 800 reads × 1.5 ms ≈ <b>1.2 core-s per second</b> of teaching tax. Embedding and the view: zero — but their price is on the write side."
+      "fa": "ارجاع: ۸۰۰ خواندن × ۱٫۵ms ≈ <b>۱٫۲ هسته-ثانیه بر ثانیه</b> مالیات آموزشی. توکار و نما: صفر — ولی قیمتشون توی نوشتنه.",
+      "en": "Reference: 800 reads × 1.5 ms ≈ <b>1.2 core-s per second</b> of teaching tax. Embedding and the view: zero on the read side — but you pay for them on the write side."
     },
     {
       "t_fa": "fan-out نوشتن",
       "t_en": "Write fan-out",
-      "fa": "توکار: هر تغییر = ۱۰۰هزار نوشتن ≈ ۵۰ ثانیه پنجره مخلوط قدیمی/جدید. ارجاع: ۱ سطر اتمیک. نما: همان ۱۰۰هزار ولی ناهمگام، با نسخه و قابل‌مشاهده‌بودن lag.",
-      "en": "Embedding: each change = 100K writes ≈ a 50 s mixed old/new window. Reference: 1 atomic row. View: the same 100K but async, versioned, with observable lag."
+      "fa": "توکار: هر تغییر = ۱۰۰هزار نوشتن ≈ ۵۰ ثانیه پنجره مخلوطِ قدیمی/جدید. ارجاع: ۱ سطر اتمیک. نما: همون ۱۰۰هزار ولی ناهمگام، با نسخه و lag قابل‌مشاهده و قابل‌پیگیری.",
+      "en": "Embedding: each change = 100K writes ≈ a 50 s mixed old/new window. Reference: 1 atomic row. The view: the same 100K but async, versioned, with a lag you can actually watch."
     },
     {
       "t_fa": "خرابی وسط دسته",
       "t_en": "Mid-batch failure",
-      "fa": "اگر سازنده نما وسط کار بمیرد، از مکان‌نمای <span class=\"ltr\">(logo_v, product_id)</span> ادامه می‌دهد؛ فقط ننوشته‌ها <span class=\"ltr\">retry</span> می‌شوند و اعمال‌کننده <span class=\"ltr\">idempotent</span> است. در توکار هم‌زمان، خواننده‌ها مخلوط می‌بینند و نقطه ادامه مشخص نیست.",
-      "en": "If the view builder dies halfway, it resumes from the <span class=\"ltr\">(logo_v, product_id)</span> cursor; only unwritten rows <span class=\"ltr\">retry</span>, and the applier is <span class=\"ltr\">idempotent</span>. With sync embedding, readers see a mix and there is no defined resume point."
+      "fa": "اگه سازنده نما وسط کار بمیره، از مکان‌نمای <span class=\"ltr\">(logo_v, product_id)</span> ادامه می‌ده؛ فقط ننوشته‌ها <span class=\"ltr\">retry</span> می‌شن و اعمال‌کننده <span class=\"ltr\">idempotent</span> می‌مونه. توی توکار هم‌زمان، خواننده‌ها مخلوط می‌بینن و نقطه ادامه هم معلوم نیست.",
+      "en": "If the view builder dies halfway, it resumes from the <span class=\"ltr\">(logo_v, product_id)</span> cursor; only the unwritten rows <span class=\"ltr\">retry</span>, and the applier stays <span class=\"ltr\">idempotent</span>. With sync embedding, the readers see a mix and there's no defined resume point."
     },
     {
       "t_fa": "تصمیم با حد تازگی",
       "t_en": "Decide from the freshness bound",
-      "fa": "اگر تازگی «فوری» است: ارجاع. اگر ۵ ثانیه آموزشی قابل‌قبول است: نمای نسخه‌دار. توکار هم‌زمان تقریباً هیچ‌وقت: گران‌ترین نوشتن با بدترین پنجره.",
+      "fa": "اگه تازگی «فوری»ه: ارجاع. اگه ۵ ثانیه آموزشی قابل‌قبوله: نمای نسخه‌دار. توکار هم‌زمان تقریباً هیچ‌وقت: گران‌ترین نوشتن با بدترین پنجره.",
       "en": "If freshness must be immediate: reference. If 5 teaching seconds are fine: the versioned view. Sync embedding almost never: the priciest writes with the worst window."
     }
   ],
-  "design_fa": "<p>مرجع: <span class=\"ltr\">brands(id, logo_url, logo_v)</span>؛ تغییر = <span class=\"ltr\">UPDATE</span> اتمیک + رویداد <span class=\"ltr\">outbox</span> با <span class=\"ltr\">logo_v</span> تازه. محصول فقط <span class=\"ltr\">brand_id</span> دارد. سازنده نما رویداد را می‌خواند و هر محصول را با شرط <span class=\"ltr\">logo_v &lt; new_v</span> به‌روز می‌کند (اعمال <span class=\"ltr\">idempotent</span>). مسیر خواندن: نما با برچسب نسخه؛ اگر lag از بودجه گذشت، <span class=\"ltr\">fallback</span> به جدول مرجع.</p>",
-  "design_en": "<p>Authority: <span class=\"ltr\">brands(id, logo_url, logo_v)</span>; a change = one atomic <span class=\"ltr\">UPDATE</span> + an <span class=\"ltr\">outbox</span> event carrying the new <span class=\"ltr\">logo_v</span>. Products keep only <span class=\"ltr\">brand_id</span>. The view builder consumes the event and updates each product guarded by <span class=\"ltr\">logo_v &lt; new_v</span> (<span class=\"ltr\">idempotent</span> apply). Read path: the view with a version label; past the lag budget, <span class=\"ltr\">fallback</span> to the authority table.</p>",
-  "worked_fa": "<p>اعداد آموزشی اسکریپت: مالیات ارجاع ۱٫۲ هسته-ثانیه بر ثانیه؛ <span class=\"ltr\">fan-out</span> توکار ۱۰۰هزار نوشتن با پنجره ≈۵۰ ثانیه؛ بودجه lag پنج‌ثانیه‌ای هر جارو ۱۰هزار محصول را پوشش می‌دهد و بعد هشدار می‌دهد.</p>",
-  "worked_en": "<p>Teaching numbers from the script: reference tax 1.2 core-s/s; embedding <span class=\"ltr\">fan-out</span> 100K writes with a ≈50 s window; a 5 s lag budget covers 10K products per sweep before alerting.</p>",
+  "design_fa": "<p>مرجع: <span class=\"ltr\">brands(id, logo_url, logo_v)</span>؛ تغییر = <span class=\"ltr\">UPDATE</span> اتمیک + رویداد <span class=\"ltr\">outbox</span> با <span class=\"ltr\">logo_v</span> تازه. محصول فقط <span class=\"ltr\">brand_id</span> داره. سازنده نما رویداد رو می‌خونه و هر محصول رو با شرط <span class=\"ltr\">logo_v &lt; new_v</span> به‌روز می‌کنه (اعمال <span class=\"ltr\">idempotent</span>). مسیر خواندن: نما با برچسب نسخه؛ اگه lag از بودجه رد شد، <span class=\"ltr\">fallback</span> به جدول مرجع.</p>",
+  "design_en": "<p>Authority: <span class=\"ltr\">brands(id, logo_url, logo_v)</span>; a change = one atomic <span class=\"ltr\">UPDATE</span> + an <span class=\"ltr\">outbox</span> event carrying the new <span class=\"ltr\">logo_v</span>. Products keep only <span class=\"ltr\">brand_id</span>. The view builder consumes the event and updates each product, guarded by <span class=\"ltr\">logo_v &lt; new_v</span> (an <span class=\"ltr\">idempotent</span> apply). Read path: the view with a version label; once the lag blows past the budget, <span class=\"ltr\">fallback</span> to the authority table.</p>",
+  "worked_fa": "<p>اعداد آموزشی اسکریپت: مالیات ارجاع ۱٫۲ هسته-ثانیه بر ثانیه؛ <span class=\"ltr\">fan-out</span> توکار ۱۰۰هزار نوشتن با پنجره ≈۵۰ ثانیه؛ بودجه lag پنج‌ثانیه‌ای هر جارو ۱۰هزار محصول رو پوشش می‌ده و بعد هشدار می‌ده. یعنی: پنج ثانیه، و نه بیشتر.</p>",
+  "worked_en": "<p>Teaching numbers from the script: reference tax 1.2 core-s/s; embedding <span class=\"ltr\">fan-out</span> 100K writes with a ≈50 s window; a 5 s lag budget covers 10K products per sweep before alerting. Which is the whole story: five teaching seconds, and no more.</p>",
   "alternatives": [
     {
-      "fa": "<span class=\"ltr\">URL</span> نسخه‌دار تغییرناپذیر (<span class=\"ltr\">logo-v4.png</span>): تغییر = فایل تازه + یک سطر؛ کش‌ها با <span class=\"ltr\">TTL</span> خودشان می‌میرند. وقتی لوگو در CDNها و کلاینت‌ها پخش است بهتر است؛ هزینه: پاک‌سازی نسخه‌های قدیمی.",
-      "en": "Immutable versioned <span class=\"ltr\">URLs</span> (<span class=\"ltr\">logo-v4.png</span>): a change = one new file + one row; caches die by <span class=\"ltr\">TTL</span>. Better when the logo spreads across CDNs and clients; cost: old-version cleanup."
+      "fa": "<span class=\"ltr\">URL</span> نسخه‌دارِ تغییرناپذیر (<span class=\"ltr\">logo-v4.png</span>): تغییر = فایل تازه + یه سطر؛ کش‌ها با <span class=\"ltr\">TTL</span> خودشون می‌میرن. وقتی لوگو توی CDNها و کلاینت‌ها پخش شده بهتره؛ هزینه: پاک‌سازی نسخه‌های قدیمی.",
+      "en": "Immutable versioned <span class=\"ltr\">URLs</span> (<span class=\"ltr\">logo-v4.png</span>): a change = one new file + one row; the caches die by <span class=\"ltr\">TTL</span> on their own. Better when the logo has already spread across CDNs and clients; the cost: cleaning up the old versions."
     }
   ],
   "failures": [
     {
-      "fa": "مرگ سازنده وسط <span class=\"ltr\">backfill</span>: نمای نصفه با <span class=\"ltr\">logo_v</span> مخلوط؛ بازیابی = ادامه از مکان‌نما، نه شروع دوباره. تا همگرایی، برچسب «در حال به‌روزرسانی» یا <span class=\"ltr\">fallback</span>.",
-      "en": "Builder death mid-<span class=\"ltr\">backfill</span>: a half-built view with mixed <span class=\"ltr\">logo_v</span>; recovery = resume from the cursor, not restart. Until convergence, an 'updating' label or <span class=\"ltr\">fallback</span>."
+      "fa": "مرگ سازنده وسط <span class=\"ltr\">backfill</span>: نمای نصفه با <span class=\"ltr\">logo_v</span> مخلوط؛ بازیابی یعنی ادامه از مکان‌نما، نه شروع دوباره. تا همگرایی، برچسب «در حال به‌روزرسانی» یا <span class=\"ltr\">fallback</span>.",
+      "en": "Builder death mid-<span class=\"ltr\">backfill</span>: you get a half-built view with mixed <span class=\"ltr\">logo_v</span>; recovery means you resume from the cursor, not start over. Until it converges, show an 'updating' label or <span class=\"ltr\">fallback</span>."
     },
     {
-      "fa": "رویداد تکراری <span class=\"ltr\">outbox</span>: شرط نسخه (<span class=\"ltr\">logo_v &lt; new_v</span>) اعمال دوم را بی‌اثر می‌کند؛ بدون آن، نسخه قدیمیِ دیررس نسخه تازه را له می‌کند.",
-      "en": "Duplicate <span class=\"ltr\">outbox</span> events: the version guard (<span class=\"ltr\">logo_v &lt; new_v</span>) makes the second apply a no-op; without it, a late old version crushes the fresh one."
+      "fa": "رویداد تکراری <span class=\"ltr\">outbox</span>: شرط نسخه (<span class=\"ltr\">logo_v &lt; new_v</span>) اعمال دوم رو بی‌اثر می‌کنه؛ بدون اون، نسخه قدیمیِ دیررس نسخه تازه رو له می‌کنه.",
+      "en": "Duplicate <span class=\"ltr\">outbox</span> events: the version guard (<span class=\"ltr\">logo_v &lt; new_v</span>) turns the second apply into a no-op; without it, a late old version crushes the fresh one."
     }
   ],
   "code": {
@@ -82,36 +82,36 @@
     "expected_en": "Tax 1.2, fan-out 100K, window 50 s, coverage 10K + verdict: sync embedding ruled out, reference for immediate freshness, versioned view for 5 s; OK. (actual output of this environment)",
     "status": "verified"
   },
-  "tests_fa": "اندازه بگیر: <span class=\"ltr\">lag</span> نما در برابر بودجه (متریک + هشدار)؛ یکنواختی نسخه‌ها (هیچ محصولی از <span class=\"ltr\">logo_v</span> مرجع جلوتر نیست)؛ تست آشوب: کشتن سازنده وسط کار و ادامه از مکان‌نما.",
-  "tests_en": "Measure: view <span class=\"ltr\">lag</span> against the budget (metric + alert); version monotonicity (no product ahead of the authority <span class=\"ltr\">logo_v</span>); chaos check: kill the builder mid-run and resume from the cursor.",
+  "tests_fa": "اندازه بگیر: <span class=\"ltr\">lag</span> نما در برابر بودجه (متریک + هشدار)؛ یکنواختی نسخه‌ها (هیچ محصولی از <span class=\"ltr\">logo_v</span> مرجع جلوتر نباشه)؛ تست آشوب: سازنده رو وسط کار بکش و از مکان‌نما ادامه بده.",
+  "tests_en": "Measure: the view <span class=\"ltr\">lag</span> against the budget (metric + alert); version monotonicity (no product ahead of the authority <span class=\"ltr\">logo_v</span>); a chaos check: kill the builder mid-run and resume from the cursor.",
   "followups": [
     {
       "q_fa": "حالا به‌روزرسانی وسط محصولات بترکه — چی رو retry می‌کنی؟",
       "q_en": "The logo update dies halfway through the products — what do you retry?",
       "level": "senior",
-      "a_fa": "فقط بازه ننوشته مکان‌نما را، با همان <span class=\"ltr\">logo_v</span> — نه کل دسته را. اعمال <span class=\"ltr\">idempotent</span> است پس تکرار امن است؛ شروع دوباره ۵۰ ثانیه پنجره تازه می‌سازد.",
-      "a_en": "Only the cursor's unwritten range, with the same <span class=\"ltr\">logo_v</span> — never the whole batch. The apply is <span class=\"ltr\">idempotent</span> so repeating is safe; restarting buys a fresh 50 s window."
+      "a_fa": "فقط همون بازهٔ ننوشتهٔ مکان‌نما، با همون <span class=\"ltr\">logo_v</span> — نه کل دسته. اعمال <span class=\"ltr\">idempotent</span> هست، پس تکرار امنه؛ شروع دوباره یه پنجره ۵۰ ثانیه‌ای تازه می‌سازه.",
+      "a_en": "Only the cursor's unwritten range, with the same <span class=\"ltr\">logo_v</span> — never the whole batch. The apply is <span class=\"ltr\">idempotent</span>, so repeating is safe; restarting just buys you a fresh 50 s window."
     },
     {
-      "q_fa": "ده برند هم‌زمان لوگو عوض کنند چه می‌شود؟",
+      "q_fa": "ده برند هم‌زمان لوگو عوض کنن چه می‌شه؟",
       "q_en": "What if ten brands change logos at once?",
       "level": "staff",
-      "a_fa": "سازنده‌ها باید سهمیه‌بندی شوند (صف به‌ازای برند + سقف نوشتن) تا یک برند بقیه را گرسنه نکند؛ lag به‌ازای هر برند جداگانه هشدار می‌دهد و نمای هر برند نسخه خودش را برچسب می‌زند.",
-      "a_en": "Builders need quotas (one queue per brand + a write cap) so one brand can't starve the rest; lag alerts per brand, and each brand's view carries its own version label."
+      "a_fa": "سازنده‌ها باید سهمیه‌بندی بشن (صف به‌ازای هر برند + سقف نوشتن) تا یه برند بقیه رو گرسنه نکنه؛ lag هر برند جداگانه هشدار می‌ده و نمای هر برند نسخه‌ی خودش رو برچسب می‌زنه.",
+      "a_en": "Builders need quotas (one queue per brand + a write cap) so one brand can't starve the others; you alert on lag per brand, and each brand's view carries its own version label."
     }
   ],
   "mistakes": [
     {
-      "fa": "کپی بدون مسیر به‌روزرسانی: «سریع می‌خوانیم» بدون جواب fan-out و پنجره ناسازگاری.",
-      "en": "Copying with no update path: 'fast reads' with no answer for fan-out and the inconsistency window."
+      "fa": "کپی بدون مسیر به‌روزرسانی: «سریع می‌خونیم» بدون جواب fan-out و پنجره ناسازگاری.",
+      "en": "Copying with no update path: \"fast reads\" with no answer for fan-out and the inconsistency window."
     },
     {
-      "fa": "یکی دانستن ناهمگام با ناسازگارِ همیشگی: نما با نسخه و بودجه lag همگرا می‌شود؛ بی‌قاعده رهایش نکن.",
-      "en": "Confusing async with inconsistent-forever: a versioned view with a lag budget converges; don't leave it rule-less."
+      "fa": "یکی گرفتن ناهمگام با ناسازگارِ همیشگی: نما با نسخه و بودجه lag همگرا می‌شه؛ بی‌قاعده رهایش نکن.",
+      "en": "Confusing async with inconsistent-forever: a versioned view with a lag budget does converge; don't leave it rule-less."
     },
     {
-      "fa": "retry کور کل دسته: نوشته‌شده‌ها را دوباره می‌نویسد و پنجره را باز می‌کند؛ از مکان‌نما ادامه بده.",
-      "en": "Blindly retrying the whole batch: rewrites finished rows and reopens the window; resume from the cursor."
+      "fa": "retry کورِ کل دسته: نوشته‌شده‌ها رو دوباره می‌نویسه و پنجره رو باز می‌کنه؛ از مکان‌نما ادامه بده.",
+      "en": "Blindly retrying the whole batch: it rewrites finished rows and reopens the window; resume from the cursor instead."
     }
   ],
   "sources": [
@@ -125,44 +125,44 @@
       "source": "assets/diagram-specs/solutions/ch3/sol2-step1-logo-propagation.json",
       "kind_fa": "جریان داده",
       "kind_en": "dataflow",
-      "caption_fa": "انتشار نسخه‌دار لوگو: مرجع تا نما با مکان‌نما و بودجه lag (اعداد آموزشی)",
+      "caption_fa": "انتشار نسخه‌دار لوگو: از مرجع تا نما، با مکان‌نما و بودجه lag (اعداد آموزشی)",
       "caption_en": "Versioned logo propagation: authority to views with cursor and lag budget (teaching numbers)",
       "height": 700,
       "narration": {
-        "scenario_fa": "برند لوگویش را عوض کرده و صد هزار صفحه محصول (عدد آموزشی) باید همگرا شوند. جریان را چپ‌به‌راست بخوان: مرجع، انتشار، پخش نسخه‌دار، نماها و خواندن.",
-        "scenario_en": "The brand changed its logo and 100K product pages (a teaching number) must converge. Read left to right: authority, publish, versioned propagation, views and read.",
+        "scenario_fa": "برند لوگوش رو عوض کرده و صد هزار صفحه محصول (عدد آموزشی) باید همگرا بشن. جریان رو چپ‌به‌راست بخون: مرجع، انتشار، پخش نسخه‌دار، نماها و خواندن.",
+        "scenario_en": "The brand changed its logo and 100K product pages (a teaching number) have to converge. Read it left to right: authority, publish, versioned propagation, views, read.",
         "steps": [
           {
-            "fa": "<span class=\"ltr\">Logo change</span> با <span class=\"ltr\">1 atomic UPDATE</span> روی <span class=\"ltr\">brands table</span> می‌نشیند — مرجع با <span class=\"ltr\">logo_v</span>؛ محصول‌ها فقط <span class=\"ltr\">brand_id</span> دارند.",
-            "en": "The logo change lands on the brands table with one atomic UPDATE — the authority with logo_v; products keep only brand_id."
+            "fa": "<span class=\"ltr\">Logo change</span> با <span class=\"ltr\">1 atomic UPDATE</span> روی <span class=\"ltr\">brands table</span> می‌نشینه — مرجع با <span class=\"ltr\">logo_v</span>؛ محصول‌ها فقط <span class=\"ltr\">brand_id</span> دارن.",
+            "en": "The logo change lands on the brands table with one atomic UPDATE — that's the authority, with logo_v; the products keep only brand_id."
           },
           {
-            "fa": "<span class=\"ltr\">event + logo_v</span> به <span class=\"ltr\">Brand outbox</span> می‌رود و <span class=\"ltr\">View builder</span> مصرف می‌کند؛ <span class=\"ltr\">Resume cursor</span> با <span class=\"ltr\">(logo_v, product_id)</span> نقطه ادامه بعد از مرگ سازنده است.",
-            "en": "The event plus logo_v goes to the brand outbox and the view builder consumes it; the resume cursor of (logo_v, product_id) is the continue point after a builder death."
+            "fa": "<span class=\"ltr\">event + logo_v</span> می‌ره توی <span class=\"ltr\">Brand outbox</span> و <span class=\"ltr\">View builder</span> مصرفش می‌کنه؛ <span class=\"ltr\">Resume cursor</span> با <span class=\"ltr\">(logo_v, product_id)</span> نقطه ادامه بعد از مرگ سازنده‌ست.",
+            "en": "The event plus logo_v goes into the brand outbox and the view builder consumes it; the resume cursor of (logo_v, product_id) is where you continue after a builder dies."
           },
           {
-            "fa": "اعمال با نگهبان <span class=\"ltr\">guarded apply</span> است: فقط اگر نسخه تازه‌تر باشد — رویداد تکراری بی‌اثر می‌شود و نسخه قدیمی دیررس تازه را له نمی‌کند.",
-            "en": "Applying is guarded: only when the version is newer — duplicate events become no-ops and a late old version never crushes the fresh one."
+            "fa": "اعمال با نگهبان <span class=\"ltr\">guarded apply</span> انجام می‌شه: فقط اگه نسخه تازه‌تر باشه — رویداد تکراری بی‌اثر می‌شه و نسخه قدیمیِ دیررس، تازه رو له نمی‌کنه.",
+            "en": "The apply is guarded: it only happens when the version is newer — duplicate events become no-ops, and a late old version never crushes the fresh one."
           },
           {
-            "fa": "<span class=\"ltr\">Product read view</span> با برچسب نسخه خوانده می‌شود؛ <span class=\"ltr\">Stale window</span> با بودجه آموزشی ۵ ثانیه دیده و هشدار داده می‌شود و <span class=\"ltr\">over budget</span> به <span class=\"ltr\">Authority fallback</span> می‌افتد که سطر تازه مرجع را می‌خواند.",
-            "en": "The product read view is read with its version tag; the stale window is observed against the 5 s teaching budget, and over budget falls back to the authority fallback, which reads the fresh authority row."
+            "fa": "<span class=\"ltr\">Product read view</span> با برچسب نسخه خونده می‌شه؛ <span class=\"ltr\">Stale window</span> با بودجه آموزشی ۵ ثانیه دیده و هشدار داده می‌شه و <span class=\"ltr\">over budget</span> به <span class=\"ltr\">Authority fallback</span> می‌افته که سطر تازه مرجع رو می‌خونه.",
+            "en": "The product read view comes with its version tag; the stale window is watched against the 5 s teaching budget, and going over budget drops you to the authority fallback, which reads the fresh authority row."
           }
         ],
-        "point_fa": "نقطه تصمیم بودجه تازگی است: «فوری» یعنی ارجاع و ۵ ثانیه آموزشی یعنی نمای نسخه‌دار؛ توکار هم‌زمان با پنجره کور ۵۰ ثانیه‌ای تقریباً هیچ‌وقت.",
-        "point_en": "The decision point is the freshness budget: immediate means reference, 5 teaching seconds mean a versioned view; sync embedding with its blind 50 s window almost never.",
-        "failure_fa": "مرگ سازنده وسط کار: فقط بازه ننوشته مکان‌نما <span class=\"ltr\">retry</span> می‌شود؛ شروع دوباره پنجره تازه می‌سازد. بدون نگهبان نسخه، رویداد قدیمی دیررس نسخه تازه را له می‌کند.",
-        "failure_en": "Builder death mid-run: only the cursor's unwritten range retries; restarting opens a fresh window. Without the version guard, a late old event crushes the fresh version.",
-        "guarantee_fa": "شکل بده‌بستان خواندن/نوشتن و قابل‌ادامه بودن را نشان می‌دهد، نه ظرفیت واقعی را — عددها آموزشی‌اند.",
-        "guarantee_en": "The figure shows the read/write trade and resumability, not real capacity — the numbers are teaching numbers.",
-        "nonguarantee_fa": "درباره سهمیه چند برند هم‌زمان و پاک‌سازی کش‌های بیرونی چیزی نمی‌گوید.",
+        "point_fa": "نقطه تصمیم همون بودجه تازگیه: «فوری» یعنی ارجاع، و ۵ ثانیه آموزشی یعنی نمای نسخه‌دار؛ توکار هم‌زمان با پنجره کور ۵۰ ثانیه‌ای تقریباً هیچ‌وقت.",
+        "point_en": "The decision point is the freshness budget: \"immediate\" means reference, 5 teaching seconds mean a versioned view, and sync embedding with its blind 50 s window almost never.",
+        "failure_fa": "مرگ سازنده وسط کار: فقط بازه ننوشتهٔ مکان‌نما <span class=\"ltr\">retry</span> می‌شه؛ شروع دوباره یه پنجره تازه می‌سازه. بدون نگهبان نسخه، رویداد قدیمیِ دیررس نسخه تازه رو له می‌کنه.",
+        "failure_en": "Builder death mid-run: only the cursor's unwritten range retries, and restarting just opens a fresh window. Without the version guard, a late old event crushes the fresh version.",
+        "guarantee_fa": "شکل بده‌بستان خواندن/نوشتن و قابل‌ادامه بودن رو نشون می‌ده، نه ظرفیت واقعی رو — عددها آموزشی‌ان.",
+        "guarantee_en": "The figure shows the read/write trade and the resumability, not real capacity — the numbers are teaching numbers.",
+        "nonguarantee_fa": "درباره سهمیهٔ چند برند هم‌زمان و پاک‌سازی کش‌های بیرونی چیزی نمی‌گه.",
         "nonguarantee_en": "It says nothing about multi-brand quotas or purging outside caches."
       },
       "selfcheck": {
-        "q_fa": "چرا نما با lag پنج‌ثانیه‌ای (آموزشی) از توکار هم‌زمان بهتر است؟",
+        "q_fa": "چرا نما با lag پنج‌ثانیه‌ای (آموزشی) از توکار هم‌زمان بهتره؟",
         "q_en": "Why is a view with 5 s of (teaching) lag better than sync embedding?",
-        "a_fa": "چون تغییر مرجع ۱ سطر اتمیک است، انتشار نسخه‌دار و قابل‌ادامه است و <span class=\"ltr\">lag</span> دیده و هشدار داده می‌شود — نه پنجره کور ۵۰ ثانیه‌ای.",
-        "a_en": "Because the authority change is one atomic row, propagation is versioned and resumable, and lag is observed and alerted — not a blind 50 s window."
+        "a_fa": "چون تغییر مرجع ۱ سطر اتمیکه، انتشار نسخه‌دار و قابل‌ادامه‌ست و <span class=\"ltr\">lag</span> دیده و هشدار داده می‌شه — نه پنجره کور ۵۰ ثانیه‌ای.",
+        "a_en": "Because the authority change is one atomic row, the propagation is versioned and resumable, and the lag is observed and alerted — not a blind 50 s window."
       }
     },
     {
@@ -174,8 +174,8 @@
       "caption_en": "Reference vs embedding vs derived view (teaching numbers)",
       "height": 640,
       "narration": {
-        "scenario_fa": "برند لوگویش را عوض کرده و صد هزار صفحه محصول باید همگرا شوند. پنل چپ را بخوان.",
-        "scenario_en": "The brand changed its logo and 100K product pages must converge. Read the left panel.",
+        "scenario_fa": "برند لوگوش رو عوض کرده و صد هزار صفحه محصول باید همگرا بشن. پنل چپ رو بخون.",
+        "scenario_en": "The brand changed its logo and 100K product pages have to converge. Read the left panel.",
         "steps": [
           {
             "fa": "پنل چپ: سه ستون — ارجاع (خواندن +۱، نوشتن ۱)، توکار (خواندن ۰، نوشتن ۱۰۰هزار)، نما (خواندن ۰ + lag محدود).",
@@ -191,26 +191,26 @@
           },
           {
             "fa": "سطر بودجه: lag پنج‌ثانیه‌ای و fallback به مرجع.",
-            "en": "Budget row: the 5 s lag budget with fallback to the authority."
+            "en": "Budget row: the 5 s lag budget with a fallback to the authority."
           }
         ],
-        "point_fa": "نقطه تصمیم بودجه تازگی است: عدد lag قابل‌قبول، روش را انتخاب می‌کند.",
-        "point_en": "The decision point is the freshness budget: the acceptable lag number picks the method.",
-        "failure_fa": "رد خرابی: مرگ سازنده وسط کار — مکان‌نما می‌گوید کجاییم و فقط بقیه نوشته می‌شوند.",
-        "failure_en": "Failure trace: builder death mid-run — the cursor says where we are, only the rest gets written.",
-        "guarantee_fa": "شکل بده‌بستان خواندن/نوشتن را تضمین می‌کند، نه ظرفیت واقعی را.",
+        "point_fa": "نقطه تصمیم همون بودجه تازگیه: عدد lag قابل‌قبول، روش رو انتخاب می‌کنه.",
+        "point_en": "The decision point is the freshness budget: the acceptable lag number is what picks the method.",
+        "failure_fa": "رد خرابی: مرگ سازنده وسط کار — مکان‌نما می‌گه کجاییم و فقط بقیه نوشته می‌شه.",
+        "failure_en": "Failure trace: builder death mid-run — the cursor says where we are, and only the rest gets written.",
+        "guarantee_fa": "شکل بده‌بستان خواندن/نوشتن رو تضمین می‌کنه، نه ظرفیت واقعی رو.",
         "guarantee_en": "The figure guarantees the read/write trade, not real capacity.",
-        "nonguarantee_fa": "درباره سهمیه چند برند هم‌زمان و پاک‌سازی CDN چیزی نمی‌گوید.",
+        "nonguarantee_fa": "درباره سهمیهٔ چند برند هم‌زمان و پاک‌سازی CDN چیزی نمی‌گه.",
         "nonguarantee_en": "It says nothing about multi-brand quotas or CDN purging."
       },
       "selfcheck": {
-        "q_fa": "چرا نمای مشتق با lag پنج‌ثانیه‌ای از توکار هم‌زمان بهتر است؟",
+        "q_fa": "چرا نمای مشتق با lag پنج‌ثانیه‌ای از توکار هم‌زمان بهتره؟",
         "q_en": "Why is a derived view with 5 s lag better than sync embedding?",
-        "a_fa": "چون تغییر مرجع ۱ سطر اتمیک است، انتشار نسخه‌دار و قابل‌ادامه است، و lag دیده و هشدار داده می‌شود — نه پنجره کور ۵۰ ثانیه‌ای.",
-        "a_en": "Because the authority change is 1 atomic row, propagation is versioned and resumable, and lag is observed and alerted — not a blind 50 s window."
+        "a_fa": "چون تغییر مرجع ۱ سطر اتمیکه، انتشار نسخه‌دار و قابل‌ادامه‌ست، و lag دیده و هشدار داده می‌شه — نه پنجره کور ۵۰ ثانیه‌ای.",
+        "a_en": "Because the authority change is 1 atomic row, the propagation is versioned and resumable, and the lag is observed and alerted — not a blind 50 s window."
       }
     }
   ],
-  "reasoning_fa": "<p>برای تغییر logo روی ۱۰۰هزار محصول با backfill دوهزار/ثانیه، حد پایین زمان ۱۰۰۰۰۰÷۲۰۰۰=۵۰ ثانیه است؛ retry و محدودیت DB آن را بیشتر می‌کنند. هزینهٔ lookup با ۸۰۰ خواندن/ثانیه × ۱٫۵ms برابر ۱۲۰۰ms کار در ثانیه است، نه ۱٫۲ ثانیه تأخیر هر درخواست. denormalization این هزینه را با هزینهٔ write fan-out عوض می‌کند؛ اگر logo باید فوراً همه‌جا عوض شود، بازهٔ ۵۰ثانیه‌ای پذیرفتنی نیست.</p>",
-  "reasoning_en": "<p>Backfilling 100k products at 2k/s takes at least 50 seconds, before retries and database limits. At 800 reads/s × 1.5ms, lookup work is 1200ms per second, not 1.2 seconds added to each request. Denormalization exchanges this read cost for write fan-out. If logo updates must appear everywhere immediately, that 50-second convergence window is unacceptable.</p>"
+  "reasoning_fa": "<p>برای تغییر logo روی ۱۰۰هزار محصول با backfill دوهزار/ثانیه، حد پایین زمان ۱۰۰۰۰۰÷۲۰۰۰=۵۰ ثانیه‌ست؛ retry و محدودیت DB بیشترش می‌کنن. هزینهٔ lookup با ۸۰۰ خواندن/ثانیه × ۱٫۵ms برابر ۱۲۰۰ms کار در ثانیه‌ست، نه ۱٫۲ ثانیه تأخیر برای هر درخواست. denormalization این هزینه رو با هزینهٔ write fan-out عوض می‌کنه؛ اگه logo باید فوراً همه‌جا عوض بشه، بازهٔ ۵۰ثانیه‌ای پذیرفتنی نیست.</p>",
+  "reasoning_en": "<p>Backfilling 100k products at 2k/s takes at least 50 seconds, and retries and database limits only stretch it. At 800 reads/s × 1.5ms, the lookup work is 1200ms per second — not 1.2 seconds of extra delay on each request. Denormalization trades that read cost for write fan-out. And if the logo has to change everywhere immediately, a 50-second convergence window is not acceptable.</p>"
 }

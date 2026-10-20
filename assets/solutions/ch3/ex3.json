@@ -3,113 +3,113 @@
   "slug": "reservation-log",
   "interview_q_fa": "تصور کن رزرو سینما داری با event log و سه projection وضعیت صندلی، فروش و بلیت. دو درخواست هم‌زمان برای یه صندلی، انقضای hold، لغو و اصلاح رزرو رو توضیح بده؛ invariant رو توی write path اعمال کن و replay رو از ارسال دوبارهٔ بلیت جدا کن.",
   "interview_q_en": "Think of it: cinema bookings on an event log, with seat, sales, and ticket projections. Handle two requests racing for one seat, hold expiry, cancellation, and fixing a booking. Enforce the invariant at the write boundary — and keep replay far away from re-sending tickets.",
-  "answer_fa": "لاگ فقط رویداد معتبرِ گذشته (<span class=\"ltr\">SeatHeld, SeatConfirmed, HoldExpired, BookingCanceled, BookingCorrected</span>) نگه می‌دارد؛ فرمان‌ها (<span class=\"ltr\">HoldSeat</span>) جدا از رویدادها هستند. انحصار صندلی با <span class=\"ltr\">conditional append</span> روی نسخه صندلی در مرز نوشتن اعمال می‌شود، پس از دو مسابقه فقط یکی می‌برد. اصلاح = رویداد جبرانی تازه، نه ویرایش. بازپخش نما را می‌سازد ولی بلیت را دوباره نمی‌فرستد: ارسال با کلید <span class=\"ltr\">idempotency</span> نگهبانی می‌شود.",
-  "answer_en": "The log keeps only valid past-tense events (<span class=\"ltr\">SeatHeld, SeatConfirmed, HoldExpired, BookingCanceled, BookingCorrected</span>); commands (<span class=\"ltr\">HoldSeat</span>) are separate from events. Seat exclusivity is enforced by a <span class=\"ltr\">conditional append</span> on the seat version at the write boundary, so of two racers exactly one wins. Fixes are fresh compensating events, never edits. Replay rebuilds views but never resends tickets: sending is guarded by an <span class=\"ltr\">idempotency</span> key.",
+  "answer_fa": "قضیه اینه که لاگ فقط رویدادِ معتبرِ گذشته رو نگه می‌داره (<span class=\"ltr\">SeatHeld, SeatConfirmed, HoldExpired, BookingCanceled, BookingCorrected</span>)؛ فرمان‌ها (<span class=\"ltr\">HoldSeat</span>) جدا از رویدادها می‌مونن. انحصار صندلی با <span class=\"ltr\">conditional append</span> روی نسخه صندلی، توی مرز نوشتن اعمال می‌شه — پس از دو مسابقه فقط یکی می‌بره. اصلاح = رویداد جبرانیِ تازه، نه ویرایش. بازپخش نما رو می‌سازه ولی بلیت رو دوباره نمی‌فرسته: ارسال با کلید <span class=\"ltr\">idempotency</span> نگهبانی می‌شه. یه جمله نگه دار: نما داور نیست، مرز نوشتن داوره.",
+  "answer_en": "The log keeps only valid past-tense events (<span class=\"ltr\">SeatHeld, SeatConfirmed, HoldExpired, BookingCanceled, BookingCorrected</span>); commands (<span class=\"ltr\">HoldSeat</span>) live apart from events. Seat exclusivity is enforced by a <span class=\"ltr\">conditional append</span> on the seat version at the write boundary, so of two racers exactly one wins. Fixes are fresh compensating events, never edits. Replay rebuilds the views but never resends a ticket: sending sits behind an <span class=\"ltr\">idempotency</span> key. Keep one line in your head: the view doesn't referee, the write boundary does.",
   "assumptions": [
     {
-      "fa": "اعداد آموزشی: یک سالن ۳۰۰ صندلی، اوج فروش ۵۰ رزرو در ثانیه، مهلت hold ده دقیقه.",
-      "en": "Teaching numbers: one 300-seat hall, 50 bookings/s at peak, a 10-minute hold TTL."
+      "fa": "اعداد آموزشی: یه سالن ۳۰۰ صندلی، اوج فروش ۵۰ رزرو در ثانیه و مهلت hold ده دقیقه.",
+      "en": "Teaching numbers: one 300-seat hall, 50 bookings/s at peak, and a 10-minute hold TTL."
     },
     {
-      "fa": "لاگ مرتب و فقط‌افزودنی است؛ هر نما رویدادها را با همان ترتیب می‌بیند.",
-      "en": "The log is ordered and append-only; every projection sees events in log order."
+      "fa": "تصور کن: لاگ مرتب و فقط‌افزودنیه؛ هر نما رویدادها رو با همون ترتیب می‌بینه.",
+      "en": "Picture this: the log is ordered and append-only, so every projection sees the events in that same order."
     },
     {
-      "fa": "چاپ بلیت و SMS اثر بیرونی‌اند؛ اثر یک‌باره فقط با idempotency مقصد یا پروتکل reconciliation قابل دفاع است.",
-      "en": "Ticket printing and SMS are external effects; once-only effects require destination idempotency or a reconciliation protocol."
+      "fa": "چاپ بلیت و SMS اثر بیرونی‌ان. برای اینکه اثر فقط یه بار اتفاق بیفته، یا باید idempotency مقصد رو داشته باشی یا پروتکل reconciliation.",
+      "en": "Printing a ticket and sending an SMS are external effects. To make an effect happen exactly once, you need destination idempotency or a reconciliation protocol."
     }
   ],
-  "mental_fa": "فرمان «لطفاً» است و می‌تواند رد شود؛ رویداد «شد» است و لاگ فقط «شد»ها را دارد. سؤال هم‌زمان را نه در نما، که در مرز نوشتن (با نسخه صندلی) حل کن.",
-  "mental_en": "A command is a 'please' and may be rejected; an event is a 'done', and the log holds only dones. Solve concurrency not in the view but at the write boundary (with the seat version).",
+  "mental_fa": "بذار ساده بگم: فرمان «لطفاً»ئه و می‌تونه رد بشه؛ رویداد «شد»ئه و لاگ فقط «شد»ها رو داره. سؤال هم‌زمان رو نه توی نما، توی مرز نوشتن (با نسخه صندلی) حل کن.",
+  "mental_en": "A command is a \"please\" and may be rejected; an event is a \"done\", and the log holds only dones. Solve concurrency not in the view but at the write boundary (with the seat version).",
   "steps": [
     {
       "t_fa": "لاگ و سه نما",
       "t_en": "The log and three views",
-      "fa": "رویدادها: <span class=\"ltr\">SeatHeld(seat, holder, hold_id, exp)</span>، <span class=\"ltr\">SeatConfirmed</span>، <span class=\"ltr\">HoldExpired</span>، <span class=\"ltr\">BookingCanceled</span>، <span class=\"ltr\">BookingCorrected</span>. نماها: تابلوی صندلی‌ها، گزارش فروش، و چاپ بلیت — هر سه از یک لاگ ساخته می‌شوند.",
-      "en": "Events: <span class=\"ltr\">SeatHeld(seat, holder, hold_id, exp)</span>, <span class=\"ltr\">SeatConfirmed</span>, <span class=\"ltr\">HoldExpired</span>, <span class=\"ltr\">BookingCanceled</span>, <span class=\"ltr\">BookingCorrected</span>. Views: seat map, sales report, ticket printing — all three built from one log."
+      "fa": "بذار با یه نگاه شروع کنیم: رویدادها: <span class=\"ltr\">SeatHeld(seat, holder, hold_id, exp)</span>، <span class=\"ltr\">SeatConfirmed</span>، <span class=\"ltr\">HoldExpired</span>، <span class=\"ltr\">BookingCanceled</span>، <span class=\"ltr\">BookingCorrected</span>. نماها: تابلوی صندلی‌ها، گزارش فروش، و چاپ بلیت — هر سه از یه لاگ ساخته می‌شن.",
+      "en": "Start with one look: the events are <span class=\"ltr\">SeatHeld(seat, holder, hold_id, exp)</span>, <span class=\"ltr\">SeatConfirmed</span>, <span class=\"ltr\">HoldExpired</span>, <span class=\"ltr\">BookingCanceled</span>, <span class=\"ltr\">BookingCorrected</span>. The views: the seat map, the sales report and ticket printing — all three are built from one log."
     },
     {
       "t_fa": "مسابقه روی یک صندلی",
       "t_en": "The race for one seat",
-      "fa": "هر <span class=\"ltr\">HoldSeat</span> نسخه‌ای که خوانده را شرط می‌گذارد: <span class=\"ltr\">append iff seat_version == v</span>. برنده نسخه را جلو می‌برد؛ بازنده <span class=\"ltr\">SeatTaken</span> می‌گیرد و می‌تواند صندلی دیگر بخواهد. نما هرگز داور نیست.",
-      "en": "Each <span class=\"ltr\">HoldSeat</span> conditions on the version it read: <span class=\"ltr\">append iff seat_version == v</span>. The winner advances the version; the loser gets <span class=\"ltr\">SeatTaken</span> and may pick another seat. The view never referees."
+      "fa": "ببین رفیق، هر <span class=\"ltr\">HoldSeat</span> اون نسخه‌ای رو که خونده شرط می‌ذاره: <span class=\"ltr\">append iff seat_version == v</span>. برنده نسخه رو جلو می‌بره؛ بازنده <span class=\"ltr\">SeatTaken</span> می‌گیره و می‌تونه صندلی دیگه بخواد. نما هرگز داور نیست.",
+      "en": "Each <span class=\"ltr\">HoldSeat</span> conditions on the version it read: <span class=\"ltr\">append iff seat_version == v</span>. The winner pushes the version forward; the loser gets a <span class=\"ltr\">SeatTaken</span> and can pick another seat. The view never referees."
     },
     {
       "t_fa": "انقضا، لغو، اصلاح",
       "t_en": "Expiry, cancel, correct",
-      "fa": "انقضا را یک جاروب‌گر با رویداد <span class=\"ltr\">HoldExpired</span> (با همان <span class=\"ltr\">hold_id</span>) ثبت می‌کند، نه با پاک‌کردن. لغو و اصلاح هم رویداد تازه‌اند: <span class=\"ltr\">BookingCanceled</span> صندلی را آزاد می‌کند و <span class=\"ltr\">BookingCorrected</span> به رزرو درست پیوند می‌خورد؛ تاریخچه می‌ماند.",
-      "en": "Expiry is recorded by a sweeper as <span class=\"ltr\">HoldExpired</span> (same <span class=\"ltr\">hold_id</span>), never by deleting. Cancel and correct are fresh events too: <span class=\"ltr\">BookingCanceled</span> frees the seat, <span class=\"ltr\">BookingCorrected</span> links to the right booking; history stays."
+      "fa": "انقضا رو یه جاروب‌گر با رویداد <span class=\"ltr\">HoldExpired</span> (با همون <span class=\"ltr\">hold_id</span>) ثبت می‌کنه، نه با پاک‌کردن. لغو و اصلاح هم رویداد تازه‌ان: <span class=\"ltr\">BookingCanceled</span> صندلی رو آزاد می‌کنه و <span class=\"ltr\">BookingCorrected</span> به رزرو درست پیوند می‌خوره؛ تاریخچه می‌مونه.",
+      "en": "Expiry gets recorded by a sweeper as <span class=\"ltr\">HoldExpired</span> (with the same <span class=\"ltr\">hold_id</span>), never by deleting. Cancel and correct are fresh events too: <span class=\"ltr\">BookingCanceled</span> frees the seat and <span class=\"ltr\">BookingCorrected</span> links to the right booking; the history stays."
     },
     {
       "t_fa": "بازپخش در برابر ارسال دوباره",
       "t_en": "Replay versus resend",
-      "fa": "بازپخش = ساختن دوباره نما از لاگ، بدون اثر بیرونی. ارسال بلیت پشت کلید <span class=\"ltr\">idempotency</span> (شناسه رویداد) است: تکرار همان رویداد «ارسال مسدود شد» می‌دهد. گم‌شدن بلیت = ارسال دوباره صریح با همان کلید، نه بازپخش لاگ.",
-      "en": "Replay = rebuilding a view from the log with no external effect. Ticket sending sits behind an <span class=\"ltr\">idempotency</span> key (the event id): repeating the event yields 'resend blocked'. A lost ticket = an explicit resend with the same key, never a log replay."
+      "fa": "این دوتا رو قاطی نکن: بازپخش = ساختن دوباره نما از لاگ، بدون اثر بیرونی. ارسال بلیت پشت کلید <span class=\"ltr\">idempotency</span> (شناسه رویداد)ه: تکرار همون رویداد «ارسال مسدود شد» می‌ده. گم‌شدن بلیت = ارسال دوباره صریح با همون کلید، نه بازپخش لاگ.",
+      "en": "Don't mix replay with resending: replay = rebuilding a view from the log with no external effect. Ticket sending sits behind an <span class=\"ltr\">idempotency</span> key (the event id): repeating that same event comes back as \"resend blocked\". A lost ticket = an explicit resend with the same key, never a log replay."
     }
   ],
-  "design_fa": "<p>مرز نوشتن: <span class=\"ltr\">partition key</span> شناسه صندلی است تا همه فرمان‌های یک صندلی به یک نویسنده شرطی برسند؛ <span class=\"ltr\">append</span> فقط اگر نسخه خوانده‌شده هنوز جاری است. نما: تابلوی صندلی (کلید صندلی → وضعیت + <span class=\"ltr\">hold_id</span>)، فروش (جمع <span class=\"ltr\">SeatConfirmed</span> منهای لغوها)، چاپ (مصرف‌کننده رویداد با جدول «ارسال‌شده‌ها»). مسیر خواندن از نما، مسیر نوشتن فقط از مرز شرطی.</p>",
-  "design_en": "<p>Write boundary: the <span class=\"ltr\">partition key</span> is the seat id, so all commands for one seat reach one conditional writer; <span class=\"ltr\">append</span> only if the read version is still current. Views: seat map (seat → status + <span class=\"ltr\">hold_id</span>), sales (sum of <span class=\"ltr\">SeatConfirmed</span> minus cancels), printing (event consumer with a sent-table). Reads come from views; writes go only through the conditional boundary.</p>",
-  "worked_fa": "<p>با منطق آموزشی اسکریپت: <span class=\"ltr\">hold(A5)</span> اول می‌برد، دومی «رد شد» می‌گیرد، تلاش دوباره با همان کلید «تکراری نادیده گرفته شد» می‌دهد و صندلی دو بار نگه داشته نمی‌شود. ارسال بلیت <span class=\"ltr\">e-77</span> موفق است و تکرارش «مسدود» می‌شود.</p>",
-  "worked_en": "<p>With the script's teaching logic: the first <span class=\"ltr\">hold(A5)</span> wins, the second is rejected, retrying with the same key is dup-ignored, and the seat is never double-held. Ticket send <span class=\"ltr\">e-77</span> succeeds once and its repeat is blocked.</p>",
+  "design_fa": "<p>مرز نوشتن: <span class=\"ltr\">partition key</span> شناسه صندلیه تا همه فرمان‌های یه صندلی به یه نویسنده شرطی برسن؛ <span class=\"ltr\">append</span> فقط اگه نسخه خوانده‌شده هنوز جاری باشه. نما: تابلوی صندلی (کلید صندلی → وضعیت + <span class=\"ltr\">hold_id</span>)، فروش (جمع <span class=\"ltr\">SeatConfirmed</span> منهای لغوها)، چاپ (مصرف‌کننده رویداد با جدول «ارسال‌شده‌ها»). مسیر خواندن از نما، مسیر نوشتن فقط از مرز شرطی.</p>",
+  "design_en": "<p>Write boundary: the <span class=\"ltr\">partition key</span> is the seat id, so every command for one seat reaches one conditional writer; <span class=\"ltr\">append</span> happens only if the version you read is still current. The views: the seat map (seat → status + <span class=\"ltr\">hold_id</span>), sales (the sum of <span class=\"ltr\">SeatConfirmed</span> minus the cancels), printing (an event consumer with a sent-table). Reads come from the views; writes only go through the conditional boundary.</p>",
+  "worked_fa": "<p>حالا نتیجهٔ اجرا: با منطق آموزشی اسکریپت، <span class=\"ltr\">hold(A5)</span> اول می‌بره، دومی «رد شد» می‌گیره، تلاش دوباره با همون کلید «تکراری نادیده گرفته شد» می‌ده و صندلی دو بار نگه داشته نمی‌شه. ارسال بلیت <span class=\"ltr\">e-77</span> موفقه و تکرارش «مسدود» می‌شه. یعنی: یه صندلی، یه برنده — همیشه.</p>",
+  "worked_en": "<p>Now the run itself: with the script's teaching logic, the first <span class=\"ltr\">hold(A5)</span> wins, the second is rejected, a retry with the same key is dup-ignored, and the seat is never double-held. The ticket send <span class=\"ltr\">e-77</span> succeeds once and its repeat is blocked. One seat, one winner — always.</p>",
   "alternatives": [
     {
-      "fa": "قفل خوش‌بینانه روی ردیف صندلی در پایگاه رابطه‌ای (<span class=\"ltr\">UPDATE … WHERE version = v</span>): وقتی ترافیک کم است و لاگ رویداد نمی‌خواهیم. هزینه: تاریخچه و نماهای بازسازی‌پذیر را از دست می‌دهیم.",
-      "en": "Optimistic locking on a seat row (<span class=\"ltr\">UPDATE … WHERE version = v</span>): when traffic is low and no event log is wanted. Cost: we lose history and rebuildable views."
+      "fa": "قفل خوش‌بینانه روی ردیف صندلی در پایگاه رابطه‌ای (<span class=\"ltr\">UPDATE … WHERE version = v</span>): وقتی ترافیک کمه و لاگ رویداد نمی‌خوای. هزینه: تاریخچه و نماهای بازسازی‌پذیر رو از دست می‌دی.",
+      "en": "Optimistic locking on a seat row (<span class=\"ltr\">UPDATE … WHERE version = v</span>): when traffic is low and you don't want an event log. The cost: you lose the history and the rebuildable views."
     }
   ],
   "failures": [
     {
-      "fa": "دو <span class=\"ltr\">hold</span> هم‌زمان: دقیقاً یکی <span class=\"ltr\">append</span> می‌شود؛ بازنده باید خطای مشخص بگیرد نه سکوت، وگرنه کاربر پول صندلی‌ای را می‌دهد که ندارد.",
-      "en": "Two concurrent <span class=\"ltr\">holds</span>: exactly one <span class=\"ltr\">appends</span>; the loser must get an explicit error, not silence, or a user pays for a seat they don't have."
+      "fa": "دو <span class=\"ltr\">hold</span> هم‌زمان: دقیقاً یکی <span class=\"ltr\">append</span> می‌شه؛ بازنده باید خطای مشخص بگیره، نه سکوت — وگرنه کاربر پول صندلی‌ای رو می‌ده که نداره.",
+      "en": "Two concurrent <span class=\"ltr\">holds</span>: exactly one <span class=\"ltr\">appends</span>; the loser has to get an explicit error, not silence — otherwise a user pays for a seat they don't have."
     },
     {
-      "fa": "کرش بین <span class=\"ltr\">append</span> و ارسال بلیت: <span class=\"ltr\">retry</span> فرمان با همان کلید امن است (رویداد تکراری نادیده گرفته می‌شود)؛ ارسال جدا با کلید رویداد نگهبانی می‌شود تا بلیت دو بار نرود.",
-      "en": "Crash between <span class=\"ltr\">append</span> and ticket send: command <span class=\"ltr\">retry</span> with the same key is safe (dup event ignored); sending is separately keyed by event id so no double ticket."
+      "fa": "کرش بین <span class=\"ltr\">append</span> و ارسال بلیت: <span class=\"ltr\">retry</span> فرمان با همون کلید امنه (رویداد تکراری نادیده گرفته می‌شه)؛ ارسال جدا با کلید رویداد نگهبانی می‌شه تا بلیت دو بار نره.",
+      "en": "Crash between <span class=\"ltr\">append</span> and the ticket send: a command <span class=\"ltr\">retry</span> with the same key is safe (the dup event is ignored); the send is keyed separately by event id, so no double ticket goes out."
     },
     {
-      "fa": "رویداد دیررس <span class=\"ltr\">SeatHeld</span> بعد از <span class=\"ltr\">SeatReleased</span>: نما با <span class=\"ltr\">hold_id</span> و ترتیب لاگ تصمیم می‌گیرد — نگهداشتی که آزادشده بی‌اعتبار است و هرگز صندلی آزاد را قفل نمی‌کند.",
-      "en": "Late <span class=\"ltr\">SeatHeld</span> after <span class=\"ltr\">SeatReleased</span>: the view decides by <span class=\"ltr\">hold_id</span> and log order — an expired hold never relocks a freed seat."
+      "fa": "رویداد دیررس <span class=\"ltr\">SeatHeld</span> بعد از <span class=\"ltr\">SeatReleased</span>: نما با <span class=\"ltr\">hold_id</span> و ترتیب لاگ تصمیم می‌گیره — نگهداشتی که آزاد شده بی‌اعتباره و هرگز صندلی آزاد رو قفل نمی‌کنه.",
+      "en": "A late <span class=\"ltr\">SeatHeld</span> after <span class=\"ltr\">SeatReleased</span>: the view decides by <span class=\"ltr\">hold_id</span> and log order — an expired hold never relocks a freed seat."
     }
   ],
   "code": {
     "lang": "java",
     "code": "import java.util.*;\nimport java.util.concurrent.*;\nimport java.util.concurrent.atomic.*;\n\n// Teaching demo: one seat, two concurrent conditional-append requests —\n// exactly one wins — plus an idempotent resend guard for the ticket send.\n// Conditional append = append iff seat_version == read version.\npublic class SeatRace {\n    // seat -> versioned holder; version -1 = free\n    static class SeatStore {\n        final ConcurrentHashMap<String, AtomicLong> versions = new ConcurrentHashMap<>();\n        final ConcurrentHashMap<String, String> holders = new ConcurrentHashMap<>();\n        final Set<String> seenReq = ConcurrentHashMap.newKeySet();\n\n        String hold(String seat, String req, String holder, long readV) {\n            if (!seenReq.add(req)) return \"dup-ignored\";\n            AtomicLong v = versions.computeIfAbsent(seat, k -> new AtomicLong(-1));\n            if (v.compareAndSet(readV, readV + 1)) {\n                holders.put(seat, holder);\n                return \"held\";\n            }\n            return \"rejected\";\n        }\n    }\n\n    public static void main(String[] a) throws Exception {\n        SeatStore store = new SeatStore();\n        CountDownLatch go = new CountDownLatch(1);\n        ExecutorService pool = Executors.newFixedThreadPool(2);\n        List<Future<String>> fs = new ArrayList<>();\n        // Both racers read version -1 (free) before either appends.\n        fs.add(pool.submit(() -> { go.await(); return store.hold(\"A5\", \"req-1\", \"u1\", -1); }));\n        fs.add(pool.submit(() -> { go.await(); return store.hold(\"A5\", \"req-2\", \"u2\", -1); }));\n        go.countDown();\n        List<String> res = List.of(fs.get(0).get(), fs.get(1).get());\n        pool.shutdown();\n        long held = res.stream().filter(\"held\"::equals).count();\n        long rejected = res.stream().filter(\"rejected\"::equals).count();\n        System.out.println(\"race results      = \" + res);\n        System.out.println(\"exactly one held  = \" + (held == 1 && rejected == 1));\n\n        // Idempotent resend guard: retry with the same key changes nothing.\n        System.out.println(\"resend req-1      = \" + store.hold(\"A5\", \"req-1\", \"u1\", -1));\n\n        // Ticket send behind the event-id key: first sends, repeat blocked.\n        Set<String> sent = ConcurrentHashMap.newKeySet();\n        System.out.println(\"send e-77         = \" + send(sent, \"e-77\", \"A5\"));\n        System.out.println(\"send e-77 again   = \" + send(sent, \"e-77\", \"A5\"));\n        System.out.println(held == 1 && rejected == 1 ? \"OK\" : \"RACE BROKEN\");\n    }\n\n    static String send(Set<String> sent, String ev, String seat) {\n        return sent.add(ev) ? \"ticket:\" + seat : \"resend-blocked\";\n    }\n}\n",
-    "run_fa": "javac SeatRace.java && java SeatRace — فقط استاندارد جاوا، فوری. مسابقه نخ‌ها را چند بار اجرا کن.",
+    "run_fa": "javac SeatRace.java && java SeatRace — فقط استاندارد جاوا، فوری. مسابقه نخ‌ها رو چند بار اجرا کن.",
     "run_en": "javac SeatRace.java && java SeatRace — stdlib Java only, instant. Run the thread race a few times.",
     "expected_fa": "دقیقاً یک held و یک rejected (برنده هر اجرا فرق می‌کند)؛ resend با همان کلید dup-ignored؛ ارسال e-77 اول ticket:A5 و دوم resend-blocked؛ OK. (خروجی واقعی همین محیط)",
     "expected_en": "Exactly one held and one rejected (the winner varies per run); same-key resend dup-ignored; send e-77 first ticket:A5 then resend-blocked; OK. (actual output of this environment)",
     "status": "verified"
   },
-  "tests_fa": "بررسی‌ها: زیر ۵۰ مسابقه هم‌زمان فقط یک <span class=\"ltr\">hold</span> می‌برد؛ <span class=\"ltr\">retry</span> با کلید تکراری حالت را عوض نمی‌کند؛ بازپخش کامل لاگ همان نما را می‌سازد و شمار ارسال‌ها ثابت می‌ماند؛ انقضا صندلی را آزاد می‌کند.",
-  "tests_en": "Checks: under 50 concurrent racers exactly one <span class=\"ltr\">hold</span> wins; same-key <span class=\"ltr\">retry</span> changes nothing; a full log replay rebuilds the same view with the sent-count unchanged; expiry frees the seat.",
+  "tests_fa": "بررسی‌ها: زیر ۵۰ مسابقه هم‌زمان فقط یه <span class=\"ltr\">hold</span> می‌بره؛ <span class=\"ltr\">retry</span> با کلید تکراری حالت رو عوض نمی‌کنه؛ بازپخش کامل لاگ همون نما رو می‌سازه و شمار ارسال‌ها ثابت می‌مونه؛ انقضا صندلی رو آزاد می‌کنه.",
+  "tests_en": "Checks: under 50 concurrent racers exactly one <span class=\"ltr\">hold</span> wins; a same-key <span class=\"ltr\">retry</span> changes nothing; a full log replay rebuilds the same view with the sent-count unchanged; expiry frees the seat.",
   "followups": [
     {
       "q_fa": "حالا SeatHeld دیر برسه و SeatReleased قبلاً پردازش شده باشه — چی کار می‌کنی؟",
       "q_en": "SeatHeld shows up late but SeatReleased is already processed — what do you do?",
       "level": "senior",
-      "a_fa": "نما هر دو را با <span class=\"ltr\">hold_id</span> و ترتیب لاگ می‌بیند: نگهداشت منقضی‌شده صندلی آزاد را قفل نمی‌کند و به‌جایش رویداد «بی‌اثر شد» ثبت می‌شود. قاعده: اثر رویداد را نسخه و وضعیت جاری تعیین می‌کند، نه ترتیب رسیدن به مصرف‌کننده.",
-      "a_en": "The view sees both with <span class=\"ltr\">hold_id</span> and log order: the expired hold never relocks the freed seat, and a 'superseded' marker is recorded instead. Rule: version plus current state decides an event's effect, not consumer arrival order."
+      "a_fa": "نما هر دو رو با <span class=\"ltr\">hold_id</span> و ترتیب لاگ می‌بینه: نگهداشتِ منقضی‌شده صندلی آزاد رو قفل نمی‌کنه و به‌جایش رویداد «بی‌اثر شد» ثبت می‌شه. قاعده: اثر رویداد رو نسخه و وضعیت جاری تعیین می‌کنه، نه ترتیب رسیدن به مصرف‌کننده.",
+      "a_en": "The view sees both, with <span class=\"ltr\">hold_id</span> and log order: the expired hold never relocks the freed seat, and a \"superseded\" marker is recorded instead. The rule: version plus current state decides an event's effect, not the order it reaches the consumer."
     },
     {
       "q_fa": "دو سالن و هزاران درخواست در ثانیه؛ مرز نوشتن را چطور مقیاس می‌دهی؟",
       "q_en": "How do you scale the write boundary to two halls and thousands of requests per second?",
       "level": "staff",
-      "a_fa": "کلید پارتیشن شناسه صندلی (یا سالن) است تا هر صندلی یک نویسنده شرطی داشته باشد؛ پارتیشن‌های جدا موازی می‌شوند. جاروب انقضا هم پارتیشن‌بندی می‌شود تا یک جاروب تنها گلوگاه نشود.",
-      "a_en": "Partition by seat (or hall) id so each seat has one conditional writer; partitions scale in parallel. The expiry sweeper is partitioned too, so no single sweeper becomes the bottleneck."
+      "a_fa": "کلید پارتیشن شناسه صندلی (یا سالن)ه تا هر صندلی یه نویسنده شرطی داشته باشه؛ پارتیشن‌های جدا موازی می‌شن. جاروب انقضا هم پارتیشن‌بندی می‌شه تا یه جاروب تنها گلوگاه نشه.",
+      "a_en": "Partition by seat (or hall) id so every seat has one conditional writer, and separate partitions scale in parallel. Partition the expiry sweeper too, so no single sweeper ends up being the bottleneck."
     }
   ],
   "mistakes": [
     {
-      "fa": "داور کردن نما: «نما نشان می‌دهد آزاد است پس می‌گیریم» — زیر مسابقه دو نفر یک صندلی را می‌برند؛ فقط مرز شرطی داور است.",
-      "en": "Letting the view referee: 'the view shows free, so we take it' — under a race two users win one seat; only the conditional boundary referees."
+      "fa": "داور کردن نما: «نما نشون می‌ده آزاده، پس می‌گیریم» — زیر مسابقه دو نفر یه صندلی رو می‌برن؛ فقط مرز شرطی داوره.",
+      "en": "Letting the view referee: \"the view shows free, so we take it\" — under a race two users win one seat; only the conditional boundary referees."
     },
     {
-      "fa": "ویرایش یا حذف رویداد برای اصلاح: تاریخچه و حسابرسی می‌میرد؛ همیشه رویداد جبرانی تازه.",
-      "en": "Editing or deleting events to fix mistakes: history and audit die; always a fresh compensating event."
+      "fa": "ویرایش یا حذف رویداد برای اصلاح: تاریخچه و حسابرسی می‌میرن؛ همیشه رویداد جبرانیِ تازه.",
+      "en": "Editing or deleting events to fix a mistake: the history and the audit die with them; always write a fresh compensating event."
     },
     {
-      "fa": "بازپخش لاگ برای «پیدا کردن بلیت گم‌شده»: بازپخش نما می‌سازد نه اثر بیرونی؛ ارسال دوباره صریح با همان کلید لازم است.",
-      "en": "Replaying the log to 'find a lost ticket': replay builds views, not external effects; an explicit resend with the same key is required."
+      "fa": "بازپخش لاگ برای «پیدا کردن بلیت گم‌شده»: بازپخش نما می‌سازه، نه اثر بیرونی؛ ارسال دوباره صریح با همون کلید لازمه.",
+      "en": "Replaying the log to \"find a lost ticket\": replay builds views, not external effects; an explicit resend with the same key is what you need."
     }
   ],
   "sources": [
@@ -123,40 +123,40 @@
       "source": "assets/diagram-specs/solutions/ch3/sol3-step1-seat-race.json",
       "kind_fa": "توالی",
       "kind_en": "sequence",
-      "caption_fa": "مسابقه روی یک صندلی: الصاق شرطی، ارسال دقیقاً یک‌بار، انقضا و لغو (اعداد آموزشی)",
+      "caption_fa": "مسابقه روی یه صندلی: الصاق شرطی، ارسال دقیقاً یک‌بار، انقضا و لغو (اعداد آموزشی)",
       "caption_en": "Race for one seat: conditional append, exactly-once send, expiry and cancel (teaching numbers)",
       "height": 780,
       "narration": {
-        "scenario_fa": "دو تماشاگر هم‌زمان دکمه صندلی A5 را می‌زنند. توالی را بالا‌به‌پایین در سه باند بخوان: مسابقه، تأیید و ارسال، انقضا و لغو.",
-        "scenario_en": "Two viewers hit seat A5 at the same moment. Read top to bottom in three bands: the race, confirm and send, expiry and cancel.",
+        "scenario_fa": "دو تماشاگر هم‌زمان دکمه صندلی A5 رو می‌زنن. توالی رو بالا‌به‌پایین در سه باند بخون: مسابقه، تأیید و ارسال، انقضا و لغو.",
+        "scenario_en": "Two viewers hit seat A5 at the same moment. Read it top to bottom in three bands: the race, confirm and send, expiry and cancel.",
         "steps": [
           {
-            "fa": "باند مسابقه: دو <span class=\"ltr\">HoldSeat A5 @v3</span> با نسخه خوانده‌شده یکسان وارد می‌شوند؛ <span class=\"ltr\">append iff seat v==3</span> فقط اولی را می‌پذیرد و <span class=\"ltr\">appended v4</span> برمی‌گرداند — بازنده <span class=\"ltr\">SeatTaken</span> صریح می‌گیرد، نه سکوت.",
-            "en": "Race band: two HoldSeat A5 at v3 with the same read version arrive; the append-iff-v3 admits only the first and returns appended v4 — the loser gets an explicit SeatTaken, never silence."
+            "fa": "باند مسابقه: دو <span class=\"ltr\">HoldSeat A5 @v3</span> با نسخه خوانده‌شده یکسان وارد می‌شن؛ <span class=\"ltr\">append iff seat v==3</span> فقط اولی رو قبول می‌کنه و <span class=\"ltr\">appended v4</span> برمی‌گردونه — بازنده <span class=\"ltr\">SeatTaken</span> صریح می‌گیره، نه سکوت.",
+            "en": "Race band: two HoldSeat A5 at v3 with the same read version arrive; the append-iff-v3 takes only the first and returns appended v4 — the loser gets an explicit SeatTaken, never silence."
           },
           {
-            "fa": "باند تأیید: <span class=\"ltr\">confirm A5</span> به <span class=\"ltr\">append SeatConfirmed</span> می‌رسد و <span class=\"ltr\">on SeatConfirmed</span> بلیت با کلید <span class=\"ltr\">e-77</span> را می‌فرستد؛ ارسال دوباره همان کلید <span class=\"ltr\">resend blocked</span> می‌دهد — بازپخش نما بلیت نمی‌فرستد.",
-            "en": "Confirm band: confirm A5 becomes an appended SeatConfirmed, and on SeatConfirmed sends the ticket under key e-77; resending the same key is blocked — replaying the view never sends tickets."
+            "fa": "باند تأیید: <span class=\"ltr\">confirm A5</span> می‌رسه به <span class=\"ltr\">append SeatConfirmed</span> و <span class=\"ltr\">on SeatConfirmed</span> بلیت رو با کلید <span class=\"ltr\">e-77</span> می‌فرسته؛ ارسال دوباره با همون کلید <span class=\"ltr\">resend blocked</span> می‌ده — بازپخش نما بلیت نمی‌فرسته.",
+            "en": "Confirm band: confirm A5 becomes an appended SeatConfirmed, and on SeatConfirmed the ticket goes out under key e-77; resending the same key is blocked — replaying the view never sends tickets."
           },
           {
-            "fa": "باند انقضا و لغو: جاروب‌گر از همان مرز با <span class=\"ltr\">HoldExpired</span> (مهلت آموزشی ده‌دقیقه‌ای) صندلی B2 را آزاد می‌کند و لغو با <span class=\"ltr\">append BookingCanceled</span> — رویداد تازه، نه ویرایش — تاریخچه را می‌بندد.",
-            "en": "Expiry and cancel band: the sweeper frees seat B2 through the same boundary with HoldExpired (the 10-minute teaching TTL), and the cancel appends BookingCanceled — a fresh event, never an edit — closing the history."
+            "fa": "باند انقضا و لغو: جاروب‌گر از همون مرز با <span class=\"ltr\">HoldExpired</span> (مهلت آموزشی ده‌دقیقه‌ای) صندلی B2 رو آزاد می‌کنه و لغو با <span class=\"ltr\">append BookingCanceled</span> — رویداد تازه، نه ویرایش — تاریخچه رو می‌بنده.",
+            "en": "Expiry and cancel band: the sweeper frees seat B2 through the same boundary with HoldExpired (the 10-minute teaching TTL), and the cancel appends BookingCanceled — a fresh event, never an edit — which closes the history."
           }
         ],
-        "point_fa": "نقطه تصمیم مرز شرطی است: نسخه صندلی — نه نما — برنده را تعیین می‌کند؛ کلید <span class=\"ltr\">idempotency</span> ارسال را دقیقاً یک‌بار نگه می‌دارد.",
-        "point_en": "The decision point is the conditional boundary: the seat version — not the view — picks the winner; the idempotency key keeps the send exactly once.",
-        "failure_fa": "کرش بین <span class=\"ltr\">append</span> و ارسال: <span class=\"ltr\">retry</span> با همان کلید امن است؛ <span class=\"ltr\">SeatHeld</span> دیررس بعد از آزاد شدن، با <span class=\"ltr\">hold_id</span> و ترتیب لاگ بی‌اثر می‌شود و صندلی آزاد را قفل نمی‌کند.",
-        "failure_en": "Crash between append and send: same-key retry is safe; a late SeatHeld after release is superseded by hold_id and log order and never relocks the freed seat.",
-        "guarantee_fa": "شکل انحصار صندلی و جدایی بازپخش از ارسال را نشان می‌دهد؛ تحویل واقعی پیامک را ثابت نمی‌کند.",
+        "point_fa": "نقطه تصمیم همون مرز شرطیه: نسخه صندلی — نه نما — برنده رو تعیین می‌کنه؛ کلید <span class=\"ltr\">idempotency</span> هم ارسال رو دقیقاً یک‌بار نگه می‌داره.",
+        "point_en": "The decision point is the conditional boundary: the seat version — not the view — picks the winner, and the idempotency key keeps the send exactly once.",
+        "failure_fa": "کرش بین <span class=\"ltr\">append</span> و ارسال: <span class=\"ltr\">retry</span> با همون کلید امنه؛ <span class=\"ltr\">SeatHeld</span> دیررس بعد از آزاد شدن، با <span class=\"ltr\">hold_id</span> و ترتیب لاگ بی‌اثر می‌شه و صندلی آزاد رو قفل نمی‌کنه.",
+        "failure_en": "Crash between append and send: a same-key retry is safe, and a late SeatHeld after the release is superseded by hold_id and log order, so it never relocks the freed seat.",
+        "guarantee_fa": "شکل انحصار صندلی و جدایی بازپخش از ارسال رو نشون می‌ده؛ تحویل واقعی پیامک رو ثابت نمی‌کنه.",
         "guarantee_en": "The figure shows seat exclusivity and the replay/send split; it does not prove real message delivery.",
-        "nonguarantee_fa": "درباره پارتیشن‌بندی چند سالن و مقیاس هزاران درخواست در ثانیه چیزی نمی‌گوید.",
+        "nonguarantee_fa": "درباره پارتیشن‌بندی چند سالن و مقیاس هزاران درخواست در ثانیه چیزی نمی‌گه.",
         "nonguarantee_en": "It says nothing about multi-hall partitioning or thousands of requests per second."
       },
       "selfcheck": {
-        "q_fa": "دو درخواست با یک نسخه به مرز می‌رسند؛ دومی چه می‌گیرد و چرا کاربر پول صندلی‌ای که ندارد را نمی‌دهد؟",
+        "q_fa": "دو درخواست با یک نسخه به مرز می‌رسن؛ دومی چی می‌گیره و چرا کاربر پول صندلی‌ای که نداره رو نمی‌ده؟",
         "q_en": "Two requests reach the boundary with one version; what does the second get, and why does nobody pay for a seat they do not hold?",
-        "a_fa": "<span class=\"ltr\">SeatTaken</span> صریح می‌گیرد چون <span class=\"ltr\">append</span> شرطی فقط نسخه جاری را می‌پذیرد؛ خطای صریح یعنی پرداخت جلو نمی‌رود.",
-        "a_en": "An explicit SeatTaken, because the conditional append admits only the current version; the explicit error means no payment proceeds."
+        "a_fa": "<span class=\"ltr\">SeatTaken</span> صریح می‌گیره چون <span class=\"ltr\">append</span> شرطی فقط نسخه جاری رو قبول می‌کنه؛ خطای صریح یعنی پرداخت جلو نمی‌ره.",
+        "a_en": "An explicit SeatTaken, because the conditional append only takes the current version, and an explicit error means no payment proceeds."
       }
     },
     {
@@ -169,36 +169,36 @@
       "caption_en": "Hold lifecycle: guarded hold states (teaching numbers)",
       "height": 700,
       "narration": {
-        "scenario_fa": "حالا همان صندلی را نه در زمان، که در حالت ببین: مسیر اصلی، انتظار و خروج‌های پایانی. هر پیکان را با نگهبان روی خودش بخوان.",
+        "scenario_fa": "حالا همون صندلی رو نه در زمان، که در حالت ببین: مسیر اصلی، انتظار و خروج‌های پایانی. هر پیکان رو با نگهبان روی خودش بخون.",
         "scenario_en": "Now see the same seat not in time but in state: the main path, waiting, and terminal exits. Read each arrow with its own guard.",
         "steps": [
           {
-            "fa": "مسیر اصلی: <span class=\"ltr\">Free</span> با <span class=\"ltr\">HoldSeat please</span> به <span class=\"ltr\">Version guard</span> می‌رسد؛ نسخه جاری به <span class=\"ltr\">Held</span> می‌رود و نسخه کهنه با <span class=\"ltr\">stale: SeatTaken</span> برمی‌گردد — داور نگهبان است.",
-            "en": "Main path: Free reaches the version guard with a HoldSeat please; the current version moves to Held while a stale one returns SeatTaken — the guard referees."
+            "fa": "مسیر اصلی: <span class=\"ltr\">Free</span> با <span class=\"ltr\">HoldSeat please</span> می‌رسه به <span class=\"ltr\">Version guard</span>؛ نسخه جاری می‌ره سمت <span class=\"ltr\">Held</span> و نسخه کهنه با <span class=\"ltr\">stale: SeatTaken</span> برمی‌گرده — داور، نگهبانه.",
+            "en": "Main path: Free reaches the version guard with a HoldSeat please; the current version moves to Held, and a stale one comes back with SeatTaken — the guard is the referee."
           },
           {
-            "fa": "انتظار: <span class=\"ltr\">Held</span> هم با <span class=\"ltr\">TTL armed</span> به <span class=\"ltr\">TTL watch</span> می‌رود و با <span class=\"ltr\">HoldExpired</span> (همان <span class=\"ltr\">hold_id</span>) آزاد می‌شود، هم با <span class=\"ltr\">confirm requested</span> به <span class=\"ltr\">Awaiting payment</span> که یا <span class=\"ltr\">paid in time</span> به <span class=\"ltr\">Confirmed</span> یا <span class=\"ltr\">timeout</span> به <span class=\"ltr\">Free</span>.",
-            "en": "Waiting: Held arms the TTL watch and is freed by HoldExpired with the same hold_id, or takes confirm requested to awaiting payment, which ends paid-in-time at Confirmed or timed-out at Free."
+            "fa": "انتظار: <span class=\"ltr\">Held</span> هم با <span class=\"ltr\">TTL armed</span> می‌ره سمت <span class=\"ltr\">TTL watch</span> و با <span class=\"ltr\">HoldExpired</span> (همون <span class=\"ltr\">hold_id</span>) آزاد می‌شه، هم با <span class=\"ltr\">confirm requested</span> می‌ره سمت <span class=\"ltr\">Awaiting payment</span> که یا با <span class=\"ltr\">paid in time</span> می‌رسه به <span class=\"ltr\">Confirmed</span> یا با <span class=\"ltr\">timeout</span> برمی‌گرده به <span class=\"ltr\">Free</span>.",
+            "en": "Waiting: Held arms the TTL watch and gets freed by HoldExpired with the same hold_id, or takes confirm requested to awaiting payment, which ends either paid-in-time at Confirmed or timed-out at Free."
           },
           {
-            "fa": "پایانی: <span class=\"ltr\">BookingCanceled</span> از <span class=\"ltr\">Held</span> به <span class=\"ltr\">Canceled</span>؛ اصلاح اشتباه با <span class=\"ltr\">BookingCorrected</span> از <span class=\"ltr\">Confirmed</span> به <span class=\"ltr\">Canceled</span> و <span class=\"ltr\">hold</span> تازه — همیشه رویداد تازه. <span class=\"ltr\">Confirmed</span> با ارسال <span class=\"ltr\">idempotent</span> به <span class=\"ltr\">Closed</span> می‌رسد و تاریخچه می‌ماند.",
-            "en": "Terminals: BookingCanceled moves Held to Canceled; fixing a mistake moves Confirmed to Canceled with a fresh BookingCorrected and a new hold — always a fresh event. Confirmed reaches Closed with an idempotent send, and history stays."
+            "fa": "پایانی: <span class=\"ltr\">BookingCanceled</span> از <span class=\"ltr\">Held</span> می‌ره به <span class=\"ltr\">Canceled</span>؛ اصلاح اشتباه با <span class=\"ltr\">BookingCorrected</span> از <span class=\"ltr\">Confirmed</span> می‌ره به <span class=\"ltr\">Canceled</span> و یه <span class=\"ltr\">hold</span> تازه — همیشه رویداد تازه. <span class=\"ltr\">Confirmed</span> با ارسال <span class=\"ltr\">idempotent</span> می‌رسه به <span class=\"ltr\">Closed</span> و تاریخچه می‌مونه.",
+            "en": "Terminals: BookingCanceled moves Held to Canceled; fixing a mistake moves Confirmed to Canceled with a fresh BookingCorrected and a new hold — always a fresh event. Confirmed reaches Closed with an idempotent send, and the history stays."
           }
         ],
-        "point_fa": "نقطه تصمیم نگهبان‌هاست: اثر هر رویداد را نسخه و وضعیت جاری تعیین می‌کند، نه ترتیب رسیدن به مصرف‌کننده.",
-        "point_en": "The decision point is the guards: version plus current state decides each event's effect, not consumer arrival order.",
-        "failure_fa": "نگهداشت منقضی‌شده دیررس صندلی آزاد را قفل نمی‌کند؛ حذف یا ویرایش رویداد برای اصلاح، حسابرسی را می‌کشد.",
-        "failure_en": "An expired late hold never relocks a freed seat; deleting or editing events to fix mistakes kills the audit trail.",
-        "guarantee_fa": "شکل حالت‌ها و نگهبان‌ها را نشان می‌دهد؛ ظرفیت مرز نوشتن را ثابت نمی‌کند — عددها (۳۰۰ صندلی، ده دقیقه) آموزشی‌اند.",
+        "point_fa": "نقطه تصمیم همون نگهبان‌هاست: اثر هر رویداد رو نسخه و وضعیت جاری تعیین می‌کنه، نه ترتیب رسیدن به مصرف‌کننده.",
+        "point_en": "The decision point is the guards: version plus current state decides each event's effect, not the order it reaches the consumer.",
+        "failure_fa": "نگهداشتِ منقضی‌شده دیررس صندلی آزاد رو قفل نمی‌کنه؛ حذف یا ویرایش رویداد برای اصلاح، حسابرسی رو می‌کشه.",
+        "failure_en": "An expired late hold never relocks a freed seat; deleting or editing events to fix a mistake kills the audit trail.",
+        "guarantee_fa": "شکل حالت‌ها و نگهبان‌ها رو نشون می‌ده؛ ظرفیت مرز نوشتن رو ثابت نمی‌کنه — عددها (۳۰۰ صندلی، ده دقیقه) آموزشی‌ان.",
         "guarantee_en": "The figure shows the states and their guards; it does not fix write-boundary capacity — the numbers (300 seats, ten minutes) are teaching numbers.",
-        "nonguarantee_fa": "درباره پارتیشن‌بندی مرز نوشتن برای چند سالن چیزی نمی‌گوید.",
+        "nonguarantee_fa": "درباره پارتیشن‌بندی مرز نوشتن برای چند سالن چیزی نمی‌گه.",
         "nonguarantee_en": "It says nothing about partitioning the write boundary across halls."
       },
       "selfcheck": {
-        "q_fa": "HoldExpired با همان hold_id می‌رسد ولی صندلی قبلاً لغو شده؛ چه می‌شود؟",
+        "q_fa": "HoldExpired با همون hold_id می‌رسه ولی صندلی قبلاً لغو شده؛ چی می‌شه؟",
         "q_en": "HoldExpired arrives with the same hold_id but the seat was already canceled; what happens?",
-        "a_fa": "هیچی — نما با <span class=\"ltr\">hold_id</span> و ترتیب لاگ می‌بیند صندلی آزاد است؛ رویداد منقضی بی‌اثر ثبت می‌شود و قفل تازه نمی‌سازد.",
-        "a_en": "Nothing — the view sees by hold_id and log order that the seat is free; the expired event is recorded superseded and builds no new lock."
+        "a_fa": "هیچی — نما با <span class=\"ltr\">hold_id</span> و ترتیب لاگ می‌بینه صندلی آزاده؛ رویداد منقضی بی‌اثر ثبت می‌شه و قفل تازه نمی‌سازه.",
+        "a_en": "Nothing — the view sees, by hold_id and log order, that the seat is free; the expired event is recorded as superseded and builds no new lock."
       }
     },
     {
@@ -210,43 +210,43 @@
       "caption_en": "Reservation log, three projections and the exactly-once send guard (teaching numbers)",
       "height": 640,
       "narration": {
-        "scenario_fa": "دو تماشاگر هم‌زمان دکمه یک صندلی را می‌زنند. لاگ وسط را از چپ به راست بخوان.",
+        "scenario_fa": "دو تماشاگر هم‌زمان دکمه یه صندلی رو می‌زنن. لاگ وسط رو از چپ به راست بخون.",
         "scenario_en": "Two viewers hit one seat at the same moment. Read the middle log left to right.",
         "steps": [
           {
-            "fa": "ستون فرمان: دو HoldSeat با کلیدهای جدا وارد مرز شرطی می‌شوند.",
+            "fa": "ستون فرمان: دو HoldSeat با کلیدهای جدا وارد مرز شرطی می‌شن.",
             "en": "Command column: two HoldSeats with separate keys enter the conditional boundary."
           },
           {
-            "fa": "لاگ وسط: فقط SeatHeld برنده append می‌شود؛ بازنده SeatTaken می‌گیرد.",
+            "fa": "لاگ وسط: فقط SeatHeld برنده append می‌شه؛ بازنده SeatTaken می‌گیره.",
             "en": "Middle log: only the winner's SeatHeld appends; the loser gets SeatTaken."
           },
           {
-            "fa": "سه نما: تابلوی صندلی، فروش و چاپ — هر سه از همان لاگ.",
-            "en": "Three views: seat map, sales and printing — all three from the same log."
+            "fa": "سه نما: تابلوی صندلی، فروش و چاپ — هر سه از همون لاگ.",
+            "en": "Three views: the seat map, sales and printing — all three from the same log."
           },
           {
-            "fa": "نگهبان راست: ارسال بلیت با کلید رویداد؛ تکرار مسدود می‌شود.",
-            "en": "Right guard: ticket send keyed by event id; repeats are blocked."
+            "fa": "نگهبان راست: ارسال بلیت با کلید رویداد؛ تکرار مسدود می‌شه.",
+            "en": "Right guard: the ticket send is keyed by event id; repeats are blocked."
           }
         ],
-        "point_fa": "نقطه تصمیم مرز شرطی است: نسخه صندلی، نه نما، برنده را تعیین می‌کند.",
+        "point_fa": "نقطه تصمیم همون مرز شرطیه: نسخه صندلی، نه نما، برنده رو تعیین می‌کنه.",
         "point_en": "The decision point is the conditional boundary: the seat version, not the view, picks the winner.",
-        "failure_fa": "رد خرابی: کرش بین append و ارسال — retry با همان کلید امن است و بلیت دو بار نمی‌رود.",
-        "failure_en": "Failure trace: crash between append and send — same-key retry is safe and no double ticket goes out.",
-        "guarantee_fa": "شکل انحصار صندلی و جدایی بازپخش از ارسال را تضمین می‌کند.",
+        "failure_fa": "رد خرابی: کرش بین append و ارسال — retry با همون کلید امنه و بلیت دو بار نمی‌ره.",
+        "failure_en": "Failure trace: a crash between append and send — a same-key retry is safe and no double ticket goes out.",
+        "guarantee_fa": "شکل انحصار صندلی و جدایی بازپخش از ارسال رو تضمین می‌کنه.",
         "guarantee_en": "The figure guarantees seat exclusivity and the replay/send split.",
-        "nonguarantee_fa": "درباره پارتیشن‌بندی چند سالن و تحویل واقعی پیامک چیزی نمی‌گوید.",
+        "nonguarantee_fa": "درباره پارتیشن‌بندی چند سالن و تحویل واقعی پیامک چیزی نمی‌گه.",
         "nonguarantee_en": "It says nothing about multi-hall partitioning or real SMS delivery."
       },
       "selfcheck": {
         "q_fa": "چرا بازپخش لاگ برای ارسال دوباره بلیت گم‌شده کافی نیست؟",
         "q_en": "Why isn't replaying the log enough to resend a lost ticket?",
-        "a_fa": "چون بازپخش فقط نما می‌سازد و اثر بیرونی ممنوع است. ارسال دوباره باید صریح و با همان کلید idempotency باشد تا دقیقاً یک‌بار بماند.",
-        "a_en": "Because replay only rebuilds views and external effects are forbidden there. Resend must be explicit with the same idempotency key to stay exactly-once."
+        "a_fa": "چون بازپخش فقط نما می‌سازه و اثر بیرونی ممنوعه. ارسال دوباره باید صریح و با همون کلید idempotency باشه تا دقیقاً یک‌بار بمونه.",
+        "a_en": "Because replay only rebuilds views, and external effects are forbidden there. A resend has to be explicit, with the same idempotency key, to stay exactly-once."
       }
     }
   ],
-  "reasoning_fa": "<p>log برای بازسازی history مناسب است، اما به‌تنهایی از فروش یک صندلی به دو نفر جلوگیری نمی‌کند؛ تصمیم رزرو باید در مرز سریال همان صندلی گرفته شود. TTL ده‌دقیقه‌ای hold فرضی از زمان لازم برای checkout است: کوتاه‌تر شدنش خرید را قطع می‌کند و بلندترشدنش ظرفیت را بیهوده نگه می‌دارد. اثر بیرونی چاپ یا SMS از log اتمیک نمی‌شود؛ کلید idempotency مقصد یا reconciliation لازم است.</p>",
-  "reasoning_en": "<p>A log enables history replay but does not itself prevent double booking; serialize the booking decision for the seat. A ten-minute hold TTL is a checkout-duration assumption: shorter interrupts buyers, longer ties up capacity. Printing or SMS does not become atomic through logging; use destination idempotency or reconciliation.</p>"
+  "reasoning_fa": "<p>log برای بازسازی history خوبه، ولی به‌تنهایی جلوی فروش یه صندلی به دو نفر رو نمی‌گیره؛ تصمیم رزرو باید توی مرزِ سریالِ همون صندلی گرفته بشه. TTL ده‌دقیقه‌ایِ hold یه فرض از زمان لازم برای checkout است: کوتاه‌ترش کنی خرید قطع می‌شه، بلندترش کنی ظرفیت بیهوده نگه داشته می‌شه. اثر بیرونیِ چاپ یا SMS از log اتمیک نمی‌شه؛ کلید idempotency مقصد یا reconciliation لازمه.</p>",
+  "reasoning_en": "<p>A log is great for rebuilding history, but on its own it doesn't stop one seat from being sold to two people; the booking decision has to be serialized at the write boundary for that seat. A ten-minute hold TTL is an assumption about how long checkout takes: make it shorter and you cut buyers off, make it longer and you tie up capacity for nothing. Printing or SMS doesn't become atomic just because you logged it; use destination idempotency or reconciliation.</p>"
 }
