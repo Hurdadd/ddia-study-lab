@@ -2,27 +2,27 @@
   "alternatives": [
     {
       "en": "Stay local when queries carry the base key or want just a few results: any single shard answers, no cross-shard write ever exists. Price: the day someone asks for 'all matches', you scatter — name that day in advance.",
-      "fa": "وقتی کوئری‌ها کلید مرجع را دارند یا فقط چند نتیجه می‌خواهند محلی بمان: هر تک‌شاردی جواب می‌دهد و هیچ نوشتن چندشاردی هرگز نیست. بها: روزی که کسی «همهٔ تطابق‌ها» را بخواهد پراکنده می‌خوانی — آن روز را از پیش نام ببر."
+      "fa": "وقتی کوئری‌ها کلید مرجع رو دارند یا فقط چند نتیجه می‌خوان، محلی بمون: هر تک‌شاردی جواب می‌ده و هیچ نوشتن چندشاردی اصلاً وجود نداره. بها: روزی که کسی «همهٔ تطابق‌ها» رو خواست، پراکنده می‌خونی — اون روز رو از پیش نام ببر."
     },
     {
       "en": "Accept async global (DynamoDB-style) when bounded staleness is tolerable: reads stay targeted and writes return fast. Price: an explicit lag SLO plus the reader-revalidation contract below — staleness without a contract is a bug report waiting.",
-      "fa": "<span class=\"ltr\">global</span> ناهمزمان (به سبک DynamoDB) وقتی کهنگی کران‌دار قابل‌تحمل است: خواندن هدفمند می‌ماند و نوشتن زود برمی‌گردد. بها: <span class=\"ltr\">SLO</span> صریح <span class=\"ltr\">lag</span> به‌علاوهٔ قرارداد بازبینی خواننده در پایین — کهنگی بدون قرارداد گزارش باگِ در راه است."
+      "fa": "<span class=\"ltr\">global</span> ناهمزمان (به سبک DynamoDB) وقتی کهنگیِ کران‌دار قابل‌تحمله: خواندن هدفمند می‌مونه و نوشتن زود برمی‌گرده. بها: <span class=\"ltr\">SLO</span> صریح <span class=\"ltr\">lag</span> به‌علاوهٔ قرارداد بازبینی خواننده در پایین — کهنگی بدون قرارداد، گزارش باگِ در راهه."
     }
   ],
-  "answer_en": "Local means 1-shard writes and 4-shard scatter reads; global means multi-shard versioned writes through an outbox and targeted reads (1 index shard, then fetch). The reader revalidates every id against its base shard — a recorded delete always beats a stale posting. Price: count RPCs and shards per operation, and never quote local stopwatch timings as networked p99.",
-  "answer_fa": "محلی یعنی نوشتن تک‌شاردی و خواندن پراکندهٔ ۴ شاردی؛ سراسری یعنی نوشتن چندشاردی نسخه‌دار از مسیر <span class=\"ltr\">outbox</span> و خواندن هدفمند (۱ شارد ایندکس بعد گرفتن رکورد). خواننده هر شناسه را با شارد مرجعش بازبینی می‌کند — حذف ثبت‌شده همیشه بر <span class=\"ltr\">posting</span> کهنه می‌چربد. بها: <span class=\"ltr\">RPC</span> و شارد per-operation را بشمار و هرگز زمان کرونومتر محلی را <span class=\"ltr\">p99</span> شبکه جا نزن.",
+  "answer_en": "Here's the split: local means 1-shard writes and 4-shard scatter reads; global means multi-shard versioned writes through an outbox and targeted reads (1 index shard, then fetch). The reader revalidates every id against its base shard — a recorded delete always beats a stale posting. And keep this in mind: price it in RPCs and shards per operation. Never quote local stopwatch timings as networked p99 — down there your number tells a lie.",
+  "answer_fa": "قضیه اینه که: محلی یعنی نوشتن تک‌شاردی و خواندن پراکندهٔ ۴ شاردی؛ سراسری یعنی نوشتن چندشاردیِ نسخه‌دار از مسیر <span class=\"ltr\">outbox</span> و خواندن هدفمند (۱ شارد ایندکس، بعد گرفتن رکورد). خواننده هر شناسه رو با شارد مرجعش بازبینی می‌کنه — حذفِ ثبت‌شده همیشه بر <span class=\"ltr\">posting</span> کهنه می‌چربه. و این رو نگه دار: بها رو با <span class=\"ltr\">RPC</span> و شارد per-operation بسنج. زمانِ کرونومتر محلی رو هیچ‌وقت جای <span class=\"ltr\">p99</span> شبکه جا نزن — اونجا عددِ تو دروغ می‌گه.",
   "assumptions": [
     {
-      "en": "4 base shards owning records by id, 2 global index shards owning postings by hashed term; each record carries 2 terms.",
-      "fa": "۴ شارد مرجع که رکوردها را با شناسه دارند و ۲ شارد ایندکس سراسری که <span class=\"ltr\">posting</span>ها را با هش term دارند؛ هر رکورد ۲ term دارد."
+      "en": "Picture 4 base shards owning records by id, and 2 global index shards owning postings by hashed term. Every record carries 2 terms.",
+      "fa": "فرض کن ۴ شارد مرجع داریم که رکورد‌ها رو با شناسه نگه می‌دارن، و ۲ شارد ایندکس سراسری که <span class=\"ltr\">posting</span>‌ها رو با هش term. هر رکورد ۲ term داره."
     },
     {
-      "en": "An RPC is one shard request; the measured unit is shards engaged per operation — never milliseconds, which predict nothing about networked p99.",
-      "fa": "<span class=\"ltr\">RPC</span> یعنی یک درخواست به یک شارد؛ واحد سنجش شاردهای درگیر per-operation است — هرگز میلی‌ثانیه نه، که دربارهٔ <span class=\"ltr\">p99</span> شبکه هیچ پیش‌بینی نمی‌کند."
+      "en": "Here's the thing: an RPC is one request to one shard, and what we measure is shards engaged per operation — never milliseconds, because milliseconds predict nothing about networked p99.",
+      "fa": "قضیه اینه که: <span class=\"ltr\">RPC</span> یعنی یه درخواست به یه شارد. واحدی که می‌سنجیم، شارد‌های درگیر در هر عملیات است — هرگز میلی‌ثانیه، چون میلی‌ثانیه دربارهٔ <span class=\"ltr\">p99</span> شبکه هیچ پیش‌بینی نمی‌کنه."
     },
     {
-      "en": "Index writes travel through a versioned outbox relay; readers can always reach the base shard for revalidation.",
-      "fa": "نوشتن‌های ایندکس از رلهٔ <span class=\"ltr\">outbox</span> نسخه‌دار می‌گذرند؛ خواننده‌ها همیشه برای بازبینی به شارد مرجع می‌رسند."
+      "en": "Index writes travel through a versioned outbox relay, and readers can always reach the base shard to revalidate.",
+      "fa": "نوشتن‌های ایندکس از رلهٔ <span class=\"ltr\">outbox</span> نسخه‌دار رد می‌شن؛ خواننده‌ها همیشه می‌تونن به شارد مرجع برسن و دوباره بررسی‌ش کنن."
     }
   ],
   "code": {
@@ -30,16 +30,16 @@
     "expected_en": "Write 1 record: local 1 shard, global 1 base + 2 index. Single-term read: local 4-shard scatter, global 1 index + 3 base. Two-term: local 4 scatter, global 2 index + fetch. Partial write: AND misses id 12. Stale entry: deleted id 3 filtered, phantoms=1; OK. (actual output of this environment)",
     "expected_fa": "نوشتن ۱ رکورد: محلی ۱ شارد و سراسری ۱ مرجع + ۲ ایندکس. خواندن تک‌شرط: محلی پراکندهٔ ۴ شاردی و سراسری ۱ ایندکس + ۳ مرجع. دوشرط: محلی ۴ پراکنده و سراسری ۲ ایندکس + گرفتن رکورد. نوشتن ناقص: AND شناسهٔ ۱۲ را گم می‌کند. ورودی کهنه: شناسهٔ حذف‌شدهٔ ۳ فیلتر شد؛ OK. (خروجی واقعی همین محیط)",
     "lang": "java",
-    "run_en": "javac IndexSim.java && java IndexSim — stdlib Java only, instant.",
-    "run_fa": "javac IndexSim.java && java IndexSim — فقط استاندارد جاوا، فوری.",
+    "run_en": "javac IndexSim.java && java IndexSim — stdlib Java only, so it runs instantly and needs no setup.",
+    "run_fa": "javac IndexSim.java && java IndexSim — فقط استاندارد جاوا، فوری و بی‌هیچ وابستگی.",
     "status": "verified"
   },
-  "design_en": "<p>Base shards own records by <code>id % 4</code>; index shards own terms by <code>hash(term) % 2</code>. A write commits to its base shard plus one versioned outbox event per term; the relay applies each event to the owning index shard with per-record versions. Reads: local scatters to 4 and merges; global looks up each term on 1 index shard, intersects, then fetches by id. Every fetched id is revalidated against its base shard before it reaches the caller.</p>",
-  "design_fa": "<p>شاردهای مرجع رکوردها را با <code>id % 4</code> دارند و شاردهای ایندکس termها را با <code>hash(term) % 2</code>. نوشتن روی شارد مرجعش <span class=\"ltr\">commit</span> می‌شود به‌علاوهٔ یک رویداد نسخه‌دار <span class=\"ltr\">outbox</span> per-term؛ رله هر رویداد را با نسخهٔ per-record روی شارد مالک ایندکس اعمال می‌کند. خواندن: محلی به ۴ شارد پراکنده و ادغام می‌کند؛ سراسری هر term را روی ۱ شارد ایندکس می‌خواند و اشتراک می‌گیرد بعد با شناسه رکوردها را می‌گیرد. هر شناسهٔ گرفته‌شده پیش از رسیدن به صداکننده با شارد مرجعش بازبینی می‌شود.</p>",
+  "design_en": "<p>Base shards own records by <code>id % 4</code>; index shards own terms by <code>hash(term) % 2</code>. A write commits to its base shard plus one versioned outbox event per term; the relay applies each event to the owning index shard with per-record versions. Reads: local scatters to all 4 and merges; global looks up each term on 1 index shard, intersects the postings, then fetches by id. Every fetched id is revalidated against its base shard before it reaches the caller.</p>",
+  "design_fa": "<p>شاردهای مرجع رکوردها رو با <code>id % 4</code> دارن و شاردهای ایندکس termها رو با <code>hash(term) % 2</code>. نوشتن روی شارد مرجعش <span class=\"ltr\">commit</span> می‌شه به‌علاوهٔ یه رویداد نسخه‌دار <span class=\"ltr\">outbox</span> per-term؛ رله هر رویداد رو با نسخهٔ per-record روی شارد مالک ایندکس اعمال می‌کنه. خواندن: محلی به ۴ شارد پراکنده و ادغام می‌کنه؛ سراسری هر term رو روی ۱ شارد ایندکس می‌خونه و اشتراک می‌گیره، بعد رکوردها رو با شناسه می‌گیره. و هر شناسهٔ گرفته‌شده، پیش از رسیدن به صداکننده، با شارد مرجعش بازبینی می‌شه.</p>",
   "diagrams": [
     {
       "caption_en": "Write and read paths: local scatter versus global term lookup",
-      "caption_fa": "مسیر نوشتن و خواندن: پراکندهٔ محلی در برابر lookup سراسری",
+      "caption_fa": "دو مسیر، دو جور پرداخت: پراکندهٔ محلی در برابر lookup سراسری",
       "file": "diagrams/sol3-step1-index-paths.html",
       "height": 640,
       "kind_en": "dataflow",
@@ -47,41 +47,41 @@
       "made": "archify",
       "narration": {
         "failure_en": "Treat the global index as the truth and a stale posting becomes a sold-out product on the page: the index is derived, the base decides — the merge node exists for exactly this.",
-        "failure_fa": "ایندکس سراسری را حقیقت بدان و <span class=\"ltr\">posting</span> کهنه کالای ناموجود را روی صفحه می‌فروشد: ایندکس مشتق است و مرجع تصمیم می‌گیرد — گره ادغام دقیقاً برای همین است.",
+        "failure_fa": "ایندکس سراسری رو حقیقت فرض کن و <span class=\"ltr\">posting</span> کهنه، کالای ناموجود رو روی صفحه می‌فروشه: ایندکس مشتقه و مرجع تصمیم می‌گیره — گرهٔ ادغام دقیقاً برای همینه.",
         "guarantee_en": "The figure shows both write and read paths and where staleness enters. It sets no lag bound — the tripwire monitor in the next diagram owns that.",
-        "guarantee_fa": "شکل هر دو مسیر نوشتن و خواندن و محل ورود کهنگی را نشان می‌دهد؛ کران <span class=\"ltr\">lag</span> تعیین نمی‌کند — مانیتور سیم‌خاردار در نمودار بعد مالک آن است.",
+        "guarantee_fa": "شکل هر دو مسیر نوشتن و خواندن و محلِ ورود کهنگی رو نشون می‌ده؛ کران <span class=\"ltr\">lag</span> رو تعیین نمی‌کنه — مانیتور سیم‌خاردار تو نمودار بعد مالکشه.",
         "nonguarantee_en": "It says nothing about index-shard failure or relay outages — those are failure scenarios below, not arrows here.",
-        "nonguarantee_fa": "دربارهٔ خرابی شارد ایندکس و قطعی رله چیزی نمی‌گوید — آن‌ها سناریوهای خرابی پایین‌اند نه پیکان‌های اینجا.",
+        "nonguarantee_fa": "دربارهٔ خرابی شارد ایندکس و قطعی رله ساکته — اون‌ها سناریوهای خرابیِ پایین‌ان، نه پیکان‌های اینجا.",
         "point_en": "The decision point is the Index stage: who owns the posting — the same shard as the record, or a far shard by term — prices everything downstream.",
-        "point_fa": "نقطهٔ تصمیم مرحلهٔ ایندکس است: مالک <span class=\"ltr\">posting</span> — همان شارد رکورد یا شارد دوری بر اساس term — بهای همهٔ پایین‌دست را تعیین می‌کند.",
+        "point_fa": "نقطهٔ تصمیم، مرحلهٔ ایندکسه: مالک <span class=\"ltr\">posting</span> — همون شاردِ رکورد یا یه شارد دور بر اساس term — بهای همهٔ پایین‌دست رو تعیین می‌کنه.",
         "scenario_en": "Read the two lines: the upper line writes once and pays on every read; the lower line pays on every write and reads precisely.",
-        "scenario_fa": "دو خط را بخوان: خط بالا یک بار می‌نویسد و سر هر خواندن پول می‌دهد؛ خط پایین سر هر نوشتن پول می‌دهد و دقیق می‌خواند.",
+        "scenario_fa": "دو خط رو بخون: خط بالا یه بار می‌نویسه و سرِ هر خواندن پول می‌ده؛ خط پایین سرِ هر نوشتن پول می‌ده و دقیق می‌خونه.",
         "steps": [
           {
             "en": "Upper line: the record commits with its local entry in one shard transaction; the term query then fans out to all 4 shards and merges.",
-            "fa": "خط بالا: رکورد با ورودی محلی‌اش در یک تراکنش تک‌شاردی <span class=\"ltr\">commit</span> می‌شود؛ کوئری term بعد به هر ۴ شارد می‌رود و ادغام می‌کند."
+            "fa": "خط بالا: رکورد با ورودی محلی‌اش تو یه تراکنش تک‌شاردی <span class=\"ltr\">commit</span> می‌شه؛ کوئریِ term بعد می‌ره سراغ هر ۴ شارد و ادغام می‌کنه."
           },
           {
             "en": "Lower line: the write fans out to the base plus the outbox relay, which versions each term onto its owning index shard.",
-            "fa": "خط پایین: نوشتن به مرجع به‌علاوهٔ رلهٔ <span class=\"ltr\">outbox</span> می‌رود که هر term را نسخه‌دار روی شارد مالکش می‌نشاند."
+            "fa": "خط پایین: نوشتن می‌ره سراغ مرجع به‌علاوهٔ رلهٔ <span class=\"ltr\">outbox</span>، و رله هر term رو نسخه‌دار روی شارد مالکش می‌نشونه."
           },
           {
             "en": "Its reads touch 1 index shard per term, then fetch by id — and filter whatever the base no longer holds.",
-            "fa": "خواندن‌هایش per-term به ۱ شارد ایندکس می‌زنند بعد با شناسه رکورد می‌گیرند — و هرچه مرجع دیگر ندارد فیلتر می‌کنند."
+            "fa": "خواندن‌هاش per-term به ۱ شارد ایندکس می‌زنه، بعد رکورد رو با شناسه می‌گیره — و هرچی مرجع دیگه نداره فیلتر می‌کنه."
           }
         ]
       },
       "selfcheck": {
         "a_en": "Local: 4 RPCs to every shard plus a merge, with tail latency set by the slowest shard.",
-        "a_fa": "محلی: ۴ <span class=\"ltr\">RPC</span> به همهٔ شاردها به‌علاوهٔ ادغام، با <span class=\"ltr\">tail latency</span> تعیین‌شده توسط کندترین شارد.",
+        "a_fa": "محلی: ۴ <span class=\"ltr\">RPC</span> به همهٔ شاردها به‌علاوهٔ ادغام، با <span class=\"ltr\">tail latency</span>ای که کندترین شارد تعیین می‌کنه.",
         "q_en": "How many RPCs does a term-only query cost on the local path?",
-        "q_fa": "کوئری فقط-term در مسیر محلی چند <span class=\"ltr\">RPC</span> خرج می‌کند؟"
+        "q_fa": "کوئری فقط-term تو مسیر محلی چند <span class=\"ltr\">RPC</span> خرج می‌کنه؟"
       },
       "source": "assets/diagram-specs/solutions/ch7/sol3-step1-index-paths.json"
     },
     {
       "caption_en": "Four base shards, two index shards, one outbox relay, one tripwire monitor",
-      "caption_fa": "چهار شارد مرجع، دو شارد ایندکس، یک رلهٔ outbox و یک مانیتور سیم‌خاردار",
+      "caption_fa": "چهار شارد مرجع، دو شارد ایندکس، یه رلهٔ outbox و یه مانیتور سیم‌خاردار",
       "file": "diagrams/sol3-step2-index-topology.html",
       "height": 700,
       "kind_en": "architecture",
@@ -89,19 +89,19 @@
       "made": "archify",
       "narration": {
         "failure_en": "Trace the dashed relay arrows: if the outbox relay stalls, the index shards freeze in the past while base writes march on — the monitor's lag metric is the only honest signal, and the cards say so.",
-        "failure_fa": "پیکان‌های چین‌چین رله را دنبال کن: اگر رلهٔ <span class=\"ltr\">outbox</span> بایستد، شاردهای ایندکس در گذشته منجمد می‌شوند درحالی‌که نوشتن‌های مرجع جلو می‌روند — متریک <span class=\"ltr\">lag</span> مانیتور تنها سیگنال صادق است و کارت‌ها همین را می‌گویند.",
+        "failure_fa": "پیکان‌های چین‌چینِ رله رو دنبال کن: اگه رلهٔ <span class=\"ltr\">outbox</span> بایسته، شاردهای ایندکس تو گذشته منجمد می‌شن درحالی‌که نوشتن‌های مرجع جلو می‌رن — متریک <span class=\"ltr\">lag</span> مانیتور تنها سیگنال صادقه و کارت‌ها همین رو می‌گن.",
         "guarantee_en": "The figure shows every component and who talks to whom on writes, reads and relay. It does not size the relay or set alert thresholds — runbooks do.",
-        "guarantee_fa": "شکل همهٔ اجزا و گفت‌وگویشان در نوشتن و خواندن و رله را نشان می‌دهد؛ ظرفیت رله و آستانهٔ هشدار را تعیین نمی‌کند — ران‌بوک‌ها می‌کنند.",
+        "guarantee_fa": "شکل همهٔ اجزا و گفت‌وگوشون تو نوشتن و خواندن و رله رو نشون می‌ده؛ ظرفیت رله و آستانهٔ هشدار رو تعیین نمی‌کنه — اون کارِ ران‌بوک‌هاست.",
         "nonguarantee_en": "It assumes the router's maps are fresh; stale-map behavior belongs to Chapter 7's routing section, not this topology.",
-        "nonguarantee_fa": "فرض می‌کند نگاشت‌های مسیریاب تازه‌اند؛ رفتار نگاشت کهنه مال بخش مسیریابی فصل ۷ است نه این توپولوژی.",
+        "nonguarantee_fa": "فرض می‌کنه نگاشت‌های مسیریاب تازه‌ان؛ رفتارِ نگاشت کهنه مالِ بخش مسیریابیِ فصل ۷ است، نه این توپولوژی.",
         "point_en": "The decision point is the router: it holds two maps (id to base, term to index) and every path — cheap or fanned-out — starts with which map it consults.",
-        "point_fa": "نقطهٔ تصمیم مسیریاب است: دو نگاشت دارد (شناسه به مرجع و term به ایندکس) و هر مسیر — ارزان یا پراکنده — با اینکه کدام نگاشت را می‌پرسد شروع می‌شود.",
+        "point_fa": "نقطهٔ تصمیم مسیریابه: دو نگاشت داره (شناسه به مرجع و term به ایندکس) و هر مسیر — ارزون یا پراکنده — با اینکه کدوم نگاشت رو بپرسه شروع می‌شه.",
         "scenario_en": "Start at the client, walk each solid arrow for reads and writes, then walk the dashed arrows for the relay that keeps the index behind — but versioned.",
-        "scenario_fa": "از کلاینت شروع کن، هر پیکان توپر را برای خواندن و نوشتن برو و بعد پیکان‌های چین‌چین رله را برو که ایندکس را عقب نگه می‌دارد — ولی نسخه‌دار.",
+        "scenario_fa": "از کلاینت شروع کن، هر پیکان توپر رو برای خواندن و نوشتن برو و بعد پیکان‌های چین‌چینِ رله رو برو که ایندکس رو عقب نگه می‌داره — ولی نسخه‌دار.",
         "steps": [
           {
             "en": "Client to router to owning base shard: the keyed request path — one shard touched, the cheapest arrow on the page.",
-            "fa": "کلاینت به مسیریاب به شارد مرجع مالک: مسیر درخواست کلیددار — یک شارد درگیر، ارزان‌ترین پیکان صفحه."
+            "fa": "کلاینت به مسیریاب به شارد مرجعِ مالک: مسیرِ درخواست کلیددار — یه شارد درگیر، ارزان‌ترین پیکان صفحه."
           },
           {
             "en": "Router to index shards for term lookups, then back to base shards to fetch by id: the two-hop global read.",
@@ -109,21 +109,21 @@
           },
           {
             "en": "Base to outbox relay to index shards, dashed: versioned index writes flowing asynchronously — plus the router's metrics arrow to the tripwire monitor.",
-            "fa": "مرجع به رلهٔ <span class=\"ltr\">outbox</span> به شاردهای ایندکس، چین‌چین: نوشتن‌های نسخه‌دار ایندکس که ناهمزمان جاری‌اند — به‌علاوهٔ پیکان متریک‌های مسیریاب به مانیتور سیم‌خاردار."
+            "fa": "مرجع به رلهٔ <span class=\"ltr\">outbox</span> به شاردهای ایندکس، چین‌چین: نوشتن‌های نسخه‌دار ایندکس که ناهمزمان جاری‌ان — به‌علاوهٔ پیکان متریک‌های مسیریاب به مانیتور سیم‌خاردار."
           }
         ]
       },
       "selfcheck": {
         "a_en": "The relay applies per-term events with per-record versions, so a crash replays them in order instead of losing half a multi-term write.",
-        "a_fa": "رله رویدادهای per-term را با نسخهٔ per-record اعمال می‌کند، پس <span class=\"ltr\">crash</span> آن‌ها را به‌ترتیب بازپخش می‌کند به‌جای گم کردن نیمی از نوشتن چندtermی.",
+        "a_fa": "رله رویدادهای per-term رو با نسخهٔ per-record اعمال می‌کنه، پس <span class=\"ltr\">crash</span> اون‌ها رو به‌ترتیب بازپخش می‌کنه به‌جای گم کردن نیمی از نوشتنِ چندtermی.",
         "q_en": "Why does the relay carry versions, not bare postings?",
-        "q_fa": "چرا رله نسخه حمل می‌کند نه <span class=\"ltr\">posting</span> لخت؟"
+        "q_fa": "چرا رله نسخه حمل می‌کنه نه <span class=\"ltr\">posting</span> لخت؟"
       },
       "source": "assets/diagram-specs/solutions/ch7/sol3-step2-index-topology.json"
     },
     {
       "caption_en": "RPC and shard counts per operation, plus the two staleness cases",
-      "caption_fa": "تعداد RPC و شارد per-operation به‌علاوهٔ دو حالت کهنگی",
+      "caption_fa": "تعداد RPC و شارد per-operation، به‌علاوهٔ دو حالت کهنگی",
       "file": "diagrams/sol3-local-global-index.html",
       "height": 640,
       "kind_en": "measurement table",
@@ -131,70 +131,70 @@
       "made": "hand",
       "narration": {
         "failure_en": "Read the pink row: one lost brand-index write makes the AND query silently drop a live record. Without the drill in the tests section, this row stays green in staging and red in production.",
-        "failure_fa": "سطر صورتی را بخوان: یک نوشتن گمشدهٔ ایندکس برند، کوئری AND را وادار می‌کند رکورد زنده را بی‌صدا بیندازد. بدون تمرین بخش آزمون‌ها، این سطر در staging سبز و در پروداکشن قرمز می‌ماند.",
+        "failure_fa": "سطر صورتی رو بخون: یه نوشتنِ گمشدهٔ ایندکس برند، کوئری AND رو وادار می‌کنه رکورد زنده رو بی‌صدا بیندازه. بدون تمرینِ بخش آزمون‌ها، این سطر تو staging سبزه و تو پروداکشن قرمز.",
         "guarantee_en": "The figure reports RPC and shard counts from the run, plus both staleness outcomes. It reports no timings — deliberately.",
-        "guarantee_fa": "شکل شمار <span class=\"ltr\">RPC</span> و شارد اجرا را گزارش می‌کند به‌علاوهٔ هر دو نتیجهٔ کهنگی. هیچ زمانی گزارش نمی‌کند — عمداً.",
+        "guarantee_fa": "شکل شمار <span class=\"ltr\">RPC</span> و شارد اجرا رو گزارش می‌کنه، به‌علاوهٔ هر دو نتیجهٔ کهنگی. هیچ زمانی گزارش نمی‌کنه — عمداً.",
         "nonguarantee_en": "It does not promise any p99: the footer forbids turning these counts into latency claims.",
-        "nonguarantee_fa": "هیچ <span class=\"ltr\">p99</span>ای وعده نمی‌دهد: پانوشت تبدیل این شمارش‌ها به ادعای تاخیر را ممنوع می‌کند.",
+        "nonguarantee_fa": "هیچ <span class=\"ltr\">p99</span>ای وعده نمی‌ده: پانوشت تبدیل این شمارش‌ها به ادعای تاخیر رو ممنوع می‌کنه.",
         "point_en": "The pink row is the staff lesson: non-atomic multi-shard writes fail partially, and the query — not the write — is where the user meets the failure.",
-        "point_fa": "سطر صورتی درس استف است: نوشتن‌های چندشاردی غیراتمی نصفه شکست می‌خورند و کوئری — نه نوشتن — جایی است که کاربر با شکست روبه‌رو می‌شود.",
+        "point_fa": "سطر صورتی درسِ استفه: نوشتن‌های چندشاردیِ غیراتمی نصفه شکست می‌خورن و کوئری — نه نوشتن — جاییه که کاربر با شکست روبه‌رو می‌شه.",
         "scenario_en": "Read the table row by row: each row is one operation, the two columns are the two index families and their shard bills.",
-        "scenario_fa": "جدول را سطر‌به‌سطر بخوان: هر سطر یک عملیات است و دو ستون دو خانوادهٔ ایندکس‌اند با صورت‌حساب شاردشان.",
+        "scenario_fa": "جدول رو سطر‌به‌سطر بخون: هر سطر یه عملیاته و دو ستون، دو خانوادهٔ ایندکس با صورت‌حسابِ شاردهاشون.",
         "steps": [
           {
             "en": "Write row: local touches 1 shard; global touches 1 base plus 2 index shards — count base and index shards separately.",
-            "fa": "سطر نوشتن: محلی ۱ شارد را لمس می‌کند؛ سراسری ۱ مرجع به‌علاوهٔ ۲ ایندکس — شاردهای مرجع و ایندکس را جدا بشمار."
+            "fa": "سطر نوشتن: محلی ۱ شارد رو لمس می‌کنه؛ سراسری ۱ مرجع به‌علاوهٔ ۲ ایندکس — شاردهای مرجع و ایندکس رو جدا بشمار."
           },
           {
             "en": "Read rows: local always scatters to 4; global reads 1 index shard per term, then fetches records by id.",
-            "fa": "سطرهای خواندن: محلی همیشه به ۴ شارد پراکنده می‌خواند؛ سراسری per-term از ۱ شارد ایندکس می‌خواند بعد رکوردها را با شناسه می‌گیرد."
+            "fa": "سطرهای خواندن: محلی همیشه به ۴ شارد پراکنده می‌خونه؛ سراسری per-term از ۱ شارد ایندکس می‌خونه و بعد رکوردها رو با شناسه می‌گیره."
           },
           {
             "en": "Staleness rows: the partial write drops a live row from AND (pink), the stale entry is filtered because the delete wins.",
-            "fa": "سطرهای کهنگی: نوشتن ناقص رکورد زنده را از AND می‌اندازد (صورتی) و ورودی کهنه فیلتر می‌شود چون حذف می‌چربد."
+            "fa": "سطرهای کهنگی: نوشتن ناقص، رکورد زنده رو از AND می‌ندازه (صورتی) و ورودی کهنه فیلتر می‌شه چون حذف می‌چربه."
           }
         ]
       },
       "selfcheck": {
         "a_en": "One lost term write: the AND query misses the record while the single-term query still finds it — partial failure, not total.",
-        "a_fa": "یک نوشتن گمشدهٔ term: کوئری AND رکورد را گم می‌کند درحالی‌که کوئری تک‌شرط هنوز پیدایش می‌کند — شکست نصفه نه کامل.",
+        "a_fa": "یه نوشتنِ گمشدهٔ term: کوئری AND رکورد رو گم می‌کنه درحالی‌که کوئری تک‌شرط هنوز پیدایش می‌کنه — شکستِ نصفه، نه کامل.",
         "q_en": "What does the pink row prove about multi-term writes?",
-        "q_fa": "سطر صورتی دربارهٔ نوشتن‌های چندtermی چه چیزی را ثابت می‌کند؟"
+        "q_fa": "سطر صورتی دربارهٔ نوشتن‌های چندtermی چه چیزی رو ثابت می‌کنه؟"
       }
     }
   ],
   "failures": [
     {
       "en": "The outbox relay stalls: base writes march on while the index freezes in the past. Guard: a per-term lag metric with a paging threshold, plus a documented stale-read mode — never silent staleness.",
-      "fa": "رلهٔ <span class=\"ltr\">outbox</span> می‌ایستد: نوشتن‌های مرجع جلو می‌روند درحالی‌که ایندکس در گذشته منجمد می‌شود. نگهبان: متریک <span class=\"ltr\">lag</span> per-term با آستانهٔ <span class=\"ltr\">paging</span> به‌علاوهٔ حالت خواندن کهنهٔ مستند — هرگز کهنگی بی‌صدا نه."
+      "fa": "رلهٔ <span class=\"ltr\">outbox</span> می‌ایسته: نوشتن‌های مرجع جلو می‌رن درحالی‌که ایندکس تو گذشته منجمد می‌شه. نگهبان: متریک <span class=\"ltr\">lag</span> per-term با آستانهٔ <span class=\"ltr\">paging</span>، به‌علاوهٔ یه حالت خواندنِ کهنهٔ مستند. کهنگیِ بی‌صدا، بدترین حالت ممکنه."
     },
     {
       "en": "One index shard goes down mid-query: its terms vanish from AND results. Guard: declare the degraded mode explicitly (partial results flagged, or fail closed for strict queries) — the worst answer is a confident incomplete one.",
-      "fa": "یک شارد ایندکس وسط کوئری می‌افتد: termهایش از نتایج AND ناپدید می‌شوند. نگهبان: حالت تنزل‌یافته را صریح اعلام کن (نتایج ناقص پرچم‌دار یا <span class=\"ltr\">fail-closed</span> برای کوئری‌های سخت‌گیر) — بدترین جواب، جواب ناقصِ مطمئن است."
+      "fa": "یه شارد ایندکس وسط کوئری می‌افته: termهایش از نتایج AND ناپدید می‌شن. نگهبان: حالت تنزل‌یافته رو صریح اعلام کن (نتایج ناقصِ پرچم‌دار یا <span class=\"ltr\">fail-closed</span> برای کوئری‌های سخت‌گیر). بدترین جواب، جوابِ ناقصِ مطمئنه."
     },
     {
       "en": "A base delete races a two-term read: the reader fetches an id the base just dropped. Guard: revalidate every id against the base and let the delete win — plus per-record versions so an older index event can never resurrect it.",
-      "fa": "حذف مرجع با خواندن دوشرط مسابقه می‌دهد: خواننده شناسه‌ای را می‌گیرد که مرجع تازه انداخته. نگهبان: هر شناسه را با مرجع بازبینی کن و بگذار حذف بچربد — به‌علاوهٔ نسخهٔ per-record تا رویداد قدیمی‌تر ایندکس هرگز زنده‌اش نکند."
+      "fa": "حذفِ مرجع با خواندن دوشرط مسابقه می‌ده: خواننده شناسه‌ای رو می‌گیره که مرجع تازه انداخته. نگهبان: هر شناسه رو با مرجع بازبینی کن و بذار حذف بچربه — به‌علاوهٔ نسخهٔ per-record تا رویداد قدیمی‌ترِ ایندکس هیچ‌وقت زنده‌اش نکنه."
     }
   ],
   "followups": [
     {
-      "a_en": "Revalidate, then serve: every id from the index is checked against its base shard before reaching the caller, and the recorded delete wins — the phantom is filtered, counted, and never shown. Then ask why the posting outlived the record: a missing tombstone or a relay backlog, and fix that cause — the reader contract hides nothing, it only protects.",
-      "a_fa": "اول بازبینی بعد سرو: هر شناسهٔ آمده از ایندکس پیش از رسیدن به صداکننده با شارد مرجعش چک می‌شود و حذف ثبت‌شده می‌چربد — شبح فیلتر و شمرده می‌شود و هرگز نشان داده نمی‌شود. بعد بپرس چرا <span class=\"ltr\">posting</span> از رکورد بیشتر عمر کرد: <span class=\"ltr\">tombstone</span> گمشده یا عقب‌ماندگی رله، و همان علت را درست کن — قرارداد خواننده چیزی را پنهان نمی‌کند، فقط محافظت می‌کند.",
+      "a_en": "Revalidate, then serve: every id from the index is checked against its base shard before reaching the caller, and the recorded delete wins — the phantom is filtered, counted, and never shown. Then ask why the posting outlived the record: a missing tombstone or a relay backlog, and fix that cause. The reader contract hides nothing; it only protects.",
+      "a_fa": "اول بازبینی، بعد سرو: هر شناسه‌ای که از ایندکس میاد، پیش از رسیدن به صداکننده با شارد مرجعش چک می‌شه و حذفِ ثبت‌شده می‌چربه — شبح فیلتر و شمرده می‌شه و هیچ‌وقت نشون داده نمی‌شه. بعدش بپرس چرا <span class=\"ltr\">posting</span> از رکورد بیشتر عمر کرده: <span class=\"ltr\">tombstone</span> گمشده یا عقب‌ماندگی رله — و همون علت رو درست کن. قراردادِ خواننده چیزی رو پنهان نمی‌کنه، فقط محافظت می‌کنه.",
       "level": "senior",
       "q_en": "The index returns a product you've already deleted from the record. What does your reader do?",
       "q_fa": "حالا index یه کالا رو نشون می‌ده ولی حذفش تو مرجع ثبت شده. خواننده باید چی کار کنه؟"
     },
     {
-      "a_en": "Price it in RPCs and network intersections, not adjectives: each extra term adds one index-shard lookup, and long postings lists make the intersection dominate. When two hot terms intersect on every query, stop intersecting at read time — precompute the conjunction as its own posting (a materialized AND) and pay on write instead. The staff call is moving cost across the read/write line deliberately, with the RPC table as evidence.",
-      "a_fa": "با <span class=\"ltr\">RPC</span> و اشتراک شبکه قیمت بگذار نه با صفت: هر term اضافه یک <span class=\"ltr\">lookup</span> شارد ایندکس اضافه می‌کند و لیست‌های بلند <span class=\"ltr\">posting</span> اشتراک را غالب می‌کنند. وقتی دو term داغ سر هر کوئری اشتراک می‌خورند، اشتراک را در زمان خواندن متوقف کن — عطف را به‌عنوان <span class=\"ltr\">posting</span> خودش پیش‌محاسبه کن (AND مادی‌شده) و به‌جایش سر نوشتن پول بده. تصمیم استف جابه‌جایی عمدی هزینه روی خط خواندن/نوشتن است با جدول <span class=\"ltr\">RPC</span> به‌عنوان مدرک.",
+      "a_en": "Price it in RPCs and network intersections, not adjectives: each extra term adds one index-shard lookup, and long posting lists make the intersection dominate. When two hot terms intersect on every query, stop intersecting at read time — precompute the conjunction as its own posting (a materialized AND) and pay on write instead. The staff call is moving cost across the read/write line deliberately, with the RPC table as evidence.",
+      "a_fa": "با <span class=\"ltr\">RPC</span> و اشتراک شبکه قیمت بگذار، نه با صفت: هر term اضافه یه <span class=\"ltr\">lookup</span> شارد ایندکس اضافه می‌کنه و لیست‌های بلند <span class=\"ltr\">posting</span>، اشتراک رو غالب می‌کنن. وقتی دو term داغ سرِ هر کوئری اشتراک می‌خورن، اشتراک رو تو زمان خواندن متوقف کن — عطف رو به‌عنوان <span class=\"ltr\">posting</span> خودش پیش‌محاسبه کن (AND مادی‌شده) و به‌جایش سرِ نوشتن پول بده. این یه تصمیمِ استفه: هزینه رو عمداً روی خط خواندن/نوشتن جابه‌جا می‌کنی، با جدول <span class=\"ltr\">RPC</span> به‌عنوان مدرک.",
       "level": "staff",
       "q_en": "A two-term AND over hot terms runs on every query. Where does the cross-shard cost go?",
       "q_fa": "یک AND دوشرط روی termهای داغ سر هر کوئری اجرا می‌شود. هزینهٔ چندشاردی کجا می‌رود؟"
     },
     {
       "a_en": "Measure in staging, promise from production: report shards-engaged and relay lag from the lab, keep p50/p99 for the real cluster with real network hops, and write the honesty line into the review — 'local timings predict nothing'. The staff habit is separating what you counted (RPCs) from what you claim (latency), in writing.",
-      "a_fa": "در staging بسنج و از پروداکشن وعده بده: شاردهای درگیر و <span class=\"ltr\">lag</span> رله را از لب گزارش کن، <span class=\"ltr\">p50/p99</span> را برای خوشهٔ واقعی با هاپ‌های واقعی شبکه نگه دار و خط صداقت را در ریویو بنویس — «زمان‌های محلی هیچ پیش‌بینی نمی‌کنند». عادت استف جدا کردن نوشته‌شدهٔ آنچه شمردی (<span class=\"ltr\">RPC</span>ها) از آنچه ادعا می‌کنی (تاخیر) است.",
+      "a_fa": "تو staging بسنج، از پروداکشن وعده بده: شاردهای درگیر و <span class=\"ltr\">lag</span> رله رو از لب گزارش کن، <span class=\"ltr\">p50/p99</span> رو برای خوشهٔ واقعی با هاپ‌های واقعی شبکه نگه دار، و خط صداقت رو تو ریویو بنویس: «زمان‌های محلی هیچ پیش‌بینی نمی‌کنن». عادتِ استف: نوشتهٔ آنچه شمردی (<span class=\"ltr\">RPC</span>ها) رو از آنچه ادعا می‌کنی (تاخیر) جدا نگه دار.",
       "level": "staff",
       "q_en": "What do you measure locally, and what do you promise about p99?",
       "q_fa": "محلی چه چیزی را می‌سنجی و دربارهٔ <span class=\"ltr\">p99</span> چه وعده‌ای می‌دهی؟"
@@ -202,24 +202,24 @@
   ],
   "interview_q_en": "Think of it — you've got four shards to index. Design local and global secondary indexes over them. Compare writes, one/two predicates, scatter-gather, partial failures and lag. Handle a “one write, several terms” change with outbox/version, and pin down your RPC counts, p99 and consistency cost.",
   "interview_q_fa": "قضیه اینه که چهار تا shard داری. روشون local و global secondary index طراحی کن. write path، تک‌شرط و دوشرط، scatter-gather، failure جزئی و lag رو مقایسه کن. یه تغییر چندtermی رو با outbox/version مدیریت کن و تعداد RPC، p99 و هزینه consistency رو مشخص کن.",
-  "mental_en": "The index is a derived copy with a sharding of its own — and its sharding answers a different question than the base's. Every secondary read is two hops (find the ids, fetch the records) and the two hops may disagree; the whole design is deciding who wins the disagreement.",
-  "mental_fa": "ایندکس کپی مشتقی است با sharding خودش — و sharding آن به سؤالی متفاوت از سؤال مرجع جواب می‌دهد. هر خواندن ثانویه دو پرش است (شناسه‌ها را پیدا کن و رکوردها را بگیر) و دو پرش ممکن است اختلاف داشته باشند؛ کل طراحی یعنی تصمیم اینکه در اختلاف چه کسی می‌برد.",
+  "mental_en": "Picture the index as a derived copy with a sharding of its own — and its sharding answers a different question than the base's. Every secondary read is two hops: find the ids, then fetch the records. Those two hops can disagree. So the whole design is one question: who wins the disagreement?",
+  "mental_fa": "فرض کن ایندکس یه کپیِ مشتقه با sharding خودش باشه — و sharding ایندکس به سؤالی جواب می‌ده که با سؤال مرجع فرق داره. هر خواندنِ ثانویه دو پرشه: شناسه‌ها رو پیدا کن، بعد رکوردها رو بگیر. و این دو پرش ممکنه با هم اختلاف داشته باشن. پس کل طراحی در یه جمله‌ست: توی اختلاف، کی می‌بره؟",
   "mistakes": [
     {
-      "en": "A global index makes reads free. The postings lookup is one shard, but fetching the records still spans shards and multi-term intersection still crosses the network.",
-      "fa": "ایندکس سراسری خواندن را رایگان می‌کند. <span class=\"ltr\">lookup</span> لیست <span class=\"ltr\">posting</span> یک شارد است ولی گرفتن رکوردها هنوز چند شارد را درگیر می‌کند و اشتراک چند term هنوز از شبکه می‌گذرد."
+      "en": "Thinking a global index makes reads free. The postings lookup is one shard, but fetching the records still spans shards and multi-term intersection still crosses the network.",
+      "fa": "«ایندکس سراسری خواندن رو رایگان می‌کنه.» نه: <span class=\"ltr\">lookup</span> لیست <span class=\"ltr\">posting</span> یه شارده، ولی گرفتنِ رکوردها هنوز چند شارد رو درگیر می‌کنه و اشتراکِ چند term هنوز از شبکه می‌گذره."
     },
     {
-      "en": "More shards speed up local-index queries. They grow storage, not query throughput — every query still visits every shard and the slowest sets the tail.",
-      "fa": "شارد بیشتر کوئری‌های ایندکس محلی را تند می‌کند. فضا را رشد می‌دهند نه <span class=\"ltr\">throughput</span> کوئری را — هر کوئری هنوز به همهٔ شاردها سر می‌زند و کندترین دم را تعیین می‌کند."
+      "en": "Thinking more shards speed up local-index queries. They grow storage, not query throughput — every query still visits every shard and the slowest sets the tail.",
+      "fa": "«شارد بیشتر، کوئری‌های ایندکس محلی رو تند می‌کنه.» نه: فضا رو رشد می‌دن، نه <span class=\"ltr\">throughput</span> کوئری رو — هر کوئری هنوز به همهٔ شاردها سر می‌زنه و کندترین، دم رو تعیین می‌کنه."
     },
     {
-      "en": "Four local SQLite timings predict cluster p99. They predict nothing about networked p99 — report counts locally, measure latency on the real cluster.",
-      "fa": "زمان‌های چهار SQLite محلی <span class=\"ltr\">p99</span> خوشه را پیش‌بینی می‌کند. دربارهٔ <span class=\"ltr\">p99</span> شبکه هیچ پیش‌بینی نمی‌کنند — محلی شمارش را گزارش کن و تاخیر را روی خوشهٔ واقعی بسنج."
+      "en": "Assuming four local SQLite timings predict cluster p99. They predict nothing about networked p99 — report counts locally, measure latency on the real cluster.",
+      "fa": "«زمان‌های چهار SQLite محلی، <span class=\"ltr\">p99</span> خوشه رو پیش‌بینی می‌کنه.» نمی‌کنه: دربارهٔ <span class=\"ltr\">p99</span> شبکه هیچ پیش‌بینی نمی‌کنن. محلی شمارش رو گزارش کن، تاخیر رو روی خوشهٔ واقعی بسنج."
     },
     {
-      "en": "The index is the source of truth, or a hand-rolled index without transactions is fine. The base is the truth and partial writes detach any unguarded index — use transactions or an outbox relay, never hope.",
-      "fa": "ایندکس مرجع حقیقت است یا ایندکس دستی بدون تراکنش خوب است. مرجع حقیقت است و نوشتن‌های نصفه هر ایندکس بی‌نگهبان را جدا می‌کنند — تراکنش یا رلهٔ <span class=\"ltr\">outbox</span> بگذار، هرگز امید نه."
+      "en": "Thinking the index is the source of truth, or that a hand-rolled index without transactions is fine. The base is the truth, and partial writes detach any unguarded index — use transactions or an outbox relay, never hope.",
+      "fa": "دو اشتباه: ایندکس مرجع حقیقت است، یا ایندکس دستی بدون تراکنش اشکالی نداره. هیچ‌کدوم. مرجع حقیقت است و نوشتن‌های نصفه هر ایندکس بی‌نگهبان رو جدا می‌کنن — تراکنش یا رلهٔ <span class=\"ltr\">outbox</span> بگذار، هرگز امید نه."
     }
   ],
   "number": 3,
@@ -230,34 +230,34 @@
   ],
   "steps": [
     {
-      "en": "A local write touches exactly one base shard with its entry in the same commit; a global write commits to the base plus one versioned outbox event per term, applied to each owning index shard. Count base and index shards separately — the audit signal demands it.",
-      "fa": "نوشتن محلی دقیقاً یک شارد مرجع را لمس می‌کند با ورودی‌اش در همان <span class=\"ltr\">commit</span>؛ نوشتن سراسری روی مرجع <span class=\"ltr\">commit</span> می‌شود به‌علاوهٔ یک رویداد نسخه‌دار <span class=\"ltr\">outbox</span> per-term که روی هر شارد مالک ایندکس اعمال می‌شود. شاردهای مرجع و ایندکس را جدا بشمار — سیگنال ممیزی همین را می‌خواهد.",
+      "en": "A local write touches exactly one base shard, its entry in the same commit; a global write commits to the base plus one versioned outbox event per term, applied to each owning index shard. Count base and index shards separately — the audit signal demands it.",
+      "fa": "نوشتن محلی دقیقاً یه شارد مرجع رو لمس می‌کنه، با ورودی‌اش تو همون <span class=\"ltr\">commit</span>. نوشتن سراسری هم روی مرجع <span class=\"ltr\">commit</span> می‌شه به‌علاوهٔ یه رویداد نسخه‌دار <span class=\"ltr\">outbox</span> per-term که روی هر شارد مالک ایندکس اعمال می‌شه. شاردهای مرجع و ایندکس رو جدا بشمار — سیگنال ممیزی همین رو می‌خواد.",
       "t_en": "Write both paths",
-      "t_fa": "هر دو مسیر نوشتن"
+      "t_fa": "هر دو مسیر نوشتن رو بنویس"
     },
     {
-      "en": "Local term queries scatter to all 4 shards and merge (tail latency follows the slowest); global single-term reads hit 1 index shard, then fetch records by id. Two-term AND intersects postings over the network — slow exactly when the lists are long.",
-      "fa": "کوئری‌های term محلی به هر ۴ شارد پراکنده و ادغام می‌شوند (<span class=\"ltr\">tail latency</span> دنبال کندترین)؛ تک‌شرط سراسری به ۱ شارد ایندکس می‌زند بعد رکوردها را با شناسه می‌گیرد. AND دوشرط <span class=\"ltr\">posting</span>ها را روی شبکه اشتراک می‌گیرد — دقیقاً وقتی کند است که لیست‌ها بلندند.",
+      "en": "Local term queries scatter to all 4 shards and merge (tail latency follows the slowest); global single-term reads hit 1 index shard, then fetch records by id. A two-term AND intersects postings over the network — slow exactly when the lists are long.",
+      "fa": "کوئری‌های term محلی به هر ۴ شارد پراکنده و ادغام می‌شن (<span class=\"ltr\">tail latency</span> دنبال کندترین). تک‌شرط سراسری به ۱ شارد ایندکس می‌زنه، بعد رکوردها رو با شناسه می‌گیره. و AND دوشرط، <span class=\"ltr\">posting</span>ها رو روی شبکه اشتراک می‌گیره — دقیقاً وقتی کند می‌شه که لیست‌ها بلند باشن.",
       "t_en": "Read one term, then two",
-      "t_fa": "یک شرط بعد دو شرط بخوان"
+      "t_fa": "یه شرط بعد دو شرط بخون"
     },
     {
       "en": "A lost brand-index write makes the AND query silently drop a live record (false negative); a lingering posting serves a deleted record (false positive). Both are partial-failure shapes of non-atomic multi-shard writes, and the demo counts each.",
-      "fa": "نوشتن گمشدهٔ ایندکس برند، کوئری AND را وادار می‌کند رکورد زنده را بی‌صدا بیندازد (منفی کاذب)؛ <span class=\"ltr\">posting</span> مانده رکورد حذف‌شده را سرو می‌کند (مثبت کاذب). هر دو شکل‌های خرابی نصفهٔ نوشتن‌های چندشاردی غیراتمی‌اند و دمو هرکدام را می‌شمارد.",
+      "fa": "یه نوشتنِ گمشدهٔ ایندکس برند، کوئری AND رو وادار می‌کنه رکورد زنده رو بی‌صدا بیندازه (منفی کاذب)؛ <span class=\"ltr\">posting</span> مانده، رکورد حذف‌شده رو سرو می‌کنه (مثبت کاذب). نکته‌ش اینجاست: هر دو، شکل‌های خرابیِ نصفهٔ نوشتن‌های چندشاردیِ غیراتمی‌ان — و دمو هرکدوم رو می‌شماره.",
       "t_en": "Break one write",
-      "t_fa": "یک نوشتن را بشکن"
+      "t_fa": "یه نوشتن رو بشکن"
     },
     {
       "en": "The reader revalidates every id against its base shard and the recorded delete always wins; tripwires fire on fan-out equal to shard count, per-term relay lag, and any index purge without a tombstone first.",
-      "fa": "خواننده هر شناسه را با شارد مرجعش بازبینی می‌کند و حذف ثبت‌شده همیشه می‌چربد؛ سیم‌خاردارها روی <span class=\"ltr\">fan-out</span> برابر تعداد شارد، <span class=\"ltr\">lag</span> per-term رله و هر پاک‌سازی ایندکس بدون <span class=\"ltr\">tombstone</span> قبلی آتش می‌کنند.",
+      "fa": "خواننده هر شناسه رو با شارد مرجعش بازبینی می‌کنه و حذفِ ثبت‌شده همیشه می‌چربه. سیم‌خاردارها هم روی <span class=\"ltr\">fan-out</span> برابر تعداد شارد، <span class=\"ltr\">lag</span> per-term رله و هر پاک‌سازی ایندکس بدون <span class=\"ltr\">tombstone</span> قبلی آتش می‌کنن.",
       "t_en": "Contract and tripwires",
       "t_fa": "قرارداد و سیم‌خاردار"
     }
   ],
-  "tests_en": "<p>Assert shards engaged per operation (local reads always 4, global single-term 1 index); drill a killed index write and require the AND miss to be detected by audit; drill a deleted-but-indexed id and require zero phantoms surfacing; track per-term relay lag with a paging threshold; forbid latency claims from local counts.</p>",
-  "tests_fa": "<p>بررسی شاردهای درگیر per-operation (خواندن محلی همیشه ۴ و تک‌شرط سراسری ۱ ایندکس)؛ تمرین نوشتن کشته‌شدهٔ ایندکس و الزام شناسایی گم شدن AND با حسابرسی؛ تمرین شناسهٔ حذف‌شدهٔ ولی ایندکس‌شده و الزام صفر شبح روی سطح؛ رصد <span class=\"ltr\">lag</span> per-term رله با آستانهٔ <span class=\"ltr\">paging</span>؛ ممنوعیت ادعای تاخیر از شمارش‌های محلی.</p>",
-  "worked_en": "<p>Actual demo output (<code>IndexSim</code>): 12 records over 4 base and 2 index shards. Single-term color=red: local 4-shard scatter, global 1 index + 3 base shards. Two-term red AND a: local 4 scatter, global 2 index + fetch. Partial write: the AND query misses id 12. Stale entry: deleted id 3 is filtered at revalidation, phantoms = 1 caught.</p>",
-  "worked_fa": "<p>خروجی واقعی دمو (<code>IndexSim</code>): ۱۲ رکورد روی ۴ شارد مرجع و ۲ ایندکس. تک‌شرط قرمز: محلی پراکندهٔ ۴ شاردی و سراسری ۱ ایندکس + ۳ مرجع. دوشرط قرمز و a: محلی ۴ پراکنده و سراسری ۲ ایندکس + گرفتن رکورد. نوشتن ناقص: کوئری AND شناسهٔ ۱۲ را گم می‌کند. ورودی کهنه: شناسهٔ حذف‌شدهٔ ۳ در بازبینی فیلتر شد و شبح‌های گرفته‌شده ۱ است.</p>",
-  "reasoning_fa": "<p>برای query با term، local index باید هر چهار base shard را بپرسد چون محل سند از term معلوم نیست؛ global index term را مستقیم به shard index می‌برد ولی write را به outbox و index هم می‌رساند. شمار RPC را می‌شماریم چون هزینهٔ ساختاری قابل مقایسه است؛ زمان چهار SQLite روی یک لپ‌تاپ شبیه شبکهٔ واقعی نیست. validation از مرجع لازم است چون index ناهمگام ممکن است حذف یا ACL تازه را هنوز ندیده باشد.</p>",
-  "reasoning_en": "<p>A local term index queries all four base shards because the term does not identify record placement. A global term index routes directly but adds outbox/index maintenance. Count RPCs as structural cost: four local SQLite instances do not model network latency. Authoritative validation matters because asynchronous indexes may not yet reflect deletions or ACL changes.</p>"
+  "tests_en": "<p>First, assert the shards engaged per operation (local reads always 4, global single-term 1 index). Then drill it: kill an index write and require the audit to catch the AND miss. Drill again: a deleted-but-indexed id, with zero phantoms allowed to surface. Track per-term relay lag with a paging threshold. And one red line: no latency claims may come out of local counts.</p>",
+  "tests_fa": "<p>اول، شاردهای درگیر per-operation رو بررسی کن (خواندن محلی همیشه ۴ و تک‌شرط سراسری ۱ ایندکس). بعد یه تمرین: نوشتنِ کشته‌شدهٔ ایندکس، و الزام اینکه حسابرسی گم شدن AND رو بگیره. یه تمرین دیگه: شناسهٔ حذف‌شده ولی ایندکس‌شده، و الزام صفر شبح روی سطح. <span class=\"ltr\">lag</span> per-term رله رو با آستانهٔ <span class=\"ltr\">paging</span> رصد کن. و یه خط قرمز: از شمارش‌های محلی، ادعای تاخیر درست نمی‌شه.</p>",
+  "worked_en": "<p>Actual demo output (<code>IndexSim</code>): 12 records over 4 base and 2 index shards. Single-term color=red: local 4-shard scatter, global 1 index + 3 base shards. Two-term red AND a: local 4 scatter, global 2 index + fetch. Partial write: the AND query misses id 12. Stale entry: deleted id 3 is filtered at revalidation, phantoms = 1 caught. And notice what the demo never prints: a single timing.</p>",
+  "worked_fa": "<p>خروجی واقعی دمو (<code>IndexSim</code>): ۱۲ رکورد روی ۴ شارد مرجع و ۲ ایندکس. تک‌شرط قرمز: محلی پراکندهٔ ۴ شاردی، سراسری ۱ ایندکس + ۳ مرجع. دوشرط قرمز و a: محلی ۴ پراکنده، سراسری ۲ ایندکس + گرفتن رکورد. نوشتن ناقص: کوئری AND شناسهٔ ۱۲ رو گم می‌کنه. ورودی کهنه: شناسهٔ حذف‌شدهٔ ۳ در بازبینی فیلتر شد و شبح‌های گرفته‌شده ۱ است. و حواست باشه چی چاپ نشده: حتی یه زمان‌بندی.</p>",
+  "reasoning_fa": "<p>چرا این مدل می‌خوره: برای کوئری با term، ایندکس محلی باید هر چهار base shard رو بپرسه، چون محلِ سند از روی term معلوم نیست. ایندکس سراسری term رو مستقیم می‌بره سراغ شارد ایندکس، ولی نوشتن رو هم به outbox و ایندکس می‌رسونه — یعنی هزینه از خواندن میاد سراغ نوشتن.</p><p>واحدها: تعداد RPC (یعنی شاردهای درگیر per-operation) واحد سنجش ماست، نه میلی‌ثانیه. زمانِ چهار SQLite روی یه لپ‌تاپ شبیه شبکهٔ واقعی نیست — پس شمارش رو گزارش کن و تاخیر رو جدا اندازه بگیر. همهٔ عددهای این حل آموزشی‌ان و باید با اندازه‌گیری خودت جایگزین بشن.</p><p>و چرا بازبینی از مرجع لازمه: چون ایندکس ناهمگامه و ممکنه هنوز حذف یا ACL تازه رو ندیده باشه. اگه فرض‌ها عوض بشن — مثلاً کوئری‌ها بیشتر تک‌شرط بشن یا termهای داغ کم بشن — هزینهٔ اشتراک کم می‌شه و ایندکس سراسری راحت‌تر برنده می‌شه؛ ولی اگه نوشتن‌ها زیاد و کوئری‌ها کم بشن، برعکس.</p>",
+  "reasoning_en": "<p>Why this model fits: for a term query, a local index must ask all four base shards, because the record's location isn't implied by the term. A global index routes the term straight to an index shard, but it also drags the write through an outbox and into the index — the cost moves from reads to writes.</p><p>Units: the RPC count (shards engaged per operation) is our measuring unit, not milliseconds. Four SQLite instances on a laptop don't model a real network, so report counts and measure latency separately. Every number here is a teaching input and must be replaced by your own measurements.</p><p>And revalidation against the base is not optional: the index is asynchronous, so it may not yet have seen a delete or a fresh ACL change. If the assumptions move — say queries become mostly single-term, or the hot terms cool down — the intersection cost shrinks and the global index wins more easily; if writes grow and reads shrink, it flips back.</p>"
 }
