@@ -1,24 +1,24 @@
 {
   "alternatives": [
     {
-      "en": "Vector clocks (one counter per process): detect causality AND concurrency, at O(n) state per node and O(n) bytes per message. Pay for it only when the product must know 'concurrent' — collaborative editing, causal delivery, CRDT metadata — not for plain ordering.",
-      "fa": "ساعت برداری (یک شمارنده per-process): هم علیّت و هم هم‌زمانی را تشخیص می‌دهد، به قیمت حالت <span class=\"ltr\">O(n)</span> در هر گره و <span class=\"ltr\">O(n)</span> بایت در هر پیام. فقط وقتی بپرداز که محصول باید «هم‌زمان» را بفهمد — ویرایش مشترک، تحویل علّی، فراداده <span class=\"ltr\">CRDT</span> — نه برای مرتب‌سازی ساده."
+      "en": "Vector clocks (one counter per process): they detect causality AND concurrency, at the price of O(n) state per node and O(n) bytes per message. Pay for that only when the product must know 'concurrent' — collaborative editing, causal delivery, CRDT metadata. For plain ordering it's just extra spend.",
+      "fa": "ساعت برداری (یک شمارنده per-process): هم علّیت را می‌فهمد هم هم‌زمانی را — به قیمت حالت <span class=\"ltr\">O(n)</span> در هر گره و <span class=\"ltr\">O(n)</span> بایت در هر پیام. فقط وقتی سراغش برو که محصول باید «هم‌زمان» را بفهمد — ویرایش مشترک، تحویل علّی، فراداده <span class=\"ltr\">CRDT</span>. برای مرتب‌سازی ساده این فقط خرج اضافه است."
     }
   ],
-  "answer_en": "Give every process a counter: tick +1 on local/send events, adopt max(local, seen) on receive, stamp (counter, processID). Sorting by stamp with the process-ID tie-break gives a total order — (1,A) &lt; (1,C) &lt; (2,B) — that respects causality. The trade-off: the order is NOT causality, and concurrency is invisible; detecting it costs vector clocks.",
-  "answer_fa": "به هر پروسه یک شمارنده بده: روی رخداد محلی/ارسال ‎+1‎ بزن، روی دریافت <span class=\"ltr\">max</span> بگیر و عقب‌گرد ممنوع، و مهر <span class=\"ltr\">(counter, processID)</span> بزن. مرتب‌سازی با tie-break شناسه می‌دهد: <span class=\"ltr\">(1,A) &lt; (1,C) &lt; (2,B)</span> — ترتیبی کلی که به علّیت احترام می‌گذارد. تریدآف: این ترتیب علّیت نیست و هم‌زمانی نامرئی است؛ دیدنش ساعت برداری می‌خواهد.",
+  "answer_en": "Give every process a counter: tick +1 on local/send events, adopt max(local, seen) on receive, stamp (counter, processID). Sort by that stamp with the process-ID tie-break and you get a total order — (1,A) < (1,C) < (2,B) — that respects every message chain. Here's the catch: that order is not causality, and concurrency is invisible in it; seeing concurrency costs you vector clocks. It numbers events beautifully — it just doesn't tell you the story of cause and effect.",
+  "answer_fa": "به هر پروسه یک شمارنده بده: هر رخداد محلی و هر ارسال ‎+1‎ بزن، روی دریافت <span class=\"ltr\">max</span> بگیر و هیچ‌وقت عقب نرو، بعد مهر <span class=\"ltr\">(counter, processID)</span> بزن. مرتب‌سازی با tie-break شناسه درمی‌آید: <span class=\"ltr\">(1,A) &lt; (1,C) &lt; (2,B)</span> — یک ترتیب کلی که به زنجیرهٔ پیام‌ها احترام می‌گذارد. ولی حواس باشه: این ترتیب علّیت نیست و هم‌زمانی درش اصلاً پیدا نمی‌شود؛ برای دیدنش باید سراغ ساعت برداری بری. شماره می‌دهد، ولی داستان علت‌ومعلول را برایت تعریف نمی‌کند.",
   "assumptions": [
     {
-      "en": "Three processes A, B, C with unique IDs; the tie-break needs uniqueness, nothing else.",
-      "fa": "سه پروسه <span class=\"ltr\">A و B و C</span> با شناسه یکتا؛ tie-break فقط یکتایی می‌خواهد نه هیچ‌چیز دیگر."
+      "en": "Picture three processes A, B and C with unique IDs. The tie-break only needs uniqueness — nothing else.",
+      "fa": "فرض کن سه پروسه <span class=\"ltr\">A و B و C</span> با شناسهٔ یکتا داریم. tie-break فقط یکتایی می‌خواد، نه هیچ‌چیز دیگه."
     },
     {
-      "en": "Teaching scenario from chapter diagram 5: A and C post once each, B merges both then replies.",
-      "fa": "سناریوی آموزشی از نمودار ۵ فصل: <span class=\"ltr\">A</span> و <span class=\"ltr\">C</span> هرکدام یک‌بار می‌فرستند و <span class=\"ltr\">B</span> هر دو را می‌گیرد بعد جواب می‌دهد."
+      "en": "This teaching scenario comes straight from chapter diagram 5: A and C post once each, B merges both and then replies.",
+      "fa": "این سناریوی آموزشی از نمودار ۵ فصله: <span class=\"ltr\">A</span> و <span class=\"ltr\">C</span> هرکدام یک‌بار می‌فرستن و <span class=\"ltr\">B</span> هر دو رو می‌گیره، بعد جواب می‌ده."
     },
     {
-      "en": "Messages can be delayed but the receive rule is applied per delivery; no wall clock is used anywhere.",
-      "fa": "پیام‌ها می‌توانند تأخیر داشته باشند ولی قاعده دریافت per-delivery اعمال می‌شود؛ هیچ ساعت دیواری هیچ‌جا نیست."
+      "en": "Messages can be delayed, but the receive rule is applied per delivery. No wall clock is used anywhere.",
+      "fa": "پیام‌ها می‌تونن تأخیر داشته باشن، ولی قاعدهٔ دریافت per-delivery اعمال می‌شه؛ هیچ ساعت دیواری‌ای هم در کار نیست."
     }
   ],
   "code": {
@@ -30,139 +30,139 @@
     "run_fa": "javac LamportDemo.java && java LamportDemo — فقط استاندارد جاوا، فوری.",
     "status": "verified"
   },
-  "design_en": "<p>One <code>counter</code> (u64) plus one immutable <code>processID</code> per process. Message envelope carries <code>(counter, processID)</code>; the harness logs every send/receive with its stamp. Read path: sort logged stamps by <code>(counter, processID)</code>. Write path: apply the two rules at each event; no coordination, no extra RPC.</p>",
-  "design_fa": "<p>یک <code>counter</code> (عدد ‎۶۴بیتی) به‌علاوه یک <code>processID</code> تغییرناپذیر برای هر پروسه. پاکت پیام <code>(counter, processID)</code> را حمل می‌کند؛ harness هر ارسال/دریافت را با مهرش ثبت می‌کند. مسیر خواندن: مرتب‌سازی مهرهای ثبت‌شده با <code>(counter, processID)</code>. مسیر نوشتن: اعمال دو قاعده در هر رخداد؛ بدون هماهنگی و بدون <span class=\"ltr\">RPC</span> اضافه.</p>",
+  "design_en": "<p>One <code>counter</code> (u64) and one immutable <code>processID</code> per process. The message envelope carries <code>(counter, processID)</code>, and the harness logs every send/receive with its stamp. Read path: sort the logged stamps by <code>(counter, processID)</code>. Write path: apply the two rules at each event — no coordination, no extra RPC.</p>",
+  "design_fa": "<p>برای هر پروسه یک <code>counter</code> (عدد ‎۶۴بیتی) به‌علاوهٔ یک <code>processID</code> تغییرناپذیر. پاکت پیام <code>(counter, processID)</code> را حمل می‌کند؛ harness هر ارسال/دریافت را با مهر خودش ثبت می‌کند. مسیر خواندن: مرتب‌سازی مهرهای ثبت‌شده با <code>(counter, processID)</code>. مسیر نوشتن: دو قاعده را در هر رخداد اعمال کن؛ بدون هماهنگی و بدون <span class=\"ltr\">RPC</span> اضافه.</p>",
   "diagrams": [
     {
-      "caption_en": "Three processes exchange posts; B merges both counters, then replies",
-      "caption_fa": "سه پروسه پست ردوبدل می‌کنند؛ B هر دو شمارنده را می‌گیرد بعد جواب می‌دهد",
+      "caption_en": "Three processes trade posts; B takes both counters, then replies",
+      "caption_fa": "سه پروسه پست رد و بدل می‌کنند؛ B هر دو شمارنده را می‌گیرد و بعد جواب می‌دهد",
       "file": "diagrams/sol1-step1-lamport-exchange.html",
       "height": 640,
       "kind_en": "sequence: clock exchange",
       "kind_fa": "توالی: تبادل ساعت",
       "made": "archify",
       "narration": {
-        "failure_en": "Trace a lost adoption: if B ignored the seen stamp and kept 0, its reply would carry (1,B) — smaller than the (1,C) it already saw, and the clock would move backwards. The receive rule exists exactly to forbid that.",
-        "failure_fa": "نپذیرفتن مهر دیده‌شده را دنبال کن: اگر <span class=\"ltr\">B</span> مهر دیده‌شده را نادیده بگیرد و روی صفر بماند، جوابش <span class=\"ltr\">(1,B)</span> می‌شود — کوچک‌تر از <span class=\"ltr\">(1,C)</span> که دیده بود و ساعت به عقب برمی‌گردد. قاعده دریافت دقیقاً برای ممنوع کردن همین است.",
-        "guarantee_en": "The figure shows the two rules producing the book's stamps and the trap segment showing order without causality. It does not show wall-clock time — there is none.",
-        "guarantee_fa": "شکل نشان می‌دهد دو قاعده مهرهای کتاب را می‌سازند و بند تله ترتیب بدون علّیت را نشان می‌دهد. زمان دیواری نشان نمی‌دهد — چون هیچ‌جا نیست.",
-        "nonguarantee_en": "Concurrency detection and message-loss handling are outside this figure — the assembly names the vector-clock price for the first.",
-        "nonguarantee_fa": "تشخیص هم‌زمانی و رفتار با گم شدن پیام بیرون این شکل‌اند — اسمبلی قیمت ساعت برداری را برای اولی نام می‌برد.",
-        "point_en": "The decision point is B's counter after each receive: adopt the max, never go backwards. Everything else is sorting.",
-        "point_fa": "نقطه تصمیم شمارنده <span class=\"ltr\">B</span> بعد از هر دریافت است: <span class=\"ltr\">max</span> را بگیر و هرگز عقب نرو. بقیه فقط مرتب‌سازی است.",
-        "scenario_en": "Three chat processes each keep a Lamport clock. Read the lifelines top to bottom through the Exchange band, then the Trap band with its two message-free reports.",
-        "scenario_fa": "سه پروسه چت هرکدام یک ساعت <span class=\"ltr\">Lamport</span> دارند. خط‌های زندگی را از بالا به پایین بخوان: اول باند <span class=\"ltr\">Exchange</span>، بعد باند <span class=\"ltr\">Trap</span> با دو گزارش بدون پیامش.",
+        "failure_en": "Follow the lost adoption: if B ignored the stamp it had seen and stayed at 0, its reply would carry (1,B) — smaller than the (1,C) it already saw, and the clock would move backwards. The receive rule exists exactly to forbid that.",
+        "failure_fa": "نپذیرفتن مهرِ دیده‌شده را دنبال کن: اگر <span class=\"ltr\">B</span> مهر دیده‌شده را نادیده بگیرد و روی صفر بماند، جوابش <span class=\"ltr\">(1,B)</span> می‌شود — کوچک‌تر از <span class=\"ltr\">(1,C)</span> که دیده بود و ساعت عقب می‌رود. قاعدهٔ دریافت دقیقاً برای ممنوع کردن همین است.",
+        "guarantee_en": "The figure shows the two rules producing the book's stamps, plus the trap segment that shows order without causality. It shows no wall-clock time — there isn't any.",
+        "guarantee_fa": "شکل نشان می‌دهد دو قاعده چطور مهرهای کتاب را می‌سازند و بند تله ترتیبِ بدون علّیت را نشان می‌دهد. زمان دیواری نشان نمی‌دهد — چون اصلاً وجود ندارد.",
+        "nonguarantee_en": "Concurrency detection and message-loss handling sit outside this figure — the assembly names the vector-clock price for the first.",
+        "nonguarantee_fa": "تشخیص هم‌زمانی و رفتار با گم شدن پیام بیرون از این شکل‌اند — اسمبلی قیمت ساعت برداری را برای اولی نام می‌برد.",
+        "point_en": "The decision point is B's counter after every receive: take the max, never go backwards. Everything else is just sorting.",
+        "point_fa": "نقطهٔ تصمیم شمارندهٔ <span class=\"ltr\">B</span> بعد از هر دریافت است: <span class=\"ltr\">max</span> را بگیر و هرگز عقب نرو. بقیه فقط مرتب‌سازی است.",
+        "scenario_en": "Three chat processes, each with its own Lamport clock. Walk the lifelines from top to bottom: first the Exchange band, then the Trap band with its two message-free reports.",
+        "scenario_fa": "سه پروسهٔ چت، هرکدام یک ساعت <span class=\"ltr\">Lamport</span> دارند. خط‌های زندگی را از بالا به پایین بخوان: اول باند <span class=\"ltr\">Exchange</span>، بعد باند <span class=\"ltr\">Trap</span> با دو گزارشِ بدون پیام.",
         "steps": [
           {
-            "en": "A posts: counter 0 to 1, message carries (1,A). C posts: counter 0 to 1, message carries (1,C).",
-            "fa": "<span class=\"ltr\">A</span> می‌فرستد: شمارنده صفر به یک و پیام <span class=\"ltr\">(1,A)</span> را می‌برد. <span class=\"ltr\">C</span> می‌فرستد: شمارنده صفر به یک و پیام <span class=\"ltr\">(1,C)</span> را می‌برد."
+            "en": "A posts: the counter goes 0 to 1 and the message carries (1,A). C posts: 0 to 1 as well, carrying (1,C).",
+            "fa": "<span class=\"ltr\">A</span> می‌فرستد: شمارنده از صفر می‌رود روی یک و پیام <span class=\"ltr\">(1,A)</span> را می‌برد. <span class=\"ltr\">C</span> هم می‌فرستد: شمارنده از صفر روی یک و پیام <span class=\"ltr\">(1,C)</span>."
           },
           {
-            "en": "B receives both: max(0,1) = 1, then max(1,1) = 1. B's reply is a send event: 1 + 1 = 2, carrying (2,B); A adopts max(1,2) = 2.",
-            "fa": "<span class=\"ltr\">B</span> هر دو را می‌گیرد: <span class=\"ltr\">max(0,1)=1</span> بعد <span class=\"ltr\">max(1,1)=1</span>. جواب <span class=\"ltr\">B</span> یک رخداد ارسال است: ‎۱+۱=۲‎ با مهر <span class=\"ltr\">(2,B)</span>؛ و <span class=\"ltr\">A</span> می‌گیرد: <span class=\"ltr\">max(1,2)=2</span>."
+            "en": "B receives both: max(0,1) = 1, then max(1,1) = 1. B's reply is itself a send event: 1 + 1 = 2, carrying (2,B); A adopts max(1,2) = 2.",
+            "fa": "<span class=\"ltr\">B</span> هر دو را می‌گیرد: <span class=\"ltr\">max(0,1)=1</span> و بعد <span class=\"ltr\">max(1,1)=1</span>. جوابِ <span class=\"ltr\">B</span> یک رخداد ارسال است: ‎۱+۱=۲‎ با مهر <span class=\"ltr\">(2,B)</span>؛ و <span class=\"ltr\">A</span> می‌گیرد: <span class=\"ltr\">max(1,2)=2</span>."
           },
           {
-            "en": "Trap band: x on A stamped (5,A) and y on C stamped (3,C) with no messages at all — (3,C) < (5,A) proves nothing, because x and y never met.",
-            "fa": "باند تله: <span class=\"ltr\">x</span> روی <span class=\"ltr\">A</span> با مهر <span class=\"ltr\">(5,A)</span> و <span class=\"ltr\">y</span> روی <span class=\"ltr\">C</span> با مهر <span class=\"ltr\">(3,C)</span> و هیچ پیامی — <span class=\"ltr\">(3,C) &lt; (5,A)</span> هیچ‌چیز را ثابت نمی‌کند چون <span class=\"ltr\">x</span> و <span class=\"ltr\">y</span> هرگز هم را ندیدند."
+            "en": "Trap band: x on A stamped (5,A) and y on C stamped (3,C), with no messages at all — (3,C) < (5,A) proves nothing, because x and y never met.",
+            "fa": "باند تله: <span class=\"ltr\">x</span> روی <span class=\"ltr\">A</span> با مهر <span class=\"ltr\">(5,A)</span> و <span class=\"ltr\">y</span> روی <span class=\"ltr\">C</span> با مهر <span class=\"ltr\">(3,C)</span>، بدون هیچ پیامی — <span class=\"ltr\">(3,C) &lt; (5,A)</span> هیچ‌چیز را ثابت نمی‌کند چون <span class=\"ltr\">x</span> و <span class=\"ltr\">y</span> هرگز همو ندیدند."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "B holds 1 after the first receive (max(0,1)) and still 1 after the second (max(1,1)); the reply-send ticks to 2, hence (2,B). The +1 some presentations put on receive is the same increment charged on the next send — the order is identical either way.",
-        "a_fa": "<span class=\"ltr\">B</span> بعد از دریافت اول ۱ است (<span class=\"ltr\">max(0,1)</span>) و بعد از دومی هنوز ۱ (<span class=\"ltr\">max(1,1)</span>)؛ ارسالِ جواب به ۲ می‌رسد پس <span class=\"ltr\">(2,B)</span>. آن ‎+1‎ که بعضی ارائه‌ها روی دریافت می‌گذارند همان افزایشی است که روی ارسال بعد حساب می‌شود — ترتیب هر دو جور یکی است.",
-        "q_en": "After receiving (1,A) then (1,C), what does B hold, and why is the reply (2,B)?",
-        "q_fa": "بعد از گرفتن <span class=\"ltr\">(1,A)</span> و بعد <span class=\"ltr\">(1,C)</span>، مقدار <span class=\"ltr\">B</span> چیست و چرا جواب <span class=\"ltr\">(2,B)</span> است؟"
+        "a_en": "B holds 1 after the first receive (max(0,1)) and still 1 after the second (max(1,1)); the reply-send ticks to 2, hence (2,B). The +1 some presentations put on receive is the same increment charged on the next send — the order comes out identical either way.",
+        "a_fa": "<span class=\"ltr\">B</span> بعد از دریافت اول ۱ است (<span class=\"ltr\">max(0,1)</span>) و بعد از دومی هنوز ۱ (<span class=\"ltr\">max(1,1)</span>)؛ ارسالِ جواب به ۲ می‌رسد پس <span class=\"ltr\">(2,B)</span>. آن ‎+1‎ که بعضی ارائه‌ها روی دریافت می‌گذارند همان افزایشی است که روی ارسالِ بعد حساب می‌شود — نتیجه هر دو جور یکی است.",
+        "q_en": "After receiving (1,A) and then (1,C), what does B hold — and why does the reply come out as (2,B)?",
+        "q_fa": "بعد از گرفتن <span class=\"ltr\">(1,A)</span> و بعد <span class=\"ltr\">(1,C)</span>، مقدار <span class=\"ltr\">B</span> چه می‌شود و چرا جواب <span class=\"ltr\">(2,B)</span> است؟"
       },
       "source": "assets/diagram-specs/solutions/ch10/sol1-step1-lamport-exchange.json"
     },
     {
-      "caption_en": "Sorted stamps beside two message-free events: the order you see, the causality you cannot",
-      "caption_fa": "مهرهای مرتب کنار دو رخداد بدون پیام: ترتیبی که می‌بینی، علّیتی که نمی‌توانی",
+      "caption_en": "Sorted stamps next to two message-free events: the order you see, the causality you cannot",
+      "caption_fa": "مهرهای مرتب کنار دو رخدادِ بدون پیام: ترتیبی که می‌بینی، علّیتی که نمی‌توانی",
       "file": "diagrams/sol1-lamport-order.html",
       "height": 640,
       "kind_en": "total order + trap",
       "kind_fa": "ترتیب کلی + تله",
       "made": "hand",
       "narration": {
-        "failure_en": "Trace the trap boxes: x stamped (5,A), y stamped (3,C), no arrows between them. Anyone reading '(3,C) < (5,A), so y caused x' has invented a message that never existed.",
-        "failure_fa": "جعبه‌های تله را دنبال کن: <span class=\"ltr\">x</span> با مهر <span class=\"ltr\">(5,A)</span> و <span class=\"ltr\">y</span> با مهر <span class=\"ltr\">(3,C)</span> و هیچ پیکیانی میانشان. هرکس بخواند «<span class=\"ltr\">(3,C) &lt; (5,A)</span> پس <span class=\"ltr\">y</span> علّت <span class=\"ltr\">x</span> است» پیامی را اختراع کرده که هرگز نبوده.",
-        "guarantee_en": "The figure shows the sorted exchange and the message-free trap side by side, plus the rule and its price. It does not detect a single concurrent pair — that is the point.",
-        "guarantee_fa": "شکل تبادل مرتب و تله بدون پیام را کنار هم نشان می‌دهد، به‌علاوه قاعده و قیمتش. حتی یک جفت هم‌زمان را تشخیص نمی‌دهد — نکته همین است.",
-        "nonguarantee_en": "Message loss, duplication and process-ID collision are outside this figure — they belong to the failure scenarios.",
-        "nonguarantee_fa": "گم شدن و تکراری پیام و برخورد شناسه پروسه بیرون این شکل‌اند — مال سناریوهای خرابی‌اند.",
-        "point_en": "The decision point is the center label: 'no path either way'. Stamps without messages end the argument.",
-        "point_fa": "نقطه تصمیم برچسب وسط است: «هیچ مسیری هیچ‌طرف». مهر بدون پیام بحث را تمام می‌کند.",
-        "scenario_en": "The same three stamps from the sequence, now sorted in violet chips, above two rose boxes that never exchanged a message. Read top to bottom.",
-        "scenario_fa": "همان سه مهر توالی که حالا در چیپ‌های بنفش مرتب‌اند، بالای دو جعبه صورتی که هرگز پیامی ردوبدل نکردند. از بالا به پایین بخوان.",
+        "failure_en": "Follow the trap boxes: x stamped (5,A), y stamped (3,C), not a single arrow between them. Anyone who reads '(3,C) < (5,A), so y caused x' has invented a message that never existed.",
+        "failure_fa": "جعبه‌های تله را دنبال کن: <span class=\"ltr\">x</span> با مهر <span class=\"ltr\">(5,A)</span> و <span class=\"ltr\">y</span> با مهر <span class=\"ltr\">(3,C)</span>، بدون هیچ پیکیانی بینشان. هرکس بخواند «<span class=\"ltr\">(3,C) &lt; (5,A)</span> پس <span class=\"ltr\">y</span> علّت <span class=\"ltr\">x</span> است» یک پیام اختراع کرده که هرگز نبوده.",
+        "guarantee_en": "The figure puts the sorted exchange next to the message-free trap, plus the rule and its price. It does not detect a single concurrent pair — that is the point.",
+        "guarantee_fa": "شکل تبادلِ مرتب و تلهٔ بدون پیام را کنار هم نشان می‌دهد، به‌علاوهٔ قاعده و قیمتش. حتی یک جفت هم‌زمان را تشخیص نمی‌دهد — نکته همین است.",
+        "nonguarantee_en": "Message loss, duplication and process-ID collision sit outside this figure — they belong to the failure scenarios.",
+        "nonguarantee_fa": "گم شدن و تکراری شدن پیام و برخورد شناسهٔ پروسه بیرون از این شکل‌اند — مال سناریوهای خرابی‌اند.",
+        "point_en": "The decision point is the label in the middle: 'no path either way'. Stamps without messages end the argument.",
+        "point_fa": "نقطهٔ تصمیم برچسبِ وسط است: «هیچ مسیری هیچ‌طرف». مهر بدون پیام بحث را تمام می‌کند.",
+        "scenario_en": "The same three stamps from the sequence, now sorted into violet chips, sitting above two rose boxes that never exchanged a message. Read it top to bottom.",
+        "scenario_fa": "همان سه مهرِ توالی، حالا در چیپ‌های بنفش مرتب شده‌اند، بالای دو جعبهٔ صورتی که هرگز پیامی رد و بدل نکردند. از بالا به پایین بخوان.",
         "steps": [
           {
-            "en": "Top: (1,A), (1,C), (2,B) in order — the total order the tie-break produces.",
-            "fa": "بالا: <span class=\"ltr\">(1,A) و (1,C) و (2,B)</span> به‌ترتیب — ترتیب کلی که tie-break می‌سازد."
+            "en": "Top: (1,A), (1,C), (2,B) in order — the total order the tie-break builds.",
+            "fa": "بالا: <span class=\"ltr\">(1,A) و (1,C) و (2,B)</span> به‌ترتیب — همان ترتیب کلی که tie-break می‌سازد."
           },
           {
-            "en": "Middle: x = (5,A) and y = (3,C), each boxed with 'no message in or out', and 'no path either way' between them.",
-            "fa": "وسط: <span class=\"ltr\">x=(5,A)</span> و <span class=\"ltr\">y=(3,C)</span> که هرکدام «بدون پیام ورودی/خروجی» دارند و میانشان «هیچ مسیر هیچ‌طرف»."
+            "en": "Middle: x = (5,A) and y = (3,C), each one boxed with 'no message in or out', and 'no path either way' sitting between them.",
+            "fa": "وسط: <span class=\"ltr\">x=(5,A)</span> و <span class=\"ltr\">y=(3,C)</span>، هرکدام داخل جعبهٔ «بدون پیام ورودی/خروجی»، و میانشان هم «هیچ مسیر هیچ‌طرف»."
           },
           {
-            "en": "Bottom: the yellow rule box — adopt max, never backwards — and the price of real concurrency truth: vector clocks.",
-            "fa": "پایین: جعبه زرد قاعده — <span class=\"ltr\">max</span> را بگیر و عقب نرو — و قیمت حقیقت واقعی هم‌زمانی: ساعت برداری."
+            "en": "Bottom: the yellow rule box — take the max, never go backwards — and the price of real concurrency truth: vector clocks.",
+            "fa": "پایین: جعبهٔ زردِ قاعده — <span class=\"ltr\">max</span> را بگیر و عقب نرو — و قیمتِ حقیقتِ واقعیِ هم‌زمانی: ساعت برداری."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "No. The stamps order the display; only a message chain orders causes. x and y are concurrent until a message connects them, and Lamport stamps cannot tell you that.",
-        "a_fa": "نه. مهرها نمایش را مرتب می‌کنند؛ فقط زنجیره پیام علّت‌ها را مرتب می‌کند. <span class=\"ltr\">x</span> و <span class=\"ltr\">y</span> تا پیامی وصلشان کند هم‌زمان‌اند و مهر <span class=\"ltr\">Lamport</span> این را نمی‌گوید.",
-        "q_en": "Does (3,C) < (5,A) mean y happened before x?",
-        "q_fa": "آیا <span class=\"ltr\">(3,C) &lt; (5,A)</span> یعنی <span class=\"ltr\">y</span> قبل از <span class=\"ltr\">x</span> رخ داده؟"
+        "a_en": "No. The stamps order the display; only a message chain orders causes. x and y stay concurrent until a message connects them, and Lamport stamps cannot tell you that.",
+        "a_fa": "نه. مهرها نمایش را مرتب می‌کنند؛ فقط زنجیرهٔ پیام علّت‌ها را مرتب می‌کند. <span class=\"ltr\">x</span> و <span class=\"ltr\">y</span> تا پیامی وصلشان کند هم‌زمان می‌مانند و مهر <span class=\"ltr\">Lamport</span> این را نمی‌گوید.",
+        "q_en": "Does (3,C) < (5,A) really mean y happened before x?",
+        "q_fa": "آیا <span class=\"ltr\">(3,C) &lt; (5,A)</span> یعنی <span class=\"ltr\">y</span> قبل از <span class=\"ltr\">x</span> اتفاق افتاده؟"
       }
     }
   ],
   "failures": [
     {
-      "en": "Lost or duplicated message: adoption is idempotent (max twice is max once), but a lost message simply never advances the receiver — the order stays valid, only coarser. Never 'fill in' a stamp you did not receive.",
-      "fa": "گم شدن یا تکراری پیام: پذیرش idempotent است (<span class=\"ltr\">max</span> دو بار همان یک‌بار است) ولی پیام گمشده گیرنده را جلو نمی‌برد — ترتیب معتبر می‌ماند فقط درشت‌تر. هرگز مهری که نگرفتی حدس نزن."
+      "en": "A lost or duplicated message: adoption is idempotent (max twice is max once), but a message that never arrives simply doesn't advance the receiver — the order stays valid, only coarser. And never 'fill in' a stamp you did not receive.",
+      "fa": "پیام گم یا تکراری: پذیرش idempotent است (<span class=\"ltr\">max</span> دو بار همان یک‌بار) ولی پیام گمشده گیرنده را جلو نمی‌برد — ترتیب معتبر می‌ماند، فقط درشت‌تر. هرگز مهری را که نگرفتی حدس نزن."
     },
     {
-      "en": "Process-ID collision: two processes sharing one ID break the tie-break and can stamp two events identically. Guard: assign IDs from one registry (or reuse the oracle of exercise 3) and crash on duplicate registration.",
-      "fa": "برخورد شناسه پروسه: دو پروسه با یک شناسه tie-break را می‌شکنند و دو رخداد مهر یکسان می‌گیرند. نگهبان: شناسه از یک رجیستری (یا همان oracle تمرین ۳) و <span class=\"ltr\">crash</span> روی ثبت تکراری."
+      "en": "Process-ID collision: two processes sharing one ID break the tie-break, and two events can end up stamped identically. Guard: hand out IDs from one registry (or reuse the oracle of exercise 3) and crash on a duplicate registration.",
+      "fa": "برخورد شناسهٔ پروسه: دو پروسه با یک شناسه tie-break را می‌شکنند و دو رخداد مهر یکسان می‌گیرند. نگهبان: شناسه‌ها را از یک رجیستری بگیر (یا همان oracle تمرین ۳) و روی ثبت تکراری <span class=\"ltr\">crash</span> کن."
     },
     {
-      "en": "Counter overflow: a u64 counter ticking per event lasts effectively forever at teaching rates; a tiny counter wraps and breaks the order. Guard: fix u64 and assert — never silently wrap.",
-      "fa": "سرریز شمارنده: شمارنده ‎۶۴بیتی با نرخ آموزشی عملاً تمام‌نشدنی است؛ شمارنده کوچک می‌چرخد و ترتیب را می‌شکند. نگهبان: ‎۶۴بیت ثابت و <span class=\"ltr\">assert</span> — هرگز بی‌صدا نچرخ."
+      "en": "Counter overflow: a u64 counter ticking per event lasts effectively forever at teaching rates; a small counter wraps around and breaks the order. Guard: fix u64 and assert it — never wrap silently.",
+      "fa": "سرریز شمارنده: شمارندهٔ ‎۶۴بیتی با نرخ آموزشی عملاً تمام‌نشدنی است؛ شمارندهٔ کوچک می‌چرخد و ترتیب را می‌شکند. نگهبان: ‎۶۴بیت ثابت و <span class=\"ltr\">assert</span> — هرگز بی‌صدا نچرخ."
     }
   ],
   "followups": [
     {
-      "a_en": "Any pair at all — for example (5,A) and (3,C), or (1,A) and (100,C). With no messages there is no constraint: each counter only ever saw itself. That freedom is exactly why Lamport stamps cannot detect concurrency: equal-or-ordered stamps without a message chain prove nothing.",
-      "a_fa": "هر جفتی — مثلاً <span class=\"ltr\">(5,A)</span> و <span class=\"ltr\">(3,C)</span> یا <span class=\"ltr\">(1,A)</span> و <span class=\"ltr\">(100,C)</span>. بدون پیام هیچ قیدی نیست: هر شمارنده فقط خودش را دیده. همین آزادی دقیقاً چرایی ناتوانی مهر <span class=\"ltr\">Lamport</span> در تشخیص هم‌زمانی است: مهرهای مرتب بدون زنجیره پیام هیچ‌چیز را ثابت نمی‌کنند.",
+      "a_en": "Any pair you like — for example (5,A) and (3,C), or (1,A) and (100,C). With no messages there is no constraint: each counter only ever saw itself. That freedom is exactly why Lamport stamps cannot detect concurrency: equal-or-ordered stamps without a message chain prove nothing.",
+      "a_fa": "هر جفتی که دلخواهت باشد — مثلاً <span class=\"ltr\">(5,A)</span> و <span class=\"ltr\">(3,C)</span> یا <span class=\"ltr\">(1,A)</span> و <span class=\"ltr\">(100,C)</span>. بدون پیام هیچ قیدی نیست: هر شمارنده فقط خودش را دیده. همین آزادیِ بی‌حدّ و مرز دلیل ناتوانی مهر <span class=\"ltr\">Lamport</span> در تشخیص هم‌زمانی است: مهرهای مرتب بدون زنجیرهٔ پیام هیچ‌چیز را ثابت نمی‌کنند.",
       "level": "senior",
       "q_en": "What timestamps can your two independent events with no messages have?",
       "q_fa": "حالا دو رخداد داری بدون هیچ پیام. چه timestampهایی می‌تونن داشته باشن؟"
     },
     {
-      "a_en": "When the product must KNOW concurrency, not just order it: collaborative editing (concurrent edits merge, causally-after edits apply), causal broadcast, CRDT metadata. Cost: O(n) counters per node and O(n) stamp bytes per message, plus join logic on every receive. Default to Lamport; upgrade only on a named concurrency question.",
-      "a_fa": "وقتی محصول باید هم‌زمانی را «بداند» نه فقط مرتبش کند: ویرایش مشترک (ویرایش‌های هم‌زمان ادغام و بعدی‌های علّی اعمال)، انتشار علّی، فراداده <span class=\"ltr\">CRDT</span>. هزینه: <span class=\"ltr\">O(n)</span> شمارنده در هر گره و <span class=\"ltr\">O(n)</span> بایت مهر در هر پیام، به‌علاوه منطق ادغام در هر دریافت. پیش‌فرض <span class=\"ltr\">Lamport</span>؛ ارتقا فقط با سؤال هم‌زمانی نام‌دار.",
+      "a_en": "When the product must KNOW concurrency, not just order events: collaborative editing (concurrent edits merge, causally-after edits apply), causal broadcast, CRDT metadata. The price: O(n) counters per node and O(n) stamp bytes per message, plus join logic on every receive. Default to Lamport, and upgrade only when a named concurrency question shows up.",
+      "a_fa": "وقتی محصول باید هم‌زمانی را «بداند»، نه فقط مرتبش کند: ویرایش مشترک (ویرایش‌های هم‌زمان ادغام و بعدی‌های علّی اعمال)، انتشار علّی، فراداده <span class=\"ltr\">CRDT</span>. هزینه‌اش هم این است: <span class=\"ltr\">O(n)</span> شمارنده در هر گره و <span class=\"ltr\">O(n)</span> بایت مهر در هر پیام، به‌علاوهٔ منطق ادغام در هر دریافت. پیش‌فرض همان <span class=\"ltr\">Lamport</span>؛ ارتقا فقط با یک سؤال هم‌زمانی نام‌دار.",
       "level": "senior",
-      "q_en": "When is a vector clock worth its O(n) cost over Lamport?",
-      "q_fa": "ساعت برداری با هزینه <span class=\"ltr\">O(n)</span> کی به <span class=\"ltr\">Lamport</span> می‌ارزد؟"
+      "q_en": "When is a vector clock worth its O(n) cost instead of plain Lamport?",
+      "q_fa": "ساعت برداری با این هزینهٔ <span class=\"ltr\">O(n)</span> کِی ارزشش را دارد که به‌جای <span class=\"ltr\">Lamport</span> سراغش بروی؟"
     }
   ],
   "interview_q_en": "Picture this — you've got three processes passing messages. Label local events and messages using Lamport clocks and process-ID tie breaking. Show why increasing timestamps like L(a)<L(b) don't imply causality or detect concurrency; compare your vector-clock costs.",
   "interview_q_fa": "فرض کن سه تا process داری. send/receive و رخداد محلی رو با Lamport clock شماره‌گذاری کن. با tie-breaker از process ID ترتیب کامل بساز. یه مثال بزن که نشون بده L(a)<L(b) علت‌ومعلولی بودن رو اثبات نمی‌کنه؛ vector clock و هزینه‌ش رو هم مقایسه کن.",
-  "mental_en": "A Lamport clock is a numbering machine, not a truth machine: it stamps every event so the stamps sort nicely and never contradict a message chain. Messages are the only facts; stamps are just labels that respect them.",
-  "mental_fa": "ساعت <span class=\"ltr\">Lamport</span> ماشین شماره‌گذاری است نه ماشین حقیقت: به هر رخداد مهری می‌زند که خوب مرتب شود و هرگز با زنجیره پیام تناقض نکند. پیام‌ها تنها واقعیت‌اند؛ مهرها فقط برچسب‌هایی‌اند که به آن‌ها احترام می‌گذارند.",
+  "mental_en": "Think of a Lamport clock as a numbering machine, not a truth machine. It stamps every event so the stamps sort nicely and never contradict a message chain. The messages are the only facts; the stamps are just labels that respect them. It numbers events beautifully — it just doesn't explain them.",
+  "mental_fa": "ساعت <span class=\"ltr\">Lamport</span> ماشین شماره‌گذاریه، نه ماشین حقیقت. به هر رخداد یک مهر می‌زند که قشنگ مرتب شود و هیچ‌وقت با زنجیرهٔ پیام در تضاد نیفتد. پیام‌ها تنها واقعیت‌اند؛ مهرها فقط برچسب‌هایی‌اند که به پیام‌ها احترام می‌گذارند. عدد می‌زند، ولی دلیل را نمی‌گوید.",
   "mistakes": [
     {
-      "en": "Reading L(a) < L(b) as 'a caused b'. The stamp order is display order; causality needs a message chain from a to b.",
-      "fa": "خواندن <span class=\"ltr\">L(a) &lt; L(b)</span> به‌معنای «a علّت b است». ترتیب مهر ترتیب نمایش است؛ علّیت زنجیره پیام از <span class=\"ltr\">a</span> به <span class=\"ltr\">b</span> می‌خواهد."
+      "en": "Reading L(a) < L(b) as 'a caused b'. Stamps only order the display; causality needs a message chain running from a to b.",
+      "fa": "خواندن <span class=\"ltr\">L(a) &lt; L(b)</span> به‌معنای «a علّت b است». ترتیبِ مهر فقط ترتیبِ نمایش است؛ علّیت زنجیرهٔ پیام از <span class=\"ltr\">a</span> به <span class=\"ltr\">b</span> می‌خواهد."
     },
     {
-      "en": "Claiming Lamport detects concurrency ('equal stamps mean concurrent'). Two message-free events may hold any stamps — equality proves nothing either.",
-      "fa": "ادعای تشخیص هم‌زمانی با <span class=\"ltr\">Lamport</span> («مهر برابر یعنی هم‌زمان»). دو رخداد بدون پیام هر مهری می‌توانند داشته باشند — برابری هم چیزی را ثابت نمی‌کند."
+      "en": "Claiming Lamport detects concurrency ('equal stamps mean concurrent'). Two message-free events can hold any stamps at all — equality doesn't prove a thing either.",
+      "fa": "ادعای تشخیص هم‌زمانی با <span class=\"ltr\">Lamport</span> («مهر برابر یعنی هم‌زمان»). دو رخدادِ بدون پیام هر مهری می‌توانند داشته باشند — برابری هم چیزی را ثابت نمی‌کند."
     },
     {
-      "en": "Reaching for wall-clock synchronization. Lamport needs no synchronized clocks at all — that is the point; adding NTP solves nothing here and adds skew failure modes.",
-      "fa": "دست بردن به هم‌گام‌سازی ساعت دیواری. <span class=\"ltr\">Lamport</span> اصلاً ساعت هم‌گام نمی‌خواهد — نکته همین است؛ افزودن <span class=\"ltr\">NTP</span> این‌جا هیچ‌چیز را حل نمی‌کند و فقط حالت خرابی <span class=\"ltr\">skew</span> می‌افزاید."
+      "en": "Reaching for wall-clock synchronization. Lamport needs no synchronized clocks at all — that's the whole point; adding NTP solves nothing here and only adds skew failure modes.",
+      "fa": "دست بردن به هم‌گام‌سازی ساعت دیواری. <span class=\"ltr\">Lamport</span> اصلاً ساعت هم‌گام نمی‌خواهد — نکتهٔ همین است؛ اضافه کردن <span class=\"ltr\">NTP</span> این‌جا هیچ‌چیزی را حل نمی‌کند، فقط یک حالت خرابی تازه یعنی <span class=\"ltr\">skew</span> می‌افزاید."
     }
   ],
   "number": 1,
@@ -173,34 +173,34 @@
   ],
   "steps": [
     {
-      "en": "One counter per process, starting at 0. Every local event and every send ticks it +1 — the clock only moves forward, one step per event.",
-      "fa": "یک شمارنده برای هر پروسه از صفر. هر رخداد محلی و هر ارسال ‎+1‎ می‌زند — ساعت فقط جلو می‌رود، یک قدم per-event.",
-      "t_en": "Count first",
-      "t_fa": "اول شمارش"
+      "en": "One counter per process, starting at 0. Every local event and every send ticks it +1 — the clock only ever moves forward, one step per event.",
+      "fa": "برای هر پروسه یک شمارنده از صفر. هر رخداد محلی و هر ارسال ‎+1‎ می‌زند — ساعت فقط جلو می‌رود، یک قدم per-event.",
+      "t_en": "Start counting",
+      "t_fa": "شمارش از صفر"
     },
     {
-      "en": "On receive, adopt max(local, seen). Walk the book's scenario: B takes max(0,1)=1 from A, max(1,1)=1 from C, then its reply-send ticks 1+1=2. No receive ever moves a clock backwards.",
-      "fa": "روی دریافت <span class=\"ltr\">max</span> بگیر. سناریوی کتاب را برو: <span class=\"ltr\">B</span> از <span class=\"ltr\">A</span> می‌گیرد <span class=\"ltr\">max(0,1)=1</span> و از <span class=\"ltr\">C</span> می‌گیرد <span class=\"ltr\">max(1,1)=1</span>، بعد ارسالِ جواب ‎۱+۱=۲‎ می‌زند. هیچ دریافتی ساعت را عقب نمی‌برد.",
-      "t_en": "Adopt on receive",
-      "t_fa": "پذیرش روی دریافت"
+      "en": "On receive, adopt max(local, seen). Walk the book's scenario with me: B takes max(0,1)=1 from A, max(1,1)=1 from C, then its reply-send ticks 1+1=2. No receive ever moves a clock backwards.",
+      "fa": "روی دریافت <span class=\"ltr\">max</span> بگیر. سناریوی کتاب را با هم برو: <span class=\"ltr\">B</span> از <span class=\"ltr\">A</span> می‌گیرد <span class=\"ltr\">max(0,1)=1</span> و از <span class=\"ltr\">C</span> می‌گیرد <span class=\"ltr\">max(1,1)=1</span>، بعد ارسالِ جواب ‎۱+۱=۲‎ می‌زند. هیچ دریافتی ساعت را عقب نمی‌برد.",
+      "t_en": "Adopt the max on receive",
+      "t_fa": "روی دریافت، max بگیر"
     },
     {
-      "en": "Sort stamps as (counter, processID) with the process ID breaking ties: (1,A) < (1,C) < (2,B). A total order that respects every message chain — concurrent posts A and C simply take ID order.",
-      "fa": "مهرها را به‌صورت <span class=\"ltr\">(counter, processID)</span> مرتب کن با tie-break شناسه: <span class=\"ltr\">(1,A) &lt; (1,C) &lt; (2,B)</span>. ترتیب کلی که به هر زنجیره پیام احترام می‌گذارد — پست‌های هم‌زمان <span class=\"ltr\">A</span> و <span class=\"ltr\">C</span> فقط ترتیب شناسه می‌گیرند.",
-      "t_en": "Sort with tie-break",
-      "t_fa": "مرتب‌سازی با tie-break"
+      "en": "Sort the stamps as (counter, processID) with the process ID breaking ties: (1,A) < (1,C) < (2,B). A total order that respects every message chain — the concurrent posts A and C simply take ID order.",
+      "fa": "مهرها را به‌صورت <span class=\"ltr\">(counter, processID)</span> مرتب کن، با tie-break شناسه: <span class=\"ltr\">(1,A) &lt; (1,C) &lt; (2,B)</span>. یک ترتیب کلی که به هر زنجیرهٔ پیام احترام می‌گذارد — پست‌های هم‌زمان <span class=\"ltr\">A</span> و <span class=\"ltr\">C</span> فقط ترتیب شناسه را می‌گیرند.",
+      "t_en": "Sort it, with a tie-break",
+      "t_fa": "مرتب کن، با tie-break"
     },
     {
-      "en": "Name the limit with the trap: x=(5,A) and y=(3,C) with no messages — ordered stamps, zero causality. Concurrency detection needs vector clocks: one entry per process, O(n) state and stamp bytes.",
-      "fa": "محدودیت را با تله نام ببر: <span class=\"ltr\">x=(5,A)</span> و <span class=\"ltr\">y=(3,C)</span> بدون پیام — مهرهای مرتب و صفر علّیت. تشخیص هم‌زمانی ساعت برداری می‌خواهد: یک ورودی per-process و حالت و بایت مهر <span class=\"ltr\">O(n)</span>.",
-      "t_en": "Name what it cannot do",
-      "t_fa": "نام بردن ناتوانی"
+      "en": "Now name its limit with the trap: x=(5,A) and y=(3,C) with no messages — ordered stamps, zero causality. Detecting concurrency needs vector clocks: one entry per process, O(n) state and stamp bytes.",
+      "fa": "حالا محدودیتش را با همان تله نام ببر: <span class=\"ltr\">x=(5,A)</span> و <span class=\"ltr\">y=(3,C)</span> بدون پیام — مهرهای مرتب و صفر علّیت. برای تشخیص هم‌زمانی باید بری سراغ ساعت برداری: یک ورودی per-process و حالت و بایت مهر <span class=\"ltr\">O(n)</span>.",
+      "t_en": "Say what it cannot do",
+      "t_fa": "نام بردن چیزی که نمی‌تواند"
     }
   ],
-  "tests_en": "Assert the receive rule (never backwards after any delivery), assert the book's sorted order (1,A) &lt; (1,C) &lt; (2,B), and property-test the trap: random message-free events must accept ANY stamp pair. State cost as O(1) per process versus O(n) for vectors — no latency claim without a harness.",
-  "tests_fa": "قاعده دریافت را <span class=\"ltr\">assert</span> کن (بعد از هر تحویل هرگز عقب‌گرد)، ترتیب مرتب کتاب را <span class=\"ltr\">assert</span> کن (<span class=\"ltr\">(1,A) &lt; (1,C) &lt; (2,B)</span>) و تله را property-test کن: رخدادهای بدون پیام باید هر جفت مهری را بپذیرند. هزینه را بگو <span class=\"ltr\">O(1)</span> در برابر <span class=\"ltr\">O(n)</span> بردارها — بدون ادعای latency بدون harness.",
-  "worked_en": "<p>Teaching walk (chapter diagram 5): A sends (1,A); C sends (1,C); B holds max(0,1)=1, then max(1,1)=1; B's reply-send ticks to (2,B); A adopts max(1,2)=2. Final counters: A=2, B=2, C=1. Sorted stamps: (1,A) &lt; (1,C) &lt; (2,B).</p>",
-  "worked_fa": "<p>گام آموزشی (نمودار ۵ فصل): <span class=\"ltr\">A</span> می‌فرستد <span class=\"ltr\">(1,A)</span>؛ <span class=\"ltr\">C</span> می‌فرستد <span class=\"ltr\">(1,C)</span>؛ <span class=\"ltr\">B</span> نگه می‌دارد <span class=\"ltr\">max(0,1)=1</span> بعد <span class=\"ltr\">max(1,1)=1</span>؛ ارسالِ جواب <span class=\"ltr\">B</span> می‌شود <span class=\"ltr\">(2,B)</span>؛ <span class=\"ltr\">A</span> می‌گیرد <span class=\"ltr\">max(1,2)=2</span>. شمارنده‌های پایانی: <span class=\"ltr\">A=2 و B=2 و C=1</span>. مهرهای مرتب: <span class=\"ltr\">(1,A) &lt; (1,C) &lt; (2,B)</span>.</p>",
-  "reasoning_fa": "<p>قاعدهٔ receive=max(local,received)+1 باعث می‌شود پیامِ دریافت‌شده بعد از ارسالش timestamp بزرگ‌تری داشته باشد؛ جمع یک برای جداشدن رویداد دریافت از قبلی است. دو رویداد بی‌رابطه ممکن است timestamp برابر یا مرتب داشته باشند، پس عکس رابطهٔ happened-before برقرار نیست. process_id فقط tie-break قطعی می‌دهد؛ از آن علت‌ومعلول نمی‌سازیم. سه process کمترین سناریوی روشن برای ارسال مستقل و دریافت مشترک را فراهم می‌کنند.</p>",
-  "reasoning_en": "<p>Receive=max(local,received)+1 gives reception a timestamp greater than its send; adding one distinguishes the receive event. Unrelated events may have equal or ordered timestamps, so the converse of happened-before fails. Process IDs provide deterministic tie-breaking, not causality. Three processes make independent sends and a shared receiver easy to inspect.</p>"
+  "tests_en": "Assert the receive rule (never backwards after any delivery), assert the book's sorted order (1,A) &lt; (1,C) &lt; (2,B), and property-test the trap: random message-free events must accept ANY stamp pair. Then say the cost out loud — O(1) per process versus O(n) for vectors — and make no latency claim without a harness.",
+  "tests_fa": "قاعدهٔ دریافت را <span class=\"ltr\">assert</span> کن (بعد از هر تحویل هرگز عقب‌گرد)، ترتیب مرتب کتاب را هم <span class=\"ltr\">assert</span> کن (<span class=\"ltr\">(1,A) &lt; (1,C) &lt; (2,B)</span>) و تله را property-test کن: رخدادهای بدون پیام باید هر جفت مهری را بپذیرند. هزینه را هم بگو: <span class=\"ltr\">O(1)</span> در برابر <span class=\"ltr\">O(n)</span> بردارها — و بدون harness هیچ ادعای latency نکن.",
+  "worked_en": "<p>Teaching walk (chapter diagram 5): A sends (1,A); C sends (1,C); B holds max(0,1)=1, then max(1,1)=1; B's reply-send ticks to (2,B); A adopts max(1,2)=2. Final counters: A=2, B=2, C=1. Sorted stamps: (1,A) &lt; (1,C) &lt; (2,B). Notice what this walk does not say: who caused whom.</p>",
+  "worked_fa": "<p>گام آموزشی (نمودار ۵ فصل): <span class=\"ltr\">A</span> می‌فرستد <span class=\"ltr\">(1,A)</span>؛ <span class=\"ltr\">C</span> می‌فرستد <span class=\"ltr\">(1,C)</span>؛ <span class=\"ltr\">B</span> نگه می‌دارد <span class=\"ltr\">max(0,1)=1</span> و بعد <span class=\"ltr\">max(1,1)=1</span>؛ ارسالِ جوابِ <span class=\"ltr\">B</span> می‌شود <span class=\"ltr\">(2,B)</span>؛ <span class=\"ltr\">A</span> می‌گیرد <span class=\"ltr\">max(1,2)=2</span>. شمارنده‌های پایانی: <span class=\"ltr\">A=2 و B=2 و C=1</span>. مهرهای مرتب: <span class=\"ltr\">(1,A) &lt; (1,C) &lt; (2,B)</span>.</p>",
+  "reasoning_fa": "<p>قاعدهٔ receive=max(local,received)+1 باعث می‌شود پیامِ دریافت‌شده بعد از ارسالش timestamp بزرگ‌تری داشته باشد؛ جمع یک برای جدا شدن رویداد دریافت از رویداد قبلی است. دو رویداد بی‌ربط می‌توانند timestamp برابر یا مرتب داشته باشند، پس عکس رابطهٔ happened-before برقرار نیست. process_id فقط tie-break قطعی می‌دهد؛ از آن علت‌ومعلول نمی‌سازیم. سه process کمترین سناریوی روشن برای ارسال مستقل و دریافت مشترک را فراهم می‌کنند.</p>",
+  "reasoning_en": "<p>Receive=max(local,received)+1 gives reception a timestamp greater than its send; that extra one separates the receive event from the one before it. Unrelated events may end up with equal or ordered timestamps, so the converse of happened-before fails. Process IDs only give you a deterministic tie-break — you cannot build causality out of them. Three processes make independent sends and a shared receiver easy to inspect.</p>"
 }
