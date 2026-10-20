@@ -1,8 +1,8 @@
 {
   "number": 1,
   "slug": "catalog-models",
-  "interview_q_fa": "کاتالوگ یک فروشگاه (محصول، برند، دسته‌بندی چندگانه، نظر کاربران) را هم رابطه‌ای و هم سندی مدل کن. سه کوئری پرتکرار (صفحه محصول، صفحه دسته، نظرهای یک محصول) را با <span class=\"ltr\">pagination</span>، ایندکس‌ها، یکتایی نظر هر کاربر و اثر تغییر نام یا لوگوی برند مشخص کن، و انتخابت را با بار کاری توجیه کن.",
-  "interview_q_en": "Model a shop catalog (product, brand, multi-category, user reviews) in both relational and document form. Pin down three hot queries (product page, category page, one product's reviews) with <span class=\"ltr\">pagination</span>, indexes, one-review-per-user uniqueness and the cost of a brand rename, then justify your pick from the workload.",
+  "interview_q_fa": "فرض کن کاتالوگ محصول داری با برند، چند دسته‌بندی برای هر محصول و نظر کاربرا. مدل رابطه‌ای و سندی رو کنار هم طراحی کن؛ سه query پرتکرار، pagination، رشد نظرات، uniqueness و تغییر برند رو روشن کن. schema و index رو بکش و انتخابت رو با بار توجیه کن.",
+  "interview_q_en": "Picture this: a product catalog with brands, multiple categories per product, and user reviews. Design it both relational and document-style. Pin down your three hottest queries, pagination, review growth, uniqueness, and brand renames. Sketch the schema and indexes, then pick a side and defend it with the workload.",
   "answer_fa": "رابطه‌ای سند مرجع است: <span class=\"ltr\">products</span> با <span class=\"ltr\">FK</span> به <span class=\"ltr\">brands</span>، دسته‌بندی چندگانه با جدول واسط، و نظرها در جدول جدا با کلید یکتای <span class=\"ltr\">(product_id, user_id)</span>. نظرها را هرگز در سند محصول <span class=\"ltr\">embed</span> نکن چون رشدشان بی‌کران است. صفحه‌بندی با کلید (<span class=\"ltr\">keyset</span>) نه <span class=\"ltr\">offset</span>؛ تغییر برند فقط یک سطر است. سند فقط وقتی می‌برد که صفحه محصول تقریباً همه بار باشد و گزارش میان‌محصولی نداشته باشیم.",
   "answer_en": "Relational is the record: <span class=\"ltr\">products</span> with an <span class=\"ltr\">FK</span> to <span class=\"ltr\">brands</span>, multi-category via a join table, reviews in their own table under a <span class=\"ltr\">(product_id, user_id)</span> unique key. Never <span class=\"ltr\">embed</span> reviews in the product document — they grow without bound. Paginate by key (<span class=\"ltr\">keyset</span>), not <span class=\"ltr\">offset</span>; a brand rename touches one row. Documents win only when the product page is nearly all the load and cross-product reports don't exist.",
   "assumptions": [
@@ -86,8 +86,8 @@
   "tests_en": "Checks: concurrent inserts by one user leave one row; <span class=\"ltr\">keyset</span> pages are disjoint and ordered; <span class=\"ltr\">EXPLAIN</span> shows index use; a brand change is visible on the next read.",
   "followups": [
     {
-      "q_fa": "اگر محصول در چند دسته باشد و نظرات میلیون‌تایی شوند مدل چگونه تغییر می‌کند؟",
-      "q_en": "How does the model change when a product has multiple categories and millions of reviews?",
+      "q_fa": "اگه محصول توی چند دسته باشه و نظرا میلیونی بشن — مدلت چطور عوض می‌شه؟",
+      "q_en": "Now a product lives in several categories and reviews go into the millions — how does your model change?",
       "level": "senior",
       "a_fa": "دسته‌ها از قبل با جدول واسط حل‌اند. نظرها با <span class=\"ltr\">keyset</span> روی <span class=\"ltr\">(product_id, id)</span> صفحه‌بندی می‌شوند و برای مرتب «برترین» ایندکس <span class=\"ltr\">(product_id, stars, id)</span> اضافه می‌شود. محصول میلیونی را با shard نظر بر اساس محصول + کش صفحه اول سرو کن. <span class=\"ltr\">embed</span> منتفی است: هر نظر یک بازنویسی <span class=\"ltr\">O(n)</span>.",
       "a_en": "Categories are already solved by the join table. Reviews page by <span class=\"ltr\">keyset</span> on <span class=\"ltr\">(product_id, id)</span>, adding a <span class=\"ltr\">(product_id, stars, id)</span> index for 'top' order. Serve a million-review product with review sharding by product plus a cached first page. <span class=\"ltr\">Embedding</span> is out: every review becomes an <span class=\"ltr\">O(n)</span> rewrite."

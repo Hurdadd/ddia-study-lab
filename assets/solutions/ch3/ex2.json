@@ -1,8 +1,8 @@
 {
   "number": 2,
   "slug": "embedding-fanout",
-  "interview_q_fa": "لوگوی یک برند روی صد هزار محصول دیده می‌شود. سه طرح ارجاع (<span class=\"ltr\">reference</span>)، توکار کردن (<span class=\"ltr\">embedding</span>) و <span class=\"ltr\">read model</span> مشتق را مقایسه کن: هزینه خواندن، <span class=\"ltr\">fan-out</span> تغییر، داده <span class=\"ltr\">stale</span>، نسخه‌بندی و خرابی وسط به‌روزرسانی دسته‌ای را بیان کن و انتخابت را با حد تازگی قابل قبول توجیه کن.",
-  "interview_q_en": "One brand logo shows on 100,000 products. Compare <span class=\"ltr\">reference</span>, <span class=\"ltr\">embedding</span> and a derived <span class=\"ltr\">read model</span>: read cost, change <span class=\"ltr\">fan-out</span>, <span class=\"ltr\">stale</span> data, versioning and mid-batch failure — then justify your pick from an acceptable freshness bound.",
+  "interview_q_fa": "حفظ کن: لوگوی یه برند روی صد هزار محصول دیده می‌شه. reference و embedding و read model مشتق رو مقایسه کن؛ خرج خواندن، fan-out تغییر، stale data و شکست وسط batch update رو بگو و انتخابت رو با حد تازگی قابل قبول توجیه کن.",
+  "interview_q_en": "Rule of thumb: one brand logo shows up on 100,000 products. Compare references, embedding, and a derived read model. Weigh read cost, update fan-out, stale reads, and dying halfway through a batch update — and justify your pick with an acceptable freshness bound.",
   "answer_fa": "مرجع حقیقت جدول <span class=\"ltr\">brands</span> با نسخه <span class=\"ltr\">logo_v</span> است. ارجاع: خواندن کمی گران‌تر ولی تغییر فقط یک سطر. توکار: خواندن رایگان ولی هر تغییر ۱۰۰هزار نوشتن با پنجره ناسازگاری ده‌ها ثانیه‌ای — منتفی. <span class=\"ltr\">read model</span> نسخه‌دار از <span class=\"ltr\">outbox</span>: خواندن سریع با تازگی محدود (مثلاً ۵ ثانیه آموزشی) و بازیابی از مکان‌نمای نسخه.",
   "answer_en": "The <span class=\"ltr\">brands</span> table with a <span class=\"ltr\">logo_v</span> version is the authority. Reference: slightly pricier reads, one-row changes. Embedding: free reads but 100K writes per change with a tens-of-seconds inconsistency window — ruled out. A versioned <span class=\"ltr\">read model</span> off the <span class=\"ltr\">outbox</span>: fast reads inside a freshness bound (e.g. 5 teaching seconds) with resume from a version cursor.",
   "assumptions": [
@@ -86,8 +86,8 @@
   "tests_en": "Measure: view <span class=\"ltr\">lag</span> against the budget (metric + alert); version monotonicity (no product ahead of the authority <span class=\"ltr\">logo_v</span>); chaos check: kill the builder mid-run and resume from the cursor.",
   "followups": [
     {
-      "q_fa": "با شکست به‌روزرسانی در نیمهٔ محصولات چه چیزی را retry می‌کنی؟",
-      "q_en": "What do you retry when a logo update fails halfway through the products?",
+      "q_fa": "حالا به‌روزرسانی وسط محصولات بترکه — چی رو retry می‌کنی؟",
+      "q_en": "The logo update dies halfway through the products — what do you retry?",
       "level": "senior",
       "a_fa": "فقط بازه ننوشته مکان‌نما را، با همان <span class=\"ltr\">logo_v</span> — نه کل دسته را. اعمال <span class=\"ltr\">idempotent</span> است پس تکرار امن است؛ شروع دوباره ۵۰ ثانیه پنجره تازه می‌سازد.",
       "a_en": "Only the cursor's unwritten range, with the same <span class=\"ltr\">logo_v</span> — never the whole batch. The apply is <span class=\"ltr\">idempotent</span> so repeating is safe; restarting buys a fresh 50 s window."

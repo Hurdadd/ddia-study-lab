@@ -1,8 +1,8 @@
 {
   "number": 3,
   "slug": "reservation-log",
-  "interview_q_fa": "رزرو سینما را با یک <span class=\"ltr\">event log</span> فقط‌افزودنی و سه <span class=\"ltr\">projection</span> (وضعیت صندلی، گزارش فروش، چاپ بلیت) طراحی کن. دو درخواست هم‌زمان برای یک صندلی، انقضای <span class=\"ltr\">hold</span>، لغو و اصلاح رزرو اشتباه را توضیح بده؛ انحصار صندلی را در مرز نوشتن اعمال کن و بازپخش (<span class=\"ltr\">replay</span>) را از ارسال دوباره بلیت جدا کن.",
-  "interview_q_en": "Design cinema reservations with an append-only <span class=\"ltr\">event log</span> and three <span class=\"ltr\">projections</span> (seat status, sales report, ticket printing). Handle two concurrent requests for one seat, <span class=\"ltr\">hold</span> expiry, cancellation and fixing a mistaken booking; enforce seat exclusivity at the write boundary and separate <span class=\"ltr\">replay</span> from ticket resend.",
+  "interview_q_fa": "تصور کن رزرو سینما داری با event log و سه projection وضعیت صندلی، فروش و بلیت. دو درخواست هم‌زمان برای یه صندلی، انقضای hold، لغو و اصلاح رزرو رو توضیح بده؛ invariant رو توی write path اعمال کن و replay رو از ارسال دوبارهٔ بلیت جدا کن.",
+  "interview_q_en": "Think of it: cinema bookings on an event log, with seat, sales, and ticket projections. Handle two requests racing for one seat, hold expiry, cancellation, and fixing a booking. Enforce the invariant at the write boundary — and keep replay far away from re-sending tickets.",
   "answer_fa": "لاگ فقط رویداد معتبرِ گذشته (<span class=\"ltr\">SeatHeld, SeatConfirmed, HoldExpired, BookingCanceled, BookingCorrected</span>) نگه می‌دارد؛ فرمان‌ها (<span class=\"ltr\">HoldSeat</span>) جدا از رویدادها هستند. انحصار صندلی با <span class=\"ltr\">conditional append</span> روی نسخه صندلی در مرز نوشتن اعمال می‌شود، پس از دو مسابقه فقط یکی می‌برد. اصلاح = رویداد جبرانی تازه، نه ویرایش. بازپخش نما را می‌سازد ولی بلیت را دوباره نمی‌فرستد: ارسال با کلید <span class=\"ltr\">idempotency</span> نگهبانی می‌شود.",
   "answer_en": "The log keeps only valid past-tense events (<span class=\"ltr\">SeatHeld, SeatConfirmed, HoldExpired, BookingCanceled, BookingCorrected</span>); commands (<span class=\"ltr\">HoldSeat</span>) are separate from events. Seat exclusivity is enforced by a <span class=\"ltr\">conditional append</span> on the seat version at the write boundary, so of two racers exactly one wins. Fixes are fresh compensating events, never edits. Replay rebuilds views but never resends tickets: sending is guarded by an <span class=\"ltr\">idempotency</span> key.",
   "assumptions": [
@@ -84,8 +84,8 @@
   "tests_en": "Checks: under 50 concurrent racers exactly one <span class=\"ltr\">hold</span> wins; same-key <span class=\"ltr\">retry</span> changes nothing; a full log replay rebuilds the same view with the sent-count unchanged; expiry frees the seat.",
   "followups": [
     {
-      "q_fa": "رویداد SeatHeld دیر برسد ولی SeatReleased قبلاً پردازش شده باشد چه می‌کنی؟",
-      "q_en": "What happens if SeatHeld arrives after SeatReleased has already been processed?",
+      "q_fa": "حالا SeatHeld دیر برسه و SeatReleased قبلاً پردازش شده باشه — چی کار می‌کنی؟",
+      "q_en": "SeatHeld shows up late but SeatReleased is already processed — what do you do?",
       "level": "senior",
       "a_fa": "نما هر دو را با <span class=\"ltr\">hold_id</span> و ترتیب لاگ می‌بیند: نگهداشت منقضی‌شده صندلی آزاد را قفل نمی‌کند و به‌جایش رویداد «بی‌اثر شد» ثبت می‌شود. قاعده: اثر رویداد را نسخه و وضعیت جاری تعیین می‌کند، نه ترتیب رسیدن به مصرف‌کننده.",
       "a_en": "The view sees both with <span class=\"ltr\">hold_id</span> and log order: the expired hold never relocks the freed seat, and a 'superseded' marker is recorded instead. Rule: version plus current state decides an event's effect, not consumer arrival order."
