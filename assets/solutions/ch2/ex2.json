@@ -1,30 +1,30 @@
 {
   "alternatives": [
     {
-      "en": "Availability-first: accept slightly stale reads from any replica during a partition when the product tolerates it — e.g. last-known status with an 'updated Xs ago' label. Cost: explicit staleness UX and a freshness metric you must monitor.",
-      "fa": "جایگزین دسترس‌پذیری‌اول: هنگام پارتیشن خواندن کمی stale را بپذیر وقتی محصول تحملش را دارد — مثلاً آخرین وضعیت معلوم با برچسب «به‌روز شده در X ثانیه پیش». هزینه: UX صریح و متریک تازگی."
+      "en": "Availability-first: accept slightly stale reads from any replica during a partition when the product tolerates it — e.g. last-known status with an 'updated Xs ago' label. The cost is explicit: a staleness UX users can see, plus a freshness metric you have to watch.",
+      "fa": "جایگزین دسترس‌پذیری‌اول: موقع پارتیشن، خواندنِ کمی stale رو بپذیر وقتی محصول تحملش رو داره — مثلاً آخرین وضعیتِ معلوم با برچسب «به‌روز شده در X ثانیه پیش». هزینه‌اش هم مشخصه: UX صریح و یه متریک تازگی که باید نگاهش داری."
     }
   ],
-  "answer_en": "Use explicitly scoped SLIs for order status: availability = semantically valid responses / eligible requests; conditional latency = successful responses under 300ms / all successful responses. Teaching 30-day goals are 99.9% availability and 99% of successful responses under threshold. A timeout fails availability but is excluded from conditional latency, so read both together. SLOs are internal objectives; SLAs are contracts with defined remedies.",
-  "answer_fa": "برای استعلام وضعیت سفارش دو SLI با مخرج مشخص داریم: دسترس‌پذیری = پاسخ معنایی معتبر ÷ همهٔ درخواست‌های معتبر، و تأخیرِ مشروط = پاسخ موفق زیر ۳۰۰ms ÷ همهٔ پاسخ‌های موفق. هدف‌های آموزشی در پنجرهٔ ۳۰روزه، ۹۹٫۹٪ دسترس‌پذیری و ۹۹٪ پاسخ‌های موفق زیر آستانه‌اند. timeout در دسترس‌پذیری شکست است ولی در مخرج SLI تأخیرِ مشروط وارد نمی‌شود؛ پس هر دو را کنار هم بخوان. SLO هدف داخلی و SLA قرارداد با پیامد مشخص است.",
+  "answer_en": "Two SLIs for the order-status read, each with its own denominator: availability = semantically valid responses / eligible requests; conditional latency = successful responses under 300ms / all successful responses. Teaching goals over a 30-day window: 99.9% availability and 99% of successful responses under threshold. Here's the small bit that bites people: a timeout fails availability but never enters the conditional-latency denominator — so read the two together, never one alone. And say the last part out loud: SLOs are internal objectives, SLAs are contracts with defined remedies. They are not the same thing.",
+  "answer_fa": "برای استعلام وضعیت سفارش دو تا SLI می‌نویسیم، هرکدوم با مخرج خودش: دسترس‌پذیری = پاسخ معنایی معتبر ÷ همهٔ درخواست‌های معتبر، و تأخیرِ مشروط = پاسخ موفق زیر ۳۰۰ms ÷ همهٔ پاسخ‌های موفق. هدف‌های آموزشی توی پنجرهٔ ۳۰ روزه: ۹۹٫۹٪ دسترس‌پذیری و ۹۹٪ پاسخ‌های موفق زیر آستانه. یه نکتهٔ ریز ولی مهم: timeout در دسترس‌پذیری شکسته، ولی اصلاً توی مخرج SLI تأخیرِ مشروط وارد نمی‌شه — پس این دوتا رو با هم بخون، نه تکی. و حرف آخر: SLO هدف داخلی توئه، SLA قرارداده با پیامد مشخص. یکی نیستن.",
   "assumptions": [
     {
-      "en": "Thresholds (300 ms, 99.9%, 30-day window) are teaching assumptions; real ones come from user-tolerance studies and business cost.",
-      "fa": "آستانه‌ها (۳۰۰ میلی‌ثانیه، ۹۹٫۹٪، پنجره ۳۰ روزه) فرض آموزشی‌اند؛ واقعی‌ها از مطالعه تحمل کاربر و هزینه کسب‌وکار می‌آیند."
+      "en": "Here's the thing: the thresholds (300 ms, 99.9%, 30-day window) are teaching assumptions. The real ones come from user-tolerance studies and business cost.",
+      "fa": "بذار ساده بگم: آستانه‌ها (۳۰۰ میلی‌ثانیه، ۹۹٫۹٪، پنجره ۳۰ روزه) فرض آموزشی‌اند. آستانهٔ واقعی از مطالعهٔ تحمل کاربر و هزینهٔ کسب‌وکار میاد."
     },
     {
-      "en": "Timeout = 1 s per attempt; dependency = inventory/risk read behind the status call.",
-      "fa": "تایم‌اوت = ۱ ثانیه برای هر تلاش؛ وابستگی = خواندن موجودی/ریسک پشت فراخوان وضعیت."
+      "en": "Timeout = 1 s per attempt. The dependency is the inventory/risk read behind the status call.",
+      "fa": "تایم‌اوت = ۱ ثانیه برای هر تلاش. وابستگی هم اینه: خواندن موجودی/ریسک پشت فراخوان وضعیت."
     },
     {
-      "en": "Alerts must route to an action (rollback, shed load, fail open) — a chart with no action is wallpaper.",
-      "fa": "هشدارها باید به یک اقدام برسند (rollback، shed load، fail open) — نمودار بدون اقدام کاغذدیواری است."
+      "en": "Every alert has to route to an action (rollback, shed load, fail open) — a chart that never leads anywhere is just wallpaper.",
+      "fa": "هر هشدار باید به یه اقدام برسه (rollback، shed load، fail open) — نموداری که به اقدام نرسه، کاغذدیواریه."
     }
   ],
   "code": {
     "lang": "java",
     "code": "// Teaching numbers: 50M status reads per 30-day window, 99.9% SLO.\n// Budget, fast-burn page and slow-burn ticket thresholds.\npublic class SloBudget {\n    public static void main(String[] a) {\n        long requests = 50_000_000L; // teaching volume over the 30-day window\n        double slo = 0.999;\n        double budget = (1 - slo) * requests; // allowed failures\n        System.out.printf(\"allowed failures: %,.0f%n\", budget);\n        // fast-burn: 2% of budget in 1 hour -> page; slow-burn: 10% in 6h -> ticket\n        System.out.printf(\"page when failures/hour > %,.0f%n\", 0.02 * budget);\n        System.out.printf(\"ticket when failures/6h > %,.0f%n\", 0.10 * budget);\n        if (Math.abs(budget - 50_000) >= 1) throw new AssertionError(budget);\n        System.out.println(\"OK\");\n    }\n}",
-    "run_fa": "javac SloBudget.java && java SloBudget — فقط استاندارد جاوا، فوری. requests و slo را با پنجره خودت تنظیم کن.",
+    "run_fa": "javac SloBudget.java && java SloBudget — فقط استاندارد جاوا، فوری. requests و slo رو با پنجرهٔ خودت تنظیم کن.",
     "run_en": "javac SloBudget.java && java SloBudget — stdlib Java only, instant. Tune requests and slo to your window.",
     "expected_fa": "خرابی مجاز: ۵۰٬۰۰۰؛ آستانه پیج ۱٬۰۰۰ در ساعت؛ آستانه تیکت ۵٬۰۰۰ در ۶ ساعت؛ OK. (خروجی واقعی همین محیط)",
     "expected_en": "allowed failures: 50,000; page threshold 1,000/h; ticket threshold 5,000/6h; OK. (actual output of this environment)",
@@ -32,18 +32,18 @@
   },
   "failures": [
     {
-      "en": "Dependency outage: status reads fail too unless a degraded path serves last-known status with an explicit staleness label — decide in advance which failures may propagate.",
-      "fa": "قطعی وابستگی: خواندن وضعیت هم fail می‌شود مگر مسیر degraded با برچسب صریح staleness آخرین وضعیت معلوم را بدهد — از قبل تصمیم بگیر کدام خرابی‌ها اجازه انتشار دارند."
+      "en": "Dependency outage: status reads fail too unless a degraded path serves last-known status with an explicit staleness label. Decide in advance which failures may propagate — during the incident, nobody has time to argue about it.",
+      "fa": "قطعی وابستگی: خواندن وضعیت هم fail می‌شه، مگر اینکه یه مسیر degraded با برچسب صریح staleness آخرین وضعیتِ معلوم رو بده. این تصمیم رو از قبل بگیر: کدوم خرابی‌ها اجازهٔ انتشار دارن."
     },
     {
       "en": "Budget exhausted on day 10 of 30: freeze non-critical releases, spend headroom only on reliability work. A budget with no consequences is decoration.",
-      "fa": "تمام شدن بودجه در روز ۱۰ از ۳۰: انتشارهای غیرحیاتی را فریز کن. بودجه بدون پیامد تزئین است."
+      "fa": "بودجه توی روز ۱۰ از ۳۰ تموم شد: انتشارهای غیرحیاتی رو فریز کن. بودجه‌ای که هیچ پیامدی نداره، تزئینه — نه ابزار."
     }
   ],
   "followups": [
     {
-      "a_en": "Slice p99 before theorizing: by region/AZ, device or app version, cache-hit vs miss, downstream shard. Usual suspects: one slow dependency shard, a cache-miss cohort hitting the database, or large-payload responses dominating the tail. Fix the biggest cohort first, then re-slice. Averages improving while p99 stays bad means you optimized the cohort that was already fine.",
-      "a_fa": "قبل از نظریه، p99 را برش بزن: بر اساس ریجن/AZ، دستگاه یا نسخه اپ، hit/miss کش، شارد پایین‌دستی. مظنون‌های همیشگی: یک شارد کند وابستگی، گروه cache-miss، یا پاسخ‌های پرحجم که دم را تصاحب کرده‌اند. اول بزرگ‌ترین گروه را درست کن، بعد دوباره برش بزن.",
+      "a_en": "Slice p99 before theorizing: by region/AZ, device or app version, cache-hit vs miss, downstream shard. Usual suspects: one slow dependency shard, a cache-miss cohort hitting the database, or large-payload responses dominating the tail. Fix the biggest cohort first, then re-slice. If the average improves while p99 stays bad, you optimized the cohort that was already fine.",
+      "a_fa": "قبل از نظریه‌پردازی، p99 رو برش بزن: بر اساس ریجن/AZ، دستگاه یا نسخهٔ اپ، hit/miss کش، شارد پایین‌دستی. مظنون‌های همیشگی: یه شارد کندِ وابستگی، گروه cache-miss، یا پاسخ‌های پرحجم که دم رو تصاحب کردن. اول بزرگ‌ترین گروه رو درست کن، بعد دوباره برش بزن. اگه میانگین بهتر شد ولی دم همون موند، یعنی گروهی رو بهینه کردی که از قبل خوب بود.",
       "level": "senior",
       "q_en": "Your average looks great but p99 is on fire — which user groups do you dig into first?",
       "q_fa": "میانگین عالیه ولی p99 خرابه — اول سراغ کدوم گروه کاربرا می‌ری؟"
@@ -51,16 +51,16 @@
   ],
   "interview_q_en": "Rule of thumb: for order-status lookups, define SLIs and SLOs with measurement windows, latency percentiles, and availability. Draw the line between success, timeout, and dependency errors; design the error budget and burn-rate alerts — and keep your internal SLO separate from the contractual SLA.",
   "interview_q_fa": "یه ترفند مصاحبه‌ای: برای استعلام وضعیت سفارش SLI و SLO با بازهٔ اندازه‌گیری، latency percentile و availability تعریف کن. مرز success و timeout و خطای وابستگی رو روشن کن؛ error budget و هشدار burn rate رو طراحی کن و SLO داخلی رو از تعهد قراردادی SLA جدا کن.",
-  "mental_en": "An SLI is good events divided by eligible events. An SLO targets that ratio over a window. Its error budget bounds tolerated failure and informs release/reliability decisions. An SLA specifies contractual scope and consequences; its looser threshold in this example is a contract choice, not a universal requirement.",
-  "mental_fa": "SLI نسبت رویدادهای خوب به رویدادهای واجد شرایط است. SLO هدفی برای همین نسبت در یک پنجره است؛ error budget سهم شکست مجاز را مشخص می‌کند تا تصمیم انتشار و کار قابلیت اطمینان مبنای مشترک داشته باشد. SLA قرارداد با دامنه و پیامد مشخص است و در این مثال آستانهٔ آسان‌تری از SLO دارد؛ این تفاوت یک انتخاب قراردادی است، نه تعریف الزامی SLA.",
+  "mental_en": "An SLI is good events divided by eligible events. An SLO is the target for that same ratio over a window of time. The error budget that comes with it caps how much failure you're willing to take, and it turns release and reliability calls into one shared decision instead of two people arguing. An SLA is a contract: scope, and what happens if you break it. Here its threshold is looser than the SLO — that's a contract choice, not a rule that SLAs have to be soft.",
+  "mental_fa": "SLI یعنی رویدادهای خوب تقسیم بر رویدادهای واجد شرایط. SLO یعنی یه هدف برای همون نسبت، توی یه پنجرهٔ زمانی. error budget هم سهم شکستِ مجازه — و کارش اینه که تصمیم انتشار و کار قابلیت اطمینان روی یه مبنای مشترک بنشونه. SLA هم یه قرارداده با دامنه و پیامد مشخص؛ توی این مثال آستانه‌ش آسان‌تر از SLOئه، و این تفاوت یه انتخاب قراردادیه، نه تعریف الزامی SLA.",
   "mistakes": [
     {
-      "en": "One number for everything ('99.9% fast and available'). Latency and availability are independent SLIs — a fast error is still an error, a slow success still breaches latency.",
-      "fa": "یک عدد برای همه‌چیز («۹۹٫۹٪ سریع و در دسترس»). تأخیر و دسترس‌پذیری دو SLI مستقل‌اند — خطای سریع هنوز خطاست و موفقیت کند هنوز SLO تأخیر را می‌شکند."
+      "en": "One number for everything ('99.9% fast and available'). Latency and availability are independent SLIs — a fast error is still an error, and a slow success still breaches the latency SLO.",
+      "fa": "یه عدد برای همه‌چیز («۹۹٫۹٪ سریع و در دسترس»). تأخیر و دسترس‌پذیری دو تا SLI مستقل‌ان — خطای سریع هنوز خطاست و موفقیتِ کند هنوز SLO تأخیر رو می‌شکنه."
     },
     {
-      "en": "Dashboards nobody acts on. Every chart needs an alert threshold and a runbook action.",
-      "fa": "داشبوردی که کسی به آن عمل نمی‌کند. هر نمودار به آستانه هشدار و اقدام ران‌بوک نیاز دارد."
+      "en": "Dashboards nobody acts on. Every chart needs an alert threshold and a runbook action — otherwise it's wallpaper.",
+      "fa": "داشبوردی که کسی بهش عمل نمی‌کنه. هر نمودار به آستانهٔ هشدار و یه اقدام ران‌بوک نیاز داره — وگرنه دکوره."
     }
   ],
   "number": 2,
@@ -71,40 +71,40 @@
   ],
   "steps": [
     {
-      "fa": "صورت و مخرج هر SLI را بنویس: تأخیر = خواندن موفق زیر ۳۰۰ms ÷ کل خواندن موفق؛ دسترس‌پذیری = پاسخ بدون خطا ÷ کل درخواست. پنجره: ۳۰ روزه غلتان.",
-      "t_en": "Numerators first",
-      "t_fa": "اول صورت‌ها",
-      "en": "Write each SLI's numerator and denominator: latency = successful reads under 300ms ÷ all successful reads; availability = non-error responses ÷ all requests. Window: rolling 30 days."
+      "fa": "صورت و مخرج هر SLI رو بنویس: تأخیر = خواندن موفق زیر ۳۰۰ms ÷ کل خواندن موفق؛ دسترس‌پذیری = پاسخ بدون خطا ÷ کل درخواست. پنجره: ۳۰ روزهٔ غلتان. تا وقتی مخرج رو ننویسی، هر عددی که بعداً می‌گی فقط یه عدد خوشگله.",
+      "t_en": "Numerator and denominator first",
+      "t_fa": "اول صورت و مخرج",
+      "en": "Write each SLI's numerator and denominator: latency = successful reads under 300ms ÷ all successful reads; availability = non-error responses ÷ all requests. Window: rolling 30 days. Until the denominator is on paper, any number you quote later is just decoration."
     },
     {
-      "fa": "موفقیت معنایی را مستقل از سرعت تعریف کن: پاسخ 2xx با وضعیت درست و تازگی مجاز، موفق است؛ پاسخ موفق کند، SLI تأخیر را بدتر می‌کند. timeout یک‌ثانیه‌ای و خطای وابستگی شکست دسترس‌پذیری‌اند و در SLI تأخیر مشروط شمرده نمی‌شوند؛ به همین دلیل نمودار تأخیر به‌تنهایی کافی نیست.",
+      "fa": "موفقیتِ معنایی رو جدا از سرعت تعریف کن: پاسخ 2xx با وضعیت درست و تازگی مجاز، موفقه؛ پاسخ موفقِ کند، SLI تأخیر رو بدتر می‌کنه. timeout یک‌ثانیه‌ای و خطای وابستگی، شکستِ دسترس‌پذیری‌ان و توی SLI تأخیرِ مشروط شمرده نمی‌شن. به همین دلیله نمودار تأخیر به‌تنهایی کافی نیست — باید دوتایی نگاهش کنی.",
       "t_en": "Draw the failure lines",
-      "t_fa": "خط‌های خرابی را بکش",
-      "en": "Define semantic success separately from speed: a correct, acceptably fresh 2xx succeeds; slow successes degrade latency. One-second timeouts and dependency failures fail availability and are excluded from conditional latency. A latency chart alone is therefore insufficient."
+      "t_fa": "خط‌های خرابی رو بکش",
+      "en": "Define semantic success separately from speed: a correct, acceptably fresh 2xx succeeds; slow successes degrade latency. One-second timeouts and dependency failures fail availability and are excluded from conditional latency. A latency chart alone is therefore insufficient — you have to read the two side by side."
     },
     {
-      "fa": "بودجه: با SLO ۹۹٫۹٪ روی حجم آموزشی ۵۰ میلیون درخواست، ۵۰٬۰۰۰ خرابی مجاز است. سیاست اتمام: فریز انتشار غیرحیاتی + فقط کار قابلیت اطمینان.",
+      "fa": "بودجه: با SLO ۹۹٫۹٪ روی حجم آموزشی ۵۰ میلیون درخواست، ۵۰٬۰۰۰ خرابی مجازه. سیاست اتمام: فریزِ انتشارهای غیرحیاتی + فقط کار قابلیت اطمینان. بودجه‌ای که آخرش هیچ اتفاقی نمی‌ندازه، فقط دکوره.",
       "t_en": "Budget and its consequence",
       "t_fa": "بودجه و پیامدش",
-      "en": "Budget: at 99.9% SLO over the teaching 50M requests, 50,000 failures are allowed. Zero policy: freeze non-critical releases + reliability work only."
+      "en": "Budget: at 99.9% SLO over the teaching 50M requests, 50,000 failures are allowed. Zero policy: freeze non-critical releases + reliability work only. A budget that never costs you anything is just wallpaper."
     },
     {
-      "fa": "هشدارها: fast-burn (۲٪ بودجه در ۱ ساعت → پیج و rollback) و slow-burn (۱۰٪ در ۶ ساعت → تیکت). هر هشدار به یک اقدام ران‌بوک وصل است.",
+      "fa": "هشدارها: fast-burn (۲٪ بودجه در ۱ ساعت → پیج و rollback) و slow-burn (۱۰٪ در ۶ ساعت → تیکت). هر هشدار به یه اقدام مشخص توی ران‌بوک وصل می‌شه — وگرنه فقط یه نمودار قشنگه که کسی نگاهش نمی‌کنه.",
       "t_en": "Two burn speeds, two actions",
       "t_fa": "دو سرعت مصرف، دو اقدام",
-      "en": "Alerts: fast-burn (2% of budget in 1h → page and rollback) and slow-burn (10% in 6h → ticket). Every alert connects to a runbook action."
+      "en": "Alerts: fast-burn (2% of budget in 1h → page and rollback) and slow-burn (10% in 6h → ticket). Every alert connects to a runbook action — otherwise it's a pretty chart nobody opens."
     },
     {
-      "fa": "جدایی SLO/SLA: مثلاً SLA قراردادی ۹۹٫۵٪ ماهانه با اعتبار ۱۰٪ — شل‌تر از SLO تا هفته بد معمولی جریمه مالی نسازد.",
+      "fa": "جدایی SLO/SLA: مثلاً SLA قراردادی ۹۹٫۵٪ ماهانه با اعتبار ۱۰٪ — عمداً شل‌تر از SLO، تا یه هفتهٔ بدِ معمولی جریمهٔ مالی نسازه. SLO رو سخت‌گیر می‌گیری چون هدف داخلیه؛ SLA رو نرم‌تر می‌گیری چون تعهد بیرونیه.",
       "t_en": "Split SLO from SLA",
       "t_fa": "جدا کردن SLO از SLA",
-      "en": "SLO/SLA split: e.g. contractual SLA 99.5% monthly with 10% credit — looser than the SLO so a normal bad week never pays money."
+      "en": "SLO/SLA split: e.g. contractual SLA 99.5% monthly with 10% credit — deliberately looser than the SLO so a normal bad week never pays money. You hold the SLO tight because it's your own goal; the SLA is softer because it's a promise to someone else."
     }
   ],
-  "tests_en": "Verify monthly: SLIs recomputed from raw logs; burn alerts fire on a synthetic spike within minutes; timeout classification matches the 1 s rule in traces; a game-day with the dependency down confirms labelled-stale degraded reads.",
-  "tests_fa": "ماهانه راستی‌آزمایی کن: SLIها از لاگ خام؛ هشدارهای burn روی spike مصنوعی ظرف چند دقیقه؛ دسته‌بندی تایم‌اوت با قاعده ۱ ثانیه در traceها؛ game-day با وابستگی خوابیده و خواندن degraded برچسب‌دار.",
-  "worked_en": "<p>Teaching volume: 50M status reads / 30 days (≈ 19/s). SLO 99.9% → budget = 0.001 × 50M = <b>50,000 allowed failures</b>. Fast-burn page: 2% (1,000) within 1 hour. Slow-burn ticket: 10% (5,000) within 6 hours. Latency SLO: 99% of successful reads under 300 ms → at most 1% slow reads, tracked as its own SLI.</p>",
-  "worked_fa": "<p>حجم آموزشی: ۵۰ میلیون خواندن در ۳۰ روز (≈ ۱۹ در ثانیه). SLO ۹۹٫۹٪ → بودجه = <b>۵۰٬۰۰۰ خرابی مجاز</b>. پیج fast-burn: ۲٪ (۱٬۰۰۰) در ۱ ساعت. تیکت slow-burn: ۱۰٪ (۵٬۰۰۰) در ۶ ساعت. SLO تأخیر: ۹۹٪ خواندن‌های موفق زیر ۳۰۰ms — SLI جدا.</p>",
+  "tests_en": "Verify monthly: recompute the SLIs from raw logs; fire the burn alerts on a synthetic spike and check they page within minutes; check the timeout classification against the 1 s rule in the traces; and run a game-day with the dependency asleep and the degraded read labelled. If you haven't watched it happen yourself, it isn't real yet.",
+  "tests_fa": "ماهانه راستی‌آزمایی کن: SLIها رو از لاگ خام دوباره حساب کن؛ هشدارهای burn رو روی یه spike مصنوعی امتحان کن؛ باید ظرف چند دقیقه شلیک کنن؛ دسته‌بندی تایم‌اوت رو با قاعدهٔ ۱ ثانیه توی traceها چک کن؛ و یه game-day بذار با وابستگیِ خوابیده و خواندن degraded برچسب‌دار. اگه ندیدیش با چشم خودت، هنوز واقعی نیست.",
+  "worked_en": "<p>Teaching volume: 50M status reads / 30 days (≈ 19/s). SLO 99.9% → budget = 0.001 × 50M = <b>50,000 allowed failures</b>. Fast-burn page: 2% (1,000) within 1 hour. Slow-burn ticket: 10% (5,000) within 6 hours. Latency SLO: 99% of successful reads under 300 ms → at most 1% slow reads, tracked as its own SLI.</p><p>So the whole SLO comes down to a single number, and every one of those failures has to buy a decision. A percentage on a slide isn't an SLO.</p>",
+  "worked_fa": "<p>حجم آموزشی: ۵۰ میلیون خواندن در ۳۰ روز (≈ ۱۹ در ثانیه). SLO ۹۹٫۹٪ → بودجه = <b>۵۰٬۰۰۰ خرابی مجاز</b>. پیج fast-burn: ۲٪ (۱٬۰۰۰) در ۱ ساعت. تیکت slow-burn: ۱۰٪ (۵٬۰۰۰) در ۶ ساعت. SLO تأخیر: ۹۹٪ خواندن‌های موفق زیر ۳۰۰ms — که خودش یه SLI جداست.</p><p>یعنی حرف آخر اینه: هر خرابیِ مجاز باید یه تصمیم رو بسازه. یه درصد خالی روی اسلاید، SLO نیست.</p>",
   "diagrams": [
     {
       "file": "diagrams/sol2-step1-burn-page.html",
@@ -112,44 +112,44 @@
       "source": "assets/diagram-specs/solutions/ch2/sol2-step1-burn-page.json",
       "kind_fa": "توالی",
       "kind_en": "sequence",
-      "caption_fa": "هشدار burn: پیج سریع با rollback و تیکت کند با تحقیق",
-      "caption_en": "Burn alerts: fast-burn page with rollback, slow-burn ticket with investigation",
+      "caption_fa": "هشدار burn: پیج سریع با rollback، تیکت کند با تحقیق",
+      "caption_en": "Burn alerts: a fast-burn page with rollback, a slow-burn ticket with investigation",
       "height": 780,
       "narration": {
-        "scenario_fa": "نیمه‌شب پیجر بیدارت کرده: بودجه دارد می‌سوزد. شکل را بالا‌به‌پایین بخوان — اول مسیر پیج سریع با اقدام <span class=\"ltr\">rollback</span>، بعد مسیر تیکت کند با تحقیق.",
-        "scenario_en": "The pager wakes you at night: the budget is burning. Read top to bottom — first the fast-burn page with its rollback action, then the slow-burn ticket with its investigation.",
+        "scenario_fa": "نیمه‌شب پیجر بیدارت کرده: بودجه داره می‌سوزه. شکل رو بالا به پایین بخون — اول مسیر پیج سریع با اقدام <span class=\"ltr\">rollback</span>، بعد مسیر تیکت کند با تحقیق.",
+        "scenario_en": "The pager wakes you at night: the budget is burning. Read the figure top to bottom — first the fast-burn page and its rollback action, then the slow-burn ticket and its investigation.",
         "steps": [
           {
-            "fa": "دو فلش اول: مانیتور <span class=\"ltr\">burn</span> پیج می‌زند (۲٪ بودجه در ۱ ساعت) و آنکال انتشارها را فریز و <span class=\"ltr\">rollback</span> می‌کند — هشدار به اقدام می‌رسد نه به نمودار.",
-            "en": "First two arrows: the burn monitor pages (2% of budget in 1 hour) and on-call freezes releases and rolls back — the alert ends in an action, not a chart."
+            "fa": "دو فلش اول: مانیتور <span class=\"ltr\">burn</span> پیج می‌زنه (۲٪ بودجه در ۱ ساعت) و آنکال انتشارها رو فریز و <span class=\"ltr\">rollback</span> می‌کنه — هشدار به اقدام می‌رسه، نه به نمودار.",
+            "en": "First two arrows: the burn monitor pages (2% of budget in 1 hour), and on-call freezes the releases and rolls back — the alert ends in an action, not in a chart."
           },
           {
-            "fa": "فلش برگشتی: قطار انتشار «<span class=\"ltr\">burn</span> تخت شد» را برمی‌گرداند — تا راستی‌آزمایی نشود قفل باز نمی‌شود.",
-            "en": "Return arrow: the release train reports 'burn flat' — no unfreeze before verification."
+            "fa": "فلش برگشتی: قطار انتشار «<span class=\"ltr\">burn</span> تخت شد» رو برمی‌گردونه — تا راستی‌آزمایی نشه، قفل باز نمی‌شه.",
+            "en": "Return arrow: the release train reports 'burn flat' — no unfreezing before you've verified it."
           },
           {
-            "fa": "شاخه <span class=\"ltr\">dashed</span>: <span class=\"ltr\">burn</span> کند (۱۰٪ در ۶ ساعت) تیکت می‌شود نه پیج — در همان شیفت بررسی می‌شود.",
-            "en": "Dashed branch: the slow burn (10% in 6 hours) becomes a ticket, not a page — investigated inside the shift."
+            "fa": "شاخهٔ <span class=\"ltr\">dashed</span>: <span class=\"ltr\">burn</span> کند (۱۰٪ در ۶ ساعت) تیکت می‌شه، نه پیج — توی همون شیفت بررسی می‌شه.",
+            "en": "Dashed branch: the slow burn (10% in 6 hours) becomes a ticket, not a page — you investigate it inside the shift."
           },
           {
-            "fa": "دو فلش آخر: <span class=\"ltr\">p99</span> بر اساس گروه برش می‌خورد (ریجن، نسخه، <span class=\"ltr\">hit/miss</span>) و بزرگ‌ترین گروه اول درست می‌شود — بعد حلقه با سبز شدن <span class=\"ltr\">burn</span> بسته می‌شود.",
-            "en": "Last two arrows: p99 is sliced by cohort (region, version, hit/miss) and the biggest cohort is fixed first — then the loop closes as the burn goes green."
+            "fa": "دو فلش آخر: <span class=\"ltr\">p99</span> بر اساس گروه برش می‌خوره (ریجن، نسخه، <span class=\"ltr\">hit/miss</span>) و بزرگ‌ترین گروه اول درست می‌شه — بعد حلقه با سبز شدن <span class=\"ltr\">burn</span> بسته می‌شه.",
+            "en": "Last two arrows: p99 is sliced by cohort (region, version, hit/miss) and the biggest cohort gets fixed first — then the loop closes as the burn goes green."
           }
         ],
-        "point_fa": "نقطه تصمیم سرعت هشدار است: پیج یعنی اقدام فوری، تیکت یعنی تحقیق در شیفت. سرعت اشتباه یعنی یا خستگی هشدار یا خواب‌ماندگی روی حادثه.",
-        "point_en": "The decision point is the alert speed: a page means act now, a ticket means investigate this shift. The wrong speed means either alert fatigue or sleeping through an incident.",
-        "failure_fa": "اگر <span class=\"ltr\">rollback</span> بدون راستی‌آزمایی قفل را باز کند، همان نسخه خراب دوباره می‌سوزاند؛ اگر <span class=\"ltr\">burn</span> کند پیج شود، تیم به پیج بی‌اعتنا می‌شود.",
-        "failure_en": "Unfreezing without verifying the burn lets the same bad release burn again; paging a slow burn trains the team to ignore pages.",
-        "guarantee_fa": "شکل نشان می‌دهد هر سرعت <span class=\"ltr\">burn</span> به کدام اقدام می‌رسد. آستانه‌های تو را تعیین نمی‌کند — آن‌ها از تحمل کاربر و هزینه می‌آیند.",
-        "guarantee_en": "The figure shows which action each burn speed reaches. It does not set your thresholds — those come from user tolerance and cost.",
-        "nonguarantee_fa": "درباره جبران‌های <span class=\"ltr\">SLA</span> و نسبت‌دادن خطا بین چند سرویس ساکت است — آن‌ها در پنل اسمبلی‌اند.",
-        "nonguarantee_en": "It is silent on SLA remedies and multi-service error attribution — those live in the assembly panel."
+        "point_fa": "نقطهٔ تصمیم، سرعت هشداره: پیج یعنی اقدام فوری، تیکت یعنی تحقیق توی همون شیفت. سرعت اشتباه یعنی یا خستگی هشدار یا خواب‌ماندگی روی حادثه.",
+        "point_en": "The decision point is the alert speed: a page means act now, a ticket means look into it this shift. Pick the wrong speed and you get either alert fatigue or an incident you slept through.",
+        "failure_fa": "اگه <span class=\"ltr\">rollback</span> بدون راستی‌آزمایی قفل رو باز کنه، همون نسخهٔ خراب دوباره بودجه رو می‌سوزونه؛ اگه <span class=\"ltr\">burn</span> کند پیج بشه، تیم به پیج بی‌اعتنا می‌شه.",
+        "failure_en": "Unfreezing without verifying the burn lets the same bad release burn the budget again; paging a slow burn trains the team to ignore pages.",
+        "guarantee_fa": "شکل نشون می‌ده هر سرعت <span class=\"ltr\">burn</span> به کدوم اقدام می‌رسه. آستانه‌های تو رو تعیین نمی‌کنه — اون‌ها از تحمل کاربر و هزینه میان.",
+        "guarantee_en": "The figure shows which action each burn speed reaches. It doesn't set your thresholds — those come from user tolerance and cost.",
+        "nonguarantee_fa": "دربارهٔ جبران‌های <span class=\"ltr\">SLA</span> و نسبت دادن خطا بین چند سرویس ساکته — اون‌ها توی پنل اسمبلی‌ان.",
+        "nonguarantee_en": "It stays quiet about SLA remedies and about attributing an error across several services — those live in the assembly panel."
       },
       "selfcheck": {
-        "q_fa": "<span class=\"ltr\">burn</span> سریع ۲٪ در ۱ ساعت و <span class=\"ltr\">burn</span> کند ۱۰٪ در ۶ ساعت؛ هرکدام چه اقدامی می‌خواهد و چرا جابه‌جایشان خطرناک است؟",
-        "q_en": "Fast burn is 2% in 1 hour, slow burn 10% in 6 hours; what action does each demand, and why is swapping them dangerous?",
-        "a_fa": "سریع: فریز و <span class=\"ltr\">rollback</span> فوری با راستی‌آزمایی؛ کند: تیکت و برش <span class=\"ltr\">p99</span> در شیفت. جابه‌جایی یعنی یا تأخیر روی حادثه یا خستگی هشدار.",
-        "a_en": "Fast: freeze and roll back now, then verify; slow: ticket and slice p99 inside the shift. Swapping means either a late response or alert fatigue."
+        "q_fa": "<span class=\"ltr\">burn</span> سریع ۲٪ در ۱ ساعت و <span class=\"ltr\">burn</span> کند ۱۰٪ در ۶ ساعت؛ هرکدوم چه اقدامی می‌خواد و چرا جابه‌جاشون خطرناکه؟",
+        "q_en": "Fast burn is 2% in 1 hour, slow burn 10% in 6 hours — what action does each one demand, and why is swapping them dangerous?",
+        "a_fa": "سریع: فریز و <span class=\"ltr\">rollback</span> فوری، بعد راستی‌آزمایی؛ کند: تیکت و برش <span class=\"ltr\">p99</span> توی همون شیفت. جابه‌جا کردنشون یعنی یا دیر رسیدن به حادثه، یا خستگی هشدار.",
+        "a_en": "Fast: freeze and roll back now, then verify it. Slow: a ticket and a p99 slice inside the shift. Swap them and you either arrive late to the incident or you train the team into alert fatigue."
       }
     },
     {
@@ -157,47 +157,47 @@
       "made": "hand",
       "kind_fa": "پنل + خط مصرف",
       "kind_en": "panel + burn timeline",
-      "caption_fa": "از کسر SLI تا مصرف بودجه و هشدار (آستانه‌های آموزشی)",
-      "caption_en": "From SLI fractions to budget burn and alerts (teaching thresholds)",
+      "caption_fa": "از کسرهای SLI تا مصرف بودجه و هشدار (آستانه‌های آموزشی)",
+      "caption_en": "From the SLI fractions to the error budget and burn alerts (teaching thresholds)",
       "height": 640,
       "narration": {
-        "failure_en": "Trace a dependency outage: the availability bar's red segment grows while latency stays green — one SLI breaches, the other holds. That split is why burn alerts are per-SLI.",
-        "failure_fa": "قطعی وابستگی را دنبال کن: بخش قرمز میله دسترس‌پذیری رشد می‌کند ولی تأخیر سبز می‌ماند — یک SLI می‌شکند و دیگری سالم است. همین جدایی دلیل per-SLI بودن هشدارهای burn است.",
-        "guarantee_en": "The figure shows how fractions become budgets and budgets become pages. It does not set your thresholds — those come from user tolerance and business cost.",
-        "guarantee_fa": "شکل نشان می‌دهد کسرها چطور بودجه و بودجه‌ها چطور پیج می‌شوند. آستانه‌های تو را تعیین نمی‌کند — آن‌ها از تحمل کاربر و هزینه کسب‌وکار می‌آیند.",
-        "nonguarantee_en": "It does not cover SLA remedies, credit math, or multi-service error attribution.",
-        "nonguarantee_fa": "جبران‌های SLA، حساب اعتبار یا نسبت‌دادن خطا بین چند سرویس را پوشش نمی‌دهد.",
-        "point_en": "The decision point is the budget policy row: what happens the day the budget hits zero. A number without a consequence is not an SLO.",
-        "point_fa": "نقطه تصمیم سطر سیاست بودجه است: روزی که بودجه صفر شد چه می‌شود. عدد بدون پیامد SLO نیست.",
-        "scenario_en": "Your status page just turned amber and the product manager asks 'are we breaching?' Read left to right: two fractions, one budget, two alert speeds.",
-        "scenario_fa": "صفحه وضعیتت تازه کهربایی شده و مدیر محصول می‌پرسد «داریم می‌شکنیم؟» چپ‌به‌راست بخوان: دو کسر، یک بودجه، دو سرعت هشدار.",
+        "failure_en": "Trace a dependency outage: the red segment of the availability bar grows while latency stays green — one SLI breaches and the other holds. That split is exactly why burn alerts are per-SLI.",
+        "failure_fa": "قطعی وابستگی رو دنبال کن: بخش قرمزِ میلهٔ دسترس‌پذیری بزرگ می‌شه ولی تأخیر سبز می‌مونه — یه SLI می‌شکنه و اون یکی سالمه. همین جداییه که دلیل per-SLI بودن هشدارهای burn ئه.",
+        "guarantee_en": "The figure shows how fractions turn into budgets and budgets turn into pages. It doesn't set your thresholds — those come from user tolerance and business cost.",
+        "guarantee_fa": "شکل نشون می‌ده کسرها چطور بودجه می‌شن و بودجه‌ها چطور پیج. آستانه‌های تو رو تعیین نمی‌کنه — اون‌ها از تحمل کاربر و هزینهٔ کسب‌وکار میان.",
+        "nonguarantee_en": "It doesn't cover SLA remedies, the credit math, or attributing an error across several services.",
+        "nonguarantee_fa": "جبران‌های SLA، حساب اعتبار یا نسبت دادن خطا بین چند سرویس رو پوشش نمی‌ده.",
+        "point_en": "The decision point is the budget policy row: what happens the day the budget hits zero. A number with no consequence behind it isn't an SLO.",
+        "point_fa": "نقطهٔ تصمیم، سطر سیاست بودجه‌ست: روزی که بودجه صفر شد چی می‌شه. عددِ بدون پیامد، SLO نیست.",
+        "scenario_en": "Your status page just turned amber and the product manager asks 'are we breaching?' Read it left to right: two fractions, one budget, two alert speeds.",
+        "scenario_fa": "صفحهٔ وضعیتت تازه کهربایی شده و مدیر محصول می‌پرسه «داریم می‌شکنیم؟» چپ به راست بخون: دو کسر، یه بودجه، دو سرعت هشدار.",
         "steps": [
           {
             "en": "Left panel: the two SLI fractions — latency (fast ÷ successful) and availability (non-error ÷ total).",
-            "fa": "پنل چپ: دو کسر SLI — تأخیر (سریع ÷ موفق) و دسترس‌پذیری (بدون‌خطا ÷ کل)."
+            "fa": "پنل چپ: دو کسرِ SLI — تأخیر (سریع ÷ موفق) و دسترس‌پذیری (بدون خطا ÷ کل)."
           },
           {
-            "en": "Middle bar: the 30-day error budget as a strip — green safe, amber warning, red exhausted — with the freeze/rollback policy under it.",
-            "fa": "میله وسط: بودجه ۳۰ روزه — سبز امن، کهربایی هشدار، قرمز اتمام — با سیاست فریز/rollback زیرش."
+            "en": "Middle bar: the 30-day error budget as a strip — green safe, amber warning, red exhausted — with the freeze/rollback policy sitting under it.",
+            "fa": "میلهٔ وسط: بودجهٔ ۳۰ روزه — سبز امن، کهربایی هشدار، قرمز اتمام — با سیاست فریز/rollback زیرش."
           },
           {
-            "en": "Right strip: the two burn speeds — fast-burn pages within the hour, slow-burn tickets within the shift.",
-            "fa": "نوار راست: دو سرعت مصرف — fast-burn در همان ساعت پیج، slow-burn در همان شیفت تیکت."
+            "en": "Right strip: the two burn speeds — fast-burn pages inside the hour, slow-burn tickets inside the shift.",
+            "fa": "نوار راست: دو سرعت مصرف — fast-burn توی همون ساعت پیج، slow-burn توی همون شیفت تیکت."
           },
           {
-            "en": "Bottom line: the SLO/SLA split — internal objective above, customer contract with remedies below.",
-            "fa": "خط پایین: جدایی SLO/SLA — بالای آن هدف داخلی، پایینش قرارداد مشتری با جبران."
+            "en": "Bottom line: the SLO/SLA split — your internal objective above, the customer contract with its remedies below.",
+            "fa": "خط پایین: جدایی SLO/SLA — بالای خط هدف داخلی، زیرش قرارداد مشتری با جبران."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "Both: timeouts count as failures in both SLIs. Dependency errors count against availability; against latency only if you count the timeout path — state the rule before the incident.",
-        "a_fa": "هر دو: تایم‌اوت در هر دو SLI خرابی حساب می‌شود. خطاهای وابستگی به دسترس‌پذیری می‌خورند؛ به تأخیر فقط اگر مسیر تایم‌اوت را بشماری — قاعده را قبل از حادثه بنویس.",
+        "a_en": "Both: timeouts count as failures in both SLIs. Dependency errors count against availability; against latency only if you count the timeout path — and write that rule down before the incident, not during it.",
+        "a_fa": "هر دو: تایم‌اوت در هر دو SLI خرابی حساب می‌شه. خطاهای وابستگی به دسترس‌پذیری می‌خورن؛ به تأخیر فقط اگه مسیر تایم‌اوت رو بشماری — و این قاعده رو قبل از حادثه بنویس، نه وسطش.",
         "q_en": "A read times out after 1 s. Does it breach the latency SLI, the availability SLI, or both?",
-        "q_fa": "یک خواندن بعد از ۱ ثانیه تایم‌اوت می‌شود. SLI تأخیر را می‌شکند، دسترس‌پذیری را، یا هر دو؟"
+        "q_fa": "یه خواندن بعد از ۱ ثانیه تایم‌اوت می‌شه. SLI تأخیر رو می‌شکنه، دسترس‌پذیری رو، یا هر دو؟"
       }
     }
   ],
-  "reasoning_fa": "<p>عدد آستانه از نیاز کاربر می‌آید. مثلاً اگر در یک فرض آموزشی، کاربر وضعیت سفارش را در حداکثر ۳ ثانیه بخواهد، بودجهٔ ۰٫۵ ثانیه شبکه + ۰٫۵ render + ۱ صف + ۰٫۷ وابستگی + ۰٫۳ سرویس جمعاً ۳ ثانیه است؛ این تقسیم، شاهد اندازه‌گیری نیست و باید با trace و آزمون کاربر تأیید شود. هدف ۳۰۰ms این پاسخ، بودجهٔ سرویس است؛ سه ثانیه سقف تجربهٔ کامل است. صدک‌های اجزا را نمی‌توان ساده جمع کرد و صدک کل نامید: باید زمان کل درخواست را اندازه گرفت.</p><p>در ۵۰میلیون درخواست، بودجهٔ خطای ۹۹٫۹٪ برابر (۱−۰٫۹۹۹)×۵۰میلیون=۵۰هزار شکست است؛ این شمار درخواست است، نه دقیقهٔ قطعی. ۳۰ روز برای دیدن چند چرخهٔ هفتگی فرض شده است. آستانه‌های نمونهٔ ۲٪ بودجه در یک ساعت و ۱۰٪ در شش ساعت، در ترافیک یکنواخت به‌ترتیب burn rate برابر ۱۴٫۴ و ۱۲ می‌دهند: درصد بودجهٔ مصرف‌شده ÷ سهم زمان از ۷۲۰ ساعت. در ترافیک متغیر باید نرخ خطا و حجم واقعی پنجره را بسنجیم. افزایش هدف به ۹۹٫۹۹٪ بودجه را ده برابر کوچک‌تر می‌کند و هزینهٔ قابلیت اطمینان را باید دوباره بررسی کرد.</p><p>چرا خودِ سه ثانیه؟ تا وقتی دادهٔ واقعی نداریم، دلیل تجربی برای این عدد نداریم و آن را فقط ورودی سناریو می‌گیریم. برای انتخاب واقعی، نرخ رهاکردن کار، درخواست تکراری و رضایت را در بازه‌های تأخیر بسنج؛ همراه مالک محصول بیشترین تأخیر قابل‌قبول و هزینهٔ کاهش آن را تعیین کن. تقسیم بودجهٔ سه ثانیه، انتخاب این هدف را اثبات نمی‌کند؛ فقط نشان می‌دهد بعد از پذیرش هدف چگونه آن را بین مسیرها بودجه‌بندی می‌کنیم.</p>",
-  "reasoning_en": "<p>Derive thresholds from user needs. For a teaching end-to-end target of three seconds, a provisional budget might be 0.5s network + 0.5s rendering + 1s queue + 0.7s dependency + 0.3s service. This allocation is an assumption requiring traces and user validation. This answer uses 300ms for the service, not the whole journey. Component percentiles do not add into an end-to-end percentile; measure the entire request.</p><p>At 50M requests, (1−0.999)×50M=50k allowed failures: a request count, not downtime minutes. Thirty days spans several weekly cycles. Under uniform traffic, consuming 2% of budget in one hour or 10% in six hours implies burn rates 14.4 and 12: budget fraction consumed divided by the time fraction of 720 hours. Variable traffic requires actual error rates and window volumes. Raising the goal to 99.99% shrinks the failure budget tenfold, requiring another cost assessment.</p><p>Why three seconds itself? Without user evidence there is no empirical justification; it is a scenario input only. Measure abandonment, repeated requests and satisfaction by latency band, then choose acceptable delay and reduction cost with the product owner. Dividing a three-second budget does not justify choosing that target; it only allocates an already accepted target.</p>"
+  "reasoning_fa": "<p>عددِ آستانه از نیازِ کاربر میاد. مثلاً اگه توی یه فرض آموزشی، کاربر وضعیت سفارش رو حداکثر توی ۳ ثانیه بخواد، بودجهٔ ۰٫۵ ثانیه شبکه + ۰٫۵ render + ۱ صف + ۰٫۷ وابستگی + ۰٫۳ سرویس جمعاً ۳ ثانیه می‌شه؛ ولی این تقسیم خودش شاهد اندازه‌گیری نیست و باید با trace و آزمون کاربر تأیید بشه. هدف ۳۰۰ms این پاسخ، بودجهٔ سرویسه؛ سه ثانیه سقفِ کل تجربه. یه چیزی رو هم یادت باشه: صدک‌های اجزا رو نمی‌شه ساده جمع کرد و اسمش رو گذاشت صدکِ کل — باید زمانِ کلِ درخواست رو اندازه گرفت.</p><p>توی ۵۰ میلیون درخواست، بودجهٔ خطای ۹۹٫۹٪ می‌شه (۱−۰٫۹۹۹)×۵۰ میلیون = ۵۰ هزار شکست؛ دقت کن، این شمارِ درخواسته، نه دقیقهٔ قطعی. ۳۰ روز رو هم فرض کردیم تا چند چرخهٔ هفتگی توش جا بشه. آستانه‌های نمونهٔ ۲٪ بودجه در یه ساعت و ۱۰٪ در شش ساعت، توی ترافیک یکنواخت به‌ترتیب burn rate برابر ۱۴٫۴ و ۱۲ می‌دن: درصدِ بودجهٔ مصرف‌شده ÷ سهمِ زمان از ۷۲۰ ساعت. توی ترافیک متغیر باید نرخ خطا و حجم واقعیِ پنجره رو بسنجیم. اگه هدف رو ببری روی ۹۹٫۹۹٪، بودجه ده برابر کوچیک‌تر می‌شه و هزینهٔ قابلیت اطمینان رو باید دوباره بررسی کنی.</p><p>حالا چرا خودِ سه ثانیه؟ تا وقتی دادهٔ واقعی نداریم، دلیل تجربی برای این عدد نداریم و فقط یه ورودیِ سناریوئه. برای انتخاب واقعی، نرخ رهاکردن کار، درخواست تکراری و رضایت رو توی بازه‌های تأخیر بسنج؛ و با مالک محصول تعیین کن بیشترین تأخیر قابل‌قبول چقدره و کاهشش چقدر خرج می‌بره. تقسیم کردنِ بودجهٔ سه ثانیه، انتخاب این هدف رو اثبات نمی‌کنه؛ فقط نشون می‌ده بعد از پذیرشِ هدف، چطور بین مسیرها بودجه‌بندیش کنیم.</p>",
+  "reasoning_en": "<p>Derive the threshold from what the user needs. Say, in a teaching assumption, the user wants the order status end-to-end in at most three seconds: 0.5s network + 0.5s rendering + 1s queue + 0.7s dependency + 0.3s service adds up to three seconds. But that split is an assumption, not a witness — it needs traces and user testing to confirm. The 300ms in this answer is the service's budget, not the whole journey. And you can't add up component percentiles and call the result the overall percentile: measure the entire request.</p><p>At 50M requests, (1−0.999)×50M = 50k allowed failures — and note that's a count of requests, not minutes of downtime. Those thirty days are assumed so you can see a few weekly cycles. The sample thresholds (2% of budget in one hour, 10% in six hours) imply, under uniform traffic, burn rates of 14.4 and 12: the fraction of budget consumed divided by the time fraction of 720 hours. With variable traffic you have to measure the real error rate and the real window volume. Push the goal to 99.99% and the budget shrinks tenfold, so the reliability bill needs another look.</p><p>So why three seconds? Without real data there's no empirical justification — it's a scenario input, nothing more. For a real choice, measure abandonment, repeated requests and satisfaction by latency band, and settle the acceptable delay and its reduction cost with the product owner. Dividing a three-second budget doesn't prove you should pick that target; it only shows how you'd budget it across the paths once you've accepted it.</p>"
 }

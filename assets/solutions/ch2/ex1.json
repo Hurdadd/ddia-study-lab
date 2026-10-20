@@ -1,30 +1,30 @@
 {
   "alternatives": [
     {
-      "en": "Read-through cache with short TTL: no extra writes at all, first read after expiry pays one DB fetch. Better when reads are rare or data changes constantly.",
-      "fa": "کش read-through با TTL کوتاه: هیچ نوشتن اضافه‌ای ندارد، فقط اولین خواندن بعد از انقضا یک خواندن از پایگاه می‌پردازد. وقتی خواندن کم است یا داده مدام عوض می‌شود بهتر است."
+      "en": "Read-through cache with a short TTL: no extra writes at all, only the first read after expiry pays one DB fetch. Better when reads are rare or the data changes constantly — and the arithmetic is simpler.",
+      "fa": "کش read-through با TTL کوتاه: هیچ نوشتن اضافه‌ای نداره؛ فقط اولین خواندن بعد از انقضا یه خواندن از پایگاه رو پرداخت می‌کنه. وقتی خواندن کمه یا داده مدام عوض می‌شه، بهتره — و حسابش هم ساده‌تره."
     }
   ],
-  "answer_en": "Average is 2M / 86400 ≈ 23.1 orders/s, peak ≈ 231.5/s; times 3 notifications ≈ 69/s average and ≈ 694/s peak. These rates alone cannot establish queue or database capacity; payload, request work, indexes and fsync must be measured. The cache question is separate: three notifications are not three cache writes — define one view where each order lands in k destinations, then materialize it only when read savings beat k extra writes per order.",
-  "answer_fa": "میانگین ۲ میلیون تقسیم بر ۸۶۴۰۰ ثانیه ≈ ۲۳٫۱ سفارش در ثانیه است و اوج ≈ ۲۳۱٫۵؛ ضرب‌در ۳ پیام داخلی ≈ ۶۹ پیام در ثانیه میانگین و ≈ ۶۹۴ در اوج. این بار راحت در یک صف و یک پایگاه جا می‌شود. سؤال کش جداست: سه پیام داخلی سه نوشتن در کش نیست — اول یک view مشخص تعریف کن که هر سفارش در k مقصد آن نوشته می‌شود، بعد فقط وقتی متریالایز کن که صرفه‌جویی خواندن از k نوشتن اضافه به‌ازای هر سفارش بیشتر باشد.",
+  "answer_en": "Here's the thing: do the math first. 2M / 86400 ≈ 23.1 orders/s on average, and the peak lands at ≈ 231.5/s. Each order fires 3 internal notifications, so ≈ 69/s average and ≈ 694/s at peak. That load sits comfortably in one queue and one database. But don't stop there — these rates alone can't establish queue or database capacity; payload, request work, indexes and fsync still have to be measured. The cache question is a separate one: three notifications are not three cache writes. Define one view where each order lands in k destinations, then materialize it only when the read savings beat the k extra writes per order. Three notifications aren't three cache writes. Count before you spend.",
+  "answer_fa": "ببین، اول حساب: ۲ میلیون تقسیم بر ۸۶۴۰۰ ثانیه ≈ ۲۳٫۱ سفارش در ثانیه، و اوج ≈ ۲۳۱٫۵. هر سفارش ۳ پیام داخلی می‌سازه: ≈ ۶۹ پیام در ثانیه میانگین و ≈ ۶۹۴ در اوج. این بار راحت تو یه صف و یه پایگاه جا می‌شه. ولی حواس باشه، همین نرخ‌ها به‌تنهایی ظرفیت صف و پایگاه رو ثابت نمی‌کنن؛ اندازهٔ payload، کار هر درخواست، ایندکس‌ها و fsync باید اندازه‌گیری بشن. سؤال کش جداست: سه پیام داخلی سه نوشتن در کش نیست. اول یه view مشخص تعریف کن که هر سفارش توی k مقصدش نوشته می‌شه، بعد فقط وقتی متریالایز کن که صرفه‌جوییِ خواندن از k نوشتن اضافه به‌ازای هر سفارش بیشتر بشه. سه پیام، سه نوشتن کش نیست — حساب کن.",
   "assumptions": [
     {
-      "en": "Day = 86400 s; peak factor 10 is a teaching assumption, not a measured trace.",
-      "fa": "روز = ۸۶۴۰۰ ثانیه؛ ضریب اوج ۱۰ فرض آموزشی است، نه ردپای اندازه‌گیری‌شده."
+      "en": "Assume a day is 86400 s. The peak factor of 10 is a teaching assumption, not a measured trace.",
+      "fa": "فرض کن روز = ۸۶۴۰۰ ثانیه. ضریب اوج ۱۰ هم فرض آموزشیه، نه یه ردپای اندازه‌گیری‌شده."
     },
     {
-      "en": "One order event ≈ 1 KB payload (teaching size); notification delivery is at-least-once.",
-      "fa": "یک رویداد سفارش ≈ ۱ کیلوبایت (اندازه آموزشی)؛ تحویل پیام‌ها at-least-once است."
+      "en": "One order event carries ≈ 1 KB of payload (teaching size), and message delivery is at-least-once.",
+      "fa": "اندازهٔ هر رویداد سفارش ≈ ۱ کیلوبایت (اندازه آموزشی). تحویل پیام‌ها هم at-least-once است."
     },
     {
-      "fa": "کش، سطر خلاصهٔ سفارش با کلید order_id در k مقصد منطقی دارد؛ هزینهٔ replica فیزیکی را جدا حساب می‌کنیم.",
-      "en": "The cache holds order-summary rows keyed by order_id in k logical destinations; physical replication costs are counted separately."
+      "fa": "حالا خودِ کش: سطر خلاصهٔ سفارش با کلید order_id توی k مقصد منطقی نگه داشته می‌شه؛ هزینهٔ replica فیزیکی رو جدا حساب می‌کنیم.",
+      "en": "Now the cache itself: it holds order-summary rows keyed by order_id across k logical destinations, and we count physical replication cost separately."
     }
   ],
   "followups": [
     {
-      "a_en": "One tenant now dominates one shard: its write rate is 100x, so that shard's queue depth and p99 grow while others stay flat — the classic hot key. Averages hide it; per-shard and per-tenant percentiles reveal it. Fixes in order: isolate the big tenant on its own partition, cap or batch its k writes, serve its reads asynchronously with a stated lag, and alert on per-tenant write share before it saturates a shard.",
-      "a_fa": "حالا یک مشتری روی یک شارد غالب است: نرخ نوشتنش ۱۰۰ برابر شده، پس عمق صف و p99 همان شارد رشد می‌کند ولی بقیه تخت می‌مانند — همان hot key کلاسیک. میانگین آن را پنهان می‌کند؛ صدک‌های per-shard و per-tenant آشکارش می‌کنند. راه‌حل‌ها به ترتیب: جدا کردن مشتری بزرگ روی پارتیشن خودش، سقف یا دسته‌بندی k نوشتنش، سرو ناهمگام خواندن‌هایش با lag اعلام‌شده، و هشدار روی سهم نوشتن هر مستأجر پیش از اشباع شارد.",
+      "a_en": "That one giant tenant just took over a shard: its write rate is 100x, so that shard's queue depth and p99 grow while the others stay flat — the classic hot key. Averages hide it; per-shard and per-tenant percentiles expose it. Fixes in order: move the big tenant onto its own partition, cap or batch its k writes, serve its reads asynchronously with a stated lag, and alert on per-tenant write share before a shard saturates.",
+      "a_fa": "همون مشتری گنده، یه شارد رو مال خودش کرده: نرخ نوشتنش ۱۰۰ برابر شده، پس عمق صف و p99 اون شارد رشد می‌کنه ولی بقیه تخت می‌مونن — همون hot key کلاسیک. میانگین قایمتش می‌کنه؛ صدک‌های per-shard و per-tenant لو می‌دنش. راه‌حل به ترتیب: مشتری بزرگ رو ببر روی پارتیشن خودش، براش سقف بذار یا k نوشتنش رو دسته‌بندی کن، خواندن‌هاش رو ناهمگام سرو کن با lag اعلام‌شده، و روی سهم نوشتن هر مستأجر هشدار بده — قبل از اینکه شارد اشباع بشه.",
       "level": "senior",
       "q_en": "Now one giant customer pushes k up 100x — what happens to your tail latency?",
       "q_fa": "حالا یه مشتری گنده k رو صد برابر کنه — tail latency چی می‌شه؟"
@@ -32,16 +32,16 @@
   ],
   "interview_q_en": "Here's the thing: you've got 2M orders a day with 10x peaks. First work out average and peak orders/s (teaching day = 86400s) plus the load from three internal notifications per order. Then define one concrete view written to k destinations per order; compare extra writes, read savings, payload size, freshness, and lag — and decide whether materialization pays off.",
   "interview_q_fa": "قضیه اینه که روزانه دو میلیون سفارش داری با اوج ده‌برابری. اول RPS میانگین و اوج رو حساب کن (یادت باشه روز آموزشی ۸۶۴۰۰ ثانیه‌ست) و بگو سه پیام داخلی به‌ازای هر سفارش چقدر بار می‌سازه. بعد یه view مشخص تعریف کن که هر سفارش توی k مقصدش نوشته می‌شه؛ write amplification، نرخ خواندن، اندازهٔ payload، تازگی و lag رو مقایسه کن و بگو materialization می‌ارزه یا نه.",
-  "mental_en": "Two different multiplications live here and must never be merged: messages per order (a property of the workflow) versus cache writes per order (a property of the view you design: k destinations). The first is given; the second is your choice.",
-  "mental_fa": "دو ضرب متفاوت این‌جا زندگی می‌کنند و هرگز نباید قاطی شوند: پیام به‌ازای سفارش (خاصیت گردش‌کار) در برابر نوشتن کش به‌ازای سفارش (خاصیت viewای که تو طراحی می‌کنی: k مقصد). اولی داده شده، دومی انتخاب توست.",
+  "mental_en": "Two different multiplications live here, and they must never get merged. One is messages per order — that belongs to the workflow, and it's handed to you. The other is cache writes per order — that belongs to the view you design, the k destinations. The first one is given; the second one is your call. Merge them and the interview answer gets muddled too.",
+  "mental_fa": "اینجا دو تا ضربِ مختلف زندگی می‌کنن که هیچ‌وقت نباید قاطی بشن. یکیش پیام به‌ازای سفارشه — این مال گردش‌کار توئه، داده شده. اون یکی نوشتن کش به‌ازای سفارشه — این مال viewایه که خودت طراحی می‌کنی، یعنی k مقصد. اولی رو کسی بهت داده، دومی رو خودت انتخاب می‌کنی. قاطی‌شون کنی، جواب مصاحبه هم قاطی می‌شه.",
   "mistakes": [
     {
-      "en": "Saying '3 services = 3 cache writes'. Notifications go to service queues; cache writes go to view destinations. Different k, different cost, different freshness contract.",
-      "fa": "گفتن «۳ سرویس = ۳ نوشتن کش». پیام‌ها به صف سرویس‌ها می‌روند؛ نوشتن‌های کش به مقصدهای view می‌روند. k متفاوت، هزینه متفاوت، قرارداد تازگی متفاوت."
+      "en": "Saying '3 services = 3 cache writes'. Notifications go to the service queues; cache writes go to the view destinations. Different k, different cost, different freshness contract — three separate things. Merge them and the interview answer falls apart too.",
+      "fa": "گفتن «۳ سرویس = ۳ نوشتن کش». پیام‌ها می‌رن توی صف سرویس‌ها؛ نوشتن‌های کش می‌رن توی مقصدهای view. k متفاوت، هزینهٔ متفاوت، قرارداد تازگی متفاوت — سه تای کاملاً جدا. قاطی‌شون کنی، جواب مصاحبه هم قاطی می‌شه."
     },
     {
-      "en": "Quoting only the average (23/s) and sizing for it. Capacity, queues and latency budgets must absorb the stated peak (231/s) plus headroom.",
-      "fa": "فقط میانگین (۲۳ در ثانیه) را گفتن و برای همان ظرفیت گرفتن. ظرفیت، صف و بودجه تأخیر باید اوج اعلام‌شده (۲۳۱ در ثانیه) به‌علاوه حاشیه را جذب کنند."
+      "en": "Quoting only the average (23/s) and sizing for it. Capacity, queues and latency budgets have to absorb the stated peak (231/s) plus headroom.",
+      "fa": "فقط میانگین (۲۳ در ثانیه) رو گفتن و برای همون ظرفیت گرفتن. ظرفیت، صف و بودجهٔ تأخیر باید اوج اعلام‌شده (۲۳۱ در ثانیه) به‌علاوهٔ حاشیه رو جذب کنن."
     }
   ],
   "number": 1,
@@ -52,34 +52,34 @@
   ],
   "steps": [
     {
-      "fa": "۲٬۰۰۰٬۰۰۰ ÷ ۸۶۴۰۰ ≈ <b>۲۳٫۱ سفارش در ثانیه میانگین</b> و با ضریب ۱۰ ≈ <b>۲۳۱٫۵ در اوج</b>. این دو عدد را همیشه جفتی نگه دار.",
-      "t_en": "Rates first",
-      "t_fa": "اول نرخ‌ها",
-      "en": "2,000,000 ÷ 86,400 ≈ <b>23.1 orders/s average</b>, ≈ <b>231.5 at a 10x peak</b>. Always keep the pair together."
+      "fa": "۲٬۰۰۰٬۰۰۰ ÷ ۸۶۴۰۰ ≈ <b>۲۳٫۱ سفارش در ثانیه میانگین</b> و با ضریب ۱۰ ≈ <b>۲۳۱٫۵ در اوج</b>. این دوتا رو همیشه جفتی نگه دار؛ میانگینِ تنها، آدم رو به درد می‌ندازه.",
+      "t_en": "Start with the rates",
+      "t_fa": "نرخ‌ها رو دربیار",
+      "en": "2,000,000 ÷ 86,400 ≈ <b>23.1 orders/s average</b>, ≈ <b>231.5 at a 10x peak</b>. Keep the pair together — the average on its own is the one that gets you hurt."
     },
     {
-      "fa": "هر سفارش ۳ پیام داخلی می‌سازد: میانگین ≈ ۶۹٫۴ و اوج ≈ ۶۹۴ پیام در ثانیه. با payload آموزشی ۱ کیلوبایت، اوج ≈ ۰٫۷ مگابایت در ثانیه است — یک صف معمولی جواب می‌دهد.",
+      "fa": "هر سفارش ۳ پیام داخلی می‌سازه: میانگین ≈ ۶۹٫۴ و اوج ≈ ۶۹۴ پیام در ثانیه. با payload آموزشی ۱ کیلوبایت، اوج ≈ ۰٫۷ مگابایت در ثانیه‌ست — یه صف معمولی راحت جواب می‌ده. تازه این سه تا هیچ ربطی به کش ندارن؛ اینجا فقط داریم بارِ گردش‌کار رو می‌سنجیم.",
       "t_en": "Then the workflow fan-out",
       "t_fa": "بعد fan-out گردش‌کار",
-      "en": "Each order makes 3 internal messages: ≈ 69.4 average, ≈ 694/s at peak. At the teaching payload of 1 KB, peak ≈ 0.7 MB/s — one ordinary queue handles it."
+      "en": "Each order makes 3 internal messages: ≈ 69.4 average, ≈ 694/s at peak. At the teaching payload of 1 KB, peak ≈ 0.7 MB/s — one ordinary queue handles it. And those three have nothing to do with the cache; right now you're only sizing the workflow."
     },
     {
-      "fa": "حالا view را تعریف کن: سطر خلاصه سفارش با کلید شناسه سفارش در k مقصد (مثلاً ۲ ریجن × ۲ رپلیکا یعنی k=۴). هر سفارش دقیقاً k نوشتن اضافه می‌سازد — نه ۳.",
-      "t_en": "Define the view before counting",
-      "t_fa": "قبل از شمردن، view را تعریف کن",
-      "en": "Now define the view: order-summary rows keyed by order id in k destinations (e.g. 2 regions × 2 replicas, k=4). Each order adds exactly k extra writes — not 3."
+      "fa": "حالا view رو تعریف کن: یه سطر خلاصهٔ سفارش با کلید شناسهٔ سفارش، توی k مقصد (مثلاً ۲ ریجن × ۲ رپلیکا یعنی k=۴). هر سفارش دقیقاً k نوشتن اضافه می‌سازه — نه ۳. این k رو خودت انتخاب می‌کنی، پس انتخابت هم هزینه داره.",
+      "t_en": "Define the view before you count",
+      "t_fa": "قبل از شمردن، view رو تعریف کن",
+      "en": "Now define the view: one order-summary row keyed by order id, sitting in k destinations (say 2 regions × 2 replicas, so k=4). Each order adds exactly k extra writes — not 3. This k is your call, and your call costs money."
     },
     {
-      "fa": "نامساوی تصمیم: اگر (خواندن در ثانیه × ارزش یک خواندن سریع‌تر) از (سفارش در ثانیه × k × هزینه یک نوشتن) بیشتر شد، متریالایز کن؛ وگرنه read-through با TTL کوتاه.",
+      "fa": "نامساوی تصمیم: اگه (خواندن در ثانیه × ارزش یک خواندن سریع‌تر) از (سفارش در ثانیه × k × هزینه یک نوشتن) بیشتر بشه، متریالایز کن؛ وگرنه read-through با TTL کوتاه. همین یه نامساوی، حکم رو برعکس می‌کنه.",
       "t_en": "Apply the break-even rule",
-      "t_fa": "قاعده سربه‌سر را اعمال کن",
-      "en": "Decision inequality: materialize when (reads/s × value of one faster read) exceeds (orders/s × k × cost of one write); otherwise read-through with a short TTL."
+      "t_fa": "نامساوی سربه‌سر رو اعمال کن",
+      "en": "The decision inequality: if (reads/s × the value of one faster read) beats (orders/s × k × the cost of one write), materialize; otherwise go read-through with a short TTL. That single inequality is what flips the verdict."
     }
   ],
-  "tests_en": "Measure: sustained orders/s and peak factor from the order log; consumer lag on each of the 3 queues; per-destination write latency; view lag against the stated budget; chaos check — kill one view destination and confirm reads degrade to the database.",
-  "tests_fa": "اندازه بگیر: سفارش پایدار در ثانیه و ضریب اوج از لاگ سفارش؛ lag مصرف‌کننده روی هر ۳ صف؛ تأخیر نوشتن هر مقصد؛ lag نما در برابر بودجه اعلام‌شده؛ تست آشوب — یک مقصد view را بکش و مطمئن شو خواندن‌ها به پایگاه برمی‌گردند.",
-  "worked_en": "<p>Average: 2,000,000 / 86,400 = <b>23.15 orders/s</b>. Peak (10x): <b>231.5/s</b>. Notifications: ≈ <b>69.4/s average</b>, ≈ <b>694.4/s peak</b>. At a teaching payload of 1 KB, peak traffic ≈ 0.7 MB/s — one partitioned queue handles it.</p><p>View with k = 4: each order adds 4 cache writes (≈ 926/s at peak). If the view serves 5,000 reads/s saving an 8 ms DB read each, the saved work dwarfs the extra writes. At 5 reads/s, materialization loses — serve read-through. Same arithmetic, opposite verdict.</p>",
-  "worked_fa": "<p>میانگین: ۲٬۰۰۰٬۰۰۰ ÷ ۸۶۴۰۰ = <b>۲۳٫۱۵ سفارش در ثانیه</b>. اوج (۱۰ برابر): <b>۲۳۱٫۵</b>. پیام‌ها: ≈ <b>۶۹٫۴ میانگین</b> و ≈ <b>۶۹۴٫۴ در اوج</b>. با payload آموزشی ۱ کیلوبایت، ترافیک اوج ≈ ۰٫۷ مگابایت در ثانیه است.</p><p>مثال view با k=۴: هر سفارش ۴ نوشتن اضافه (≈ ۹۲۶ در ثانیه در اوج). اگر view پنج‌هزار خواندن در ثانیه بدهد و هرکدام ۸ میلی‌ثانیه ذخیره کند، کار ذخیره‌شده نوشتن‌ها را محو می‌کند. با ۵ خواندن در ثانیه، متریالایزیشن می‌بازد — read-through بده. همان حساب، حکم برعکس.</p>",
+  "tests_en": "Measure: sustained orders/s and peak factor from the order log; consumer lag on each of the 3 queues; per-destination write latency; view lag against the stated budget; and a chaos check — kill one view destination and confirm reads degrade to the database. Those five numbers size your next round.",
+  "tests_fa": "اندازه بگیر: سفارش پایدار در ثانیه و ضریب اوج از لاگ سفارش؛ lag مصرف‌کننده روی هر ۳ صف؛ تأخیر نوشتن هر مقصد؛ lag نما در برابر بودجهٔ اعلام‌شده؛ و یه تست آشوب — یک مقصد view رو بکش و مطمئن شو خواندن‌ها برمی‌گردن پایگاه. همین پنج تا عدد، سایزینگ بعدی تو رو می‌سازن.",
+  "worked_en": "<p>Average: 2,000,000 / 86,400 = <b>23.15 orders/s</b>. Peak (10x): <b>231.5/s</b>. Notifications: ≈ <b>69.4/s average</b>, ≈ <b>694.4/s peak</b>. At a teaching payload of 1 KB, peak traffic ≈ 0.7 MB/s — one partitioned queue handles that fine.</p><p>View with k = 4: each order adds 4 cache writes (≈ 926/s at peak). If the view serves 5,000 reads/s and each one saves an 8 ms DB read, the saved work dwarfs the extra writes. At 5 reads/s materialization loses — serve read-through instead. Same arithmetic, opposite verdict. Count first, spend second.</p>",
+  "worked_fa": "<p>میانگین: ۲٬۰۰۰٬۰۰۰ ÷ ۸۶۴۰۰ = <b>۲۳٫۱۵ سفارش در ثانیه</b>. اوج (۱۰ برابر): <b>۲۳۱٫۵</b>. پیام‌ها: ≈ <b>۶۹٫۴ میانگین</b> و ≈ <b>۶۹۴٫۴ در اوج</b>. با payload آموزشی ۱ کیلوبایت، ترافیک اوج ≈ ۰٫۷ مگابایت در ثانیه‌ست.</p><p>مثال view با k=۴: هر سفارش ۴ نوشتن اضافه می‌بره (≈ ۹۲۶ در ثانیه در اوج). اگه view پنج‌هزار خواندن در ثانیه بده و هرکدوم ۸ میلی‌ثانیه ذخیره کنه، کارِ ذخیره‌شده نوشتن‌های اضافه رو محو می‌کنه. با ۵ خواندن در ثانیه، متریالایزیشن می‌بازه — read-through بده. همون حساب، حکم برعکس — حساب کن، بعد خرج کن.</p>",
   "code": {
     "lang": "java",
     "code": "// Teaching math: 2M orders/day, 10x peak, 3 notifications per order,\n// plus the materialized-view break-even verdict. All inputs labelled.\npublic class LoadDemo {\n    public static void main(String[] a) {\n        double ordersPerDay = 2_000_000;\n        double avg = ordersPerDay / 86400.0;      // orders/s average\n        double peak = avg * 10.0;                 // 10x teaching peak factor\n        double notifAvg = avg * 3;                // 3 internal notifications/order\n        double notifPeak = peak * 3;\n        double peakMBs = notifPeak * 1024 / (1024 * 1024); // 1 KB teaching payload\n        int k = 4;                                // view destinations: 2 regions x 2 replicas\n        double extraWritesPeak = peak * k;        // NOT 3: k cache writes per order\n        // Break-even: materialize iff reads/s x saved ms per read beats orders/s x k x write cost.\n        double readWin = 5000, savedMs = 8, writeCostMs = 2;   // busy view: wins\n        double readLose = 5;                                   // quiet view: loses\n        boolean verdictWin = (readWin * savedMs) > (avg * k * writeCostMs);\n        boolean verdictLose = (readLose * savedMs) > (avg * k * writeCostMs);\n        System.out.printf(\"avg orders/s      = %.2f%n\", avg);\n        System.out.printf(\"peak orders/s     = %.1f%n\", peak);\n        System.out.printf(\"avg notif/s       = %.1f%n\", notifAvg);\n        System.out.printf(\"peak notif/s      = %.1f%n\", notifPeak);\n        System.out.printf(\"peak traffic      = %.2f MB/s (one queue holds it)%n\", peakMBs);\n        System.out.printf(\"peak extra writes = %.0f/s (k=%d)%n\", extraWritesPeak, k);\n        System.out.println(\"busy view verdict = \" + (verdictWin ? \"MATERIALIZE\" : \"READ-THROUGH\"));\n        System.out.println(\"quiet view verdict= \" + (verdictLose ? \"MATERIALIZE\" : \"READ-THROUGH\"));\n        if (Math.abs(avg - 23.15) > 0.01) throw new AssertionError(avg);\n        if (Math.abs(notifPeak - 694.4) > 0.1) throw new AssertionError(notifPeak);\n        if (!verdictWin || verdictLose) throw new AssertionError(\"break-even flipped\");\n        System.out.println(\"OK\");\n    }\n}",
@@ -95,49 +95,49 @@
       "made": "hand",
       "kind_fa": "نمودار + جدول تصمیم",
       "kind_en": "plot + decision table",
-      "caption_fa": "محاسبه بار و تصمیم متریالایزیشن (اعداد آموزشی)",
+      "caption_fa": "حسابِ بار و تصمیم متریالایزیشن (اعداد آموزشی)",
       "caption_en": "Load math and the materialization decision (teaching numbers)",
       "height": 640,
       "narration": {
-        "failure_en": "Trace the hot-tenant failure: the k-writes bar for one tenant grows 100x while the rest stay flat. The break-even row flips for that tenant alone — which is why the fix (isolate, cap, async) is per-tenant, not global.",
-        "failure_fa": "خرابی مشتری داغ را دنبال کن: میله k نوشتن یک مستأجر ۱۰۰ برابر می‌شود ولی بقیه تخت می‌مانند. سطر سربه‌سر فقط برای همان مستأجر برعکس می‌شود — و به همین دلیل راه‌حل (ایزوله، سقف، ناهمگام) per-tenant است نه سراسری.",
-        "guarantee_en": "The figure guarantees arithmetic honesty: averages, peaks and per-order fan-out on one scale. It does not guarantee production sizing — payload sizes, growth and real peak shapes must be measured.",
-        "guarantee_fa": "شکل صداقت حسابی را تضمین می‌کند: میانگین، اوج و fan-out به‌ازای سفارش روی یک مقیاس. اندازه واقعی پروداکشن را تضمین نمی‌کند.",
-        "nonguarantee_en": "It says nothing about delivery semantics (at-least-once retries, ordering) or which destination is the system of record.",
-        "nonguarantee_fa": "درباره معنای تحویل (تلاش مجدد at-least-once، ترتیب) یا این‌که کدام مقصد system of record است چیزی نمی‌گوید.",
-        "point_en": "The decision point is the break-even row: reads/s × value of one saved read versus k × cost of one extra write.",
-        "point_fa": "نقطه تصمیم سطر سربه‌سر است: خواندن در ثانیه × ارزش یک خواندن ذخیره‌شده در برابر k × هزینه یک نوشتن اضافه.",
-        "scenario_en": "You are sizing the launch week of an order pipeline: events flow in, three services must hear about each, and someone proposes precomputing a view into k copies. Start from the two bar pairs on the left.",
-        "scenario_fa": "داری هفته لانچ یک خط سفارش را سایز می‌کنی: رویدادها می‌آیند، سه سرویس باید باخبر شوند و کسی پیشنهاد می‌دهد یک view را از قبل در k کپی محاسبه کنی. خواندن را از دو جفت میله سمت چپ شروع کن.",
+        "failure_en": "Trace the hot-tenant failure: one tenant's k-writes bar grows 100x while the rest stay flat. The break-even row flips for that tenant only — which is exactly why the fix (isolate, cap, async) is per-tenant, not global.",
+        "failure_fa": "خرابی مشتری داغ رو دنبال کن: میلهٔ k نوشتنِ یه مستأجر ۱۰۰ برابر می‌شه ولی بقیه تخت می‌مونن. سطر سربه‌سر فقط برای همون مستأجر برعکس می‌شه — و به همین دلیله راه‌حل (ایزوله، سقف، ناهمگام) per-tenantه، نه سراسری.",
+        "guarantee_en": "What the figure guarantees is arithmetic honesty: averages, peaks and per-order fan-out on one scale. Production sizing it does not guarantee — payload sizes, growth and the real shape of your peaks still have to be measured.",
+        "guarantee_fa": "شکل فقط صداقتِ حساب رو تضمین می‌کنه: میانگین، اوج و fan-out به‌ازای سفارش، همه روی یه مقیاس. اندازهٔ واقعی پروداکشن رو تضمین نمی‌کنه.",
+        "nonguarantee_en": "It says nothing about delivery semantics (at-least-once retries, ordering) or about which destination is the system of record.",
+        "nonguarantee_fa": "دربارهٔ معنای تحویل (تلاش مجدد at-least-once، ترتیب) یا اینکه کدوم مقصد system of record هیچی نمی‌گه.",
+        "point_en": "The decision point is the break-even row: reads/s × the value of one saved read, against k × the cost of one extra write.",
+        "point_fa": "نقطهٔ تصمیم، همون سطر سربه‌سره: خواندن در ثانیه × ارزش یه خواندن ذخیره‌شده، در برابر k × هزینهٔ یه نوشتن اضافه.",
+        "scenario_en": "Picture the launch week of an order pipeline: events flow in, three services need to hear about each one, and someone proposes precomputing a view into k copies. Start reading at the two bar pairs on the left.",
+        "scenario_fa": "داری هفتهٔ لانچ یه خط سفارش رو سایز می‌کنی: رویدادها می‌آیان، سه سرویس باید باخبر بشن و یکی پیشنهاد می‌ده یه view رو از قبل توی k کپی حساب کنی. خواندن رو از دو جفت میلهٔ سمت چپ شروع کن.",
         "steps": [
           {
-            "en": "Left bars: average 23.1 vs peak 231.5 orders/s — a 10x band you must provision for, not the average alone.",
-            "fa": "میله‌های چپ: میانگین ۲۳٫۱ در برابر اوج ۲۳۱٫۵ سفارش در ثانیه — یک باند ۱۰ برابری که باید برایش ظرفیت بگذاری."
+            "en": "Left bars: average 23.1 against peak 231.5 orders/s. That's a 10x band to provision for — the average alone won't get you there.",
+            "fa": "میله‌های چپ: میانگین ۲۳٫۱ در برابر اوج ۲۳۱٫۵ سفارش در ثانیه — یه باند ۱۰ برابری که باید براش ظرفیت بگذاری."
           },
           {
-            "en": "Middle bars: the same two rates times 3 notifications (≈ 69/s, ≈ 694/s) — workflow fan-out through a queue, not into a cache.",
-            "fa": "میله‌های وسط: همان دو نرخ ضرب‌در ۳ پیام (≈ ۶۹ و ≈ ۶۹۴ در ثانیه) — fan-out گردش‌کار که از صف می‌گذرد، نه به کش می‌رود."
+            "en": "Middle bars: the same two rates times 3 notifications (≈ 69/s, ≈ 694/s). That's workflow fan-out through a queue — it never touches the cache.",
+            "fa": "میله‌های وسط: همون دو نرخ ضرب‌در ۳ پیام (≈ ۶۹ و ≈ ۶۹۴ در ثانیه) — fan-out گردش‌کار که از صف رد می‌شه، نه می‌ره سمت کش."
           },
           {
-            "en": "Right panel: the view you define — one order in, k writes out — with payload size and lag budget written next to it.",
-            "fa": "پنل راست: viewای که تعریف می‌کنی — یک سفارش داخل، k نوشتن بیرون — با اندازه payload و بودجه lag کنارش."
+            "en": "Right panel: the view you define — one order in, k writes out — with the payload size and the lag budget written right next to it.",
+            "fa": "پنل راست: همون viewای که خودت تعریف می‌کنی — یه سفارش داخل، k نوشتن بیرون — با اندازهٔ payload و بودجهٔ lag کنارش."
           },
           {
-            "en": "Bottom strip: the break-even inequality that turns the arithmetic into a materialization decision.",
-            "fa": "نوار پایین: نامساوی سربه‌سر که حساب را به تصمیم متریالایزیشن تبدیل می‌کند."
+            "en": "Bottom strip: the break-even inequality — the thing that turns the arithmetic into a materialization decision.",
+            "fa": "نوار پایین: نامساوی سربه‌سر که حساب رو تبدیل به تصمیم متریالایزیشن می‌کنه."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "Peak notifications ≈ 694/s at ~1 KB ≈ 0.7 MB/s — negligible for one queue. If the peak factor were 100 or payloads 1 MB, recheck queue depth, consumer lag and per-destination write capacity; the method is identical.",
-        "a_fa": "پیام‌های اوج ≈ ۶۹۴ در ثانیه با ~۱ کیلوبایت ≈ ۰٫۷ مگابایت در ثانیه — برای یک صف ناچیز است. اگر ضریب اوج ۱۰۰ بود یا payloadها ۱ مگابایت، عمق صف و lag را دوباره چک کن؛ روش همان است.",
-        "q_en": "Recompute the peak notification bandwidth if payloads were 100 KB instead of 1 KB. What breaks first?",
-        "q_fa": "پهنای باند پیام‌های اوج را دوباره حساب کن اگر payloadها ۱۰۰ کیلوبایت بودند نه ۱ کیلوبایت. اول چه چیزی می‌شکند؟"
+        "a_en": "Peak notifications ≈ 694/s at ~1 KB ≈ 0.7 MB/s — that's nothing for one queue. If the peak factor were 100, or the payloads 1 MB, recheck queue depth, consumer lag and per-destination write capacity; the method doesn't change.",
+        "a_fa": "پیام‌های اوج ≈ ۶۹۴ در ثانیه با ~۱ کیلوبایت ≈ ۰٫۷ مگابایت در ثانیه — برای یه صف ناچیزه. اگه ضریب اوج ۱۰۰ بود یا payloadها ۱ مگابایت، عمق صف و lag رو دوباره چک کن؛ روش عوض نمی‌شه.",
+        "q_en": "Recompute the peak notification bandwidth if the payloads were 100 KB instead of 1 KB. So what breaks first?",
+        "q_fa": "اگه payloadها ۱۰۰ کیلوبایت بودن نه ۱ کیلوبایت، پهنای باند پیام‌های اوج رو دوباره حساب کن. اول چی می‌شکنه؟"
       }
     }
   ],
   "lab_fa": "<p>حالا با این عددها: روزانه ۲ میلیون سفارش داری و سه اعلان به سرویس‌های موجودی، ریسک و اطلاع‌رسانی می‌فرستی. با فرض آموزشی اوج ده‌برابری، سفارش بر ثانیه و پیام بر ثانیه رو جدا حساب کن. برای کش، یه سطر خلاصهٔ سفارش توی k مقصد منطقی تعریف کن؛ اول k=1 بعد k=5 رو بسنج. هر تغییر سفارش توی هر مقصد یه upsert داره؛ تکثیر فیزیکی ذخیره‌ساز رو جدا بشمار. نرخ خواندن Q، خرج خواندن مرجع C_db، خرج خواندن کش C_cache و خرج نگهداری هر نوشتن C_w رو با واحد سازگار تعریف کن. شرط Q×(C_db−C_cache) > λ_order×k×C_w رو از مقایسهٔ خرج ذخیره‌شدهٔ خواندن با خرج اضافهٔ نوشتن دربیار؛ اندازهٔ payload، ترافیک و lag مجاز رو هم بسنج. آخرش بگو چرا سه اعلان لزوماً سه نوشتن کش نیست.</p>",
   "lab_en": "<p>Say you've got 2M orders/day, three internal notifications per order, and a teaching peak factor of ten. Work out orders/s and messages/s separately. Define a cache holding one order-summary row in k logical destinations; compare k=1 against k=5, with one upsert per destination per order change. Count physical storage replication separately. Define read rate Q, source-read cost C_db, cache-read cost C_cache, and per-write maintenance cost C_w in compatible units. Derive Q×(C_db−C_cache) > λ_order×k×C_w by weighing saved read cost against added write cost. Cover payload, bandwidth, and allowed lag — and explain why three notifications don't mean three cache writes.</p>",
-  "reasoning_fa": "<p>تقسیم سفارش روزانه بر ثانیه‌های روز، واحد را از سفارش/روز به سفارش/ثانیه تبدیل می‌کند؛ ضرب در سه فقط نرخ پیام را می‌دهد. تعداد مقصدهای کش k متغیر مستقلی است، پس نرخ نوشتن اضافه λ×k است. شرط سود کش از کم‌کردن هزینهٔ طراحی بدون کش و با کش به دست می‌آید؛ همهٔ هزینه‌ها باید در یک واحد مثل CPU-ms/ثانیه یا پول/ثانیه باشند. با دوبرابرشدن k هزینهٔ نگهداری دوبرابر می‌شود، حتی اگر تعداد اعلان ثابت بماند.</p>",
-  "reasoning_en": "<p>Dividing daily orders by seconds/day converts orders/day to orders/s; multiplying by three gives notification rate only. Cache destination count k is independent, so added writes are λ×k. The cache break-even inequality subtracts the with-cache cost from the without-cache cost; use one unit such as CPU-ms/s or currency/s. Doubling k doubles maintenance cost even with unchanged notifications.</p>"
+  "reasoning_fa": "<p>تقسیم کردنِ سفارش روزانه بر ثانیه‌های روز، واحد رو از سفارش/روز به سفارش/ثانیه می‌بره؛ ضرب در سه هم فقط نرخ پیام رو می‌ده. تعداد مقصدهای کش یعنی k یه متغیر مستقله، پس نرخ نوشتن اضافه می‌شه λ×k. شرط سودِ کش از کم کردنِ خرجِ طراحیِ بدون کش و با کش به دست میاد، و همهٔ خرج‌ها باید توی یه واحد مثل CPU-ms/ثانیه یا پول/ثانیه باشن. دو برابر شدن k یعنی هزینهٔ نگهداری هم دو برابر — حتی وقتی تعداد اعلان‌ها ثابت مونده.</p>",
+  "reasoning_en": "<p>Dividing daily orders by seconds per day turns orders/day into orders/s; multiplying by three only tells you the notification rate. The cache destination count k is an independent variable, so the added writes are λ×k. The break-even inequality compares the with-cache cost against the without-cache cost, and every cost has to sit in one unit — CPU-ms/s or money/s, pick one. Double k and the maintenance cost doubles too, even when the notification count never changes.</p>"
 }
