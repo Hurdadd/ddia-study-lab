@@ -31,8 +31,8 @@
   <p class="crumb"><a href="../index.html"><span class="fa">نقشه راه</span><span class="en">Roadmap</span></a>/ <span class="fa">فصل ۱</span><span class="en">Chapter 1</span></p>
   <h1 class="reveal"><span class="fa">انتخاب‌ها و هزینه‌های معماری سیستم‌های داده</span><span class="en">Trade-offs in data systems architecture</span></h1>
   <p class="lede reveal">
-    <span class="fa">معماریِ داده یعنی انتخاب بر اساس نیاز: چه چیزی را سریع‌تر کنیم و در برابرش چه هزینه‌ای بپذیریم؟ در این فصل تفاوتِ ثبتِ کار روزمره و تحلیل، دادهٔ مرجع و نسخهٔ مشتق‌شده، و اجرای تک‌ماشین و توزیع‌شده را دنبال می‌کنیم.</span>
-    <span class="en">A focused distillation for learning and interviews — eight interactive diagrams, comparison tables and a question pack.</span>
+    <span class="fa">ببین رفیق، معماری داده یعنی همین یه جمله: چی رو تندتر کنیم و بابتش چی بدیم؟ تو این فصل با هم می‌بینیم ثبت سفارش با گزارش فروش چه فرقی داره، حرف اصلی کجاست و کپی‌ها از کجا میان، و کی یه ماشین بسه و کی باید پخشش کنیم.</span>
+    <span class="en">Look, friend, data architecture is one sentence: what do we speed up, and what do we pay for it? This chapter walks through checkout vs sales reports, where the truth lives, and when one machine is enough.</span>
   </p>
   <div class="meta-row reveal">
     <span><b><span class="fa">۸</span><span class="en">8</span></b> <span class="fa">نمودار تعاملی</span><span class="en">interactive diagrams</span></span><span class="dot">·</span>
@@ -76,7 +76,7 @@
   <h2 class="reveal"><span class="secnum"><span class="fa">۰</span><span class="en">0</span></span> <span class="fa">نقشه راه فصل و اصطلاحات</span><span class="en">Chapter map and terminology</span></h2>
 <aside class="callout fa example-index" id="chapter-examples" aria-label="مثال‌های فنی فصل ۱">
 <div class="tag">مثال‌های فنی فصل ۱</div>
-<p>هر مثال، وضعیت اولیه، ترتیبِ عملیات و نتیجه را نشان می‌دهد. عددها و داده‌ها فرض آموزشی‌اند؛ نام ابزارها فقط جایی آمده که رفتار مشخصِ آن ابزار موضوع بحث است.</p>
+<p>هر مثال رو مثل یه قصهٔ سه‌تیکه بخون: اول صحنه، بعد قدم‌به‌قدم، آخرش هم نتیجه و چراش. عددها فرضین، مال کلاسن؛ اسم ابزار هم فقط اونجایی اومده که خود اون ابزار موضوع بحثه.</p>
 <details><summary>فهرستِ مثال‌ها؛ رفتن مستقیم به هر موضوع</summary><ul>
 <li><a href="#example-ch1-0">مسیر یک سفارش در سه مخزن</a></li>
 <li><a href="#example-ch1-1">دادهٔ بیشتر یا محاسبهٔ بیشتر؟</a></li>
@@ -105,78 +105,78 @@
 
   <div class="callout">
     <div class="tag"><span class="fa">ایده کلیدی فصل</span><span class="en">Chapter thesis</span></div>
-    <div class="fa"><p>معماریِ داده یعنی انتخاب بر اساس نیاز: چه چیزی را سریع‌تر کنیم و در برابرش چه هزینه‌ای بپذیریم؟ در این فصل تفاوتِ ثبتِ کار روزمره و تحلیل، دادهٔ مرجع و نسخهٔ مشتق‌شده، و اجرای تک‌ماشین و توزیع‌شده را دنبال می‌کنیم.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-0">
+    <div class="fa"><p>حرف اصلی فصل همینه رفیق، معماری داده یعنی همین یه جمله: چی رو تندتر کنیم و بابتش چی بدیم؟ تو این فصل با هم می‌بینیم ثبت سفارش با گزارش فروش چه فرقی داره، حرف اصلی کجاست و کپی‌ها از کجا میان، و کی یه ماشین بسه و کی باید پخشش کنیم.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-0">
 <p class="example-title"><b>مثال فنی: مسیر یک سفارش در سه مخزن</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سفارش <code dir="ltr">id=42</code> با مبلغ <code dir="ltr">500</code> در PostgreSQL ثبت شده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> رویداد تغییر، نسخهٔ نمایش را در Redis و سند جست‌وجو را در ایندکس به‌روز می‌کند. گزارش شبانه مبلغ را جمع می‌زند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> خرابی Redis سفارش را حذف نمی‌کند؛ کش از مرجع بازسازی می‌شود. تأخیر انتقال می‌تواند نمایش را موقتاً قدیمی کند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سفارش <code dir="ltr">id=42</code> با مبلغ <code dir="ltr">500</code> تازه توی PostgreSQL نشسته. همین مرجع اصلیه.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا خبرش پخش می‌شه: یه کپی می‌ره توی Redis تا نمایش سریع بشه، یه کپی هم می‌ره توی ایندکس جست‌وجو. آخر شب هم گزارش فروش همین مبلغ رو جمع می‌زنه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> حالا اگه Redis بترکه چی؟ هیچی — سفارش سر جاشه و کش رو از نو می‌سازیم. فقط یادت باشه تا خبر برسه، ممکنه چند ثانیه عدد قدیمی ببینی؛ طبیعیه.</p>
 </div>
-<p>مثال‌های این فصل سناریوهای آموزشیِ برگرفته از کارهای روزمره‌اند. عددهای انتخاب‌شده برای توضیح‌اند؛ معماریِ داخلیِ یک شرکت مشخص را توصیف نمی‌کنند.</p></div>
-    <div class="en"><p>“There are no solutions, only <b>trade-offs</b>.” A data engineer’s job is not to memorize the best tool; it is to ask the <b>right question</b>: what access pattern is this system built for, and what does that choice cost?</p></div>
+<p>یه چیز رو هم روشن کنم: مثال‌های این فصل قصه‌های کلاسین از کارهای روزمره، نه افشای معماری یه شرکت خاص. عددها رو برای فهم انتخاب کردیم.</p></div>
+    <div class="en"><p>“There are no solutions, only <b>trade-offs</b>.” Your job isn’t to memorize the best tool, friend — it’s to ask the <b>right question</b>: what access pattern is this thing built for, and what’s the price?</p></div>
   </div>
 
   <h3><span class="fa">سیستم data-intensive چیست؟</span><span class="en">What is a data-intensive system?</span></h3>
   <div class="fa">
-<p>سیستم داده‌محور یعنی برنامه‌ای که سختی اصلی آن نگهداری، پیدا کردن و به‌روز نگه‌داشتن داده‌هاست. در سیستم محاسبه‌محور، سختی اصلی خودِ محاسبه است.</p>
+<p>داستان از این قراره: سیستم داده‌محور یعنی برنامه‌ای که درد اصلیش نگه‌داشتن، پیدا کردن و به‌روز نگه‌داشتن داده‌ست. ولی تو سیستم محاسبه‌محور، درد اصلی خود محاسبه‌ست — اینکه یه حساب سنگین رو چطور موازی کنی.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-1">
 <p class="example-title"><b>مثال فنی: دادهٔ بیشتر یا محاسبهٔ بیشتر؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویس سفارش روزانه یک میلیون رکورد با <code dir="ltr">customer_id</code> و <code dir="ltr">status</code> نگه می‌دارد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پرس‌وجوی وضعیت باید رکورد درست را با ایندکس پیدا کند؛ سرویس تبدیل ویدیو روی یک فایل، کدک را با CPU اجرا می‌کند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اولی بیشتر با نگهداری و بازیابی داده درگیر است؛ دومی بیشتر با هزینهٔ محاسبه. یک محصول می‌تواند هر دو نوع بار را داشته باشد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> یه سرویس سفارش رو تصور کن که روزی یه میلیون رکورد با <code dir="ltr">customer_id</code> و <code dir="ltr">status</code> قورت می‌ده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا صحنه رو بچین: پرس‌وجوی وضعیت فقط دنبال یه رکورد درست با ایندکس می‌گرده؛ اون‌ور یه سرویس تبدیل ویدیو داره با CPU روی یه فایل عرق می‌ریزه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس دغدغه اولی داده‌ست، دغدغه دومی محاسبه. یادت باشه یه محصول می‌تونه هر دو دغدغه رو هم‌زمان داشته باشه.</p>
 </div>
 </div>
-  <div class="en"><p>If managing data is one of the main challenges of building the application, your system is <span class="ltr">data-intensive</span>. In contrast, <span class="ltr">compute-intensive</span> means the challenge is parallelizing one giant computation. Data-intensive concerns: storing and processing high volumes, managing data change, coping with failure and concurrency, and high availability.</p></div>
+  <div class="en"><p>If wrestling with data is one of the hardest parts of building your app, congrats — you’ve got a <span class="ltr">data-intensive</span> system. <span class="ltr">Compute-intensive</span> is the flip side: one giant computation you need to split up. Data-intensive headaches: big volumes, constant change, failure plus concurrency, and staying up.</p></div>
 
   <h3><span class="fa">بلوک‌های ساختمانی (که بارها در کتاب تکرار می‌شوند)</span><span class="en">Building blocks (recurring throughout the book)</span></h3>
 <div class="fa">
-<p>هر ابزارِ داده بخشی از کار را انجام می‌دهد: پایگاه داده اطلاعات را نگه می‌دارد، کش خواندن را سریع می‌کند و پردازشگرها داده را به نتیجهٔ قابل‌استفاده تبدیل می‌کنند.</p>
+<p>قضیه اینه که هیچ ابزاری همه‌کاره نیست، هر کدوم یه تیکه کار رو برمی‌داره: پایگاه داده جنس رو انبار می‌کنه، کش خوندن رو تند می‌کنه، پردازشگرها هم دادهٔ خام رو تبدیل می‌کنن به چیزی که به درد بخوره.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-2">
 <p class="example-title"><b>مثال فنی: پایگاه داده، کش و ایندکس چه می‌کنند؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> قیمت کالای <code dir="ltr">P7</code> در مرجع <code dir="ltr">120</code> است؛ در کش هنوز <code dir="ltr">100</code> مانده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> API خرید قیمت معتبر را از مسیر مرجع می‌گیرد؛ مصرف‌کنندهٔ تغییر، کش و ایندکس جست‌وجو را به نسخهٔ <code dir="ltr">120</code> می‌رساند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> کش برای سرعت و ایندکس برای جست‌وجوست؛ هیچ‌کدام بدون قرارداد مشخص، مرجع تأیید قیمت خرید نیستند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن قیمت کالای <code dir="ltr">P7</code> توی مرجع شده <code dir="ltr">120</code>، ولی توی کش هنوز <code dir="ltr">100</code> مونده. آشناست، نه؟</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بریم سراغ مسیر خرید: API قیمت معتبر رو فقط از مرجع برمی‌داره. بعد مصرف‌کنندهٔ تغییر میاد کش و ایندکس جست‌وجو رو به نسخهٔ <code dir="ltr">120</code> می‌رسونه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس کش فقط برای سرعته، ایندکس فقط برای جست‌وجو. هیچ‌کدوم بدون قرارداد مشخص مرجع تأیید قیمت نیستن — اینو قاطی نکن.</p>
 </div>
 </div>
 
   <div class="fa"><ul>
-    <li><b>پایگاه داده‌ها:</b> ذخیره داده برای بازیابی بعدی</li>
-    <li><b>کش:</b> نگه‌داشتن نتیجه عملیات گران برای سرعت‌بخشیدن به خواندن</li>
-    <li><b>ایندکس جست‌وجو:</b> جست‌وجوی کلیدواژه‌ای و فیلترهای پیچیده</li>
-    <li><b>پردازش جریانی (Stream Processing):</b> واکنش فوری به رویدادها و تغییرات</li>
-    <li><b>پردازش دسته‌ای (Batch Processing):</b> پردازش حجم زیادی از داده‌های جمع‌شده</li>
+    <li><b>پایگاه داده‌ها:</b> انبار کردن داده برای بعداً</li>
+    <li><b>کش:</b> نگه‌داشتن جواب کارهای گرون که خوندن تند بشه</li>
+    <li><b>ایندکس جست‌وجو:</b> دنبال کلمه گشتن و فیلترهای پیچیده</li>
+    <li><b>پردازش جریانی (Stream Processing):</b> همین لحظه به اتفاق‌ها واکنش نشون دادن</li>
+    <li><b>پردازش دسته‌ای (Batch Processing):</b> یه عالمه دادهٔ جمع‌شده رو یه‌جا جویدن</li>
   </ul></div>
   <div class="en"><ul>
-    <li><b>Databases:</b> storing data for later retrieval</li>
-    <li><b>Caches:</b> memoizing expensive operations to speed up reads</li>
-    <li><b>Search indexes:</b> keyword search and complex filters</li>
-    <li><b>Stream processing:</b> reacting to events and changes immediately</li>
-    <li><b>Batch processing:</b> crunching large accumulated volumes of data</li>
+    <li><b>Databases:</b> stashing data away for later</li>
+    <li><b>Caches:</b> keeping pricey answers around so reads fly</li>
+    <li><b>Search indexes:</b> hunting words and slicing with tricky filters</li>
+    <li><b>Stream processing:</b> reacting to stuff the moment it happens</li>
+    <li><b>Batch processing:</b> chewing through a mountain of saved-up data at once</li>
   </ul></div>
 
   <h3><span class="fa">اصطلاحات ضروری</span><span class="en">Essential terminology</span></h3>
 <div class="fa">
-<p>فرانت‌اند بخش قابل‌دیدن برنامه است؛ بک‌اند درخواست را بررسی و اجرا می‌کند. اطلاعاتی که باید پس از پایان درخواست باقی بمانند، در یک محل ذخیره‌سازی پایدار نگه داشته می‌شوند.</p>
+<p>بذار ساده بگم: فرانت‌اند همون چیزیه که کاربر می‌بینه؛ بک‌اند درخواست رو تحویل می‌گیره و اجراش می‌کنه. هر اطلاعاتی هم که باید بعد تموم شدن درخواست بمونه، می‌ره تو یه جای مطمئن برای نگه‌داشتن.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-3">
 <p class="example-title"><b>مثال فنی: از مرورگر تا دیسک</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> کاربر دکمهٔ خرید را می‌زند و مرورگر <code dir="ltr">POST /orders</code> با <code dir="ltr">request_id=r7</code> می‌فرستد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> بک‌اند اعتبار درخواست را بررسی می‌کند؛ پایگاه داده سفارش را ثبت می‌کند؛ پاسخ شامل <code dir="ltr">order_id=42</code> برمی‌گردد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> مرورگر کلاینت است، بک‌اند منطق برنامه را اجرا می‌کند و پایگاه داده مسئول نگهداری رکورد است؛ این سه الزاماً سه ماشین نیستند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن دکمهٔ خرید رو زدی؛ مرورگرت یه <code dir="ltr">POST /orders</code> با <code dir="ltr">request_id=r7</code> می‌فرسته.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> بک‌اند اول چک می‌کنه درخواست درسته یا نه، بعد پایگاه داده سفارش رو ثبت می‌کنه. آخرش هم جواب با <code dir="ltr">order_id=42</code> برمی‌گرده.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس مرورگر فقط کلاینته، بک‌اند مجریه، پایگاه داده هم صندوق اماناته. نگران نشو، این سه‌تا لازم نیست سه تا ماشین جدا باشن.</p>
 </div>
 </div>
 
   <div class="fa"><ul>
-    <li><span class="ltr">Frontend</span>: کد سمت کلاینت (مرورگر/موبایل) — فقط داده یک کاربر را مدیریت می‌کند.</li>
-    <li><span class="ltr">Backend</span>: کد سمت سرور — داده <b>همه کاربران</b> را مدیریت می‌کند؛ اینجاست که چالش زیرساخت داده شکل می‌گیرد.</li>
-    <li><span class="ltr">Data infrastructure</span>: مجموعه پایگاه داده‌ها، کش‌ها و صف‌های پیام که کد برنامه با آن‌ها کار می‌کند.</li>
-    <li>کد برنامه معمولاً <span class="ltr">stateless</span> است؛ هرچه باید بین درخواست‌ها بماند، باید در سمت کلاینت یا زیرساخت داده ذخیره شود.</li>
-    <li><b>Transaction</b> در این فصل با معنایی کلی‌تر یعنی «خواندن‌ها و نوشتن‌های کم‌تأخیر که یک واحد منطقی‌اند» (تعریف دقیق در فصل ۸).</li>
+    <li><span class="ltr">Frontend</span>: کد سمت کلاینت (مرورگر/موبایل) — فقط با دادهٔ همون یه کاربر سر و کار داره.</li>
+    <li><span class="ltr">Backend</span>: کد سمت سرور — با دادهٔ <b>همهٔ کاربرها</b> سر و کار داره؛ دردسر زیرساخت داده دقیقاً همین‌جاست.</li>
+    <li><span class="ltr">Data infrastructure</span>: همون دیتابیس‌ها، کش‌ها و صف‌های پیام که کد برنامه باهاشون کار می‌کنه.</li>
+    <li>کد برنامه معمولاً <span class="ltr">stateless</span> ـه؛ هر چی باید بین دو تا درخواست بمونه، یا می‌ره سمت کلاینت یا تو زیرساخت داده می‌خوابه.</li>
+    <li><b>Transaction</b> تو این فصل فعلاً شل باهاش برخورد می‌کنیم یعنی «خوندن‌ها و نوشتن‌های تند که یه واحد منطقین» (تعریف سفت‌وسختش فصل ۸).</li>
   </ul></div>
   <div class="en"><ul>
-    <li><span class="ltr">Frontend</span>: client-side code (browser/mobile) — manages only one user’s data.</li>
-    <li><span class="ltr">Backend</span>: server-side code — manages <b>all users’</b> data; this is where the data-infrastructure challenge lives.</li>
-    <li><span class="ltr">Data infrastructure</span>: the databases, caches and message queues the application code works with.</li>
-    <li>Application code is usually <span class="ltr">stateless</span>; anything that must survive between requests lives on the client or in data infrastructure.</li>
-    <li><b>Transaction</b> is used loosely in this chapter to mean “low-latency reads and writes forming one logical unit” (precise definition in Chapter 8).</li>
+    <li><span class="ltr">Frontend</span>: client-side code (browser/mobile) — only deals with that one user’s data.</li>
+    <li><span class="ltr">Backend</span>: server-side code — deals with <b>everybody’s</b> data; the data-infrastructure headache lives right here.</li>
+    <li><span class="ltr">Data infrastructure</span>: the databases, caches and message queues your app code hangs out with.</li>
+    <li>App code is usually <span class="ltr">stateless</span>; anything that must survive between two requests sleeps either on the client or in data infrastructure.</li>
+    <li>In this chapter we use <b>transaction</b> loosely — “fast reads and writes that form one logical unit” (the strict definition lands in Chapter 8).</li>
   </ul></div>
 </section>
 
@@ -187,92 +187,92 @@
   <div class="callout">
     <div class="tag"><span class="fa">ایده کلیدی</span><span class="en">Key idea</span></div>
     <div class="fa">
-<p>دادهٔ عملیاتی برای انجام کارِ همین حالای کاربر است؛ دادهٔ تحلیلی برای فهمیدن الگوهای تعداد زیادی از همین کارهاست. این دو نوع استفاده، نیازهای متفاوتی دارند.</p>
+<p>داستان اینه: دادهٔ عملیاتی مال همین حالای کاربره — اینکه سفارشش ثبت بشه. دادهٔ تحلیلی مال فهمیدن الگوی هزاران تا از همین کارهاست. دو تا دنیای جدا با نیازهای جدا.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-4">
 <p class="example-title"><b>مثال فنی: ثبت خرید در برابر گزارش فروش</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> ثبت سفارش فقط ردیف سفارش <code dir="ltr">42</code> و موجودی کالای <code dir="ltr">P7</code> را تغییر می‌دهد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> گزارش ماهانه <code dir="ltr">SUM(amount) GROUP BY city</code> باید میلیون‌ها ردیف را بخواند. اجرای هم‌زمان هر دو روی منابع محدود صف ایجاد می‌کند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نسخهٔ تحلیلی رقابت منابع را کم می‌کند، ولی گزارش به‌اندازهٔ تأخیر انتقال از مرجع عقب می‌ماند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ثبت سفارش فقط ردیف سفارش <code dir="ltr">42</code> و موجودی کالای <code dir="ltr">P7</code> رو دست می‌زنه. یه کار کوچیک و تمیز.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا گزارش ماهانه با <code dir="ltr">SUM(amount) GROUP BY city</code> رو نگاه کن: باید میلیون‌ها ردیف رو بخونه. اگه هر دو رو بندازی روی یه منبع ضعیف، صف درست می‌شه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس نسخهٔ تحلیلی دعوا سر منابع رو کم می‌کنه. فقط یادت باشه گزارش به اندازهٔ تأخیر انتقال از مرجع عقبه؛ تازه نیست، طبیعیه.</p>
 </div>
 </div>
-    <div class="en"><p>Data in organizations lives two different “lives”: where it is <b>created</b> (operational services for end users) and where it is <b>analyzed</b> (a read-only copy for analysts and data scientists). Don’t mix the two.</p></div>
+    <div class="en"><p>Think of it like this, friend: your data lives two lives. One where it’s born — the operational side serving users. And one where it’s studied — a read-only copy for analysts. Keep them apart.</p></div>
   </div>
 
   <h3><span class="fa">چه کسانی با داده کار می‌کنند؟</span><span class="en">Who works with data?</span></h3>
 <div class="fa">
-<p>همه با یک داده کار می‌کنند، اما سؤالشان یکی نیست: توسعه‌دهنده عملیات را می‌سازد، تحلیلگر گزارش می‌خواهد و مهندس داده مسیرِ رسیدن اطلاعات به گزارش را آماده می‌کند.</p>
+<p>راستش همه با همون یه داده سر و کار دارن، ولی سؤالشون یکیه؟ نه! توسعه‌دهنده عملیات رو می‌سازه، تحلیلگر گزارش می‌خواد، مهندس داده هم جادهٔ بین این دوتا رو می‌کشه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-5">
 <p class="example-title"><b>مثال فنی: مسئولیت‌ها روی یک خطای مبلغ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویس سفارش مبلغ را به ریال ثبت می‌کند، اما منبع دیگری تومان می‌فرستد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> توسعه‌دهنده واحد API را مشخص می‌کند؛ مهندس داده در تبدیل، واحدها را یکسان می‌کند؛ تحلیلگر جمع فروش را با نمونهٔ سفارش‌ها تطبیق می‌دهد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> عدد نهایی صرفاً با افزودن سرور درست نمی‌شود؛ قرارداد واحد و کنترل کیفیت در زنجیره لازم است.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سرویس سفارش مبلغ رو به ریال ثبت می‌کنه، ولی یه منبع دیگه با تومان می‌فرسته. بوی دردسر میاد، نه؟</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا نوبت نقش‌هاست: توسعه‌دهنده واحد API رو مشخص می‌کنه، مهندس داده توی تبدیل واحدها رو یکی می‌کنه، تحلیلگر هم جمع فروش رو با چند نمونه سفارش چک می‌کنه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس عدد نهایی با اضافه کردن سرور درست نمی‌شه. قرارداد واحد و کنترل کیفیت توی زنجیره رو جدی بگیر؛ وگرنه آشغال منظم تحویل می‌گیری.</p>
 </div>
 </div>
 
   <div class="fa"><ul>
-    <li><b>Backend Engineer:</b> سرویس‌های خواندن/نوشتن برای کاربران (عملیاتی)</li>
-    <li><b>Business Analyst:</b> گزارش برای تصمیم‌گیری مدیریت — <span class="ltr">Business Intelligence (BI)</span></li>
-    <li><b>Data Scientist:</b> کشف بینش، مدل ML، قابلیت‌های داده‌محور محصول (پیشنهاددهنده، امتیاز ریسک، فیلتر اسپم)</li>
-    <li><b>Data Engineer:</b> پل بین دو دنیا و مسئول زیرساخت داده</li>
-    <li><b>Analytics Engineer:</b> داده را برای تحلیلگران مدل و تبدیل می‌کند</li>
+    <li><b>Backend Engineer:</b> سرویس خوندن/نوشتن برای کاربرها می‌سازه (عملیاتی)</li>
+    <li><b>Business Analyst:</b> برای مدیریت گزارش می‌سازه — <span class="ltr">Business Intelligence (BI)</span></li>
+    <li><b>Data Scientist:</b> دنبال بینش می‌گرده، مدل ML و قابلیت داده‌محور محصول (پیشنهاددهنده، امتیاز ریسک، فیلتر اسپم)</li>
+    <li><b>Data Engineer:</b> پل بین این دو دنیاست و صاحب زیرساخت داده</li>
+    <li><b>Analytics Engineer:</b> داده رو برای تحلیلگرها مدل و تبدیل می‌کنه</li>
   </ul></div>
   <div class="en"><ul>
-    <li><b>Backend engineer:</b> read/write services for users (operational)</li>
-    <li><b>Business analyst:</b> reports for management decisions — <span class="ltr">Business Intelligence (BI)</span></li>
-    <li><b>Data scientist:</b> insight discovery, ML models, data-driven product features (recommenders, risk scores, spam filters)</li>
-    <li><b>Data engineer:</b> the bridge between both worlds, owner of data infrastructure</li>
-    <li><b>Analytics engineer:</b> models and transforms data for analysts</li>
+    <li><b>Backend engineer:</b> builds read/write services for users (the operational side)</li>
+    <li><b>Business analyst:</b> writes reports for management — <span class="ltr">Business Intelligence (BI)</span></li>
+    <li><b>Data scientist:</b> hunts insights, ML models, data-driven features (recommenders, risk scores, spam filters)</li>
+    <li><b>Data engineer:</b> the bridge between both worlds, owner of the data plumbing</li>
+    <li><b>Analytics engineer:</b> shapes data so analysts can actually use it</li>
   </ul></div>
 
   <h3 id="s1-1"><span class="fa">OLTP در برابر OLAP</span><span class="en">OLTP vs OLAP</span></h3>
   <div class="fa">
-<p>در OLTP معمولاً چند رکورد مشخص را می‌خوانیم یا تغییر می‌دهیم. در OLAP تعداد زیادی رکورد را کنار هم بررسی می‌کنیم تا به آمار و الگو برسیم.</p>
+<p>فرقشون رو این‌جوری بفهم: تو OLTP معمولاً چند تا رکورد مشخص رو می‌خونی یا عوض می‌کنی. تو OLAP خروار رکورد رو کنار هم می‌ذاری تا به آمار و الگو برسی — مقیاسشون زمین تا آسمونه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-6">
 <p class="example-title"><b>مثال فنی: دو پرس‌وجو، دو الگوی دسترسی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> جدول <code dir="ltr">orders</code> صد میلیون ردیف دارد و روی <code dir="ltr">id</code> ایندکس شده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> <code dir="ltr">WHERE id=42</code> با ایندکس چند صفحه را می‌خواند؛ <code dir="ltr">SUM(amount)</code> برای کل سال حجم زیادی از ستون مبلغ را اسکن می‌کند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اولی نمونهٔ OLTP و دومی OLAP است؛ ایندکس مناسب اولی لزوماً گزارش دوم را سریع نمی‌کند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن جدول <code dir="ltr">orders</code> صد میلیون ردیف داره — یه غول واقعی. روی <code dir="ltr">id</code> هم ایندکس شده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> <code dir="ltr">WHERE id=42</code> با ایندکس مثل برق فقط چند صفحه رو می‌خونه؛ ولی <code dir="ltr">SUM(amount)</code> کل سال مجبوره ستون مبلغ رو شخم بزنه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اولی OLTP ـه، دومی OLAP. یادت باشه ایندکسی که اولی رو پرواز می‌ده، لزوماً دومی رو نجات نمی‌ده.</p>
 </div>
 </div>
-  <div class="en"><p><span class="ltr">Online Transaction Processing (OLTP)</span>: look up a few records by key (<span class="ltr">point query</span>), then insert/update/delete per user input. <span class="ltr">Online Analytical Processing (OLAP)</span>: scan a huge number of records and compute aggregates (<span class="ltr">count / sum / avg</span>) — not return individual rows.</p></div>
+  <div class="en"><p>Look, <span class="ltr">OLTP</span> means grabbing or tweaking a few specific records by key (<span class="ltr">point query</span>), then insert/update/delete per user tap. <span class="ltr">OLAP</span> means lining up tons of records and computing <span class="ltr">count / sum / avg</span> — you don’t get individual rows back. Different scale entirely.</p></div>
 
   <div class="fa"><table>
     <thead><tr><th>ویژگی</th><th>عملیاتی (OLTP)</th><th>تحلیلی (OLAP)</th></tr></thead>
     <tbody>
-      <tr><td>الگوی خواندن</td><td><span class="ltr">point query</span> — یافتن رکورد با کلید</td><td>اسکن و تجمیع روی انبوه رکورد</td></tr>
-      <tr><td>الگوی نوشتن</td><td>درج/به‌روزرسانی/حذف تک‌رکورد</td><td>ورود دسته‌ای (<span class="ltr">ETL</span>) یا جریان رویداد</td></tr>
-      <tr><td>کاربر انسانی</td><td>کاربر نهایی وب/موبایل</td><td>تحلیلگر داخلی برای تصمیم‌گیری</td></tr>
-      <tr><td>نوع کوئری</td><td>ثابت و از پیش تعریف‌شده در کد برنامه</td><td>دل‌خواه، اکتشافی (<span class="ltr">ad-hoc</span>)</td></tr>
-      <tr><td>حجم کوئری</td><td>تعداد زیاد، هرکدام کوچک</td><td>تعداد کم، هرکدام پیچیده و سنگین</td></tr>
-      <tr><td>معنای داده</td><td>آخرین وضعیت فعلی داده</td><td>تاریخچه رویدادهای رخداده در طول زمان</td></tr>
+      <tr><td>الگوی خواندن</td><td><span class="ltr">point query</span> — پیدا کردن یه رکورد با کلید</td><td>اسکن و جمع بستن روی خروار رکورد</td></tr>
+      <tr><td>الگوی نوشتن</td><td>تک‌تک: درج/تغییر/حذف یه رکورد</td><td>دسته‌ای (<span class="ltr">ETL</span>) یا جریان رویداد</td></tr>
+      <tr><td>کاربر انسانی</td><td>کاربر وب/موبایل</td><td>تحلیلگر داخل شرکت</td></tr>
+      <tr><td>نوع کوئری</td><td>ثابت، از قبل تو کد نوشته شده</td><td>دلبخواهی و اکتشافی (<span class="ltr">ad-hoc</span>)</td></tr>
+      <tr><td>حجم کوئری</td><td>زیاد ولی کوچیک</td><td>کم ولی سنگین</td></tr>
+      <tr><td>معنای داده</td><td>وضعیت همین حالا</td><td>تاریخچهٔ اتفاق‌ها</td></tr>
       <tr><td>اندازه داده</td><td>گیگابایت تا ترابایت</td><td>ترابایت تا پتابایت</td></tr>
-      <tr><td>مثال</td><td>بررسی مجاز بودن یک عملیات</td><td>تشخیص الگوی تقلب/سوءاستفاده</td></tr>
+      <tr><td>مثال</td><td>این کار مجازه یا نه؟</td><td>پیدا کردن الگوی تقلب</td></tr>
     </tbody>
   </table></div>
   <div class="en"><table>
     <thead><tr><th>Property</th><th>Operational (OLTP)</th><th>Analytical (OLAP)</th></tr></thead>
     <tbody>
-      <tr><td>Read pattern</td><td><span class="ltr">point query</span> — record lookup by key</td><td>Scan and aggregate over masses of records</td></tr>
-      <tr><td>Write pattern</td><td>Single-record insert/update/delete</td><td>Bulk ingest (<span class="ltr">ETL</span>) or event stream</td></tr>
-      <tr><td>Human user</td><td>End user of web/mobile</td><td>Internal analyst deciding things</td></tr>
-      <tr><td>Query type</td><td>Fixed, predefined in application code</td><td>Ad-hoc, exploratory</td></tr>
-      <tr><td>Query volume</td><td>Many, each small</td><td>Few, each complex and heavy</td></tr>
-      <tr><td>Data meaning</td><td>Latest current state</td><td>History of events over time</td></tr>
+      <tr><td>Read pattern</td><td><span class="ltr">point query</span> — find one record by key</td><td>Scan and add up piles of records</td></tr>
+      <tr><td>Write pattern</td><td>One at a time: insert/update/delete</td><td>In bulk (<span class="ltr">ETL</span>) or event stream</td></tr>
+      <tr><td>Human user</td><td>Web/mobile user</td><td>In-house analyst</td></tr>
+      <tr><td>Query type</td><td>Fixed, written in code beforehand</td><td>Free-form, exploratory</td></tr>
+      <tr><td>Query volume</td><td>Many but tiny</td><td>Few but heavy</td></tr>
+      <tr><td>Data meaning</td><td>The right-now state</td><td>History of what happened</td></tr>
       <tr><td>Data size</td><td>Gigabytes to terabytes</td><td>Terabytes to petabytes</td></tr>
-      <tr><td>Example</td><td>Checking whether an operation is allowed</td><td>Detecting fraud/abuse patterns</td></tr>
+      <tr><td>Example</td><td>Is this operation allowed?</td><td>Spotting fraud patterns</td></tr>
     </tbody>
   </table></div>
 
   <div class="callout">
     <div class="tag"><span class="fa">نکته مصاحبه</span><span class="en">Interview tip</span></div>
-    <div class="fa"><p>وقتی می‌پرسند «چرا تحلیل را روی پایگاه داده عملیاتی اجرا نکنیم؟» این چهار دلیل را بگو: <b>۱)</b> داده بین ده‌ها سیستم عملیاتی پخش است (<span class="ltr">data silos</span>) و باید ترکیب شود؛ <b>۲)</b> اسکیمای خوب برای OLTP برای تحلیل مناسب نیست؛ <b>۳)</b> کوئری تحلیلی گران است و پاسخ‌گویی به کاربران دیگر را کند می‌کند؛ <b>۴)</b> دسترسی مستقیم به سیستم‌های عملیاتی به دلایل امنیتی/انطباق ممنوع است.</p></div>
-    <div class="en"><p>When asked “why not run analytics on the operational database?”, give these four reasons: <b>1)</b> data is spread across dozens of operational systems (<span class="ltr">data silos</span>) and must be combined; <b>2)</b> a good OLTP schema is a bad analytical schema; <b>3)</b> analytical queries are expensive and starve other users; <b>4)</b> direct access to operational systems is forbidden for security/compliance reasons.</p></div>
+    <div class="fa"><p>اگه تو مصاحبه پرسیدن «چرا تحلیل رو روی دیتابیس عملیاتی اجرا نکنیم؟» این چهار تا رو بگو: <b>۱)</b> داده بین ده‌ها سیستم عملیاتی پخش‌وپلاست (<span class="ltr">data silos</span>) و باید جمعش کنی؛ <b>۲)</b> اسکیمای خوب OLTP به درد تحلیل نمی‌خوره؛ <b>۳)</b> کوئری تحلیلی گرونه و نفس کاربرهای دیگه رو می‌گیره؛ <b>۴)</b> دست زدن مستقیم به سیستم عملیاتی از نظر امنیتی/قانونی ممنوعه.</p></div>
+    <div class="en"><p>If the interviewer asks “why not analyze on the operational database?”, hit them with these four: <b>1)</b> data is scattered across dozens of operational systems (<span class="ltr">data silos</span>) — go collect it; <b>2)</b> a good OLTP schema stinks for analytics; <b>3)</b> analytical queries are expensive and choke other users; <b>4)</b> touching operational systems directly is usually banned for security/compliance.</p></div>
   </div>
 
   <div class="callout">
     <div class="tag"><span class="fa">زیر ذره‌بین</span><span class="en">Under the lens</span></div>
-    <div class="fa"><p><b>Product / real-time analytics:</b> سیستم‌هایی مثل <span class="ltr">Pinot</span>، <span class="ltr">Druid</span> و <span class="ltr">ClickHouse</span> بار تحلیلی را داخل محصول کاربر می‌آورند: ورودی زنده، پاسخ کم‌تأخیر. در مقابل، OLAP سنتی ورودی دسته‌ای دارد و برای <span class="ltr">throughput</span> بهینه شده است.</p></div>
-    <div class="en"><p><b>Product / real-time analytics:</b> systems like <span class="ltr">Pinot</span>, <span class="ltr">Druid</span> and <span class="ltr">ClickHouse</span> bring analytical load inside the user-facing product: live input, low-latency answers. Traditional OLAP instead has batch input and is optimized for <span class="ltr">throughput</span>.</p></div>
+    <div class="fa"><p><b>Product / real-time analytics:</b> سیستم‌هایی مثل <span class="ltr">Pinot</span>، <span class="ltr">Druid</span> و <span class="ltr">ClickHouse</span> بار تحلیلی رو میارن تو دل محصول: ورودی زنده، جواب تند. ولی OLAP سنتی ورودی دسته‌ای داره و برای <span class="ltr">throughput</span> ساخته شده — دو تا بازی جدا.</p></div>
+    <div class="en"><p><b>Product / real-time analytics:</b> systems like <span class="ltr">Pinot</span>, <span class="ltr">Druid</span> and <span class="ltr">ClickHouse</span> move analytics inside the product: live input, fast answers. Old-school OLAP is batch-fed and built for <span class="ltr">throughput</span> — different game.</p></div>
   </div>
 
   <div class="diagram">
@@ -287,17 +287,17 @@
     <div class="fa">
 <div class="technical-example teacher-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی برای خواندنِ نمودار: دو پرس‌وجو، دو الگوی دسترسی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> جدول <code dir="ltr">orders</code> صد میلیون ردیف دارد و روی <code dir="ltr">id</code> ایندکس شده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> <code dir="ltr">WHERE id=42</code> با ایندکس چند صفحه را می‌خواند؛ <code dir="ltr">SUM(amount)</code> برای کل سال حجم زیادی از ستون مبلغ را اسکن می‌کند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اولی نمونهٔ OLTP و دومی OLAP است؛ ایندکس مناسب اولی لزوماً گزارش دوم را سریع نمی‌کند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن جدول <code dir="ltr">orders</code> صد میلیون ردیف داره — یه غول واقعی. روی <code dir="ltr">id</code> هم ایندکس شده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> <code dir="ltr">WHERE id=42</code> با ایندکس مثل برق فقط چند صفحه رو می‌خونه؛ ولی <code dir="ltr">SUM(amount)</code> کل سال مجبوره ستون مبلغ رو شخم بزنه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اولی OLTP ـه، دومی OLAP. یادت باشه ایندکسی که اولی رو پرواز می‌ده، لزوماً دومی رو نجات نمی‌ده.</p>
 </div>
 
-      <p>دو ستون سبز و آبی را از روی برچسب‌های زرد وسط بخوانید: هفت سطر از READ تا SIZE. ستون چپ (OLTP) دنیای عملیات است — پیدا کردن چند رکورد با کلید، نوشتن تک‌تک، کاربر نهایی وب و موبایل، کوئری‌های ثابت داخل کد برنامه، تعداد زیاد ولی کوچک، معنای «وضعیت فعلی» و حجم گیگابایت تا ترابایت. ستون راست (OLAP) دنیای تحلیل است — اسکن میلیون‌ها رکورد و تجمیع، ورود دسته‌ای یا جریانی، تحلیلگر داخلی، کوئری اکتشافی، تعداد کم ولی سنگین، معنای «تاریخچه» و حجم ترابایت تا پتابایت.</p>
-      <p>نوار پایینی جواب سوال مصاحبه‌ای است: چرا تحلیل را روی OLTP اجرا نکنیم؟ چهار جعبه: SILOS (داده در ده‌ها سیستم جدا پخش است)، SCHEMA (اسکیمای خوب عملیاتی، اسکیمای بد تحلیلی است)، COST (اسکن سنگین منابع لازم برای پاسخ به کاربران را مصرف می‌کند) و ACCESS (دسترسی مستقیم اغلب به دلایل امنیتی ممنوع است). جمع‌بندی یک‌خطی پایین تصویر: OLTP برای کارِ روزمره پاسخ می‌دهد، OLAP گذشته را توضیح می‌دهد.</p>
+      <p>خوب، دو تا ستون سبز و آبی رو از روی برچسب‌های زرد وسط بخون: هفت سطر از READ تا SIZE. ستون چپ (OLTP) دنیای عملیاته — پیدا کردن چند رکورد با کلید، نوشتن تک‌تک، کاربر وب و موبایل، کوئری‌های ثابت تو دل کد، تعداد زیاد ولی کوچیک، معنای «وضعیت فعلی» و حجم گیگ تا ترا. ستون راست (OLAP) دنیای تحلیله — شخم زدن میلیون‌ها رکورد و جمع بستن، ورود دسته‌ای یا جریانی، تحلیلگر داخل شرکت، کوئری دلبخواهی، تعداد کم ولی سنگین، معنای «تاریخچه» و حجم ترا تا پتا.</p>
+      <p>نوار پایینی همون جواب سؤال مصاحبه‌ست: چرا تحلیل رو روی OLTP اجرا نکنیم؟ چهار تا جعبه: SILOS (داده تو ده‌ها سیستم جدا پخش‌وپلاست)، SCHEMA (اسکیمای خوب عملیاتی = اسکیمای بد تحلیلی)، COST (اسکن سنگین نفس کاربرها رو می‌گیره) و ACCESS (دست مستقیم معمولاً از نظر امنیتی ممنوعه). جمع‌بندیش یه خطه: OLTP جواب امروز رو می‌ده، OLAP گذشته رو توضیح می‌ده.</p>
     </div>
     <div class="en">
-      <p>Read the green and blue columns through the yellow center pills: seven rows from READ to SIZE. The left column (OLTP) is the operational world — looking up a few rows by key, writing one row at a time, end users on web and mobile, fixed queries baked into application code, many but tiny queries, the meaning “current state”, and gigabytes to terabytes. The right column (OLAP) is the analytical world — scanning millions of rows and aggregating, bulk or streaming ingest, internal analysts, ad-hoc exploratory queries, few but heavy, the meaning “history”, and terabytes to petabytes.</p>
-      <p>The bottom strip answers the interview question: why not analyze on the OLTP database? Four boxes: SILOS (data lives in dozens of separate systems), SCHEMA (a good operational schema is a bad analytical one), COST (heavy scans starve live users), and ACCESS (direct access is usually forbidden for security reasons). The one-line takeaway: OLTP serves the present, OLAP explains the past.</p>
+      <p>Read the green and blue columns through the yellow middle pills: seven rows, READ to SIZE. Left (OLTP) is the ops world — finding a few rows by key, writing one at a time, web and mobile users, fixed queries baked into code, many but tiny, “current state”, gigs to teras. Right (OLAP) is analysis — plowing millions of rows and aggregating, bulk or streaming input, in-house analysts, free-form queries, few but heavy, “history”, teras to petas.</p>
+      <p>The bottom strip is your interview answer: why not analyze on OLTP? Four boxes: SILOS (data scattered everywhere), SCHEMA (good operational schema = bad analytical one), COST (heavy scans choke live users), ACCESS (direct access usually banned). One-line takeaway: OLTP answers today, OLAP explains yesterday.</p>
     </div>
   </div>
 
@@ -305,48 +305,48 @@
 
   <h4><span class="fa">انبارداده (Data Warehouse)</span><span class="en">Data warehouse</span></h4>
   <div class="fa">
-<p>انبار داده، اطلاعات را برای گزارش‌گیری منظم آماده می‌کند. دریاچهٔ داده می‌تواند فایل‌ها را با قالب‌های متنوع نگه دارد. ETL یعنی استخراج، تبدیل و بارگذاری؛ در ELT تبدیل پس از بارگذاری انجام می‌شود.</p>
+<p>انبار داده رو این‌جوری به خاطر بسپر: آشپزخونهٔ گزارش‌گیریه: اطلاعات رو تمیز و آماده می‌چینه. دریاچهٔ داده انباره که هر قالبی رو همون خام می‌قاپه. ETL یعنی استخراج، تبدیل، بارگذاری؛ ELT یعنی اول بار بزن بعد تبدیل کن — جاشون عوض می‌شه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-7">
 <p class="example-title"><b>مثال فنی: ساخت جدول قابل‌تحلیل</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سفارش‌ها شامل <code dir="ltr">amount_rial</code> و زمان با منطقهٔ زمانی‌اند.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> ETL زمان را به روز گزارش تبدیل می‌کند، واحد مبلغ را یکسان می‌کند و در <code dir="ltr">fact_sales(day, product_id, amount)</code> می‌نویسد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> تحلیلگر می‌تواند فروش روزانه را جمع بزند؛ اگر واحد یا منطقهٔ زمانی مبهم باشد، انبار داده فقط خطا را منظم‌تر ذخیره کرده است.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سفارش‌ها <code dir="ltr">amount_rial</code> دارن و زمانشون هم با منطقهٔ زمانی قاطی شده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بریم سر ETL: زمان رو تبدیل می‌کنه به روز گزارش، واحد مبلغ رو یکی می‌کنه، بعد می‌نویسه توی <code dir="ltr">fact_sales(day, product_id, amount)</code>.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> حالا تحلیلگر راحت فروش روزانه رو جمع می‌زنه. ولی اگه واحد یا timezone مبهم بمونه، انبار داده فقط خطا رو شیک و منظم ذخیره کرده — گول نظمش رو نخور.</p>
 </div>
 </div>
-  <div class="en"><p>A separate database holding a <b>read-only copy</b> of every operational system’s data, so analysts can run anything without pressuring OLTP. Data arrives via <span class="ltr">Extract–Transform–Load (ETL)</span>: extract from operational databases (periodic dumps or a continuous change stream) → transform into an analysis-friendly schema → clean → load. Swap <span class="ltr">transform</span> and <span class="ltr">load</span> and you get <span class="ltr">ELT</span>.</p></div>
+  <div class="en"><p>A separate database holding a <b>read-only copy</b> of every operational system’s data, so analysts can run wild without hurting OLTP. Data arrives via <span class="ltr">ETL</span>: pull from operational DBs (dumps or a live change stream) → reshape into an analysis-friendly schema → clean → load. Swap transform and load and boom, that’s <span class="ltr">ELT</span>.</p></div>
 
   <h4><span class="fa">دریاچه داده (Data Lake)</span><span class="en">Data lake</span></h4>
-<div class="fa"><p>دریاچهٔ داده محلِ نگهداریِ داده با قالب‌های متنوع است؛ برای استفاده از آن همچنان به فهرست، کیفیت و قراردادِ داده نیاز داریم.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-8">
+<div class="fa"><p>دریاچهٔ داده هم داستانش اینه: انبار قالب‌های جورواجوره؛ ولی برای استفاده هنوز فهرست و کیفیت و قرارداد لازم داری — انبار شلخته هم دفتر می‌خواد.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-8">
 <p class="example-title"><b>مثال فنی: فایل خام در دریاچهٔ داده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> رویدادهای وب به‌شکل JSON و تصاویر کالا به‌شکل JPEG در object storage ذخیره‌اند.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> یک job فیلد <code dir="ltr">event_time</code> را از JSON می‌خواند و خروجی ستونی می‌سازد؛ تصاویر از مسیر پردازش دیگری می‌روند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> فایل‌ها می‌توانند قالب‌های متفاوت داشته باشند؛ برای تحلیل هنوز schema، نسخه و کیفیت هر مجموعه باید مشخص باشد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن رویدادهای وب به شکل JSON و عکس‌های کالا به شکل JPEG ریختن توی object storage.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا کار job اینه: فیلد <code dir="ltr">event_time</code> رو از JSON می‌خونه و خروجی ستونی می‌سازه؛ عکس‌ها هم از یه مسیر دیگه پردازش می‌شن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس دریاچه هر قالبی رو قورت می‌ده. ولی برای تحلیل هنوز باید schema و نسخه و کیفیت هر مجموعه مشخص باشه؛ خام بودن یعنی بی‌قانون بودن نیست.</p>
 </div></div>
 
-  <div class="fa"><p>مخزن متمرکزی از <b>فایل‌های خام</b> بدون اجبار به فرمت/اسکیمای خاص: رکوردهای پایگاه‌داده‌ای با فرمت <span class="ltr">Avro</span> یا <span class="ltr">Parquet</span>، اما می‌تواند متن، تصویر، ویدیو و... هم باشد. معمولاً ارزان‌تر از ذخیره‌سازی رابطه‌ای چون روی <span class="ltr">object storage</span> می‌نشیند. اصل معروف: <b>«sushi principle: raw data is better»</b> — داده خام را نگه دار تا هر مصرف‌کننده خودش تبدیل کند.</p></div>
-  <div class="en"><p>A central repository of <b>raw files</b> with no enforced format/schema: database records as <span class="ltr">Avro</span> or <span class="ltr">Parquet</span>, but also text, images, video and more. Usually cheaper than relational storage because it sits on <span class="ltr">object storage</span>. The famous rule: <b>“sushi principle: raw data is better”</b> — keep data raw so each consumer transforms it their own way.</p></div>
+  <div class="fa"><p>یه انبار مرکزی از <b>فایل‌های خام</b> بدون زور فرمت/اسکیما: رکوردهای دیتابیسی با فرمت <span class="ltr">Avro</span> یا <span class="ltr">Parquet</span>، ولی متن و عکس و ویدیو هم هست. معمولاً ارزون‌تر از ذخیرهٔ رابطه‌ای چون روی <span class="ltr">object storage</span> خوابیده. قانون معروف: <b>«sushi principle: raw data is better»</b> — دادهٔ خام رو نگه دار تا هرکی خودش تبدیلش کنه.</p></div>
+  <div class="en"><p>A central pile of <b>raw files</b> with no forced format: DB records as <span class="ltr">Avro</span> or <span class="ltr">Parquet</span>, plus text, images, video, whatever. Usually cheaper than relational storage since it naps on <span class="ltr">object storage</span>. The famous rule: <b>“sushi principle: raw data is better”</b> — keep it raw, let each consumer cook it their own way.</p></div>
 
   <h4>HTAP <span class="fa">و Reverse ETL</span><span class="en">and reverse ETL</span></h4>
-<div class="fa"><p>HTAP می‌کوشد بارِ عملیاتی و تحلیلی را نزدیک‌تر کند. Reverse ETL نتیجهٔ آمادهٔ تحلیل را به ابزارهای عملیاتی برمی‌گرداند؛ این دو کار متفاوت‌اند.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-9">
+<div class="fa"><p>HTAP دلش می‌خواد بار عملیاتی و تحلیلی رو به هم بچسبونه. Reverse ETL برعکسه: نتیجهٔ آمادهٔ تحلیل رو برمی‌گردونه تو ابزار عملیاتی. دو تا کار جدا — قاطی‌شون نکن.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-9">
 <p class="example-title"><b>مثال فنی: برگرداندن نتیجهٔ تحلیل به عملیات</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> انبار داده برای مشتری <code dir="ltr">17</code> مجموع خرید ۹۰ روزه را <code dir="ltr">8000</code> محاسبه کرده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> job مشتریان با مجموع بالای <code dir="ltr">5000</code> را با کلید <code dir="ltr">customer_id</code> به CRM منتقل می‌کند و زمان محاسبه را هم می‌فرستد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> CRM از برچسب آماده استفاده می‌کند؛ این Reverse ETL است. برچسب تا اجرای بعدی به‌روز نمی‌شود.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن انبار داده برای مشتری <code dir="ltr">17</code> حساب کرده مجموع خرید ۹۰ روزه شده <code dir="ltr">8000</code>.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا job میاد وسط: هرکی بالای <code dir="ltr">5000</code> خریده رو با کلید <code dir="ltr">customer_id</code> می‌فرسته توی CRM، زمان محاسبه رو هم همراهش می‌فرسته.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> حالا CRM از برچسب آماده استفاده می‌کنه — اسمش Reverse ETL ـه. فقط یادت باشه این برچسب تا اجرای بعدی تازه نمی‌شه؛ تاریخ انقضا داره.</p>
 </div></div>
 
   <div class="fa"><ul>
-    <li><b>HTAP</b> (<span class="ltr">Hybrid Transactional/Analytical Processing</span>): هدفش اجرای هر دو بار در یک سیستم است، اما در عمل داخل خودش یک موتور OLTP و یک موتور تحلیلیِ پشت یک رابط مشترک دارد؛ پس جایگزین انبارداده نمی‌شود.</li>
-    <li><b>Reverse ETL:</b> خروجی سیستم‌های تحلیلی به سیستم‌های عملیاتی برمی‌گردد؛ مثلاً مدل ML آموزش‌دیده به پروداکشن می‌رود تا پیشنهاد «کسانی که X خریدند Y هم خریدند» بسازد.</li>
+    <li><b>HTAP</b> (<span class="ltr">Hybrid Transactional/Analytical Processing</span>): هدفش اجرای هر دو بار تو یه سیستمه، ولی تو عمل تو دلش یه موتور OLTP و یه موتور تحلیلی پشت یه رابط مشترکن؛ پس جای انبارداده رو نمی‌گیره.</li>
+    <li><b>Reverse ETL:</b> خروجی سیستم تحلیلی برمی‌گرده تو سیستم عملیاتی؛ مثلاً مدل ML آموزش‌دیده می‌ره تو پروداکشن تا پیشنهاد «کی X خریده Y هم بخره» رو بسازه.</li>
   </ul></div>
   <div class="en"><ul>
-    <li><b>HTAP</b> (<span class="ltr">Hybrid Transactional/Analytical Processing</span>): aims to serve both workloads in one system, but internally it is an OLTP engine plus an analytical engine behind one interface — so it does not replace the warehouse.</li>
-    <li><b>Reverse ETL:</b> analytical output flows back into operational systems; e.g. a trained ML model goes to production to power “customers who bought X also bought Y”.</li>
+    <li><b>HTAP</b> (<span class="ltr">Hybrid Transactional/Analytical Processing</span>): wants both workloads in one system, but look inside: an OLTP engine plus an analytical engine behind one shared face — so no, it doesn’t replace the warehouse.</li>
+    <li><b>Reverse ETL:</b> analytical output flows back into operations; e.g. a trained ML model ships to production to power “people who bought X also buy Y”.</li>
   </ul></div>
 
   <div class="callout warn">
     <div class="tag"><span class="fa">فقط اسمش را بدان</span><span class="en">Names only</span></div>
-    <div class="fa"><p>مفاهیمی مثل <span class="ltr">DataOps</span>، <span class="ltr">feature engineering</span> و ابزارهایی مثل <span class="ltr">Fivetran / Airbyte / Singer</span> فقط لازم است <b>نامشان</b> را بدانی و جایگاهشان در مسیر داده؛ عمق ابزاری‌شان موضوع مصاحبه این فصل نیست.</p></div>
-    <div class="en"><p>Concepts like <span class="ltr">DataOps</span> and <span class="ltr">feature engineering</span>, and tools like <span class="ltr">Fivetran / Airbyte / Singer</span>, are name-and-place-in-the-pipeline knowledge; their tooling depth is not this chapter’s interview topic.</p></div>
+    <div class="fa"><p>مفاهیمی مثل <span class="ltr">DataOps</span>، <span class="ltr">feature engineering</span> و ابزارهایی مثل <span class="ltr">Fivetran / Airbyte / Singer</span> فقط <b>اسمشون</b> رو بدون و جاشون تو مسیر داده؛ عمق ابزاری‌شون سؤال مصاحبهٔ این فصل نیست — نگران نشو.</p></div>
+    <div class="en"><p>Concepts like <span class="ltr">DataOps</span> and <span class="ltr">feature engineering</span>, and tools like <span class="ltr">Fivetran / Airbyte / Singer</span>, — just know their <b>names</b> and their seat on the bus. Tooling depth is not this chapter’s interview question — relax.</p></div>
   </div>
 
   <h3 id="s1-3"><span class="fa">نمودار ۱ — جریان داده از OLTP تا تحلیل و بازگشت به عملیات</span><span class="en">Diagram 1 — dataflow from OLTP to analytics and back to operations</span></h3>
@@ -362,21 +362,21 @@
     <div class="fa">
 <div class="technical-example teacher-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی برای خواندنِ نمودار: ساخت جدول قابل‌تحلیل</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سفارش‌ها شامل <code dir="ltr">amount_rial</code> و زمان با منطقهٔ زمانی‌اند.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> ETL زمان را به روز گزارش تبدیل می‌کند، واحد مبلغ را یکسان می‌کند و در <code dir="ltr">fact_sales(day, product_id, amount)</code> می‌نویسد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> تحلیلگر می‌تواند فروش روزانه را جمع بزند؛ اگر واحد یا منطقهٔ زمانی مبهم باشد، انبار داده فقط خطا را منظم‌تر ذخیره کرده است.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سفارش‌ها <code dir="ltr">amount_rial</code> دارن و زمانشون هم با منطقهٔ زمانی قاطی شده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بریم سر ETL: زمان رو تبدیل می‌کنه به روز گزارش، واحد مبلغ رو یکی می‌کنه، بعد می‌نویسه توی <code dir="ltr">fact_sales(day, product_id, amount)</code>.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> حالا تحلیلگر راحت فروش روزانه رو جمع می‌زنه. ولی اگه واحد یا timezone مبهم بمونه، انبار داده فقط خطا رو شیک و منظم ذخیره کرده — گول نظمش رو نخور.</p>
 </div>
 
-      <p>این نمودار را مثل سه خط تولید موازی بخوانید که در پنج ستون جلو می‌روند: <span class="ltr">OLTP Sources</span>، <span class="ltr">Ingest</span>، <span class="ltr">Analytics Store</span>، <span class="ltr">Consumers</span> و <span class="ltr">Back to Ops</span>. ردیف بالا مسیر دسته‌ای است: <span class="ltr">Orders DB</span> (سیستم مرجع) ← <span class="ltr">ETL Jobs</span> (استخراج و تبدیل) ← <span class="ltr">Warehouse</span> (کپی فقط‌خواندنی با اسکیمای پاک‌شده) ← <span class="ltr">BI Dashboards</span> با SQL دل‌خواه.</p>
-      <p>ردیف میانی مسیر داده خام است: <span class="ltr">External SaaS</span> ← <span class="ltr">Connectors</span> ← <span class="ltr">Data Lake</span> (فایل خام بدون اسکیما) ← <span class="ltr">Data Science</span> که روی همان داده خام مدل می‌سازد.</p>
-      <p>ردیف پایین مسیر زنده است: <span class="ltr">Backend Svcs</span> ← <span class="ltr">Event Stream</span> (لاگ کافکا) ← <span class="ltr">Real-Time OLAP</span> مثل <span class="ltr">ClickHouse</span> ← <span class="ltr">Product UI</span> که رویدادها را در چند ثانیه مصرف می‌کند.</p>
-      <p>و تنها فلش افقی چین‌چین: از <span class="ltr">Data Science</span> به <span class="ltr">Prod Services</span> با برچسب <span class="ltr">reverse ETL</span> — مدل آموزش‌دیده به مسیر عملیاتی برمی‌گردد. درس نمودار: هر سه مسیر داده «مشتق‌شده» می‌سازند؛ تحلیل، کپی چیزی است که جای دیگر ساخته شده.</p>
+      <p>حالا این نمودار رو مثل سه تا خط تولید موازی بخون که تو پنج تا ستون جلو می‌رن: <span class="ltr">OLTP Sources</span> و <span class="ltr">Ingest</span> و <span class="ltr">Analytics Store</span> و <span class="ltr">Consumers</span> و <span class="ltr">Back to Ops</span>. ردیف بالا مسیر دسته‌ایه: <span class="ltr">Orders DB</span> (مرجع) ← <span class="ltr">ETL Jobs</span> (استخراج و تبدیل) ← <span class="ltr">Warehouse</span> (کپی فقط‌خوندنی با اسکیمای تمیز) ← <span class="ltr">BI Dashboards</span> با SQL دلبخواهی.</p>
+      <p>ردیف وسط مسیر دادهٔ خامه: <span class="ltr">External SaaS</span> ← <span class="ltr">Connectors</span> ← <span class="ltr">Data Lake</span> (فایل خام بدون اسکیما) ← <span class="ltr">Data Science</span> که رو همون دادهٔ خام مدل می‌سازه.</p>
+      <p>ردیف پایین مسیر زنده‌ست: <span class="ltr">Backend Svcs</span> ← <span class="ltr">Event Stream</span> (لاگ کافکا) ← <span class="ltr">Real-Time OLAP</span> مثل <span class="ltr">ClickHouse</span> ← <span class="ltr">Product UI</span> که اتفاق‌ها رو تو چند ثانیه مصرف می‌کنه.</p>
+      <p>و اون یه فلش چین‌چین افقی: از <span class="ltr">Data Science</span> به <span class="ltr">Prod Services</span> با برچسب <span class="ltr">reverse ETL</span> — مدل آموزش‌دیده برمی‌گرده تو مسیر عملیاتی. درس نمودار: هر سه مسیر دادهٔ «مشتق‌شده» می‌سازن؛ تحلیل کپی چیزیه که یه جای دیگه ساخته شده — یادت باشه.</p>
     </div>
     <div class="en">
-      <p>Read this diagram as three parallel production lines across five stages: <span class="ltr">OLTP Sources</span>, <span class="ltr">Ingest</span>, <span class="ltr">Analytics Store</span>, <span class="ltr">Consumers</span> and <span class="ltr">Back to Ops</span>. The top row is the batch path: <span class="ltr">Orders DB</span> (system of record) → <span class="ltr">ETL Jobs</span> (extract and transform) → <span class="ltr">Warehouse</span> (read-only copy with a curated schema) → <span class="ltr">BI Dashboards</span> over ad-hoc SQL.</p>
-      <p>The middle row is the raw-data path: <span class="ltr">External SaaS</span> → <span class="ltr">Connectors</span> → <span class="ltr">Data Lake</span> (schema-less raw files) → <span class="ltr">Data Science</span>, which trains models on that same raw data.</p>
-      <p>The bottom row is the live path: <span class="ltr">Backend Svcs</span> → <span class="ltr">Event Stream</span> (Kafka log) → <span class="ltr">Real-Time OLAP</span> such as <span class="ltr">ClickHouse</span> → <span class="ltr">Product UI</span>, consuming events within seconds.</p>
-      <p>And the single dashed horizontal arrow: from <span class="ltr">Data Science</span> to <span class="ltr">Prod Services</span>, labelled <span class="ltr">reverse ETL</span> — the trained model returns to the operational path. The lesson: all three paths produce <em>derived</em> data; analytics is a copy of something created elsewhere.</p>
+      <p>Read this one as three parallel assembly lines across five stages: <span class="ltr">OLTP Sources</span>, <span class="ltr">Ingest</span>, <span class="ltr">Analytics Store</span>, <span class="ltr">Consumers</span> and <span class="ltr">Back to Ops</span>. Top row is batch: <span class="ltr">Orders DB</span> (the record) → <span class="ltr">ETL Jobs</span> (extract and transform) → <span class="ltr">Warehouse</span> (read-only copy, tidy schema) → <span class="ltr">BI Dashboards</span> with free-form SQL.</p>
+      <p>Middle row is raw: <span class="ltr">External SaaS</span> → <span class="ltr">Connectors</span> → <span class="ltr">Data Lake</span> (schema-less raw files) → <span class="ltr">Data Science</span>, training models on that same raw stuff.</p>
+      <p>Bottom row is live: <span class="ltr">Backend Svcs</span> → <span class="ltr">Event Stream</span> (Kafka log) → <span class="ltr">Real-Time OLAP</span> like <span class="ltr">ClickHouse</span> → <span class="ltr">Product UI</span>, eating events within seconds.</p>
+      <p>And that one dashed arrow: <span class="ltr">Data Science</span> → <span class="ltr">Prod Services</span>, tagged <span class="ltr">reverse ETL</span> — the trained model walks back into operations. The lesson: all three lines make <em>derived</em> data. Analytics is a copy of something born elsewhere — remember that.</p>
     </div>
   </div>
 </section>
@@ -388,33 +388,33 @@
   <div class="callout">
     <div class="tag"><span class="fa">ایده کلیدی</span><span class="en">Key idea</span></div>
     <div class="fa">
-<p>سیستم مرجع محل نگهداری نسخهٔ معتبر داده است. کش، ایندکس جست‌وجو و گزارش‌ها معمولاً از آن ساخته می‌شوند؛ اگر از بین بروند، باید بتوان آن‌ها را دوباره ساخت.</p>
+<p>نوبتی هم باشه نوبت مرجعه: سیستم مرجع همون‌جاست که نسخهٔ درست داده نگه داشته می‌شه. کش و ایندکس جست‌وجو و گزارش‌ها معمولاً از روش ساخته می‌شن؛ اگه بترکن، باید بشه از نو ساختشون — مرجع نه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-10">
 <p class="example-title"><b>مثال فنی: بازسازی دادهٔ مشتق‌شده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> مرجع کالا <code dir="ltr">P7</code> را با <code dir="ltr">version=12</code> نگه داشته؛ ایندکس جست‌وجو خراب شده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> snapshot مرجع تا موقعیت لاگ <code dir="ltr">500</code> وارد ایندکس تازه می‌شود و سپس تغییرهای پس از <code dir="ltr">500</code> اعمال می‌شوند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> با مرز snapshot و لاگِ هماهنگ می‌توان ایندکس را بازسازی کرد؛ صرفِ کپی قدیمی ممکن است تغییرهای حین کپی را جا بیندازد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن مرجع کالا <code dir="ltr">P7</code> رو با <code dir="ltr">version=12</code> نگه داشته، ولی ایندکس جست‌وجو ترَکیده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بریم سراغ بازسازی: اول snapshot مرجع تا موقعیت لاگ <code dir="ltr">500</code> می‌ره توی ایندکس تازه، بعد تغییرهای بعد از <code dir="ltr">500</code> یکی‌یکی اعمال می‌شن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> با مرز مشخص snapshot و لاگ هماهنگ، ایندکس برمی‌گرده. نگران نشو، ولی فقط با یه کپی قدیمی جلو نرو — تغییرهای وسط کپی جا می‌مونن.</p>
 </div>
 </div>
     <div class="en">
-      <p><b><span class="ltr">System of record</span> (source of truth):</b> where fresh data is written <b>first</b>; each fact is stored exactly once (usually normalized), and if two systems disagree, this system’s value is correct <b>by definition</b>.</p>
-      <p><b><span class="ltr">Derived data</span>:</b> the result of transforming data that exists elsewhere. If lost, it can be rebuilt from the record: caches, search indexes, materialized views, denormalized values, even a trained ML model.</p>
+      <p><b><span class="ltr">System of record</span> (source of truth):</b> the place fresh data hits <b>first</b>. Each fact lives there exactly once (usually normalized), and when two systems disagree, this one wins — <b>by definition</b>, no argument.</p>
+      <p><b><span class="ltr">Derived data</span>:</b> anything cooked from data that already lives somewhere else. Lose it? Just rebuild it from the record — caches, search indexes, materialized views, denormalized copies, even a trained ML model.</p>
     </div>
   </div>
 
   <div class="callout">
     <div class="tag"><span class="fa">زیر ذره‌بین</span><span class="en">Under the lens</span></div>
     <div class="fa"><ul>
-      <li>داده مشتق‌شده از نظر اطلاعاتی <b>اضافه</b> است اما برای کارایی خواندن حیاتی: از یک منبع، چند نمای متفاوت می‌سازی.</li>
-      <li>سیستم‌های تحلیلی معمولاً مشتق‌شده‌اند چون مصرف‌کننده داده‌ای‌اند که جای دیگر ساخته شده.</li>
-      <li><b>خود ابزار تعیین‌کننده نیست:</b> این <b>نوع استفاده تو</b> در معماری است که چیزی را «مرجع» یا «مشتق» می‌کند.</li>
-      <li><b>مسئله اصلی:</b> وقتی مرجع تغییر می‌کند، همه داده‌های مشتق‌شده باید به‌روز شوند → راه‌حل: <b>pipeline داده</b> (فصل ۱۱).</li>
+      <li>نکته‌ش اینجاست: دادهٔ مشتق‌شده رو کاغذ اضافه‌ست، ولی برای تندی خوندن حیاتیه: از یه منبع، چند تا ویوی جدا می‌سازی.</li>
+      <li>سیستم‌های تحلیلی معمولاً مشتق‌شده‌ان چون مهمون سفره‌ای‌ان که یه جای دیگه پخته شده.</li>
+      <li><b>خود ابزار تعیین نمی‌کنه:</b> این تویی که با نوع استفادت تو معماری به چیزی می‌گی «مرجع» یا «مشتق».</li>
+      <li><b>درد اصلی:</b> وقتی مرجع عوض می‌شه، همهٔ مشتق‌ها باید دنبالش بیان → راه‌حل: <b>pipeline داده</b> (فصل ۱۱).</li>
     </ul></div>
     <div class="en"><ul>
-      <li>Derived data is informationally <b>redundant</b> yet vital for read performance: one source, many views.</li>
-      <li>Analytical systems are usually derived — they consume data created elsewhere.</li>
-      <li><b>The tool doesn’t decide:</b> it is <b>how you use it</b> in the architecture that makes something a record or derived.</li>
-      <li><b>The core problem:</b> when the record changes, all derived data must catch up → the answer is a <b>data pipeline</b> (Chapter 11).</li>
+      <li>Derived data is technically extra, yet your reads can’t live without it: one source, many views.</li>
+      <li>Analytical systems are usually derived — they eat food cooked elsewhere.</li>
+      <li><b>The tool doesn’t get a vote:</b> <b>how YOU use it</b> in the architecture decides what’s a record and what’s derived.</li>
+      <li><b>The real headache:</b> when the record moves, every copy must follow → the fix is a <b>data pipeline</b> (Chapter 11).</li>
     </ul></div>
   </div>
 
@@ -431,28 +431,28 @@
     <div class="fa">
 <div class="technical-example teacher-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی برای خواندنِ نمودار: پایگاه داده، کش و ایندکس چه می‌کنند؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> قیمت کالای <code dir="ltr">P7</code> در مرجع <code dir="ltr">120</code> است؛ در کش هنوز <code dir="ltr">100</code> مانده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> API خرید قیمت معتبر را از مسیر مرجع می‌گیرد؛ مصرف‌کنندهٔ تغییر، کش و ایندکس جست‌وجو را به نسخهٔ <code dir="ltr">120</code> می‌رساند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> کش برای سرعت و ایندکس برای جست‌وجوست؛ هیچ‌کدام بدون قرارداد مشخص، مرجع تأیید قیمت خرید نیستند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن قیمت کالای <code dir="ltr">P7</code> توی مرجع شده <code dir="ltr">120</code>، ولی توی کش هنوز <code dir="ltr">100</code> مونده. آشناست، نه؟</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بریم سراغ مسیر خرید: API قیمت معتبر رو فقط از مرجع برمی‌داره. بعد مصرف‌کنندهٔ تغییر میاد کش و ایندکس جست‌وجو رو به نسخهٔ <code dir="ltr">120</code> می‌رسونه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس کش فقط برای سرعته، ایندکس فقط برای جست‌وجو. هیچ‌کدوم بدون قرارداد مشخص مرجع تأیید قیمت نیستن — اینو قاطی نکن.</p>
 </div>
 
-      <p>خط افقی وسط، مسیر نوشتن است: <span class="ltr">Users</span> ← <span class="ltr">API Service</span> ← <span class="ltr">System of Record</span> (پرایمری با برچسب <span class="ltr">source of truth</span>). هر داده واقعی اول اینجا می‌نشیند.</p>
-      <p>ردیف بالا مسیر خواندن است: <span class="ltr">API Service</span> با <span class="ltr">cache lookup</span> به <span class="ltr">Cache</span> و با <span class="ltr">search query</span> به <span class="ltr">Search Index</span> می‌رود — هر دو با برچسب <span class="ltr">derived</span>، ساخته‌شده برای سرعت خواندن نه نگه‌داشتن حقیقت.</p>
-      <p>فلش‌های چین‌چین مسیر تغییرند: <span class="ltr">CDC events</span> از مرجع به <span class="ltr">Change Capture</span>، بعد <span class="ltr">refresh/evict</span> به کش، <span class="ltr">index update</span> به ایندکس و <span class="ltr">recompute</span> به <span class="ltr">Materialized Views</span>. و تحلیلگران روی همین نماها کوئری می‌زنند، نه روی پایگاه داده زنده.</p>
-      <p>نکته اصلی: مرجع که عوض شود همه‌چیز باید دنبالش به‌روز شود. ناسازگاری موقت قابل قبول است، از دست رفتن دائمی داده مرجع هرگز.</p>
+      <p>خط افقی وسط رو بگیر — همون مسیر نوشتنه: <span class="ltr">Users</span> ← <span class="ltr">API Service</span> ← <span class="ltr">System of Record</span> (همون پرایمری با برچسب <span class="ltr">source of truth</span>). هر دادهٔ واقعی اول میاد اینجا می‌شینه.</p>
+      <p>ردیف بالا مسیر خوندنه: <span class="ltr">API Service</span> با <span class="ltr">cache lookup</span> می‌ره سراغ <span class="ltr">Cache</span> و با <span class="ltr">search query</span> می‌ره سراغ <span class="ltr">Search Index</span> — هر دو برچسب <span class="ltr">derived</span> دارن، ساخته شدن برای تندی خوندن، نه نگه‌داشتن حقیقت.</p>
+      <p>فلش‌های چین‌چین مسیر تغییرن: <span class="ltr">CDC events</span> از مرجع می‌رن به <span class="ltr">Change Capture</span>، بعد <span class="ltr">refresh/evict</span> به کش، <span class="ltr">index update</span> به ایندکس و <span class="ltr">recompute</span> به <span class="ltr">Materialized Views</span>. تحلیلگرها رو همین نماها کوئری می‌زنن، نه رو دیتابیس زنده.</p>
+      <p>حرف اصلی: مرجع که عوض شد همه باید دنبالش بیان. ناسازگاری موقتی اشکالی نداره، ولی گم شدن همیشگی دادهٔ مرجع هرگز — خط قرمزه.</p>
     </div>
     <div class="en">
-      <p>The middle horizontal line is the write path: <span class="ltr">Users</span> → <span class="ltr">API Service</span> → <span class="ltr">System of Record</span> (primary, labelled <span class="ltr">source of truth</span>). Every real datum lands here first.</p>
-      <p>The top row is the read path: <span class="ltr">API Service</span> issues a <span class="ltr">cache lookup</span> to the <span class="ltr">Cache</span> and a <span class="ltr">search query</span> to the <span class="ltr">Search Index</span> — both labelled <span class="ltr">derived</span>, built for read speed, not for holding truth.</p>
-      <p>The dashed arrows are the change path: <span class="ltr">CDC events</span> flow from the record into <span class="ltr">Change Capture</span>, then <span class="ltr">refresh/evict</span> to the cache, <span class="ltr">index update</span> to the index, and <span class="ltr">recompute</span> to <span class="ltr">Materialized Views</span>. Analysts query those views — never the live database.</p>
-      <p>The point: when the record changes, everything must follow. Temporary inconsistency is acceptable; permanent loss of record data never is.</p>
+      <p>The middle horizontal line is the write path: <span class="ltr">Users</span> → <span class="ltr">API Service</span> → <span class="ltr">System of Record</span> (primary, labelled <span class="ltr">source of truth</span>). Every real piece of data lands here first.</p>
+      <p>The top row is the read path: <span class="ltr">API Service</span> issues a <span class="ltr">cache lookup</span> to the <span class="ltr">Cache</span> and a <span class="ltr">search query</span> to the <span class="ltr">Search Index</span> — both tagged <span class="ltr">derived</span>, built for fast reads, not for guarding the truth.</p>
+      <p>The dashed arrows are the change path: <span class="ltr">CDC events</span> stream from the record into <span class="ltr">Change Capture</span>, then <span class="ltr">refresh/evict</span> to the cache, <span class="ltr">index update</span> to the index, <span class="ltr">recompute</span> to <span class="ltr">Materialized Views</span>. Analysts query those views — never the live database, promise.</p>
+      <p>The punchline: when the record moves, everything follows. Brief disagreement is fine; losing record data forever never is — that’s the red line.</p>
     </div>
   </div>
 
   <div class="callout">
     <div class="tag"><span class="fa">نکته مصاحبه</span><span class="en">Interview tip</span></div>
-    <div class="fa"><p>اگر گفتند «کش شما source of truth است»، جواب قوی این است: کش/ایندکس مشتق‌شده‌اند، پس باید <b>قابل بازسازی</b> باشند و مکانیزم انتشار تغییر (<span class="ltr">CDC</span>، رویداد یا pipeline) داشته باشند.</p></div>
-    <div class="en"><p>If someone calls the cache the source of truth, push back: caches/indexes are derived, so they must be <b>rebuildable</b> and fed by a change-propagation mechanism (<span class="ltr">CDC</span>, events or a pipeline).</p></div>
+    <div class="fa"><p>اگه گفتن «کش شما source of truth ـه»، این‌جوری محکم جواب بده: کش/ایندکس مشتق‌شده‌ان، پس باید <b>قابل بازسازی</b> باشن و لولهٔ انتشار تغییر (<span class="ltr">CDC</span>، رویداد یا pipeline) داشته باشن — بدون لوله، حرف مفته.</p></div>
+    <div class="en"><p>If someone calls the cache the source of truth, push back, friend: caches and indexes are derived, so they’d better be <b>rebuildable</b> and fed by a change pipe (<span class="ltr">CDC</span>, events, whatever). No pipe, no deal.</p></div>
   </div>
 
   <h3 id="s2-2"><span class="fa">نمودار وضعیت — چرخه عمر یک داده</span><span class="en">State diagram — life of a datum</span></h3>
@@ -468,12 +468,12 @@
     <div class="fa">
 <div class="technical-example teacher-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی برای خواندنِ نمودار: بازسازی دادهٔ مشتق‌شده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> مرجع کالا <code dir="ltr">P7</code> را با <code dir="ltr">version=12</code> نگه داشته؛ ایندکس جست‌وجو خراب شده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> snapshot مرجع تا موقعیت لاگ <code dir="ltr">500</code> وارد ایندکس تازه می‌شود و سپس تغییرهای پس از <code dir="ltr">500</code> اعمال می‌شوند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> با مرز snapshot و لاگِ هماهنگ می‌توان ایندکس را بازسازی کرد؛ صرفِ کپی قدیمی ممکن است تغییرهای حین کپی را جا بیندازد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن مرجع کالا <code dir="ltr">P7</code> رو با <code dir="ltr">version=12</code> نگه داشته، ولی ایندکس جست‌وجو ترَکیده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بریم سراغ بازسازی: اول snapshot مرجع تا موقعیت لاگ <code dir="ltr">500</code> می‌ره توی ایندکس تازه، بعد تغییرهای بعد از <code dir="ltr">500</code> یکی‌یکی اعمال می‌شن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> با مرز مشخص snapshot و لاگ هماهنگ، ایندکس برمی‌گرده. نگران نشو، ولی فقط با یه کپی قدیمی جلو نرو — تغییرهای وسط کپی جا می‌مونن.</p>
 </div>
-<p>این ماشین وضعیت را مثل خط زمانی زندگی یک «داده» بخوانید. ردیفِ بالا (<span class="ltr">Authoritative data</span>): <span class="ltr">Created</span> ← <span class="ltr">Recorded</span> (مرجع، <span class="ltr">source of truth</span>) ← <span class="ltr">Change Captured</span>. از آنجا دو فلش به ردیفِ وسط (<span class="ltr">Derived copies</span>) می‌روند: <span class="ltr">refresh</span> به کپی‌های مشتق (بازسازی‌شدنی) و <span class="ltr">ETL pipeline</span> به کپی تحلیلی (فقط‌خواندنی). درس اصلی در ردیفِ پایین (<span class="ltr">End of life</span>) است: <span class="ltr">Deleted</span> با برچسب حق فراموش شدن — حذف فقط پاک کردن رکورد نیست، باید به همه کپی‌های مشتق‌شده هم برسد، و همین کار با لاگ‌های تغییرناپذیر را سخت می‌کند.</p></div>
-    <div class="en"><p>Read this state machine as the timeline of one datum’s life. Top lane (<span class="ltr">Authoritative data</span>): <span class="ltr">Created</span> → <span class="ltr">Recorded</span> (the record, <span class="ltr">source of truth</span>) → <span class="ltr">Change Captured</span>. Two arrows then drop to the middle lane (<span class="ltr">Derived copies</span>): <span class="ltr">refresh</span> into derived copies (rebuildable) and an <span class="ltr">ETL pipeline</span> into the analytical copy (read-only). The real lesson is the bottom lane (<span class="ltr">End of life</span>): <span class="ltr">Deleted</span>, tagged with the right to be forgotten — deletion is not just dropping the record; it must reach every derived copy, which is exactly what immutable logs make hard.</p></div>
+<p>این ماشین وضعیت رو مثل زندگی‌نامهٔ یه «داده» بخون. ردیف بالا (<span class="ltr">Authoritative data</span>): <span class="ltr">Created</span> ← <span class="ltr">Recorded</span> (مرجع، <span class="ltr">source of truth</span>) ← <span class="ltr">Change Captured</span>. از اونجا دو تا فلش می‌رن به ردیف وسط (<span class="ltr">Derived copies</span>): <span class="ltr">refresh</span> به کپی‌های مشتق (که می‌شه از نو ساخت) و <span class="ltr">ETL pipeline</span> به کپی تحلیلی (فقط‌خوندنی). درس اصلی ردیف پایینه (<span class="ltr">End of life</span>): <span class="ltr">Deleted</span> با برچسب حق فراموش شدن — حذف فقط پاک کردن رکورد نیست، باید برسه به همهٔ کپی‌های مشتق‌شده، و همین کار با لاگ‌های تغییرناپذیر سخت می‌شه — اینجا گره کاره.</p></div>
+    <div class="en"><p>Read this little machine as one datum’s biography. Top lane (<span class="ltr">Authoritative data</span>): <span class="ltr">Created</span> → <span class="ltr">Recorded</span> (the record, <span class="ltr">source of truth</span>) → <span class="ltr">Change Captured</span>. Two arrows drop to the middle lane (<span class="ltr">Derived copies</span>): <span class="ltr">refresh</span> into rebuildable copies, an <span class="ltr">ETL pipeline</span> into the read-only analytical copy. The real lesson is the bottom lane (<span class="ltr">End of life</span>): <span class="ltr">Deleted</span>, tagged with the right to be forgotten — deleting isn’t just dropping the record, it must reach every single copy, and that’s exactly what immutable logs make painful.</p></div>
   </div>
 </section>
 
@@ -484,62 +484,62 @@
   <div class="callout">
     <div class="tag"><span class="fa">ایده کلیدی</span><span class="en">Key idea</span></div>
     <div class="fa">
-<p>انتخاب بین سرویس ابری و میزبانی شخصی یعنی تصمیم بگیریم کدام مسئولیت‌ها را خودمان انجام دهیم و کدام را به ارائه‌دهنده بسپاریم. هزینه، مهارت تیم و میزان کنترل در این تصمیم اثر دارند.</p>
+<p>دیگه وقتشه بریم سراغ دعوای کلاود و خودمیزبانی: کدوم کار رو خودت بکنی و کدوم رو بدی دست ارائه‌دهنده. هزینه و بلدی تیم و میزان کنترل، هر سه تو این تصمیم بازی می‌کنن.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-11">
 <p class="example-title"><b>مثال فنی: مرز مسئولیت در میزبانی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> یک پایگاه داده به patch، backup و آزمون restore نیاز دارد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> در خودمیزبانی تیم این کارها را اجرا می‌کند؛ در سرویس مدیریت‌شده بخشی از عملیات به ارائه‌دهنده سپرده می‌شود، اما schema و مجوزهای برنامه همچنان با تیم است.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> مدیریت‌شده بودن مسئولیت را جابه‌جا می‌کند؛ وجود backup بدون آزمون بازیابی، زمان بازگشت سرویس را معلوم نمی‌کند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن یه پایگاه داده داری که patch و backup و آزمون restore می‌خواد. مثل بچه‌ست، رسیدگی می‌خواد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> توی خودمیزبانی خودت آستین بالا می‌زنی و همه رو انجام می‌دی؛ توی سرویس مدیریت‌شده بخشی رو می‌سپری به ارائه‌دهنده. ولی schema و مجوزهای برنامه هنوز با توئه، فرار نداره.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس مدیریت‌شده بودن مسئولیت رو جابه‌جا می‌کنه، حذف نمی‌کنه. یادت باشه backup که تست restore نشده مثل چتر نجاتی که بازش نکردی — موقع پرش معلوم می‌شه.</p>
 </div>
 </div>
-    <div class="en"><p>This is a “build or buy” debate — ultimately a business decision. The rule of thumb: build in-house what is your <b>competitive advantage</b>; hand the undifferentiated commodity parts to a vendor.</p></div>
+    <div class="en"><p>Classic build-or-buy fight, friend — and honestly it’s a business call. Rule of thumb: build what makes <b>YOU</b> special, rent the boring commodity parts.</p></div>
   </div>
 
   <h3><span class="fa">طیف برون‌سپاری</span><span class="en">The outsourcing spectrum</span></h3>
   <div class="fa">
-<p>برون‌سپاری صفر و یک نیست: از نوشتن و اجرای همه‌چیز توسط تیم تا استفاده از یک نرم‌افزار کاملاً آماده، چند سطح مختلف داریم.</p>
+<p>قضیهٔ برون‌سپاری اینه: صفر و یک نیست: از اینکه تیمت همه‌چی رو بنویسه و اجرا کنه تا اینکه یه نرم‌افزار آماده رو فقط مصرف کنی، چند تا پله وسطه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-12">
 <p class="example-title"><b>مثال فنی: سه راه ساخت جست‌وجو</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> نیاز محصول جست‌وجوی متن با غلط املایی و رتبه‌بندی است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تیم می‌تواند موتور بنویسد، موتور آماده را روی سرور خودش اجرا کند یا API مدیریت‌شده بخرد؛ در هر سه راه کیفیت نتایج باید با همان مجموعهٔ آزمون سنجیده شود.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> هزینهٔ توسعه، عملیات و وابستگی متفاوت است؛ خرید API به‌خودی‌خود کیفیت جست‌وجوی محصول را تضمین نمی‌کند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن محصولت جست‌وجوی متن می‌خواد که غلط املایی رو بفهمه و رتبه‌بندی هم بده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا سه راه داری: خودت موتور بنویسی، موتور آماده رو روی سرور خودت بالا بیاری، یا API مدیریت‌شده بخری. هر سه رو باید با یه مجموعه آزمون ثابت بسنجی.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هزینهٔ ساخت و عملیات و وابستگی‌شون فرق داره. پول دادن برای API یعنی کیفیت جست‌وجو تضمین شده؟ نه عزیز، خودت باید تست کنی.</p>
 </div>
 </div>
-  <div class="en"><p>On one end: <span class="ltr">bespoke</span> software you write and run yourself → packaged <span class="ltr">self-hosted</span> software (MySQL on your own server, <span class="ltr">on-prem</span> or <span class="ltr">IaaS</span>) → and on the other end: cloud/SaaS services you only consume through an API.</p></div>
+  <div class="en"><p>One end of the rope: <span class="ltr">bespoke</span> stuff you write and run yourself → packaged <span class="ltr">self-hosted</span> (MySQL on your box, <span class="ltr">on-prem</span> or <span class="ltr">IaaS</span>) → other end: cloud/SaaS you just sip through an API.</p></div>
 
   <h3><span class="fa">کی کلاود به‌صرفه است؟</span><span class="en">When does cloud win?</span></h3>
 <div class="fa">
-<p>ابر زمانی به‌صرفه‌تر می‌شود که انعطاف منابع یا کاهش کار عملیاتی، هزینهٔ اجاره را جبران کند. باید هزینهٔ کل را دید: زیرساخت، نیروی انسانی، انتقال داده و خرابی‌ها.</p>
+<p>کی ابر می‌صرفه؟ وقتی انعطاف منابع یا کم شدن کار عملیاتی، کرایه‌ش رو جبران کنه. باید ته حساب رو دید: زیرساخت، آدم‌ها، انتقال داده و خرابی‌ها — همه با هم.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-13">
 <p class="example-title"><b>مثال فنی: حساب هزینهٔ ظرفیت فصلی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کنید بار عادی به ۲ worker و حراجِ دو روزه به ۲۰ worker نیاز دارد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> در مدل ساعتی ۱۸ worker اضافه فقط همان دو روز فعال‌اند؛ هزینهٔ ذخیره، شبکه و سرویس‌های ثابت هم جدا محاسبه می‌شود.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> کشسانی می‌تواند هزینهٔ ظرفیت بیکار را کم کند؛ از این مثال نمی‌توان نتیجه گرفت ابر برای هر بار دائمی ارزان‌تر است.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن بار عادی با ۲ تا worker راه می‌افته، ولی حراج دو روزه ۲۰ تا worker می‌خواد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> توی مدل ساعتی، اون ۱۸ تا worker اضافه فقط همون دو روز روشنن. هزینهٔ ذخیره و شبکه و سرویس‌های ثابت رو هم جدا حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس کشسانی هزینهٔ ظرفیت بیکار رو کم می‌کنه. ولی از این مثال نپر به اینکه ابر همیشه ارزون‌تره — بار دائمی حساب دیگه‌ای داره.</p>
 </div>
 </div>
 
   <div class="fa"><ul>
-    <li><b>به‌سود کلاود:</b> راه‌اندازی سیستمی که بلد نیستی؛ بار کاری بسیار متغیر؛ سرعت حرکت و تمرکز تیم روی مسائل سطح بالاتر.</li>
-    <li><b>به‌سود خودمیزبانی:</b> تجربه عملیاتی داری و بار قابل پیش‌بینی است؛ کنترل کامل می‌خواهی (مثل <span class="ltr">high-frequency trading</span>)؛ می‌خواهی برای بار خاصت تیون کنی.</li>
+    <li><b>به نفع کلاود:</b> راه انداختن سیستمی که بلد نیستی؛ بار خیلی پرنوسان؛ سرعت و اینکه تیم بچسبه به مسئله‌های مهم‌تر.</li>
+    <li><b>به نفع خودمیزبانی:</b> تجربهٔ عملیات داری و بار قابل پیش‌بینیه؛ کنترل کامل می‌خوای (مثل <span class="ltr">high-frequency trading</span>)؛ می‌خوای برای بار خودت تیون کنی.</li>
   </ul></div>
   <div class="en"><ul>
-    <li><b>Cloud wins:</b> you can’t operate the system yourself; the workload is highly variable; you want speed and the team focused on higher-level problems.</li>
-    <li><b>Self-hosting wins:</b> you have operating experience and predictable load; you need full control (e.g. <span class="ltr">high-frequency trading</span>); you want to tune for your specific workload.</li>
+    <li><b>Cloud wins when:</b> you can’t run the thing yourself; the load swings like crazy; you want speed and your team glued to bigger problems.</li>
+    <li><b>Self-hosting wins when:</b> you’ve done ops before and the load is predictable; you need full control (think <span class="ltr">high-frequency trading</span>); you want to tune for YOUR exact workload.</li>
   </ul></div>
 
   <div class="callout warn">
     <div class="tag"><span class="fa">ریسک‌های بزرگ کلاود</span><span class="en">Big cloud risks</span></div>
     <div class="fa"><ul>
-      <li>کنترلی نداری: نبود قابلیت، قطعی سرویس، دشواری دیباگ.</li>
-      <li><span class="ltr">Vendor lock-in</span>: بدون API استاندارد، هزینه مهاجرت بالاست.</li>
-      <li>ریسک ژئوپلیتیک: تحریم یا تنش سیاسی می‌تواند دسترسی را قطع کند.</li>
-      <li>اعتماد به فروشنده برای امنیت داده؛ انطباق حریم خصوصی پیچیده‌تر می‌شود.</li>
+      <li>کنترلی نداری: قابلیت نیست، سرویس می‌خوابه، دیباگ عذابه.</li>
+      <li><span class="ltr">Vendor lock-in</span>: بدون API استاندارد، مهاجرت گرون تموم می‌شه — قفل شدی.</li>
+      <li>ریسک ژئوپلیتیک: تحریم یا دعوای سیاسی می‌تونه دسترسی رو قطع کنه — واقعیته.</li>
+      <li>امنیت داده رو سپردی دست فروشنده؛ حریم خصوصی هم پیچیده‌تر می‌شه.</li>
     </ul></div>
     <div class="en"><ul>
-      <li>No control: missing features, outages, hard debugging.</li>
-      <li><span class="ltr">Vendor lock-in</span>: without a standard API, migration is expensive.</li>
-      <li>Geopolitical risk: sanctions or tension can cut off access.</li>
-      <li>You trust the vendor with data security; privacy compliance gets harder.</li>
+      <li>No control: features go missing, outages happen, debugging hurts.</li>
+      <li><span class="ltr">Vendor lock-in</span>: no standard API means moving out costs a fortune — you’re stuck.</li>
+      <li>Geopolitics: sanctions or tension can literally unplug you.</li>
+      <li>You hand data security to the vendor; privacy compliance gets messier.</li>
     </ul></div>
   </div>
 
@@ -555,48 +555,48 @@
     <div class="fa">
 <div class="technical-example teacher-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی برای خواندنِ نمودار: سه راه ساخت جست‌وجو</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> نیاز محصول جست‌وجوی متن با غلط املایی و رتبه‌بندی است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تیم می‌تواند موتور بنویسد، موتور آماده را روی سرور خودش اجرا کند یا API مدیریت‌شده بخرد؛ در هر سه راه کیفیت نتایج باید با همان مجموعهٔ آزمون سنجیده شود.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> هزینهٔ توسعه، عملیات و وابستگی متفاوت است؛ خرید API به‌خودی‌خود کیفیت جست‌وجوی محصول را تضمین نمی‌کند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن محصولت جست‌وجوی متن می‌خواد که غلط املایی رو بفهمه و رتبه‌بندی هم بده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا سه راه داری: خودت موتور بنویسی، موتور آماده رو روی سرور خودت بالا بیاری، یا API مدیریت‌شده بخری. هر سه رو باید با یه مجموعه آزمون ثابت بسنجی.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هزینهٔ ساخت و عملیات و وابستگی‌شون فرق داره. پول دادن برای API یعنی کیفیت جست‌وجو تضمین شده؟ نه عزیز، خودت باید تست کنی.</p>
 </div>
 
-      <p>نوار سه‌تکه بالا طیف برون‌سپاری است: BESPOKE صورتی (خودت می‌نویسی و اجرا می‌کنی) ← SELF-HOSTED زرد (نرم‌افزار آماده روی سرور خودت) ← CLOUD سبز (مصرف از طریق API). زیرنویس‌ها جهت را می‌گویند: به‌سمت راست کنترل کم و راحتی زیاد می‌شود. قاعده سرانگشتی بالای تصویر: چیزی که مزیت رقابتی توست بساز، بقیه کالایی را بخر.</p>
-      <p>دو جعبه وسط شرط برد هر سمت را می‌گویند: کلاود وقتی می‌برد که بلد نیستی اجرایش کنی، بار پرنوسان است و سرعت مهم‌تر از کنترل است؛ خودمیزبانی وقتی که تجربه عملیاتی داری، بار قابل پیش‌بینی است و کنترل یا تیون خاص مزیت توست. نوار پایینی چهار ریسک کلاود است — نبود کنترل، قفل فروشنده، ژئوپلیتیک و اعتماد — و جمله طلایی عملیات: برنامه‌ریزی ظرفیت تبدیل به برنامه‌ریزی مالی می‌شود.</p>
+      <p>نوار سه‌تیکهٔ بالا رو بگیر: طیف برون‌سپاریه: BESPOKE صورتی (خودت می‌نویسی و اجرا می‌کنی) ← SELF-HOSTED زرد (نرم‌افزار آماده رو سرور خودت) ← CLOUD سبز (مصرف از طریق API). زیرنویس‌ها جهت رو می‌گن: هر چی راست‌تر، کنترل کمتر و راحتی بیشتر. قانون سرانگشتی بالای تصویر: چیزی که برگ برندهٔ توئه بساز، بقیهٔ جنس بازاری رو بخر.</p>
+      <p>دو تا جعبهٔ وسط شرط برد هر طرف رو می‌گن: کلاود وقتی می‌بره که بلد نیستی اجراش کنی، بار پرنوسانه و سرعت از کنترل مهم‌تره؛ خودمیزبانی وقتی که تجربهٔ عملیات داری، بار قابل پیش‌بینیه و کنترل یا تیون خاص برگ توئه. نوار پایینی چهار تا ریسک کلاوده — بی‌کنترلی، قفل فروشنده، ژئوپلیتیک و اعتماد — و جملهٔ طلایی عملیات: برنامه‌ریزی ظرفیت می‌شه برنامه‌ریزی مالی.</p>
     </div>
     <div class="en">
-      <p>The three-segment bar is the outsourcing spectrum: pink BESPOKE (you write it, you run it) → yellow SELF-HOSTED (packaged software on your servers) → green CLOUD (consume through an API). The captions give the direction: control decreases rightward, convenience grows. The rule of thumb on top: build what is your competitive edge, buy the commodity rest.</p>
-      <p>The two middle boxes state each side’s winning condition: cloud wins when you cannot operate the system, the workload swings, and speed beats control; self-hosting wins when you have ops experience, load is predictable, and control or special tuning is your edge. The bottom strip lists four cloud risks — no control, lock-in, geopolitics, trust — and the ops golden line: capacity planning becomes financial planning.</p>
+      <p>Top bar, three slices — that’s the outsourcing spectrum: pink BESPOKE (you write it, you run it) → yellow SELF-HOSTED (packaged stuff on your boxes) → green CLOUD (sip through an API). Captions show the direction: right means less control, more comfort. Golden rule on top: build your edge, buy the boring rest.</p>
+      <p>The two middle boxes call each side’s win condition: cloud wins when you can’t run it, load swings, speed beats control; self-hosting wins when you’ve got ops miles, load is predictable, control or special tuning is your edge. Bottom strip: four cloud risks — no control, lock-in, geopolitics, trust — plus the golden ops line: capacity planning becomes money planning.</p>
     </div>
   </div>
 
   <h3 id="s3-1"><span class="fa">Cloud Native و جدایی ذخیره‌سازی از محاسبه</span><span class="en">Cloud native and storage/compute disaggregation</span></h3>
   <div class="fa"><ul>
-    <li><b><span class="ltr">Cloud Native</span>:</b> معماری طراحی‌شده از پایه برای سرویس‌های ابری؛ نه فقط «نرم‌افزار قدیمی روی VM».</li>
-    <li><b>لایه‌بندی:</b> سرویس‌های سطح پایین مثل <span class="ltr">Object Storage</span> فایل‌های بزرگ را نگه می‌دارند؛ سرویس‌های بالاتر (مثل <span class="ltr">Snowflake</span>) روی آن‌ها ساخته می‌شوند.</li>
-    <li><b>جدایی (<span class="ltr">disaggregation</span>):</b> ذخیره در S3، محاسبه جای دیگر؛ پس دیسک محلی ماشین ابری دیگر «ماندگار» نیست — یک <b>کش موقت</b> است.</li>
-    <li><b>تله دیسک مجازی:</b> <span class="ltr">EBS</span> رفتار دیسک را روی شبکه شبیه می‌کند؛ هر I/O یک فراخوانی شبکه است.</li>
-    <li><b><span class="ltr">Multitenancy</span>:</b> سخت‌افزار مشترک بین مشتریان — بهره‌وری بالاتر، اما نیازمند جداسازی دقیق کارایی و امنیت.</li>
+    <li><b><span class="ltr">Cloud Native</span>:</b> معماری که از اول برای ابر طراحی شده؛ نه اینکه «نرم‌افزار قدیمی رو بندازی رو VM».</li>
+    <li><b>لایه‌بندی:</b> سرویس‌های کف مثل <span class="ltr">Object Storage</span> فایل‌های گنده رو نگه می‌دارن؛ سرویس‌های بالایی (مثل <span class="ltr">Snowflake</span>) رو همونا سوار می‌شن.</li>
+    <li><b>جدایی (<span class="ltr">disaggregation</span>):</b> ذخیره تو S3، حساب‌وکتاب یه جای دیگه؛ پس دیسک محلی ماشین ابری دیگه «ماندگار» نیست — یه <b>کش موقتیه</b>، دل نبند.</li>
+    <li><b>تله دیسک مجازی:</b> <span class="ltr">EBS</span> ادای دیسک رو رو شبکه درمیاره؛ هر I/O یه سفر شبکه‌ست.</li>
+    <li><b><span class="ltr">Multitenancy</span>:</b> سخت‌افزار مشترک بین مشتری‌ها — بازده بالاتر، ولی جداسازی تمیز کارایی و امنیت رو می‌خواد.</li>
   </ul></div>
   <div class="en"><ul>
-    <li><b><span class="ltr">Cloud native</span>:</b> architecture designed from the ground up for cloud services — not “legacy software on a VM”.</li>
-    <li><b>Layering:</b> low-level services like <span class="ltr">object storage</span> hold large files; higher services (e.g. <span class="ltr">Snowflake</span>) build on top.</li>
-    <li><b>Disaggregation:</b> storage in S3, compute elsewhere; so a cloud VM’s local disk is no longer “durable” — it is a <b>temporary cache</b>.</li>
-    <li><b>Virtual-disk trap:</b> <span class="ltr">EBS</span> emulates a disk over the network; every I/O is a network call.</li>
-    <li><b><span class="ltr">Multitenancy</span>:</b> hardware shared across customers — better utilization, but performance and security isolation must be engineered precisely.</li>
+    <li><b><span class="ltr">Cloud native</span>:</b> built for the cloud from day one — not “your grandpa’s app on a VM”.</li>
+    <li><b>Layering:</b> bottom-floor services like <span class="ltr">object storage</span> hold the big files; upstairs services (hi, <span class="ltr">Snowflake</span>) live on top of them.</li>
+    <li><b>Disaggregation:</b> storage in S3, brains elsewhere; so your cloud VM’s local disk isn’t “durable” anymore — it’s a <b>temp cache</b>, don’t fall in love with it.</li>
+    <li><b>Virtual-disk trap:</b> <span class="ltr">EBS</span> plays dress-up as a disk over the network; every I/O is a network trip.</li>
+    <li><b><span class="ltr">Multitenancy</span>:</b> shared hardware across customers — better bang per box, but you must nail performance and security isolation.</li>
   </ul></div>
 
   <div class="callout">
     <div class="tag"><span class="fa">عملیات در عصر کلاود</span><span class="en">Ops in the cloud era</span></div>
     <div class="fa">
-<p>جدا کردن ذخیره‌سازی از محاسبه یعنی داده در یک لایه بماند و تعداد پردازنده‌ها مستقل از آن تغییر کند. افزایش توان پردازش دیگر الزاماً به معنی جابه‌جایی همهٔ داده نیست.</p>
+<p>ایده‌ش ساده‌ست: جدا کردن ذخیره از محاسبه یعنی داده تو یه لایه بمونه و تعداد پردازنده‌ها جدا از اون کم‌وزیاد بشه. قوی‌تر شدن پردازش دیگه یعنی جابه‌جا کردن همهٔ داده‌ها؟ نه!</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-14">
 <p class="example-title"><b>مثال فنی: پردازش جدا از فایل‌ها</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> گزارش روی <code dir="ltr">10 TB</code> فایل فروش در مخزن مشترک اجرا می‌شود.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> برای گزارش آخر ماه ۲۰ worker فایل‌ها را تقسیم می‌کنند؛ پس از پایان خاموش می‌شوند و فایل‌ها باقی می‌مانند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> ظرفیت compute مستقل از حجم داده تغییر می‌کند؛ توان خواندن مخزن و انتقال شبکه هنوز می‌تواند گلوگاه باشد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن گزارشت روی <code dir="ltr">10 TB</code> فایل فروش خوابیده توی یه مخزن مشترک.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> سر آخر ماه ۲۰ تا worker میان فایل‌ها رو تقسیم می‌کنن، کار رو می‌کنن، بعد خاموش می‌شن. فایل‌ها سر جاشون می‌مونن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس compute رو مستقل از حجم داده کم و زیاد می‌کنی. فقط یادت باشه سرعت خوندن مخزن و شبکه هنوز می‌تونه گلوت رو بگیره.</p>
 </div>
 </div>
-    <div class="en"><p>The goal is unchanged (reliable service delivery) but the tools changed. The book’s golden line: <b>“capacity planning becomes financial planning, and performance optimization becomes cost optimization.”</b></p></div>
+    <div class="en"><p>Same goal as ever (keep the service humming), brand-new toolbox. The book’s golden line: <b>“capacity planning becomes money planning, and speed tuning becomes cost tuning.”</b></p></div>
   </div>
 
   <h3 id="s3-2"><span class="fa">نمودار ۳ — معماری Cloud Native</span><span class="en">Diagram 3 — cloud-native architecture</span></h3>
@@ -612,12 +612,12 @@
     <div class="fa">
 <div class="technical-example teacher-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی برای خواندنِ نمودار: پردازش جدا از فایل‌ها</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> گزارش روی <code dir="ltr">10 TB</code> فایل فروش در مخزن مشترک اجرا می‌شود.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> برای گزارش آخر ماه ۲۰ worker فایل‌ها را تقسیم می‌کنند؛ پس از پایان خاموش می‌شوند و فایل‌ها باقی می‌مانند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> ظرفیت compute مستقل از حجم داده تغییر می‌کند؛ توان خواندن مخزن و انتقال شبکه هنوز می‌تواند گلوگاه باشد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن گزارشت روی <code dir="ltr">10 TB</code> فایل فروش خوابیده توی یه مخزن مشترک.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> سر آخر ماه ۲۰ تا worker میان فایل‌ها رو تقسیم می‌کنن، کار رو می‌کنن، بعد خاموش می‌شن. فایل‌ها سر جاشون می‌مونن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس compute رو مستقل از حجم داده کم و زیاد می‌کنی. فقط یادت باشه سرعت خوندن مخزن و شبکه هنوز می‌تونه گلوت رو بگیره.</p>
 </div>
-<p>بیشتر اجزا داخل قاب بزرگ <span class="ltr">Cloud Region: multitenant shared hardware</span> نشسته‌اند. از بیرون: <span class="ltr">Clients</span> ← <span class="ltr">Data Service API</span> (لایه بی‌حالت با صورتحساب مصرفی) ← <span class="ltr">Elastic Compute</span> (ارتجاعی، <span class="ltr">ephemeral</span>). بالای محاسبه، <span class="ltr">Local Disk</span> فقط «بلوک‌های داغ» را کش می‌کند و با خرابی می‌میرد — هرگز جای ماندگاری نیست. سمت راست دو مقصد ماندگارند: <span class="ltr">Object Storage</span> برای بلوک‌های بزرگ (<span class="ltr">durable</span>) و <span class="ltr">Metadata Service</span> برای مقادیر کوچک (<span class="ltr">low latency</span>). فلش چین‌چین پایینی (<span class="ltr">legacy path</span>) به <span class="ltr">Virtual Disk</span> همان جایگزین قدیمی است. درس: محاسبه گذراست، داده ماندگار است، و می‌توانی بدون دست زدن به داده محاسبه را بالا و پایین ببری.</p></div>
-    <div class="en"><p>Most components sit inside the large <span class="ltr">Cloud Region: multitenant shared hardware</span> frame. From outside: <span class="ltr">Clients</span> → <span class="ltr">Data Service API</span> (a stateless tier with metered billing) → <span class="ltr">Elastic Compute</span> (elastic, <span class="ltr">ephemeral</span>). Above compute, the <span class="ltr">Local Disk</span> caches only “hot blocks” and dies with failure — never the place of durability. On the right sit the two durable destinations: <span class="ltr">Object Storage</span> for large blocks (<span class="ltr">durable</span>) and a <span class="ltr">Metadata Service</span> for small values (<span class="ltr">low latency</span>). The dashed arrow at the bottom (<span class="ltr">legacy path</span>) to the <span class="ltr">Virtual Disk</span> is the old alternative. The lesson: compute is transient, data is durable, and you can scale compute up and down without touching the data.</p></div>
+<p>تو این نمودار بیشتر اجزا تو قاب بزرگ <span class="ltr">Cloud Region: multitenant shared hardware</span> نشستن. از بیرون: <span class="ltr">Clients</span> ← <span class="ltr">Data Service API</span> (لایهٔ بی‌حالت با قبض مصرفی) ← <span class="ltr">Elastic Compute</span> (کشسان، <span class="ltr">ephemeral</span>). بالای محاسبه، <span class="ltr">Local Disk</span> فقط «بلوک‌های داغ» رو کش می‌کنه و با خرابی می‌میره — هرگز خونهٔ ماندگاری نیست. سمت راست دو تا مقصد ماندگارن: <span class="ltr">Object Storage</span> برای بلوک‌های گنده (<span class="ltr">durable</span>) و <span class="ltr">Metadata Service</span> برای چیزهای کوچیک (<span class="ltr">low latency</span>). فلش چین‌چین پایینی (<span class="ltr">legacy path</span>) به <span class="ltr">Virtual Disk</span> همون راه قدیمیه. درسش: محاسبه مهمونه، داده صاحب‌خونه‌ست، و می‌تونی بدون دست زدن به داده محاسبه رو کم‌وزیاد کنی.</p></div>
+    <div class="en"><p>Most boxes live inside the big <span class="ltr">Cloud Region: multitenant shared hardware</span> frame. From outside: <span class="ltr">Clients</span> → <span class="ltr">Data Service API</span> (stateless tier, pay-per-sip) → <span class="ltr">Elastic Compute</span> (stretchy, <span class="ltr">ephemeral</span>). Above compute, the <span class="ltr">Local Disk</span> only caches “hot blocks” and dies with the machine — never trust it with anything precious. Right side holds the two durable homes: <span class="ltr">Object Storage</span> for big blocks (<span class="ltr">durable</span>) and a <span class="ltr">Metadata Service</span> for tiny values (<span class="ltr">low latency</span>). The dashed arrow at the bottom (<span class="ltr">legacy path</span>) to the <span class="ltr">Virtual Disk</span> is the old road. Lesson: compute is a guest, data owns the house — scale brains up and down without touching the data.</p></div>
   </div>
 </section>
 
@@ -628,80 +628,80 @@
   <div class="callout">
     <div class="tag"><span class="fa">ایده کلیدی</span><span class="en">Key idea</span></div>
     <div class="fa">
-<p>روی یک ماشین، هماهنگی ساده‌تر است؛ روی چند ماشین، می‌توان ظرفیت و تحمل خرابی بیشتری ساخت، اما شبکه و هماهنگی به مسئله اضافه می‌شوند.</p>
+<p>قانون اول: رو یه ماشین همه‌چی ساده‌ست؛ رو چند تا ماشین می‌تونی ظرفیت و تحمل خرابی بیشتری بسازی، ولی شبکه و هماهنگی هم می‌پرن وسط معرکه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-15">
 <p class="example-title"><b>مثال فنی: آیا یک ماشین کافی است؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> دادهٔ فعال <code dir="ltr">80 GB</code> است و در حافظهٔ سرور <code dir="ltr">128 GB</code> جا می‌گیرد؛ آزمون بار هم هدف پاسخ را تأمین می‌کند.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> افزودن شارد، مسیریابی و هماهنگی را وارد مسیر می‌کند، بی‌آنکه هنوز کمبود ظرفیت اثبات شده باشد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> فعلاً همان ماشین ساده‌تر است؛ replica برای تحمل خرابی می‌تواند نیاز جداگانه‌ای باشد، حتی وقتی sharding لازم نیست.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دادهٔ فعالت <code dir="ltr">80 GB</code> ـه و راحت توی سرور <code dir="ltr">128 GB</code> جا می‌شه؛ تست بار هم می‌گه جواب می‌ده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا اگه شارد اضافه کنی، مسیریابی و هماهنگی میاد توی مسیر — بدون اینکه هنوز ثابت شده باشه ظرفیت کم داری.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس فعلاً همون یه ماشین ساده‌تر و ارزون‌تره. replica برای تحمل خرابی یه نیاز جداست؛ با sharding قاطیش نکن.</p>
 </div>
 </div>
-    <div class="en"><p><b>Don’t rush.</b> Doing the job on one machine is usually far simpler and cheaper. With single-node databases like <span class="ltr">DuckDB</span>, <span class="ltr">SQLite</span> and <span class="ltr">KùzuDB</span>, many workloads fit on one node.</p></div>
+    <div class="en"><p><b>Don’t rush, friend.</b> One machine is usually way simpler and cheaper. With single-node beasts like <span class="ltr">DuckDB</span>, <span class="ltr">SQLite</span> and <span class="ltr">KùzuDB</span>, tons of workloads fit on one box.</p></div>
   </div>
 
   <h3><span class="fa">چرا اصلاً توزیع کنیم؟ (دلایل واقعی)</span><span class="en">Why distribute at all? (real reasons)</span></h3>
 <div class="fa">
-<p>توزیع کردن باید مسئلهٔ مشخصی را حل کند: کمبود ظرفیت، نیاز به ادامهٔ کار هنگام خرابی یا نزدیک کردن داده به کاربران. هر دلیل، طراحی متفاوتی می‌خواهد.</p>
+<p>توزیع کردن باید یه درد مشخص رو دوا کنه: جا کم آوردی، می‌خوای موقع خرابی سرپا بمونی، یا می‌خوای داده رو ببری نزدیک کاربر. هر درد، نسخهٔ خودش رو می‌خواد.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-16">
 <p class="example-title"><b>مثال فنی: توزیع برای حل یک محدودیت مشخص</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> آرشیو <code dir="ltr">40 TB</code> است و هر سرور فقط <code dir="ltr">10 TB</code> فضای قابل‌استفاده دارد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کلیدها بین چند shard تقسیم می‌شوند و برای هر shard نسخهٔ پشتیبانِ زنده در نظر گرفته می‌شود.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> sharding ظرفیت را زیاد می‌کند و replication تحمل خرابی را؛ این دو وظیفه را نباید با هم اشتباه گرفت.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن آرشیوت <code dir="ltr">40 TB</code> ـه، ولی هر سرور فقط <code dir="ltr">10 TB</code> جا داره. جا نمی‌شه، خب؟</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا کلیدها رو پخش می‌کنی بین چند shard، بعد برای هر shard یه نسخهٔ پشتیبان زنده هم می‌ذاری.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس sharding ظرفیت رو زیاد می‌کنه، replication تحمل خرابی رو. دو تا کار جدا — قاطی‌شون نکن که تو مصاحبه لو می‌ری.</p>
 </div>
 </div>
 
   <div class="fa"><ul>
-    <li><b>توزیع ذاتی:</b> تعامل دو کاربر با دستگاه متفاوت ناگزیر از شبکه می‌گذرد.</li>
-    <li><b>تحمل خرابی / دسترس‌پذیری:</b> افتادن یک ماشین نباید سرویس را بخواباند.</li>
-    <li><b>مقیاس‌پذیری:</b> حجم یا محاسبه از ظرفیت یک ماشین بیشتر شود.</li>
-    <li><b>تأخیر:</b> کاربران جهانی ← سرور نزدیک هر کاربر.</li>
-    <li><b>ارتجاع:</b> پرداخت فقط به‌ازای منابع مصرفی در اوج و فرود بار.</li>
-    <li><b>سخت‌افزار تخصصی، انطباق قانونی (data residency) و پایداری انرژی.</b></li>
+    <li><b>توزیع ذاتی:</b> دو تا کاربر با دو تا گوشی بخوان حرف بزنن، راهی جز شبکه نیست.</li>
+    <li><b>تحمل خرابی / دسترس‌پذیری:</b> یه ماشین افتاد، سرویس نباید بخوابه.</li>
+    <li><b>مقیاس‌پذیری:</b> حجم یا حساب از زور یه ماشین بیشتر بشه.</li>
+    <li><b>تأخیر:</b> کاربر جهانی داری ← سرور ببر نزدیک هر کاربر.</li>
+    <li><b>ارتجاع:</b> فقط پول همون چیزی رو بده که مصرف کردی، تو اوج و فرود بار.</li>
+    <li><b>سخت‌افزار خاص، قانون محل داده (data residency) و انرژی — اینا هم هستن.</b></li>
   </ul></div>
   <div class="en"><ul>
-    <li><b>Inherent distribution:</b> two users on different devices must communicate over a network.</li>
-    <li><b>Fault tolerance / availability:</b> losing one machine must not stop the service.</li>
-    <li><b>Scalability:</b> volume or compute outgrows one machine.</li>
-    <li><b>Latency:</b> global users → a server near each user.</li>
-    <li><b>Elasticity:</b> paying only for consumed resources through peaks and troughs.</li>
-    <li><b>Specialized hardware, legal data residency, and energy sustainability.</b></li>
+    <li><b>Inherent distribution:</b> two users on two phones have no choice but the network.</li>
+    <li><b>Fault tolerance / availability:</b> one box dies, the service stays up.</li>
+    <li><b>Scalability:</b> data or math outgrows one box.</li>
+    <li><b>Latency:</b> worldwide users → park a server next to each one.</li>
+    <li><b>Elasticity:</b> pay only for what you burn, peaks and valleys alike.</li>
+    <li><b>Exotic hardware, data-residency laws, green energy — the bonus round.</b></li>
   </ul></div>
 
   <h3 id="s4-1"><span class="fa">هزینه‌های توزیع + میکروسرویس و Serverless</span><span class="en">Costs of distribution + microservices and serverless</span></h3>
 <div class="fa">
-<p>با جدا کردن سرویس‌ها، هر درخواست ممکن است از چند اتصال شبکه عبور کند. باید تأخیر، خطا، تکرار درخواست و هزینهٔ اجرای هر بخش را هم حساب کنیم.</p>
+<p>حالا که سرویس‌ها رو جدا کردی، هر درخواست ممکنه از چند تا سیم شبکه رد بشه. تأخیر و خطا و تکرار و خرج اجرای هر تیکه رو هم باید حساب کنی — مفت نیست.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-17">
 <p class="example-title"><b>مثال فنی: ثبت موفق، پاسخ گم‌شده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویس سفارش درخواست <code dir="ltr">r7</code> را ثبت می‌کند، اما پاسخ در شبکه گم می‌شود.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کلاینت همان <code dir="ltr">r7</code> را دوباره می‌فرستد؛ قید یکتایی روی شناسهٔ درخواست اجازهٔ سفارش دوم نمی‌دهد و نتیجهٔ قبلی برمی‌گردد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> timeout شکست قطعی عملیات نیست؛ تولید شناسهٔ تازه در هر retry می‌تواند دو سفارش واقعی بسازد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سرویس سفارش درخواست <code dir="ltr">r7</code> رو ثبت کرده، ولی جواب توی شبکه گم شده. استرس نگیر.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کلاینت همون <code dir="ltr">r7</code> رو دوباره می‌فرسته؛ قید یکتایی روی شناسهٔ درخواست نمی‌ذاره سفارش دوم ساخته بشه و نتیجهٔ قبلی برمی‌گرده.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس timeout یعنی «نمی‌دونم چی شد»، نه «انجام نشد». اگه هر retry یه شناسهٔ تازه بسازه، یهو دو تا سفارش واقعی داری — این دام معروفه.</p>
 </div>
 </div>
 
   <div class="fa"><ul>
-    <li>هر درخواست شبکه ممکن است <b>timeout</b> بخورد؛ نمی‌دانی سرویس درخواست را گرفته یا نه و «تکرار کورکورانه» ممکن است ناامن باشد (فصل ۹).</li>
-    <li>فراخوانی شبکه به‌مراتب کندتر از فراخوانی تابع در همان فرآیند است؛ گاهی جابه‌جایی «محاسبه» به سمت داده سریع‌تر است. بیشتر گره ≠ سریع‌تر.</li>
-    <li>دیباگ سخت می‌شود ← <b>Observability</b>: متریک، لاگ و ردیابی با <span class="ltr">OpenTelemetry</span>، <span class="ltr">Zipkin</span>، <span class="ltr">Jaeger</span>.</li>
-    <li>وقتی هر سرویس پایگاه داده خودش را دارد، <b>سازگاری داده بین سرویس‌ها مشکل خود برنامه</b> می‌شود.</li>
+    <li>هر درخواست شبکه ممکنه <b>timeout</b> بخوره؛ نمی‌دونی سرویس گرفته یا نه، و «تکرار کورکورانه» ممکنه خطرناک باشه (فصل ۹).</li>
+    <li>صدا زدن شبکه خیلی کندتر از صدا زدن تابع تو همون فرآینده؛ گاهی بردن «محاسبه» سمت داده تندتره. گرهٔ بیشتر ≠ سرعت بیشتر — حفظ کن.</li>
+    <li>دیباگ سخت می‌شه ← <b>Observability</b>: متریک و لاگ و ردیابی با <span class="ltr">OpenTelemetry</span> و <span class="ltr">Zipkin</span> و <span class="ltr">Jaeger</span> — چراغ‌قوه‌ته.</li>
+    <li>وقتی هر سرویس دیتابیس خودش رو داره، <b>جور کردن داده بین سرویس‌ها می‌افته گردن خود برنامه</b> — کسی دیگه نیست.</li>
   </ul></div>
   <div class="en"><ul>
-    <li>Every network request can <b>time out</b>; you don’t know if the service got it, and blind retries may be unsafe (Chapter 9).</li>
-    <li>A network call is far slower than an in-process function call; sometimes moving compute to the data is faster. More nodes ≠ faster.</li>
-    <li>Debugging gets hard → <b>observability</b>: metrics, logs and tracing with <span class="ltr">OpenTelemetry</span>, <span class="ltr">Zipkin</span>, <span class="ltr">Jaeger</span>.</li>
-    <li>When each service owns its database, <b>cross-service data consistency becomes the application’s own problem</b>.</li>
+    <li>Every network call can <b>time out</b>; did the service get it? Who knows. And blind retries can bite you (Chapter 9).</li>
+    <li>Network calls crawl next to in-process calls; sometimes you drag the math to the data instead. More boxes ≠ faster — tattoo that.</li>
+    <li>Debugging gets painful → <b>observability</b> is your flashlight: metrics, logs, tracing with <span class="ltr">OpenTelemetry</span>, <span class="ltr">Zipkin</span>, <span class="ltr">Jaeger</span>.</li>
+    <li>When every service owns its database, keeping data straight across services is <b>YOUR app’s problem</b> now — nobody else’s.</li>
   </ul></div>
 
   <div class="callout">
     <div class="tag"><span class="fa">میکروسرویس و Serverless در یک نگاه</span><span class="en">Microservices and serverless at a glance</span></div>
     <div class="fa"><ul>
-      <li><b>میکروسرویس:</b> هر سرویس یک هدف، یک API و یک تیم؛ معمولاً هر سرویس <b>پایگاه داده خودش</b> را دارد. مزیت: به‌روزرسانی مستقل. هزینه: تست، استقرار، مانیتورینگ و تکامل API.</li>
-      <li>نکته طلایی: «میکروسرویس راه‌حل فنی برای یک <b>مسئله انسانی</b> است» — در شرکت کوچک سربار بی‌دلیل است.</li>
-      <li><b>Serverless / FaaS:</b> پرداخت به‌ازای اجرا؛ اما محدودیت زمان تابع، محیط محدود و <span class="ltr">cold start</span>.</li>
+      <li><b>میکروسرویس:</b> هر سرویس یه هدف، یه API و یه تیم؛ معمولاً هر سرویس <b>دیتابیس خودش</b> رو داره. سود: آپدیت مستقل. خرج: تست و استقرار و مانیتورینگ و عوض شدن API.</li>
+      <li>حرف طلایی: «میکروسرویس جواب فنی به یه <b>مسئلهٔ انسانیه</b>» — تو شرکت کوچیک فقط خرج اضافه‌ست.</li>
+      <li><b>Serverless / FaaS:</b> فقط پول اجرایی که کردی؛ ولی سقف زمان تابع و محیط تنگ و <span class="ltr">cold start</span> هم هست.</li>
     </ul></div>
     <div class="en"><ul>
-      <li><b>Microservices:</b> one goal, one API and one team per service; usually each service owns <b>its database</b>. Benefit: independent deploys. Cost: testing, deployment, monitoring and API evolution.</li>
-      <li>Golden line: “microservices are a technical solution to a <b>human problem</b>” — in a small company they are needless overhead.</li>
-      <li><b>Serverless / FaaS:</b> pay per execution; but function time limits, constrained runtimes and <span class="ltr">cold starts</span>.</li>
+      <li><b>Microservices:</b> one goal, one API, one team per service; usually each owns <b>its database</b>. Win: ship independently. Bill: testing, deploys, monitoring, APIs that keep changing.</li>
+      <li>Golden line: “microservices fix a people problem with tech” — in a tiny company that’s just dead weight.</li>
+      <li><b>Serverless / FaaS:</b> pay per run; but ticking clocks, tiny sandboxes and <span class="ltr">cold starts</span>.</li>
     </ul></div>
   </div>
 
@@ -718,18 +718,18 @@
     <div class="fa">
 <div class="technical-example teacher-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی برای خواندنِ نمودار: توزیع برای حل یک محدودیت مشخص</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> آرشیو <code dir="ltr">40 TB</code> است و هر سرور فقط <code dir="ltr">10 TB</code> فضای قابل‌استفاده دارد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کلیدها بین چند shard تقسیم می‌شوند و برای هر shard نسخهٔ پشتیبانِ زنده در نظر گرفته می‌شود.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> sharding ظرفیت را زیاد می‌کند و replication تحمل خرابی را؛ این دو وظیفه را نباید با هم اشتباه گرفت.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن آرشیوت <code dir="ltr">40 TB</code> ـه، ولی هر سرور فقط <code dir="ltr">10 TB</code> جا داره. جا نمی‌شه، خب؟</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا کلیدها رو پخش می‌کنی بین چند shard، بعد برای هر shard یه نسخهٔ پشتیبان زنده هم می‌ذاری.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس sharding ظرفیت رو زیاد می‌کنه، replication تحمل خرابی رو. دو تا کار جدا — قاطی‌شون نکن که تو مصاحبه لو می‌ری.</p>
 </div>
-<p>از <span class="ltr">New Service</span> شروع کن و با فلش <span class="ltr">start here</span> به <span class="ltr">Single Node First</span> برو (<span class="ltr">Postgres, DuckDB, SQLite</span> — ساده‌تر و ارزان‌تر). با رشد، به تصمیم <span class="ltr">Limit Reached?</span> می‌رسی (حجم، نرخ درخواست، تأخیر): اگر نه ← <span class="ltr">Stay Single-Node</span> (مقیاس عمودی و تیون کوئری)؛ اگر بله ← <span class="ltr">Name the Driver</span> (دسترس‌پذیری، مقیاس، تأخیر، قانون) و بعد <span class="ltr">Distribute</span> با حداقل دامنه لازم. ناحیه آخر قیمت کار است: توزیع حالت‌های شکست تازه می‌آورد (<span class="ltr">timeout, retries</span>) و باید بودجه مقابله بگذاری — <span class="ltr">idempotency</span> و ردیابی — که هرگز رایگان نیست. قاعده: اول تک‌ماشین، بعد توزیع حداقلی، فقط با اسم‌آوردن دلیل.</p></div>
-    <div class="en"><p>Start at <span class="ltr">New Service</span> and follow <span class="ltr">start here</span> to <span class="ltr">Single Node First</span> (<span class="ltr">Postgres, DuckDB, SQLite</span> — simpler and cheaper). As you grow you hit the <span class="ltr">Limit Reached?</span> decision (volume, QPS, latency): if no → <span class="ltr">Stay Single-Node</span> (scale up, tune queries); if yes → <span class="ltr">Name the Driver</span> (availability, scale, latency, legal) and then <span class="ltr">Distribute</span> with the minimal necessary scope. The last zone shows the price: distribution introduces new failure modes (<span class="ltr">timeout, retries</span>) and you must budget mitigation — <span class="ltr">idempotency</span> and tracing — which is never free. The rule: single-node first, then minimal distribution, only with a named reason.</p></div>
+<p>از <span class="ltr">New Service</span> شروع کن و با فلش <span class="ltr">start here</span> برو به <span class="ltr">Single Node First</span> (<span class="ltr">Postgres, DuckDB, SQLite</span> — ساده‌تر و ارزون‌تر). با رشد می‌رسی به دو راهی <span class="ltr">Limit Reached?</span> (حجم، نرخ درخواست، تأخیر): نه ← <span class="ltr">Stay Single-Node</span> (بزرگ‌ترش کن، کوئری رو تیون کن)؛ آره ← <span class="ltr">Name the Driver</span> (دسترس‌پذیری، مقیاس، تأخیر، قانون) و بعد <span class="ltr">Distribute</span> با کمترین دامنهٔ لازم. ناحیهٔ آخر قبض کاره: توزیع خرابی‌های تازه میاره (<span class="ltr">timeout, retries</span>) و باید بودجهٔ مقابله بذاری — <span class="ltr">idempotency</span> و ردیابی — که هیچ‌وقت مفت نیست. قانون: اول تک‌ماشین، بعد حداقل توزیع، فقط با گفتن دلیل.</p></div>
+    <div class="en"><p>Start at <span class="ltr">New Service</span>, follow <span class="ltr">start here</span> to <span class="ltr">Single Node First</span> (<span class="ltr">Postgres, DuckDB, SQLite</span> — simpler, cheaper). Growing up you hit <span class="ltr">Limit Reached?</span> (volume, QPS, latency): nope → <span class="ltr">Stay Single-Node</span> (beef it up, tune queries); yep → <span class="ltr">Name the Driver</span> (availability, scale, latency, legal), then <span class="ltr">Distribute</span> with the tiniest scope that works. Last zone is the bill: distribution ships fresh failure modes (<span class="ltr">timeout, retries</span>) and you must budget the antidote — <span class="ltr">idempotency</span> and tracing — never free. The rule: single box first, minimal spreading, always with a named reason.</p></div>
   </div>
 
   <div class="callout">
     <div class="tag"><span class="fa">نکته مصاحبه</span><span class="en">Interview tip</span></div>
-    <div class="fa"><p>وقتی از «retry» حرف می‌زنی، حتماً کلمه <b><span class="ltr">idempotency</span></b> را بیاور: تکرار یک درخواست ناموفق شبکه می‌تواند یعنی «دو بار کسر شد». کلید idempotent پاسخ مهندسی به همین محدودیت ذاتی سیستم توزیع‌شده است.</p></div>
-    <div class="en"><p>When you mention “retry”, always bring the word <b><span class="ltr">idempotency</span></b>: repeating a failed network request can mean “charged twice”. The idempotent key is the engineering answer to this inherent distributed-systems limit.</p></div>
+    <div class="fa"><p>یه ترفند مصاحبه‌ای: وقتی از «retry» حرف می‌زنی، حتماً کلمهٔ <b><span class="ltr">idempotency</span></b> رو بیار: تکرار یه درخواست شبکه که خراب شده می‌تونه یعنی «دو بار پول کم شد». کلید idempotent جواب مهندسی به همین محدودیت ذاتی سیستم پخشه — ورد جادوییه.</p></div>
+    <div class="en"><p>Say “retry” in an interview, and you’d better say <b><span class="ltr">idempotency</span></b> in the same breath: re-sending a failed request can mean “charged twice”. The idempotent key is engineering’s answer to that built-in distributed headache — it’s the magic word.</p></div>
   </div>
 </section>
 
@@ -739,29 +739,29 @@
   <div class="callout">
     <div class="tag"><span class="fa">ایده کلیدی</span><span class="en">Key idea</span></div>
     <div class="fa">
-<p>معماری داده فقط موضوع سرعت و ظرفیت نیست؛ باید روشن باشد چه اطلاعاتی جمع می‌شود، چه کسی آن را می‌بیند و چگونه حذف یا اصلاح می‌شود.</p>
+<p>راستش معماری داده فقط سرعت و ظرفیت نیست؛ باید روشن باشه چی جمع می‌شه، کی می‌بینه‌ش و چطور پاک یا اصلاح می‌شه — آدم‌ها هم تو معادلن.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch1-18">
 <p class="example-title"><b>مثال فنی: حذف در چند نسخه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> دادهٔ مشتری <code dir="ltr">17</code> در مرجع، ایندکس و فایل خروجی گزارش کپی شده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> جریان حذف با همین شناسه مقصدها را دنبال می‌کند؛ وضعیت حذف، زمان نگهداری و محدودیت backup نیز ثبت می‌شوند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> حذف یک ردیف به‌معنی حذف همهٔ کپی‌ها نیست؛ دامنه و الزام نگهداری باید برای همین کاربرد بررسی شود.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دادهٔ مشتری <code dir="ltr">17</code> هم توی مرجع هست، هم توی ایندکس، هم توی فایل گزارش. سه‌جا پخشه.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا جریان حذف با همون شناسه می‌ره سراغ همهٔ مقصدها. وضعیت حذف و زمان نگهداری و محدودیت backup هم ثبت می‌شه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس پاک کردن یه ردیف یعنی همهٔ کپی‌ها پاک شدن؟ نه! دامنهٔ حذف و قانون نگهداری رو برای همون کاربرد چک کن؛ restore هم می‌تونه مرده رو زنده کنه.</p>
 </div>
 </div>
-    <div class="en"><p>Architecture is not shaped by technical goals alone; <b>users’ rights</b> enter the equation too.</p></div>
+    <div class="en"><p>Tech goals don’t shape architecture alone, friend; real humans’ <b>rights</b> sit at the table too.</p></div>
   </div>
   <div class="fa"><ul>
-    <li><b>GDPR</b> (از ۲۰۱۸)، <b>CCPA</b> و <b>EU AI Act</b>: حقوقی مثل «حق فراموش شدن» (<span class="ltr">right to be forgotten</span>).</li>
-    <li><b>چالش فنی:</b> حذف داده از میان فایل <span class="ltr">append-only</span> غیرقابل‌تغییر، و از داده‌های مشتق‌شده مثل داده آموزش مدل ML؟</li>
-    <li><b>انطباق مبهم است:</b> مقررات اصول سطح‌بالای تفسیرپذیر می‌دهند، نه تکنولوژی خاص.</li>
-    <li><b>Data Minimization</b> (<span class="ltr">Datensparsamkeit</span>): در برابر فلسفه «big data» که می‌گوید همه‌چیز را نگه دار. هزینه نگهداری فقط قبض S3 نیست: ریسک نشت، آبرو، جریمه و هزینه حقوقی هم هست.</li>
-    <li>در پرداخت: <b>PCI</b> برای کارت و <b>SOC 2</b> برای فروشندگان نرم‌افزار — با ممیزی‌های دوره‌ای مستقل.</li>
+    <li><b>GDPR</b> (از ۲۰۱۸) و <b>CCPA</b> و <b>EU AI Act</b>: حق‌هایی مثل «حق فراموش شدن» (<span class="ltr">right to be forgotten</span>) — کاربر می‌تونه بگه منو یادت بره.</li>
+    <li><b>درد فنی:</b> پاک کردن داده از وسط فایل <span class="ltr">append-only</span> که نمی‌شه عوضش کرد، و از دادهٔ مشتق‌شده مثل دادهٔ آموزش مدل ML؟ سخته!</li>
+    <li><b>انطباق گنگه:</b> قانون حرف‌های کلی می‌زنه که هرکی یه جور می‌فهمه، تکنولوژی خاص نمی‌گه.</li>
+    <li><b>Data Minimization</b> (<span class="ltr">Datensparsamkeit</span>): روبه‌روی فلسفهٔ «big data» که می‌گه همه‌چی رو نگه دار. خرج نگه‌داشتن فقط قبض S3 نیست: ریسک لو رفتن و آبرو و جریمه و خرج وکیل هم هست.</li>
+    <li>تو پرداخت: <b>PCI</b> برای کارت و <b>SOC 2</b> برای فروشندهٔ نرم‌افزار — با ممیزی مستقل دوره‌ای.</li>
   </ul></div>
   <div class="en"><ul>
-    <li><b>GDPR</b> (since 2018), <b>CCPA</b> and the <b>EU AI Act</b>: rights such as the <span class="ltr">right to be forgotten</span>.</li>
-    <li><b>Technical challenge:</b> deleting data from the middle of an immutable <span class="ltr">append-only</span> file — and from derived data like ML training sets?</li>
-    <li><b>Compliance is vague:</b> regulations give interpretable high-level principles, not specific technology.</li>
-    <li><b>Data minimization</b> (<span class="ltr">Datensparsamkeit</span>) vs the “big data” philosophy of keeping everything. Retention cost isn’t just the S3 bill: breach risk, reputation, fines and legal cost count too.</li>
-    <li>In payments: <b>PCI</b> for cards and <b>SOC 2</b> for software vendors — with periodic independent audits.</li>
+    <li><b>GDPR</b> (since 2018), <b>CCPA</b>, <b>EU AI Act</b>: rights like the <span class="ltr">right to be forgotten</span> — the user can tell you “forget me”.</li>
+    <li><b>Nasty puzzle:</b> deleting from the middle of an immutable <span class="ltr">append-only</span> file — plus derived stuff like ML training sets?</li>
+    <li><b>Compliance is foggy:</b> laws speak in big vague principles, never in specific tech.</li>
+    <li><b>Data minimization</b> (<span class="ltr">Datensparsamkeit</span>) vs the “big data” hoard-everything religion. Keeping data costs way more than the S3 bill: leaks, reputation, fines, lawyers.</li>
+    <li>In payments: <b>PCI</b> for cards, <b>SOC 2</b> for software sellers — with outside audits on a schedule.</li>
   </ul></div>
 
   <div class="diagram">
@@ -776,17 +776,17 @@
     <div class="fa">
 <div class="technical-example teacher-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی برای خواندنِ نمودار: مسیر یک سفارش در سه مخزن</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سفارش <code dir="ltr">id=42</code> با مبلغ <code dir="ltr">500</code> در PostgreSQL ثبت شده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> رویداد تغییر، نسخهٔ نمایش را در Redis و سند جست‌وجو را در ایندکس به‌روز می‌کند. گزارش شبانه مبلغ را جمع می‌زند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> خرابی Redis سفارش را حذف نمی‌کند؛ کش از مرجع بازسازی می‌شود. تأخیر انتقال می‌تواند نمایش را موقتاً قدیمی کند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سفارش <code dir="ltr">id=42</code> با مبلغ <code dir="ltr">500</code> تازه توی PostgreSQL نشسته. همین مرجع اصلیه.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا خبرش پخش می‌شه: یه کپی می‌ره توی Redis تا نمایش سریع بشه، یه کپی هم می‌ره توی ایندکس جست‌وجو. آخر شب هم گزارش فروش همین مبلغ رو جمع می‌زنه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> حالا اگه Redis بترکه چی؟ هیچی — سفارش سر جاشه و کش رو از نو می‌سازیم. فقط یادت باشه تا خبر برسه، ممکنه چند ثانیه عدد قدیمی ببینی؛ طبیعیه.</p>
 </div>
 
-      <p>مرکز نقشه تز فصل است: راه‌حل نیست، فقط تریدآف است. سه یال بالا دنیای داده‌اند: OLTP در برابر OLAP (داده کجا ساخته و کجا تحلیل می‌شود)، مرجع در برابر مشتق‌شده (حقیقت کجاست و کپی‌ها چگونه به‌روز می‌مانند) و انبار در برابر دریاچه (تحلیل روی کپی پاک‌شده یا فایل خام).</p>
-      <p>سه یال پایین تصمیم‌های معماری‌اند: کلاود در برابر خودمیزبانی (بساز یا بخر)، تک‌ماشین در برابر توزیع‌شده (اول تک‌ماشین، توزیع فقط با دلیل نام‌برده) و داده در برابر قانون (حق فراموش شدن و کمینه‌سازی در برابر نگه‌داشتن همه‌چیز). هر فلش یک سوال می‌پرسد و هر جواب قیمتش را می‌گوید — همین «به چه قیمتی» جواب مصاحبه‌ای توست.</p>
+      <p>وسط نقشه رو بگیر: تز فصل اینه: راه‌حل نیست، فقط تریدآفه. سه تا یال بالا دنیای داده‌ان: OLTP در برابر OLAP (داده کجا ساخته و کجا تحلیل می‌شه)، مرجع در برابر مشتق (حقیقت کجاست و کپی‌ها چطور به‌روز می‌مونن) و انبار در برابر دریاچه (تحلیل رو کپی تمیز یا فایل خام).</p>
+      <p>سه تا یال پایین تصمیم‌های معمارین: کلاود در برابر خودمیزبانی (بساز یا بخر)، تک‌ماشین در برابر پخش‌شده (اول تک‌ماشین، پخش فقط با دلیل اسم‌دار) و داده در برابر قانون (حق فراموش شدن و کم نگه‌داشتن در برابر نگه‌داشتن همه‌چی). هر فلش یه سؤال می‌پرسه و هر جواب قیمتش رو می‌گه — همین «به چه قیمتی» جواب مصاحبهٔ توئه.</p>
     </div>
     <div class="en">
-      <p>The hub states the chapter thesis: no solutions, only trade-offs. The three upper edges are the data world: OLTP vs OLAP (where data is created vs analyzed), record vs derived (where truth lives and how copies keep up), and warehouse vs lake (analysis over a curated copy or raw files).</p>
-      <p>The three lower edges are architecture decisions: cloud vs self-hosting (build or buy), single-machine vs distributed (single-node first, distribute only with a named reason), and data vs law (the right to be forgotten and minimization vs keeping everything). Each arrow asks a question and each answer names its price — that “at what price” is your interview answer.</p>
+      <p>Center of the map is the chapter thesis: no solutions, only trade-offs. Top three edges are data-land: OLTP vs OLAP (born here, studied there), record vs derived (where truth lives, how copies keep up), warehouse vs lake (tidy copy or raw files).</p>
+      <p>Bottom three edges are architecture calls: cloud vs self-host (build or buy), single box vs spread out (box first, spread only with a named reason), data vs law (forget-me rights and less-data vs keep-everything). Every arrow asks a question, every answer names its price — that “at what price” IS your interview answer.</p>
     </div>
   </div>
 </section>
@@ -799,252 +799,252 @@
   <div class="fa"><table>
     <thead><tr><th>اصطلاح</th><th>تعریف یک‌خطی</th><th>کلیدواژه مصاحبه</th></tr></thead>
     <tbody>
-      <tr><td><span class="ltr">Data-Intensive</span></td><td>چالش اصلی، مدیریت داده است نه محاسبه</td><td>حجم، تغییر، سازگاری، دسترس‌پذیری</td></tr>
-      <tr><td><span class="ltr">OLTP</span></td><td>خواندن/نوشتن تک‌رکورد تعاملی</td><td>point query، وضعیت فعلی</td></tr>
-      <tr><td><span class="ltr">OLAP</span></td><td>تجمیع روی اسکن‌های عظیم</td><td>ad-hoc، تاریخچه، TB→PB</td></tr>
-      <tr><td><span class="ltr">Data Warehouse</span></td><td>کپی فقط‌خواندنی برای BI</td><td>ETL، اسکیمای تحلیلی</td></tr>
-      <tr><td><span class="ltr">Data Lake</span></td><td>فایل‌های خام بدون اسکیمای اجباری</td><td>Avro/Parquet، raw is better</td></tr>
-      <tr><td><span class="ltr">ETL / ELT</span></td><td>ترتیب تبدیل و بارگذاری</td><td>transform کجا انجام شود</td></tr>
-      <tr><td><span class="ltr">HTAP</span></td><td>OLTP+OLAP زیر یک رابط</td><td>دو موتور پنهان داخلی</td></tr>
-      <tr><td><span class="ltr">Reverse ETL</span></td><td>بازگرداندن خروجی تحلیل به عملیات</td><td>مدل ML در پروداکشن</td></tr>
-      <tr><td><span class="ltr">System of Record</span></td><td>نسخه مرجع و اولین جای نوشتن</td><td>source of truth</td></tr>
+      <tr><td><span class="ltr">Data-Intensive</span></td><td>درد اصلی داده‌ست، نه حساب</td><td>حجم، تغییر، سازگاری، دسترس‌پذیری</td></tr>
+      <tr><td><span class="ltr">OLTP</span></td><td>خوندن/نوشتن تک‌رکورد، تندتند</td><td>point query، وضعیت فعلی</td></tr>
+      <tr><td><span class="ltr">OLAP</span></td><td>جمع بستن رو اسکن‌های غول</td><td>ad-hoc، تاریخچه، TB→PB</td></tr>
+      <tr><td><span class="ltr">Data Warehouse</span></td><td>کپی فقط‌خوندنی برای BI</td><td>ETL، اسکیمای تحلیلی</td></tr>
+      <tr><td><span class="ltr">Data Lake</span></td><td>فایل خام بدون زور اسکیما</td><td>Avro/Parquet، raw is better</td></tr>
+      <tr><td><span class="ltr">ETL / ELT</span></td><td>اول تبدیل یا اول بار؟</td><td>transform کجا انجام شود</td></tr>
+      <tr><td><span class="ltr">HTAP</span></td><td>OLTP+OLAP زیر یه سقف</td><td>دو موتور پنهان داخلی</td></tr>
+      <tr><td><span class="ltr">Reverse ETL</span></td><td>برگردوندن خروجی تحلیل تو عملیات</td><td>مدل ML در پروداکشن</td></tr>
+      <tr><td><span class="ltr">System of Record</span></td><td>نسخهٔ مرجع، اولین جای نوشتن</td><td>source of truth</td></tr>
       <tr><td><span class="ltr">Derived Data</span></td><td>قابل بازسازی از مرجع</td><td>cache، index، MV</td></tr>
-      <tr><td><span class="ltr">CDC</span></td><td>انتشار جریان تغییرات رکوردها</td><td>به‌روزرسانی داده مشتق‌شده</td></tr>
-      <tr><td><span class="ltr">Cloud Native</span></td><td>طراحی بر پایه سرویس‌های ابری</td><td>object storage، multitenancy</td></tr>
-      <tr><td><span class="ltr">Disaggregation</span></td><td>جدایی ذخیره‌سازی از محاسبه</td><td>دیسک محلی = کش موقت</td></tr>
-      <tr><td><span class="ltr">Microservices</span></td><td>راه‌حل فنی برای استقلال تیم‌ها</td><td>پایگاه داده جدا، تکامل API</td></tr>
-      <tr><td><span class="ltr">Serverless / FaaS</span></td><td>پرداخت به‌ازای اجرا</td><td>cold start، محدودیت زمان</td></tr>
-      <tr><td><span class="ltr">Idempotency</span></td><td>تکرار امن یک عملیات</td><td>پاسخ به retry در شبکه</td></tr>
+      <tr><td><span class="ltr">CDC</span></td><td>پخش زندهٔ تغییر رکوردها</td><td>به‌روز کردن مشتق‌ها</td></tr>
+      <tr><td><span class="ltr">Cloud Native</span></td><td>طراحی‌شده برای ابر</td><td>object storage، multitenancy</td></tr>
+      <tr><td><span class="ltr">Disaggregation</span></td><td>جدایی ذخیره از محاسبه</td><td>دیسک محلی = کش موقت</td></tr>
+      <tr><td><span class="ltr">Microservices</span></td><td>جواب فنی برای استقلال تیم‌ها</td><td>پایگاه داده جدا، تکامل API</td></tr>
+      <tr><td><span class="ltr">Serverless / FaaS</span></td><td>فقط پول اجرا</td><td>cold start، محدودیت زمان</td></tr>
+      <tr><td><span class="ltr">Idempotency</span></td><td>تکرار امن یه عملیات</td><td>پاسخ به retry در شبکه</td></tr>
     </tbody>
   </table></div>
   <div class="en"><table>
     <thead><tr><th>Term</th><th>One-line definition</th><th>Interview keyword</th></tr></thead>
     <tbody>
-      <tr><td><span class="ltr">Data-Intensive</span></td><td>The core challenge is data, not computation</td><td>Volume, change, consistency, availability</td></tr>
-      <tr><td><span class="ltr">OLTP</span></td><td>Interactive single-record reads/writes</td><td>Point query, current state</td></tr>
-      <tr><td><span class="ltr">OLAP</span></td><td>Aggregation over giant scans</td><td>Ad-hoc, history, TB→PB</td></tr>
+      <tr><td><span class="ltr">Data-Intensive</span></td><td>Data’s the hard part, not math</td><td>Volume, change, consistency, availability</td></tr>
+      <tr><td><span class="ltr">OLTP</span></td><td>Fast single-record reads/writes</td><td>Point query, current state</td></tr>
+      <tr><td><span class="ltr">OLAP</span></td><td>Adding up giant scans</td><td>Ad-hoc, history, TB→PB</td></tr>
       <tr><td><span class="ltr">Data Warehouse</span></td><td>Read-only copy for BI</td><td>ETL, analytical schema</td></tr>
-      <tr><td><span class="ltr">Data Lake</span></td><td>Raw files, no enforced schema</td><td>Avro/Parquet, raw is better</td></tr>
-      <tr><td><span class="ltr">ETL / ELT</span></td><td>Order of transform and load</td><td>Where transform happens</td></tr>
-      <tr><td><span class="ltr">HTAP</span></td><td>OLTP+OLAP under one interface</td><td>Two hidden engines inside</td></tr>
-      <tr><td><span class="ltr">Reverse ETL</span></td><td>Returning analytical output to operations</td><td>ML model in production</td></tr>
-      <tr><td><span class="ltr">System of Record</span></td><td>Reference version, first place of write</td><td>Source of truth</td></tr>
+      <tr><td><span class="ltr">Data Lake</span></td><td>Raw files, zero forced schema</td><td>Avro/Parquet, raw is better</td></tr>
+      <tr><td><span class="ltr">ETL / ELT</span></td><td>Transform first or load first?</td><td>Where transform happens</td></tr>
+      <tr><td><span class="ltr">HTAP</span></td><td>OLTP+OLAP under one roof</td><td>Two hidden engines inside</td></tr>
+      <tr><td><span class="ltr">Reverse ETL</span></td><td>Sending analysis back into operations</td><td>ML model in production</td></tr>
+      <tr><td><span class="ltr">System of Record</span></td><td>The truth’s home, written here first</td><td>Source of truth</td></tr>
       <tr><td><span class="ltr">Derived Data</span></td><td>Rebuildable from the record</td><td>Cache, index, MV</td></tr>
-      <tr><td><span class="ltr">CDC</span></td><td>Streaming record changes out</td><td>Updating derived data</td></tr>
-      <tr><td><span class="ltr">Cloud Native</span></td><td>Designed on cloud services</td><td>Object storage, multitenancy</td></tr>
-      <tr><td><span class="ltr">Disaggregation</span></td><td>Storage separated from compute</td><td>Local disk = temp cache</td></tr>
-      <tr><td><span class="ltr">Microservices</span></td><td>Technical fix for team independence</td><td>Separate DBs, API evolution</td></tr>
-      <tr><td><span class="ltr">Serverless / FaaS</span></td><td>Pay per execution</td><td>Cold start, time limits</td></tr>
-      <tr><td><span class="ltr">Idempotency</span></td><td>Safe repetition of an operation</td><td>Answer to network retry</td></tr>
+      <tr><td><span class="ltr">CDC</span></td><td>Live-streaming record changes</td><td>Updating derived data</td></tr>
+      <tr><td><span class="ltr">Cloud Native</span></td><td>Born for cloud services</td><td>Object storage, multitenancy</td></tr>
+      <tr><td><span class="ltr">Disaggregation</span></td><td>Storage split from compute</td><td>Local disk = temp cache</td></tr>
+      <tr><td><span class="ltr">Microservices</span></td><td>Tech fix for team freedom</td><td>Separate DBs, API evolution</td></tr>
+      <tr><td><span class="ltr">Serverless / FaaS</span></td><td>Pay per run</td><td>Cold start, time limits</td></tr>
+      <tr><td><span class="ltr">Idempotency</span></td><td>Repeat without fear</td><td>Answer to network retry</td></tr>
     </tbody>
   </table></div>
 
   <h3 id="s6-2"><span class="fa">۶.۲ هفده سوال پرتکرار (برای دیدن جواب کلیک کن)</span><span class="en">6.2 Seventeen frequent questions (click for answers)</span></h3>
 
   <details><summary><span class="fa">۱. سیستم data-intensive یعنی چه؟ فرقش با compute-intensive؟</span><span class="en">1. What is a data-intensive system? How does it differ from compute-intensive?</span></summary>
-    <div class="fa"><p>در سیستمِ داده‌محور، مسئلهٔ اصلی نگهداری، پیدا کردن و هماهنگ ماندن اطلاعات است. در سیستمِ محاسبه‌محور، اجرای محاسبهٔ سنگین مسئلهٔ اصلی است.</p>
+    <div class="fa"><p>تو سیستم داده‌محور درد اصلی نگه‌داشتن و پیدا کردن و هماهنگ نگه‌داشتن اطلاعاته. تو سیستم محاسبه‌محور درد اصلی خود حساب سنگینه‌ست — این دو تا رو قاطی نکن.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: دادهٔ بیشتر یا محاسبهٔ بیشتر؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویس سفارش روزانه یک میلیون رکورد با <code dir="ltr">customer_id</code> و <code dir="ltr">status</code> نگه می‌دارد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پرس‌وجوی وضعیت باید رکورد درست را با ایندکس پیدا کند؛ سرویس تبدیل ویدیو روی یک فایل، کدک را با CPU اجرا می‌کند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اولی بیشتر با نگهداری و بازیابی داده درگیر است؛ دومی بیشتر با هزینهٔ محاسبه. یک محصول می‌تواند هر دو نوع بار را داشته باشد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> یه سرویس سفارش رو تصور کن که روزی یه میلیون رکورد با <code dir="ltr">customer_id</code> و <code dir="ltr">status</code> قورت می‌ده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا صحنه رو بچین: پرس‌وجوی وضعیت فقط دنبال یه رکورد درست با ایندکس می‌گرده؛ اون‌ور یه سرویس تبدیل ویدیو داره با CPU روی یه فایل عرق می‌ریزه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس دغدغه اولی داده‌ست، دغدغه دومی محاسبه. یادت باشه یه محصول می‌تونه هر دو دغدغه رو هم‌زمان داشته باشه.</p>
 </div></div>
-    <div class="en"><p>Data-intensive means the core challenge is data: high volume, constant change, coping with failure/concurrency, high availability. Compute-intensive means the challenge is parallelizing one giant computation.</p></div>
+    <div class="en"><p>Look, data-intensive means data IS the hard part: big volumes, constant change, failure plus concurrency, staying up. Compute-intensive? One giant math problem you split across machines. Different pain, different game.</p></div>
   </details>
   <details><summary><span class="fa">۲. پنج تفاوت OLTP و OLAP را بگو.</span><span class="en">2. Name five OLTP vs OLAP differences.</span></summary>
-    <div class="fa"><p>پنج تفاوتِ اصلی: خواندنِ چند رکورد در برابر اسکنِ انبوه؛ تغییرِ کوچک در برابر ورودِ دسته‌ای؛ کاربرِ محصول در برابر تحلیلگر؛ پرس‌وجوی مشخص در برابر اکتشافی؛ و وضعیتِ فعلی در برابر تاریخچه.</p>
+    <div class="fa"><p>حفظ کن: پنج تا فرق اصلی: خوندن چند رکورد در برابر شخم زدن خروار رکورد؛ تغییر کوچیک در برابر ورود دسته‌ای؛ کاربر محصول در برابر تحلیلگر؛ کوئری مشخص در برابر دلبخواهی؛ وضعیت فعلی در برابر تاریخچه — همین پنج تا رو بگو، تمومه.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: دو پرس‌وجو، دو الگوی دسترسی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> جدول <code dir="ltr">orders</code> صد میلیون ردیف دارد و روی <code dir="ltr">id</code> ایندکس شده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> <code dir="ltr">WHERE id=42</code> با ایندکس چند صفحه را می‌خواند؛ <code dir="ltr">SUM(amount)</code> برای کل سال حجم زیادی از ستون مبلغ را اسکن می‌کند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اولی نمونهٔ OLTP و دومی OLAP است؛ ایندکس مناسب اولی لزوماً گزارش دوم را سریع نمی‌کند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن جدول <code dir="ltr">orders</code> صد میلیون ردیف داره — یه غول واقعی. روی <code dir="ltr">id</code> هم ایندکس شده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> <code dir="ltr">WHERE id=42</code> با ایندکس مثل برق فقط چند صفحه رو می‌خونه؛ ولی <code dir="ltr">SUM(amount)</code> کل سال مجبوره ستون مبلغ رو شخم بزنه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اولی OLTP ـه، دومی OLAP. یادت باشه ایندکسی که اولی رو پرواز می‌ده، لزوماً دومی رو نجات نمی‌ده.</p>
 </div></div>
-    <div class="en"><p>Read pattern (point query vs scan+aggregate), write pattern (single-record vs bulk/stream), query type (fixed vs ad-hoc), data meaning (current state vs history), size (GB–TB vs TB–PB). Audience differs too: end user vs analyst.</p></div>
+    <div class="en"><p>Five quick hits, friend: reads (one row vs piles of rows), writes (single vs bulk/stream), queries (fixed vs free-form), meaning (right-now vs history), size (gigs vs petas). Oh, and the humans differ too: end users vs analysts.</p></div>
   </details>
   <details><summary><span class="fa">۳. Data Warehouse و Data Lake چه فرقی دارند؟</span><span class="en">3. Warehouse vs lake?</span></summary>
-    <div class="fa"><p>انبار داده معمولاً اطلاعاتِ ساخت‌یافته و آمادهٔ تحلیل دارد. دریاچهٔ داده قالب‌های متنوع، از جمله فایل خام، نگه می‌دارد؛ هر دو به مدیریتِ کیفیت و معنای داده نیاز دارند.</p>
+    <div class="fa"><p>فرقشون ساده‌ست: انبار داده معمولاً اطلاعات تمیز و آمادهٔ تحلیل داره. دریاچهٔ داده قالب‌های جورواجور، از جمله فایل خام، نگه می‌داره؛ هر دو هم مدیریت کیفیت و معنا می‌خوان — هیچ‌کدوم بی‌صاحب نیستن.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: یک ورودی، فایل خام و جدول آماده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فایل JSON فروش مبلغ را در دو واحد متفاوت دارد و تصویر کالا هم کنار آن نگهداری می‌شود.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> دریاچه فایل‌های خام و قالب‌های مختلف را نگه می‌دارد؛ pipeline واحد مبلغ را یکسان و جدولِ fact فروش را برای انبار آماده می‌کند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> query انبار روی قرارداد آمادهٔ fact اجرا می‌شود؛ خواندن خام در lake همچنان به تشخیص schema و کیفیت داده نیاز دارد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل JSON فروش مبلغ رو با دو واحد قاطی داره، عکس کالا هم بغلش خوابیده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا دریاچه همهٔ فایل‌های خام با هر قالبی رو نگه می‌داره؛ pipeline واحد مبلغ رو یکی می‌کنه و جدول fact فروش رو برای انبار آماده می‌کنه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس کوئری انبار روی قرارداد آمادهٔ fact اجرا می‌شه. ولی خوندن خام توی lake هنوز تشخیص schema و کیفیت می‌خواد — خام یعنی آماده نیست، یادت باشه.</p>
 </div></div>
-    <div class="en"><p>Warehouse = relational database with a curated schema and SQL for BI; lake = raw schema-less files for data scientists — cheaper and more flexible.</p></div>
+    <div class="en"><p>Warehouse = tidy relational DB with a curated schema and SQL for BI. Lake = raw schema-less files for data scientists — cheaper, roomier. Both still need someone minding quality.</p></div>
   </details>
   <details><summary><span class="fa">۴. ETL در برابر ELT؟</span><span class="en">4. ETL vs ELT?</span></summary>
-    <div class="fa"><p>در <span class="ltr">ETL</span>، داده پیش از ورود به مقصد تبدیل می‌شود. در <span class="ltr">ELT</span>، ابتدا وارد مقصد می‌شود و تبدیل در آنجا انجام می‌گیرد.</p>
+    <div class="fa"><p>تو <span class="ltr">ETL</span> داده قبل ورود به مقصد تبدیل می‌شه. تو <span class="ltr">ELT</span> اول وارد مقصد می‌شه، بعد همون‌جا تبدیل می‌شه — فرقشون فقط جای تبدیله.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: ETL و ELT روی واحد مبلغ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> منبع اول مبلغ <code dir="ltr">100</code> تومان و منبع دوم <code dir="ltr">1000</code> ریال می‌فرستد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> در ETL هر دو پیش از بارگذاری به <code dir="ltr">1000</code> ریال تبدیل می‌شوند؛ در ELT دادهٔ خام ابتدا بارگذاری و تبدیل در مقصد اجرا می‌شود.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> خروجی نهایی می‌تواند یکسان باشد؛ تفاوت در محل و زمان تبدیل و منابع مصرفی آن است.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن منبع اول مبلغ <code dir="ltr">100</code> تومان می‌فرسته، منبع دوم <code dir="ltr">1000</code> ریال. همون پول، دو زبون.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> توی ETL هر دو قبل از بارگذاری می‌شن <code dir="ltr">1000</code> ریال؛ توی ELT اول دادهٔ خام بارگذاری می‌شه، بعد تبدیل توی مقصد اجرا می‌شه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس خروجی نهایی می‌تونه یکی باشه. فرق سر محل و زمان تبدیله و اینکه CPU کی رو بسوزونی — همین.</p>
 </div></div>
-    <div class="en"><p>ETL: transform in the pipeline, then load. ELT: load first, transform at the destination. It depends on where you have compute power and schema control.</p></div>
+    <div class="en"><p>ETL: cook it in the pipeline, then serve. ELT: dump it at the destination first, cook it there. Where’s your stove and who owns the recipe? That’s the whole question.</p></div>
   </details>
   <details><summary><span class="fa">۵. چرا تحلیل را روی پایگاه داده عملیاتی اجرا نمی‌کنیم؟</span><span class="en">5. Why not run analytics on the operational DB?</span></summary>
-    <div class="fa"><p>تحلیل ممکن است به دادهٔ چند سیستم نیاز داشته باشد، با ساختارِ عملیاتی راحت نباشد، منابعِ زیادی مصرف کند یا دسترسیِ جدا بخواهد. جداسازی بر اساسِ همین نیازهاست، نه ممنوعیتِ همیشگیِ تحلیل روی مرجع.</p>
+    <div class="fa"><p>چون تحلیل ممکنه دادهٔ چند تا سیستم رو بخواد، با ساختار عملیاتی حال نکنه، منابع زیادی بخوره یا دسترسی جدا بخواد. جداسازی برای همینه، نه اینکه تحلیل رو مرجع همیشه ممنوعه — دلیل داره.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: ثبت خرید در برابر گزارش فروش</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> ثبت سفارش فقط ردیف سفارش <code dir="ltr">42</code> و موجودی کالای <code dir="ltr">P7</code> را تغییر می‌دهد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> گزارش ماهانه <code dir="ltr">SUM(amount) GROUP BY city</code> باید میلیون‌ها ردیف را بخواند. اجرای هم‌زمان هر دو روی منابع محدود صف ایجاد می‌کند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نسخهٔ تحلیلی رقابت منابع را کم می‌کند، ولی گزارش به‌اندازهٔ تأخیر انتقال از مرجع عقب می‌ماند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ثبت سفارش فقط ردیف سفارش <code dir="ltr">42</code> و موجودی کالای <code dir="ltr">P7</code> رو دست می‌زنه. یه کار کوچیک و تمیز.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا گزارش ماهانه با <code dir="ltr">SUM(amount) GROUP BY city</code> رو نگاه کن: باید میلیون‌ها ردیف رو بخونه. اگه هر دو رو بندازی روی یه منبع ضعیف، صف درست می‌شه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس نسخهٔ تحلیلی دعوا سر منابع رو کم می‌کنه. فقط یادت باشه گزارش به اندازهٔ تأخیر انتقال از مرجع عقبه؛ تازه نیست، طبیعیه.</p>
 </div></div>
-    <div class="en"><p>Data silos across systems, OLTP schemas unfit for analysis, heavy queries starving users, and security limits on direct access.</p></div>
+    <div class="en"><p>Four reasons, say them with confidence: data scattered in silos, OLTP schemas that stink for analysis, heavy queries choking live users, and security saying hands off.</p></div>
   </details>
   <details><summary><span class="fa">۶. System of Record و Derived Data را تعریف و مثال بزن.</span><span class="en">6. Define system of record and derived data, with examples.</span></summary>
-    <div class="fa"><p>سیستمِ مرجع نسخهٔ معتبرِ هر داده را نگه می‌دارد. دادهٔ مشتق‌شده با تبدیلِ مرجع ساخته می‌شود و باید مسیرِ ساخت و به‌روزرسانیِ مشخص داشته باشد.</p>
+    <div class="fa"><p>تعریفش اینه: سیستم مرجع نسخهٔ درست هر داده رو نگه می‌داره. دادهٔ مشتق‌شده با تبدیل مرجع ساخته می‌شه و باید راه ساخت و به‌روزشدنش مشخص باشه — بی‌لوله قبول نیست.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: بازسازی دادهٔ مشتق‌شده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> مرجع کالا <code dir="ltr">P7</code> را با <code dir="ltr">version=12</code> نگه داشته؛ ایندکس جست‌وجو خراب شده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> snapshot مرجع تا موقعیت لاگ <code dir="ltr">500</code> وارد ایندکس تازه می‌شود و سپس تغییرهای پس از <code dir="ltr">500</code> اعمال می‌شوند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> با مرز snapshot و لاگِ هماهنگ می‌توان ایندکس را بازسازی کرد؛ صرفِ کپی قدیمی ممکن است تغییرهای حین کپی را جا بیندازد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن مرجع کالا <code dir="ltr">P7</code> رو با <code dir="ltr">version=12</code> نگه داشته، ولی ایندکس جست‌وجو ترَکیده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بریم سراغ بازسازی: اول snapshot مرجع تا موقعیت لاگ <code dir="ltr">500</code> می‌ره توی ایندکس تازه، بعد تغییرهای بعد از <code dir="ltr">500</code> یکی‌یکی اعمال می‌شن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> با مرز مشخص snapshot و لاگ هماهنگ، ایندکس برمی‌گرده. نگران نشو، ولی فقط با یه کپی قدیمی جلو نرو — تغییرهای وسط کپی جا می‌مونن.</p>
 </div></div>
-    <div class="en"><p>Record: the first, most authoritative version of data; each fact once; it wins disagreements. Derived: transformed from existing data (cache, index, MV, ML model), rebuildable from the record.</p></div>
+    <div class="en"><p>Record = the original truth: each fact lives there once, and it wins every argument. Derived = anything cooked from it (cache, index, MV, ML model) — lose it, rebuild it, no tears.</p></div>
   </details>
   <details><summary><span class="fa">۷. چرا کش و ایندکس «مشتق‌شده»‌اند و این چه فایده‌ای دارد؟</span><span class="en">7. Why are caches and indexes “derived”, and why does it matter?</span></summary>
-    <div class="fa"><p>کش و ایندکس، داده را برای خواندنِ خاصی آماده می‌کنند. اگر فقط از مرجع ساخته شده باشند و ورودیِ لازم موجود باشد، خرابیِ آن‌ها با بازسازی جبران می‌شود.</p>
+    <div class="fa"><p>کش و ایندکس داده رو برای یه خوندن خاص آماده می‌کنن. اگه فقط از مرجع ساخته شده باشن و مواد لازم موجود باشه، خرابیشون با از نو ساختن جبران می‌شه — نگران نباش.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: بازسازی دادهٔ مشتق‌شده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> مرجع کالا <code dir="ltr">P7</code> را با <code dir="ltr">version=12</code> نگه داشته؛ ایندکس جست‌وجو خراب شده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> snapshot مرجع تا موقعیت لاگ <code dir="ltr">500</code> وارد ایندکس تازه می‌شود و سپس تغییرهای پس از <code dir="ltr">500</code> اعمال می‌شوند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> با مرز snapshot و لاگِ هماهنگ می‌توان ایندکس را بازسازی کرد؛ صرفِ کپی قدیمی ممکن است تغییرهای حین کپی را جا بیندازد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن مرجع کالا <code dir="ltr">P7</code> رو با <code dir="ltr">version=12</code> نگه داشته، ولی ایندکس جست‌وجو ترَکیده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بریم سراغ بازسازی: اول snapshot مرجع تا موقعیت لاگ <code dir="ltr">500</code> می‌ره توی ایندکس تازه، بعد تغییرهای بعد از <code dir="ltr">500</code> یکی‌یکی اعمال می‌شن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> با مرز مشخص snapshot و لاگ هماهنگ، ایندکس برمی‌گرده. نگران نشو، ولی فقط با یه کپی قدیمی جلو نرو — تغییرهای وسط کپی جا می‌مونن.</p>
 </div></div>
-    <div class="en"><p>Because they are built from record data and rebuildable if dropped. Once the “what derives from what” map is explicit, you know everywhere each change must propagate.</p></div>
+    <div class="en"><p>Because they’re built from the record and rebuildable if they blow up. Draw the “what comes from what” map once, and you’ll always know where each change must travel.</p></div>
   </details>
   <details><summary><span class="fa">۸. HTAP چیست و چرا جایگزین انبارداده نشد؟</span><span class="en">8. What is HTAP, and why didn’t it replace the warehouse?</span></summary>
-    <div class="fa"><p><span class="ltr">HTAP</span> بارِ تراکنشی و تحلیلی را نزدیک‌تر می‌کند، اما نیازِ جمع کردنِ دادهٔ چند منبع، تاریخچه و ساختارِ مناسبِ تحلیل را خودبه‌خود حذف نمی‌کند.</p>
+    <div class="fa"><p><span class="ltr">HTAP</span> بار تراکنشی و تحلیلی رو به هم نزدیک می‌کنه، ولی نیاز جمع کردن دادهٔ چند منبع و تاریخچه و ساختار مناسب تحلیل رو خودش حذف نمی‌کنه — جادو نیست.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: HTAP و نیاز چندمنبعی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> یک موتور هم ثبت سفارش و هم گزارش سریع روی همان سفارش‌ها را پشتیبانی می‌کند.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> گزارش نرخ تبدیل، کلیک وب و تماس پشتیبانی را هم لازم دارد؛ این داده‌ها هنوز باید با <code dir="ltr">customer_id</code> و بازهٔ زمانی یکپارچه شوند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نزدیک شدن OLTP و OLAP نیاز به هماهنگ کردن دادهٔ چند سامانه را حذف نمی‌کند.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن یه موتور هم ثبت سفارش رو انجام می‌ده، هم گزارش سریع روی همون سفارش‌ها می‌ده. همه‌کاره به نظر میاد، نه؟</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> ولی گزارش نرخ تبدیل کلیک وب و تماس پشتیبانی رو هم می‌خواد. اینا هنوز باید با <code dir="ltr">customer_id</code> و بازهٔ زمانی قاطی و یکدست بشن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس چسبوندن OLTP و OLAP دردسر جمع کردن دادهٔ چند سامانه رو حذف نمی‌کنه. HTAP جادو نیست، یادت باشه.</p>
 </div></div>
-    <div class="en"><p>HTAP aims to serve transactional and analytical load in one system, but it is usually two engines inside and doesn’t remove the need for “one combined copy of all systems”.</p></div>
+    <div class="en"><p>HTAP dreams of serving both loads in one box — but peek inside and it’s usually two engines wearing a trench coat. You still need that one combined copy of everything.</p></div>
   </details>
   <details><summary><span class="fa">۹. Reverse ETL چیست؟</span><span class="en">9. What is reverse ETL?</span></summary>
-    <div class="fa"><p><span class="ltr">Reverse</span> <span class="ltr">ETL</span> یعنی نتیجهٔ آمادهٔ تحلیل را به ابزارِ عملیاتی برگردانیم تا در کارِ روزمره استفاده شود.</p>
+    <div class="fa"><p><span class="ltr">Reverse</span> <span class="ltr">ETL</span> یعنی نتیجهٔ آمادهٔ تحلیل رو برگردونی تو ابزار عملیاتی تا تو کار روزمره استفاده بشه — رفت و برگشت.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: برگرداندن نتیجهٔ تحلیل به عملیات</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> انبار داده برای مشتری <code dir="ltr">17</code> مجموع خرید ۹۰ روزه را <code dir="ltr">8000</code> محاسبه کرده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> job مشتریان با مجموع بالای <code dir="ltr">5000</code> را با کلید <code dir="ltr">customer_id</code> به CRM منتقل می‌کند و زمان محاسبه را هم می‌فرستد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> CRM از برچسب آماده استفاده می‌کند؛ این Reverse ETL است. برچسب تا اجرای بعدی به‌روز نمی‌شود.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن انبار داده برای مشتری <code dir="ltr">17</code> حساب کرده مجموع خرید ۹۰ روزه شده <code dir="ltr">8000</code>.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا job میاد وسط: هرکی بالای <code dir="ltr">5000</code> خریده رو با کلید <code dir="ltr">customer_id</code> می‌فرسته توی CRM، زمان محاسبه رو هم همراهش می‌فرسته.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> حالا CRM از برچسب آماده استفاده می‌کنه — اسمش Reverse ETL ـه. فقط یادت باشه این برچسب تا اجرای بعدی تازه نمی‌شه؛ تاریخ انقضا داره.</p>
 </div></div>
-    <div class="en"><p>Sending analytical output back to operational systems — e.g. a trained model for recommendations, or a churn-risk list returning to the CRM.</p></div>
+    <div class="en"><p>Taking finished analysis back into daily operations — like shipping a trained recommender to production, or sending a churn-risk list home to the CRM. Round trip.</p></div>
   </details>
   <details><summary><span class="fa">۱۰. Cloud Native یعنی چه؟ جدایی storage و compute چه فایده‌ای دارد؟</span><span class="en">10. What is cloud native? What does storage/compute separation buy you?</span></summary>
-    <div class="fa"><p>طراحیِ ابری از قابلیت‌های محیطِ ابر استفاده می‌کند. با جداییِ ذخیره و محاسبه، می‌توان ظرفیتِ پردازش را مستقل از داده تغییر داد؛ صرفِ اجرا روی ماشینِ ابری کافی نیست.</p>
+    <div class="fa"><p>طراحی ابری یعنی از قابلیت‌های محیط ابر استفاده کنی. با جدایی ذخیره و محاسبه می‌تونی ظرفیت پردازش رو جدا از داده کم‌وزیاد کنی؛ فقط اجرا شدن رو ماشین ابری کافی نیست — ابر فقط یه اسم نیست.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: پردازش جدا از فایل‌ها</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> گزارش روی <code dir="ltr">10 TB</code> فایل فروش در مخزن مشترک اجرا می‌شود.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> برای گزارش آخر ماه ۲۰ worker فایل‌ها را تقسیم می‌کنند؛ پس از پایان خاموش می‌شوند و فایل‌ها باقی می‌مانند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> ظرفیت compute مستقل از حجم داده تغییر می‌کند؛ توان خواندن مخزن و انتقال شبکه هنوز می‌تواند گلوگاه باشد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن گزارشت روی <code dir="ltr">10 TB</code> فایل فروش خوابیده توی یه مخزن مشترک.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> سر آخر ماه ۲۰ تا worker میان فایل‌ها رو تقسیم می‌کنن، کار رو می‌کنن، بعد خاموش می‌شن. فایل‌ها سر جاشون می‌مونن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس compute رو مستقل از حجم داده کم و زیاد می‌کنی. فقط یادت باشه سرعت خوندن مخزن و شبکه هنوز می‌تونه گلوت رو بگیره.</p>
 </div></div>
-    <div class="en"><p>Designed from the ground up on cloud services instead of “legacy software on a VM”. Separation lets compute scale independently of data, and machines be replaced without data loss.</p></div>
+    <div class="en"><p>Built for the cloud from day one — not grandpa’s app on a VM. Splitting storage from compute means brains scale without the data, and you can swap machines without losing a byte.</p></div>
   </details>
   <details><summary><span class="fa">۱۱. دیسکِ محلیِ موقت و <span class="ltr">EBS</span> چه تفاوتی دارند؟</span><span class="en">11. Why is the cloud local disk ephemeral, and what is the EBS trap?</span></summary>
-    <div class="fa"><p>دیسکِ محلیِ موقت با دیسکِ پایدارِ ابری فرق دارد. در <span class="ltr">EC2</span>، <span class="ltr">instance</span> <span class="ltr">store</span> برای دادهٔ موقت است؛ <span class="ltr">EBS</span> ذخیرهٔ بلوکیِ متصل از شبکه است و رفتار و هزینه‌اش باید جدا سنجیده شود.</p>
+    <div class="fa"><p>دیسک محلی موقت با دیسک پایدار ابری فرق داره. تو <span class="ltr">EC2</span>، <span class="ltr">instance</span> <span class="ltr">store</span> مال دادهٔ موقته؛ <span class="ltr">EBS</span> ذخیرهٔ بلوکی وصل از شبکه‌ست و رفتار و خرجش رو باید جدا سنجید — دو تا چیز جدا.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: دیسک موقت در برابر EBS</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> worker ابری فایل میانی قابل‌بازسازی و تنها نسخهٔ سفارش تأییدشده را تولید می‌کند.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> فایل میانی را می‌توان روی instance store گذاشت؛ برای دادهٔ معتبر، ذخیرهٔ پایدار و سیاست backup لازم است. EBS مستقل از دیسک محلی است و حذف هنگام پایان نمونه به تنظیمات بستگی دارد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نوع دیسک و چرخهٔ عمرش بخشی از طراحی ماندگاری است؛ «روی ابر است» پاسخ کافی نیست.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن worker ابری دو چیز تولید می‌کنه: یه فایل میانی که اگه پاک بشه قابل ساخت مجدده، و یه نسخهٔ سفارش تأییدشده که تکیه.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> فایل میانی رو بنداز روی instance store، اشکالی نداره. ولی برای دادهٔ معتبر ذخیرهٔ پایدار و سیاست backup می‌خوای. EBS هم از دیسک محلی جداست؛ پاک شدنش موقع پایان نمونه بستگی به تنظیمات داره، خودکار فرضش نکن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس نوع دیسک و عمرش بخشی از طراحی ماندگاریه. «روی ابره پس امنه» جواب نیست — این جمله رو تو مصاحبه نگی.</p>
 </div>
 <p class="small">منبعِ توضیحِ فنی: <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/InstanceStorage.html" target="_blank" rel="noopener">ذخیرهٔ موقتِ EC2</a> · <a href="https://docs.aws.amazon.com/ebs/latest/userguide/what-is-ebs.html" target="_blank" rel="noopener">ذخیرهٔ بلوکیِ EBS</a></p></div>
-    <div class="en"><p>It goes away with failure or resizing — so it is only a cache. EBS emulates a disk over the network, turning every I/O into a network call → sensitive to network variance.</p></div>
+    <div class="en"><p>It vanishes on failure or resize — so it’s a cache, nothing more. EBS fakes a disk over the network, so every I/O is a network trip — and networks have moods.</p></div>
   </details>
   <details><summary><span class="fa">۱۲. Multitenancy چه سود و چه ریسکی دارد؟</span><span class="en">12. Multitenancy: benefit and risk?</span></summary>
-    <div class="fa"><p>چندمستاجری منابع و عملیات را مشترک می‌کند و می‌تواند هزینه را کم کند. در مقابل، جداسازیِ دسترسی و جلوگیری از اثرِ بارِ یک مشتری بر بقیه ضروری است.</p>
+    <div class="fa"><p>چندمستاجری منابع و عملیات رو مشترک می‌کنه و می‌تونه خرج رو کم کنه. ولی جداسازی دسترسی و جلوگیری از اینکه بار یه مشتری بقیه رو خفه کنه واجبه — همسایهٔ پرمصرف رو یادته؟</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: همسایهٔ پرمصرف</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> دو tenant از یک پایگاه داده استفاده می‌کنند؛ tenant A گزارشِ اسکن کامل می‌فرستد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> سهم منابع و محدودیت هم‌زمانی برای A گذاشته می‌شود و همهٔ پرس‌وجوها با <code dir="ltr">tenant_id</code> محدود می‌شوند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> کنترل بار از کند شدن B جلوگیری می‌کند؛ کنترل دسترسی مسئلهٔ جداگانهٔ نشت داده بین tenantها را پوشش می‌دهد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دو تا tenant روی یه پایگاه داده سوارن؛ tenant A یه گزارش اسکن کامل می‌فرسته که همه‌چی رو شخم می‌زنه.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا برای A سهم منابع و سقف هم‌زمانی می‌ذاری، بعد همهٔ کوئری‌ها رو با <code dir="ltr">tenant_id</code> قفل می‌کنی به همون مستأجر.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس سهم‌بندی نمی‌ذاره B خفه بشه. ولی یادت باشه کنترل دسترسی یه درد جداست — نشت داده بین tenantها با سهمیه حل نمی‌شه.</p>
 </div></div>
-    <div class="en"><p>Benefit: hardware efficiency and easier management. Risk: one tenant must not harm others’ performance or security; it demands precise isolation.</p></div>
+    <div class="en"><p>Upside: better hardware mileage, easier babysitting. Downside: one noisy tenant must never wreck the others’ speed or leak their data — isolation has to be airtight. Remember the hungry neighbor?</p></div>
   </details>
   <details><summary><span class="fa">۱۳. کی باید سراغ سیستم توزیع‌شده برویم؟</span><span class="en">13. When should we go distributed?</span></summary>
-    <div class="fa"><p>وقتی مسئله‌ای واقعی مثل ظرفیتِ ناکافی، خرابی، تأخیرِ جغرافیایی، کشسانی، نیازِ سخت‌افزاری یا محدودیتِ محلِ داده داریم، توزیع را بررسی می‌کنیم. باید کمترین توزیعِ لازم را انتخاب کرد.</p>
+    <div class="fa"><p>وقتی یه درد واقعی داری — جا کم آوردی، خرابی، تأخیر جغرافیایی، کشسانی، سخت‌افزار خاص یا قانون محل داده — اون‌وقت توزیع رو بررسی کن. و کمترین توزیع لازم رو انتخاب کن — زیاده‌روی ممنوع.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: توزیع برای حل یک محدودیت مشخص</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> آرشیو <code dir="ltr">40 TB</code> است و هر سرور فقط <code dir="ltr">10 TB</code> فضای قابل‌استفاده دارد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کلیدها بین چند shard تقسیم می‌شوند و برای هر shard نسخهٔ پشتیبانِ زنده در نظر گرفته می‌شود.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> sharding ظرفیت را زیاد می‌کند و replication تحمل خرابی را؛ این دو وظیفه را نباید با هم اشتباه گرفت.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن آرشیوت <code dir="ltr">40 TB</code> ـه، ولی هر سرور فقط <code dir="ltr">10 TB</code> جا داره. جا نمی‌شه، خب؟</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا کلیدها رو پخش می‌کنی بین چند shard، بعد برای هر shard یه نسخهٔ پشتیبان زنده هم می‌ذاری.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس sharding ظرفیت رو زیاد می‌کنه، replication تحمل خرابی رو. دو تا کار جدا — قاطی‌شون نکن که تو مصاحبه لو می‌ری.</p>
 </div></div>
-    <div class="en"><p>When one of these is real: inherent user distribution, fault tolerance, beyond-one-machine scale, geo latency, elasticity, specialized hardware, data-residency law or sustainability. Name the reason first, then pick minimal distribution.</p></div>
+    <div class="en"><p>Only when one of these is genuinely real: spread-out users, surviving failures, outgrowing one box, geo latency, elasticity, exotic hardware, data-residency law, green energy. Name the reason out loud first — then pick the smallest distribution that fixes it. No more.</p></div>
   </details>
   <details><summary><span class="fa">۱۴. هزینه‌های پنهان سیستم توزیع‌شده چیست؟</span><span class="en">14. Hidden costs of distribution?</span></summary>
-    <div class="fa"><p>شبکه تأخیر و نتیجهٔ نامشخص می‌آورد؛ بازتلاش، اشکال‌زدایی و نگه داشتنِ دادهٔ سازگار میان سرویس‌ها هم سخت‌تر می‌شود.</p>
+    <div class="fa"><p>شبکه تأخیر و نتیجهٔ نامشخص میاره؛ بازتلاش و دیباگ و نگه‌داشتن دادهٔ سازگار بین سرویس‌ها هم سخت‌تر می‌شه — اینا قبض توزیعه.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: ثبت موفق، پاسخ گم‌شده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویس سفارش درخواست <code dir="ltr">r7</code> را ثبت می‌کند، اما پاسخ در شبکه گم می‌شود.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کلاینت همان <code dir="ltr">r7</code> را دوباره می‌فرستد؛ قید یکتایی روی شناسهٔ درخواست اجازهٔ سفارش دوم نمی‌دهد و نتیجهٔ قبلی برمی‌گردد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> timeout شکست قطعی عملیات نیست؛ تولید شناسهٔ تازه در هر retry می‌تواند دو سفارش واقعی بسازد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سرویس سفارش درخواست <code dir="ltr">r7</code> رو ثبت کرده، ولی جواب توی شبکه گم شده. استرس نگیر.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کلاینت همون <code dir="ltr">r7</code> رو دوباره می‌فرسته؛ قید یکتایی روی شناسهٔ درخواست نمی‌ذاره سفارش دوم ساخته بشه و نتیجهٔ قبلی برمی‌گرده.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس timeout یعنی «نمی‌دونم چی شد»، نه «انجام نشد». اگه هر retry یه شناسهٔ تازه بسازه، یهو دو تا سفارش واقعی داری — این دام معروفه.</p>
 </div></div>
-    <div class="en"><p>Timeouts and request-status ambiguity, unsafe-retry risk, network slower than local calls, hard debugging, and cross-service consistency becoming the application’s job.</p></div>
+    <div class="en"><p>The bill, friend: timeouts with mystery outcomes, retries that bite, networks crawling next to local calls, painful debugging, and consistency across services landing on YOUR app’s shoulders.</p></div>
   </details>
   <details><summary><span class="fa">۱۵. چرا retry کورکورانه خطرناک است؟</span><span class="en">15. Why is blind retry dangerous?</span></summary>
-    <div class="fa"><p>پس از <span class="ltr">timeout</span> نمی‌دانیم عملیات اجرا شده یا نه. شناسهٔ ثابت و عملیاتِ مقاوم به تکرار یا استعلامِ نتیجه، جلوی اثرِ دوباره را می‌گیرند.</p>
+    <div class="fa"><p>بعد <span class="ltr">timeout</span> نمی‌دونی عملیات اجرا شده یا نه. شناسهٔ ثابت و عملیات مقاوم به تکرار یا استعلام نتیجه جلوی اثر دوباره رو می‌گیرن — همون ورد جادویی idempotency.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: ثبت موفق، پاسخ گم‌شده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویس سفارش درخواست <code dir="ltr">r7</code> را ثبت می‌کند، اما پاسخ در شبکه گم می‌شود.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کلاینت همان <code dir="ltr">r7</code> را دوباره می‌فرستد؛ قید یکتایی روی شناسهٔ درخواست اجازهٔ سفارش دوم نمی‌دهد و نتیجهٔ قبلی برمی‌گردد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> timeout شکست قطعی عملیات نیست؛ تولید شناسهٔ تازه در هر retry می‌تواند دو سفارش واقعی بسازد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سرویس سفارش درخواست <code dir="ltr">r7</code> رو ثبت کرده، ولی جواب توی شبکه گم شده. استرس نگیر.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کلاینت همون <code dir="ltr">r7</code> رو دوباره می‌فرسته؛ قید یکتایی روی شناسهٔ درخواست نمی‌ذاره سفارش دوم ساخته بشه و نتیجهٔ قبلی برمی‌گرده.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس timeout یعنی «نمی‌دونم چی شد»، نه «انجام نشد». اگه هر retry یه شناسهٔ تازه بسازه، یهو دو تا سفارش واقعی داری — این دام معروفه.</p>
 </div></div>
-    <div class="en"><p>On timeout you don’t know whether the operation happened; retrying may apply the effect twice (e.g. double charge). Fix: idempotent keys and operations.</p></div>
+    <div class="en"><p>On timeout you genuinely don’t know what happened; a blind retry can charge twice. The fix never changes: idempotent keys and operations. Magic words.</p></div>
   </details>
   <details><summary><span class="fa">۱۶. چرا میکروسرویس برای تیم کوچک overkill است؟</span><span class="en">16. Why are microservices overkill for a small team?</span></summary>
-    <div class="fa"><p>میکروسرویس می‌تواند استقلالِ تیم‌ها را بیشتر کند، ولی استقرار، آزمون، پایش و قراردادِ شبکه هزینه دارند. برای تیمِ کوچک، این هزینه ممکن است از سودِ جداسازی بیشتر باشد.</p>
+    <div class="fa"><p>میکروسرویس می‌تونه استقلال تیم‌ها رو بیشتر کنه، ولی استقرار و آزمون و پایش و قرارداد شبکه خرج دارن. برای تیم کوچیک این خرج ممکنه از سود جداسازی بیشتر باشه — حساب کن.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: هزینهٔ خرد کردن برنامه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سه نفر روی یک برنامهٔ ماژولار کار می‌کنند و یک مسیر انتشار دارند.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تقسیم آن به ۱۰ سرویس، قرارداد شبکه، مانیتورینگ، timeout و انتشار جدا برای هر سرویس می‌خواهد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> جداسازی وقتی مفید است که استقلال یا مقیاس لازم را بدهد؛ تعداد بیشتر سرویس به‌تنهایی پیشرفت معماری نیست.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سه نفرین روی یه برنامهٔ ماژولار با یه مسیر انتشار. جمع‌وجور و راحت.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا تیکه‌تیکه‌ش کن به ۱۰ تا سرویس: قرارداد شبکه می‌خواد، مانیتورینگ می‌خواد، timeout و انتشار جدا برای هر سرویس می‌خواد. می‌بینی چقدر خرج رو دستت می‌ذاره؟</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس جداسازی وقتی می‌ارزه که استقلال یا مقیاس بده. سرویس بیشتر مساوی معماری بهتر نیست — اینو قاب کن بزن به دیوار.</p>
 </div></div>
-    <div class="en"><p>Microservices solve the human problem of “team independence”; in a small team their cost (testing, deploys, monitoring, API evolution) exceeds the benefit.</p></div>
+    <div class="en"><p>Microservices fix the people problem called “team independence”. In a tiny team, the bill (testing, deploys, monitoring, ever-changing APIs) outweighs the win — do the math first.</p></div>
   </details>
   <details><summary><span class="fa">۱۷. «حق فراموش شدن» با لاگ‌های append-only چه تضادی دارد؟</span><span class="en">17. How does the right to be forgotten clash with append-only logs?</span></summary>
-    <div class="fa"><p>لاگِ فقط‌افزودنی برای حفظِ تاریخچه طراحی شده، اما حذفِ داده باید در مرجع، نسخه‌های مشتق‌شده و سیاستِ نگهداری دیده شود. جزئیاتِ الزامِ حقوقی به مورد بستگی دارد.</p>
+    <div class="fa"><p>لاگ فقط‌افزودنی برای نگه‌داشتن تاریخچه ساخته شده، ولی حذف داده باید تو مرجع و نسخه‌های مشتق‌شده و سیاست نگه‌داری دیده بشه. جزئیات حقوقی‌ش هم موردبه‌مورد فرق داره.</p>
 <div class="technical-example concept-example review-example" data-example-version="technical-v2">
 <p class="example-title"><b>مثال فنی: حذف در چند نسخه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> دادهٔ مشتری <code dir="ltr">17</code> در مرجع، ایندکس و فایل خروجی گزارش کپی شده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> جریان حذف با همین شناسه مقصدها را دنبال می‌کند؛ وضعیت حذف، زمان نگهداری و محدودیت backup نیز ثبت می‌شوند.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> حذف یک ردیف به‌معنی حذف همهٔ کپی‌ها نیست؛ دامنه و الزام نگهداری باید برای همین کاربرد بررسی شود.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دادهٔ مشتری <code dir="ltr">17</code> هم توی مرجع هست، هم توی ایندکس، هم توی فایل گزارش. سه‌جا پخشه.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا جریان حذف با همون شناسه می‌ره سراغ همهٔ مقصدها. وضعیت حذف و زمان نگهداری و محدودیت backup هم ثبت می‌شه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس پاک کردن یه ردیف یعنی همهٔ کپی‌ها پاک شدن؟ نه! دامنهٔ حذف و قانون نگهداری رو برای همون کاربرد چک کن؛ restore هم می‌تونه مرده رو زنده کنه.</p>
 </div></div>
-    <div class="en"><p>Many systems are built on immutable structures; deleting from their middle — and from derived data like model training sets — is a fresh engineering challenge. And data minimization says some data should never be kept at all.</p></div>
+    <div class="en"><p>Loads of systems sit on immutable bones; deleting from their middle — plus derived stuff like training sets — is genuinely new engineering territory. And data minimization whispers: maybe don’t keep it at all.</p></div>
   </details>
 
   <h3 id="s6-3"><span class="fa">۶.۳ اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">6.3 Common interview mistakes</span></h3>
   <div class="fa"><ul>
-    <li>گفتن «میکروسرویس بهتر است» بدون نام بردن دلیل و هزینه‌اش.</li>
-    <li>استفاده از کش/ایندکس به‌عنوان منبع حقیقت، یا نداشتن مکانیزم انتشار تغییر.</li>
-    <li>نفهمیدن فرق «کپی فقط‌خواندنی تحلیلی» و «پایگاه داده عملیاتی».</li>
-    <li>فراموش کردن اینکه در سیستم توزیع‌شده، timeout یعنی «نمی‌دانیم» نه «انجام نشد».</li>
-    <li>تحلیل نکردن تریدآف: هر جواب باید بگوید «به چه قیمتی».</li>
+    <li>گفتن «میکروسرویس بهتره» بدون گفتن دلیل و خرجش — شعار نده.</li>
+    <li>کش/ایندکس رو گذاشتن جای حقیقت، یا نداشتن لولهٔ انتشار تغییر — هر دو غلطه.</li>
+    <li>نفهمیدن فرق «کپی فقط‌خوندنی تحلیلی» با «دیتابیس عملیاتی» — دو تا دنیای جدا.</li>
+    <li>یادت بره که تو سیستم پخش‌شده timeout یعنی «نمی‌دونم» نه «نشد» — فرقش زمین تا آسمونه.</li>
+    <li>تریدآف رو تحلیل نکردن: هر جواب باید بگه «به چه قیمتی» — اینو نگفتی یعنی هیچی نگفتی.</li>
   </ul></div>
   <div class="en"><ul>
-    <li>Saying “microservices are better” without naming a reason and a cost.</li>
-    <li>Treating cache/index as the source of truth, or having no change-propagation mechanism.</li>
-    <li>Missing the difference between a “read-only analytical copy” and the “operational database”.</li>
-    <li>Forgetting that in distributed systems, timeout means “unknown”, not “failed”.</li>
-    <li>Skipping the trade-off: every answer must say “at what price”.</li>
+    <li>Shouting “microservices are better” with no reason and no price tag — that’s a slogan, not an answer.</li>
+    <li>Crowining cache/index as the source of truth, or showing up with zero change-propagation plan — both wrong.</li>
+    <li>Blurring a “read-only analytical copy” with the “operational database” — two different planets.</li>
+    <li>Forgetting that out in distributed-land, timeout means “no idea”, not “failed” — worlds apart.</li>
+    <li>Skipping the trade-off: every answer must say “at what price” — skip it and you said nothing.</li>
   </ul></div>
 
   <h3 id="s6-4"><span class="fa">۶.۴ چک‌لیست مرور ۵ دقیقه‌ای</span><span class="en">6.4 Five-minute checklist</span></h3>
   <div class="fa"><ol>
-    <li>جدول OLTP/OLAP را از حفظ بگو (۵ سطر).</li>
-    <li>تعریف record/derived + مثال‌هایش.</li>
-    <li>مسیر داده: operational ← ETL ← warehouse/lake ← consumer ← reverse ETL.</li>
-    <li>سه مزیت و سه ریسک کلاود + یک جمله درباره جدایی storage/compute.</li>
-    <li>سه دلیل توزیع + سه هزینه‌اش + کلمه idempotency.</li>
-    <li>یک جمله درباره GDPR و data minimization.</li>
+    <li>جدول OLTP/OLAP رو از حفظ بگو (۵ سطر) — چشم‌بسته.</li>
+    <li>تعریف record/derived با مثالش — با مثال، نه حفظی.</li>
+    <li>مسیر داده رو بکش: operational ← ETL ← warehouse/lake ← consumer ← reverse ETL.</li>
+    <li>سه تا سود و سه تا ریسک کلاود + یه جمله دربارهٔ جدایی storage/compute.</li>
+    <li>سه تا دلیل توزیع + سه تا خرجش + کلمهٔ جادویی idempotency.</li>
+    <li>یه جمله دربارهٔ GDPR و data minimization — کوتاه و دقیق.</li>
   </ol></div>
   <div class="en"><ol>
-    <li>Recite the OLTP/OLAP table from memory (5 rows).</li>
-    <li>The record/derived definition + examples.</li>
-    <li>The data path: operational → ETL → warehouse/lake → consumer → reverse ETL.</li>
-    <li>Three cloud benefits and three risks + one sentence on storage/compute separation.</li>
-    <li>Three reasons to distribute + three costs + the word idempotency.</li>
-    <li>One sentence on GDPR and data minimization.</li>
+    <li>Rattle off the OLTP/OLAP table eyes closed (5 rows).</li>
+    <li>Record/derived definition with an example — with one, not from memory alone.</li>
+    <li>Draw the data path: operational → ETL → warehouse/lake → consumer → reverse ETL.</li>
+    <li>Three cloud wins and three risks + one line on splitting storage from compute.</li>
+    <li>Three reasons to distribute + three costs + the magic word idempotency.</li>
+    <li>One tight sentence on GDPR and data minimization.</li>
   </ol></div>
 </section>
 
@@ -1055,25 +1055,25 @@
   <article class="exercise-block" id="exercise-1" data-reviewed-exercise="1">
 <h3><span class="fa">تمرین ۱ — معماری یک فروشگاه آنلاین</span><span class="en">Exercise 1 — an online shop’s architecture</span></h3>
 <div class="exercise-labels"><span class="exercise-label level-senior"><span class="fa">L2 · Senior</span><span class="en">L2 · Senior</span></span><span class="exercise-label priority-core"><span class="fa">اولویت اصلی</span><span class="en">Core priority</span></span><span class="exercise-label"><span class="fa">35 دقیقه بحث</span><span class="en">35 min discussion</span></span></div>
-<p class="exercise-verdict"><span class="fa">مرجع داده، مشتق‌ها و انتشار تغییر، مسئلهٔ واقعی طراحی است؛ صرف نام‌گذاری اجزا عمق کافی ندارد.</span><span class="en">Record and derived data are useful, but classification alone is too shallow.</span></p>
-<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">فروشگاهی را طراحی کن که سفارش را ثبت می‌کند و کش، جست‌وجو، گزارش و پیشنهاد محصول دارد. مرجع هر واقعیت را مشخص کن. اگر سفارش commit شود ولی انتشار رویداد شکست بخورد چه می‌کنی؟ قرارداد تازگی هر نما، مسیر بازسازی و هزینهٔ حداقل معماری را توضیح بده.</span><span class="en">Design order storage and its cache, search, reporting and recommendation views. Explain commit-without-publication, freshness contracts, rebuilding and minimum cost.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">مرجع و مشتق را برای هر واقعیت جدا می‌کند</span><span class="en">Authority per fact</span></li><li><span class="fa">dual write، outbox/CDC و idempotency را تحلیل می‌کند</span><span class="en">Atomic publication and idempotence</span></li><li><span class="fa">برای تازگی و بازسازی معیار قابل سنجش دارد</span><span class="en">Freshness and rebuild criteria</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">اگر مشتری بلافاصله بعد از ثبت سفارش آن را در جست‌وجو نبیند، تجربهٔ کاربر را چطور حفظ می‌کنی؟</span><span class="en">How do you preserve the user experience if a new order is not yet visible in search?</span></p></details>
-<details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳۰–۶۰ دقیقه</span><span class="en">Extended hands-on laboratory · estimated 30–60 minutes</span></summary><div class="fa"><p>برای این اجزا مشخص کن هرکدام <span class="ltr">system of record</span> است یا <span class="ltr">derived</span> و چرا: پایگاه داده سفارش‌ها، کش وضعیت سفارش، ایندکس جست‌وجوی سفارش‌ها، گزارش ماهانه فروش، مدل پیشنهاد محصول. بعد بگو: با ثبت سفارش جدید، کدام سیستم‌ها باید به‌روز شوند و مکانیزم انتشار چه باشد؟</p></div><div class="en"><p>For each of these, decide <span class="ltr">system of record</span> or <span class="ltr">derived</span> and why: the orders database, the order-status cache, the order search index, the monthly sales report, the recommendation model. Then: when a new order lands, which systems must update, and by what propagation mechanism?</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
+<p class="exercise-verdict"><span class="fa">دعوای اصلی اینجاست: مرجع داده کجاست، مشتق‌ها چطور می‌خونن و اگه انتشار بترکه چی می‌شه — فقط اسم بردن اجزا درد رو دوا نمی‌کنه.</span><span class="en">Here&#x27;s the thing: the real fight is authority versus derived views and surviving a failed publication — just naming components won&#x27;t cut it.</span></p>
+<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">فرض کن یه فروشگاه داری که سفارش ثبت می‌کنه و کش، جست‌وجو، گزارش و پیشنهاد محصول هم داره. اول بگو مرجع هر واقعیت کجاست و کدوم نما مشتقه. بعد حساب کن: اگه سفارش commit بشه ولی انتشار رویداد بترکه چی می‌شه؟ قرارداد تازگی هر نما، مسیر بازسازیش و خرج حداقل معماری رو هم بگو.</span><span class="en">Picture this: you&#x27;ve got a shop that takes orders, plus cache, search, reporting, and recommendations. Say which store is the authority for each fact and which views are derived. Then tell me: what happens when the order commits but publishing the event blows up? Spell out each view&#x27;s freshness contract, how you&#x27;d rebuild it, and the cheapest architecture that still works.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">می‌گه مرجع هر واقعیت کجاست و کدوم نما مشتقه</span><span class="en">Names the authority for each fact</span></li><li><span class="fa">dual write و outbox/CDC و idempotency رو با هم مقایسه می‌کنه</span><span class="en">Compares dual write with outbox/CDC and idempotency</span></li><li><span class="fa">برای تازگی و بازسازی یه معیار قابل اندازه‌گیری می‌ده</span><span class="en">Gives measurable freshness and rebuild criteria</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا مشتری سفارش رو ثبت می‌کنه ولی توی جست‌وجو نمی‌بینتش — حال کاربر رو چطور خوب نگه می‌داری؟</span><span class="en">Your customer places an order but can&#x27;t find it in search yet — how do you keep them happy?</span></p></details>
+<details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳۰–۶۰ دقیقه</span><span class="en">Extended hands-on laboratory · estimated 30–60 minutes</span></summary><div class="fa"><p>حالا اینا رو داری: پایگاه داده سفارش‌ها، کش وضعیت سفارش، ایندکس جست‌وجوی سفارش‌ها، گزارش ماهانه فروش، مدل پیشنهاد محصول. برای هرکدوم بگو <span class="ltr">system of record</span>ـه یا <span class="ltr">derived</span> و چرا. بعد حساب کن: با یه سفارش تازه، کدوم سیستم‌ها باید به‌روز بشن و خبرش با چه مکانیزمی پخش می‌شه؟</p></div><div class="en"><p>Here's your lineup: the orders database, the order-status cache, the order search index, the monthly sales report, and the recommendation model. For each, say <span class="ltr">system of record</span> or <span class="ltr">derived</span> — and why. Then tell me: when a fresh order lands, which systems must update, and how does the news travel?</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch1-ex1"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-1"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://www.amazon.jobs/content/en/how-we-hire/sde-iii-interview-prep" target="_blank" rel="noopener">Amazon · SDE III interview preparation</a> · <a href="https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html" target="_blank" rel="noopener">Debezium · outbox event router</a></p>
 </article>
   <article class="exercise-block" id="exercise-2" data-reviewed-exercise="2">
 <h3><span class="fa">تمرین ۲ — تصمیم توزیع</span><span class="en">Exercise 2 — the distribution decision</span></h3>
 <div class="exercise-labels"><span class="exercise-label level-senior"><span class="fa">L2 · Senior</span><span class="en">L2 · Senior</span></span><span class="exercise-label priority-core"><span class="fa">اولویت اصلی</span><span class="en">Core priority</span></span><span class="exercise-label"><span class="fa">40 دقیقه بحث</span><span class="en">40 min discussion</span></span></div>
-<p class="exercise-verdict"><span class="fa">برآورد بار و انتخاب کمترین توزیع مفید است؛ تعداد سفارش روزانه به‌تنهایی دلیل sharding نیست.</span><span class="en">Capacity estimates should justify distribution rather than assume it.</span></p>
-<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">روزانه دو میلیون سفارش، اوج ده‌برابری، گزارش فروش و الزام نگهداری داده در یک کشور داریم. ابتدا اندازهٔ رکورد، read/write ratio، SLO و رشد را روشن کن. سه طرح تک‌گره، primary+replica و sharding را با شواهد ظرفیت مقایسه کن؛ بکاپ، failover و محل داده را هم پوشش بده.</span><span class="en">Compare single-node, primary/replica and sharded designs for two million daily orders, tenfold peaks, analytics and in-country storage. Specify workload, SLOs, growth, failover, backup and migration thresholds.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">میانگین را با peak اشتباه نمی‌گیرد</span><span class="en">Average versus peak</span></li><li><span class="fa">residency را با لزوم sharding یکی نمی‌گیرد</span><span class="en">Residency versus sharding</span></li><li><span class="fa">threshold مهاجرت و هزینهٔ عملیاتی را مشخص می‌کند</span><span class="en">Migration thresholds and cost</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">با پنج برابر شدن حجم و نصف شدن بودجه، کدام بخش را اول تغییر می‌دهی؟</span><span class="en">With fivefold data growth and half the budget, which component do you change first?</span></p></details>
-<details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳۰–۶۰ دقیقه</span><span class="en">Extended hands-on laboratory · estimated 30–60 minutes</span></summary><div class="fa"><p>سناریو: روزانه ۲ میلیون سفارش، گزارش‌های تحلیلی تیم فروش، و قانونی که داده کاربران باید داخل کشور بماند. برای هر سه بگو چه زمانی از «تک‌ماشین» به «توزیع‌شده» می‌رسی، دلیل دقیق چیست و حداقل معماری انتخابی چه شکلی است.</p></div><div class="en"><p>Scenario: 2M orders/day, analytical reports for the sales team, and a law keeping user data inside the country. For each, say when you move from “single-node” to “distributed”, the exact reason, and what the minimal chosen architecture looks like.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
+<p class="exercise-verdict"><span class="fa">اول باید با عدد ثابت کنی توزیع لازم داری یا نه — شمارش سفارش روزانه به‌تنهایی دلیل sharding نیست.</span><span class="en">Honestly, you&#x27;ve got to earn distribution with numbers — a daily order count alone doesn&#x27;t justify sharding.</span></p>
+<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">تصور کن روزانه دو میلیون سفارش داری با اوج ده‌برابری، گزارش فروش و قانونی که داده باید توی یه کشور بمونه. اول اندازهٔ رکورد، read/write ratio، SLO و رشد رو روشن کن. بعد سه طرح تک‌گره، primary+replica و sharding رو با عدد و رقم ظرفیت مقایسه کن؛ بکاپ، failover و جای داده رو هم حساب کن.</span><span class="en">Think of it: 2M orders a day, 10x peaks, sales analytics, and a law keeping data inside one country. First pin down record size, read/write ratio, SLOs, and growth. Then compare single-node, primary/replica, and sharded designs with real capacity numbers — and cover backup, failover, and where the data lives.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">میانگین رو با peak قاطی نمی‌کنه</span><span class="en">Keeps average apart from peak</span></li><li><span class="fa">residency رو با اجبار sharding یکی نمی‌دونه</span><span class="en">Keeps residency apart from forced sharding</span></li><li><span class="fa">threshold مهاجرت و خرج عملیات رو می‌گه</span><span class="en">Names migration thresholds and operating cost</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">اگه حجم پنج برابر بشه و بودجه نصف — اول کدوم تیکه رو دست می‌زنی؟</span><span class="en">Data grows 5x and your budget gets cut in half — which piece do you touch first?</span></p></details>
+<details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳۰–۶۰ دقیقه</span><span class="en">Extended hands-on laboratory · estimated 30–60 minutes</span></summary><div class="fa"><p>تصور کن روزانه ۲ میلیون سفارش داری، تیم فروش گزارش تحلیلی می‌خواد و قانون می‌گه داده کاربرا باید داخل کشور بمونه. برای هر سه بگو دقیقاً کی از «تک‌ماشین» به «توزیع‌شده» می‌رسی، دلیلت چیه و کم‌خرج‌ترین معماری که کارت رو راه می‌ندازه چه شکلیه.</p></div><div class="en"><p>Think of it: 2M orders/day, analytical reports for the sales team, and a law keeping user data inside the country. For each, say exactly when you'd move from “single-node” to “distributed”, why, and what the cheapest architecture that does the job looks like.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch1-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://www.amazon.jobs/content/en/how-we-hire/sde-iii-interview-prep" target="_blank" rel="noopener">Amazon · SDE III interview preparation</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
 </article>
   <article class="exercise-block" id="exercise-3" data-reviewed-exercise="3">
 <h3><span class="fa">تمرین ۳ — چالش GDPR</span><span class="en">Exercise 3 — the GDPR challenge</span></h3>
 <div class="exercise-labels"><span class="exercise-label level-staff"><span class="fa">L3 · Staff / Principal</span><span class="en">L3 · Staff / Principal</span></span><span class="exercise-label priority-role"><span class="fa">وابسته به نقش</span><span class="en">Role-specific</span></span><span class="exercise-label"><span class="fa">35 دقیقه بحث</span><span class="en">35 min discussion</span></span></div>
-<p class="exercise-verdict"><span class="fa">حذف داده در سامانه‌های لاگ‌محور برای پلتفرم و حریم خصوصی مهم است؛ انتظار حفظ متن قانون برای همهٔ نقش‌ها مناسب نیست.</span><span class="en">Important for privacy/platform roles; legal memorization is not a general backend requirement.</span></p>
-<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">درخواست حذف یک کاربر را از مرجع تا کش، ایندکس، لاگ، بکاپ و مجموعهٔ آموزش دنبال کن. گزینه‌های جداسازی PII، retention، بازنویسی سگمنت و حذف کلید رمز را مقایسه کن. بگو چه چیزی در restore نباید دوباره زنده شود و کدام تصمیم نیازمند تفسیر حقوقی است.</span><span class="en">Trace deletion through the record, cache, index, log, backup and training data. Compare PII separation, retention, rewriting and key deletion. Prevent resurrection after restore and identify legal uncertainties.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">همهٔ کپی‌ها و restore را پوشش می‌دهد</span><span class="en">Derived copies and restore</span></li><li><span class="fa">محدودیت crypto-shredding و لینک‌پذیری را می‌بیند</span><span class="en">Key-deletion limitations</span></li><li><span class="fa">تأیید حذف را با مدرک و SLA داخلی طراحی می‌کند</span><span class="en">Deletion evidence and deadlines</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">اگر یک مصرف‌کنندهٔ قدیمی هنگام حذف آفلاین باشد چه تضمینی داری؟</span><span class="en">What happens when an old consumer is offline throughout a deletion?</span></p></details>
-<details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۱–۲ ساعت</span><span class="en">Extended hands-on laboratory · estimated 1–2 hours</span></summary><div class="fa"><p>اگر سیستمت روی <span class="ltr">append-only event log</span> ساخته شده و کاربر حذف داده‌اش را بخواهد، چه گزینه‌های مهندسی داری؟ هر گزینه را با تریدآفش بیان کن.</p></div><div class="en"><p>If your system is built on an <span class="ltr">append-only event log</span> and a user requests deletion, what engineering options do you have? State each option with its trade-off.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
+<p class="exercise-verdict"><span class="fa">پاک کردن داده توی سیستم لاگ‌محور درد واقعی پلتفرم و حریم خصوصیه — ولی از هیچ‌کس انتظار نمی‌ره متن قانون رو حفظ باشه.</span><span class="en">Rule of thumb: deletion in log-based systems is a real platform and privacy pain — but nobody expects you to recite the law by heart.</span></p>
+<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">داستان از این قراره: یه کاربر می‌گه داده‌م رو پاک کن. رد درخواست رو از مرجع تا کش، ایندکس، لاگ، بکاپ و مجموعهٔ آموزش دنبال کن. جداسازی PII، retention، بازنویسی سگمنت و حذف کلید رمز رو مقایسه کن؛ بگو چی نباید با restore دوباره زنده بشه و کدوم تصمیم تفسیر حقوقی می‌خواد.</span><span class="en">Here&#x27;s the thing: a user asks you to delete their data. Trace that request from the record through the cache, index, log, backup, and training data. Compare PII separation, retention, segment rewriting, and key deletion — then say what must never come back to life on restore, and which call needs a lawyer.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">همهٔ کپی‌ها رو تا restore پوشش می‌ده</span><span class="en">Covers every copy through restore</span></li><li><span class="fa">محدودیت crypto-shredding و لینک‌پذیری رو می‌دونه</span><span class="en">Knows key-deletion limits and re-linkability</span></li><li><span class="fa">تأیید حذف رو با مدرک و SLA داخلی طراحی می‌کنه</span><span class="en">Designs deletion proof with an internal SLA</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا یه مصرف‌کنندهٔ قدیمی دقیقاً موقع حذف آفلاین باشه — چه تضمینی می‌دی؟</span><span class="en">Now an old consumer is offline for the whole deletion — what guarantee can you still give?</span></p></details>
+<details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۱–۲ ساعت</span><span class="en">Extended hands-on laboratory · estimated 1–2 hours</span></summary><div class="fa"><p>فرض کن سیستمت روی <span class="ltr">append-only event log</span> ساخته شده و کاربر می‌گه داده‌م رو پاک کن. چه راه‌های مهندسی داری؟ هر راه رو با تریدآفش بگو.</p></div><div class="en"><p>Picture this: your system is built on an <span class="ltr">append-only event log</span> and a user asks for deletion. What engineering moves do you have? Give each option with its trade-off.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch1-ex3"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-3"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://commission.europa.eu/law/law-topic/data-protection/information-business-and-organisations/principles-gdpr_en" target="_blank" rel="noopener">European Commission · GDPR principles</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
 </article>
   <div class="doc-nav">

@@ -40,12 +40,12 @@
       "a_en": "Never fake it by writing to the index synchronously. Keep the async path and protect the experience another way: after placing the order, show the user their own order from the record (read-your-writes) with a 'search updates within seconds' note; route the user's own queries to record + pending state first. The freshness contract stays honest, and the person affected never sees the lag.",
       "a_fa": "هرگز با نوشتن هم‌گام به ایندکس تظاهرش را درنیاور. مسیر ناهمگام را نگه دار و تجربه را جور دیگر حفظ کن: بعد از ثبت، سفارش خود کاربر را از مرجع نشان بده (read-your-writes) با یادداشت «جست‌وجو ظرف چند ثانیه به‌روز می‌شود»؛ کوئری‌های خود کاربر اول به مرجع + حالت pending بروند. قرارداد تازگی صادق می‌ماند و فرد متأثر lag را هرگز نمی‌بیند.",
       "level": "senior",
-      "q_en": "How do you preserve the user experience if a new order is not yet visible in search?",
-      "q_fa": "اگر مشتری بلافاصله بعد از ثبت سفارش آن را در جست‌وجو نبیند، تجربه کاربر را چطور حفظ می‌کنی؟"
+      "q_en": "Your customer places an order but can't find it in search yet — how do you keep them happy?",
+      "q_fa": "حالا مشتری سفارش رو ثبت می‌کنه ولی توی جست‌وجو نمی‌بینتش — حال کاربر رو چطور خوب نگه می‌داری؟"
     }
   ],
-  "interview_q_en": "Design order storage with cache, search, reporting and recommendation views. Name the record for each fact; explain commit-without-publication, freshness contracts, rebuilding and minimum cost.",
-  "interview_q_fa": "فروشگاهی را طراحی کن که سفارش را ثبت می‌کند و کش، جست‌وجو، گزارش و پیشنهاد محصول دارد. مرجع هر واقعیت را مشخص کن. اگر سفارش commit شود ولی انتشار رویداد شکست بخورد چه می‌کنی؟ قرارداد تازگی هر نما، مسیر بازسازی و هزینه حداقل معماری را توضیح بده.",
+  "interview_q_en": "Picture this: you've got a shop that takes orders, plus cache, search, reporting, and recommendations. Say which store is the authority for each fact and which views are derived. Then tell me: what happens when the order commits but publishing the event blows up? Spell out each view's freshness contract, how you'd rebuild it, and the cheapest architecture that still works.",
+  "interview_q_fa": "فرض کن یه فروشگاه داری که سفارش ثبت می‌کنه و کش، جست‌وجو، گزارش و پیشنهاد محصول هم داره. اول بگو مرجع هر واقعیت کجاست و کدوم نما مشتقه. بعد حساب کن: اگه سفارش commit بشه ولی انتشار رویداد بترکه چی می‌شه؟ قرارداد تازگی هر نما، مسیر بازسازیش و خرج حداقل معماری رو هم بگو.",
   "mental_en": "The record is where a fact becomes official: losing it loses the truth. A derived view is a function of the record: it may lag, be dropped and be rebuilt. Every design question here is just 'which box is the function, and which is the truth?'",
   "mental_fa": "مرجع جایی است که واقعیت رسمیت پیدا می‌کند: گم شدنش یعنی گم شدن حقیقت. نمای مشتق تابعی از مرجع است: می‌تواند عقب بماند، انداخته و بازسازی شود. هر سؤال طراحی این‌جا فقط همین است: «کدام جعبه تابع است و کدام حقیقت؟»",
   "mistakes": [

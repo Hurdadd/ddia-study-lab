@@ -36,12 +36,12 @@
       "a_en": "Cut in this order: (1) analytics freshness first — nightly instead of hourly extracts, reports tolerate it; (2) standby class and replica count — keep one standby (safety) but drop read replicas, serve reads from the primary with a latency watch; (3) last: shard later, not sooner — sharding under a halved budget doubles the ways to fail. Never cut backups or the restore drill: the cheapest way to lose everything is saving on the thing that proves you can come back.",
       "a_fa": "به این ترتیب ببر: (۱) اول تازگی تحلیلی — استخراج شبانه به‌جای ساعتی، گزارش‌ها تحمل می‌کنند؛ (۲) کلاس standby و تعداد رپلیکا — یک standby بماند (ایمنی) ولی رپلیکاهای خواندن حذف و خواندن‌ها با دیده‌بانی تأخیر از primary داده شوند؛ (۳) آخر: شاردینگ دیرتر نه زودتر — شارد کردن با بودجه نصف‌شده راه‌های خرابی را دو برابر می‌کند. هرگز بکاپ و drill بازیابی را نبر: ارزان‌ترین راه برای از دست دادن همه‌چیز، صرفه‌جویی روی چیزی است که بازگشتت را ثابت می‌کند.",
       "level": "staff",
-      "q_en": "With fivefold data growth and half the budget, which component do you change first?",
-      "q_fa": "با پنج برابر شدن حجم و نصف شدن بودجه، کدام بخش را اول تغییر می‌دهی؟"
+      "q_en": "Data grows 5x and your budget gets cut in half — which piece do you touch first?",
+      "q_fa": "اگه حجم پنج برابر بشه و بودجه نصف — اول کدوم تیکه رو دست می‌زنی؟"
     }
   ],
-  "interview_q_en": "For 2M daily orders with 10x peaks, sales analytics and in-country storage: clarify workload, SLOs and growth; compare single-node, primary+replica and sharded designs with capacity evidence; cover backup, failover, data placement and migration thresholds.",
-  "interview_q_fa": "روزانه دو میلیون سفارش، اوج ده‌برابری، گزارش فروش و الزام نگهداری داده در یک کشور: ابتدا اندازه رکورد، read/write ratio، SLO و رشد را روشن کن؛ سه طرح تک‌گره، primary+replica و sharding را با شواهد ظرفیت مقایسه کن؛ بکاپ، failover و محل داده را هم پوشش بده.",
+  "interview_q_en": "Think of it: 2M orders a day, 10x peaks, sales analytics, and a law keeping data inside one country. First pin down record size, read/write ratio, SLOs, and growth. Then compare single-node, primary/replica, and sharded designs with real capacity numbers — and cover backup, failover, and where the data lives.",
+  "interview_q_fa": "تصور کن روزانه دو میلیون سفارش داری با اوج ده‌برابری، گزارش فروش و قانونی که داده باید توی یه کشور بمونه. اول اندازهٔ رکورد، read/write ratio، SLO و رشد رو روشن کن. بعد سه طرح تک‌گره، primary+replica و sharding رو با عدد و رقم ظرفیت مقایسه کن؛ بکاپ، failover و جای داده رو هم حساب کن.",
   "mental_en": "Distribution is a cost you pay to cross a named limit — throughput, size, availability math, or a legal boundary. Until a number crosses, a bigger single box plus a standby is the honest minimum.",
   "mental_fa": "توزیع هزینه‌ای است که برای گذر از یک حد نام‌دار می‌پردازی — توان، اندازه، حساب دسترس‌پذیری یا مرز حقوقی. تا عددی رد نشده، جعبه واحد بزرگ‌تر به‌علاوه standby حداقل صادقانه است.",
   "mistakes": [
