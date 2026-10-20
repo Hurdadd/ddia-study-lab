@@ -141,8 +141,8 @@
       "a_en": "Not always. If the client only READ the new schema, rollback is still one flag flip. But if it WROTE data the old schema cannot represent (a new required field, a split the flat row cannot hold), flipping back either drops that data or serves it wrongly. Guard: during canary, writes must stay old-readable (new fields optional/ignored by the old projector), or carry a forward-fill job that backfills the new shape into the old view before any rollback. If neither holds, say so: rollback is broken from that write on, and the only way back is forward-fix.",
       "a_fa": "نه همیشه. اگر کلاینت فقط schema تازه را خوانده باشد rollback هنوز یک چرخش flag است. ولی اگر داده‌ای نوشته که schema قدیم نمی‌تواند نمایش دهد (فیلد اجباری تازه یا شکافی که سطر تخت نمی‌گیرد)، برگشتن یا آن داده را می‌اندازد یا غلط سرو می‌کند. نگهبان: در canary نوشتن‌ها باید old-readable بمانند (فیلدهای تازه اختیاری و نادیده‌گرفته‌شده توسط projector قدیم) یا کار forward-fill باشد که شکل تازه را پیش از rollback به نمای قدیم برگرداند. اگر هیچ‌کدام نیست صریح بگو: rollback از آن نوشتن به بعد خراب است و تنها راه برگشت اصلاح روبه‌جلوست.",
       "level": "staff",
-      "q_en": "A client writes data the old schema cannot represent after reading the new schema. Is rollback still possible?",
-      "q_fa": "کاربری بعد از خواندن schema جدید داده‌ای بنویسد که نسخه قدیم نمی‌فهمد؛ rollback هنوز ممکن است؟"
+      "q_en": "A client writes data the old schema can't represent after reading the new schema. Is rollback still possible?",
+      "q_fa": "کاربر بعد از خوندن schema جدید داده‌ای بنویسه که نسخه قدیم نمی‌فهمه؛ rollback هنوز ممکنه؟"
     },
     {
       "a_en": "After the criteria hold: 100% new reads for a full business cycle with zero mismatches, lag inside SLO, and no rollback in the hold window. Then stop the old projector, keep its last snapshot for one more retention period (cheap insurance), and only then delete. Retiring on canary percentages alone — without the hold — strands you if a slow-burn bug surfaces a week later.",
@@ -152,8 +152,8 @@
       "q_fa": "دقیقاً کی نمای قدیم را حذف می‌کنی؟"
     }
   ],
-  "interview_q_en": "Migrate a catalog schema using one authoritative log with independent old and new projections. Define backfill plus catch-up, shadow reads, canary, rollback and old-view retirement. Inject a bug and lag in the new projection; keep compatibility and write-path ownership explicit.",
-  "interview_q_fa": "schema کاتالوگ را با یک لاگ مرجع و دو projection قدیم و جدید مهاجرت بده. backfill با catch-up و خواندن سایه و canary و rollback و بازنشستگی نمای قدیم را تعریف کن. باگ و lag در projection تازه تزریق کن؛ سازگاری و مالکیت مسیر نوشتن را صریح نگه دار.",
+  "interview_q_en": "Think of it, you're migrating a catalog with one shared input log and independent old and new projections. You define backfill, catch-up, shadow reads, canary routing, rollback, and when you retire the old view. You inject a projection bug and lag; and you keep write ownership and compatibility explicit.",
+  "interview_q_fa": "تصور کن schema کاتالوگ رو با یه log مرجع و دو projection قدیم و جدید مهاجرت می‌دی. backfill و catch-up، shadow read، canary، rollback و زمان حذف نسخه قدیم رو تعریف کن. bug تو projection جدید و lag تزریق کن؛ مالکیت compatibility و write path رو هم شفاف نگه دار.",
   "mental_en": "Two rails while the train keeps running: the old rail carries every passenger while the new rail is laid beside it, tested with empty cars (shadow), then a few cars (canary), then all traffic. The old rail is torn up only after the new one has carried full load through a whole timetable — and until then, switching back is just points on the track.",
   "mental_fa": "دو ریل درحالی‌که قطار همچنان می‌رود: ریل قدیم همه مسافرها را می‌برد درحالی‌که ریل تازه کنارش کشیده می‌شود، با واگن‌های خالی تست می‌شود (سایه)، بعد چند واگن (canary) و بعد کل ترافیک. ریل قدیم فقط بعد از این‌که تازه کل بار را در یک جدول زمانی کامل برد جمع می‌شود — و تا آن موقع برگشتن فقط سوزن ریل است.",
   "mistakes": [

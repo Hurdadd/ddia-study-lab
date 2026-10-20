@@ -187,7 +187,7 @@
       "a_fa": "قید یکتایی آن‌ها را سریال می‌کند: یک INSERT می‌برد و انتقال را اجرا می‌کند؛ دیگری conflict کلید می‌گیرد و سطر را می‌خواند. اگر سطر از قبل SUCCESS می‌گوید نتیجه ذخیره‌شده را برگردان. اگر هنوز PENDING می‌گوید (برنده وسط تراکنش است) ۲۰۲ در حال انجام با محل poll برگردان — و هرگز محاسبه دوم شروع نکن. حالت pending به timeout نیاز دارد: برنده crashکرده باید بالاخره سطرش را به FAILED بغلتاند تا منتظرها از poll دست بکشند.",
       "level": "senior",
       "q_en": "Two requests with the same ID arrive concurrently. How do you return success or pending?",
-      "q_fa": "دو درخواست هم‌زمان با یک ID برسند؛ پاسخ موفق یا pending را چگونه تعیین می‌کنی؟"
+      "q_fa": "دو درخواست هم‌زمان با یه ID برسن؛ پاسخ موفق یا pending رو چطور تعیین می‌کنی؟"
     },
     {
       "a_en": "It does not retry; the money already moved. The client recovers certainty by reading the request ID (GET /transfers/{id}) or its statement: the stored result is the receipt. Design rule: every mutating response includes the request ID, so a lost reply is always re-resolvable without a new intent.",
@@ -197,8 +197,8 @@
       "q_fa": "کلاینت بعد از پاسخ گمشده هیچ‌وقت retry نمی‌کند. پول گم شده؟"
     }
   ],
-  "interview_q_en": "Design a two-account transfer API carrying a request ID from client to database. Bind payload and result to the ID; commit uniqueness, debit/credit and the log atomically. Analyze the lost-commit reply with retry, and rebuild balances independently from the log.",
-  "interview_q_fa": "API انتقال دو حساب را با شناسه درخواست از کلاینت تا پایگاه داده طراحی کن. payload و نتیجه را به شناسه bind کن؛ یکتایی و بدهی/بستانکاری و لاگ را اتمیک commit کن. پاسخ commit گم‌شده با retry را تحلیل کن و بالانس‌ها را مستقل از لاگ بازسازی کن.",
+  "interview_q_en": "Picture this, you're designing a transfer API between two accounts. You carry a request ID end to end, from client to DB. You bind payload and result to that ID; your UNIQUE constraint, debit and credit, and log commit together. You handle the lost commit response plus retry, and you rebuild balance projections independently from the log.",
+  "interview_q_fa": "فرض کن API انتقال بین دو حساب داری. request ID رو از client تا DB ببر. payload و نتیجه رو به ID بچسبون؛ UNIQUE، debit و credit و log باید اتمیک باشن. پاسخ commit گم‌شده و retry رو تحلیل کن و projection موجودی رو مستقل از log بساز.",
   "mental_en": "A post office with a receipt book: every letter gets a numbered receipt BEFORE any money moves, and the receipt already names the result. A lost copy of the receipt never re-sends the money — the clerk looks up the number and hands over the same receipt again. A different letter needs a new number; the same number on a different letter is forgery and gets rejected.",
   "mental_fa": "اداره پست با دفتر رسید: هر نامه پیش از حرکت پول یک رسید شماره‌دار می‌گیرد و رسید از قبل نتیجه را نام می‌برد. گم‌شدن کپی رسید هرگز پول را دوباره نمی‌فرستد — کارمند شماره را پیدا می‌کند و همان رسید را دوباره می‌دهد. نامه متفاوت شماره تازه می‌خواهد؛ همان شماره روی نامه متفاوت جعل است و رد می‌شود.",
   "mistakes": [
