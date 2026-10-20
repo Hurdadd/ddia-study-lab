@@ -1,40 +1,40 @@
 {
   "alternatives": [
     {
-      "en": "Stay single-node longer with a bigger box and a standby: valid while writes fit, working set fits RAM, and one AZ of downtime is survivable. Cost: a harder migration later — state the tripwire numbers now so the move is a decision, not a surprise.",
-      "fa": "تک‌گره بزرگ‌تر با standby را بیشتر نگه دار: تا وقتی نوشتن‌ها جا می‌شوند، working set در RAM است و downtime یک AZ قابل تحمل است معتبر است. هزینه: مهاجرت سخت‌تر بعدی — اعداد tripwire را حالا بنویس تا جابه‌جایی تصمیم باشد نه غافلگیری."
+      "en": "Stay single-node longer with a bigger box and a standby: that's valid while writes fit, the working set fits in RAM, and one AZ of downtime is survivable. The cost: a harder migration later — write the tripwire numbers down now so the move is a decision, not a surprise.",
+      "fa": "تک‌گرهٔ بزرگ‌تر با standby رو بیشتر نگه دار: تا وقتی نوشتن‌ها جا می‌شن، working set توی RAM هست و downtime یه AZ قابل تحمله، معتبره. هزینه‌اش: مهاجرت سخت‌تر بعدی — اعداد tripwire رو همین الان بنویس تا جابه‌جایی تصمیم باشه نه غافلگیری."
     }
   ],
-  "answer_en": "2M/day (≈ 23/s avg, ≈ 231/s peak) does not force sharding: one healthy relational primary with a standby handles it. Split analytics off from day one (workload isolation, not volume), and treat in-country storage as a placement rule, not a scaling reason. Shard only when a named tripwire fires — write throughput, data size, or availability math — with backup, failover and migration thresholds written down.",
-  "answer_fa": "۲ میلیون در روز (≈ ۲۳ میانگین و ≈ ۲۳۱ اوج در ثانیه) شاردینگ را تحمیل نمی‌کند: یک primary رابطه‌ای سالم با standby جواب می‌دهد. تحلیلی را از روز اول جدا کن (ایزولاسیون بار، نه حجم) و نگهداری داخل کشور را قاعده مکانی بدان نه دلیل مقیاس. فقط وقتی tripwire نام‌داری خورد شارد کن — توان نوشتن، اندازه داده یا حساب دسترس‌پذیری — با آستانه‌های بکاپ و failover و مهاجرت نوشته‌شده.",
+  "answer_en": "Honestly, 2M/day (≈ 23/s avg, ≈ 231/s peak) doesn't force sharding: one healthy relational primary with a standby handles it. Split analytics off from day one (workload isolation, not volume), and treat in-country storage as a placement rule, not a scaling reason. Shard only when a named tripwire fires — write throughput, data size, or availability math — and write the backup, failover and migration thresholds down while you're still calm.",
+  "answer_fa": "راستش ۲ میلیون در روز (≈ ۲۳ میانگین و ≈ ۲۳۱ اوج در ثانیه) مجبورت نمی‌کنه شارد کنی: یه primary رابطه‌ای سالم با standby جواب می‌ده. تحلیلی رو از روز اول جدا کن (ایزولاسیون بار، نه حجم) و نگهداری داخل کشور رو قاعدهٔ مکانی بدون، نه دلیل مقیاس. فقط وقتی یه tripwire نام‌دار خورد شارد کن — توان نوشتن، اندازهٔ داده یا حساب دسترس‌پذیری — با آستانه‌های بکاپ و failover و مهاجرت نوشته‌شده.",
   "assumptions": [
     {
-      "en": "Record ≈ 1 KB; read/write ≈ 10:1; 10x peak factor; 30% yearly growth — all teaching numbers, revisit with real traces.",
-      "fa": "رکورد ≈ ۱ کیلوبایت؛ خواندن/نوشتن ≈ ۱۰:۱؛ ضریب اوج ۱۰؛ رشد سالانه ۳۰٪ — همه اعداد آموزشی‌اند، با ردپای واقعی بازبینی شوند."
+      "en": "Picture this: record ≈ 1 KB, read/write ≈ 10:1, 10x peak factor, 30% yearly growth — all teaching numbers, so revisit them with real traces.",
+      "fa": "بذار با حساب ساده شروع کنیم: رکورد ≈ ۱ کیلوبایت؛ خواندن/نوشتن ≈ ۱۰:۱؛ ضریب اوج ۱۰؛ رشد سالانه ۳۰٪ — همه اعداد آموزشی‌اند، با ردپای واقعی بازبینی بشن."
     },
     {
-      "en": "SLO (teaching): p95 order write < 300 ms, RPO ≤ 1 min, RTO ≤ 5 min.",
-      "fa": "SLO آموزشی: نوشتن سفارش p95 زیر ۳۰۰ms، RPO ≤ ۱ دقیقه، RTO ≤ ۵ دقیقه."
+      "en": "SLO (teaching): p95 order write < 300 ms, RPO ≤ 1 min, RTO ≤ 5 min — that's the line you design against.",
+      "fa": "SLO آموزشی: نوشتن سفارش p95 زیر ۳۰۰ms، RPO ≤ ۱ دقیقه، RTO ≤ ۵ دقیقه — همین رو مبنا بگیر."
     },
     {
-      "en": "Residency = legal placement constraint; analytics = workload isolation need.",
-      "fa": "ماندگاری = قید حقوقی مکانی؛ تحلیلی = نیاز ایزولاسیون بار."
+      "en": "Residency = a legal placement constraint; analytics = a workload isolation need — residency says where the data lives, analytics keeps the load apart.",
+      "fa": "ماندگاری = قید حقوقی مکانی؛ تحلیلی = نیاز ایزولاسیون بار — یعنی ماندگاری می‌گه داده کجا بمونه، تحلیلی می‌گه بار از هم جدا بمونه."
     }
   ],
   "failures": [
     {
-      "en": "Primary death: standby promotes (fenced old primary), queue buffers peak writes during the seconds of failover; analytics never notices because it reads the warehouse.",
-      "fa": "مرگ primary: standby بالا می‌آید (primary قدیم فنس)، صف نوشتن‌های اوج را در ثانیه‌های failover بافر می‌کند؛ تحلیلی چون از انبار می‌خواند اصلاً نمی‌فهمد."
+      "en": "Primary death: the standby promotes (the old primary is fenced), a queue buffers the peak writes during the seconds of failover; analytics never notices, because it reads the warehouse.",
+      "fa": "مرگ primary: standby بالا میاد (primary قدیم فنس می‌شه)، صف نوشتن‌های اوج رو در ثانیه‌های failover بافر می‌کنه؛ تحلیلی چون از انبار می‌خونه اصلاً نمی‌فهمه."
     },
     {
-      "en": "Analytics stampede: a Black-Friday report scans the orders DB directly. The guard is structural — reports only touch the warehouse — plus a nightly extract with a bounded load budget.",
-      "fa": "هجوم تحلیلی: گزارش بلک‌فرایدی مستقیم پایگاه سفارش‌ها را اسکن می‌کند. نگهبان ساختاری است — گزارش‌ها فقط به انبار می‌خورند — به‌علاوه استخراج شبانه با بودجه بار کران‌دار."
+      "en": "Analytics stampede: a Black-Friday report scans the orders DB directly. The guard is structural — reports only touch the warehouse — plus a nightly extract with a bounded load budget. Structure beats a reminder here.",
+      "fa": "هجوم تحلیلی: گزارش بلک‌فرایدی مستقیم پایگاه سفارش‌ها رو اسکن می‌کنه. نگهبانش ساختاریه — گزارش‌ها فقط به انبار می‌خورن — به‌علاوهٔ استخراج شبانه با بودجهٔ بار کران‌دار."
     }
   ],
   "followups": [
     {
-      "a_en": "Cut in this order: (1) analytics freshness first — nightly instead of hourly extracts, reports tolerate it; (2) standby class and replica count — keep one standby (safety) but drop read replicas, serve reads from the primary with a latency watch; (3) last: shard later, not sooner — sharding under a halved budget doubles the ways to fail. Never cut backups or the restore drill: the cheapest way to lose everything is saving on the thing that proves you can come back.",
-      "a_fa": "به این ترتیب ببر: (۱) اول تازگی تحلیلی — استخراج شبانه به‌جای ساعتی، گزارش‌ها تحمل می‌کنند؛ (۲) کلاس standby و تعداد رپلیکا — یک standby بماند (ایمنی) ولی رپلیکاهای خواندن حذف و خواندن‌ها با دیده‌بانی تأخیر از primary داده شوند؛ (۳) آخر: شاردینگ دیرتر نه زودتر — شارد کردن با بودجه نصف‌شده راه‌های خرابی را دو برابر می‌کند. هرگز بکاپ و drill بازیابی را نبر: ارزان‌ترین راه برای از دست دادن همه‌چیز، صرفه‌جویی روی چیزی است که بازگشتت را ثابت می‌کند.",
+      "a_en": "Cut in this order: (1) analytics freshness first — nightly instead of hourly extracts, reports tolerate it; (2) standby class and replica count — keep one standby (safety) but drop the read replicas, serve reads from the primary with a latency watch; (3) last: shard later, not sooner — sharding under a halved budget doubles the ways to fail. And never cut backups or the restore drill: the cheapest way to lose everything is saving on the very thing that proves you can come back.",
+      "a_fa": "به این ترتیب ببر: (۱) اول تازگی تحلیلی — استخراج شبانه به‌جای ساعتی، گزارش‌ها تحمل می‌کنن؛ (۲) کلاس standby و تعداد رپلیکا — یه standby بمونه (ایمنی) ولی رپلیکاهای خواندن حذف بشن و خواندن‌ها با دیده‌بانی تأخیر از primary داده بشن؛ (۳) آخر: شاردینگ دیرتر نه زودتر — شارد کردن با بودجهٔ نصف‌شده راه‌های خرابی رو دو برابر می‌کنه. هرگز بکاپ و drill بازیابی رو نبر: ارزان‌ترین راه برای از دست دادن همه‌چیز، صرفه‌جویی روی همون چیزیه که برگشتتو ثابت می‌کنه.",
       "level": "staff",
       "q_en": "Data grows 5x and your budget gets cut in half — which piece do you touch first?",
       "q_fa": "اگه حجم پنج برابر بشه و بودجه نصف — اول کدوم تیکه رو دست می‌زنی؟"
@@ -42,16 +42,16 @@
   ],
   "interview_q_en": "Think of it: 2M orders a day, 10x peaks, sales analytics, and a law keeping data inside one country. First pin down record size, read/write ratio, SLOs, and growth. Then compare single-node, primary/replica, and sharded designs with real capacity numbers — and cover backup, failover, and where the data lives.",
   "interview_q_fa": "تصور کن روزانه دو میلیون سفارش داری با اوج ده‌برابری، گزارش فروش و قانونی که داده باید توی یه کشور بمونه. اول اندازهٔ رکورد، read/write ratio، SLO و رشد رو روشن کن. بعد سه طرح تک‌گره، primary+replica و sharding رو با عدد و رقم ظرفیت مقایسه کن؛ بکاپ، failover و جای داده رو هم حساب کن.",
-  "mental_en": "Distribution is a cost you pay to cross a named limit — throughput, size, availability math, or a legal boundary. Until a number crosses, a bigger single box plus a standby is the honest minimum.",
-  "mental_fa": "توزیع هزینه‌ای است که برای گذر از یک حد نام‌دار می‌پردازی — توان، اندازه، حساب دسترس‌پذیری یا مرز حقوقی. تا عددی رد نشده، جعبه واحد بزرگ‌تر به‌علاوه standby حداقل صادقانه است.",
+  "mental_en": "Think of distribution as a price you pay to cross a named limit — throughput, size, availability math, or a legal boundary. Until a number crosses, a bigger single box plus a standby is the honest minimum. Sharding without a number is just a bill with no reason attached.",
+  "mental_fa": "ببین رفیق، توزیع یه هزینه‌ایه که برای رد شدن از یه حد نام‌دار می‌دی — توان، اندازه، حساب دسترس‌پذیری یا مرز حقوقی. تا وقتی هیچ عددی رد نشده، یه جعبهٔ بزرگ‌تر به‌علاوهٔ standby صادقانه‌ترین حداقله. شارد کردن وقتی معنی داره که یه عدد پشتش باشه، نه وقتی فقط حس می‌کنی بزرگ شده.",
   "mistakes": [
     {
-      "en": "'Big scale, so shards and microservices from day one.' You buy distributed-ops cost and debugging pain with no crossing number to justify it.",
-      "fa": "«مقیاس بزرگ است پس میکروسرویس/شارد از روز اول». هزینه عملیات توزیع‌شده و درد اشکال‌زدایی را بدون عدد گذر می‌خری."
+      "en": "'Big scale, so shards and microservices from day one.' You buy distributed-ops cost and debugging pain with no crossing number to justify it — and no way to argue the bill later.",
+      "fa": "«مقیاس بزرگه پس میکروسرویس/شارد از روز اول». هزینهٔ عملیات توزیع‌شده و درد اشکال‌زدایی رو بدون عدد گذر می‌خری."
     },
     {
-      "en": "Confusing residency with sharding: the law says where data lives, not how many primaries you run. One compliant region deployment answers the law; sharding answers throughput.",
-      "fa": "قاطی کردن residency با sharding: قانون می‌گوید داده کجاست، نه چند primary داری. یک استقرار منطقه‌ای سازگار جواب قانون است؛ شاردینگ جواب توان است."
+      "en": "Confusing residency with sharding: the law says where data lives, not how many primaries you run. One compliant regional deployment answers the law; sharding answers throughput.",
+      "fa": "قاطی کردن residency با sharding: قانون می‌گه داده کجاست، نه چند primary داری. یه استقرار منطقه‌ای سازگار جواب قانونه؛ شاردینگ جواب توانه."
     }
   ],
   "number": 2,
@@ -62,78 +62,78 @@
   ],
   "steps": [
     {
-      "en": "Rough math first: 2M/day ≈ 23/s average, ≈ 231/s at 10x peak; ×3 internal messages stays under a thousand/s. One healthy primary absorbs this.",
-      "fa": "اول حساب سرانگشتی: ۲ میلیون در روز ≈ ۲۳ میانگین و ≈ ۲۳۱ اوج در ثانیه؛ ضرب‌در ۳ پیام داخلی زیر هزار در ثانیه می‌ماند. یک primary سالم این را جذب می‌کند.",
+      "en": "Rough math first: 2M/day ≈ 23/s average, ≈ 231/s at 10x peak; ×3 internal messages stays under a thousand/s. One healthy primary absorbs that easily.",
+      "fa": "اول حساب سرانگشتی: ۲ میلیون در روز ≈ ۲۳ میانگین و ≈ ۲۳۱ اوج در ثانیه؛ ضرب‌در ۳ پیام داخلی زیر هزار در ثانیه می‌مونه. یه primary سالم این رو جذب می‌کنه.",
       "t_en": "Size the load honestly",
-      "t_fa": "سایز صادقانه بار"
+      "t_fa": "اول بار رو صادقانه سایز کن"
     },
     {
-      "en": "Orders (operational): start single-node + standby for availability and backup. Shard only past a named tripwire: single-writer throughput, disk/RAM fit, or certain explosive growth.",
-      "fa": "سفارش‌ها (عملیاتی): شروع تک‌گره + standby برای دسترس‌پذیری و بکاپ. شارد فقط بعد از tripwire نام‌دار: توان تک‌نویسنده، جا شدن دیسک/RAM یا رشد انفجاری قطعی.",
+      "en": "Orders (operational): start single-node + standby for availability and backup. Shard only past a named tripwire: single-writer throughput, disk/RAM fit, or certain explosive growth. No number, no move.",
+      "fa": "سفارش‌ها (عملیاتی): شروع با تک‌گره + standby برای دسترس‌پذیری و بکاپ. شارد فقط بعد از یه tripwire نام‌دار: توان تک‌نویسنده، جا شدن دیسک/RAM یا رشد انفجاری قطعی.",
       "t_en": "Operational: single until a tripwire",
-      "t_fa": "عملیاتی: تک‌گره تا tripwire"
+      "t_fa": "عملیاتی: تا tripwire تک‌گره بمون"
     },
     {
-      "en": "Sales reports (analytical): separate from day one for workload isolation. Hourly/nightly extract into a columnar warehouse; heavy scans never touch the orders DB.",
-      "fa": "گزارش‌های فروش (تحلیلی): از روز اول جدا برای ایزولاسیون بار. استخراج ساعتی/شبانه به انبار ستونی؛ اسکن سنگین هرگز به پایگاه سفارش‌ها نخورد.",
+      "en": "Sales reports (analytical): separate from day one for workload isolation. Hourly/nightly extract into a columnar warehouse; heavy scans never touch the orders DB. The warehouse isn't a tripwire decision — it starts on day one.",
+      "fa": "گزارش‌های فروش (تحلیلی): از روز اول جدا، برای ایزولاسیون بار. استخراج ساعتی/شبانه به انبار ستونی؛ اسکن سنگین هیچ‌وقت به پایگاه سفارش‌ها نخوره.",
       "t_en": "Analytical: warehouse from day one",
       "t_fa": "تحلیلی: انبار از روز اول"
     },
     {
-      "en": "Residency (legal): a regional deployment with a clear boundary; only anonymized/aggregated data leaves. This answers the law, not throughput.",
-      "fa": "ماندگاری (حقوقی): استقرار منطقه‌ای با مرز روشن؛ فقط داده بی‌هویت/تجمیعی بیرون می‌رود. این جواب قانون است نه توان.",
+      "en": "Residency (legal): a regional deployment with a clear boundary; only anonymized/aggregated data leaves. That answers the law, not throughput.",
+      "fa": "ماندگاری (حقوقی): استقرار منطقه‌ای با مرز روشن؛ فقط دادهٔ بی‌هویت/تجمیعی بیرون می‌ره. این جواب قانونه، نه توان.",
       "t_en": "Residency: placement, not topology",
       "t_fa": "ماندگاری: مکان نه توپولوژی"
     }
   ],
-  "tests_en": "Track monthly: writes/s vs the single-writer tripwire, data size vs disk/RAM fit, failover seconds vs RTO, restore minutes vs RTO, warehouse extract load vs its budget. The migration decision is a dashboard, not a meeting opinion.",
-  "tests_fa": "ماهانه رصد کن: نوشتن در ثانیه در برابر tripwire تک‌نویسنده، اندازه داده در برابر جا شدن دیسک/RAM، ثانیه‌های failover در برابر RTO، دقیقه‌های بازیابی در برابر RTO، بار استخراج انبار در برابر بودجه‌اش. تصمیم مهاجرت یک داشبورد است نه نظر جلسه.",
-  "worked_en": "<p>Teaching capacity: 2M rows/day × 1 KB ≈ 2 GB/day ≈ 0.7 TB/year plus indexes — fits on one box for years. Writes 231/s peak are two orders of magnitude below a single primary's comfortable limit. So the verdict table reads: single-node green on writes/size/cost until the tripwire (e.g. sustained > 5k writes/s or data > RAM × 3); primary+replica green on read scale and AZ survival, red on write growth; sharded green on write growth, red on operational cost — earned only past the tripwire.</p>",
-  "worked_fa": "<p>ظرفیت آموزشی: ۲ میلیون سطر در روز × ۱ کیلوبایت ≈ ۲ گیگ در روز ≈ ۰٫۷ ترابایت در سال به‌علاوه ایندکس — سال‌ها روی یک جعبه جا می‌شود. نوشتن ۲۳۱ در ثانیه در اوج دو مرتبه بزرگی زیر سقف راحت یک primary است. پس جدول حکم این‌طور خوانده می‌شود: تک‌گره روی نوشتن/اندازه/هزینه سبز تا tripwire (مثلاً پایدار بالای ۵هزار نوشتن در ثانیه یا داده بزرگ‌تر از ۳ برابر RAM)؛ primary+رپلیکا روی مقیاس خواندن و بقای AZ سبز و روی رشد نوشتن قرمز؛ شاردشده روی رشد نوشتن سبز و روی هزینه عملیات قرمز — فقط بعد از tripwire به‌دست می‌آید.</p>",
+  "tests_en": "Track monthly: writes/s vs the single-writer tripwire, data size vs disk/RAM fit, failover seconds vs RTO, restore minutes vs RTO, warehouse extract load vs its budget. The migration decision is a dashboard, not a meeting opinion — if it isn't on the dashboard, it isn't a decision yet.",
+  "tests_fa": "ماهانه رصد کن: نوشتن در ثانیه در برابر tripwire تک‌نویسنده، اندازهٔ داده در برابر جا شدن دیسک/RAM، ثانیه‌های failover در برابر RTO، دقیقه‌های بازیابی در برابر RTO، بار استخراج انبار در برابر بودجه‌اش. تصمیم مهاجرت یه داشبورده، نه نظر جلسه.",
+  "worked_en": "<p>Teaching capacity: 2M rows/day × 1 KB ≈ 2 GB/day ≈ 0.7 TB/year plus indexes — fits on one box for years. Writes at a 231/s peak are two orders of magnitude below a single primary's comfortable limit. So the verdict table reads: single-node green on writes/size/cost until the tripwire (e.g. sustained > 5k writes/s or data > RAM × 3); primary+replica green on read scale and AZ survival, red on write growth; sharded green on write growth, red on operational cost — earned only past the tripwire. The simple design wins today, as long as those tripwire numbers are written down now.</p>",
+  "worked_fa": "<p>ظرفیت آموزشی: ۲ میلیون سطر در روز × ۱ کیلوبایت ≈ ۲ گیگ در روز ≈ ۰٫۷ ترابایت در سال به‌علاوهٔ ایندکس — سال‌ها روی یه جعبه جا می‌شه. نوشتن ۲۳۱ در ثانیه در اوج، دو مرتبه بزرگی زیر سقف راحت یه primary هست. پس جدول حکم این‌طوری خونده می‌شه: تک‌گره روی نوشتن/اندازه/هزینه سبز تا tripwire (مثلاً پایدار بالای ۵هزار نوشتن در ثانیه یا داده بزرگ‌تر از ۳ برابر RAM)؛ primary+رپلیکا روی مقیاس خواندن و بقای AZ سبز و روی رشد نوشتن قرمز؛ شاردشده روی رشد نوشتن سبز و روی هزینهٔ عملیات قرمز — فقط بعد از tripwire به‌دست میاد. خلاصه این‌که امروز ساده‌ترین طرح می‌بره، به شرط این‌که اعداد tripwire از الان نوشته شده باشن.</p>",
   "diagrams": [
     {
       "file": "diagrams/sol2-step1-load-bars.html",
       "made": "hand",
       "kind_en": "bar plot",
       "kind_fa": "نمودار میله‌ای",
-      "caption_en": "Load math at 2M/day: rates, fan-out and disk horizon (teaching numbers)",
-      "caption_fa": "حساب بار در ۲ میلیون در روز: نرخ‌ها، fan-out و افق دیسک (اعداد آموزشی)",
+      "caption_en": "Load math at 2M/day: the rates, the fan-out and the disk horizon (teaching numbers)",
+      "caption_fa": "اول حساب بار در ۲ میلیون در روز: نرخ‌ها، fan-out و افق دیسک (اعداد آموزشی)",
       "height": 640,
       "narration": {
         "scenario_en": "Picture 2M orders/day on the table and nobody has said shard yet. This plot only sizes the load: orders and internal messages per second, and how many years one 4 TB box lasts.",
-        "scenario_fa": "فرض کن ۲ میلیون سفارش در روز روی میز است و کسی هنوز کلمه <span class=\"ltr\">shard</span> را نگفته. این نمودار فقط بار را می‌سنجد: سفارش و پیام داخلی در هر ثانیه، و این‌که یک جعبه ۴ ترابایتی چند سال دوام می‌آورد.",
+        "scenario_fa": "فرض کن ۲ میلیون سفارش در روز روی میزه و کسی هنوز کلمهٔ <span class=\"ltr\">shard</span> رو نگفته. این نمودار فقط بار رو می‌سنجه: سفارش و پیام داخلی در هر ثانیه، و این‌که یه جعبهٔ ۴ ترابایتی چند سال دوام می‌آورد.",
         "steps": [
           {
-            "en": "Read the blue bars: 23.1/s average, 231.5/s at a 10x peak — both teaching numbers, labelled on the bars.",
-            "fa": "میله‌های آبی را بخوان: میانگین <span class=\"ltr\">23.1/s</span> و اوج <span class=\"ltr\">231.5/s</span> با ضریب ۱۰ — هر دو عدد آموزشی‌اند و روی میله‌ها برچسب خورده‌اند."
+            "en": "Read the blue bars: 23.1/s average, 231.5/s at a 10x peak — both teaching numbers, labelled right on the bars.",
+            "fa": "میله‌های آبی رو بخون: میانگین <span class=\"ltr\">23.1/s</span> و اوج <span class=\"ltr\">231.5/s</span> با ضریب ۱۰ — هر دو عدد آموزشی‌اند و روی خود میله‌ها برچسب خورده‌اند."
           },
           {
             "en": "The green bars apply the 3-internal-messages fan-out: 69.4/s average, 694.4/s at peak — still under a thousand per second.",
-            "fa": "میله‌های سبز ضریب ۳ پیام داخلی را اعمال می‌کنند: <span class=\"ltr\">69.4/s</span> میانگین و <span class=\"ltr\">694.4/s</span> در اوج — هنوز زیر هزار در ثانیه."
+            "fa": "میله‌های سبز ضریب ۳ پیام داخلی رو اعمال می‌کنن: <span class=\"ltr\">69.4/s</span> میانگین و <span class=\"ltr\">694.4/s</span> در اوج — هنوز زیر هزار در ثانیه."
           },
           {
-            "en": "Read the peach card: 0.75 TB/year means the 4 TB disk lasts about 5.4 years, and peak writes sit 20x below the 5k/s tripwire.",
-            "fa": "کارت هلویی را بخوان: <span class=\"ltr\">0.75 TB</span> در سال یعنی دیسک ۴ ترابایتی حدود <span class=\"ltr\">5.4</span> سال دوام می‌آورد و اوج نوشتن ۲۰ برابر زیر <span class=\"ltr\">tripwire</span> پنج‌هزارتایی است."
+            "en": "Read the peach card: 0.75 TB/year means the 4 TB disk lasts about 5.4 years, and the peak writes sit 20x below the 5k/s tripwire.",
+            "fa": "کارت هلویی رو بخون: <span class=\"ltr\">0.75 TB</span> در سال یعنی دیسک ۴ ترابایتی حدود <span class=\"ltr\">5.4</span> سال دوام می‌آورد و اوج نوشتن ۲۰ برابر زیر <span class=\"ltr\">tripwire</span> پنج‌هزارتاییه."
           },
           {
-            "en": "Walk the bottom strip year by year: five green segments and one yellow stub — the point where the disk fills is the disk-horizon tripwire decided in step 2.",
-            "fa": "نوار پایین را سال‌به‌سال جلو برو: پنج قطعه سبز و یک تکه زرد — نقطه‌ای که دیسک پر می‌شود همان <span class=\"ltr\">tripwire</span> افق دیسک در گام ۲ است."
+            "en": "Walk the bottom strip year by year: five green segments and one yellow stub — the point where the disk fills is the disk-horizon tripwire decided back in step 2.",
+            "fa": "نوار پایین رو سال‌به‌سال جلو برو: پنج قطعهٔ سبز و یه تکهٔ زرد — نقطه‌ای که دیسک پر می‌شه همون <span class=\"ltr\">tripwire</span> افق دیسک در گام ۲ است."
           }
         ],
-        "point_en": "The point of the plot: the current load fits on one box; tripwire numbers make the architecture call, not a feeling of scale.",
-        "point_fa": "پیام نمودار: بار امروز روی یک جعبه جا می‌شود؛ تصمیم معماری را عددهای <span class=\"ltr\">tripwire</span> می‌گیرند نه حس مقیاس.",
+        "point_en": "The point of the plot: the current load fits on one box; the tripwire numbers make the architecture call, not a feeling of scale.",
+        "point_fa": "پیام نمودار: بار امروز روی یه جعبه جا می‌شه؛ تصمیم معماری رو عددهای <span class=\"ltr\">tripwire</span> می‌گیرن، نه حس مقیاس.",
         "failure_en": "Replay 5x growth on these same bars: peak reaches about 1150/s — still below the write tripwire, but the disk strip shrinks to about one year.",
-        "failure_fa": "رشد ۵ برابری را روی همین میله‌ها امتحان کن: اوج به حدود <span class=\"ltr\">1150/s</span> می‌رسد — هنوز زیر <span class=\"ltr\">tripwire</span> نوشتن، ولی نوار دیسک به حدود یک سال می‌رسد.",
+        "failure_fa": "رشد ۵ برابری رو روی همین میله‌ها امتحان کن: اوج به حدود <span class=\"ltr\">1150/s</span> می‌رسه — هنوز زیر <span class=\"ltr\">tripwire</span> نوشتن، ولی نوار دیسک به حدود یه سال می‌رسه.",
         "guarantee_en": "This plot shows rates and the disk horizon with teaching numbers; it never replaces measuring your own workload.",
-        "guarantee_fa": "این نمودار نرخ‌ها و افق دیسک را با اعداد آموزشی نشان می‌دهد؛ هرگز جای اندازه‌گیری بار خودت را نمی‌گیرد.",
+        "guarantee_fa": "این نمودار نرخ‌ها و افق دیسک رو با اعداد آموزشی نشون می‌ده؛ هرگز جای اندازه‌گیری بار خودت رو نمی‌گیره.",
         "nonguarantee_en": "It says nothing about which design wins — that job belongs to the step-2 decision tree and the assembly table.",
-        "nonguarantee_fa": "درباره این‌که کدام طرح می‌برد چیزی نمی‌گوید — آن کار درخت تصمیم گام ۲ و جدول مونتاژ است."
+        "nonguarantee_fa": "دربارهٔ این‌که کدوم طرح می‌بره چیزی نمی‌گه — اون کار درخت تصمیم گام ۲ و جدول مونتاژه."
       },
       "selfcheck": {
         "q_en": "On these numbers alone, why does a 231.5/s peak not force sharding?",
-        "q_fa": "فقط با همین اعداد، چرا اوج <span class=\"ltr\">231.5/s</span> شاردینگ را تحمیل نمی‌کند؟",
+        "q_fa": "فقط با همین اعداد، چرا اوج <span class=\"ltr\">231.5/s</span> شاردینگ رو تحمیل نمی‌کنه؟",
         "a_en": "Because it sits about 20x below the 5k/s single-writer tripwire and the data fits one box for years — sharding starts only past a named tripwire.",
-        "a_fa": "چون حدود ۲۰ برابر زیر <span class=\"ltr\">tripwire</span> پنج‌هزارتایی تک‌نویسنده است و داده سال‌ها روی یک جعبه جا می‌شود — شارد فقط بعد از گذر از یک <span class=\"ltr\">tripwire</span> نام‌دار شروع می‌شود."
+        "a_fa": "چون حدود ۲۰ برابر زیر <span class=\"ltr\">tripwire</span> پنج‌هزارتایی تک‌نویسنده‌ست و داده سال‌ها روی یه جعبه جا می‌شه — شارد فقط بعد از گذر از یه <span class=\"ltr\">tripwire</span> نام‌دار شروع می‌شه."
       }
     },
     {
@@ -147,39 +147,39 @@
       "height": 640,
       "narration": {
         "scenario_en": "Now that the load is sized, walk the three tripwire gates in order; each yes buys a design, and two always-answers hold from day one.",
-        "scenario_fa": "حالا که بار سنجیده شد، سه دروازه <span class=\"ltr\">tripwire</span> را به‌ترتیب بپیما؛ هر «بله» یک طرح را می‌خرد و دو جواب همیشگی از روز اول برقرارند.",
+        "scenario_fa": "حالا که بار سنجیده شد، سه دروازهٔ <span class=\"ltr\">tripwire</span> رو به‌ترتیب بپیما؛ هر «بله» یه طرح رو می‌خره و دو جواب همیشگی از روز اول برقرارن.",
         "steps": [
           {
             "en": "Start at Size the load and ask gate one: sustained writes past 5k/s? Yes means Sharded — the only path that buys write throughput.",
-            "fa": "از <span class=\"ltr\">Size the load</span> شروع کن و دروازه اول را بپرس: نوشتن پایدار گذشته از <span class=\"ltr\">5k/s</span>؟ «بله» یعنی <span class=\"ltr\">Sharded</span> — تنها مسیری که توان نوشتن می‌خرد."
+            "fa": "از <span class=\"ltr\">Size the load</span> شروع کن و دروازهٔ اول رو بپرس: نوشتن پایدار گذشته از <span class=\"ltr\">5k/s</span>؟ «بله» یعنی <span class=\"ltr\">Sharded</span> — تنها مسیری که توان نوشتن می‌خره."
           },
           {
             "en": "If no, gate two: data past the disk horizon (5.4 years on 4 TB, or 3x RAM)? Yes is Sharded again.",
-            "fa": "اگر «نه»، دروازه دوم: داده گذشته از افق دیسک (<span class=\"ltr\">5.4</span> سال روی ۴ ترابایت یا ۳ برابر <span class=\"ltr\">RAM</span>)؟ «بله» دوباره <span class=\"ltr\">Sharded</span> است."
+            "fa": "اگه «نه»، دروازهٔ دوم: داده گذشته از افق دیسک (<span class=\"ltr\">5.4</span> سال روی ۴ ترابایت یا ۳ برابر <span class=\"ltr\">RAM</span>)؟ «بله» دوباره <span class=\"ltr\">Sharded</span> است."
           },
           {
             "en": "If still no, gate three: is AZ survival required? Yes means Primary + replicas, no means Single + standby — the default start.",
-            "fa": "اگر هنوز «نه»، دروازه سوم: بقای <span class=\"ltr\">AZ</span> لازم است؟ «بله» یعنی <span class=\"ltr\">Primary + replicas</span> و «نه» یعنی <span class=\"ltr\">Single + standby</span> — شروع پیش‌فرض."
+            "fa": "اگه هنوز «نه»، دروازهٔ سوم: بقای <span class=\"ltr\">AZ</span> لازمه؟ «بله» یعنی <span class=\"ltr\">Primary + replicas</span> و «نه» یعنی <span class=\"ltr\">Single + standby</span> — همون شروع پیش‌فرض."
           },
           {
             "en": "Do not skip the dashed chain at the bottom: Warehouse and Regional placement depend on no gate and hold from day one.",
-            "fa": "زنجیره چین‌دار پایین را جا نینداز: <span class=\"ltr\">Warehouse</span> و <span class=\"ltr\">Regional placement</span> به هیچ دروازه‌ای وابسته نیستند و از روز اول برقرارند."
+            "fa": "زنجیرهٔ چین‌دار پایین رو جا نینداز: <span class=\"ltr\">Warehouse</span> و <span class=\"ltr\">Regional placement</span> به هیچ دروازه‌ای وابسته نیستن و از روز اول برقرارن."
           }
         ],
         "point_en": "Each yes-edge is a decision point: it names the number whose crossing changes the architecture — no crossing, no move.",
-        "point_fa": "هر یال «بله» یک نقطه تصمیم است: عددی را نام می‌برد که رد شدنش معماری را عوض می‌کند — بدون گذر، بدون حرکت.",
+        "point_fa": "هر یال «بله» یه نقطهٔ تصمیمه: عددی رو نام می‌بره که رد شدنش معماری رو عوض می‌کنه — بدون گذر، بدون حرکت.",
         "failure_en": "Trace the halved-budget failure on the tree: the Sharded leaf turns redder because its ops cost is unaffordable — so freshness and replicas are cut before topology is touched.",
-        "failure_fa": "خرابی نصف‌شدن بودجه را روی درخت دنبال کن: برگ <span class=\"ltr\">Sharded</span> قرمزتر می‌شود چون هزینه عملیاتش پرداختنی نیست — پس قبل از دست زدن به توپولوژی، تازگی و رپلیکا بریده می‌شوند.",
+        "failure_fa": "خرابی نصف‌شدن بودجه رو روی درخت دنبال کن: برگ <span class=\"ltr\">Sharded</span> قرمزتر می‌شه چون هزینهٔ عملیاتش پرداختنی نیست — پس قبل از دست زدن به توپولوژی، تازگی و رپلیکا بریده می‌شن.",
         "guarantee_en": "The tree shows which tripwire buys which design; its numbers are teaching values to re-measure on your own workload.",
-        "guarantee_fa": "درخت نشان می‌دهد کدام <span class=\"ltr\">tripwire</span> کدام طرح را می‌خرد؛ اعدادش آموزشی‌اند و باید روی بار خودت بازسنجی شوند.",
+        "guarantee_fa": "درخت نشون می‌ده کدوم <span class=\"ltr\">tripwire</span> کدوم طرح رو می‌خره؛ اعدادش آموزشی‌اند و باید روی بار خودت بازسنجی بشن.",
         "nonguarantee_en": "It says nothing about shard-key choice or rebalance mechanics — that is the chapter 7 interview.",
-        "nonguarantee_fa": "درباره انتخاب <span class=\"ltr\">shard key</span> یا مکانیک <span class=\"ltr\">rebalance</span> چیزی نمی‌گوید — آن مصاحبه فصل ۷ است."
+        "nonguarantee_fa": "دربارهٔ انتخاب <span class=\"ltr\">shard key</span> یا مکانیک <span class=\"ltr\">rebalance</span> چیزی نمی‌گه — اون مصاحبهٔ فصل ۷ است."
       },
       "selfcheck": {
         "q_en": "Which two tree answers depend on no tripwire, and why?",
-        "q_fa": "کدام دو جواب درخت به هیچ <span class=\"ltr\">tripwire</span> وابسته نیستند و چرا؟",
+        "q_fa": "کدوم دو جواب درخت به هیچ <span class=\"ltr\">tripwire</span> وابسته نیستن و چرا؟",
         "a_en": "Warehouse, because it is workload isolation rather than volume — and Regional placement, because it is a legal placement rule rather than a scaling reason.",
-        "a_fa": "<span class=\"ltr\">Warehouse</span> چون ایزولاسیون بار است نه حجم — و <span class=\"ltr\">Regional placement</span> چون قاعده حقوقی مکانی است نه دلیل مقیاس."
+        "a_fa": "<span class=\"ltr\">Warehouse</span> چون ایزولاسیون باره نه حجم — و <span class=\"ltr\">Regional placement</span> چون قاعدهٔ حقوقی مکانیه نه دلیل مقیاس."
       }
     },
     {
@@ -192,39 +192,39 @@
       "made": "hand",
       "narration": {
         "failure_en": "Trace the 5x-growth, half-budget failure on the same table: the single-node row's write and size cells turn red, but the sharded row's ops-cost cell turns redder — which is why the answer cuts freshness and replicas before touching topology.",
-        "failure_fa": "خرابی رشد ۵ برابری با بودجه نصف را روی همان جدول دنبال کن: خانه‌های نوشتن و اندازه سطر تک‌گره قرمز می‌شوند ولی خانه هزینه عملیات سطر شارد قرمزتر — و به همین دلیل جواب قبل از دست زدن به توپولوژی، تازگی و رپلیکا را می‌برد.",
+        "failure_fa": "خرابی رشد ۵ برابری با بودجهٔ نصف رو روی همون جدول دنبال کن: خونه‌های نوشتن و اندازهٔ سطر تک‌گره قرمز می‌شن ولی خونهٔ هزینهٔ عملیات سطر شارد قرمزتر — و به همین دلیل جواب قبل از دست زدن به توپولوژی، تازگی و رپلیکا رو می‌بره.",
         "guarantee_en": "The table shows which limit each design crosses and what each costs to run. It does not size your system — the tripwire numbers must be re-measured on your workload.",
-        "guarantee_fa": "جدول نشان می‌دهد هر طرح از کدام حد می‌گذرد و اجرایش چه هزینه‌ای دارد. سیستمت را سایز نمی‌کند — اعداد tripwire باید روی بار خودت دوباره اندازه‌گیری شوند.",
+        "guarantee_fa": "جدول نشون می‌ده هر طرح از کدوم حد رد می‌شه و اجرایش چه هزینه‌ای داره. سیستمت رو سایز نمی‌کنه — اعداد tripwire باید روی بار خودت دوباره اندازه‌گیری بشن.",
         "nonguarantee_en": "It says nothing about shard-key choice or rebalancing mechanics — that is chapter 7's interview, referenced in the migration row.",
-        "nonguarantee_fa": "درباره انتخاب shard key یا مکانیک rebalance چیزی نمی‌گوید — آن مصاحبه فصل ۷ است که در سطر مهاجرت ارجاع شده.",
+        "nonguarantee_fa": "دربارهٔ انتخاب shard key یا مکانیک rebalance چیزی نمی‌گه — اون مصاحبهٔ فصل ۷ است که در سطر مهاجرت ارجاع شده.",
         "point_en": "The decision points are the tripwire cells: each names the number whose crossing changes the architecture. No crossing, no move.",
-        "point_fa": "نقطه‌های تصمیم خانه‌های tripwireاند: هرکدام عددی را نام می‌برند که رد شدنش معماری را عوض می‌کند. بدون گذر، بدون حرکت.",
+        "point_fa": "نقطه‌های تصمیم خونه‌های tripwireان: هرکدوم عددی رو نام می‌برن که رد شدنش معماری رو عوض می‌کنه. بدون گذر، بدون حرکت.",
         "scenario_en": "The sales team wants hourly reports, legal wants data in-country, and someone shouts 'shard!'. Read the table row by row: which demand actually forces which design?",
-        "scenario_fa": "تیم فروش گزارش ساعتی می‌خواهد، حقوقی داده داخل کشور می‌خواهد و کسی فریاد می‌زند «شارد!» جدول را سطر‌به‌سطر بخوان: کدام خواسته واقعاً کدام طرح را تحمیل می‌کند؟",
+        "scenario_fa": "تیم فروش گزارش ساعتی می‌خواد، حقوقی داده داخل کشور می‌خواد و یکی فریاد می‌زنه «شارد!» جدول رو سطر‌به‌سطر بخون: کدوم خواسته واقعاً کدوم طرح رو تحمیل می‌کنه؟",
         "steps": [
           {
             "en": "Row one: single-node + standby — which cells are green at 2M/day (writes, size, ops cost) and which tripwire would flip them.",
-            "fa": "سطر اول: تک‌گره + standby — کدام خانه‌ها در ۲ میلیون در روز سبزند (نوشتن، اندازه، هزینه عملیات) و کدام tripwire برعکسشان می‌کند."
+            "fa": "سطر اول: تک‌گره + standby — کدوم خونه‌ها در ۲ میلیون در روز سبزن (نوشتن، اندازه، هزینهٔ عملیات) و کدوم tripwire برعکسشون می‌کنه."
           },
           {
             "en": "Row two: primary + replicas — what replicas buy (read scale, AZ survival) and what they never buy (write throughput).",
-            "fa": "سطر دوم: primary + رپلیکا — رپلیکا چه می‌خرد (مقیاس خواندن، بقای AZ) و چه چیزی هرگز نمی‌خرد (توان نوشتن)."
+            "fa": "سطر دوم: primary + رپلیکا — رپلیکا چی می‌خره (مقیاس خواندن، بقای AZ) و چی هرگز نمی‌خره (توان نوشتن)."
           },
           {
             "en": "Row three: sharded — the only row whose write cell stays green past the tripwire, and the ops-cost cell that prices it.",
-            "fa": "سطر سوم: شاردشده — تنها سطری که خانه نوشتنش بعد از tripwire سبز می‌ماند، و خانه هزینه عملیاتی که قیمتش را می‌گوید."
+            "fa": "سطر سوم: شاردشده — تنها سطری که خونهٔ نوشتنش بعد از tripwire سبز می‌مونه، و خونهٔ هزینهٔ عملیاتی که قیمتش رو می‌گه."
           },
           {
             "en": "Side columns: analytics (always the warehouse) and residency (placement, not topology) — answered once, not per row.",
-            "fa": "ستون‌های کناری: تحلیلی (همیشه انبار) و ماندگاری (مکان نه توپولوژی) — یک‌بار جواب داده می‌شوند نه per-row."
+            "fa": "ستون‌های کناری: تحلیلی (همیشه انبار) و ماندگاری (مکان نه توپولوژی) — یک‌بار جواب داده می‌شن، نه per-row."
           }
         ]
       },
       "selfcheck": {
         "a_en": "Reads: each AZ's surviving capacity at peak plus failover seconds. Writes: single-writer limit (231/s is far below it) and replication lag. If any one number is unknown, the verdict is 'measure first', not a design.",
-        "a_fa": "خواندن: ظرفیت باقی‌مانده هر AZ در اوج به‌علاوه ثانیه‌های failover. نوشتن: سقف تک‌نویسنده (۲۳۱ در ثانیه خیلی پایین‌ترش است) و lag تکثیر. اگر هر عددی نامعلوم است حکم «اول اندازه بگیر» است نه یک طرح.",
+        "a_fa": "خواندن: ظرفیت باقی‌ماندهٔ هر AZ در اوج به‌علاوهٔ ثانیه‌های failover. نوشتن: سقف تک‌نویسنده (۲۳۱ در ثانیه خیلی پایین‌ترشه) و lag تکثیر. اگه هر عددی نامعلومه، حکم «اول اندازه بگیر»ه نه یه طرح.",
         "q_en": "Name the three numbers that would flip your verdict from single-node to sharded.",
-        "q_fa": "سه عددی را نام ببر که حکمت را از تک‌گره به شاردشده برعکس می‌کنند."
+        "q_fa": "سه عددی رو نام ببر که حکمت رو از تک‌گره به شاردشده برعکس می‌کنن."
       }
     }
   ],
@@ -237,6 +237,6 @@
     "expected_en": "avg=23.15, peak=231.5, data/year=0.75TB, years on disk=5.4; both tripwires HOLD. (actual output of this environment)",
     "status": "verified"
   },
-  "reasoning_fa": "<p>روزانه دو میلیون، نرخ است نه اندازهٔ cluster: تقسیم بر ۸۶۴۰۰ حدود ۲۳٫۱۵ سفارش/ثانیه و ضرب در ضریب آموزشی ۱۰ حدود ۲۳۱٫۵ می‌دهد. با رکورد ۱ KB، دادهٔ خام روزانه حدود ۲ GB است؛ index، replica و backup جدا اضافه می‌شوند. رشد ۳۰٪ با V(t)=V0×1.3^t محاسبه می‌شود چون هر سال روی حجم سال قبل اعمال می‌شود. هدف ۳۰۰ms و RPO یک دقیقه/RTO پنج دقیقه از این فرمول نتیجه نمی‌شوند؛ فرض‌های نیاز محصول‌اند که باید با تحمل تأخیر، زیان داده و زمان توقف تأیید شوند.</p>",
-  "reasoning_en": "<p>Two million per day is a rate, not a cluster size: divide by 86400 for 23.15 orders/s and multiply by the teaching peak factor ten for 231.5/s. At 1 KB/record raw data is about 2 GB/day, before indexes, replicas and backups. Annual 30% growth compounds as V(t)=V0×1.3^t. The 300ms target and one-minute RPO/five-minute RTO are separate product assumptions requiring latency, data-loss and downtime evidence.</p>"
+  "reasoning_fa": "<p>روزانه دو میلیون، نرخه نه اندازهٔ cluster: تقسیم بر ۸۶۴۰۰ حدود ۲۳٫۱۵ سفارش/ثانیه می‌ده و ضرب در ضریب آموزشی ۱۰ حدود ۲۳۱٫۵. با رکورد ۱ KB، دادهٔ خام روزانه حدود ۲ GB هست؛ index، replica و backup جدا اضافه می‌شن. رشد ۳۰٪ با V(t)=V0×1.3^t حساب می‌شه چون هر سال روی حجم سال قبل اعمال می‌شه. جوابِ هدف ۳۰۰ms و RPO یک دقیقه/RTO پنج دقیقه رو این فرمول نمی‌ده؛ فرض‌های نیاز محصول‌اند که باید با تحمل تأخیر، زیان داده و زمان توقف تأیید بشن. پس اول نرخ، بعد جعبه — نه اول جعبه، بعد نگرانی.</p>",
+  "reasoning_en": "<p>Two million per day is a rate, not a cluster size: divide by 86400 for 23.15 orders/s and multiply by the teaching peak factor ten for 231.5/s. At 1 KB/record raw data is about 2 GB/day, before indexes, replicas and backups. Annual 30% growth compounds as V(t)=V0×1.3^t. The 300ms target and the one-minute RPO/five-minute RTO don't come out of that formula at all; they're product assumptions that have to be backed by latency, data-loss and downtime evidence. So: rate first, then the box — not the box first and the worry later.</p>"
 }

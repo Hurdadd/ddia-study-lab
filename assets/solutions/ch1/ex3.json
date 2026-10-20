@@ -1,44 +1,44 @@
 {
   "alternatives": [
     {
-      "en": "Full log rewrite on every deletion (compaction that drops the user's records immediately): strongest guarantee, highest cost — rewrites segments, invalidates backups, pauses consumers. Reserve for small logs or the strictest deadlines; otherwise tombstone + bounded retention + crypto-shredding compose the practical answer.",
-      "fa": "بازنویسی کامل لاگ با هر حذف (فشرده‌سازی که رکوردهای کاربر را فوری می‌اندازد): قوی‌ترین تضمین و بیشترین هزینه — سگمنت‌ها را بازنویسی می‌کند، بکاپ‌ها را باطل می‌کند و مصرف‌کننده‌ها را متوقف می‌کند. برای لاگ‌های کوچک یا سخت‌گیرانه‌ترین مهلت‌ها نگه دار؛ وگرنه tombstone + نگهداری کران‌دار + shredding ترکیب عملی است."
+      "en": "Full log rewrite on every deletion (a compaction that drops the user's records immediately): strongest guarantee, highest cost — it rewrites segments, invalidates backups and pauses consumers. Reserve it for small logs or the strictest deadlines; otherwise tombstone + bounded retention + crypto-shredding compose the practical answer.",
+      "fa": "بازنویسی کامل لاگ با هر حذف (فشرده‌سازی که رکوردهای کاربر رو فوری می‌ندازه): قوی‌ترین تضمین و بیشترین هزینه — سگمنت‌ها رو بازنویسی می‌کنه، بکاپ‌ها رو باطل می‌کنه و مصرف‌کننده‌ها رو متوقف می‌کنه. برای لاگ‌های کوچک یا سخت‌گیرانه‌ترین مهلت‌ها نگهش دار؛ وگرنه ترکیب عملی همون tombstone + نگهداری کران‌دار + shreddingه."
     }
   ],
-  "answer_en": "Trace one deletion through every copy — record, cache, index, log, backup, training data — and close each with its own mechanism: delete the record, purge derived views, tombstone + compact the log (or crypto-shred per-user keys for instant effect), expire backups by retention, and exclude the user from training sets with a documented re-check. Nothing resurrects on restore because restore replays only live state. Name which deadlines need legal interpretation instead of guessing them.",
-  "answer_fa": "یک حذف را از همه کپی‌ها بگذران — مرجع، کش، ایندکس، لاگ، بکاپ، داده آموزش — و هرکدام را با سازوکار خودش ببند: حذف مرجع، پاک‌سازی نماهای مشتق، tombstone + فشرده‌سازی لاگ (یا shredding کلید per-user برای اثر فوری)، انقضای بکاپ‌ها با نگهداری، و کنار گذاشتن کاربر از مجموعه‌های آموزش با بازبینی مستند. هنگام restore چیزی زنده نمی‌شود چون restore فقط حالت زنده را بازپخش می‌کند. بگو کدام مهلت‌ها تفسیر حقوقی می‌خواهند به‌جای حدس زدنشان.",
+  "answer_en": "Here's the thing: one deletion has to be traced through every copy — record, cache, index, log, backup, training data — and each one closed with its own mechanism: delete the record, purge the derived views, tombstone + compact the log (or crypto-shred the per-user keys for instant effect), expire backups by retention, and exclude the user from training sets with a documented re-check. Nothing resurrects on restore, because restore replays only live state. And name which deadlines need legal interpretation instead of guessing them.",
+  "answer_fa": "قضیه اینه که یه حذف رو باید از همهٔ کپی‌ها رد کنی — مرجع، کش، ایندکس، لاگ، بکاپ، دادهٔ آموزش — و هرکدوم رو با سازوکار خودش ببندی: حذف مرجع، پاک‌سازی نماهای مشتق، tombstone + فشرده‌سازی لاگ (یا shredding کلید per-user برای اثر فوری)، انقضای بکاپ‌ها با نگهداری، و کنار گذاشتن کاربر از مجموعه‌های آموزش با بازبینی مستند. موقع restore چیزی زنده نمی‌شه چون restore فقط حالت زنده رو بازپخش می‌کنه. و در آخر بگو کدوم مهلت‌ها تفسیر حقوقی می‌خوان، به‌جای حدس زدنشون.",
   "assumptions": [
     {
-      "en": "Append-only event log as the store; per-user encryption keys exist for the shredding option.",
-      "fa": "فروشگاه لاگ فقط‌افزودنی است؛ کلیدهای رمز per-user برای گزینه shredding هست."
+      "en": "Picture this: the store is an append-only event log, and per-user encryption keys exist for the shredding option.",
+      "fa": "فرض کن فروشگاه‌مون یه لاگ فقط‌افزودنی باشه؛ کلیدهای رمز per-user هم برای گزینهٔ shredding داریم."
     },
     {
-      "en": "Deadlines (e.g. 30 days) are teaching numbers — real ones need legal interpretation, stated as uncertain.",
-      "fa": "مهلت‌ها (مثلاً ۳۰ روز) اعداد آموزشی‌اند — واقعی‌ها تفسیر حقوقی می‌خواهند و نامطمئن اعلام می‌شوند."
+      "en": "Deadlines (e.g. 30 days) are teaching numbers — the real ones need legal interpretation, so you state them as uncertain.",
+      "fa": "مهلت‌ها (مثلاً ۳۰ روز) اعداد آموزشی‌اند — واقعی‌ها تفسیر حقوقی می‌خوان و نامطمئن اعلام می‌شن."
     },
     {
-      "en": "Backups expire by retention; restores replay live state only, never purged tombstones.",
-      "fa": "بکاپ‌ها با نگهداری منقضی می‌شوند؛ restore فقط حالت زنده را بازپخش می‌کند، هرگز tombstoneهای پاک‌شده را نه."
+      "en": "Rule of thumb: backups expire by retention; a restore replays live state only, never the purged tombstones.",
+      "fa": "قضیه اینه که بکاپ‌ها با نگهداری منقضی می‌شن؛ restore فقط حالت زنده رو بازپخش می‌کنه، هرگز tombstoneهای پاک‌شده رو نه."
     }
   ],
   "failures": [
     {
-      "en": "Offline old consumer: it missed the tombstone and still serves the user's data. Guard with a deletion watermark — consumers must catch up past the watermark before serving, and keys for shredded users fail closed (no key = no read).",
-      "fa": "مصرف‌کننده قدیم آفلاین: tombstone را از دست داده و هنوز داده کاربر را سرو می‌کند. نگهبان watermark حذف است — مصرف‌کننده‌ها باید از watermark جلو بزنند بعد سرو کنند و کلیدهای کاربران shredded بسته-fail می‌شوند (بدون کلید = بدون خواندن)."
+      "en": "An old consumer goes offline: it missed the tombstone and still serves the user's data. Guard it with a deletion watermark — consumers must catch up past the watermark before serving, and the keys of shredded users fail closed (no key = no read).",
+      "fa": "مصرف‌کنندهٔ قدیم آفلاین: tombstone رو از دست داده و هنوز دادهٔ کاربر رو سرو می‌کنه. نگهبانش watermark حذفه — مصرف‌کننده‌ها باید از watermark جلو بزنن بعد سرو کنن، و کلیدهای کاربران shredded بسته-fail می‌شن (بدون کلید = بدون خواندن)."
     },
     {
-      "en": "Restore resurrection: last month's backup predates the deletion and replays the user back to life. Guard: restores replay through the tombstone log (deletion watermarks are part of the restore), and backups older than retention are destroyed, not kept 'just in case'.",
-      "fa": "زنده شدن با restore: بکاپ ماه پیش قدیمی‌تر از حذف است و کاربر را زنده برمی‌گرداند. نگهبان: restoreها از لاگ tombstone می‌گذرند (watermarkهای حذف جزو restoreاند) و بکاپ‌های قدیمی‌تر از نگهداری نابود می‌شوند نه «شاید لازم شد»."
+      "en": "Restore resurrection: last month's backup predates the deletion and replays the user back to life. Guard it: restores replay through the tombstone log (the deletion watermarks are part of the restore), and backups older than the retention horizon are destroyed, not kept 'just in case'.",
+      "fa": "زنده شدن با restore: بکاپ ماه پیش قدیمی‌تر از حذفه و کاربر رو زنده برمی‌گردونه. نگهبانش اینه که restoreها از لاگ tombstone رد می‌شن (watermarkهای حذف جزو restoreان) و بکاپ‌های قدیمی‌تر از نگهداری نابود می‌شن، نه «شاید لازم شد»."
     },
     {
-      "en": "Training-data leak: the model already learned the user's patterns. Guard: exclude on next retrain, document the lag honestly, and prefer feature stores that support row-level deletion over frozen dumps.",
-      "fa": "نشت داده آموزش: مدل الگوهای کاربر را قبلاً یاد گرفته. نگهبان: کنار گذاشتن در بازآموزی بعد، مستندسازی صادقانه lag، و ترجیح feature store با حذف سطری به‌جای dump منجمد."
+      "en": "Training-data leak: the model has already learned the user's patterns. Guard it: exclude the user at the next retrain, document the lag honestly, and prefer feature stores that support row-level deletion over frozen dumps.",
+      "fa": "نشت دادهٔ آموزش: مدل الگوهای کاربر رو قبلاً یاد گرفته. نگهبانش: کنار گذاشتن در بازآموزی بعد، مستندسازی صادقانهٔ lag، و ترجیح feature store با حذف سطری به‌جای dump منجمد."
     }
   ],
   "followups": [
     {
-      "a_en": "No end-to-end guarantee until it returns. The offline consumer is fenced by the watermark: it may not serve reads until it has consumed past the deletion watermark, and per-user keys it missed are already destroyed, so its reads fail closed instead of leaking. The honest answer names the window: deletions complete when the slowest registered consumer acknowledges past the watermark — track that lag per consumer and alert on stragglers. Unregistered copies (a laptop dump, a screenshot) are outside engineering guarantees; say so explicitly.",
-      "a_fa": "تا برنگردد هیچ تضمین سرتاسری نیست. مصرف‌کننده آفلاین با watermark فنس می‌شود: تا از watermark حذف جلو نزند حق سرو خواندن ندارد و کلیدهای per-user ازدست‌رفته‌اش قبلاً نابود شده‌اند، پس خواندن‌هایش بسته-fail می‌شوند نه نشتی. جواب صادق پنجره را نام می‌برد: حذف وقتی کامل است که کندترین مصرف‌کننده ثبت‌شده از watermark جلو بزند — آن lag را per-consumer رصد کن و روی عقب‌مانده‌ها هشدار بده. کپی‌های ثبت‌نشده (dump لپ‌تاپ، اسکرین‌شات) بیرون تضمین‌های مهندسی‌اند؛ صریح بگو.",
+      "a_en": "No end-to-end guarantee until it comes back. The offline consumer is fenced by the watermark: it may not serve reads until it has consumed past the deletion watermark, and the per-user keys it missed are already destroyed, so its reads fail closed instead of leaking. The honest answer names the window: a deletion is complete when the slowest registered consumer acknowledges past the watermark — track that lag per consumer and alert on stragglers. Unregistered copies (a laptop dump, a screenshot) sit outside engineering guarantees; say that out loud.",
+      "a_fa": "تا برنگرده هیچ تضمین سرتاسری نیست. مصرف‌کنندهٔ آفلاین با watermark فنس می‌شه: تا از watermark حذف جلو نزنه حق سرو خواندن نداره، و کلیدهای per-user ازدست‌رفته‌اش قبلاً نابود شده‌اند، پس خواندن‌هاش بسته-fail می‌شه نه نشتی. جواب صادق، پنجره رو نام می‌بره: حذف وقتی کامله که کندترین مصرف‌کنندهٔ ثبت‌شده از watermark جلو بزنه — اون lag رو per-consumer رصد کن و روی عقب‌مانده‌ها هشدار بده. کپی‌های ثبت‌نشده (dump لپ‌تاپ، اسکرین‌شات) بیرون تضمین‌های مهندسی‌ان؛ صریح بگو.",
       "level": "staff",
       "q_en": "Now an old consumer is offline for the whole deletion — what guarantee can you still give?",
       "q_fa": "حالا یه مصرف‌کنندهٔ قدیمی دقیقاً موقع حذف آفلاین باشه — چه تضمینی می‌دی؟"
@@ -46,16 +46,16 @@
   ],
   "interview_q_en": "Here's the thing: a user asks you to delete their data. Trace that request from the record through the cache, index, log, backup, and training data. Compare PII separation, retention, segment rewriting, and key deletion — then say what must never come back to life on restore, and which call needs a lawyer.",
   "interview_q_fa": "داستان از این قراره: یه کاربر می‌گه داده‌م رو پاک کن. رد درخواست رو از مرجع تا کش، ایندکس، لاگ، بکاپ و مجموعهٔ آموزش دنبال کن. جداسازی PII، retention، بازنویسی سگمنت و حذف کلید رمز رو مقایسه کن؛ بگو چی نباید با restore دوباره زنده بشه و کدوم تصمیم تفسیر حقوقی می‌خواد.",
-  "mental_en": "Deletion is not one delete — it is a hunt for every copy, and each copy needs its own weapon: direct delete for live stores, tombstones for logs, expiry for backups, exclusion for training sets. The append-only log is the hardest copy because 'append-only' and 'forget' are opposites — so you either make data unreadable (shred the key) or rewrite history (compact the segments).",
-  "mental_fa": "حذف یک delete نیست — شکار هر کپی است و هر کپی سلاح خودش را می‌خواهد: حذف مستقیم برای فروشگاه‌های زنده، tombstone برای لاگ‌ها، انقضا برای بکاپ‌ها، کنارگذاری برای مجموعه‌های آموزش. لاگ فقط‌افزودنی سخت‌ترین کپی است چون «فقط‌افزودنی» و «فراموش کن» متضادند — پس یا داده را ناخوانا می‌کنی (کلید را shred) یا تاریخ را بازنویسی می‌کنی (سگمنت‌ها را فشرده).",
+  "mental_en": "Deletion isn't one delete — it's a hunt for every copy, and every copy needs its own weapon: direct delete for live stores, tombstones for logs, expiry for backups, exclusion for training sets. The append-only log is the hardest copy, because 'append-only' and 'forget' are opposites — so you either make the data unreadable (shred the key) or rewrite history (compact the segments). A copy with no weapon is the finding.",
+  "mental_fa": "ببین رفیق، حذف یه delete نیست — شکار هر کپیه، و هر کپی سلاح خودش رو می‌خواد: حذف مستقیم برای فروشگاه‌های زنده، برای لاگ‌ها tombstone، انقضا برای بکاپ‌ها، کنارگذاری برای مجموعه‌های آموزش. سخت‌ترین کپی همون لاگ فقط‌افزودنیه، چون «فقط‌افزودنی» و «فراموش کن» دشمن همن — پس یا داده رو ناخوانا می‌کنی (کلید رو shred می‌کنی) یا تاریخ رو بازنویسی می‌کنی (سگمنت‌ها رو فشرده می‌کنی). یعنی هر کپی یه سلاح داره؛ بی‌سلاح بودنش یه یافته‌ست.",
   "mistakes": [
     {
-      "en": "Deleting only the live record and forgetting backups, caches, indexes and the log. Deletion must be defined end-to-end, with a checklist per copy.",
-      "fa": "فقط رکورد زنده را حذف کردن و فراموش کردن بکاپ، کش، ایندکس و لاگ. حذف باید سرتاسری با چک‌لیست per-copy تعریف شود."
+      "en": "Deleting only the live record and forgetting backups, caches, indexes and the log. Deletion must be defined end-to-end, with a checklist per copy — otherwise you're guessing which copies are still alive.",
+      "fa": "فقط رکورد زنده رو حذف کردن و فراموش کردن بکاپ، کش، ایندکس و لاگ. حذف باید سرتاسری و با یه چک‌لیست per-copy تعریف بشه — وگرنه داری حدس می‌زنی کدوم کپی‌ها هنوز زنده‌ان."
     },
     {
-      "en": "Quoting a retention number as law ('GDPR says 30 days'). The regulation sets principles and deadlines per basis; the exact number for your case needs legal interpretation — engineers own the mechanism and the evidence, not the legal reading.",
-      "fa": "نقل عدد نگهداری به‌عنوان قانون («GDPR می‌گوید ۳۰ روز»). مقرره اصول و مهلت per-basis می‌گذارد؛ عدد دقیق حالت تو تفسیر حقوقی می‌خواهد — مهندس‌ها مالک سازوکار و مدرک‌اند نه خوانش حقوقی."
+      "en": "Quoting a retention number as law ('GDPR says 30 days'). The regulation sets principles and deadlines per basis; the exact number for your case needs legal interpretation — engineers own the mechanism and the evidence, not the legal reading. Say 'that deadline is per our reading, pending legal sign-off' instead.",
+      "fa": "نقل عدد نگهداری به‌عنوان قانون («GDPR می‌گه ۳۰ روز»). مقرره اصول و مهلت per-basis رو می‌ذاره؛ عدد دقیق حالت تو تفسیر حقوقی می‌خواد — مهندس‌ها مالک سازوکار و مدرک‌ان، نه خوانش حقوقی."
     }
   ],
   "number": 3,
@@ -66,32 +66,32 @@
   ],
   "steps": [
     {
-      "en": "Split sensitive payload from the start: the log keeps IDs, PII lives in a keyed store that supports real deletion. Two-step reads are the price.",
-      "fa": "محتوای حساس را از اول جدا کن: لاگ فقط شناسه نگه دارد و PII در فروشگاه کلیددار که حذف واقعی را می‌فهمد. خواندن دومرحله‌ای قیمتش است.",
+      "en": "Split the sensitive payload from the start: the log keeps IDs, PII lives in a keyed store that understands real deletion. Two-step reads are the price you pay.",
+      "fa": "محتوای حساس رو از اول جدا کن: لاگ فقط شناسه نگه می‌داره و PII می‌ره توی یه فروشگاه کلیددار که حذف واقعی رو می‌فهمه. قیمتش همون خواندن دومرحله‌ایه.",
       "t_en": "Separate PII up front",
-      "t_fa": "جدایی PII از اول"
+      "t_fa": "از اول PII رو جدا کن"
     },
     {
-      "en": "Crypto-shredding: each user's payload encrypted with a per-user key; deletion = key destruction. Instant, no rewrite — but key management per user, and a leaked key defeats it.",
-      "fa": "shredding رمزنگاری: payload هر کاربر با کلید خودش رمز می‌شود؛ حذف = نابودی کلید. فوری و بدون بازنویسی — ولی مدیریت کلید per-user، و کلید لو رفته حذف را خنثی می‌کند.",
+      "en": "Crypto-shredding: each user's payload is encrypted with a per-user key, and deletion = key destruction. Instant, no rewrite — but you need per-user key management, and a leaked key defeats the whole thing.",
+      "fa": "shredding رمزنگاری: payload هر کاربر با کلید خودش رمز می‌شه؛ حذف = نابودی کلید. فوری و بدون بازنویسی — ولی مدیریت کلید per-user می‌خواد، و کلید لو رفته حذف رو خنثی می‌کنه.",
       "t_en": "Shred for instant effect",
-      "t_fa": "shred برای اثر فوری"
+      "t_fa": "برای اثر فوری، shred کن"
     },
     {
-      "en": "Tombstone + compaction: append 'delete user X', filter those records on rebuild/compaction. Data lingers on disk and backups until rewritten — derived caches and indexes purge too.",
-      "fa": "tombstone + فشرده‌سازی: «حذف کاربر X» را الصاق کن و موقع بازسازی/فشرده‌سازی رکوردهایش را رد کن. داده تا بازنویسی روی دیسک/بکاپ می‌ماند — کش و ایندکس مشتق هم پاک شوند.",
+      "en": "Tombstone + compaction: append 'delete user X' and filter those records on rebuild/compaction. The data lingers on disk and in backups until it's rewritten — and the derived caches and indexes purge too.",
+      "fa": "tombstone + فشرده‌سازی: «حذف کاربر X» رو الصاق کن و موقع بازسازی/فشرده‌سازی رکورداش رو رد کن. داده تا بازنویسی روی دیسک/بکاپ می‌مونه — کش و ایندکس مشتق هم باید پاک بشن.",
       "t_en": "Tombstone the log",
       "t_fa": "tombstone برای لاگ"
     },
     {
-      "en": "Bounded retention + periodic rewrite: expire old segments and rewrite them without deleted data. Operational cost plus loss of full history — price it openly.",
-      "fa": "نگهداری کران‌دار + بازنویسی دوره‌ای: سگمنت‌های قدیم را منقضی و بدون داده حذف‌شده بازنویسی کن. هزینه عملیاتی به‌علاوه از دست رفتن تاریخچه کامل — قیمتش را علنی بگو.",
+      "en": "Bounded retention + periodic rewrite: expire old segments and rewrite them without the deleted data. Operational cost plus the loss of full history — price it openly.",
+      "fa": "نگهداری کران‌دار + بازنویسی دوره‌ای: سگمنت‌های قدیم رو منقضی کن و بدون دادهٔ حذف‌شده بازنویسی کن. هزینهٔ عملیاتی به‌علاوهٔ از دست رفتن تاریخچهٔ کامل — قیمتش رو علنی بگو.",
       "t_en": "Expire and rewrite",
       "t_fa": "انقضا و بازنویسی"
     }
   ],
-  "tests_en": "Prove quarterly: issue a test erasure and verify per copy (record gone, cache/index clean, tombstone present, key destroyed, backup expired, training excluded); restore the oldest backup and confirm no resurrection; measure slowest-consumer watermark lag and alert past the deadline.",
-  "tests_fa": "فصلی اثبات کن: حذف آزمایشی بزن و per-copy راستی‌آزمایی کن (مرجع رفته، کش/ایندکس تمیز، tombstone هست، کلید نابود، بکاپ منقضی، آموزش کنارگذاشته)؛ قدیمی‌ترین بکاپ را برگردان و زنده نشدن را تأیید کن؛ lag watermark کندترین مصرف‌کننده را بسنج و بعد از مهلت هشدار بده.",
+  "tests_en": "Prove quarterly: issue a test erasure and verify it per copy (record gone, cache/index clean, tombstone present, key destroyed, backup expired, training excluded); restore the oldest backup and confirm no resurrection; measure the slowest consumer's watermark lag and alert past the deadline. Keep the evidence on paper — an unrecorded proof is a rumour.",
+  "tests_fa": "فصلی اثبات کن: یه حذف آزمایشی بزن و per-copy راستی‌آزمایی کن (مرجع رفته، کش/ایندکس تمیز، tombstone هست، کلید نابود، بکاپ منقضی، آموزش کنارگذاشته)؛ قدیمی‌ترین بکاپ رو برگردان و زنده نشدن رو تأیید کن؛ lag watermark کندترین مصرف‌کننده رو بسنج و بعد از مهلت هشدار بده. نکته‌ش اینه: این اثبات باید مکتوب بمونه، نه توی حافظهٔ تیم.",
   "diagrams": [
     {
       "file": "diagrams/sol3-step1-erasure-runbook.html",
@@ -103,34 +103,34 @@
       "caption_en": "Erasure runbook: six copies, six mechanisms, in order",
       "height": 700,
       "narration": {
-        "scenario_fa": "کاربر «داده‌ام را حذف کن» را می‌زند و واحد حقوقی مدرک می‌خواهد. ران‌بوک را چپ‌به‌راست بخوان: کپی‌های سریع، بعد لاگ، بعد کپی‌های کند و مدرک پایانی.",
-        "scenario_en": "A user asks for erasure and legal wants proof. Read the runbook left to right: fast copies, then the log, then slow copies and the closing proof.",
+        "scenario_fa": "کاربر «داده‌ام را حذف کن» رو می‌زنه و واحد حقوقی مدرک می‌خواد. ران‌بوک رو چپ‌به‌راست بخون: کپی‌های سریع، بعد لاگ، بعد کپی‌های کند و مدرک پایانی.",
+        "scenario_en": "A user asks for erasure and legal wants proof. Read the runbook left to right: the fast copies, then the log, then the slow copies and the closing proof.",
         "steps": [
           {
-            "fa": "ستون اول: <span class=\"ltr\">record</span> با حذف مستقیم بسته می‌شود و رسید حذف می‌دهد؛ شاخه <span class=\"ltr\">shred</span> همان‌جا گزینه فوری است: نابودی کلید <span class=\"ltr\">per-user</span> با رسید نابودی.",
-            "en": "First column: the record closes with a direct delete and a delete receipt; the shred branch beside it is the instant option: per-user key destruction with a destruction receipt."
+            "fa": "ستون اول: <span class=\"ltr\">record</span> با حذف مستقیم بسته می‌شه و رسید حذف می‌ده؛ شاخهٔ <span class=\"ltr\">shred</span> همون‌جا گزینهٔ فوریه: نابودی کلید <span class=\"ltr\">per-user</span> با رسید نابودی.",
+            "en": "First column: the record closes with a direct delete and a delete receipt; the shred branch next to it is the instant option — per-user key destruction with a destruction receipt."
           },
           {
-            "fa": "<span class=\"ltr\">cache</span> کلیدها را پاک می‌کند و <span class=\"ltr\">index</span> بدون کاربر بازسازی می‌شود — نماهای مشتق با لاگ پاک‌سازی و رکورد بازسازی بسته می‌شوند.",
-            "en": "Cache purges its keys and the index rebuilds without the user — derived views close with a purge log and a rebuild record."
+            "fa": "<span class=\"ltr\">cache</span> کلیدها رو پاک می‌کنه و <span class=\"ltr\">index</span> بدون کاربر بازسازی می‌شه — نماهای مشتق با لاگ پاک‌سازی و رکورد بازسازی بسته می‌شن.",
+            "en": "The cache purges its keys and the index rebuilds without the user — the derived views close with a purge log and a rebuild record."
           },
           {
-            "fa": "لاگ دو سلاح دارد: زنجیره <span class=\"ltr\">tombstone</span> و فشرده‌سازی روی ستون فقرات، یا <span class=\"ltr\">shred</span> به‌عنوان برگ جدا. داده تا بازنویسی می‌ماند — با عدد نگهداری آموزشی صادقانه گفته می‌شود.",
-            "en": "The log has two weapons: the tombstone-and-compact chain on the spine, or shred as a separate leaf. Data lingers until rewritten — said honestly, with the teaching retention number."
+            "fa": "لاگ دو سلاح داره: زنجیرهٔ <span class=\"ltr\">tombstone</span> و فشرده‌سازی روی ستون فقرات، یا <span class=\"ltr\">shred</span> به‌عنوان یه برگ جدا. داده تا بازنویسی می‌مونه — با عدد نگهداری آموزشی، صادقانه گفته می‌شه.",
+            "en": "The log has two weapons: the tombstone-and-compact chain on the spine, or shred as its own leaf. The data lingers until it's rewritten — said honestly, with the teaching retention number."
           },
           {
-            "fa": "بکاپ‌ها با انقضای نگهداری و داده آموزش با کنارگذاری در بازآموزی بعد بسته می‌شوند — با <span class=\"ltr\">lag</span> مستند، نه پنهان. گره راستی‌آزمایی آخر چک می‌کند هیچ خواندن زنده‌ای کاربر را برنگرداند.",
-            "en": "Backups close by retention expiry and training data by exclusion at the next retrain — with documented, not hidden, lag. The final verify node checks that no live read returns the user."
+            "fa": "بکاپ‌ها با انقضای نگهداری و دادهٔ آموزش با کنارگذاری در بازآموزی بعد بسته می‌شن — با <span class=\"ltr\">lag</span> مستند، نه پنهان. گرهٔ راستی‌آزمایی آخر چک می‌کنه هیچ خواندن زنده‌ای کاربر رو برنگردونه.",
+            "en": "Backups close by retention expiry and training data by exclusion at the next retrain — with documented lag, not hidden lag. The final verify node checks that no live read brings the user back."
           }
         ],
-        "point_fa": "نقطه تصمیم برچسب هر برگ است: هر کپی سازوکار و مدرکش را نام می‌برد. کپی بدون سلاح همان یافته است — ثبتش کن، حذفش نکن.",
-        "point_en": "The decision point is each leaf's label: every copy names its mechanism and its evidence. A copy with no weapon is the finding — register it, do not drop it.",
-        "failure_fa": "اگر کلید لو رفته باشد <span class=\"ltr\">shred</span> شکست می‌خورد؛ اگر کپی ثبت‌نشده‌ای باشد هیچ برگی ندارد و همان‌جا پیداست؛ اگر <span class=\"ltr\">lag</span> آموزش مستند نشود، انطباق دروغین است.",
-        "failure_en": "A leaked key defeats shredding; an unregistered copy has no leaf and shows exactly there; undocumented training lag is false compliance.",
-        "guarantee_fa": "شکل ترتیب و مدرک هر کپی را نشان می‌دهد. انطباق حقوقی را ثابت نمی‌کند — فقط سازوکار و مدرک را.",
-        "guarantee_en": "The figure shows each copy's order, mechanism and evidence. It does not prove legal compliance — only mechanism and evidence.",
-        "nonguarantee_fa": "درباره کپی‌های ثبت‌نشده و <span class=\"ltr\">unlearning</span> مدل چیزی نمی‌گوید؛ مهلت‌های واقعی تفسیر حقوقی می‌خواهند و نامعلوم می‌مانند.",
-        "nonguarantee_en": "It says nothing about unregistered copies and model unlearning; real deadlines need legal interpretation and stay uncertain."
+        "point_fa": "نقطهٔ تصمیم برچسب هر برگه: هر کپی سازوکار و مدرکش رو نام می‌بره. کپی بدون سلاح خودش یافته‌ست — ثبتش کن، حذفش نکن.",
+        "point_en": "The decision point is each leaf's label: every copy names its mechanism and its evidence. A copy with no weapon is the finding itself — register it, don't drop it.",
+        "failure_fa": "اگه کلید لو رفته باشه، <span class=\"ltr\">shred</span> می‌شکنه؛ اگه کپی ثبت‌نشده‌ای باشه هیچ برگی نداره و همون‌جا پیداست؛ اگه <span class=\"ltr\">lag</span> آموزش مستند نشه، انطباق دروغینه.",
+        "failure_en": "A leaked key defeats shredding; an unregistered copy has no leaf and shows up exactly there; undocumented training lag is false compliance.",
+        "guarantee_fa": "این شکل ترتیب و مدرک هر کپی رو نشون می‌ده. انطباق حقوقی رو ثابت نمی‌کنه — فقط سازوکار و مدرک رو.",
+        "guarantee_en": "The figure shows each copy's order, mechanism and evidence. It doesn't prove legal compliance — only the mechanism and its evidence.",
+        "nonguarantee_fa": "دربارهٔ کپی‌های ثبت‌نشده و <span class=\"ltr\">unlearning</span> مدل چیزی نمی‌گوید؛ مهلت‌های واقعی تفسیر حقوقی می‌خواهند و نامعلوم می‌مانند.",
+        "nonguarantee_en": "It says nothing about unregistered copies and model unlearning; the real deadlines need legal interpretation and stay uncertain."
       },
       "selfcheck": {
         "q_fa": "هر شش کپی را نام ببر و برای هرکدام بگو سازوکار حذف و مدرکش چیست.",
@@ -145,39 +145,39 @@
       "source": "assets/diagram-specs/solutions/ch1/sol3-step2-straggler-fence.json",
       "kind_fa": "توالی",
       "kind_en": "sequence",
-      "caption_fa": "نرده مصرف‌کننده کند: واترمارک، خواندن بسته، بازپخش بدون زنده شدن",
+      "caption_fa": "نردهٔ مصرف‌کنندهٔ کند: واترمارک، خواندن بسته، بازپخش بدون زنده شدن",
       "caption_en": "Straggler fence: watermark, fail-closed reads, resurrection-free replay",
       "height": 780,
       "narration": {
-        "scenario_fa": "حذف انجام شده ولی یک مصرف‌کننده کند آفلاین بوده. شکل را بالا‌به‌پایین بخوان: پاک‌سازی و واترمارک، بعد نرده، بعد بازپخش <span class=\"ltr\">restore</span>.",
+        "scenario_fa": "حذف انجام شده ولی یک مصرف‌کنندهٔ کند آفلاین بوده. شکل را بالا‌به‌پایین بخوان: پاک‌سازی و واترمارک، بعد نرده، بعد بازپخش <span class=\"ltr\">restore</span>.",
         "scenario_en": "Erasure is done but one slow consumer was offline. Read top to bottom: erase plus watermark, then the fence, then the restore replay.",
         "steps": [
           {
-            "fa": "سه فلش اول: الصاق <span class=\"ltr\">delete-user-X</span> با مدرک آفست، نابودی کلید با رسید، و انتشار واترمارک حذف — که چون مصرف‌کننده آفلاین است نگه داشته می‌شود.",
-            "en": "First three arrows: the delete-user-X append with its offset evidence, key destruction with its receipt, and the deletion-watermark publish — held because the consumer is offline."
+            "fa": "سه فلش اول: الصاق <span class=\"ltr\">delete-user-X</span> با مدرک آفست، نابودی کلید با رسید، و انتشار واترمارک حذف — که چون مصرف‌کننده آفلاینه نگه داشته می‌شه.",
+            "en": "First three arrows: the delete-user-X append with its offset evidence, key destruction with its receipt, and the deletion-watermark publish — held back because the consumer is offline."
           },
           {
-            "fa": "مصرف‌کننده برمی‌گردد و می‌خواهد سرو کند؛ نرده امنیتی می‌گوید اول از واترمارک جلو بزن. خواندن کهنه‌اش به کلید نابودشده می‌خورد و بسته-<span class=\"ltr\">fail</span> می‌شود — نشت نمی‌کند.",
-            "en": "The consumer returns and asks to serve; the security fence says catch up past the watermark first. Its stale read hits the destroyed key and fails closed — nothing leaks."
+            "fa": "مصرف‌کننده برمی‌گرده و می‌خواد سرو کنه؛ نردهٔ امنیتی می‌گه اول از واترمارک جلو بزن. خواندن کهنه‌اش به کلید نابودشده می‌خوره و بسته-<span class=\"ltr\">fail</span> می‌شه — نشت نمی‌کنه.",
+            "en": "The consumer comes back and asks to serve; the security fence says catch up past the watermark first. Its stale read hits the destroyed key and fails closed — nothing leaks."
           },
           {
-            "fa": "شاخه موازی: <span class=\"ltr\">restore</span> بکاپ را از میان <span class=\"ltr\">tombstone</span>ها بازپخش می‌کند؛ فقط حالت زنده برمی‌گردد و چیزی زنده نمی‌شود. بکاپ قدیمی‌تر از نگهداری نابود می‌شود، نه بازپخش.",
-            "en": "Parallel branch: restore replays the backup through the tombstones; only live state returns, nothing resurrects. Backups older than retention are destroyed, never replayed."
+            "fa": "شاخهٔ موازی: <span class=\"ltr\">restore</span> بکاپ رو از میان <span class=\"ltr\">tombstone</span>ها بازپخش می‌کنه؛ فقط حالت زنده برمی‌گرده و چیزی زنده نمی‌شه. بکاپ قدیمی‌تر از نگهداری نابود می‌شه، نه بازپخش.",
+            "en": "Parallel branch: restore replays the backup through the tombstones; only live state comes back, nothing resurrects. Backups older than the retention horizon are destroyed, never replayed."
           }
         ],
-        "point_fa": "نقطه تصمیم واترمارک است: جلو زدن از آن شرط سرو است، نه توصیه.",
+        "point_fa": "نقطهٔ تصمیم واترمارکه: جلو زدن ازش شرط سروئه، نه توصیه.",
         "point_en": "The decision point is the watermark: catching up past it is the condition for serving, not advice.",
-        "failure_fa": "سرو قبل از جبران عقب‌ماندگی یعنی داده حذف‌شده بیرون می‌رود؛ <span class=\"ltr\">restore</span> بدون <span class=\"ltr\">tombstone</span> یعنی زنده شدن مرده‌ها.",
+        "failure_fa": "سرو قبل از جبران عقب‌ماندگی یعنی دادهٔ حذف‌شده بیرون می‌رود؛ <span class=\"ltr\">restore</span> بدون <span class=\"ltr\">tombstone</span> یعنی زنده شدن مرده‌ها.",
         "failure_en": "Serving before catching up leaks deleted data; restore without tombstones resurrects the dead.",
-        "guarantee_fa": "شکل نرده و بازپخش <span class=\"ltr\">tombstone</span>دار را نشان می‌دهد؛ ثابت نمی‌کند همه مصرف‌کننده‌ها ثبت‌اند.",
+        "guarantee_fa": "این شکل نرده و بازپخش <span class=\"ltr\">tombstone</span>دار رو نشون می‌ده؛ ثابت نمی‌کنه همهٔ مصرف‌کننده‌ها ثبت‌ان.",
         "guarantee_en": "The figure shows the fence and the tombstoned replay; it does not prove every consumer is registered.",
-        "nonguarantee_fa": "درباره مصرف‌کننده‌های ناشناخته و مهلت واقعی — که تفسیر حقوقی می‌خواهد — ساکت است.",
+        "nonguarantee_fa": "دربارهٔ مصرف‌کننده‌های ناشناخته و مهلت واقعی — که تفسیر حقوقی می‌خواد — ساکته.",
         "nonguarantee_en": "It is silent on unknown consumers and on the real deadline — which needs legal interpretation."
       },
       "selfcheck": {
-        "q_fa": "مصرف‌کننده آفلاین برمی‌گردد؛ قبل از سرو چه باید بکند و چرا خواندنش امن است؟",
+        "q_fa": "مصرف‌کنندهٔ آفلاین برمی‌گرده؛ قبل از سرو چه باید بکنه و چرا خواندنش امنه؟",
         "q_en": "The offline consumer returns; what must it do before serving, and why is its read safe?",
-        "a_fa": "باید از واترمارک حذف جلو بزند وگرنه نرده جلویش را می‌گیرد؛ خواندن کهنه‌اش به کلید نابودشده می‌خورد و بسته-<span class=\"ltr\">fail</span> می‌شود پس نشت نمی‌کند.",
+        "a_fa": "باید از واترمارک حذف جلو بزنه، وگرنه نرده جلوش رو می‌گیره؛ خواندن کهنه‌اش به کلید نابودشده می‌خوره و بسته-<span class=\"ltr\">fail</span> می‌شه، پس نشت نمی‌کنه.",
         "a_en": "It must catch up past the deletion watermark or the fence blocks it; its stale read hits the destroyed key and fails closed, so nothing leaks."
       }
     },
@@ -186,42 +186,42 @@
       "made": "hand",
       "kind_fa": "ردیابی + نقشه کپی‌ها",
       "kind_en": "trace + copy map",
-      "caption_fa": "یک درخواست حذف در شش کپی، شامل مصرف‌کننده آفلاین",
+      "caption_fa": "یه درخواست حذف در شش کپی، از جمله مصرف‌کنندهٔ آفلاین",
       "caption_en": "One erasure request across six copies, including the offline consumer",
       "height": 640,
       "narration": {
         "failure_en": "Trace the offline consumer on the same figure: its lane stays dotted while others turn solid, and the watermark bar stops it from serving — its reads hit the destroyed key and fail closed. Then trace a restore: the replay arrow passes through the tombstone box, and the backup older than retention is crossed out, not replayed.",
-        "failure_fa": "مصرف‌کننده آفلاین را روی همان شکل دنبال کن: لاینش نقطه‌چین می‌ماند ولی بقیه توپر می‌شوند و میله watermark جلوی سرو کردنش را می‌گیرد — خواندن‌هایش به کلید نابودشده می‌خورند و بسته-fail می‌شوند. بعد restore را دنبال کن: پیکان بازپخش از جعبه tombstone می‌گذرد و بکاپ قدیمی‌تر از نگهداری خط می‌خورد نه بازپخش.",
+        "failure_fa": "مصرف‌کنندهٔ آفلاین رو روی همون شکل دنبال کن: لاینش نقطه‌چین می‌مونه ولی بقیه توپر می‌شن و میلهٔ watermark جلوی سرو کردنش رو می‌گیره — خواندن‌هاش به کلید نابودشده می‌خوره و بسته-fail می‌شه. بعد restore رو دنبال کن: پیکان بازپخش از جعبهٔ tombstone می‌گذره و بکاپ قدیمی‌تر از نگهداری خط می‌خوره، نه بازپخش.",
         "guarantee_en": "The figure shows every copy closing and the two resurrection guards (watermark + tombstoned restore). It does not prove legal compliance — only the mechanism and its evidence.",
-        "guarantee_fa": "شکل بسته شدن هر کپی و دو نگهبان زنده شدن (watermark + restore tombstoneدار) را نشان می‌دهد. انطباق حقوقی را اثبات نمی‌کند — فقط سازوکار و مدرکش را.",
+        "guarantee_fa": "این شکل بسته شدن هر کپی و دو نگهبان زنده شدن (watermark + restore tombstoneدار) رو نشون می‌ده. انطباق حقوقی رو اثبات نمی‌کنه — فقط سازوکار و مدرکش رو.",
         "nonguarantee_en": "Unregistered copies and model unlearning are outside the trace — named explicitly, not silently dropped.",
-        "nonguarantee_fa": "کپی‌های ثبت‌نشده و unlearning مدل بیرون ردیابی‌اند — صریح نام برده می‌شوند نه بی‌صدا انداخته.",
+        "nonguarantee_fa": "کپی‌های ثبت‌نشده و unlearning مدل بیرون این ردیابی‌ان — صریح نام برده می‌شن، نه بی‌صدا انداخته.",
         "point_en": "The decision points are the per-copy weapon labels: each copy names its mechanism and its evidence (key-destruction receipt, compaction record, purge log). A copy with no weapon is the finding.",
-        "point_fa": "نقطه‌های تصمیم برچسب‌های سلاح per-copyاند: هر کپی سازوکار و مدرکش را نام می‌برد (رسید نابودی کلید، رکورد فشرده‌سازی، لاگ پاک‌سازی). کپی بدون سلاح همان یافته است.",
+        "point_fa": "نقطه‌های تصمیم برچسب‌های سلاح per-copy ان: هر کپی سازوکار و مدرکش رو نام می‌بره (رسید نابودی کلید، رکورد فشرده‌سازی، لاگ پاک‌سازی). کپی بدون سلاح خودش یافته‌ست.",
         "scenario_en": "A user clicks 'delete my data' and legal asks for proof. Start at the API arrow on the left and walk every lane until each shows its closing evidence.",
         "scenario_fa": "کاربری «داده‌ام را حذف کن» را می‌زند و حقوقی مدرک می‌خواهد. از پیکان API در چپ شروع کن و هر لاین را تا مدرک بسته شدنش برو.",
         "steps": [
           {
             "en": "Top lanes: record (direct delete), cache and index (purge + rebuild without the user) — the easy copies, closed first.",
-            "fa": "لاین‌های بالا: مرجع (حذف مستقیم)، کش و ایندکس (پاک‌سازی + بازسازی بدون کاربر) — کپی‌های آسان که اول بسته می‌شوند."
+            "fa": "لاین‌های بالا: مرجع (حذف مستقیم)، کش و ایندکس (پاک‌سازی + بازسازی بدون کاربر) — کپی‌های آسان که اول بسته می‌شن."
           },
           {
             "en": "Middle lane: the log — tombstone appended, segments compacted, or the per-user key shredded for instant unreadability.",
-            "fa": "لاین وسط: لاگ — tombstone الصاق، سگمنت‌ها فشرده، یا کلید per-user برای ناخوانایی فوری shredded می‌شود."
+            "fa": "لاین وسط: لاگ — tombstone الصاق، سگمنت‌ها فشرده، یا کلید per-user برای ناخوانایی فوری shredded می‌شه."
           },
           {
             "en": "Bottom lanes: backups (expire by retention, restore replays tombstones) and training data (exclude next retrain, documented lag).",
-            "fa": "لاین‌های پایین: بکاپ‌ها (انقضا با نگهداری، restore لاگ tombstone را بازپخش می‌کند) و داده آموزش (کنارگذاری در بازآموزی بعد با lag مستند)."
+            "fa": "لاین‌های پایین: بکاپ‌ها (انقضا با نگهداری، restore لاگ tombstone رو بازپخش می‌کنه) و دادهٔ آموزش (کنارگذاری در بازآموزی بعد با lag مستند)."
           },
           {
             "en": "Dotted lane + watermark bar: the offline consumer, fenced until caught up — the staff-level guard.",
-            "fa": "لاین نقطه‌چین + میله watermark: مصرف‌کننده آفلاین که تا عقب‌ماندگی جبران نشود فنس است — نگهبان سطح استف."
+            "fa": "لاین نقطه‌چین + میلهٔ watermark: مصرف‌کنندهٔ آفلاین که تا عقب‌ماندگی جبران نشه فنس می‌شه — نگهبان سطح استف."
           }
         ]
       },
       "selfcheck": {
         "a_en": "Paper-trace one erasure from API to log, backup, cache, index and reports, and find where data survives. Then answer: which of those survivals needs engineering work, and which needs a lawyer?",
-        "a_fa": "یک درخواست حذف را روی کاغذ از API تا لاگ، بکاپ، کش، ایندکس و گزارش دنبال کن و نقطه‌ای که داده باقی می‌ماند را پیدا کن. بعد جواب بده: کدام بقا کار مهندسی می‌خواهد و کدام وکیل؟",
+        "a_fa": "یه درخواست حذف رو روی کاغذ از API تا لاگ، بکاپ، کش، ایندکس و گزارش دنبال کن و نقطه‌ای که داده باقی می‌مونه رو پیدا کن. بعد جواب بده: کدوم بقا کار مهندسی می‌خواد و کدوم وکیل؟",
         "q_en": "Where does data survive your deletion, and who owns each survival — engineering or legal?",
         "q_fa": "داده‌ات بعد از حذف کجا باقی می‌ماند و مالک هر بقا کیست — مهندسی یا حقوقی؟"
       }
@@ -236,6 +236,6 @@
     "expected_en": "all six copies false/clean, key shredded, offline consumer did not serve, restore clean; OK. (actual output of this environment)",
     "status": "verified"
   },
-  "reasoning_fa": "<p>حذف را در همهٔ کپی‌ها دنبال می‌کنیم چون پاک‌کردن سطر مرجع، backup و مشتق را تغییر نمی‌دهد. crypto-shredding فقط وقتی مؤثر است که کلید واقعاً حذف شود و همهٔ کپی‌های قابل‌شناسایی همان مرز رمز را رعایت کنند. عدد ۳۰ روز مهلت قانونی این تمرین نیست؛ بازهٔ نمونه برای برنامه‌ریزی است. retention واقعی باید از هدف داده، الزام مربوط و امکان restore به دست بیاید؛ restore نیز باید فهرست حذف‌های معتبر را دوباره اعمال کند.</p>",
-  "reasoning_en": "<p>Deletion follows every copy because removing an authoritative row does not alter backups or derived views. Crypto-shredding depends on actual key destruction and coverage of every identifiable copy. Thirty days is a planning example, not a legal deadline here. Derive retention from purpose, applicable obligations and restore behavior; restores must reapply the durable deletion registry.</p>"
+  "reasoning_fa": "<p>حذف رو در همهٔ کپی‌ها دنبال می‌کنیم چون پاک‌کردن سطر مرجع، backup و مشتق رو تغییر نمی‌ده. crypto-shredding فقط وقتی مؤثره که کلید واقعاً حذف بشه و همهٔ کپی‌های قابل‌شناسایی همون مرز رمز رو رعایت کنن. عدد ۳۰ روز مهلت قانونی این تمرین نیست؛ بازهٔ نمونه برای برنامه‌ریزیه. retention واقعی باید از هدف داده، الزام مربوط و امکان restore به‌دست بیاد؛ restore هم باید فهرست حذف‌های معتبر رو دوباره اعمال کنه. یعنی مدرک، مکانیزم — نه شعار.</p>",
+  "reasoning_en": "<p>Deletion follows every copy because removing an authoritative row doesn't touch the backups or the derived views. Crypto-shredding depends on real key destruction and on covering every identifiable copy. Thirty days is a planning example, not a legal deadline here. Derive the retention from purpose, applicable obligations and restore behavior; and a restore must reapply the durable deletion registry. In other words: evidence and mechanism, not slogans.</p>"
 }
