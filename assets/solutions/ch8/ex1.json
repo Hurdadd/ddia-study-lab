@@ -1,28 +1,28 @@
 {
   "alternatives": [
     {
-      "en": "Explicit locking instead of serializability: <span class=\"ltr\">SELECT ... FOR UPDATE</span> the rows your predicate depends on, or maintain a materialized conflict row and lock it. Same effect as serializable for a known predicate, but you must find every predicate by hand — miss one and the anomaly returns.",
-      "fa": "قفل صریح به‌جای سریال‌پذیری: ردیف‌هایی که گزاره‌ات به آن‌ها وابسته است با <span class=\"ltr\">SELECT ... FOR UPDATE</span> قفل کن یا یک ردیف تعارضِ materialized نگه دار و همان را قفل کن. برای گزارهٔ شناخته‌شده همان اثر سریال‌پذیری را دارد، ولی باید هر گزاره را با دست پیدا کنی — یکی جا بماند ناهنجاری برمی‌گردد."
+      "en": "Explicit locking instead of serializability: <span class=\"ltr\">SELECT ... FOR UPDATE</span> the rows your predicate depends on, or keep a materialized conflict row around and lock that. Same effect as serializable for a known predicate, but you have to find every predicate by hand — miss one and the anomaly walks right back in.",
+      "fa": "قفل صریح به‌جای سریال‌پذیری: ردیف‌هایی که گزاره‌ات به آن‌ها وابسته است را با <span class=\"ltr\">SELECT ... FOR UPDATE</span> قفل کن، یا یک ردیف تعارضِ materialized نگه دار و همان را قفل کن. برای گزارهٔ شناخته‌شده همان اثر سریال‌پذیری را دارد؛ فقط باید هر گزاره را با دست پیدا کنی — یکی جا بماند، ناهنجاری برمی‌گردد."
     },
     {
-      "en": "Optimistic version check in the application: read a version column with the row and <span class=\"ltr\">UPDATE ... WHERE version = read_version</span>. Zero lock contention, but every writer must follow the protocol and retries are still whole-transaction.",
-      "fa": "بررسی خوش‌بینانهٔ نسخه در برنامه: ستون نسخه را با ردیف بخوان و با <span class=\"ltr\">UPDATE ... WHERE version = read_version</span> بنویس. هیچ contention قفلی نیست، ولی هر نویسنده باید پروتکل را رعایت کند و retry همچنان کل تراکنش است."
+      "en": "Optimistic version check in the application: read a version column with the row and <span class=\"ltr\">UPDATE ... WHERE version = read_version</span>. Zero lock contention, but every writer has to follow the protocol, and retries are still whole-transaction.",
+      "fa": "بررسی خوش‌بینانهٔ نسخه در برنامه: ستون نسخه را با ردیف بخوان و با <span class=\"ltr\">UPDATE ... WHERE version = read_version</span> بنویس. هیچ contention قفلی نداری، ولی هر نویسنده باید پروتکل را رعایت کند و retry همچنان کل تراکنش است."
     }
   ],
-  "answer_en": "On PostgreSQL 18, dirty reads never happen — not even at <span class=\"ltr\">READ UNCOMMITTED</span> — and dirty writes block on the row lock, so those two tests assert prevention, not reproduction. Read skew, read-modify-write lost update, phantom recounts and write skew each reproduce at the level that permits them and vanish at the level that forbids them. Fix the write, not the read: single-statement increments, a lock on an existing row, or serializable with whole-transaction retry.",
-  "answer_fa": "روی PostgreSQL 18 خواندن کثیف هیچ‌وقت رخ نمی‌دهد — حتی در <span class=\"ltr\">READ UNCOMMITTED</span> — و نوشتن کثیف روی قفل ردیف block می‌شود، پس آن دو آزمون عدم وقوع را assert می‌کنند نه بازتولید را. read skew، lost update از نوع خواندن-تغییر-نوشتن، بازشماری phantom و write skew هرکدام در سطحی که اجازه‌شان می‌دهد بازتولید می‌شوند و در سطحی که منع‌شان می‌کند ناپدید. نوشتن را درست کن نه خواندن را: increment تک‌دستوری، قفل روی ردیف موجود، یا سریال‌پذیر با retry کل تراکنش.",
+  "answer_en": "Here's the thing about PostgreSQL 18: dirty reads never happen — not even at <span class=\"ltr\">READ UNCOMMITTED</span> — and dirty writes block on the row lock. So those two tests assert prevention, not reproduction. The rest is fair game: read skew, read-modify-write lost update, phantom recounts and write skew each reproduce at the level that permits them and vanish at the level that forbids them. Now the punchline: fix the write, not the read. Single-statement increments, a lock on an existing row, or serializable with whole-transaction retry. Patch the read side and you only hide the pain.",
+  "answer_fa": "روی PostgreSQL 18 خواندن کثیف هیچ‌وقت رخ نمی‌دهد — حتی با <span class=\"ltr\">READ UNCOMMITTED</span> — و نوشتن کثیف هم روی قفل ردیف block می‌شود. یعنی آن دو آزمون دارند «نمی‌گذاریم اتفاق بیفتد» را ثابت می‌کنند، نه «بیایید بازتولیدش کنیم». بقیه‌اش این است: read skew، lost update از نوع خواندن-تغییر-نوشتن، بازشماری phantom و write skew هرکدام زیر سطحی که اجازه‌شان می‌دهد بازتولید می‌شوند و زیر سطحی که منعشان می‌کند ناپدید می‌شوند. و نکته‌ش اینجاست: درستی را در نوشتن پیدا کن، نه در خواندن. increment تک‌دستوری، قفل روی ردیف موجود، یا سریال‌پذیر با retry کل تراکنش. خواندن را وصله کنی، فقط درد را قایم می‌کنی.",
   "assumptions": [
     {
-      "en": "Named product and version: PostgreSQL 18, per its transaction-isolation documentation; behavior below is product behavior, not the SQL minimum.",
-      "fa": "محصول و نسخهٔ مشخص: PostgreSQL 18 طبق مستندات جداسازی تراکنش خودش؛ رفتار زیر رفتار محصول است نه حداقل استاندارد SQL."
+      "en": "Let's name the product and the version: PostgreSQL 18, per its own transaction-isolation documentation. The behavior below is this product's behavior, not the SQL minimum.",
+      "fa": "فرض کن محصول و نسخه روشن باشه: PostgreSQL 18، طبق مستندات جداسازی تراکنش خودش. رفتاری که پایین می‌بینی رفتار همین محصوله، نه حداقلِ استاندارد SQL."
     },
     {
-      "en": "Two concurrent sessions on one small accounts table; balances like 500/500 are teaching numbers (آموزشی), never benchmarks.",
-      "fa": "دو اتصال هم‌زمان روی یک جدول کوچک حساب‌ها؛ موجودی‌هایی مثل ۵۰۰/۵۰۰ اعداد آموزشی‌اند (آموزشی)، هرگز بنچمارک نیستند."
+      "en": "Two concurrent sessions on one small accounts table. Balances like 500/500 are teaching numbers (آموزشی), never benchmarks.",
+      "fa": "دو اتصال هم‌زمان روی یه جدول کوچکِ حساب‌ها. موجودی‌هایی مثل ۵۰۰/۵۰۰ آموزشی‌ان (آموزشی) و هرگز بنچمارک نیستن."
     },
     {
-      "en": "PostgreSQL is NOT installed in this sandbox (no <span class=\"ltr\">psql</span>, no <span class=\"ltr\">pg_ctl</span>), so the SQL runs below are a local-run guide; the executed demo models the same histories and checks the same invariants in memory.",
-      "fa": "PostgreSQL در این محیط نصب نیست (نه <span class=\"ltr\">psql</span> نه <span class=\"ltr\">pg_ctl</span>)، پس اجراهای SQL زیر راهنمای اجرای محلی‌اند؛ دموی اجراشده همان historyها را مدل می‌کند و همان invariantها را در حافظه می‌سنجد."
+      "en": "Honestly, PostgreSQL is NOT installed in this sandbox (no <span class=\"ltr\">psql</span>, no <span class=\"ltr\">pg_ctl</span>), so the SQL runs below are a local-run guide. The executed demo models the same histories and checks the same invariants in memory.",
+      "fa": "راستش، توی این محیط PostgreSQL نصب نیست (نه <span class=\"ltr\">psql</span>، نه <span class=\"ltr\">pg_ctl</span>)، پس اجرا‌های SQL پایین فقط راهنمای اجرای محلی‌ان. دموی اجراشده همون history‌ها رو مدل می‌کنه و همون invariant‌ها رو توی حافظه می‌سنجه."
     }
   ],
   "code": {
@@ -30,62 +30,62 @@
     "expected_en": "PASS H1 dirty-read prevention (READ UNCOMMITTED) — reader saw 500, uncommitted 400 stayed invisible\nPASS H2 dirty-write blocking — T2 waited on the row lock, wrote only after T1 committed\nPASS H3 read skew (READ COMMITTED) anomaly present — T2 saw 500+600=1100, 100 appeared from nowhere mid-transfer; REPRODUCED as designed\nPASS H4 read skew (SNAPSHOT ISOLATION) — T2 read its start snapshot 500+500=1000; PREVENTED\nPASS H5 lost update (read-modify-write) — final=11 instead of 12; REPRODUCED\nPASS H6 atomic increment (UPDATE balance=balance+1) — final=12; row lock serialized the two writes\nPASS H7 phantom read (READ COMMITTED / SI re-read) — 2 then 3 in one transaction; REPRODUCED\nPASS H8 phantom (REPEATABLE READ snapshot re-read) — snapshot re-read stable at 2; new row invisible, PREVENTED\nPASS H9 write skew (SNAPSHOT ISOLATION) — on-call=[], invariant '>=1 on call' broken; REPRODUCED\nPASS H10 write skew (SERIALIZABLE) — survivor=[Bob]; exactly one committer, other retries; PREVENTED\n----\nhistories run=10 passed=10 failed=0\nPG-18 note: H1/H2 are prevention tests (blocking observed, anomaly absent).",
     "expected_fa": "هر ۱۰ history سبز: H1/H2 عدم وقوع و blocking، H3/H5/H7/H9 بازتولیدشده، H4/H6/H8/H10 تمیز؛ جمع‌بندی <span class=\"ltr\">passed=10 failed=0</span>. (خروجی واقعی همین محیط)",
     "lang": "java",
-    "run_en": "javac AnomalyLab.java && java AnomalyLab — stdlib Java only, instant. PostgreSQL parts are NOT executed here; see the local-run guide in the checks section.",
-    "run_fa": "javac AnomalyLab.java && java AnomalyLab — فقط استاندارد جاوا، فوری. بخش‌های PostgreSQL این‌جا اجرا نشده‌اند؛ راهنمای اجرای محلی در بخش آزمون‌هاست.",
+    "run_en": "javac AnomalyLab.java && java AnomalyLab — stdlib Java only, instant. The PostgreSQL parts are NOT executed here; the local-run guide lives in the checks section.",
+    "run_fa": "javac AnomalyLab.java && java AnomalyLab — فقط استاندارد جاوا، فوری. بخش‌های PostgreSQL این‌جا اجرا نشده‌اند؛ راهنمای اجرای محلی توی بخش آزمون‌هاست.",
     "status": "verified"
   },
-  "design_en": "<p>Two <span class=\"ltr\">psql</span> sessions, A and B, on one database. Table: <code>accounts(id int primary key, balance int)</code> with two rows of 500. Session A runs the writer history, session B the reader history; the interleaving is driven by hand (run each statement in the printed order). Set the level per run with <code>BEGIN; SET TRANSACTION ISOLATION LEVEL ...</code>. For the blocking probe, run B's conflicting <span class=\"ltr\">UPDATE</span> before A commits and watch it wait; <code>SELECT ... FOR UPDATE</code> is not needed for the probe — the write lock is implicit.</p>",
-  "design_fa": "<p>دو اتصال <span class=\"ltr\">psql</span> به‌نام A و B روی یک پایگاه. جدول: <code>accounts(id int primary key, balance int)</code> با دو ردیف ۵۰۰تایی. اتصال A تاریخچهٔ نویسنده و B تاریخچهٔ خواننده را اجرا می‌کند؛ درهم‌تنیدگی با دست رانده می‌شود (هر دستور به‌ترتیب چاپ‌شده). سطح هر اجرا با <code>BEGIN; SET TRANSACTION ISOLATION LEVEL ...</code> تنظیم می‌شود. برای آزمون blocking، <span class=\"ltr\">UPDATE</span> متعارض B را قبل از commit اتصال A بزن و منتظر ماندنش را ببین؛ برای آزمون نیازی به <code>SELECT ... FOR UPDATE</code> نیست — قفل نوشتن ضمنی است.</p>",
+  "design_en": "<p>Two <span class=\"ltr\">psql</span> sessions, A and B, on one database. Table: <code>accounts(id int primary key, balance int)</code> with two rows of 500. Session A runs the writer history, session B the reader history, and you drive the interleaving by hand (run each statement in the printed order). Set the level per run with <code>BEGIN; SET TRANSACTION ISOLATION LEVEL ...</code>. For the blocking probe, fire B's conflicting <span class=\"ltr\">UPDATE</span> before A commits and watch it sit there waiting; you don't need <code>SELECT ... FOR UPDATE</code> for that — the write lock is implicit.</p>",
+  "design_fa": "<p>دو اتصال <span class=\"ltr\">psql</span> به‌نام A و B روی یک پایگاه. جدول: <code>accounts(id int primary key, balance int)</code> با دو ردیف ۵۰۰تایی. اتصال A تاریخچهٔ نویسنده را اجرا می‌کند و B تاریخچهٔ خواننده را؛ درهم‌تنیدگی را با دست می‌رانی (هر دستور دقیقاً به همان ترتیب چاپ‌شده اجرا می‌شود). سطح هر اجرا را با <code>BEGIN; SET TRANSACTION ISOLATION LEVEL ...</code> تنظیم کن. برای آزمون blocking، <span class=\"ltr\">UPDATE</span> متعارض B را قبل از commit اتصال A بزن و ببینش چطور منتظر می‌ماند؛ به <code>SELECT ... FOR UPDATE</code> نیازی نیست — قفل نوشتن ضمنی است.</p>",
   "diagrams": [
     {
-      "caption_en": "Dirty probes, read skew, lost update across two sessions",
-      "caption_fa": "آزمون‌های dirty، read skew و lost update روی دو اتصال",
+      "caption_en": "Two sessions, three probes: dirty, read skew and lost update",
+      "caption_fa": "دو اتصال، آزمون‌های dirty، read skew و lost update",
       "file": "diagrams/sol1a-read-skew-lost-update.html",
       "height": 640,
       "kind_en": "sequence",
       "kind_fa": "توالی",
       "made": "archify",
       "narration": {
-        "failure_en": "Read the RC skew branch on the same figure: B's two reads straddle A's commit, so 500 + 600 = 1100. Then read the lost-update branch: both sessions read 10, both write 11.",
-        "failure_fa": "شاخهٔ skew در RC را روی همان شکل دنبال کن: دو خواندن B دو طرف commit اتصال A می‌افتند، پس ۵۰۰ + ۶۰۰ = ۱۱۰۰. بعد شاخهٔ lost update را بخوان: هر دو اتصال ۱۰ می‌خوانند و هر دو ۱۱ می‌نویسند.",
+        "failure_en": "Read the RC skew branch on the same figure: B's two reads straddle A's commit, so 500 + 600 = 1100. Then the lost-update branch: both sessions read 10, both write 11.",
+        "failure_fa": "شاخهٔ skew در RC را روی همان شکل دنبال کن: دو خواندن B دو طرف commit اتصال A می‌افتند، یعنی ۵۰۰ + ۶۰۰ = ۱۱۰۰. بعد شاخهٔ lost update: هر دو اتصال ۱۰ می‌خوانند و هر دو ۱۱ می‌نویسند.",
         "guarantee_en": "The figure shows which interleaving breaks which level and which single-statement fix holds. It does not prove the database internals — only the observable histories.",
         "guarantee_fa": "شکل نشان می‌دهد کدام درهم‌تنیدگی کدام سطح را می‌شکند و کدام اصلاح تک‌دستوری می‌ماند. سازوکار داخلی پایگاه را ثابت نمی‌کند — فقط historyهای مشاهده‌پذیر را.",
-        "nonguarantee_en": "It says nothing about write skew and phantoms (next figure) or about other products' levels.",
-        "nonguarantee_fa": "دربارهٔ write skew و phantomها (شکل بعد) و دربارهٔ سطح‌های محصولات دیگر چیزی نمی‌گوید.",
+        "nonguarantee_en": "It says nothing about write skew and phantoms (next figure), and nothing about other products' levels.",
+        "nonguarantee_fa": "دربارهٔ write skew و phantomها (شکل بعد) و دربارهٔ سطح‌های محصولات دیگر چیزی نمی‌گوید. فقط همین شکل حرف می‌زند.",
         "point_en": "The decision point is the isolation label on each re-run: same statements, different level, different sum.",
-        "point_fa": "نقطهٔ تصمیم برچسب isolation هر اجرای دوباره است: همان دستورها، سطح متفاوت، جمع متفاوت.",
-        "scenario_en": "Two sessions share two accounts. Walk the figure top to bottom: first the probes that must find nothing, then the histories that break.",
-        "scenario_fa": "دو اتصال دو حساب را شریک‌اند. شکل را بالا‌به‌پایین بخوان: اول آزمون‌هایی که باید هیچ‌چیز نیابند، بعد historyهایی که می‌شکنند.",
+        "point_fa": "نقطهٔ تصمیم، برچسب isolation هر اجرای دوباره است: همان دستورها، سطح متفاوت، جمع متفاوت.",
+        "scenario_en": "Two sessions share two accounts. Walk the figure from the top down: first the probes that must find nothing, then the histories that break.",
+        "scenario_fa": "دو اتصال، دو حساب را شریک‌اند. شکل را بالا‌به‌پایین بخوان: اول آزمون‌هایی که باید هیچ‌چیز نیابند، بعد historyهایی که می‌شکنند.",
         "steps": [
           {
-            "en": "First arrows: A writes 400 uncommitted; B still reads 500 — the dirty-read probe finds nothing, even at READ UNCOMMITTED.",
-            "fa": "فلش‌های اول: اتصال A مقدار ۴۰۰ تأییدنشده می‌نویسد؛ B هنوز ۵۰۰ می‌خواند — آزمون dirty read هیچ‌چیز نمی‌یابد، حتی در READ UNCOMMITTED."
+            "en": "First arrows: A writes 400 uncommitted, B still reads 500 — the dirty-read probe finds nothing, even at READ UNCOMMITTED.",
+            "fa": "فلش‌های اول: اتصال A مقدار ۴۰۰ تأییدنشده را می‌نویسد، B هنوز ۵۰۰ می‌خواند — آزمون dirty read هیچ‌چیز پیدا نمی‌کند، حتی در READ UNCOMMITTED."
           },
           {
-            "en": "Next: B's UPDATE on the same row blocks until A commits — the dirty-write probe observes waiting, not corruption.",
-            "fa": "بعد: UPDATE اتصال B روی همان ردیف تا commit اتصال A می‌ماند — آزمون dirty write انتظار می‌بیند نه خرابی."
+            "en": "Next: B's UPDATE on the same row blocks until A commits — the dirty-write probe sees waiting, not corruption.",
+            "fa": "بعد: UPDATE اتصال B روی همان ردیف تا commit اتصال A می‌ماند — آزمون dirty write انتظار می‌بیند، نه خرابی."
           },
           {
-            "en": "Skew segment: B reads A=500, A commits the transfer, B reads B=600: 1100. The SI re-run reads its start snapshot: 1000.",
-            "fa": "بخش skew: اتصال B مقدار A=۵۰۰ را می‌خواند، A انتقال را commit می‌کند، B مقدار B=۶۰۰ را می‌خواند: ۱۱۰۰. اجرای SI از snapshot شروع خودش می‌خواند: ۱۰۰۰."
+            "en": "Skew segment: B reads A=500, A commits the transfer, B reads B=600: 1100. The SI re-run reads from its own start snapshot: 1000.",
+            "fa": "بخش skew: اتصال B مقدار A=۵۰۰ را می‌خواند، A انتقال را commit می‌کند، B مقدار B=۶۰۰ را می‌خواند: ۱۱۰۰. اجرای SI از snapshot خودش می‌خواند: ۱۰۰۰."
           },
           {
-            "en": "Lost-update segment: both read 10, both write 11 — final 11, one +1 lost. The single-statement increment ends at 12.",
-            "fa": "بخش lost update: هر دو ۱۰ می‌خوانند و هر دو ۱۱ می‌نویسند — نهایی ۱۱، یک ۱+ گم شد. increment تک‌دستوری در ۱۲ تمام می‌شود."
+            "en": "Lost-update segment: both read 10, both write 11 — final 11, one +1 lost. The single-statement increment ends at 12 too.",
+            "fa": "بخش lost update: هر دو ۱۰ می‌خوانند و هر دو ۱۱ می‌نویسند — نهایی ۱۱، یک ۱+ گم شد. increment تک‌دستوری می‌رسد به ۱۲."
           }
         ]
       },
       "selfcheck": {
-        "a_en": "READ UNCOMMITTED, because on PG 18 it still shows only committed data; the probe then asserts invisibility, and the row-lock wait asserts blocking.",
-        "a_fa": "READ UNCOMMITTED، چون روی PG 18 هنوز فقط دادهٔ تأییدشده را نشان می‌دهد؛ آزمون بعد نامرئی بودن را assert می‌کند و انتظار روی قفل ردیف blocking را.",
+        "a_en": "READ UNCOMMITTED, because on PG 18 it still shows only committed data. The probe then asserts invisibility, and the row-lock wait asserts blocking.",
+        "a_fa": "READ UNCOMMITTED، چون روی PG 18 هنوز فقط دادهٔ تأییدشده را نشان می‌دهد. آزمون بعد نامرئی بودن را assert می‌کند و انتظار روی قفل ردیف، blocking را.",
         "q_en": "Which level makes the dirty-read probe strongest, and what does each probe assert?",
         "q_fa": "کدام سطح آزمون dirty read را قوی‌تر می‌کند و هر آزمون چه چیزی را assert می‌کند؟"
       },
       "source": "assets/diagram-specs/solutions/ch8/sol1a-read-skew-lost-update.json"
     },
     {
-      "caption_en": "Phantom recounts, write skew, and the serializable survivor",
-      "caption_fa": "بازشماری phantom، write skew و بازماندهٔ سریال‌پذیر",
+      "caption_en": "Phantom recounts, write skew, and the one who survives",
+      "caption_fa": "phantom، write skew و بازماندهٔ سریال‌پذیر",
       "file": "diagrams/sol1b-phantom-write-skew.html",
       "height": 640,
       "kind_en": "sequence",
@@ -93,27 +93,27 @@
       "made": "archify",
       "narration": {
         "failure_en": "Read the skew branch: both snapshots contain {Alice, Bob}, so both step down and the set ends empty. Then read the serializable branch: Alice commits, Bob takes 40001 and retries.",
-        "failure_fa": "شاخهٔ skew را بخوان: هر دو snapshot مجموعهٔ {Alice, Bob} را دارند، پس هر دو کنار می‌روند و مجموعه خالی می‌ماند. بعد شاخهٔ سریال‌پذیر را بخوان: Alice تأیید می‌کند، Bob خطای 40001 می‌گیرد و retry می‌کند.",
+        "failure_fa": "شاخهٔ skew را بخوان: هر دو snapshot مجموعهٔ {Alice, Bob} را دارند؛ هر دو کنار می‌روند و مجموعه خالی می‌ماند. بعد شاخهٔ سریال‌پذیر: Alice تأیید می‌کند، Bob خطای 40001 می‌گیرد و retry می‌کند.",
         "guarantee_en": "The figure shows snapshot isolation stopping phantoms but not write skew, and serializability stopping both at the price of aborts. It does not show predicate locking.",
         "guarantee_fa": "شکل نشان می‌دهد جداسازی snapshot جلوی phantom را می‌گیرد ولی جلوی write skew را نه، و سریال‌پذیری جلوی هر دو را به قیمت abort می‌گیرد. قفل گزاره‌ای را نشان نمی‌دهد.",
         "nonguarantee_en": "It is silent on dirty anomalies (previous figure) and on how SSI detects the cycle internally.",
         "nonguarantee_fa": "دربارهٔ ناهنجاری‌های dirty (شکل قبل) و دربارهٔ این‌که SSI چرخه را داخلی چطور تشخیص می‌دهد ساکت است.",
         "point_en": "The decision point is the second committer: under SI it succeeds and breaks the invariant; under serializable it aborts.",
-        "point_fa": "نقطهٔ تصمیم تأییدکنندهٔ دوم است: زیر SI موفق می‌شود و invariant را می‌شکند؛ زیر سریال‌پذیر abort می‌شود.",
+        "point_fa": "نقطهٔ تصمیم، تأییدکنندهٔ دوم است: زیر SI موفق می‌شود و invariant را می‌شکند؛ زیر سریال‌پذیر abort می‌شود.",
         "scenario_en": "One session counts while another inserts; two on-call staff step down together. Read the figure in three bands.",
-        "scenario_fa": "یک اتصال می‌شمرد و دیگری درج می‌کند؛ دو نگهبان on-call با هم کنار می‌روند. شکل را در سه نوار بخوان.",
+        "scenario_fa": "یک اتصال می‌شمرد و دیگری درج می‌کند؛ دو نگهبان on-call با هم کنار می‌روند. شکل را نوار‌به‌نوار بخوان.",
         "steps": [
           {
             "en": "Phantom band: COUNT gives 2, a rival INSERT commits, the recount gives 3 — inside one RC transaction.",
-            "fa": "نوار phantom: شمارش ۲ می‌دهد، INSERT رقیب تأیید می‌شود، بازشماری ۳ می‌دهد — داخل یک تراکنش RC."
+            "fa": "نوار phantom: شمارش ۲ می‌دهد، INSERT رقیب تأیید می‌شود، بازشماری ۳ می‌دهد — همه داخل یک تراکنش RC."
           },
           {
             "en": "Same band, REPEATABLE READ: the recount reads the start snapshot and stays at 2 — the newcomer is invisible.",
-            "fa": "همان نوار با REPEATABLE READ: بازشماری از snapshot شروع می‌خواند و روی ۲ می‌ماند — تازه‌وارد نامرئی است."
+            "fa": "همان نوار با REPEATABLE READ: بازشماری از snapshot شروع می‌خواند و روی ۲ می‌ماند — تازه‌وارد نامرئی می‌ماند."
           },
           {
             "en": "Skew band: Alice and Bob each see cover in their snapshot and both go off call — the on-call set ends empty.",
-            "fa": "نوار skew: هرکدام از Alice و Bob در snapshot خود پوشش می‌بینند و هر دو off-call می‌شوند — مجموعهٔ on-call خالی می‌ماند."
+            "fa": "نوار skew: Alice و Bob هرکدام در snapshot خود پوشش می‌بینند و هر دو off-call می‌شوند — مجموعهٔ on-call خالی می‌ماند."
           },
           {
             "en": "Serializable band: Alice commits, Bob gets 40001 and retries the whole transaction — one survivor, invariant holds.",
@@ -123,15 +123,15 @@
       },
       "selfcheck": {
         "a_en": "No: in PG, REPEATABLE READ is snapshot isolation, which hides the new row on re-read. The name differs per product — Db2's repeatable read really is serializable.",
-        "a_fa": "نه: در PG عبارت REPEATABLE READ یعنی جداسازی snapshot که سطر تازه را در بازخوانی پنهان می‌کند. نامش per-product فرق می‌کند — repeatable read در Db2 واقعاً سریال‌پذیر است.",
+        "a_fa": "نه: در PG عبارت REPEATABLE READ یعنی جداسازی snapshot، که سطر تازه را در بازخوانی پنهان می‌کند. نامش per-product فرق می‌کند — repeatable read در Db2 واقعاً سریال‌پذیر است.",
         "q_en": "Does REPEATABLE READ stop the phantom recount on every database?",
         "q_fa": "آیا REPEATABLE READ روی هر پایگاهی جلوی بازشماری phantom را می‌گیرد؟"
       },
       "source": "assets/diagram-specs/solutions/ch8/sol1b-phantom-write-skew.json"
     },
     {
-      "caption_en": "One matrix: every anomaly against every level on PG 18",
-      "caption_fa": "یک ماتریس: هر ناهنجاری در برابر هر سطح روی PG 18",
+      "caption_en": "One matrix: every anomaly, every level, on PG 18",
+      "caption_fa": "یک ماتریس: هر ناهنجاری، هر سطح، روی PG 18",
       "file": "diagrams/sol1-anomaly-matrix.html",
       "height": 640,
       "kind_en": "anomaly table",
@@ -145,9 +145,9 @@
         "nonguarantee_en": "Timings, throughput and lock-wait durations are absent — this is a correctness map, not a benchmark.",
         "nonguarantee_fa": "زمان‌بندی، توان و مدت انتظار قفل غایب‌اند — این نقشهٔ درستی است نه بنچمارک.",
         "point_en": "The decision column is SERIALIZABLE: the only column with no rose cells — and the only one that answers conflicts with aborts.",
-        "point_fa": "ستون تصمیم SERIALIZABLE است: تنها ستون بدون خانهٔ صورتی — و تنها ستونی که به تعارض‌ها با abort جواب می‌دهد.",
+        "point_fa": "ستون تصمیم، SERIALIZABLE است: تنها ستون بدون خانهٔ صورتی — و تنها ستونی که به تعارض‌ها با abort جواب می‌دهد.",
         "scenario_en": "Seven anomaly rows against three isolation columns. Read rosary: every rose cell is a history you must either prevent or handle.",
-        "scenario_fa": "هفت ردیف ناهنجاری در برابر سه ستون isolation. مثل تسبیح بخوان: هر خانهٔ صورتی historyی است که یا باید جلوگیری‌اش کنی یا مدیریتش.",
+        "scenario_fa": "هفت ردیف ناهنجاری در برابر سه ستون isolation. مثل تسبیح بخون: هر خانهٔ صورتی یک history است که یا باید جلوگیری‌اش کنی یا مدیریتش کنی.",
         "steps": [
           {
             "en": "Top two rows: dirty read and dirty write are green everywhere — PG 18 forbids the first and blocks the second at every level.",
@@ -177,36 +177,36 @@
   ],
   "failures": [
     {
-      "en": "Serializability failure 40001 retried as a single statement: the retry reuses the stale snapshot reads and can still break the invariant. Retry means re-running the WHOLE transaction from BEGIN.",
-      "fa": "تلاش دوبارهٔ خطای سریال‌پذیری 40001 به‌صورت تک‌دستور: retry از خواندن‌های کهنهٔ snapshot استفاده می‌کند و هنوز می‌تواند invariant را بشکند. retry یعنی اجرای دوبارهٔ کل تراکنش از BEGIN."
+      "en": "Serializability failure 40001 retried as a single statement: the retry reuses the stale snapshot reads and can still break the invariant. Retry means re-running the WHOLE transaction from BEGIN — never just the statement that blew up.",
+      "fa": "تلاش دوبارهٔ خطای سریال‌پذیری 40001 به‌صورت تک‌دستور: retry از خواندن‌های کهنهٔ snapshot استفاده می‌کند و هنوز می‌تواند invariant را بشکند. retry یعنی اجرای دوبارهٔ کل تراکنش، از BEGIN. تک‌دستور، هیچ‌وقت."
     },
     {
-      "en": "An ORM that maps counter increments to read-then-absolute-write: the application looks correct and passes single-threaded tests, then loses updates under the first concurrent load.",
-      "fa": "یک ORM که increment شمارنده را به خواندن-بعد-نوشتنِ مطلق نگاشت می‌کند: برنامه درست به نظر می‌رسد و آزمون‌های تک‌نخی را پاس می‌کند، بعد زیر اولین بار هم‌زمان به‌روزرسانی گم می‌کند."
+      "en": "An ORM that maps counter increments to read-then-absolute-write: the application looks correct and passes single-threaded tests, then loses updates under the first concurrent load. Calm, tidy code — and quietly wrong.",
+      "fa": "یک ORM که increment شمارنده را به خواندن-بعد-نوشتنِ مطلق نگاشت می‌کند: برنامه درست به نظر می‌رسد و آزمون‌های تک‌نخی را پاس می‌کند، بعد زیر اولین بار هم‌زمان به‌روزرسانی گم می‌کند. بدترین حالت: کد آرام و تمیز است، فقط بی‌صدا غلط."
     },
     {
-      "en": "Assuming READ UNCOMMITTED shows dirty data because the standard allows it: on PostgreSQL 18 it does not, and a test written for the standard's minimum asserts a behavior the product never exhibits.",
-      "fa": "فرض این‌که READ UNCOMMITTED دادهٔ کثیف نشان می‌دهد چون استاندارد اجازه‌اش می‌دهد: روی PostgreSQL 18 نه، و آزمونی که برای حداقل استاندارد نوشته شده رفتاری را assert می‌کند که محصول هیچ‌وقت نشان نمی‌دهد."
+      "en": "Assuming READ UNCOMMITTED shows dirty data because the standard allows it: on PostgreSQL 18 it does not, so a test written for the standard's minimum asserts a behavior the product never exhibits. Name the product and its version in every claim.",
+      "fa": "فرض این‌که READ UNCOMMITTED دادهٔ کثیف نشان می‌دهد چون استاندارد اجازه‌اش می‌دهد: روی PostgreSQL 18 نه. یعنی آزمونی که برای حداقل استاندارد نوشته شده، رفتاری را assert می‌کند که محصول هیچ‌وقت نشان نمی‌دهد. نام محصول و نسخه‌اش را در هر ادعا بیاور."
     }
   ],
   "followups": [
     {
-      "a_en": "SELECT-then-absolute-UPDATE is a read-modify-write cycle: two sessions read 10 and both write 11, so one +1 is lost (history H5 ends at 11). UPDATE balance=balance+1 never reads a stale value into the application — each writer takes the row lock and applies +1 to the latest committed value, so two commutating increments serialize to 12 (history H6). The rule: keep commutative updates inside one statement; never carry a value across a round trip when concurrent writers exist.",
-      "a_fa": "SELECT و بعد UPDATE با مقدار مطلق یک چرخهٔ خواندن-تغییر-نوشتن است: دو اتصال ۱۰ می‌خوانند و هر دو ۱۱ می‌نویسند، پس یک ۱+ گم می‌شود (تاریخچهٔ H5 در ۱۱ تمام می‌شود). UPDATE با balance=balance+1 هیچ‌وقت مقدار کهنه را به برنامه نمی‌آورد — هر نویسنده قفل ردیف را می‌گیرد و ۱+ را روی تازه‌ترین مقدار تأییدشده اعمال می‌کند، پس دو increment جابه‌جاپذیر سریال می‌شوند به ۱۲ (تاریخچهٔ H6). قاعده: به‌روزرسانی‌های جابه‌جاپذیر را داخل یک دستور نگه دار؛ وقتی نویسندهٔ هم‌زمان هست مقدار را از رفت‌وبرگشت عبور نده.",
+      "a_en": "SELECT-then-absolute-UPDATE is a read-modify-write cycle: two sessions read 10 and both write 11, so one +1 is lost (history H5 ends at 11). UPDATE balance=balance+1 never reads a stale value into the application — each writer takes the row lock and applies +1 to the latest committed value, so two commutating increments serialize to 12 (history H6). The rule: keep commutative updates inside one statement, and never carry a value across a round trip when concurrent writers exist.",
+      "a_fa": "SELECT و بعد UPDATE با مقدار مطلق یک چرخهٔ خواندن-تغییر-نوشتن است: دو اتصال ۱۰ می‌خوانند و هر دو ۱۱ می‌نویسند، یعنی یک ۱+ گم می‌شود (تاریخچهٔ H5 در ۱۱ تمام می‌شود). UPDATE با balance=balance+1 هیچ‌وقت مقدار کهنه را به برنامه نمی‌آورد — هر نویسنده قفل ردیف را می‌گیرد و ۱+ را روی تازه‌ترین مقدار تأییدشده اعمال می‌کند، و دو increment جابه‌جاپذیر سریال می‌شوند به ۱۲ (تاریخچهٔ H6). قاعده: به‌روزرسانی‌های جابه‌جاپذیر را داخل یک دستور نگه دار؛ وقتی نویسندهٔ هم‌زمان داری، مقدار را از رفت‌وبرگشت عبور نده.",
       "level": "senior",
       "q_en": "How does your UPDATE balance=balance+1 differ from a SELECT followed by an absolute-value UPDATE?",
       "q_fa": "حالا UPDATE با balance=balance+1 چه فرقی با این داره که اول SELECT بزنی بعد با مقدار ثابت UPDATE کنی؟"
     },
     {
-      "a_en": "Because they guard different things. Snapshot isolation hides concurrent WRITES from your reads (no skew, no phantom on re-read), but write skew is two transactions each DECIDING from an overlapping-but-disjoint read set and writing different rows — neither write conflicts at the row level, so SI sees no cycle to abort. Serializable SSI tracks the read-write dependencies and aborts one side with 40001. If your predicate spans rows no single row lock covers, you need serializable or an explicit materialized conflict.",
-      "a_fa": "چون چیزهای متفاوتی را نگهبانی می‌کنند. جداسازی snapshot نوشتن‌های هم‌زمان را از خواندن‌های تو پنهان می‌کند (نه skew، نه phantom در بازخوانی)، ولی write skew یعنی دو تراکنش که هرکدام از مجموعهٔ خواندنِ هم‌پوشانِ ولی مجزا تصمیم می‌گیرند و ردیف‌های متفاوت می‌نویسند — هیچ‌کدام در سطح ردیف تعارض ندارند، پس SI چرخه‌ای برای abort نمی‌بیند. SSI سریال‌پذیر وابستگی‌های خواندن-نوشتن را دنبال می‌کند و یک طرف را با 40001 abort می‌کند. اگر گزاره‌ات ردیف‌هایی را بپوشاند که هیچ قفل ردیفی پوشش‌شان ندهد، سریال‌پذیر یا تعارض materialized صریح لازم داری.",
+      "a_en": "Because they guard different things. Snapshot isolation hides concurrent WRITES from your reads (no skew, no phantom on re-read), but write skew is two transactions each DECIDING from an overlapping-but-disjoint read set and writing different rows — neither write conflicts at the row level, so SI sees no cycle to abort. Serializable SSI tracks the read-write dependencies and aborts one side with 40001. If your predicate spans rows no single row lock covers, you need serializable or an explicit materialized conflict. Short version: SI hides the writes, SSI catches the decision.",
+      "a_fa": "چون دو چیز متفاوت را نگهبانی می‌کنند. جداسازی snapshot نوشتن‌های هم‌زمان را از خواندن‌های تو پنهان می‌کند (نه skew، نه phantom در بازخوانی)، ولی write skew یعنی دو تراکنش که هرکدام از مجموعهٔ خواندنِ هم‌پوشانِ ولی مجزا تصمیم می‌گیرند و ردیف‌های متفاوت می‌نویسند — هیچ‌کدام در سطح ردیف تعارض ندارند و برای همین SI چرخه‌ای برای abort نمی‌بیند. SSI سریال‌پذیر وابستگی‌های خواندن-نوشتن را دنبال می‌کند و یک طرف را با 40001 abort می‌کند. اگر گزاره‌ات ردیف‌هایی را بپوشاند که هیچ قفل ردیفی پوشش‌شان ندهد، سریال‌پذیر یا تعارض materialized صریح لازم داری. خلاصه‌اش: SI خواندن را قایم می‌کند، SSI تصمیم را گیر می‌اندازد.",
       "level": "senior",
       "q_en": "Why does REPEATABLE READ stop the phantom recount but still allow write skew?",
       "q_fa": "چرا REPEATABLE READ جلوی بازشماری phantom را می‌گیرد ولی write skew را اجازه می‌دهد؟"
     },
     {
-      "a_en": "When the predicate is known and narrow: locking the exact rows (or one materialized conflict row) gives serializable-grade safety with fewer surprise aborts and clearer contention (one hot lock you can see). Prefer SERIALIZABLE when predicates are ad hoc, span many rows, or evolve faster than your lock audit — and only if the application retries the whole transaction on 40001 with backoff. Never pick serializable and then swallow the abort.",
-      "a_fa": "وقتی گزاره شناخته‌شده و باریک است: قفل کردن دقیق همان ردیف‌ها (یا یک ردیف تعارض materialized) امنیت در حد سریال‌پذیر می‌دهد با abort غافلگیرکنندهٔ کمتر و contention شفاف‌تر (یک قفل داغ که دیده می‌شود). SERIALIZABLE را وقتی ترجیح بده که گزاره‌ها ad hocاند، ردیف‌های زیادی را می‌پوشانند، یا سریع‌تر از ممیزی قفلت عوض می‌شوند — و فقط اگر برنامه کل تراکنش را روی 40001 با backoff دوباره بزند. هیچ‌وقت سریال‌پذیر را انتخاب نکن و بعد abort را قورت بده.",
+      "a_en": "When the predicate is known and narrow: locking the exact rows (or one materialized conflict row) gives serializable-grade safety with fewer surprise aborts and clearer contention (one hot lock you can see). Prefer SERIALIZABLE when predicates are ad hoc, span many rows, or evolve faster than your lock audit — and only if the application retries the whole transaction on 40001 with backoff. Pick serializable and then swallow the abort? Never.",
+      "a_fa": "وقتی گزاره شناخته‌شده و باریک است: قفل کردن دقیق همان ردیف‌ها (یا یک ردیف تعارض materialized) امنیت در حد سریال‌پذیر می‌دهد، با abort غافلگیرکنندهٔ کمتر و contention شفاف‌تر (یک قفل داغ که دیده می‌شود). SERIALIZABLE را وقتی ترجیح بده که گزاره‌ها ad hocاند، ردیف‌های زیادی را می‌پوشانند، یا سریع‌تر از ممیزی قفلت عوض می‌شوند — و فقط اگر برنامه کل تراکنش را روی 40001 با backoff دوباره بزند. سریال‌پذیر را انتخاب کن و بعد abort را قورت بده؟ هیچ‌وقت.",
       "level": "staff",
       "q_en": "When would you choose explicit predicate locks over SERIALIZABLE?",
       "q_fa": "کی قفل صریح گزاره‌ای را به SERIALIZABLE ترجیح می‌دهی؟"
@@ -216,20 +216,20 @@
   "interview_q_fa": "فرض کن روی یه PostgreSQL مشخص کار می‌کنی. با دو اتصال، history دقیق بساز برای read skew، lost update، phantom و write skew و isolationها رو مقایسه کن. برای dirty read/write آزمون عدم وقوع و blocking بنویس. هر ناهنجاری رو با SQL دقیق توضیح بده و رفتار این محصول رو از حداقل استاندارد SQL جدا کن.",
   "lab_en": "<p>Use two sessions on PostgreSQL 18 and record your exact SQL histories. Test account read skew, read-modify-write lost updates, phantom set queries and a two-doctor on-call write-skew invariant. Record isolation, statement order and commit/rollback. Assert dirty-read prevention and dirty-write row-lock waiting. Remember PostgreSQL RR prevents phantoms; compare RR write skew with Serializable and whole-transaction retry. Counting a forbidden outcome as “prevented” is part of your test.</p>",
   "lab_fa": "<p>روی PostgreSQL 18 با دو session، history دقیق SQL بساز. read skew و lost update از نوع read-modify-write رو روی حساب‌ها امتحان کن، phantom رو روی query مجموعه، و write skew رو روی invariant دو پزشک on-call. سطح isolation، ترتیب statementها و commit/rollback رو ثبت کن. برای dirty read باید ثابت کنی داده commitنشده دیده نمی‌شه و برای dirty write انتظار روی row lock رو ثبت کن. یادت باشه phantom تو RR این محصول منع می‌شه؛ برای write skew، RR رو با Serializable و retry کامل تراکنش مقایسه کن. شمردن نتیجه ممنوع‌شده به‌عنوان «جلوگیری موفق» بخشی از آزمونه.</p>",
-  "mental_en": "Think in interleavings, not in statements: write both sessions' SQL as numbered histories and interleave them line by line. An anomaly is a broken application invariant with a timestamp on it — a sum that is not 1000, a counter that ends at 11, a recount that changes, an on-call set that ends empty. Prevention is also an observation: a reader that never sees 400, a writer that waits.",
-  "mental_fa": "با درهم‌تنیدگی فکر کن نه با دستور: SQL هر دو اتصال را به‌صورت history شماره‌دار بنویس و خط‌به‌خط درهم کن. ناهنجاری یعنی invariant شکستهٔ برنامه با مُهر زمانی — جمعی که ۱۰۰۰ نیست، شمارنده‌ای که در ۱۱ تمام می‌شود، بازشماری‌ای که عوض می‌شود، مجموعهٔ on-callی که خالی می‌ماند. جلوگیری هم یک مشاهده است: خواننده‌ای که هیچ‌وقت ۴۰۰ را نمی‌بیند، نویسنده‌ای که منتظر می‌ماند.",
+  "mental_en": "Think in interleavings, not in statements. Write both sessions' SQL as numbered histories and interleave them line by line. An anomaly is a broken application invariant with a timestamp on it — a sum that is not 1000, a counter that ends at 11, a recount that changes, an on-call set that ends empty. And prevention counts as an observation too: a reader that never sees 400, a writer that waits. \"Nothing happened\" is a result as well, and you have to log it to prove it.",
+  "mental_fa": "ببین، این فصل را با «درهم‌تنیدگی» بخون نه با «دستور». SQL هر دو اتصال را به‌صورت history شماره‌دار بنویس و خط‌به‌خط قاطی کن. ناهنجاری یعنی invariant شکستهٔ برنامه با مُهر زمانی: جمعی که ۱۰۰۰ نیست، شمارنده‌ای که در ۱۱ تمام می‌شود، بازشماری‌ای که عوض می‌شود، مجموعهٔ on-callی که خالی می‌ماند. و جلوگیری هم یک مشاهده است، مثل بقیه: خواننده‌ای که هیچ‌وقت ۴۰۰ را نمی‌بیند، نویسنده‌ای که منتظر می‌ماند. یعنی «چیزی نشد» هم یک نتیجه است — باید ثبتش کنی تا ثابت شود.",
   "mistakes": [
     {
-      "en": "Claiming a reproduced dirty read on PostgreSQL: the product forbids it at every level including READ UNCOMMITTED, so the 'reproduction' is either a different anomaly mislabeled or a test bug.",
-      "fa": "ادعای بازتولید خواندن کثیف روی PostgreSQL: محصول آن را در هر سطحی حتی READ UNCOMMITTED منع می‌کند، پس آن «بازتولید» یا ناهنجاری دیگری است که اشتباه نامیده شده یا باگ آزمون است."
+      "en": "Claiming a reproduced dirty read on PostgreSQL: the product forbids it at every level including READ UNCOMMITTED, so the 'reproduction' is either a different anomaly mislabeled or a test bug. You simply cannot reproduce it here.",
+      "fa": "ادعای بازتولید خواندن کثیف روی PostgreSQL: محصول آن را در هر سطحی حتی READ UNCOMMITTED منع می‌کند، یعنی آن «بازتولید» یا یک ناهنجاری دیگر است که اشتباه نامیده شده، یا باگ آزمون. اینجا اصلاً نمی‌شود بازتولیدش کرد."
     },
     {
-      "en": "Reading product behavior as the SQL standard: the standard never defined snapshot isolation, so 'repeatable read' means snapshot isolation in PostgreSQL, weaker MVCC in MySQL/InnoDB, and real serializability in Db2.",
-      "fa": "خواندن رفتار محصول به‌جای استاندارد SQL: استاندارد هیچ‌وقت جداسازی snapshot را تعریف نکرد، پس «repeatable read» در PostgreSQL یعنی جداسازی snapshot، در MySQL/InnoDB یعنی MVCC ضعیف‌تر، و در Db2 یعنی سریال‌پذیری واقعی."
+      "en": "Reading product behavior as the SQL standard: the standard never defined snapshot isolation, so 'repeatable read' means snapshot isolation in PostgreSQL, weaker MVCC in MySQL/InnoDB, and real serializability in Db2. The name of the level takes its meaning from the product, not from the standard.",
+      "fa": "خواندن رفتار محصول به‌جای استاندارد SQL: استاندارد هیچ‌وقت جداسازی snapshot را تعریف نکرد؛ «repeatable read» در PostgreSQL یعنی جداسازی snapshot، در MySQL/InnoDB یعنی MVCC ضعیف‌تر، و در Db2 یعنی سریال‌پذیری واقعی. یعنی اسم سطح، معنی‌اش را از محصول می‌گیرد نه از استاندارد."
     },
     {
-      "en": "Retrying only the failed statement after a 40001: the retried statement reuses the doomed snapshot, so the invariant can break again. Serializable retries always restart from BEGIN.",
-      "fa": "تلاش دوبارهٔ فقط دستورِ شکست‌خورده بعد از 40001: دستورِ دوباره‌زده‌شده از snapshot محکوم استفاده می‌کند، پس invariant می‌تواند دوباره بشکند. retryهای سریال‌پذیر همیشه از BEGIN شروع می‌شوند."
+      "en": "Retrying only the failed statement after a 40001: the retried statement reuses the doomed snapshot, so the invariant can break again. Serializable retries always restart from BEGIN — from BEGIN, not from the statement.",
+      "fa": "تلاش دوبارهٔ فقط دستورِ شکست‌خورده بعد از 40001: دستورِ دوباره‌زده‌شده از snapshot محکوم استفاده می‌کند و invariant می‌تواند دوباره بشکند. retryهای سریال‌پذیر همیشه از BEGIN شروع می‌شوند. از BEGIN، نه از همان دستور."
     }
   ],
   "number": 1,
@@ -239,40 +239,40 @@
   ],
   "steps": [
     {
-      "en": "Probe the forbidden first: with T1's UPDATE uncommitted, a READ UNCOMMITTED reader must still see 500 (history H1), and a rival UPDATE must wait on the row lock (history H2). Log invisibility and waiting as passes.",
-      "fa": "اولِ اولِ ممنوعه‌ها را آزمون کن: وقتی UPDATE اتصال T1 تأییدنشده است، خوانندهٔ READ UNCOMMITTED هنوز باید ۵۰۰ ببیند (تاریخچهٔ H1) و UPDATE رقیب باید روی قفل ردیف بماند (تاریخچهٔ H2). نامرئی بودن و انتظار را به‌عنوان قبولی ثبت کن.",
-      "t_en": "Prove the forbidden absent",
-      "t_fa": "غیبت ممنوعه را اثبات کن"
+      "en": "Start with the forbidden ones. With T1's UPDATE uncommitted, a READ UNCOMMITTED reader must still see 500 (history H1), and a rival UPDATE must wait on the row lock (history H2). Log invisibility and waiting as passes — here, \"nothing happened\" is the expected output.",
+      "fa": "از ممنوعه‌ها شروع کن: وقتی UPDATE اتصال T1 هنوز تأیید نشده، خوانندهٔ READ UNCOMMITTED باید ۵۰۰ را ببیند (تاریخچهٔ H1) و UPDATE رقیب باید روی قفل ردیف بماند (تاریخچهٔ H2). نامرئی بودن و انتظار را به‌عنوان قبولی ثبت کن — اینجا «چیزی نشد» خودش خروجی آزمونه.",
+      "t_en": "Start with the forbidden ones",
+      "t_fa": "اول، ممنوعه‌ها را ثابت کن"
     },
     {
-      "en": "Replay the transfer twice: under READ COMMITTED the reader straddles the commit and sums 1100 (history H3, reproduced); under snapshot isolation the same interleaving reads the start snapshot and sums 1000 (history H4, prevented).",
-      "fa": "انتقال را دو بار بازپخش کن: زیر READ COMMITTED خواننده دو طرف commit می‌ایستد و جمع ۱۱۰۰ می‌شود (تاریخچهٔ H3، بازتولیدشده)؛ زیر جداسازی snapshot همان درهم‌تنیدگی از snapshot شروع می‌خواند و جمع ۱۰۰۰ می‌شود (تاریخچهٔ H4، جلوگیری‌شده).",
+      "en": "Replay the transfer twice. Under READ COMMITTED the reader straddles the commit and sums 1100 (history H3, reproduced). Under snapshot isolation the same interleaving reads the start snapshot and sums 1000 (history H4, prevented). Same statements, different level, different sum — that's the whole game.",
+      "fa": "انتقال را دو بار بازپخش کن. زیر READ COMMITTED خواننده دو طرف commit می‌ایستد و جمع ۱۱۰۰ می‌شود (تاریخچهٔ H3، بازتولیدشده). زیر جداسازی snapshot همان درهم‌تنیدگی از snapshot شروع می‌خواند و جمع ۱۰۰۰ می‌شود (تاریخچهٔ H4، جلوگیری‌شده). همان دستورها، فقط سطح عوض شده و جمع هم عوض شد.",
       "t_en": "Skew the transfer",
       "t_fa": "انتقال را skew کن"
     },
     {
-      "en": "Overlap two read-modify-write cycles on a counter at 10: both write 11 and one increment is lost (history H5). Replace the pair with two single-statement increments: each applies to the latest committed value and the counter ends at 12 (history H6) — the audit follow-up, answered in code.",
-      "fa": "دو چرخهٔ خواندن-تغییر-نوشتن را روی شمارندهٔ ۱۰ هم‌پوشان کن: هر دو ۱۱ می‌نویسند و یک increment گم می‌شود (تاریخچهٔ H5). جفت را با دو increment تک‌دستوری عوض کن: هرکدام روی تازه‌ترین مقدار تأییدشده اعمال می‌شود و شمارنده در ۱۲ تمام می‌شود (تاریخچهٔ H6) — همان پیگیری ممیزی، جواب‌داده‌شده در کد.",
+      "en": "Overlap two read-modify-write cycles on a counter at 10: both write 11 and one increment is lost (history H5). Now swap the pair for two single-statement increments: each applies to the latest committed value and the counter ends at 12 (history H6) — the audit follow-up, answered in code. Same counter, same two writers, different statement. The lost increment comes back.",
+      "fa": "دو چرخهٔ خواندن-تغییر-نوشتن را روی شمارندهٔ ۱۰ هم‌پوشان کن: هر دو ۱۱ می‌نویسند و یک increment گم می‌شود (تاریخچهٔ H5). حالا جفت را با دو increment تک‌دستوری عوض کن: هرکدام روی تازه‌ترین مقدار تأییدشده اعمال می‌شود و شمارنده در ۱۲ تمام می‌شود (تاریخچهٔ H6) — همان پیگیری ممیزی، جواب‌داده‌شده در کد. همان شمارنده، همان دو نویسنده؛ فقط دستور عوض شد.",
       "t_en": "Lose an update, then fix it",
       "t_fa": "یک به‌روزرسانی را گم کن، بعد درستش کن"
     },
     {
-      "en": "Count twice inside one transaction while a rival inserts: READ COMMITTED recounts 2 then 3 (history H7). On PostgreSQL, REPEATABLE READ re-reads the snapshot and stays at 2 (history H8) — product behavior, not a portable promise.",
-      "fa": "داخل یک تراکنش دو بار بشمار وقتی رقیب درج می‌کند: READ COMMITTED اول ۲ بعد ۳ می‌شمرد (تاریخچهٔ H7). روی PostgreSQL، REPEATABLE READ از snapshot بازمی‌خواند و روی ۲ می‌ماند (تاریخچهٔ H8) — رفتار محصول است نه قول قابل‌حمل.",
+      "en": "Count twice inside one transaction while a rival inserts: READ COMMITTED recounts 2 then 3 (history H7). On PostgreSQL, REPEATABLE READ re-reads the snapshot and stays at 2 (history H8) — product behavior, not a portable promise. In other words: don't budget for that on another database.",
+      "fa": "داخل یک تراکنش دو بار بشمار، درست وقتی رقیب دارد درج می‌کند: READ COMMITTED اول ۲ بعد ۳ می‌شمرد (تاریخچهٔ H7). روی PostgreSQL، REPEATABLE READ از snapshot بازمی‌خواند و روی ۲ می‌ماند (تاریخچهٔ H8) — رفتار محصول است نه قول قابل‌حمل. یعنی روی محصول دیگر نمی‌توانی روی همین رفتار حساب کنی.",
       "t_en": "Recount under a rival insert",
       "t_fa": "زیر درج رقیب بازشماری کن"
     },
     {
-      "en": "Let Alice and Bob each see {Alice, Bob} in their snapshot and both step down: the on-call set ends empty under snapshot isolation (history H9). Re-run at SERIALIZABLE: the second committer takes 40001, retries the whole transaction, and one doctor survives (history H10).",
-      "fa": "بگذار Alice و Bob هرکدام {Alice, Bob} را در snapshot خود ببینند و هر دو کنار بروند: مجموعهٔ on-call زیر جداسازی snapshot خالی می‌ماند (تاریخچهٔ H9). با SERIALIZABLE دوباره بزن: تأییدکنندهٔ دوم 40001 می‌گیرد، کل تراکنش را retry می‌کند و یک پزشک می‌ماند (تاریخچهٔ H10).",
+      "en": "Let Alice and Bob each see {Alice, Bob} in their snapshot and both step down: the on-call set ends empty under snapshot isolation (history H9). Re-run at SERIALIZABLE: the second committer takes 40001, retries the whole transaction, and one doctor survives (history H10). One survivor, invariant intact — that's the whole trade.",
+      "fa": "بگذار Alice و Bob هرکدام {Alice, Bob} را در snapshot خود ببینند و هر دو کنار بروند: مجموعهٔ on-call زیر جداسازی snapshot خالی می‌ماند (تاریخچهٔ H9). با SERIALIZABLE دوباره بزن: تأییدکنندهٔ دوم 40001 می‌گیرد، کل تراکنش را retry می‌کند و یک پزشک می‌ماند (تاریخچهٔ H10). یک بازمانده، و invariant برقرار.",
       "t_en": "Skew the rota, then serialize it",
       "t_fa": "شیفت را skew کن، بعد سریالش کن"
     }
   ],
-  "tests_en": "<p>Per-history invariants: H1 reader value == 500 while 400 uncommitted; H2 second UPDATE returns only after first commit/abort; H3 sum == 1100; H4 sum == 1000; H5 final == 11; H6 final == 12; H7 counts 2 then 3; H8 recount == 2; H9 on-call empty; H10 exactly one survivor. Local-run guide (needs a real PostgreSQL 18): open two <span class=\"ltr\">psql</span> sessions, <code>BEGIN; SET TRANSACTION ISOLATION LEVEL READ COMMITTED;</code> (or <span class=\"ltr\">REPEATABLE READ</span> / <span class=\"ltr\">SERIALIZABLE</span>), interleave the statements by hand, and use a second connection to confirm the H2 writer is waiting (it returns only after the first session commits). Measure lock-wait time and 40001 abort rate under a concurrent driver — those two numbers size your retry budget.</p>",
-  "tests_fa": "<p>invariantهای per-history: مقدار خوانندهٔ H1 برابر ۵۰۰ وقتی ۴۰۰ تأییدنشده است؛ UPDATE دوم H2 فقط بعد از commit/abort اولی برمی‌گردد؛ جمع H3 برابر ۱۱۰۰؛ جمع H4 برابر ۱۰۰۰؛ نهایی H5 برابر ۱۱؛ نهایی H6 برابر ۱۲؛ شمارش‌های H7 اول ۲ بعد ۳؛ بازشماری H8 برابر ۲؛ on-call در H9 خالی؛ دقیقاً یک بازمانده در H10. راهنمای اجرای محلی (PostgreSQL 18 واقعی لازم دارد): دو اتصال <span class=\"ltr\">psql</span> باز کن، <code>BEGIN; SET TRANSACTION ISOLATION LEVEL READ COMMITTED;</code> (یا <span class=\"ltr\">REPEATABLE READ</span> یا <span class=\"ltr\">SERIALIZABLE</span>)، دستورها را با دست درهم کن و با اتصال دوم تأیید کن نویسندهٔ H2 منتظر است (فقط بعد از commit اتصال اول برمی‌گردد). زمان انتظار قفل و نرخ abort روی 40001 را زیر درایور هم‌زمان بسنج — همان دو عدد بودجهٔ retry تو را اندازه می‌زنند.</p>",
-  "worked_en": "<p>Teaching numbers (آموزشی): transfer history sums 1100 under RC against 1000 under SI — the 100 gap is the anomaly, priced in the same units as the balances. Counter histories end at 11 (RMW pair) against 12 (statement pair) — the missing 1 is one lost increment. Recount histories read 2-then-3 (RC) against 2-then-2 (snapshot) — the extra 1 is the phantom. Rota histories end with 0 on call (SI) against 1 survivor (serializable) — the survivor is the invariant kept.</p>",
-  "worked_fa": "<p>اعداد آموزشی (آموزشی): جمع تاریخچهٔ انتقال زیر RC برابر ۱۱۰۰ است در برابر ۱۰۰۰ زیر SI — آن اختلاف ۱۰۰ همان ناهنجاری است با همان واحد موجودی‌ها. تاریخچه‌های شمارنده در ۱۱ تمام می‌شوند (جفت RMW) در برابر ۱۲ (جفت دستوری) — آن ۱ِ گمشده همان increment گمشده است. تاریخچه‌های بازشماری ۲-بعد-۳ می‌خوانند (RC) در برابر ۲-بعد-۲ (snapshot) — آن ۱ِ اضافه همان phantom است. تاریخچه‌های شیفت با ۰ نگهبان تمام می‌شوند (SI) در برابر ۱ بازمانده (سریال‌پذیر) — آن بازمانده همان invariantِ نگه‌داشته‌شده است.</p>",
-  "reasoning_fa": "<p>history دو session نشان می‌دهد هر read دقیقاً چه چیزی دیده؛ فقط اجرای هم‌زمان دو thread بدون ترتیب مشخص، شاهد ناهنجاری نیست. PostgreSQL 18 را نام می‌بریم چون سطح استاندارد SQL حداقل تضمین است و محصول می‌تواند قوی‌تر باشد. write skew به قیدی بین دو سطر نیاز دارد؛ برای همین پزشک‌های on-call از دو balance مستقل واضح‌ترند. retry باید کل تراکنش را با snapshot تازه تکرار کند تا تصمیم قدیمی دوباره اعمال نشود.</p>",
-  "reasoning_en": "<p>A two-session history identifies exactly what each read observed; unscheduled concurrent threads alone are not evidence of an anomaly. Name PostgreSQL 18 because SQL levels specify minima and products may be stronger. Write skew needs a cross-row invariant, illustrated by on-call doctors. Retry the whole transaction with a fresh snapshot to avoid reusing an obsolete decision.</p>"
+  "tests_en": "<p>Per-history invariants: H1 reader value == 500 while 400 uncommitted; H2 second UPDATE returns only after first commit/abort; H3 sum == 1100; H4 sum == 1000; H5 final == 11; H6 final == 12; H7 counts 2 then 3; H8 recount == 2; H9 on-call empty; H10 exactly one survivor. Local-run guide (needs a real PostgreSQL 18): open two <span class=\"ltr\">psql</span> sessions, <code>BEGIN; SET TRANSACTION ISOLATION LEVEL READ COMMITTED;</code> (or <span class=\"ltr\">REPEATABLE READ</span> / <span class=\"ltr\">SERIALIZABLE</span>), interleave the statements by hand, and use a second connection to confirm the H2 writer is waiting (it returns only after the first session commits). Measure lock-wait time and 40001 abort rate under a concurrent driver — those two numbers are what size your retry budget.</p>",
+  "tests_fa": "<p>invariantهای per-history: مقدار خوانندهٔ H1 برابر ۵۰۰ وقتی ۴۰۰ تأییدنشده است؛ UPDATE دوم H2 فقط بعد از commit/abort اولی برمی‌گردد؛ جمع H3 برابر ۱۱۰۰؛ جمع H4 برابر ۱۰۰۰؛ نهایی H5 برابر ۱۱؛ نهایی H6 برابر ۱۲؛ شمارش‌های H7 اول ۲ بعد ۳؛ بازشماری H8 برابر ۲؛ on-call در H9 خالی؛ دقیقاً یک بازمانده در H10. راهنمای اجرای محلی (PostgreSQL 18 واقعی لازم دارد): دو اتصال <span class=\"ltr\">psql</span> باز کن، <code>BEGIN; SET TRANSACTION ISOLATION LEVEL READ COMMITTED;</code> (یا <span class=\"ltr\">REPEATABLE READ</span> یا <span class=\"ltr\">SERIALIZABLE</span>)، دستورها را با دست درهم کن و با اتصال دوم تأیید کن نویسندهٔ H2 منتظر است (فقط بعد از commit اتصال اول برمی‌گردد). زمان انتظار قفل و نرخ abort روی 40001 را زیر درایور هم‌زمان بسنج — همین دو عدد، بودجهٔ retry تو را می‌سازند.</p>",
+  "worked_en": "<p>Teaching numbers (آموزشی): transfer history sums 1100 under RC against 1000 under SI — the 100 gap is the anomaly, priced in the same units as the balances. Counter histories end at 11 (RMW pair) against 12 (statement pair) — the missing 1 is one lost increment. Recount histories read 2-then-3 (RC) against 2-then-2 (snapshot) — the extra 1 is the phantom. Rota histories end with 0 on call (SI) against 1 survivor (serializable) — the survivor is the invariant kept. Every anomaly here carries a number you can count; swap these for your own measurements.</p>",
+  "worked_fa": "<p>اعداد آموزشی (آموزشی): جمع تاریخچهٔ انتقال زیر RC می‌شود ۱۱۰۰، زیر SI می‌شود ۱۰۰۰ — آن اختلاف ۱۰۰ همان ناهنجاری است، با همان واحد موجودی‌ها. تاریخچه‌های شمارنده در ۱۱ تمام می‌شوند (جفت RMW) در برابر ۱۲ (جفت دستوری) — آن ۱ِ گمشده همان increment گمشده است. تاریخچه‌های بازشماری ۲-بعد-۳ می‌خوانند (RC) در برابر ۲-بعد-۲ (snapshot) — آن ۱ِ اضافه همان phantom است. تاریخچه‌های شیفت با ۰ نگهبان تمام می‌شوند (SI) در برابر ۱ بازمانده (سریال‌پذیر) — آن بازمانده همان invariantِ نگه‌داشته‌شده است. یعنی هر ناهنجاری یک عدد قابل‌شماره دارد؛ این اعداد را با اندازه‌گیری خودت عوض کن.</p>",
+  "reasoning_fa": "<p>چرا این مدل می‌خوره: history دو session نشان می‌دهد هر read دقیقاً چه چیزی دیده؛ فقط اجرای هم‌زمان دو thread بدون ترتیب مشخص، شاهد ناهنجاری نیست. PostgreSQL 18 را نام می‌بریم چون سطح استاندارد SQL حداقل تضمین است و محصول می‌تواند قوی‌تر باشد. write skew به قیدی بین دو سطر نیاز دارد؛ برای همین پزشک‌های on-call از دو balance مستقل واضح‌ترند. retry باید کل تراکنش را با snapshot تازه تکرار کند تا تصمیم قدیمی دوباره اعمال نشود. واحدها اینجا موجودی و شمارنده‌اند و همهٔ عددها آموزشی‌اند؛ محصول یا گزاره عوض شد، اول invariant را بررسی کن و بعد latency را.</p>",
+  "reasoning_en": "<p>Why this model fits: a two-session history identifies exactly what each read observed; unscheduled concurrent threads alone are not evidence of an anomaly. Name PostgreSQL 18 because SQL levels specify minima and products may be stronger. Write skew needs a cross-row invariant, illustrated by on-call doctors. Retry the whole transaction with a fresh snapshot to avoid reusing an obsolete decision. The units here are balances and counters, every number is a teaching input, and if you swap the product or widen the predicate, check the invariant first and the latency second.</p>"
 }

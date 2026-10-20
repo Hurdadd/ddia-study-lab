@@ -1,28 +1,28 @@
 {
   "alternatives": [
     {
-      "en": "2PC/XA across the queue and the database: true atomic commit of consume-plus-effect, but the coordinator blocks participants while in-doubt, queues rarely support XA, and one slow participant stalls every consumer. Correct in theory, unusable in most real topologies — which is why the chapter recommends idempotency instead.",
-      "fa": "2PC/XA روی صف و پایگاه: commit اتمیک واقعی مصرف-به‌علاوهٔ-اثر، ولی coordinator شرکت‌کننده‌ها را موقع in-doubt block می‌کند، صف‌ها به‌ندرت XA می‌فهمند و یک شرکت‌کنندهٔ کند هر مصرف‌کننده‌ای را متوقف می‌کند. در تئوری درست و در بیشتر توپولوژی‌های واقعی ناکاربردی — به همین دلیل فصل idempotency را توصیه می‌کند."
+      "en": "2PC/XA across the queue and the database: true atomic commit of consume-plus-effect, but the coordinator blocks participants while in-doubt, queues rarely support XA, and one slow participant stalls every consumer. Correct in theory, unusable in most real topologies — which is why the chapter recommends idempotency instead. Nice theory, expensive production.",
+      "fa": "2PC/XA روی صف و پایگاه: commit اتمیک واقعی مصرف-به‌علاوهٔ-اثر، ولی coordinator شرکت‌کننده‌ها را موقع in-doubt block می‌کند، صف‌ها به‌ندرت XA می‌فهمند و یک شرکت‌کنندهٔ کند هر مصرف‌کننده‌ای را متوقف می‌کند. در تئوری درست، در بیشتر توپولوژی‌های واقعی ناکاربردی — و به همین دلیل فصل idempotency را توصیه می‌کند. تئوری قشنگ، تولید را گران می‌کند."
     },
     {
-      "en": "Kafka transactions plus the idempotent producer: exactly-once inside a Kafka-to-Kafka pipeline (consume-transform-produce), but the guarantee ends at the topic edge — the final receiver (ledger, mailbox, webhook) still needs its own idempotency key.",
-      "fa": "تراکنش‌های Kafka به‌علاوهٔ producer ایدم‌پوتنت: exactly-once داخل پایپ‌لاین Kafka-به-Kafka (مصرف-تبدیل-تولید)، ولی تضمین در لبهٔ تاپیک تمام می‌شود — گیرندهٔ نهایی (ledger، صندوق پست، webhook) هنوز کلید idempotency خودش را لازم دارد."
+      "en": "Kafka transactions plus the idempotent producer: exactly-once inside a Kafka-to-Kafka pipeline (consume-transform-produce), but the guarantee ends at the topic edge — the final receiver (ledger, mailbox, webhook) still needs its own idempotency key. Inside the topic you are in control; outside it, you are not.",
+      "fa": "تراکنش‌های Kafka به‌علاوهٔ producer ایدم‌پوتنت: exactly-once داخل پایپ‌لاین Kafka-به-Kafka (مصرف-تبدیل-تولید)، ولی تضمین در لبهٔ تاپیک تمام می‌شود — گیرندهٔ نهایی (ledger، صندوق پست، webhook) هنوز کلید idempotency خودش را لازم دارد. داخل تاپیک، خودت هستی؛ بیرونش، دنیای واقعی."
     }
   ],
-  "answer_en": "Commit <span class=\"ltr\">{insert idempotency key + apply local effect}</span> in ONE transaction, then ACK — never the reverse. Redelivery after any crash is normal, so the UNIQUE key decides: known key skips the effect and ACKs, unknown key applies once. ACK is not a delete permit — only horizon expiry removes keys — and the promise ends at the horizon. External sends live outside every transaction, so they are at-least-once: make the receivers idempotent too.",
-  "answer_fa": "مجموعهٔ <span class=\"ltr\">{درج کلید idempotency + اعمال اثر محلی}</span> را در یک تراکنش commit کن و بعد ACK بده — هرگز برعکس. تحویل دوباره بعد از هر crash عادی است، پس کلید UNIQUE تصمیم می‌گیرد: کلید شناخته‌شده اثر را رد می‌کند و ACK می‌دهد، کلید ناشناخته یک بار اعمال می‌کند. ACK مجوز حذف نیست — فقط انقضای horizon کلیدها را پاک می‌کند — و قول در horizon تمام می‌شود. ارسال‌های بیرونی بیرون هر تراکنشی زندگی می‌کنند، پس at-least-onceاند: گیرنده‌ها را هم ایدم‌پوتنت کن.",
+  "answer_en": "Here's the thing: commit <span class=\"ltr\">{insert idempotency key + apply local effect}</span> in ONE transaction, then ACK — never the reverse. Redelivery after any crash is normal, so the UNIQUE key decides: known key skips the effect and ACKs, unknown key applies once. ACK is not a delete permit — only horizon expiry removes keys — and the promise ends at the horizon. External sends live outside every transaction, so they are at-least-once: make the receivers idempotent too. Order is the whole protocol: commit first, ACK second.",
+  "answer_fa": "نکته‌ش اینجاست: مجموعهٔ <span class=\"ltr\">{درج کلید idempotency + اعمال اثر محلی}</span> را در یک تراکنش commit کن و بعد ACK بده — هرگز برعکس. تحویل دوباره بعد از هر crash عادی است، پس تصمیم با کلید UNIQUE است: کلید شناخته‌شده اثر را رد می‌کند و ACK می‌دهد، کلید ناشناخته یک بار اعمال می‌کند. ACK مجوز حذف نیست — فقط انقضای horizon کلیدها را پاک می‌کند — و قول در horizon تمام می‌شود. ارسال‌های بیرونی بیرون هر تراکنشی زندگی می‌کنند، یعنی at-least-onceاند: گیرنده‌ها را هم ایدم‌پوتنت کن. ترتیب، خودِ پروتکل است: اول commit، بعد ACK.",
   "assumptions": [
     {
-      "en": "An at-least-once queue: the broker redelivers after every crash and after every un-ACKed attempt; duplicates are normal transport behavior.",
-      "fa": "یک صف at-least-once: کارگزار بعد از هر crash و بعد از هر تلاش بی-ACK دوباره تحویل می‌دهد؛ تکراری‌ها رفتار عادی حمل‌اند."
+      "en": "Picture an at-least-once queue: the broker redelivers after every crash and after every un-ACKed attempt. Duplicates are just normal transport behavior here.",
+      "fa": "فرض کن صف ما at-least-once باشه: کارگزار بعد از هر crash و بعد از هر تلاش بی‌ACK دوباره تحویل می‌ده. تکراری‌ها رفتار عادیِ همین حمله."
     },
     {
-      "en": "A local store with real transactions holding both the dedup table and the ledger; the 30-day horizon is a teaching number (آموزشی), sized per product in production.",
-      "fa": "یک فروشگاه محلی با تراکنش واقعی که هم جدول dedup و هم ledger را نگه می‌دارد؛ horizon سی‌روزه عدد آموزشی است (آموزشی) و در پروداکشن per-product اندازه می‌خورد."
+      "en": "A local store with real transactions, holding both the dedup table and the ledger. The 30-day horizon is a teaching number (آموزشی), and in production you size it per product.",
+      "fa": "یه فروشگاه محلی با تراکنش واقعی، که هم جدول dedup رو نگه می‌داره هم ledger رو. horizon سی‌روزه یه عدد آموزشیه (آموزشی)؛ توی پروداکشن per-product اندازه‌اش می‌خوری."
     },
     {
-      "en": "No broker or database is installed in this sandbox, so the queue, the crashes and the ledger are modeled in memory; the executed demo asserts the same per-crash invariants a SQLite-backed lab would check.",
-      "fa": "در این محیط نه کارگزاری نه پایگاهی نصب است، پس صف و crashها و ledger در حافظه مدل می‌شوند؛ دموی اجراشده همان invariantهای per-crash را assert می‌کند که آزمایشگاه SQLite-محور می‌سنجید."
+      "en": "No broker and no database is installed in this sandbox, so the queue, the crashes and the ledger are modeled in memory. The executed demo asserts the same per-crash invariants a SQLite-backed lab would check.",
+      "fa": "توی این محیط نه کارگزاری نصبه نه پایگاه داده، پس صف و crash‌ها و ledger توی حافظه مدل می‌شن. دموی اجراشده همون invariant‌های per-crash رو assert می‌کنه — همون‌هایی که یه آزمایشگاهِ SQLite-محور می‌سنجید."
     }
   ],
   "code": {
@@ -30,12 +30,12 @@
     "expected_en": "[dedup ON] three crash points, one message m1 (+100):\n  crash BEFORE commit for m1 -> redeliver\n  crash AFTER commit BEFORE ack for m2 -> redeliver\n  dedup hit for m2: effect skipped, safe to ACK\n  crash AFTER ack BEFORE cleanup for m3 -> redeliver\n  dedup hit for m3: effect skipped, safe to ACK\n  ledger={acct=175} appliedEffects=3 (each message applied EXACTLY once)\n  reject m3: same key, DIFFERENT payload (poison redelivery)\n  ledger after poison redelivery={acct=175} (unchanged)\n[dedup OFF] same crashes, no id table:\n  balance=350 applied=6 (6 applications for 3 messages — luck, not safety)\n[horizon] operator replays 6-month-old m9, keys expire after 30 days:\n  re-applied after expiry=1 (guarantee ends at the horizon; replays beyond it need business rules)\n[external] e-mail send is outside the transaction boundary:\n  crash AFTER commit BEFORE ack for m5 -> redeliver\n  dedup hit for m5: effect skipped, safe to ACK\n  careful sender: ledger applied=1, e-mails sent=1\n  naive sender crashes before commit -> redeliver\n  naive sender: ledger applied=1 BUT e-mails sent=2 (external effects are at-least-once: make THEM idempotent too)\nRULE: commit-then-ACK; ACK never deletes the key; horizon bounds the promise.",
     "expected_fa": "با dedup: ledger برابر ۱۷۵ و applied برابر ۳ (هر پیام دقیقاً یک بار)؛ بدون dedup: ۳۵۰ با ۶ اعمال؛ replay پسا-horizon یک بار دوباره اعمال می‌شود؛ فرستندهٔ بی‌احتیاط ۲ ایمیل می‌فرستد. (خروجی واقعی همین محیط)",
     "lang": "java",
-    "run_en": "javac IdempotencyDemo.java && java IdempotencyDemo — stdlib Java only, instant. No broker or database needed; crashes are injected calls.",
-    "run_fa": "javac IdempotencyDemo.java && java IdempotencyDemo — فقط استاندارد جاوا، فوری. نه کارگزار نه پایگاه لازم است؛ crashها فراخوانی تزریقی‌اند.",
+    "run_en": "javac IdempotencyDemo.java && java IdempotencyDemo — stdlib Java only, instant. No broker and no database needed; the crashes are injected calls.",
+    "run_fa": "javac IdempotencyDemo.java && java IdempotencyDemo — فقط استاندارد جاوا، فوری. نه کارگزار لازم است نه پایگاه؛ crashها فراخوانی تزریقی‌اند.",
     "status": "verified"
   },
-  "design_en": "<p>Tables: <code>processed_messages(id text primary key, payload_hash text not null, processed_at timestamptz)</code> and the business table (here a <code>ledger</code>). Consumer loop per delivery: <code>BEGIN</code>; <code>INSERT INTO processed_messages</code> — on conflict compare <code>payload_hash</code> (mismatch means reject plus alert, never apply); apply the ledger effect; <code>COMMIT</code>; then ACK. A retention job deletes keys older than the horizon (30 days, teaching) — nothing else may delete keys, especially not the ACK path. Poison messages ACK after alerting so they stop looping; operator replays carry the original id so the horizon rule applies to them too.</p>",
-  "design_fa": "<p>جدول‌ها: <code>processed_messages(id text primary key, payload_hash text not null, processed_at timestamptz)</code> و جدول کسب‌وکار (این‌جا یک <code>ledger</code>). حلقهٔ مصرف‌کننده per-delivery: <code>BEGIN</code>؛ <code>INSERT INTO processed_messages</code> — موقع تعارض <code>payload_hash</code> را مقایسه کن (ناهمخوانی یعنی reject به‌علاوهٔ هشدار، هرگز اعمال نه)؛ اثر ledger را اعمال کن؛ <code>COMMIT</code>؛ بعد ACK. یک job نگهداری کلیدهای قدیمی‌تر از horizon (سی روز، آموزشی) را پاک می‌کند — هیچ‌چیز دیگری حق پاک کردن کلیدها را ندارد، مخصوصاً نه مسیر ACK. پیام‌های poison بعد از هشدار ACK می‌شوند تا از حلقه بیفتند؛ replayهای اپراتور شناسهٔ اصلی را حمل می‌کنند تا قاعدهٔ horizon به آن‌ها هم بخورد.</p>",
+  "design_en": "<p>Tables: <code>processed_messages(id text primary key, payload_hash text not null, processed_at timestamptz)</code> and the business table (here a <code>ledger</code>). Consumer loop per delivery: <code>BEGIN</code>; <code>INSERT INTO processed_messages</code> — on conflict compare <code>payload_hash</code> (mismatch means reject plus alert, never apply); apply the ledger effect; <code>COMMIT</code>; then ACK. A retention job deletes keys older than the horizon (30 days, teaching) — nothing else may delete keys, especially not the ACK path. Poison messages ACK after alerting so they stop looping; operator replays carry the original id so the horizon rule applies to them too. The order above is the red line: no ACK ever goes out before the COMMIT.</p>",
+  "design_fa": "<p>جدول‌ها: <code>processed_messages(id text primary key, payload_hash text not null, processed_at timestamptz)</code> و جدول کسب‌وکار (این‌جا یک <code>ledger</code>). حلقهٔ مصرف‌کننده per-delivery: <code>BEGIN</code>؛ <code>INSERT INTO processed_messages</code> — موقع تعارض <code>payload_hash</code> را مقایسه کن (ناهمخوانی یعنی reject به‌علاوهٔ هشدار، هرگز اعمال نه)؛ اثر ledger را اعمال کن؛ <code>COMMIT</code>؛ بعد ACK. یک job نگهداری کلیدهای قدیمی‌تر از horizon (سی روز، آموزشی) را پاک می‌کند — هیچ‌چیز دیگری حق پاک کردن کلیدها را ندارد، مخصوصاً نه مسیر ACK. پیام‌های poison بعد از هشدار ACK می‌شوند تا از حلقه بیفتند؛ replayهای اپراتور شناسهٔ اصلی را حمل می‌کنند تا قاعدهٔ horizon به آن‌ها هم بخورد. ترتیب بالا خط قرمز است: هیچ ACKی قبل از COMMIT نمی‌رود.</p>",
   "diagrams": [
     {
       "caption_en": "Three crash points, one rule: commit-then-ACK",
@@ -47,7 +47,7 @@
       "made": "archify",
       "narration": {
         "failure_en": "Read each crash band: crash 1 commits nothing so the redelivery applies once; crash 2 commits then loses the ACK so the redelivery hits the key; crash 3 ACKs then loses cleanup so the key must still be live. Then read the poison tail: same key, new payload — rejected.",
-        "failure_fa": "هر نوار crash را بخوان: crash 1 هیچ‌چیز را commit نمی‌کند پس تحویل دوباره یک بار اعمال می‌کند؛ crash 2 تأیید می‌کند ولی ACK را گم می‌کند پس تحویل دوباره به کلید می‌خورد؛ crash 3 ACK می‌دهد ولی پاک‌سازی را گم می‌کند پس کلید هنوز باید زنده باشد. بعد دم poison را بخوان: همان کلید با payload تازه — رد می‌شود.",
+        "failure_fa": "هر نوار crash را بخوان: crash 1 هیچ‌چیز را commit نمی‌کند و تحویل دوباره یک بار اعمال می‌کند؛ crash 2 تأیید می‌کند ولی ACK را گم می‌کند و تحویل دوباره به کلید می‌خورد؛ crash 3 ACK می‌دهد ولی پاک‌سازی را گم می‌کند و کلید هنوز باید زنده باشد. بعد دم poison را بخوان: همان کلید با payload تازه — رد می‌شود.",
         "guarantee_en": "The figure shows the only safe order (effect durable before ACK) and the dedup decision on every redelivery. It does not show the horizon or external sends.",
         "guarantee_fa": "شکل تنها ترتیب امن (اثر پایدار قبل از ACK) و تصمیم dedup روی هر تحویل دوباره را نشان می‌دهد. horizon و ارسال‌های بیرونی را نشان نمی‌دهد.",
         "nonguarantee_en": "Horizon expiry, operator replays and the mailbox live in the next two figures.",
@@ -67,7 +67,7 @@
           },
           {
             "en": "Crash 3: commit plus ACK, crash before cleanup — the key is still live, so the redelivery is a dedup hit, not a re-apply.",
-            "fa": "crash 3: commit به‌علاوهٔ ACK و crash قبل از پاک‌سازی — کلید هنوز زنده است، پس تحویل دوباره برخورد dedup است نه اعمال دوباره."
+            "fa": "crash 3: commit به‌علاوهٔ ACK و crash قبل از پاک‌سازی — کلید هنوز زنده است و تحویل دوباره برخورد dedup است، نه اعمال دوباره."
           },
           {
             "en": "Poison tail: redelivery with the same key but a different payload is rejected with an alert — the ledger never moves.",
@@ -177,40 +177,40 @@
   ],
   "failures": [
     {
-      "en": "ACK before COMMIT: the broker forgets the message while the effect is still uncommitted, so a crash loses the message forever — the one outcome redelivery cannot repair. Commit first is not style, it is the protocol.",
-      "fa": "ACK قبل از COMMIT: کارگزار پیام را فراموش می‌کند درحالی‌که اثر هنوز تأییدنشده است، پس یک crash پیام را برای همیشه گم می‌کند — تنها نتیجه‌ای که تحویل دوباره نمی‌تواند تعمیرش کند. اول commit قرارداد است نه سلیقه."
+      "en": "ACK before COMMIT: the broker forgets the message while the effect is still uncommitted, so a crash loses the message forever — the one outcome redelivery cannot repair. Commit first is not style, it is the protocol. Flip the order and you have found the one way to lose a message.",
+      "fa": "ACK قبل از COMMIT: کارگزار پیام را فراموش می‌کند درحالی‌که اثر هنوز تأییدنشده است، و یک crash پیام را برای همیشه گم می‌کند — تنها نتیجه‌ای که تحویل دوباره نمی‌تواند تعمیرش کند. اول commit قرارداد است، نه سلیقه. ترتیب برعکس، همان یک راهِ از دست دادن پیام است."
     },
     {
-      "en": "Deleting the dedup key on the ACK path ('we're done with it'): the next redelivery — crash 3 guarantees there will be one — finds no key and applies the effect a second time. Keys die by horizon expiry, never by ACK.",
-      "fa": "پاک کردن کلید dedup در مسیر ACK («دیگر کارش تمام شد»): تحویل دوبارهٔ بعدی — crash 3 تضمین می‌کند که یکی خواهد بود — هیچ کلیدی نمی‌یابد و اثر را بار دوم اعمال می‌کند. کلیدها با انقضای horizon می‌میرند، هرگز با ACK نه."
+      "en": "Deleting the dedup key on the ACK path ('we're done with it'): the next redelivery — crash 3 guarantees there will be one — finds no key and applies the effect a second time. Keys die by horizon expiry, never by ACK. ACK means 'I got it', not 'delete it'.",
+      "fa": "پاک کردن کلید dedup در مسیر ACK («دیگر کارش تمام شد»): تحویل دوبارهٔ بعدی — crash 3 تضمین می‌کند که یکی خواهد بود — هیچ کلیدی نمی‌یابد و اثر را بار دوم اعمال می‌کند. کلیدها با انقضای horizon می‌میرند، هرگز با ACK. ACK یعنی «رسیدم»، نه «پاکش کن»."
     },
     {
-      "en": "Dedup on the id alone without payload binding: a poisoned redelivery (same key, attacker's payload) applies as a legitimate retry. Store the payload hash with the key and reject mismatches with an alert.",
-      "fa": "dedup فقط روی شناسه بدون بستن payload: تحویل دوبارهٔ مسموم (همان کلید با payload مهاجم) به‌عنوان retry مشروع اعمال می‌شود. hash payload را با کلید ذخیره کن و ناهمخوانی‌ها را با هشدار رد کن."
+      "en": "Dedup on the id alone without payload binding: a poisoned redelivery (same key, attacker's payload) applies as a legitimate retry. Store the payload hash with the key and reject mismatches with an alert. A key without a payload is just an empty name.",
+      "fa": "dedup فقط روی شناسه بدون بستن payload: تحویل دوبارهٔ مسموم (همان کلید با payload مهاجم) به‌عنوان retry مشروع اعمال می‌شود. hash payload را با کلید ذخیره کن و ناهمخوانی‌ها را با هشدار رد کن. کلید بدون payload، فقط یک اسمِ خالی است."
     },
     {
-      "en": "A horizon shorter than the oldest legitimate replay: month-end replays, disaster-recovery restores and operator retries silently double-apply. Size the horizon beyond the oldest replay you must honor, and reject anything older by business timestamp — not by hope.",
-      "fa": "horizon کوتاه‌تر از قدیمی‌ترین replay مشروع: replayهای پایان ماه و restoreهای بازیابی از فاجعه و retryهای اپراتور بی‌صدا دو بار اعمال می‌کنند. horizon را بزرگ‌تر از قدیمی‌ترین replayی که باید محترم بشمری اندازه بزن و هرچه قدیمی‌تر است با timestamp کسب‌وکاری رد کن — نه با امید."
+      "en": "A horizon shorter than the oldest legitimate replay: month-end replays, disaster-recovery restores and operator retries silently double-apply. Size the horizon beyond the oldest replay you must honor, and reject anything older by business timestamp — not by hope. A short horizon is a promise that lies to you.",
+      "fa": "horizon کوتاه‌تر از قدیمی‌ترین replay مشروع: replayهای پایان ماه و restoreهای بازیابی از فاجعه و retryهای اپراتور بی‌صدا دو بار اعمال می‌کنند. horizon را بزرگ‌تر از قدیمی‌ترین replayی که باید محترم بشمری اندازه بزن و هرچه قدیمی‌تر است با timestamp کسب‌وکاری رد کن — نه با امید. horizon کوچک یعنی قولی که خودش دروغ می‌گوید."
     }
   ],
   "followups": [
     {
-      "a_en": "It re-applies: the key expired at one month, so the six-month-old replay looks brand new and the ledger moves a second time. The dedup promise ended at the horizon — exactly what the demo's horizon probe prints. Defenses, in order: keep the horizon longer than any replay you must honor; carry a business timestamp or version in the message and reject replays older than policy; make the downstream effect itself idempotent (idempotent receivers compose, horizons do not). Never silently extend the horizon by keeping keys forever — unbounded key growth is its own outage.",
-      "a_fa": "دوباره اعمال می‌شود: کلید در یک ماهگی منقضی شده، پس replay شش‌ماهه کاملاً تازه به نظر می‌رسد و ledger بار دوم تکان می‌خورد. قول dedup در horizon تمام شد — دقیقاً همان چیزی که آزمون horizon دمو چاپ می‌کند. دفاع‌ها به‌ترتیب: horizon را بلندتر از هر replayی که باید محترم بشمری نگه دار؛ timestamp یا version کسب‌وکاری داخل پیام حمل کن و replayهای قدیمی‌تر از سیاست را رد کن؛ خودِ اثر پایین‌دست را ایدم‌پوتنت کن (گیرنده‌های ایدم‌پوتنت ترکیب می‌شوند و horizonها نه). هیچ‌وقت با نگه داشتن کلیدها برای همیشه horizon را بی‌صدا تمدید نکن — رشد بی‌کران کلیدها خودش outage است.",
+      "a_en": "It re-applies: the key expired at one month, so the six-month-old replay looks brand new and the ledger moves a second time. The dedup promise ended at the horizon — exactly what the demo's horizon probe prints. Defenses, in order: keep the horizon longer than any replay you must honor; carry a business timestamp or version in the message and reject replays older than policy; make the downstream effect itself idempotent (idempotent receivers compose, horizons do not). And never silently extend the horizon by keeping keys forever — unbounded key growth is its own outage.",
+      "a_fa": "دوباره اعمال می‌شود: کلید در یک ماهگی منقضی شده و replay شش‌ماهه کاملاً تازه به نظر می‌رسد، پس ledger بار دوم تکان می‌خورد. قول dedup در horizon تمام شد — دقیقاً همان چیزی که آزمون horizon دمو چاپ می‌کند. دفاع‌ها به‌ترتیب: horizon را بلندتر از هر replayی که باید محترم بشمری نگه دار؛ timestamp یا version کسب‌وکاری داخل پیام حمل کن و replayهای قدیمی‌تر از سیاست را رد کن؛ خودِ اثر پایین‌دست را ایدم‌پوتنت کن (گیرنده‌های ایدم‌پوتنت ترکیب می‌شوند و horizonها نه). و هیچ‌وقت با نگه داشتن کلیدها برای همیشه horizon را بی‌صدا تمدید نکن — رشد بی‌کران کلیدها خودش outage است.",
       "level": "senior",
       "q_en": "An operator replays a six-month-old message after your dedup was deleted at one month. What happens?",
       "q_fa": "حالا اپراتور یه پیام شش‌ماهه رو replay می‌کنه ولی dedup بعد از یه ماه پاک شده. چی می‌شه؟"
     },
     {
-      "a_en": "Because 2PC's atomicity stops at the system boundary. The queue and the database would need a shared XA coordinator, in-doubt states would block consumers during coordinator outages, and most queues do not participate — while the external mailbox cannot join any transaction at all. Idempotency moves the guarantee to the receiver: at-least-once delivery plus a deduped effect, with explicit boundaries instead of a global commit.",
-      "a_fa": "چون اتمی بودن 2PC در مرز سیستم می‌ایستد. صف و پایگاه به coordinator مشترک XA نیاز داشتند، حالت‌های in-doubt موقع outage coordinator مصرف‌کننده‌ها را block می‌کردند و بیشتر صف‌ها شرکت نمی‌کنند — درحالی‌که صندوق پست بیرونی اصلاً نمی‌تواند وارد هیچ تراکنشی شود. idempotency تضمین را به گیرنده منتقل می‌کند: تحویل at-least-once به‌علاوهٔ اثر dedupشده با مرزهای صریح به‌جای commit سراسری.",
+      "a_en": "Because 2PC's atomicity stops at the system boundary. The queue and the database would need a shared XA coordinator, in-doubt states would block consumers during coordinator outages, and most queues do not participate — while the external mailbox cannot join any transaction at all. Idempotency moves the guarantee to the receiver: at-least-once delivery plus a deduped effect, with explicit boundaries instead of a global commit. You trade a global commit you cannot have for a local one you can.",
+      "a_fa": "چون اتمی بودن 2PC در مرز سیستم می‌ایستد. صف و پایگاه به coordinator مشترک XA نیاز داشتند، حالت‌های in-doubt موقع outage coordinator مصرف‌کننده‌ها را block می‌کردند و بیشتر صف‌ها شرکت نمی‌کنند — درحالی‌که صندوق پست بیرونی اصلاً نمی‌تواند وارد هیچ تراکنشی شود. idempotency تضمین را به گیرنده منتقل می‌کند: تحویل at-least-once به‌علاوهٔ اثر dedupشده، با مرزهای صریح به‌جای commit سراسری. یعنی یک commit سراسریِ غیرممکن را با یک commit محلیِ واقعی عوض می‌کنی.",
       "level": "senior",
       "q_en": "Why not 2PC between the queue and the database instead of all this?",
       "q_fa": "چرا به‌جای همهٔ این‌ها 2PC بین صف و پایگاه نه؟"
     },
     {
-      "a_en": "The sender's — but the fix is on the receiving side too. Any effect outside the sender's transaction (mail, SMS, webhook, charge) can be emitted twice around a crash, as the naive sender in the demo proves (2 sends, 1 ledger application). So every external receiver must be idempotent: carry the idempotency key into the mail job, dedup at the gateway, or make the downstream operation naturally repeatable. Exactly-once effect is a property of the receiver, never of the send.",
-      "a_fa": "مال فرستنده — ولی اصلاح سمت گیرنده هم هست. هر اثری بیرون تراکنش فرستنده (ایمیل، پیامک، webhook، شارژ) می‌تواند دور یک crash دو بار صادر شود، چنان‌که فرستندهٔ ساده‌لوح دمو اثبات می‌کند (۲ ارسال و ۱ اعمال ledger). پس هر گیرندهٔ بیرونی باید ایدم‌پوتنت باشد: کلید idempotency را داخل job ایمیل حمل کن، در gateway dedup کن، یا عملیات پایین‌دست را ذاتاً تکرارپذیر کن. اثر exactly-once خاصیت گیرنده است، هرگز خاصیت ارسال نه.",
+      "a_en": "The sender's — but the fix is on the receiving side too. Any effect outside the sender's transaction (mail, SMS, webhook, charge) can be emitted twice around a crash, as the naive sender in the demo proves (2 sends, 1 ledger application). So every external receiver must be idempotent: carry the idempotency key into the mail job, dedup at the gateway, or make the downstream operation naturally repeatable. Exactly-once effect is a property of the receiver, never of the send. A mail that went out cannot be recalled.",
+      "a_fa": "مال فرستنده — ولی اصلاح سمت گیرنده هم هست. هر اثری بیرون تراکنش فرستنده (ایمیل، پیامک، webhook، شارژ) می‌تواند دور یک crash دو بار صادر شود، چنان‌که فرستندهٔ ساده‌لوح دمو اثبات می‌کند (۲ ارسال و ۱ اعمال ledger)، و هر گیرندهٔ بیرونی باید ایدم‌پوتنت باشد: کلید idempotency را داخل job ایمیل حمل کن، در gateway dedup کن، یا عملیات پایین‌دست را ذاتاً تکرارپذیر کن. اثر exactly-once خاصیت گیرنده است، هرگز خاصیت ارسال. ایمیلی که رفت، دیگر برنمی‌گردد.",
       "level": "staff",
       "q_en": "The mail goes out twice around a crash: whose bug is that, and where is it fixed?",
       "q_fa": "ایمیل دور یک crash دو بار می‌رود: باگ کیست و کجا درست می‌شود؟"
@@ -220,20 +220,20 @@
   "interview_q_fa": "داستان از این قراره که صف و پردازشگر داری با processed_messages و قید UNIQUE. ثبت ID و اثر محلی رو تو یه تراکنش بذار و ACK رو بعد از commit بده. تو سه نقطه crash تزریق کن؛ نسخه بدون dedup رو هم مقایسه کن. retention شناسه و side effect بیرونی رو صریح مشخص کن.",
   "lab_en": "<p>Build your at-least-once queue and a unique processed_messages key in the same database as your local effect. Commit ID and effect together, then ACK. Inject crashes before commit, after commit before ACK and after ACK; assert total effect. Derive your replay horizon from client retries, queue retention, DLQ and restores; ACK doesn't authorize key deletion. Test replay after GC explicitly and specify rejection/recovery. Your external SMS or provider charges need destination idempotency outside this local transaction. Run a no-dedup comparison.</p>",
   "lab_fa": "<p>صف at-least-once و جدول processed_messages با کلید یکتا رو تو همون DB اثر محلی بساز. درج شناسه و اثر رو یکجا commit کن، بعد ACK بده. crash قبل از commit، بعد از commit و قبل از ACK، و بعد از ACK رو تزریق کن و مجموع اثر رو assert کن. افق replay رو از retry کاربر، نگهداری صف، DLQ و restore تعیین کن؛ ACK مجوز پاک‌کردن کلید نیست. replay یه پیام بعد از GC رو عمداً امتحان کن و سیاست رد/بازیابی‌ش رو مشخص کن. ارسال SMS یا برداشت سرویس بیرونی رو خارج از تضمین این تراکنش حساب کن و کلید idempotency مقصد رو جدا طراحی کن. نسخه بدون dedup رو هم برای مقایسه اجرا کن.</p>",
-  "mental_en": "Draw four boxes before writing any code: the LOCAL effect (rolls back with the transaction), the TRANSACTION (key insert plus effect, atomic), the EXTERNAL effect (mail already sent cannot be unsent), and the HORIZON (keys expire; ACK deletes nothing). 2PC cannot cross the outer two boxes, so exactly-once is a receiver property: at-least-once delivery plus a deduped, payload-bound, horizon-limited effect.",
-  "mental_fa": "قبل از نوشتن هر کدی چهار جعبه بکش: اثر محلی (با تراکنش rollback می‌شود)، تراکنش (درج کلید به‌علاوهٔ اثر، اتمیک)، اثر بیرونی (ایمیل فرستاده‌شده را نمی‌شود نفرستاده کرد) و horizon (کلیدها منقضی می‌شوند؛ ACK هیچ‌چیز را پاک نمی‌کند). 2PC نمی‌تواند از دو جعبهٔ بیرونی بگذرد، پس exactly-once خاصیت گیرنده است: تحویل at-least-once به‌علاوهٔ اثر dedupشدهٔ مقیدبه-payload و کران‌داربه-horizon.",
+  "mental_en": "Draw four boxes before you write a single line of code: the LOCAL effect (rolls back with the transaction), the TRANSACTION (key insert plus effect, atomic), the EXTERNAL effect (mail already sent cannot be unsent), and the HORIZON (keys expire; ACK deletes nothing). 2PC cannot cross the outer two boxes, so exactly-once is a receiver property: at-least-once delivery plus a deduped, payload-bound, horizon-limited effect. Rule of thumb from here on: every claim has to name its box.",
+  "mental_fa": "قبل از نوشتن حتی یک خط کد، چهار جعبه بکش: اثر محلی (با تراکنش rollback می‌شود)، تراکنش (درج کلید به‌علاوهٔ اثر، اتمیک)، اثر بیرونی (ایمیل فرستاده‌شده را نمی‌شود نفرستاده کرد) و horizon (کلیدها منقضی می‌شوند؛ ACK هیچ‌چیز را پاک نمی‌کند). 2PC نمی‌تواند از دو جعبهٔ بیرونی رد بشود، و exactly-once خاصیت گیرنده است: تحویل at-least-once به‌علاوهٔ اثر dedupشدهٔ مقیدبه-payload و کران‌داربه-horizon. و قانون بازی: هر ادعای بعدی باید بگوید کدام جعبه.",
   "mistakes": [
     {
-      "en": "Treating ACK as a delete permit for the dedup key: crash 3 exists precisely to punish this — the redelivery after ACK finds no key and doubles the effect.",
-      "fa": "تلقی ACK به‌عنوان مجوز حذف کلید dedup: نقطهٔ crash 3 دقیقاً برای تنبیه همین است — تحویل دوبارهٔ بعد از ACK هیچ کلیدی نمی‌یابد و اثر را دو برابر می‌کند."
+      "en": "Treating ACK as a delete permit for the dedup key: crash 3 exists precisely to punish this — the redelivery after ACK finds no key and doubles the effect. ACK says 'received', not 'delete me'.",
+      "fa": "تلقی ACK به‌عنوان مجوز حذف کلید dedup: نقطهٔ crash 3 دقیقاً برای تنبیه همین است — تحویل دوبارهٔ بعد از ACK هیچ کلیدی نمی‌یابد و اثر را دو برابر می‌کند. ACK یعنی «رسیدم»، نه «دیگه لازم نیست»."
     },
     {
-      "en": "Promising exactly-once across systems with 2PC: the coordinator, the in-doubt window and the non-participating mailbox make it a bigger failure domain than the duplicates it prevents.",
-      "fa": "قول exactly-once روی سیستم‌ها با 2PC: coordinator و پنجرهٔ in-doubt و صندوق پستِ شرکت‌نکننده دامنهٔ خرابی را بزرگ‌تر می‌کنند از تکراری‌هایی که جلوگیری می‌کند."
+      "en": "Promising exactly-once across systems with 2PC: the coordinator, the in-doubt window and the non-participating mailbox make it a bigger failure domain than the duplicates it prevents. A failure domain bigger than the benefit is a loss.",
+      "fa": "قول exactly-once روی سیستم‌ها با 2PC: coordinator و پنجرهٔ in-doubt و صندوق پستِ شرکت‌نکننده دامنهٔ خرابی را بزرگ‌تر می‌کنند از تکراری‌هایی که جلوگیری می‌کند. دامنهٔ خرابی بزرگ‌تر از سودش یعنی ضرر."
     },
     {
-      "en": "Dedup keys without payload hashes and without a horizon: the first invites poisoned redeliveries, the second grows the key table until it becomes the outage.",
-      "fa": "کلیدهای dedup بدون hashِ payload و بدون horizon: اولی تحویل‌های مسموم را دعوت می‌کند و دومی جدول کلید را آن‌قدر بزرگ می‌کند تا خودش outage شود."
+      "en": "Dedup keys without payload hashes and without a horizon: the first invites poisoned redeliveries, the second grows the key table until it becomes the outage. One poisons, the other chokes.",
+      "fa": "کلیدهای dedup بدون hashِ payload و بدون horizon: اولی تحویل‌های مسموم را دعوت می‌کند و دومی جدول کلید را آن‌قدر بزرگ می‌کند تا خودش outage شود. یکی مسموم می‌کند، یکی خفه."
     }
   ],
   "number": 3,
@@ -244,40 +244,40 @@
   ],
   "steps": [
     {
-      "en": "Draw the four boundaries and label what each contains: LOCAL (ledger rows that roll back), TRANSACTION (key insert plus effect, all-or-nothing), EXTERNAL (mail/SMS/webhook, no rollback exists), HORIZON (keys live 30 days teaching; ACK removes nothing). Every later claim must name its box.",
-      "fa": "چهار مرز را بکش و محتوای هرکدام را برچسب بزن: محلی (ردیف‌های ledger که rollback می‌شوند)، تراکنش (درج کلید به‌علاوهٔ اثر، همه-یا-هیچ)، بیرونی (ایمیل/پیامک/webhook که rollbackای ندارد) و horizon (کلیدها سی روز آموزشی عمر می‌کنند؛ ACK هیچ‌چیز را پاک نمی‌کند). هر ادعای بعدی باید جعبه‌اش را نام ببرد.",
+      "en": "Draw the four boundaries and label what each contains: LOCAL (ledger rows that roll back), TRANSACTION (key insert plus effect, all-or-nothing), EXTERNAL (mail/SMS/webhook, no rollback exists), HORIZON (keys live 30 days teaching; ACK removes nothing). The rule for everything after this: every claim must name its box.",
+      "fa": "چهار مرز را بکش و محتوای هرکدام را برچسب بزن: محلی (ردیف‌های ledger که rollback می‌شوند)، تراکنش (درج کلید به‌علاوهٔ اثر، همه-یا-هیچ)، بیرونی (ایمیل/پیامک/webhook که rollbackای ندارد) و horizon (کلیدها سی روز آموزشی عمر می‌کنند؛ ACK هیچ‌چیز را پاک نمی‌کند). و قانونش: هر ادعای بعدی باید جعبه‌اش را نام ببرد.",
       "t_en": "Box the promise first",
       "t_fa": "اول قول را جعبه کن"
     },
     {
-      "en": "Fix the order: BEGIN, INSERT the key, apply the ledger effect, COMMIT, then ACK. Crash-before-commit leaves nothing durable; crash-after-commit leaves the key; crash-after-ACK still leaves the key — the demo asserts all three redeliveries end applied-exactly-once.",
-      "fa": "ترتیب را ثابت کن: BEGIN، درج کلید، اعمال اثر ledger، بعد COMMIT و بعد ACK. crash قبل از commit هیچ‌چیز پایدار نمی‌گذارد؛ crash بعد از commit کلید را می‌گذارد؛ crash بعد از ACK هنوز کلید را می‌گذارد — دمو assert می‌کند هر سه تحویل دوباره با اعمالِ دقیقاً یک‌باره تمام می‌شوند.",
+      "en": "Fix the order: BEGIN, INSERT the key, apply the ledger effect, COMMIT, then ACK. Crash-before-commit leaves nothing durable; crash-after-commit leaves the key; crash-after-ACK still leaves the key — the demo asserts all three redeliveries end applied-exactly-once. That order is the protocol, not a style choice.",
+      "fa": "ترتیب را ثابت کن: BEGIN، درج کلید، اعمال اثر ledger، بعد COMMIT و بعد ACK. crash قبل از commit هیچ‌چیز پایدار نمی‌گذارد؛ crash بعد از commit کلید را می‌گذارد؛ crash بعد از ACK هم کلید را می‌گذارد — دمو assert می‌کند هر سه تحویل دوباره با اعمالِ دقیقاً یک‌باره تمام می‌شوند. این ترتیب، خودِ پروتکل است، نه یک سلیقه.",
       "t_en": "Commit, then ACK",
       "t_fa": "اول commit بعد ACK"
     },
     {
-      "en": "Remove the table and rerun the same three crashes: 6 applications for 3 messages, balance 350 against 175 — the exact price of luck. Keep this pair of numbers; they are the whole argument for the dedup table.",
-      "fa": "جدول را بردار و همان سه crash را دوباره بزن: ۶ اعمال برای ۳ پیام و موجودی ۳۵۰ در برابر ۱۷۵ — قیمت دقیق شانس. همین جفت عدد را نگه دار؛ کل استدلال جدول dedup همین است.",
+      "en": "Remove the table and rerun the same three crashes: 6 applications for 3 messages, balance 350 against 175 — the exact price of luck. Keep this pair of numbers; they are the whole argument for the dedup table. Without the table, luck writes the ledger.",
+      "fa": "جدول را بردار و همان سه crash را دوباره بزن: ۶ اعمال برای ۳ پیام و موجودی ۳۵۰ در برابر ۱۷۵ — قیمت دقیق شانس. همین جفت عدد را نگه دار؛ کل استدلال جدول dedup همین است. بدون جدول، ledger را شانس می‌نویسد.",
       "t_en": "Price the alternative",
       "t_fa": "جایگزین را قیمت بزن"
     },
     {
-      "en": "Bind the payload and bound the time: store the payload hash with each key and reject mismatches with an alert (poison redelivery changes nothing); expire keys at the horizon and admit that a six-month replay past a 30-day horizon re-applies — then cover it with business timestamps, not hope.",
-      "fa": "payload را ببند و زمان را کران‌دار کن: hashِ payload را با هر کلید ذخیره کن و ناهمخوانی‌ها را با هشدار رد کن (تحویل مسموم هیچ‌چیز را عوض نمی‌کند)؛ کلیدها را در horizon منقضی کن و بپذیر که replay شش‌ماهه بعد از horizon سی‌روزه دوباره اعمال می‌شود — بعد با timestamp کسب‌وکاری پوششش بده نه با امید.",
+      "en": "Bind the payload and bound the time: store the payload hash with each key and reject mismatches with an alert (poison redelivery changes nothing); expire keys at the horizon and admit that a six-month replay past a 30-day horizon re-applies — then cover it with business timestamps, not with hope.",
+      "fa": "payload را ببند و زمان را کران‌دار کن: hashِ payload را با هر کلید ذخیره کن و ناهمخوانی‌ها را با هشدار رد کن (تحویل مسموم هیچ‌چیز را عوض نمی‌کند)؛ کلیدها را در horizon منقضی کن و بپذیر که replay شش‌ماهه بعد از horizon سی‌روزه دوباره اعمال می‌شود — بعد با timestamp کسب‌وکاری پوششش بده، نه با امید.",
       "t_en": "Bind payload, bound time",
       "t_fa": "payload را ببند، زمان را کران‌دار کن"
     },
     {
-      "en": "Push the guarantee to the receivers: the naive sender proves 2 mails for 1 ledger application around a crash, so carry the idempotency key into every external job and dedup at the gateway. Exactly-once effect is a receiver property.",
-      "fa": "تضمین را به گیرنده‌ها هل بده: فرستندهٔ ساده‌لوح دور یک crash ثابت می‌کند ۲ ایمیل در برابر ۱ اعمال ledger، پس کلید idempotency را داخل هر job بیرونی حمل کن و در gateway dedup کن. اثر exactly-once خاصیت گیرنده است.",
+      "en": "Push the guarantee to the receivers: the naive sender proves 2 mails for 1 ledger application around a crash, so carry the idempotency key into every external job and dedup at the gateway. Exactly-once effect is a receiver property, never a sender property.",
+      "fa": "تضمین را به گیرنده‌ها هل بده: فرستندهٔ ساده‌لوح دور یک crash ثابت می‌کند ۲ ایمیل در برابر ۱ اعمال ledger، و کلید idempotency را داخل هر job بیرونی حمل کن و در gateway dedup کن. اثر exactly-once خاصیت گیرنده است، هرگز خاصیت فرستنده.",
       "t_en": "Idempotent receivers",
       "t_fa": "گیرنده‌های ایدم‌پوتنت"
     }
   ],
-  "tests_en": "<p>Per-crash invariants with dedup: applied effects == 3 for 3 messages, ledger == 175, poison redelivery changes nothing, horizon replay re-applies exactly 1, naive external sender emits 2 mails for 1 application. Without dedup: 6 applications, balance 350. Operational metrics: redelivery rate, dedup-hit rate (should dominate after incidents), key-table growth against the retention job, and age of the oldest unexpired key — alert when replays approach the horizon.</p>",
-  "tests_fa": "<p>invariantهای per-crash با dedup: اثرهای اعمال‌شده == ۳ برای ۳ پیام، ledger == ۱۷۵، تحویل مسموم هیچ‌چیز را عوض نمی‌کند، replay پسا-horizon دقیقاً ۱ بار دوباره اعمال می‌شود و فرستندهٔ بیرونی ساده‌لوح ۲ ایمیل برای ۱ اعمال صادر می‌کند. بدون dedup: ۶ اعمال و موجودی ۳۵۰. معیارهای عملیاتی: نرخ تحویل دوباره، نرخ برخورد dedup (بعد از incidentها باید غالب باشد)، رشد جدول کلید در برابر job نگهداری و سن قدیمی‌ترین کلید منقضی‌نشده — وقتی replayها به horizon نزدیک شدند هشدار بده.</p>",
-  "worked_en": "<p>Teaching numbers (آموزشی): three messages (+100, +50, +25) land the ledger at 175 with 3 applications under dedup, against 350 with 6 applications without it — the extra 175 is three duplicated effects. The poison probe moves the ledger by 0. The horizon probe re-applies 1. The naive external sender emits 2 mails for 1 ledger row — the 2-to-1 ratio is the at-least-once boundary, priced in sends.</p>",
-  "worked_fa": "<p>اعداد آموزشی (آموزشی): سه پیام (۱۰۰+ و ۵۰+ و ۲۵+) ledger را با dedup به ۱۷۵ می‌رسانند با ۳ اعمال، در برابر ۳۵۰ با ۶ اعمال بدون آن — آن ۱۷۵ِ اضافه همان سه اثر تکراری است. آزمون poison ledger را ۰ تکان می‌دهد. آزمون horizon دقیقاً ۱ بار دوباره اعمال می‌کند. فرستندهٔ بیرونی ساده‌لوح ۲ ایمیل برای ۱ ردیف ledger صادر می‌کند — همان نسبت ۲به۱ مرز at-least-once است با واحد ارسال.</p>",
-  "reasoning_fa": "<p>ثبت ID پیش از اثر در تراکنش مشترک اجازه می‌دهد unique constraint برنده را تعیین کند؛ rollback هر دو را برمی‌گرداند. ACK بعد از commit از حذف پیام پیش از ثبت اثر جلوگیری می‌کند. افق ۳۰روزهٔ نمونه باید حداقل بازهٔ معتبر retry/بازپخش/restore را بپوشاند؛ اگر بازپخش پس از آن ممکن باشد، تضمین شکسته می‌شود و باید کلید بیشتر بماند یا درخواست قدیمی صریح رد شود. این استدلال هیچ SMS بیرونی را داخل تراکنش محلی نمی‌آورد.</p>",
-  "reasoning_en": "<p>A unique ID in the same transaction as the effect lets the constraint pick the winner; rollback removes both. ACK after commit avoids losing the message before its effect exists. The example 30-day horizon must cover supported retry/replay/restore windows. Longer replay requires longer retention or explicit rejection. None of this includes an external SMS in the local transaction.</p>"
+  "tests_en": "<p>Per-crash invariants with dedup: applied effects == 3 for 3 messages, ledger == 175, poison redelivery changes nothing, horizon replay re-applies exactly 1, naive external sender emits 2 mails for 1 application. Without dedup: 6 applications, balance 350. Operational metrics: redelivery rate, dedup-hit rate (should dominate after incidents), key-table growth against the retention job, and age of the oldest unexpired key — alert when replays approach the horizon. Track those four numbers; they size your budget and your disk.</p>",
+  "tests_fa": "<p>invariantهای per-crash با dedup: اثرهای اعمال‌شده == ۳ برای ۳ پیام، ledger == ۱۷۵، تحویل مسموم هیچ‌چیز را عوض نمی‌کند، replay پسا-horizon دقیقاً ۱ بار دوباره اعمال می‌شود و فرستندهٔ بیرونی ساده‌لوح ۲ ایمیل برای ۱ اعمال صادر می‌کند. بدون dedup: ۶ اعمال و موجودی ۳۵۰. معیارهای عملیاتی: نرخ تحویل دوباره، نرخ برخورد dedup (بعد از incidentها باید غالب باشد)، رشد جدول کلید در برابر job نگهداری و سن قدیمی‌ترین کلید منقضی‌نشده — وقتی replayها به horizon نزدیک شدند هشدار بده. چهار عدد را نگه دار؛ همین‌ها بودجه و دیسک تو را می‌سازند.</p>",
+  "worked_en": "<p>Teaching numbers (آموزشی): three messages (+100, +50, +25) land the ledger at 175 with 3 applications under dedup, against 350 with 6 applications without it — the extra 175 is three duplicated effects. The poison probe moves the ledger by 0. The horizon probe re-applies 1. The naive external sender emits 2 mails for 1 ledger row — the 2-to-1 ratio is the at-least-once boundary, priced in sends. Anything outside the transaction repeats on its own.</p>",
+  "worked_fa": "<p>اعداد آموزشی (آموزشی): سه پیام (۱۰۰+ و ۵۰+ و ۲۵+) ledger را با dedup به ۱۷۵ می‌رسانند با ۳ اعمال، در برابر ۳۵۰ با ۶ اعمال بدون آن — آن ۱۷۵ِ اضافه همان سه اثر تکراری است. آزمون poison ledger را ۰ تکان می‌دهد. آزمون horizon دقیقاً ۱ بار دوباره اعمال می‌کند. فرستندهٔ بیرونی ساده‌لوح ۲ ایمیل برای ۱ ردیف ledger صادر می‌کند — همان نسبت ۲به۱ مرز at-least-once است با واحد ارسال. یعنی هر چیزی بیرون از تراکنش، تکرار خودش را دارد.</p>",
+  "reasoning_fa": "<p>چرا این مدل می‌خوره: ثبت ID پیش از اثر در تراکنش مشترک اجازه می‌دهد unique constraint برنده را تعیین کند؛ rollback هر دو را برمی‌گرداند. ACK بعد از commit از حذف پیام پیش از ثبت اثر جلوگیری می‌کند. افق ۳۰روزهٔ نمونه باید حداقل بازهٔ معتبر retry/بازپخش/restore را بپوشاند؛ اگر بازپخش پس از آن ممکن باشد، تضمین شکسته می‌شود و باید کلید بیشتر بماند یا درخواست قدیمی صریح رد شود. این استدلال هیچ SMS بیرونی را داخل تراکنش محلی نمی‌آورد. واحدها روز و پیام است و عدد افق آموزشی؛ اگر بازهٔ بازپخش عوض شد، اول افق را بزرگ کن و بعد بقیه را.</p>",
+  "reasoning_en": "<p>Why this model fits: a unique ID in the same transaction as the effect lets the constraint pick the winner; rollback removes both. ACK after commit avoids losing the message before its effect exists. The example 30-day horizon must cover supported retry/replay/restore windows. Longer replay requires longer retention or explicit rejection. None of this includes an external SMS in the local transaction. The units are days and messages, the horizon is a teaching input, and if the replay window changes you change the horizon first.</p>"
 }

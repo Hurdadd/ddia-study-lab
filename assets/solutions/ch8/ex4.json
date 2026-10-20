@@ -3,90 +3,90 @@
   "slug": "inventory-holds",
   "interview_q_fa": "حالا یه فروشگاه اینترنتی داری تو شب حراج با هزاران خریدار هم‌زمان؛ رزرو (hold چنددقیقه‌ای) تو انبار key-value با شمارنده‌ست و دفتر موجودی تو پایگاه رابطه‌ای. چرا این دوتایی اتمیک نیست؟ با MySQL، استخر محدود و SKIP LOCKED درستش کن؛ قفل گپ، ترتیب قفل، پرکننده تکی، نگه‌داشتن connection و کات‌اور سایه‌ای رو هم توضیح بده.",
   "interview_q_en": "Honestly, you've got a web shop facing thousands of concurrent buyers on sale night; holds live in a key-value counter while your ledger lives in a relational database. Why isn't that pair atomic? Fix it with MySQL, a bounded pool and SKIP LOCKED; cover gap locks, lock ordering, the single refiller, connection holding and your shadow cutover.",
-  "answer_fa": "شمارنده و دفتر commit مشترک ندارند: ترتیبِ کم‌کردن-بعد-پاک‌کردن با crash وسطش undersell می‌دهد و ترتیبِ برعکس oversell. راه درست: به‌ازای هر واحد یک ردیف ولی فقط یک استخر آمادهٔ محدود، مصرف با SELECT ... FOR UPDATE SKIP LOCKED، پرکردن با یک مالک، و رزرو و claim در یک تراکنش تک‌پایگاهی — یا هر دو یا هیچ‌کدام. قفل گپ با READ COMMITTED ول می‌شود، کلید کامپوزیت قفل را یکی می‌کند، و کات‌اور با dual-write سایه‌ای و kill-switch جلو می‌رود.",
-  "answer_en": "The counter and the ledger share no commit: deduct-then-clear crashes into undersell, clear-then-deduct into oversell. The fix: one row per unit but only a bounded ready pool, consumed with SELECT ... FOR UPDATE SKIP LOCKED, refilled by a single owner, with reserve and claim in one single-database transaction — all or nothing. READ COMMITTED drops the gap lock, a composite key cuts locks to one per row, and the cutover rides a shadow dual-write with a kill-switch.",
+  "answer_fa": "قضیه اینه که شمارنده و دفتر هیچ commit مشترکی ندارن: کم‌کردن دفتر و بعد پاک‌کردن رزرو، با یه crash وسط کار، undersell می‌ده؛ ترتیب برعکس هم oversell. درمانش اینه: به‌ازای هر واحد یک ردیف، ولی فقط یه استخر آمادهٔ محدود؛ برداشتن از استخر با SELECT ... FOR UPDATE SKIP LOCKED، پرکردن با یه مالوک واحد، و رزرو و claim توی یه تراکنش تک‌پایگاهی — یا هر دو می‌مونن یا هیچ‌کدوم. قفل گپ رو READ COMMITTED ول می‌کنه، کلید کامپوزیت تعداد قفل‌ها رو می‌آرونه به یکی، و کات‌اور با dual-write سایه‌ای و kill-switch جلو می‌ره — یه commit مشترک، کل درد رو می‌بره.",
+  "answer_en": "Here's the thing: the counter and the ledger share no commit. Deduct-then-clear crashes into undersell, clear-then-deduct crashes into oversell. The fix: one row per unit, but only a bounded ready pool — pull from it with SELECT ... FOR UPDATE SKIP LOCKED, let a single owner refill it, and keep reserve and claim inside one single-database transaction, so it's all or nothing. READ COMMITTED drops the gap lock, a composite key cuts the locks down to one per row, and the cutover rides a shadow dual-write with a kill-switch. One shared commit, and the whole pain goes away.",
   "assumptions": [
     {
-      "fa": "فروش فلش با هزاران خریدار هم‌زمان روی تعداد محدودی جنس داغ؛ اعداد (۱۰۰۰ ردیف آماده، hold چنددقیقه‌ای) آموزشی‌اند (آموزشی)، نه بنچمارک.",
-      "en": "Flash sale with thousands of concurrent buyers on a few hot items; numbers (1,000 ready rows, a minutes-long hold) are teaching sizes (آموزشی), never benchmarks."
+      "fa": "فرض کن یه فروش فلش داریم با هزاران خریدار هم‌زمان روی چند جنس داغ. اعداد (۱۰۰۰ ردیف آماده، hold چنددقیقه‌ای) آموزشی‌ان (آموزشی)، نه بنچمارک.",
+      "en": "Picture a flash sale: thousands of concurrent buyers chasing a few hot items. The numbers (1,000 ready rows, a minutes-long hold) are teaching sizes (آموزشی), never benchmarks."
     },
     {
-      "fa": "MySQL/InnoDB با SKIP LOCKED و READ COMMITTED واقعی؛ رفتار قفل گپ و supremum رفتار محصول است نه حداقل استاندارد SQL.",
-      "en": "MySQL/InnoDB with real SKIP LOCKED and READ COMMITTED; gap-lock and supremum behavior is product behavior, not the SQL minimum."
+      "fa": "MySQL/InnoDB با SKIP LOCKED و READ COMMITTED واقعی. رفتارِ قفل گپ و supremum رفتار همین محصوله، نه حداقلِ استاندارد SQL.",
+      "en": "MySQL/InnoDB with real SKIP LOCKED and READ COMMITTED. Gap-lock and supremum behavior is this product's behavior, not the SQL minimum."
     },
     {
-      "fa": "پرداخت بیرون از تراکنش رزرو می‌نشیند؛ claim فقط بعد از موفقیت پرداخت اجرا می‌شود و رزرو منقضی آزاد می‌گردد.",
-      "en": "Payment settles outside the reservation transaction; claim runs only after successful payment and expired holds are released."
+      "fa": "پرداخت بیرون از تراکنش رزرو می‌نشینه. claim فقط بعد از موفقیت پرداخت اجرا می‌شه و رزرو‌های منقضی آزاد می‌شن.",
+      "en": "Payment settles outside the reservation transaction. The claim runs only after the payment succeeds, and expired holds get released."
     }
   ],
-  "mental_fa": "مثل قصهٔ اتاق فکر کن ولی برعکس: به‌جای قفل کردن یک اتاق برای همه، به هر جنس یک ردیف بده و فقط از استخر آماده بردار؛ ردیف قفل را رد کن معطلش نشو. و سؤال اول همیشه این است: می‌شود مرز تراکنش را دور یک پایگاه کشید؟ اگر آره، 2PC اصلاً لازم نیست.",
-  "mental_en": "Think like the room story in reverse: instead of locking one room for everyone, give every unit its own row and take only from the ready pool; skip a locked row, never wait on it. And always ask first: can the transaction boundary be drawn around one database? If yes, 2PC is not needed at all.",
+  "mental_fa": "تصور کن قصهٔ اتاق فکر، ولی برعکس: به‌جای قفل کردن یه اتاق برای همه، به هر جنس یه ردیف بده و فقط از استخر آماده بردار؛ ردیف قفل رو رد کن، معطلش نشو. و سؤال اول همیشه اینه: می‌شه مرز تراکنش رو دور یه پایگاه کشید؟ اگه آره، 2PC اصلاً لازم نیست.",
+  "mental_en": "Think of the room story, but backwards: instead of locking one room for everyone, give every unit its own row and take only from the ready pool; skip a locked row, don't wait on it. And always ask the first question: can you draw the transaction boundary around one database? If yes, 2PC isn't needed at all.",
   "steps": [
     {
-      "t_fa": "خرابی دوتایی را ثابت کن",
-      "t_en": "Prove the pair broken",
-      "fa": "هر دو ترتیب claim را با crash وسطش اجرا کن: کم‌کردن دفتر و بعد پاک‌کردن رزرو، دفتر را کم می‌کند ولی hold گیر می‌کند (undersell)؛ پاک‌کردن رزرو و بعد کم‌کردن دفتر، جنس را می‌فروشد ولی از دفتر کم نمی‌کند (oversell). تاریخچه‌های P1 و P2 شبیه‌ساز همین را نشان می‌دهند.",
-      "en": "Run both claim orders with a crash in the middle: deduct-then-clear deducts the ledger but strands the hold (undersell); clear-then-deduct sells the units but never deducts (oversell). Simulator histories P1 and P2 show exactly this."
+      "t_fa": "دوتایی رو خراب نشون بده",
+      "t_en": "Show the pair breaking",
+      "fa": "هر دو ترتیب claim رو با یه crash وسطش اجرا کن. کم‌کردن دفتر و بعد پاک‌کردن رزرو: دفتر کم می‌شه ولی hold گیر می‌کنه (undersell). برعکسش: پاک‌کردن رزرو و بعد کم‌کردن دفتر، جنس فروخته می‌شه ولی از دفتر کم نمی‌شه (oversell). تاریخچه‌های P1 و P2 شبیه‌ساز دقیقاً همین رو نشون می‌دن.",
+      "en": "Run both claim orders with a crash in the middle. Deduct the ledger, then clear the hold: the ledger goes down but the hold gets stranded (undersell). The other way round — clear the hold, then deduct the ledger — and you sell the units but never take them off the ledger (oversell). Simulator histories P1 and P2 show exactly this."
     },
     {
-      "t_fa": "شمارندهٔ داغ را خرد کن",
+      "t_fa": "شمارندهٔ داغ رو خرد کن",
       "t_en": "Break up the hot counter",
-      "fa": "به‌ازای هر واحد یک ردیف بساز ولی نه برای کل موجودی — فقط یک استخر آمادهٔ محدود (مثلاً ۱۰۰۰). رزرو یعنی چند ردیف خالی با SELECT ... FOR UPDATE SKIP LOCKED برداشتن؛ ردیف قفل رد می‌شود. سقف را از جنس پیک فروش فلش اندازه بزن: آن‌قدر بزرگ که جهش را جذب کند، آن‌قدر کوچک که اسکن تند بماند.",
-      "en": "Give every unit its own row but not for the whole stock — only a bounded ready pool (say 1,000). Reserving means taking free rows with SELECT ... FOR UPDATE SKIP LOCKED; locked rows are skipped. Size the cap from flash-sale peaks: big enough to absorb bursts, small enough to scan fast."
+      "fa": "به‌ازای هر واحد یه ردیف بساز، ولی نه برای کل موجودی — فقط یه استخر آمادهٔ محدود (مثلاً ۱۰۰۰). رزرو یعنی چند ردیف خالی برداری با SELECT ... FOR UPDATE SKIP LOCKED؛ ردیفی که قفل داره رد می‌شه. سقف رو از جنس پیک فروش فلش اندازه بگیر: اون‌قدر بزرگ که جهش رو جذب کنه، اون‌قدر کوچک که اسکن تند بمونه.",
+      "en": "Give every unit its own row — but not for the whole stock, just a bounded ready pool (say 1,000). Reserving means taking free rows with SELECT ... FOR UPDATE SKIP LOCKED; a locked row gets skipped. Size the cap from flash-sale peaks: big enough to absorb the burst, small enough to keep the scan fast."
     },
     {
-      "t_fa": "قفل‌ها را یکی و گپ را ول کن",
+      "t_fa": "قفل‌ها رو یکی کن و گپ رو ول کن",
       "t_en": "Shrink locks, drop the gap",
-      "fa": "ستون‌های شرط را داخل کلید اصلی بگذار (کلید کامپوزیت) تا به‌جای ۲ قفل فقط ۱ قفل بگیری. سطح را READ COMMITTED بگذار تا روی جدول خالی قفل گپ و supremum جلوی INSERT پرکننده را نگیرد. رفتار قفل را با SHOW ENGINE INNODB STATUS قبل و بعد ببین، حدس نزن.",
-      "en": "Put the filter columns in the primary key (composite key) so each row takes 1 lock instead of 2. Use READ COMMITTED so no gap or supremum lock blocks the refiller's INSERTs on an empty table. Observe lock behavior with SHOW ENGINE INNODB STATUS before and after — never guess."
+      "fa": "ستون‌های شرط رو بذار داخل کلید اصلی (کلید کامپوزیت) تا به‌جای ۲ قفل فقط ۱ قفل بگیری. سطح رو READ COMMITTED بذار تا روی جدول خالی، قفل گپ و supremum جلوی INSERT پرکننده رو نگیره. رفتار قفل رو با SHOW ENGINE INNODB STATUS قبل و بعد ببین، حدس نزن.",
+      "en": "Put the filter columns inside the primary key (a composite key) so each row takes 1 lock instead of 2. Set the level to READ COMMITTED so no gap or supremum lock blocks the refiller's INSERTs on an empty table. Watch the locks with SHOW ENGINE INNODB STATUS before and after — don't guess."
     },
     {
       "t_fa": "ترتیب قفل و پرکنندهٔ تکی",
       "t_en": "Lock order and one refiller",
-      "fa": "همهٔ مسیرها اول از استخر DELETE کنند بعد در holdها INSERT — reserve و claim هیچ‌وقت قفل‌ها را چرخه‌ای نمی‌گیرند. استخر خالی را فقط یک تراکنش پر می‌کند و بقیه صبر می‌کنند تا هجوم نشود؛ خالی یعنی «صبر کن» نه «ناموجود». سبد چندقلمی را هم با UNION ALL در یک رفت‌وبرگشت بگیر.",
-      "en": "Every path DELETEs from the pool first and INSERTs into the holds second — reserve and claim can never take locks in a cycle. Exactly one transaction refills an empty pool while the rest wait, so no stampede; empty means “wait”, never a false sold-out. Batch multi-item carts with UNION ALL in one round trip."
+      "fa": "همهٔ مسیرها اول از استخر DELETE کنن، بعد توی holdها INSERT — اینجوری reserve و claim هیچ‌وقت قفل‌ها رو چرخه‌ای نمی‌گیرن. استخر خالی رو فقط یه تراکنش پر می‌کنه و بقیه صبر می‌کنن تا هجوم نشه؛ خالی یعنی «صبر کن»، نه «ناموجود». سبد چندقلمی رو هم با UNION ALL توی یه رفت‌وبرگشت بگیر.",
+      "en": "Every path DELETEs from the pool first and INSERTs into the holds second — that's what keeps reserve and claim from ever taking locks in a cycle. Exactly one transaction refills an empty pool while the rest wait, so nobody stampedes; empty means “wait”, never a fake “sold out”. And grab multi-item carts with UNION ALL in one round trip."
     },
     {
       "t_fa": "گلوگاه واقعی و کات‌اور امن",
       "t_en": "The real bottleneck and the safe cutover",
-      "fa": "وقتی CPU آرام است ولی صف رشد می‌کند، موتور را دست نزن: به هر SQL برچسب فرایند بزن و در لایهٔ پروکسی بسنج چه کسی connection را نگه داشته؛ اول مسیر checkout را تمیز کن (خواندن و تراکنش اضافه). کات‌اور را با dual-write سایه‌ای جلو ببر: هر دو سیستم زنده، مقایسه روی ترافیک واقعی، مرجعیت قدم‌به‌قدم، و kill-switch برای برگشت.",
-      "en": "When CPU is calm but queues grow, leave the engine alone: tag every SQL with its process and measure at the proxy layer who holds connections; clean the checkout path first (spare reads and transactions). Cut over with a shadow dual-write: both systems live, compared on real traffic, authority moved pod by pod, with a kill-switch back."
+      "fa": "وقتی CPU آرومه ولی صف داره بزرگ می‌شه، موتور رو دست نزن: به هر SQL برچسب فرایند بزن و توی لایهٔ پروکسی بسنج چه کسی connection رو نگه داشته؛ اول مسیر checkout رو تمیز کن (خواندن و تراکنش اضافه). کات‌اور رو با dual-write سایه‌ای جلو ببر: هر دو سیستم زنده، مقایسه روی ترافیک واقعی، مرجعیت قدم‌به‌قدم، و kill-switch برای برگشت.",
+      "en": "When the CPU is calm but the queues keep growing, leave the engine alone: tag every SQL with its process and measure at the proxy layer who is holding connections; clean up the checkout path first (spare reads and transactions). And cut over with a shadow dual-write: both systems stay live, you compare them on real traffic, you move authority pod by pod, and the kill-switch is there to walk it back."
     }
   ],
-  "design_fa": "<p>جدول‌ها: <code>unit_pool(item_id, unit_id, status)</code> با کلید اصلی کامپوزیت روی ستون‌های شرط، سقف ۱۰۰۰ ردیف آماده برای هر item/location؛ <code>holds(hold_id, unit_id, expires_at)</code>؛ دفتر <code>ledger(item_id, qty)</code> در همان پایگاه. مسیر خواندن: رزرو با <code>SELECT ... FOR UPDATE SKIP LOCKED LIMIT n</code> روی ردیف‌های آماده؛ مسیر نوشتن: همان تراکنش ردیف‌ها را به hold منتقل می‌کند و claim کم‌کردن دفتر و پاک‌کردن hold است. انقضا با جاروی دوره‌ای ردیف را به استخر برمی‌گرداند. اتصال: برچسب فرایند در کامنت هر SQL و سنجش در پروکسی.</p>",
-  "design_en": "<p>Tables: <code>unit_pool(item_id, unit_id, status)</code> with a composite primary key on the filter columns, capped at 1,000 ready rows per item/location; <code>holds(hold_id, unit_id, expires_at)</code>; the <code>ledger(item_id, qty)</code> in the same database. Read path: reserve with <code>SELECT ... FOR UPDATE SKIP LOCKED LIMIT n</code> over ready rows. Write path: the same transaction moves rows into holds, and claim deducts the ledger and clears the holds. A sweeper returns expired rows to the pool. Connections: a process tag in each SQL comment, measured at the proxy.</p>",
-  "worked_fa": "<p>اعداد آموزشی (آموزشی): شبیه‌ساز با ۵۰ خریدار و ۳ واحد برای هر کدام اجرا شد: ۲۵ پرداخت موفق ۷۵ واحد claim کرد و بقایا آزاد شدند؛ جمع available و reserved و claimed و دفتر برابر ۵۰۰۰ ماند و هیچ oversell رخ نداد (تاریخچه‌های P3 تا P5). استخر ۵تایی کاملاً خالی و بعد صفر واحد داد ولی جمع همان ۵ ماند (P6). سقف ۱۰۰۰ از جنس پیک فروش فلش است و باید با اندازه‌گیری محصول جایگزین شود.</p>",
-  "worked_en": "<p>Teaching numbers (آموزشی): the simulator ran 50 buyers taking 3 units each: 25 successful payments claimed 75 units and the rest were released; available plus reserved plus claimed plus ledger stayed 5,000 with zero oversell (histories P3–P5). A 5-row pool drained fully, then dealt 0, while its total stayed 5 (P6). The 1,000 cap reflects flash-sale peaks and must be replaced with product measurements.</p>",
+  "design_fa": "<p>جدول‌ها: <code>unit_pool(item_id, unit_id, status)</code> با کلید اصلی کامپوزیت روی ستون‌های شرط، سقف ۱۰۰۰ ردیف آماده برای هر item/location؛ <code>holds(hold_id, unit_id, expires_at)</code>؛ و دفتر <code>ledger(item_id, qty)</code> توی همون پایگاه. مسیر خواندن: رزرو با <code>SELECT ... FOR UPDATE SKIP LOCKED LIMIT n</code> روی ردیف‌های آماده. مسیر نوشتن: همون تراکنش ردیف‌ها رو می‌بره توی hold، و claim دفتر رو کم می‌کنه و hold رو پاک می‌کنه. انقضا رو جاروی دوره‌ای جمع می‌کنه و ردیف رو به استخر برمی‌گردونه. اتصال: برچسب فرایند توی کامنت هر SQL و سنجش توی پروکسی.</p>",
+  "design_en": "<p>Tables: <code>unit_pool(item_id, unit_id, status)</code> with a composite primary key on the filter columns, capped at 1,000 ready rows per item/location; <code>holds(hold_id, unit_id, expires_at)</code>; and the <code>ledger(item_id, qty)</code> sitting in the same database. Read path: reserve with <code>SELECT ... FOR UPDATE SKIP LOCKED LIMIT n</code> over the ready rows. Write path: the same transaction moves those rows into the holds, and claim deducts the ledger and clears the holds. A periodic sweeper returns expired rows to the pool. Connections: a process tag in each SQL comment, measured at the proxy.</p>",
+  "worked_fa": "<p>اعداد آموزشی (آموزشی): شبیه‌ساز با ۵۰ خریدار و ۳ واحد برای هر کدام اجرا شد — ۲۵ پرداخت موفق، ۷۵ واحد claim شد و بقیه آزاد شدن؛ جمع available و reserved و claimed و دفتر همون ۵۰۰۰ موند و هیچ oversell رخ نداد (تاریخچه‌های P3 تا P5). استخر ۵تایی کامل خالی شد و بعد صفر واحد داد، ولی جمع همون ۵ موند (P6). سقف ۱۰۰۰ از جنس پیک فروش فلشه و باید با اندازه‌گیری محصول جایگزین بشه — پیکِ خودت، نه ترسِ خودت.</p>",
+  "worked_en": "<p>Teaching numbers (آموزشی): the simulator ran with 50 buyers taking 3 units each — 25 successful payments claimed 75 units, the rest got released, and available plus reserved plus claimed plus ledger stayed at 5,000 with zero oversell (histories P3–P5). The 5-row pool drained fully and then dealt 0, while its total stayed 5 (P6). The 1,000 cap comes from flash-sale peaks, so replace it with your own product measurements.</p>",
   "alternatives": [
     {
-      "fa": "سریال‌پذیر کامل با SERIALIZABLE: درستی تضمینی ولی زیر contention فروش فلش abort پشت abort می‌گیری و retryها صف پرداخت را خفه می‌کنند؛ استخر محدود همان دعوا را از ریشه کم می‌کند.",
-      "en": "Full SERIALIZABLE: guaranteed correctness, but under flash-sale contention you collect abort after abort and retries choke the payment queue; the bounded pool shrinks the fight at its root."
+      "fa": "SERIALIZABLE کامل: درستی رو تضمین می‌کنه، ولی زیر contention فروش فلش abort پشت abort می‌گیری و retryها صف پرداخت رو خفه می‌کنن. استخر محدود همین دعوا رو از ریشه کم می‌کنه.",
+      "en": "Full SERIALIZABLE: it guarantees correctness, but under flash-sale contention you collect abort after abort and the retries choke the payment queue; the bounded pool shrinks that fight at the root."
     },
     {
-      "fa": "2PC بین شمارنده و دفتر: atomic commit می‌دهد ولی coordinator تک‌نقطهٔ خرابی است و participant رأی‌داده قفل نگه می‌دارد؛ وقتی می‌شود مرز را دور یک پایگاه کشید، پروتکل توزیع‌شده هزینهٔ بیهوده است.",
-      "en": "2PC between the counter and the ledger: gives atomic commit, but the coordinator is a single point of failure and a yes-voting participant holds locks; when the boundary fits around one database, the distributed protocol is pure overhead."
+      "fa": "2PC بین شمارنده و دفتر: atomic commit می‌ده، ولی coordinator تک‌نقطهٔ خرابیه و participantی که رأی داده قفل نگه می‌داره. وقتی می‌شه مرز رو دور یه پایگاه کشید، پروتکل توزیع‌شده فقط هزینهٔ بیهوده‌ست.",
+      "en": "2PC between the counter and the ledger: you get atomic commit, but the coordinator is a single point of failure and the yes-voting participant sits on its locks; when the boundary fits around one database, a distributed protocol is pure overhead."
     }
   ],
   "failures": [
     {
-      "fa": "پرکنندهٔ بدون مالک واحد: ده تراکنش هم‌زمان استخر خالی می‌بینند و هرکدام هزار ردیف درج می‌کنند — هجوم درج و استخر بادکرده. فقط یک مالک پر کند.",
-      "en": "Refill with no single owner: ten transactions see an empty pool and each inserts a thousand rows — an insert stampede and a bloated pool. Exactly one owner refills."
+      "fa": "پرکنندهٔ بدون مالک واحد: ده تراکنش هم‌زمان استخر خالی می‌بینن و هرکدام هزار ردیف درج می‌کنن — هجوم درج و استخر بادکرده. فقط یه مالوک پر کنه.",
+      "en": "A refiller with no single owner: ten transactions see an empty pool at once and each inserts a thousand rows — an insert stampede and a bloated pool. Exactly one owner refills."
     },
     {
-      "fa": "سطح REPEATABLE READ روی جدول خالی: قفل گپ و supremum جلوی INSERT پرکننده را می‌گیرد و deadlock می‌گیری. READ COMMITTED برای همین مسیر.",
-      "en": "REPEATABLE READ over an empty table: gap and supremum locks block the refiller's INSERTs into deadlock. READ COMMITTED for this path."
+      "fa": "سطح REPEATABLE READ روی جدول خالی: قفل گپ و supremum جلوی INSERT پرکننده رو می‌گیره و deadlock می‌گیری. برای همین مسیر، READ COMMITTED.",
+      "en": "REPEATABLE READ on an empty table: gap and supremum locks block the refiller's INSERTs and you walk into a deadlock. READ COMMITTED for this path."
     },
     {
-      "fa": "ترتیب قفل وارونه در یک مسیر: یک جا اول INSERT و بعد DELETE، جای دیگر برعکس — چرخهٔ انتظار و deadlock. همه‌جا اول استخر بعد holdها.",
-      "en": "Reversed lock order on one path: INSERT-then-DELETE here, the opposite there — a wait cycle and deadlock. Pool first, holds second, everywhere."
+      "fa": "ترتیب قفل وارونه توی یکی از مسیرها: یه جا اول INSERT و بعد DELETE، یه جای دیگه برعکس — چرخهٔ انتظار و deadlock. همه‌جا اول استخر، بعد holdها.",
+      "en": "Reversed lock order on one path: INSERT-then-DELETE here, the opposite there — a wait cycle and a deadlock. Pool first, holds second, everywhere."
     },
     {
-      "fa": "connectionهای نگه‌داشته‌شده در مسیر checkout: رزرو تند است ولی استخر connection خالی است و صف رشد می‌کند. برچسب بزن، بسنج، بعد تمیز کن.",
-      "en": "Connections held across the checkout path: reservations are fast but the pool is drained and queues grow. Tag, measure, then clean."
+      "fa": "connectionهای نگه‌داشته‌شده توی مسیر checkout: رزرو تنده ولی استخر connection خالیه و صف بزرگ می‌شه. برچسب بزن، بسنج، بعد تمیز کن.",
+      "en": "Connections held across the checkout path: reservations are fast but the connection pool is drained and the queues grow. Tag it, measure it, then clean it up."
     },
     {
-      "fa": "سوئیچ مرجعیت بدون سایه: اختلاف رفتار دو سیستم روی ترافیک واقعی دیده نمی‌شود و برگشت مرجع قدیمی را نداری. dual-write سایه‌ای با kill-switch.",
-      "en": "Switching authority with no shadow: behavior gaps never show on real traffic and there is no way back. Shadow dual-write with a kill-switch."
+      "fa": "سوئیچ مرجعیت بدون سایه: اختلاف رفتار دو سیستم روی ترافیک واقعی دیده نمی‌شه و برگشت به مرجع قدیمی هم نداری. dual-write سایه‌ای با kill-switch.",
+      "en": "Switching authority with no shadow: behavior gaps never show on real traffic and there's no way back to the old authority. Shadow dual-write with a kill-switch."
     }
   ],
   "code": {
@@ -98,36 +98,36 @@
     "expected_en": "PASS P1 order-A crash undersells -- ledger=8 but 2 units still held -> lost sale\nPASS P2 order-B crash oversells -- ledger still 10, units gone -> sold air\nPASS P3 no buyer short -- 50x3 units dealt\nPASS P4 conservation -- total=5000 initial=5000\nPASS P5 claimed exact -- claimed=75 expected=75\nPASS P6 empty pool honest -- drained=5 then 0, total still 5\n----\nchecks run=6 passed=6 failed=0",
     "code": "import java.util.*;\n\n/**\n * Teaching demo: flash-sale inventory holds (reserve + claim).\n * Part 1 shows the BROKEN dual-system design: reservation counter in a\n * key-value store plus the ledger in a relational database share no commit,\n * so a crash between the two steps oversells in one order and undersells\n * in the other. Part 2 shows the FIX: a bounded pool of one-row-per-unit\n * consumed with SKIP-LOCKED semantics, refilled by a single refiller,\n * with reserve and claim in ONE local transaction.\n * Deterministic: fixed buyers, fixed payment outcomes, threads joined.\n */\npublic class PoolSim {\n    static int passed = 0, failed = 0;\n\n    static void check(String name, boolean cond, String detail) {\n        System.out.println((cond ? \"PASS \" : \"FAIL \") + name + \" -- \" + detail);\n        if (cond) passed++; else failed++;\n    }\n\n    // ---------- Part 1: dual-system claim, crash between the two steps ----------\n    static class DualSystem {\n        int kvReserved = 0;   // key-value counter (DECR on reserve, INCR on release)\n        int ledgerQty;        // relational ledger, source of truth\n        DualSystem(int qty) { ledgerQty = qty; }\n        void reserve(int n) { kvReserved += n; }\n        // order A: deduct ledger first, then clear reservation (crash in between)\n        void claimOrderA_crashAfterDeduct(int n) { ledgerQty -= n; /* crash: kvReserved never cleared */ }\n        // order B: clear reservation first, then deduct ledger (crash in between)\n        void claimOrderB_crashAfterClear(int n) { kvReserved -= n; /* crash: ledger never deducted */ }\n    }\n\n    // ---------- Part 2: single-database bounded pool ----------\n    static class Pool {\n        final LinkedList<Integer> available = new LinkedList<Integer>();\n        final Set<Integer> reserved = new HashSet<Integer>();\n        int ledgerQty;                 // same database as the pool\n        int claimed = 0;\n        boolean refilling = false;     // single-refiller guard\n        int nextId = 0;\n        Pool(int ledger) { ledgerQty = ledger; refill(); }\n        // refill up to cap from the ledger; only one transaction does this\n        synchronized void refill() {\n            if (refilling) return;\n            refilling = true;\n            try {\n                while (available.size() < 1000 && ledgerQty > 0) {\n                    available.add(nextId++);\n                    ledgerQty--;\n                }\n            } finally { refilling = false; }\n        }\n        // SKIP LOCKED: take up to n rows without waiting (synchronized = atomic take)\n        synchronized List<Integer> reserve(int n) {\n            List<Integer> got = new ArrayList<Integer>();\n            while (got.size() < n && !available.isEmpty())\n                got.add(available.removeFirst());\n            for (int u : got) reserved.add(u);\n            return got;\n        }\n        // claim or release inside the SAME local transaction as the ledger move\n        synchronized void claim(List<Integer> units) {\n            for (int u : units) reserved.remove(u);\n            claimed += units.size();   // ledger row moved atomically with pool rows\n        }\n        synchronized void release(List<Integer> units) {\n            for (int u : units) { reserved.remove(u); available.addLast(u); }\n        }\n        synchronized int total() { return available.size() + reserved.size() + claimed + ledgerQty; }\n    }\n\n    public static void main(String[] a) throws Exception {\n        // P1: order A crash -> ledger deducted AND reservation stuck = undersell\n        DualSystem d1 = new DualSystem(10);\n        d1.reserve(2);\n        d1.claimOrderA_crashAfterDeduct(2);\n        check(\"P1 order-A crash undersells\",\n                d1.ledgerQty == 8 && d1.kvReserved == 2,\n                \"ledger=8 but 2 units still held -> lost sale\");\n\n        // P2: order B crash -> paid units never deducted = oversell\n        DualSystem d2 = new DualSystem(10);\n        d2.reserve(2);\n        d2.claimOrderB_crashAfterClear(2);\n        check(\"P2 order-B crash oversells\",\n                d2.ledgerQty == 10 && d2.kvReserved == 0,\n                \"ledger still 10, units gone -> sold air\");\n\n        // P3..P5: fixed pool, 50 buyers x 3 units, even buyers pay, odd release\n        final Pool p = new Pool(5000);\n        final int initial = p.total();\n        final List<String> errors = Collections.synchronizedList(new ArrayList<String>());\n        Thread[] ts = new Thread[50];\n        for (int i = 0; i < 50; i++) {\n            final int id = i;\n            ts[i] = new Thread(new Runnable() {\n                public void run() {\n                    List<Integer> got = p.reserve(3);\n                    if (got.size() != 3) { errors.add(\"buyer \" + id + \" short\"); return; }\n                    try { Thread.sleep(1); } catch (InterruptedException e) { errors.add(\"interrupt\"); return; }\n                    if (id % 2 == 0) p.claim(got); else p.release(got);\n                }\n            });\n            ts[i].start();\n        }\n        for (Thread t : ts) t.join();\n        check(\"P3 no buyer short\", errors.isEmpty(), errors.isEmpty() ? \"50x3 units dealt\" : errors.toString());\n        check(\"P4 conservation\", p.total() == initial,\n                \"total=\" + p.total() + \" initial=\" + initial);\n        check(\"P5 claimed exact\", p.claimed == 25 * 3,\n                \"claimed=\" + p.claimed + \" expected=75\");\n\n        // P6: empty pool means wait-and-refill, never a false sold-out\n        final Pool small = new Pool(5);\n        List<Integer> all = small.reserve(5);\n        List<Integer> none = small.reserve(1);\n        small.refill(); // single refiller tops up from the ledger (nothing left here)\n        check(\"P6 empty pool honest\", all.size() == 5 && none.isEmpty() && small.total() == 5,\n                \"drained=5 then 0, total still 5\");\n\n        System.out.println(\"----\");\n        System.out.println(\"checks run=\" + (passed + failed) + \" passed=\" + passed + \" failed=\" + failed);\n    }\n}\n"
   },
-  "tests_fa": "<p>invariantهای per-history: در P1 دفتر ۸ و hold گیرکردهٔ ۲؛ در P2 دفتر ۱۰ و hold صفر؛ در P3 هیچ خریداری کم نیاورده؛ در P4 جمع همیشه ۵۰۰۰؛ در P5 دقیقاً ۷۵ claim؛ در P6 خالی‌بودن صفر واحد می‌دهد نه خطا. راهنمای اجرای محلی (MySQL 8 واقعی لازم دارد): دو اتصال باز کن، <code>BEGIN; SET TRANSACTION ISOLATION LEVEL READ COMMITTED;</code>، رزرو را با <code>SELECT ... FOR UPDATE SKIP LOCKED LIMIT 3</code> روی جدول استخر بزن و بین دو مرحله crash تزریق کن؛ نرخ abort و زمان انتظار قفل را زیر درایور هم‌زمان بسنج — همان دو عدد بودجهٔ retry تو را می‌سازند.</p>",
-  "tests_en": "<p>Per-history invariants: P1 ledger 8 with 2 stranded holds; P2 ledger 10 with 0 holds; P3 no buyer short; P4 total always 5,000; P5 exactly 75 claimed; P6 an empty pool deals 0, never an error. Local-run guide (needs a real MySQL 8): open two sessions, <code>BEGIN; SET TRANSACTION ISOLATION LEVEL READ COMMITTED;</code>, reserve with <code>SELECT ... FOR UPDATE SKIP LOCKED LIMIT 3</code> over the pool table and inject a crash between the two steps; measure abort rate and lock-wait time under a concurrent driver — those two numbers size your retry budget.</p>",
+  "tests_fa": "<p>invariantهای per-history: توی P1 دفتر ۸ و hold گیرکردهٔ ۲؛ توی P2 دفتر ۱۰ و hold صفر؛ توی P3 هیچ خریداری کم نیاورده؛ توی P4 جمع همیشه ۵۰۰۰؛ توی P5 دقیقاً ۷۵ claim؛ توی P6 خالی‌بودن صفر واحد می‌ده، نه خطا. راهنمای اجرای محلی (MySQL 8 واقعی لازم داره): دو اتصال باز کن، <code>BEGIN; SET TRANSACTION ISOLATION LEVEL READ COMMITTED;</code>، رزرو رو با <code>SELECT ... FOR UPDATE SKIP LOCKED LIMIT 3</code> روی جدول استخر بزن و بین دو مرحله crash تزریق کن؛ نرخ abort و زمان انتظار قفل رو زیر درایور هم‌زمان بسنج — همین دو عدد بودجهٔ retry تو رو می‌سازن.</p>",
+  "tests_en": "<p>Per-history invariants: P1 has ledger 8 with 2 stranded holds; P2 has ledger 10 with 0 holds; P3 leaves no buyer short; P4 keeps the total at 5,000; P5 claims exactly 75; P6 deals 0 on an empty pool, never an error. Local-run guide (you'll need a real MySQL 8): open two sessions, <code>BEGIN; SET TRANSACTION ISOLATION LEVEL READ COMMITTED;</code>, reserve with <code>SELECT ... FOR UPDATE SKIP LOCKED LIMIT 3</code> over the pool table and inject a crash between the two steps, then measure abort rate and lock-wait time under a concurrent driver — those two numbers are what size your retry budget.</p>",
   "followups": [
     {
       "q_fa": "وسط فروش فلش استخر خالی می‌شه و صد تراکنش هم‌زمان می‌بیننش؛ چی کار می‌کنی که هجوم درج راه نیفته؟",
       "q_en": "Your pool drains mid-flash-sale with a hundred concurrent transactions watching; how do you refill without an insert stampede?",
-      "a_fa": "پرکردن را پشت یک مالک واحد می‌گذاری: فقط یک تراکنش از دفتر پر می‌کند و بقیه روی همان قفل صبر می‌کنند؛ بقیه بعد از پرشدن با استخر پر ادامه می‌دهند. خالی یعنی «صبر کن» و منطق خریدار هیچ‌وقت «ناموجود» برنمی‌گرداند مگر این‌که دفتر هم واقعاً صفر باشد.",
-      "a_en": "Put the refill behind a single owner: exactly one transaction tops up from the ledger while the rest wait on that lock; they continue against a full pool afterwards. Empty means “wait”, and buyer logic never reports sold-out unless the ledger itself is truly zero.",
+      "a_fa": "پرکردن رو پشت یه مالک واحد می‌ذاری: فقط یه تراکنش از دفتر پر می‌کنه و بقیه روی همون قفل صبر می‌کنن؛ بعد از پرشدن، بقیه با استخر پر ادامه می‌دن. خالی یعنی «صبر کن»، و منطق خریدار هیچ‌وقت «ناموجود» برنمی‌گردونه مگر این‌که دفتر واقعاً صفر باشه.",
+      "a_en": "You put the refill behind a single owner: exactly one transaction tops up from the ledger while the rest wait on that lock, then everyone carries on against a full pool. Empty means “wait” — buyer logic never reports sold-out unless the ledger itself is truly zero.",
       "level": "senior"
     },
     {
-      "q_fa": "CPU آرام است ولی صف رزرو رشد می‌کند؛ کوئری‌ها هم تندند. کجا را می‌سنجی؟",
+      "q_fa": "CPU آرومه ولی صف رزرو داره بزرگ می‌شه؛ کوئری‌ها هم تندن. کجا رو می‌سنجی؟",
       "q_en": "CPU is calm but the reservation queue grows; queries are fast. What do you measure?",
-      "a_fa": "نگه‌داشتن connection را نه سرعت کوئری را: به هر SQL برچسب فرایند می‌زنی و در لایهٔ پروکسی می‌سنجی چه کسی connection را چقدر نگه داشته. معمولاً مقصر رزرو نیست — مسیر checkout است که خواندن و تراکنش اضافه نگه داشته؛ اول همان را تمیز می‌کنی بعد سراغ بزرگ‌کردن استخر می‌روی.",
-      "a_en": "Connection holding, not query speed: tag every SQL with its process and measure at the proxy layer who holds connections and for how long. Usually reservations are innocent — the checkout path holds spare reads and transactions; clean that first, then consider bigger pools.",
+      "a_fa": "نگه‌داشتن connection، نه سرعت کوئری: به هر SQL برچسب فرایند می‌زنی و توی لایهٔ پروکسی می‌سنجی چه کسی connection رو چقدر نگه داشته. معمولاً رزرو مقصر نیست — مسیر checkout خواندن و تراکنش اضافه رو نگه داشته؛ اول همون رو تمیز کن، بعد سراغ بزرگ‌کردن استخر برو.",
+      "a_en": "Connection holding, not query speed: tag every SQL with its process and measure at the proxy layer who holds connections, and for how long. Reservations are usually innocent here — it's the checkout path that holds spare reads and transactions; clean that up first, then think about bigger pools.",
       "level": "staff"
     }
   ],
   "mistakes": [
     {
-      "fa": "بزرگ‌کردن سقف استخر برای حل contention: اسکن SKIP LOCKED کند می‌شود و دعوای قفل برمی‌گردد؛ سقف را از روی پیک واقعی اندازه بزن نه از روی ترس.",
-      "en": "Raising the pool cap to fix contention: the SKIP LOCKED scan slows down and lock fights return; size the cap from real peaks, not from fear."
+      "fa": "بزرگ‌کردن سقف استخر برای حل contention: اسکن SKIP LOCKED کند می‌شه و دعوای قفل برمی‌گرده؛ سقف رو از روی پیک واقعی اندازه بگیر، نه از روی ترس.",
+      "en": "Raising the pool cap to fix contention: the SKIP LOCKED scan slows down and the lock fights come back; size the cap from real peaks, not from fear."
     },
     {
-      "fa": "انتخاب REPEATABLE READ از روی عادت: روی جدول خالی قفل گپ جلوی پرکننده را می‌گیرد؛ سطح را برای همین مسیر آگاهانه READ COMMITTED بگذار.",
-      "en": "Picking REPEATABLE READ from habit: gap locks block the refiller on an empty table; deliberately choose READ COMMITTED for this path."
+      "fa": "انتخاب REPEATABLE READ از روی عادت: روی جدول خالی قفل گپ جلوی پرکننده رو می‌گیره؛ برای همین مسیر آگاهانه READ COMMITTED رو انتخاب کن.",
+      "en": "Picking REPEATABLE READ out of habit: gap locks block the refiller on an empty table; deliberately choose READ COMMITTED for this path."
     },
     {
-      "fa": "برگرداندن «ناموجود» وقتی استخر خالی است ولی دفتر پر است: فروش ازدست‌رفتهٔ الکی. خالی یعنی صبر و پرکردن؛ ناموجود فقط وقتی دفتر صفر است.",
-      "en": "Reporting sold-out when the pool is empty but the ledger is full: a fake lost sale. Empty means wait and refill; sold-out only when the ledger is zero."
+      "fa": "برگرداندن «ناموجود» وقتی استخر خالیه ولی دفتر پره: یه فروش ازدست‌رفتهٔ الکی. خالی یعنی صبر و پرکردن؛ ناموجود فقط وقتی دفتر صفره.",
+      "en": "Reporting sold-out when the pool is empty but the ledger is full: that's a fake lost sale. Empty means wait and refill; sold-out only when the ledger is zero."
     }
   ],
   "diagrams": [
@@ -136,43 +136,43 @@
       "made": "hand",
       "kind_fa": "توالی",
       "kind_en": "sequence",
-      "caption_fa": "دو سیستم بدون commit مشترک: هر دو ترتیب می‌شکنند",
-      "caption_en": "Two systems, no shared commit: both orders break",
+      "caption_fa": "دو سیستم بدون commit مشترک: هر دو ترتیب می‌شکنن",
+      "caption_en": "Two systems with no shared commit: both orders break",
       "height": 640,
       "narration": {
-        "scenario_fa": "شمارنده در انبار key-value و دفتر در پایگاه رابطه‌ای است. شکل را چپ‌به‌راست بخوان: هر ستون یک ترتیب claim با یک crash وسطش.",
-        "scenario_en": "The counter lives in a key-value store, the ledger in a relational database. Read the figure left to right: each column is one claim order with one crash in the middle.",
+        "scenario_fa": "شمارنده توی انبار key-value نشسته و دفتر توی پایگاه رابطه‌ای. شکل رو چپ‌به‌راست بخون: هر ستون یه ترتیب claim با یه crash وسطشه.",
+        "scenario_en": "The counter sits in a key-value store and the ledger in a relational database. Read the figure left to right: each column is one claim order with one crash in the middle.",
         "steps": [
           {
-            "fa": "هر دو ستون با رزرو شروع می‌شوند: شمارنده ۲ واحد کم می‌شود و پرداخت موفق است — تا این‌جا همه‌چیز سالم است.",
-            "en": "Both columns start with the reserve: the counter drops by 2 and payment succeeds — healthy so far."
+            "fa": "هر دو ستون با رزرو شروع می‌شن: شمارنده ۲ واحد کم می‌شه و پرداخت موفقه — تا اینجا همه‌چیز سالمه.",
+            "en": "Both columns start with the reserve: the counter drops by 2 and the payment succeeds — healthy so far."
           },
           {
-            "fa": "ستون چپ اول دفتر را کم می‌کند (۱۰ به ۸) و بعد crash می‌کند؛ پاک‌کردن hold هیچ‌وقت نمی‌رسد.",
+            "fa": "ستون چپ اول دفتر رو کم می‌کنه (۱۰ به ۸) و بعد crash می‌کنه؛ پاک‌کردن hold هیچ‌وقت نمی‌رسه.",
             "en": "The left column deducts the ledger first (10 to 8), then crashes; clearing the hold never arrives."
           },
           {
-            "fa": "ستون راست اول hold را پاک می‌کند (شمارنده برمی‌گردد به ۰) و بعد crash می‌کند؛ کم‌کردن دفتر هیچ‌وقت نمی‌رسد.",
-            "en": "The right column clears the hold first (counter back to 0), then crashes; deducting the ledger never arrives."
+            "fa": "ستون راست اول hold رو پاک می‌کنه (شمارنده برمی‌گرده به ۰) و بعد crash می‌کنه؛ کم‌کردن دفتر هیچ‌وقت نمی‌رسه.",
+            "en": "The right column clears the hold first (the counter goes back to 0), then crashes; deducting the ledger never arrives."
           },
           {
-            "fa": "جعبه‌های صورتی حکم را می‌دهند: چپ undersell (دفتر کم و hold گیرکرده) و راست oversell (دفتر پر و جنس رفته).",
+            "fa": "جعبه‌های صورتی حکم رو می‌دن: چپ undersell (دفتر کم، hold گیرکرده) و راست oversell (دفتر پر، جنس رفته).",
             "en": "The rose boxes give the verdicts: left is undersell (ledger down, hold stranded), right is oversell (ledger full, units gone)."
           }
         ],
-        "point_fa": "نقطهٔ تصمیم ترتیب دو قدم است: چون commit مشترکی نیست، هر ترتیبی یک روی خراب دارد.",
-        "point_en": "The decision point is the order of the two steps: with no shared commit, every order has a broken side.",
-        "failure_fa": "همان crash را در ستون دیگر ببین: ترتیب را عوض کنی خرابی عوض می‌شود ولی حذف نه — این ذات دوتایی بدون اتم است.",
-        "failure_en": "See the same crash in the other column: swapping the order swaps the failure but never removes it — that is the nature of a non-atomic pair.",
-        "guarantee_fa": "شکل نشان می‌دهد چرا دو سیستم جدا commit مشترک ندارند. راه‌حل را نشان نمی‌دهد — آن شکل بعد است.",
-        "guarantee_en": "The figure shows why two separate systems share no commit. It does not show the fix — that is the next figure.",
-        "nonguarantee_fa": "دربارهٔ سرعت، قفل‌ها و سطح isolation چیزی نمی‌گوید؛ فقط atomicity جفت را می‌سنجد.",
-        "nonguarantee_en": "It says nothing about speed, locks or isolation levels; it only judges the pair's atomicity."
+        "point_fa": "نقطهٔ تصمیم، ترتیب اون دو قدمه: چون commit مشترکی در کار نیست، هر ترتیبی یه روی خراب داره.",
+        "point_en": "The decision point is the order of those two steps: with no shared commit, every order breaks on one side.",
+        "failure_fa": "همون crash رو توی ستون دیگه ببین: ترتیب رو عوض کنی، خرابی عوض می‌شه ولی حذف نمی‌شه — این ذاتِ دوتاییِ بدون اتمه.",
+        "failure_en": "See the same crash in the other column: swap the order and you swap the failure, but you never remove it — that's the nature of a non-atomic pair.",
+        "guarantee_fa": "این شکل نشون می‌ده چرا دو سیستم جدا commit مشترک ندارن. راه‌حل رو نشون نمی‌ده — اون شکل بعدیه.",
+        "guarantee_en": "This figure shows why two separate systems share no commit. It doesn't show the fix — that's the next figure.",
+        "nonguarantee_fa": "دربارهٔ سرعت، قفل‌ها و سطح isolation هیچی نمی‌گه؛ فقط atomicity این جفت رو می‌سنجه.",
+        "nonguarantee_en": "It says nothing about speed, locks or isolation levels; it only judges this pair's atomicity."
       },
       "selfcheck": {
-        "q_fa": "چرا جابه‌جا کردن ترتیب دو قدم مشکل را حل نمی‌کند؟",
+        "q_fa": "چرا جابه‌جا کردن ترتیب اون دو قدم مشکل رو حل نمی‌کنه؟",
         "q_en": "Why does swapping the two steps not fix the problem?",
-        "a_fa": "چون crash همیشه می‌تواند دقیقاً بین همان دو قدم بیفتد؛ هر ترتیب فقط نوع خرابی را عوض می‌کند (undersell در برابر oversell) و commit مشترک نمی‌سازد.",
+        "a_fa": "چون crash همیشه می‌تونه دقیقاً بین همون دو قدم بیفته؛ هر ترتیب فقط نوع خرابی رو عوض می‌کنه (undersell در برابر oversell) و commit مشترک نمی‌سازه.",
         "a_en": "Because a crash can always land exactly between those two steps; each order only swaps the failure mode (undersell vs oversell) and never creates a shared commit."
       }
     },
@@ -185,39 +185,39 @@
       "caption_en": "One database: bounded pool with SKIP LOCKED and a single refiller",
       "height": 640,
       "narration": {
-        "scenario_fa": "خریدار، استخر آماده، یک تراکنش و دفتر — هر چهار در یک پایگاه‌اند. بالا مسیر، پایین چرخهٔ عمر ردیف است.",
+        "scenario_fa": "خریدار، استخر آماده، یه تراکنش و دفتر — هر چهار توی یه پایگاه. بالا مسیره، پایین چرخهٔ عمر ردیف.",
         "scenario_en": "Buyer, ready pool, one transaction, ledger — all four in one database. Top is the path, bottom the row lifecycle.",
         "steps": [
           {
-            "fa": "نوار بالا را چپ‌به‌راست بخوان: خریدار ۳ واحد می‌خواهد، استخر با SKIP LOCKED سه ردیف خالی می‌دهد، یک تراکنش رزرو و claim را با هم می‌برد و دفتر در همان پایگاه کم می‌شود.",
+            "fa": "نوار بالا رو چپ‌به‌راست بخون: خریدار ۳ واحد می‌خواد، استخر با SKIP LOCKED سه ردیف خالی می‌ده، یه تراکنش رزرو و claim رو با هم می‌بره و دفتر توی همون پایگاه کم می‌شه.",
             "en": "Read the top band left to right: the buyer wants 3 units, the pool deals three free rows with SKIP LOCKED, one transaction carries reserve and claim together, and the ledger in the same database is deducted."
           },
           {
-            "fa": "پنج باکس پایین چرخهٔ ردیف است: Available به Reserved (hold چنددقیقه‌ای)، بعد یا Claimed (دفتر کم شد) یا Released (پرداخت ناموفق، ردیف برگشت).",
+            "fa": "پنج باکس پایین چرخهٔ عمر ردیفه: Available به Reserved (hold چنددقیقه‌ای)، بعد یا Claimed (دفتر کم شد) یا Released (پرداخت ناموفق، ردیف برگشت).",
             "en": "The five bottom boxes are the row lifecycle: Available to Reserved (a minutes-long hold), then either Claimed (ledger deducted) or Released (payment failed, row back)."
           },
           {
-            "fa": "باکس پنجم Replenishing است: استخر خالی را فقط یک تراکنش پر می‌کند و بقیه صبر می‌کنند — هجوم درج نیست.",
+            "fa": "باکس پنجم Replenishingـه: استخر خالی رو فقط یه تراکنش پر می‌کنه و بقیه صبر می‌کنن — هجوم درج نیست.",
             "en": "The fifth box is Replenishing: exactly one transaction refills an empty pool while the rest wait — no insert stampede."
           },
           {
-            "fa": "جعبهٔ پایین دلیل هر حرکت را می‌گوید: سقف برای تندی اسکن، READ COMMITTED برای ول‌کردن گپ، کلید کامپوزیت برای ۱ قفل، و خالی یعنی صبر.",
+            "fa": "باکس پایین دلیل هر حرکت رو می‌گه: سقف برای تندی اسکن، READ COMMITTED برای ول‌کردن گپ، کلید کامپوزیت برای ۱ قفل، و خالی یعنی صبر.",
             "en": "The bottom card gives each move its reason: the cap for scan speed, READ COMMITTED for dropping the gap, the composite key for 1 lock, and empty means wait."
           }
         ],
-        "point_fa": "نقطهٔ تصمیم همان «یک تراکنش» وسط است: رزرو و claim یا با هم می‌نشینند یا هیچ‌کدام.",
+        "point_fa": "نقطهٔ تصمیم همون «یه تراکنش» وسطه: رزرو و claim یا با هم می‌نشن یا هیچ‌کدوم.",
         "point_en": "The decision point is that middle “one transaction”: reserve and claim land together or not at all.",
-        "failure_fa": "اگر پرکننده مالک واحد نداشته باشد، ده تراکنش هم‌زمان هزار ردیف درج می‌کنند؛ اگر سطح REPEATABLE READ بماند، گپ جلوی پرکردن را می‌گیرد.",
-        "failure_en": "With no single refill owner, ten concurrent transactions insert a thousand rows each; if the level stays REPEATABLE READ, the gap blocks the refill.",
-        "guarantee_fa": "شکل نشان می‌دهد دعوای یک شمارنده چطور به برداشتن ردیف‌های جدا تبدیل می‌شود. اندازهٔ سقف و زمان hold را ثابت نمی‌کند.",
-        "guarantee_en": "The figure shows how one counter's fight becomes taking separate rows. It does not fix the cap size or the hold time.",
-        "nonguarantee_fa": "دربارهٔ connectionها و کات‌اور ساکت است — آن‌ها در شکل سرهم‌بندی‌اند.",
+        "failure_fa": "اگه پرکننده مالک واحد نداشته باشه، ده تراکنش هم‌زمان هزار ردیف درج می‌کنن؛ اگه سطح REPEATABLE READ بمونه، گپ جلوی پرکردن رو می‌گیره.",
+        "failure_en": "With no single refill owner, ten concurrent transactions insert a thousand rows each; if the level stays REPEATABLE READ, the gap lock blocks the refill.",
+        "guarantee_fa": "این شکل نشون می‌ده دعوای یه شمارنده چطور تبدیل به برداشتن ردیف‌های جدا می‌شه. اندازهٔ سقف و زمان hold رو ثابت نمی‌کنه.",
+        "guarantee_en": "This figure shows how one counter's fight turns into taking separate rows. It doesn't fix the cap size or the hold time.",
+        "nonguarantee_fa": "دربارهٔ connectionها و کات‌اور ساکته — اون‌ها توی شکل سرهم‌بندی‌ان.",
         "nonguarantee_en": "It is silent on connections and the cutover — those live in the assembly figure."
       },
       "selfcheck": {
-        "q_fa": "استخر خالی شد؛ خریدار بعدی چه می‌بیند و چرا «ناموجود» غلط است؟",
+        "q_fa": "استخر خالی شد؛ خریدار بعدی چی می‌بینه و چرا «ناموجود» غلطه؟",
         "q_en": "The pool just drained; what does the next buyer see, and why is “sold out” wrong?",
-        "a_fa": "صبر می‌کند تا پرکنندهٔ تکی استخر را پر کند و بعد رزرو می‌گیرد؛ «ناموجود» فقط وقتی درست است که دفتر هم صفر باشد، وگرنه فروش الکی از دست رفته.",
+        "a_fa": "صبر می‌کنه تا پرکنندهٔ تکی استخر رو پر کنه و بعد رزرو می‌گیره؛ «ناموجود» فقط وقتی درسته که دفتر هم صفر باشه، وگرنه یه فروش الکی از دست رفته.",
         "a_en": "It waits for the single refiller to top up the pool, then reserves; “sold out” is only true when the ledger itself is zero, otherwise it is a fake lost sale."
       }
     },
@@ -230,49 +230,49 @@
       "caption_en": "The whole fix on one page: every move and its guard",
       "height": 640,
       "narration": {
-        "scenario_fa": "پنج حرکت چپ و پنج نگهبان راست. هر ردیف را جدا بخوان: حرکت و قیمتی که نگهبانش می‌پردازد.",
+        "scenario_fa": "پنج حرکت چپ، پنج نگهبان راست. هر ردیف رو جدا بخون: حرکت، و قیمتی که نگهبانش می‌پردازه.",
         "scenario_en": "Five moves on the left, five guards on the right. Read each row alone: the move and the price its guard pays.",
         "steps": [
           {
-            "fa": "ردیف ۱: ردیفِ هر واحد با سقف ۱۰۰۰ — نگهبانش اندازه از روی پیک واقعی است، نه ترس.",
+            "fa": "ردیف ۱: یه ردیف برای هر واحد با سقف ۱۰۰۰ — نگهبانش اینه که اندازه رو از روی پیک واقعی بگیری، نه از روی ترس.",
             "en": "Row 1: a row per unit capped at 1,000 — its guard sizes from real peaks, not fear."
           },
           {
-            "fa": "ردیف ۲: READ COMMITTED و کلید کامپوزیت — نگهبانش دیدن قفل‌ها با ابزار موتور است، نه حدس.",
+            "fa": "ردیف ۲: READ COMMITTED و کلید کامپوزیت — نگهبانش دیدن قفل‌ها با ابزار موتوره، نه حدس زدن.",
             "en": "Row 2: READ COMMITTED and the composite key — its guard observes locks with engine tools, never guesses."
           },
           {
-            "fa": "ردیف ۳: ترتیب قفل واحد و پرکنندهٔ تکی — نگهبانش صبر بقیه است، نه هجوم.",
+            "fa": "ردیف ۳: ترتیب قفل واحد و پرکنندهٔ تکی — نگهبانش صبرِ بقیه‌ست، نه هجوم.",
             "en": "Row 3: one lock order and a single refiller — its guard is everyone else waiting, not stampeding."
           },
           {
-            "fa": "ردیف ۴: برچسب connection و تمیزکاری checkout — نگهبانش این است که اول لوله را می‌سنجی بعد موتور را.",
+            "fa": "ردیف ۴: برچسب connection و تمیزکاری checkout — نگهبانش اینه که اول لوله رو بسنجی، بعد موتور رو.",
             "en": "Row 4: connection tagging and checkout cleanup — its guard measures the plumbing before blaming the engine."
           },
           {
-            "fa": "ردیف ۵: dual-write سایه‌ای و kill-switch — نگهبانش این است که هر دو سیستم زنده‌اند و برگشت داری.",
+            "fa": "ردیف ۵: dual-write سایه‌ای و kill-switch — نگهبانش اینه که هر دو سیستم زنده‌ان و برگشت داری.",
             "en": "Row 5: shadow dual-write and kill-switch — its guard keeps both systems live so there is a way back."
           }
         ],
-        "point_fa": "دو جملهٔ پایین تصمیم‌اند: مرز را دور یک پایگاه بکش؛ و وقتی CPU آرام ولی صف پر است، لوله را بسنج.",
-        "point_en": "The two bottom lines are the decisions: draw the boundary around one database; and when CPU is calm but queues fill, instrument the plumbing.",
-        "failure_fa": "هر نگهبان را بردار و خرابی‌اش را ببین: سقف بی‌اندازه اسکن را کند می‌کند، ترتیب وارونه deadlock می‌دهد، و سوئیچ بی‌سایه برگشت ندارد.",
-        "failure_en": "Drop any guard and see its failure: a wild cap slows the scan, reversed order deadlocks, and a shadowless switch has no way back.",
-        "guarantee_fa": "شکل هر پنج حرکت را با نگهبانش یک‌جا نشان می‌دهد. عددها آموزشی‌اند و باید با اندازهٔ محصول عوض شوند.",
-        "guarantee_en": "The figure shows all five moves with their guards together. The numbers are teaching sizes and must be replaced with product measurements.",
-        "nonguarantee_fa": "نمی‌گوید سقف دقیق باید چند باشد؛ آن را فقط پیک ترافیک محصول می‌گوید.",
-        "nonguarantee_en": "It does not say what the cap must be; only product traffic peaks say that."
+        "point_fa": "دو جملهٔ پایین، تصمیم‌ان: مرز رو دور یه پایگاه بکش؛ و وقتی CPU آرومه ولی صف پره، لوله رو بسنج.",
+        "point_en": "The two bottom lines are the decisions: draw the boundary around one database, and when the CPU is calm but the queues fill up, instrument the plumbing.",
+        "failure_fa": "هر نگهبان رو بردار و خرابی‌اش رو ببین: سقف بی‌اندازه اسکن رو کند می‌کنه، ترتیب وارونه deadlock می‌ده، و سوئیچ بی‌سایه برگشت نداره.",
+        "failure_en": "Drop any guard and watch its failure: a wild cap slows the scan, a reversed order deadlocks, and a shadowless switch has no way back.",
+        "guarantee_fa": "این شکل هر پنج حرکت رو با نگهبانش یک‌جا نشون می‌ده. عددها آموزشی‌ان و باید با اندازهٔ محصول عوض بشن.",
+        "guarantee_en": "This figure shows all five moves with their guards together. The numbers are teaching sizes, so replace them with your own product measurements.",
+        "nonguarantee_fa": "نمی‌گه سقف دقیق باید چند باشه؛ اون رو فقط پیک ترافیک محصول می‌گه.",
+        "nonguarantee_en": "It doesn't tell you what the cap must be; only your product's traffic peaks do."
       },
       "selfcheck": {
-        "q_fa": "کدام ردیف جلوی خرابی‌ای را می‌گیرد که در شکل اول دیدی؟",
+        "q_fa": "کدوم ردیف جلوی خرابی‌ای رو می‌گیره که توی شکل اول دیدی؟",
         "q_en": "Which row prevents the failure you saw in the first figure?",
-        "a_fa": "ردیف «یک تراکنش» در شکل دوم و ردیف ۵ این شکل: بردن رزرو و دفتر در یک تراکنش تک‌پایگاهی همان commit مشترکی است که شکل اول نداشت.",
+        "a_fa": "ردیف «یه تراکنش» توی شکل دوم و ردیف ۵ این شکل: بردن رزرو و دفتر توی یه تراکنش تک‌پایگاهی، همون commit مشترکیه که شکل اول نداشت.",
         "a_en": "The “one transaction” of the second figure and row 5 here: moving reserve and ledger into one single-database transaction is exactly the shared commit the first figure lacked."
       }
     }
   ],
-  "reasoning_fa": "<p>دو سیستم جدا ذاتاً commit مشترک ندارند پس هر ترتیب claim یک روی خراب دارد — اول باید خرابی را با تاریخچه دید. بعد دعوای شمارندهٔ داغ را با ردیفِ هر واحد خرد می‌کنیم ولی سقف می‌گذاریم تا اسکن تند بماند. قفل‌ها را کوچک می‌کنیم (کلید کامپوزیت، READ COMMITTED) و ترتیبشان را ثابت تا deadlock نشود. عددها آموزشی‌اند: سقف، زمان hold و بودجهٔ retry را فقط اندازه‌گیری محصول تعیین می‌کند.</p>",
-  "reasoning_en": "<p>Two separate systems inherently share no commit, so every claim order has a broken side — first see the failure as a history. Then break the hot counter into per-unit rows but cap the pool so the scan stays fast. Shrink locks (composite key, READ COMMITTED) and fix their order so no deadlock forms. The numbers are teaching inputs: only product measurements set the cap, the hold time and the retry budget.</p>",
+  "reasoning_fa": "<p>چرا این مدل می‌خوره: دو سیستم جدا ذاتاً commit مشترک ندارن، پس هر ترتیب claim یه روی خراب داره — اول باید خرابی رو با تاریخچه ببینی. بعد دعوای شمارندهٔ داغ رو با ردیفِ هر واحد خرد می‌کنیم، ولی سقف می‌ذاریم تا اسکن تند بمونه. قفل‌ها رو کوچک می‌کنیم (کلید کامپوزیت، READ COMMITTED) و ترتیبشون رو ثابت نگه می‌داریم تا deadlock نشه. عددها آموزشی‌ان: سقف، زمان hold و بودجهٔ retry رو فقط اندازه‌گیری محصول تعیین می‌کنه.</p>",
+  "reasoning_en": "<p>Why this model fits: two separate systems inherently share no commit, so every claim order breaks on one side — first you have to see that failure as a history. Then you break up the hot counter into per-unit rows, but cap the pool so the scan stays fast. Shrink the locks (composite key, READ COMMITTED) and fix their order so no deadlock forms. The numbers are teaching inputs: only measurements from your own product set the cap, the hold time and the retry budget.</p>",
   "sources": [
     "mysql",
     "retry"
