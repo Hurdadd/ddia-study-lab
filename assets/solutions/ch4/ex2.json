@@ -56,7 +56,7 @@
       "a_fa": "پیش‌فرض زمان فروش. پول سال گذشته با برچسب‌های همان موقع به دست آمده؛ گزارش با طبقه‌بندی امروز سؤال دیگری است («تاریخ با دسته‌های امروز چه شکلی بود») و باید به‌عنوان نمای بازنویسی‌شده برچسب بخورد و هر دو برچسب در بعد کندتغییر بمانند.",
       "level": "senior",
       "q_en": "Should last year's sales use today's category or the category at the time of sale?",
-      "q_fa": "آیا فروش سال گذشته باید با دسته‌بندی امروز گزارش شود یا دسته‌بندی زمان فروش؟"
+      "q_fa": "فروش پارسال رو با دسته‌بندی امروز گزارش می‌دی یا دسته‌بندی روز فروش؟"
     },
     {
       "a_en": "Detect it in the sort key distribution: one pid owns a whole block, so range pruning on that block degrades to a full read. Isolate the hot key (own partition or salted shards for the fact, single view at query time) and re-check the blocks-read ratio after the fix.",
@@ -73,10 +73,10 @@
       "q_fa": "اصلاح‌ها و backfillها را چطور مدیریت می‌کنی بدون این‌که گزارش‌های منتشرشده خراب شوند؟"
     }
   ],
-  "interview_q_en": "Design last year's total sales per category by weekday: fact and dimension tables, the SQL, partition and sort keys, and exactly which columns and blocks get read. Then explain skew, bitmap compression under stated cardinality, and what a product category change mid-history means for the report.",
-  "interview_q_fa": "مجموع فروش سال گذشته به تفکیک دسته‌بندی و روز هفته را طراحی کن: جدول‌های fact و dimension، کوئری SQL، کلیدهای پارتیشن و مرتب‌سازی، و دقیقاً کدام ستون‌ها و بلوک‌ها خوانده می‌شوند. بعد اثر skew، فشرده‌سازی bitmap با cardinality اعلام‌شده، و معنای تغییر دسته‌بندی محصول وسط تاریخ برای گزارش را توضیح بده.",
-  "lab_en": "<p>Extended lab (3-6 hours): build the sales fact plus two dimensions, write the report SQL, and state exactly which columns and blocks get read; then hand-encode the category lane (5 values) with bitmaps and run-length compression and run <span class=\"ltr\">WHERE category = B AND weekday = 2</span> with bitwise ops. This solution is the interview-sized decision map of that same path.</p>",
-  "lab_fa": "<p>آزمایشگاه تکمیلی (۳ تا ۶ ساعت): جدول فروش و دو بعد را بساز، SQL گزارش را بنویس و دقیق بگو کدام ستون‌ها و بلوک‌ها خوانده می‌شوند؛ بعد ستون دسته (۵ مقدار) را دستی bitmap و run-length کن و فیلتر <span class=\"ltr\">WHERE category = B AND weekday = 2</span> را با عملیات بیتی اجرا کن. این حل، نقشهٔ تصمیم مصاحبه‌ای همان مسیر است.</p>",
+  "interview_q_en": "Think of it like this, friend — you need daily category sales broken down by weekday. You'll lay out the sales fact plus product and date dimensions. Give the SQL, the partition key, the sort key, and the exact columns you read. Then work out the pain from skew, cardinality, bitmaps, and a product changing category over time.",
+  "interview_q_fa": "تصور کن گزارش فروش می‌خوای: مجموع فروش هر دسته‌بندی به تفکیک روز هفته. جدول fact فروش و dimensionهای محصول و تاریخ رو بچین. SQL، partition key، sort key و ستون‌هایی که خونده می‌شن رو مشخص کن. بعد حساب کن skew، cardinality، bitmap و عوض شدن دسته‌بندی محصول وسط تاریخ چه دردی درست می‌کنه.",
+  "lab_en": "<p>Design a sales fact table (date, product, store, quantity, amount) plus date and product dimension tables, friend. For \"last year's total sales per category by weekday\", pick sensible sort keys for the columnar files, write the SQL, and say exactly which columns and blocks get read. Then hand-encode the product-category column (5 distinct values) with bitmaps plus run-length compression, and run <span class=\"ltr\">WHERE category = A AND weekday = 2</span> with bitwise ops.</p>",
+  "lab_fa": "<p>یه جدول fact فروش بساز (تاریخ، محصول، فروشگاه، تعداد، مبلغ) با دو جدول بعد تاریخ و محصول. برای کوئری «مجموع فروش هر دسته‌بندی به تفکیک روز هفته در سال گذشته» sort keyهای منطقی برای فایل‌های ستونی انتخاب کن، SQL رو بنویس و بگو دقیقاً کدوم ستون‌ها و کدوم بلوک‌ها خونده می‌شن. بعد ستون «دسته‌بندی محصول» با ۵ مقدار متمایز رو دستی با bitmap و run-length فشرده کن و فیلتر <span class=\"ltr\">WHERE category = A AND weekday = 2</span> رو با عملیات بیتی اجرا کن.</p>",
   "mental_en": "A row store reads whole rows even when the question needs two columns; a columnar file reads whole columns but only the ones asked for. Sorting puts equal values next to each other so they compress, and partitioning lets the engine skip entire blocks without opening them.",
   "mental_fa": "row store کل سطر را می‌خواند حتی وقتی سؤال دو ستون می‌خواهد؛ فایل ستونی کل ستون را می‌خواند ولی فقط ستون‌های خواسته‌شده را. مرتب‌سازی مقادیر مساوی را کنار هم می‌گذارد تا فشرده شوند، و پارتیشن‌بندی می‌گذارد موتور بلوک‌های کامل را بدون باز کردن رد کند.",
   "mistakes": [
