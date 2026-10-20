@@ -181,8 +181,8 @@
       "a_en": "Size by shares, not by rehash: on the ring give it 2x virtual nodes, in fixed shards 2x logical shards, in rendezvous 2x weight entries. Only the new node's portion grows — every existing key stays. Verify with the load column: its key count should land near 2x the mean.",
       "a_fa": "با سهم اندازه بزن نه <span class=\"ltr\">rehash</span>: روی حلقه ۲ برابر <span class=\"ltr\">vnode</span>، در شارد ثابت ۲ برابر شارد منطقی و در <span class=\"ltr\">rendezvous</span> ۲ برابر ورودی وزنی به آن بده. فقط سهم گره تازه رشد می‌کند — بقیهٔ کلیدها می‌مانند. با ستون بار راستی‌آزمایی کن: شمار کلیدهایش باید نزدیک ۲ برابر میانگین بنشیند.",
       "level": "senior",
-      "q_en": "A new node has twice the capacity. How do you rebalance without moving every key?",
-      "q_fa": "node جدید دو برابر ظرفیت دارد؛ balancing را بدون جابه‌جایی همهٔ کلیدها چطور انجام می‌دهی؟"
+      "q_en": "A new node's got twice the capacity. How do you rebalance without moving every key?",
+      "q_fa": "حالا یه node جدید اومده با دو برابر ظرفیت. چطور balancing می‌کنی بدون اینکه همه کلیدها رو جابه‌جا کنی؟"
     },
     {
       "a_en": "You don't — the ring spreads keys, never load. Isolate the hot key on its own shard (or a dedicated machine), or split its writes with a suffix and merge on read. Name the price each time: isolation needs hot-key detection, suffixes tax every read.",
@@ -199,8 +199,8 @@
       "q_fa": "دو گره هم‌زمان مدعی یک بازه‌اند. طرحت چطور این را ناممکن می‌کند؟"
     }
   ],
-  "interview_q_en": "Compare modulo, rendezvous and fixed logical shards with an explicit ownership map for node joins and leaves. Compute the moved percentage for a stated mapping and decide on skew, node weights, failure, replication and staged handoff.",
-  "interview_q_fa": "برای اضافه/حذف <span class=\"ltr\">node</span>، <span class=\"ltr\">modulo</span> و <span class=\"ltr\">rendezvous</span> و شاردهای منطقی ثابت با جدول مالکیت صریح را مقایسه کن. درصد جابه‌جایی را برای نگاشت مشخص محاسبه کن و دربارهٔ کجی، وزن گره، خرابی، تکثیر و تحویل مرحله‌ای تصمیم بگیر.",
+  "interview_q_en": "Here's the thing — nodes join and leave, and you've got to handle it. Compare modulo, rendezvous and fixed logical shards with an explicit ownership map. Estimate your movement percentage for a concrete mapping. Then call it: what's your skew? How do you weight nodes? How do you cover failure and replication? How'd you run a staged handoff?",
+  "interview_q_fa": "تصور کن node اضافه یا کم می‌شه. این سه‌تا رو مقایسه کن: modulo، rendezvous و fixed logical shards با جدول مالکیت. درصد حرکت رو برای mapping مشخص حساب کن. بعد تصمیم بگیر: skew چی می‌شه؟ node سنگین‌تر چه وزنی می‌گیره؟ failure و replication رو چطور پوشش می‌دی؟ و مهاجرت تدریجی رو قدم‌به‌قدم چطور می‌بری جلو؟",
   "mental_en": "Three separate jobs: mapping (which key sits where), movement (what flies over the wire on change), routing (who believes the current truth). Mod-N confuses all three; the ring plus a versioned map keeps each job honest.",
   "mental_fa": "سه کار جدا: نگاشت (کدام کلید کجا می‌نشیند)، جابه‌جایی (در تغییر چه چیزی روی سیم می‌پرد) و مسیریابی (چه کسی حقیقت جاری را باور دارد). <span class=\"ltr\">mod-N</span> هر سه را قاطی می‌کند؛ حلقه به‌علاوهٔ نگاشت نسخه‌دار هر کار را صادق نگه می‌دارد.",
   "mistakes": [

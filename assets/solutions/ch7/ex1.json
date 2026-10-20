@@ -182,8 +182,8 @@
       "a_en": "Change the partition key for that sensor only: append a 00..99 suffix so its writes spread over 100 sub-keys across all shards. Reads of that sensor now fetch all 100 and merge them (a sum for counters). Run a hot-sensor registry: detect past 10%, convert the key format, and retire the suffix when the sensor cools — because only writes spread, reads pay forever.",
       "a_fa": "کلید تقسیم را فقط برای همان سنسور عوض کن: پسوند ۰۰ تا ۹۹ بچسبان تا نوشتن‌هایش روی ۱۰۰ زیرکلید در همهٔ شاردها پخش شود. خواندن آن سنسور حالا هر ۱۰۰ تا را می‌خواند و ادغام می‌کند (جمع برای شمارنده‌ها). رجیستری سنسور داغ بچرخان: بالای ۱۰٪ شناسایی، تبدیل قالب کلید، و بازنشستگی پسوند وقتی سنسور خنک شد — چون فقط نوشتن پخش می‌شود و خواندن برای همیشه پول می‌دهد.",
       "level": "senior",
-      "q_en": "One sensor generates 40% of all writes. How do you change the partition key?",
-      "q_fa": "یک سنسور ۴۰٪ نوشتن‌ها را تولید کند؛ چه تغییری در کلید می‌دهی؟"
+      "q_en": "One sensor's now generating 40% of all writes. How do you change your partition key?",
+      "q_fa": "حالا فرض کن یه سنسور به‌تنهایی ۴۰٪ نوشتن‌ها رو می‌ده. تو کلید partition چی رو عوض می‌کنی؟"
     },
     {
       "a_en": "Never row-by-row deletes: keep shards month-aligned (or time-partitioned files inside them) and drop the whole old shard by retention. Then drill it: retire one month on staging and verify its readings vanish from every query path before trusting the runbook.",
@@ -200,8 +200,8 @@
       "q_fa": "بازهٔ داغ را وسط ترافیک چطور بدون قطعی <span class=\"ltr\">split</span> می‌کنی؟"
     }
   ],
-  "interview_q_en": "Compare four schemes (timestamp ranges, sensor:timestamp ranges, hash(sensor_id), hash(full key)) for one month of sensor data. Measure instantaneous and monthly load separately, pin down the 'one sensor, one month' query path and its fan-out, and explain the hot-sensor effect and repartitioning.",
-  "interview_q_fa": "برای دادهٔ یک ماههٔ سنسورها چهار طرح (بازهٔ <span class=\"ltr\">timestamp</span>، بازهٔ <span class=\"ltr\">sensor:timestamp</span>، <span class=\"ltr\">hash(sensor_id)</span> و <span class=\"ltr\">hash</span> کلید کامل) را مقایسه کن. بار لحظه‌ای و مجموع ماه را جدا بسنج، مسیر کوئری «یک ماهِ یک سنسور» و <span class=\"ltr\">fan-out</span> آن را مشخص کن و اثر سنسور پرنرخ و راه <span class=\"ltr\">repartitioning</span> را توضیح بده.",
+  "interview_q_en": "Picture this — you've got one month of sensor data. Compare timestamp ranges, sensor:timestamp ranges, hash(sensor_id) and hash(full_key). Measure both your instantaneous load and your monthly total. Then tell me: what's the query path for “one month of one sensor” in each design? Where does your hot sensor build a hotspot? How'd you repartition?",
+  "interview_q_fa": "فرض کن یک ماه داده سنسور داری. حالا این چهارتا رو کنار هم بذار و مقایسه کن: timestamp-range، sensor:timestamp range، hash(sensor_id) و hash(full_key). هم بار لحظه‌ای رو حساب کن، هم جمع کل ماه رو. بعد به من بگو: query «یک ماهِ یک سنسور» تو هر طرح چه مسیری می‌ره؟ سنسور پرنرخ کجا hotspot می‌سازه؟ و repartitioning رو چطور انجام می‌دی؟",
   "mental_en": "You own two clocks: the month clock (totals) and the this-second clock (instantaneous). A scheme that spreads the month beautifully may dump this very second onto one shard. Then one question: 'whose month do you read?' That answer picks the partition key.",
   "mental_fa": "دو ساعت داری: ساعتِ ماه (مجموع) و ساعتِ همین ثانیه (لحظه‌ای). طرحی که ماه را قشنگ پخش می‌کند ممکن است همین ثانیه همه‌چیز را روی یک شارد بریزد. بعد یک سؤال داری: «ماهِ کدام سنسور را می‌خوانی؟» جواب همین سؤال کلید تقسیم را انتخاب می‌کند.",
   "mistakes": [

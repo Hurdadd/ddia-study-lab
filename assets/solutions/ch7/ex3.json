@@ -182,8 +182,8 @@
       "a_en": "Revalidate, then serve: every id from the index is checked against its base shard before reaching the caller, and the recorded delete wins — the phantom is filtered, counted, and never shown. Then ask why the posting outlived the record: a missing tombstone or a relay backlog, and fix that cause — the reader contract hides nothing, it only protects.",
       "a_fa": "اول بازبینی بعد سرو: هر شناسهٔ آمده از ایندکس پیش از رسیدن به صداکننده با شارد مرجعش چک می‌شود و حذف ثبت‌شده می‌چربد — شبح فیلتر و شمرده می‌شود و هرگز نشان داده نمی‌شود. بعد بپرس چرا <span class=\"ltr\">posting</span> از رکورد بیشتر عمر کرد: <span class=\"ltr\">tombstone</span> گمشده یا عقب‌ماندگی رله، و همان علت را درست کن — قرارداد خواننده چیزی را پنهان نمی‌کند، فقط محافظت می‌کند.",
       "level": "senior",
-      "q_en": "The index returns a product already deleted from the record. What does the reader do?",
-      "q_fa": "index کالا را نشان می‌دهد ولی حذف آن در مرجع ثبت شده؛ خواننده چه می‌کند؟"
+      "q_en": "The index returns a product you've already deleted from the record. What does your reader do?",
+      "q_fa": "حالا index یه کالا رو نشون می‌ده ولی حذفش تو مرجع ثبت شده. خواننده باید چی کار کنه؟"
     },
     {
       "a_en": "Price it in RPCs and network intersections, not adjectives: each extra term adds one index-shard lookup, and long postings lists make the intersection dominate. When two hot terms intersect on every query, stop intersecting at read time — precompute the conjunction as its own posting (a materialized AND) and pay on write instead. The staff call is moving cost across the read/write line deliberately, with the RPC table as evidence.",
@@ -200,8 +200,8 @@
       "q_fa": "محلی چه چیزی را می‌سنجی و دربارهٔ <span class=\"ltr\">p99</span> چه وعده‌ای می‌دهی؟"
     }
   ],
-  "interview_q_en": "Design local and global secondary indexes over four shards. Compare writes, one/two predicates, scatter-gather, partial failures and lag. Specify outbox/version handling, RPC counts and consistency cost.",
-  "interview_q_fa": "برای دادهٔ چهار شارد، ایندکس ثانویهٔ محلی و سراسری طراحی کن. مسیر نوشتن، تک‌شرط/دوشرط، <span class=\"ltr\">scatter-gather</span>، خرابی نصفه و <span class=\"ltr\">lag</span> را مقایسه کن. مدیریت تغییر چندtermی با <span class=\"ltr\">outbox</span>/نسخه را مشخص کن و تعداد <span class=\"ltr\">RPC</span> و <span class=\"ltr\">p99</span> و هزینهٔ سازگاری را بگو.",
+  "interview_q_en": "Think of it — you've got four shards to index. Design local and global secondary indexes over them. Compare writes, one/two predicates, scatter-gather, partial failures and lag. Handle a “one write, several terms” change with outbox/version, and pin down your RPC counts, p99 and consistency cost.",
+  "interview_q_fa": "قضیه اینه که چهار تا shard داری. روشون local و global secondary index طراحی کن. write path، تک‌شرط و دوشرط، scatter-gather، failure جزئی و lag رو مقایسه کن. یه تغییر چندtermی رو با outbox/version مدیریت کن و تعداد RPC، p99 و هزینه consistency رو مشخص کن.",
   "mental_en": "The index is a derived copy with a sharding of its own — and its sharding answers a different question than the base's. Every secondary read is two hops (find the ids, fetch the records) and the two hops may disagree; the whole design is deciding who wins the disagreement.",
   "mental_fa": "ایندکس کپی مشتقی است با sharding خودش — و sharding آن به سؤالی متفاوت از سؤال مرجع جواب می‌دهد. هر خواندن ثانویه دو پرش است (شناسه‌ها را پیدا کن و رکوردها را بگیر) و دو پرش ممکن است اختلاف داشته باشند؛ کل طراحی یعنی تصمیم اینکه در اختلاف چه کسی می‌برد.",
   "mistakes": [
