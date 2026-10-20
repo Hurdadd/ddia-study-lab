@@ -197,8 +197,8 @@
       "a_en": "Park it after a bounded idle timeout: exclude it from the watermark minimum, meter the exclusion, keep closing windows, and readmit on data. Never wait silently and never drop the parked backlog without replaying it by event time.",
       "a_fa": "بعد از timeout بیکاری کران‌دار پارکش کن: از کمینه watermark کنارش بگذار، کنارگذاری را متریک کن، به بستن پنجره‌ها ادامه بده و با داده برگردانش. هرگز بی‌صدا صبر نکن و backlog پارک‌شده را بدون بازپخش با زمان رویداد نینداز.",
       "level": "senior",
-      "q_en": "An idle partition holds back the watermark. How do you close windows safely?",
-      "q_fa": "یک partition بیکار watermark را نگه دارد؛ پنجره‌ها را چطور می‌بندی؟"
+      "q_en": "An idle partition holds back your watermark. How do you close windows safely?",
+      "q_fa": "یه partition بیکار watermark رو نگه داره، پنجره‌ها رو چطور می‌بندی؟"
     },
     {
       "a_en": "Both: the click waits in the session's click list and the search probes it on arrival — the buffer is two-sided precisely so neither order is special. The demo joins q2×c2 although c2 arrived first.",
@@ -215,10 +215,10 @@
       "q_fa": "اصلاحیه‌ای بعد از crash دوباره تحویل می‌شود. متریک چطور exactly-once می‌ماند؟"
     }
   ],
-  "interview_q_en": "Join the search and click streams by session id in a one-hour event-time window. Handle either arrival order with dedup, define CTR without inflating it, and choose the watermark, idle-partition policy, allowed lateness and correction policy from measured lateness — then estimate tenfold state growth and backpressure.",
-  "interview_q_fa": "استریم‌های جستجو و کلیک را با session id در پنجره یک‌ساعته زمان‌رویداد join کن. هر دو ترتیب رسیدن را با dedup پوشش بده، CTR را بدون باد کردن تعریف کن و watermark، سیاست پارتیشن بیکار، lateness مجاز و سیاست اصلاحیه را از lateness اندازه‌گیری‌شده انتخاب کن — بعد رشد ده‌برابری state و backpressure را برآورد کن.",
-  "lab_en": "<p>Extended lab (3–6 hours): replay a day of search/click logs through this join, plot the lateness distribution, and set allowed lateness from its p99 instead of a guess; then kill a partition for an hour and watch windows keep closing. Watermark tuning needs real traffic and was not executed here.</p>",
-  "lab_fa": "<p>آزمایشگاه تکمیلی (۳–۶ ساعت): یک روز لاگ جستجو/کلیک را از این join بگذران، توزیع lateness را رسم کن و lateness مجاز را از p99 آن بگذار نه از حدس؛ بعد یک پارتیشن را یک ساعت بکش و ببین پنجره‌ها به بستن ادامه می‌دهند. تنظیم watermark ترافیک واقعی می‌خواهد و این‌جا اجرا نشده.</p>",
+  "interview_q_en": "Think of it, you're joining search and click by session and event time in a one-hour window. You handle either arrival order, dedup, and your CTR definition. You pick your watermark, idle-partition policy, allowed lateness, and corrections from your own lateness data; then you estimate state and backpressure at tenfold throughput.",
+  "interview_q_fa": "تصور کن search و click رو با session و event time تو پنجره یک‌ساعته join می‌کنی. هر دو arrival order، dedup و تعریف CTR رو پوشش بده. watermark، idle partition، allowed lateness و اصلاحیه رو بر اساس داده lateness خودت انتخاب کن؛ تو throughput ده‌برابری هم state و backpressure رو برآورد کن.",
+  "lab_en": "<p>For click rate, you want to join the search and click streams on session id with a one-hour window. Decide and justify in writing: (a) if a click arrives before the search, how do you arrange state so both orders work; (b) how many minutes past the hour do you set the closing timeout, and where do you get the watermark from; (c) what do you do with post-close laggards — ignore or correct? What's each choice's effect on your \"click rate\" metric, and how do you metric it; (d) if throughput grows tenfold, how much does your buffer state grow and which part do you move to disk?</p>",
+  "lab_fa": "<p>برای نرخ کلیک، می‌خوای استریم جستجو و کلیک رو با session id و پنجره یک‌ساعته join کنی. تصمیم بگیر و مستدل بنویس: (الف) اگه کلیک قبل از جستجو برسه state رو چطور می‌چینی که هر دو ترتیب جواب بده؛ (ب) timeout بستن پنجره رو چند دقیقه بعد از پایان ساعت می‌ذاری و watermark رو از کجا می‌گیری؛ (پ) با دیررس بعد از بستن چی کار می‌کنی — بی‌خیال می‌شی یا اصلاحیه می‌دی؟ اثر هر کدوم روی متریک «نرخ کلیک» چیه و چطور متریکش می‌کنی؛ (ت) اگه throughput ده برابر بشه، state بافر چقدر رشد می‌کنه و کدوم بخشش رو می‌بری روی دیسک؟</p>",
   "mental_en": "A click and its search are two letters mailed separately: either can arrive first. Keep a drawer per session until the postman — the watermark — says no more letters with old dates are coming, and decide upfront what a late letter is worth: a correction, or the bin with a receipt.",
   "mental_fa": "کلیک و جستجوش دو نامه‌اند که جدا پست شده‌اند: هرکدام ممکن است اول برسد. به‌ازای هر session یک کشو نگه دار تا پستچی — watermark — بگوید دیگر نامه‌ای با تاریخ قدیم نمی‌آید و از اول مشخص کن نامه دیررس چه می‌ارزد: اصلاحیه یا سطل با رسید.",
   "mistakes": [
