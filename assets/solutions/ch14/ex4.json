@@ -196,7 +196,7 @@
       "a_fa": "از میان tombstoneها بازپخش می‌کند: u1 و u3 رد می‌شوند (skipped=2) و u5 به‌عنوان زنده برمی‌گردد و resurrected=0 — دقیقاً آزمون restore دمو. بکاپ‌های قدیمی‌تر از نگهداری اصلاً به بازپخش نمی‌رسند: نابود می‌شوند و رکورد نابودی مدرک است. restoreای که مشورت را دور بزند همان باگ زنده کردن است که با assert کردن resurrected=0 در هر تمرین گرفته می‌شود.",
       "level": "staff",
       "q_en": "How does restoring a six-month-old backup avoid resurrecting deleted users?",
-      "q_fa": "برگرداندن بکاپ شش‌ماهه چطور از زنده شدن کاربرهای حذف‌شده جلوگیری می‌کند؟"
+      "q_fa": "restore بکاپ شش‌ماهه چطور جلوی برگشت کاربران حذف‌شده رو می‌گیره؟"
     },
     {
       "a_en": "The hold wins, every time: the sweeper refuses rows with a live hold no matter how expired, and rows with an overdue hold review are refused too until a human re-dates them. Retention is a schedule; a hold is an order — schedules yield to orders, and the refusal is audit-logged.",
@@ -213,10 +213,10 @@
       "q_fa": "بازبینی تقلب شش ماه بعد پروفایل پاک‌شده را می‌خواهد؛ برمی‌گردانی‌اش؟"
     }
   ],
-  "interview_q_en": "Design retention and purge for a shop, including legal holds, re-identifiable aggregates, backups, restores and minimal audit data. Trace deletion through derived views and evaluate breach exposure using the actual data inventory.",
-  "interview_q_fa": "نگهداری و پاک‌سازی فروشگاه را با hold حقوقی، aggregate قابل بازشناسایی، بکاپ، restore و داده ممیزی حداقلی طراحی کن. حذف را در نماهای مشتق دنبال کن و مواجهه رخنه را با موجودی واقعی داده بسنج.",
-  "lab_en": "<p>Write the what/why/how-long/what-after table for a hypothetical shop; design the periodic purge script (retention + purge + aggregate); write the breach scenario of what never leaked because it was never held; apply the decision tree to three real data items. The Java demo runs the sweep, the hold, the suppression and the gated restore in memory.</p>",
-  "lab_fa": "<p>جدول چه/چرا/تا کی/بعدش چه را برای فروشگاه فرضی بنویس؛ اسکریپت پاک‌سازی دوره‌ای (نگهداری + purge + aggregate) را طراحی کن؛ سناریوی رخنه «چه لو نرفت چون اصلاً نداشتیمش» را بنویس؛ درخت تصمیم را روی سه قلم داده واقعی همان سرویس اعمال کن. دموی جاوا sweep و hold و suppression و restore دروازه‌دار را در حافظه اجرا می‌کند.</p>",
+  "interview_q_en": "Honestly, you design retention and purge for a shop, with a data, purpose, retention, and delete table. You cover periodic purge, legal holds, re-identifiable aggregates, backup restores, and minimal audit data without extra PII. You trace deletion through cache, search, and model data, and you evaluate breach exposure from your actual data inventory.",
+  "interview_q_fa": "داستان از این قراره که برای فروشگاه جدول data و purpose و retention و delete طراحی می‌کنی. purge دوره‌ای، legal hold، aggregate قابل بازشناسایی، backup restore و audit بدون ذخیره PII اضافه رو پوشش بده. حذف رو تو cache و search و model data پیگیری کن و سناریوی رخنه رو با موجودی واقعی داده بسنج.",
+  "lab_en": "<p>For a hypothetical service (e.g. an online shop with targeted ads) write the \"what data, why needed, kept how long, what happens after\" table; design a periodic purge script (retention plus purge plus aggregate); and write the breach scenario: \"what didn't leak because we never had it\". Finally, apply diagram 10's decision tree to three real data items of that same service.</p>",
+  "lab_fa": "<p>برای یه سرویس فرضی (مثلاً فروشگاه آنلاین با تبلیغ هدفمند) جدول «چه داده‌ای، چرا لازمه، تا کی نگه می‌داریم، بعدش چی می‌شه» بنویس؛ یه اسکریپت پاک‌سازی دوره‌ای (retention و purge و aggregate) طراحی کن؛ و سناریوی رخنه رو بنویس: «چی لو نرفت چون اصلاً نداشتیمش». آخرش درخت تصمیم نمودار 10 رو روی سه قلم داده واقعی همون سرویس اعمال کن.</p>",
   "mental_en": "Data you do not have cannot leak, cannot be stolen, and no government can force you to hand it over. So purge is two things: a sweep that closes every copy, and a proof that it did — tombstones for the restore, hashes for the auditor, suppression for the aggregates. The hold and the tombstones are the two guards; everything else is schedule.",
   "mental_fa": "داده‌ای که نداری لو نمی‌رود، دزدیده نمی‌شود و هیچ دولتی نمی‌تواند وادارت کند تحویلش دهی. پس پاک‌سازی دو چیز است: sweepای که هر کپی را می‌بندد و مدرکی که بستنش را ثابت می‌کند — tombstone برای restore، hash برای حسابرس و suppression برای aggregateها. hold و tombstoneها دو نگهبان‌اند؛ بقیه برنامه است.",
   "mistakes": [
