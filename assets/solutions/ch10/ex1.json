@@ -136,8 +136,8 @@
       "a_en": "Any pair at all — for example (5,A) and (3,C), or (1,A) and (100,C). With no messages there is no constraint: each counter only ever saw itself. That freedom is exactly why Lamport stamps cannot detect concurrency: equal-or-ordered stamps without a message chain prove nothing.",
       "a_fa": "هر جفتی — مثلاً <span class=\"ltr\">(5,A)</span> و <span class=\"ltr\">(3,C)</span> یا <span class=\"ltr\">(1,A)</span> و <span class=\"ltr\">(100,C)</span>. بدون پیام هیچ قیدی نیست: هر شمارنده فقط خودش را دیده. همین آزادی دقیقاً چرایی ناتوانی مهر <span class=\"ltr\">Lamport</span> در تشخیص هم‌زمانی است: مهرهای مرتب بدون زنجیره پیام هیچ‌چیز را ثابت نمی‌کنند.",
       "level": "senior",
-      "q_en": "What timestamps can two independent events with no messages have?",
-      "q_fa": "دو رخداد بدون هیچ پیام چه timestampهایی می‌توانند داشته باشند؟"
+      "q_en": "What timestamps can your two independent events with no messages have?",
+      "q_fa": "حالا دو رخداد داری بدون هیچ پیام. چه timestampهایی می‌تونن داشته باشن؟"
     },
     {
       "a_en": "When the product must KNOW concurrency, not just order it: collaborative editing (concurrent edits merge, causally-after edits apply), causal broadcast, CRDT metadata. Cost: O(n) counters per node and O(n) stamp bytes per message, plus join logic on every receive. Default to Lamport; upgrade only on a named concurrency question.",
@@ -147,8 +147,8 @@
       "q_fa": "ساعت برداری با هزینه <span class=\"ltr\">O(n)</span> کی به <span class=\"ltr\">Lamport</span> می‌ارزد؟"
     }
   ],
-  "interview_q_en": "Label local events and messages using Lamport clocks and process-ID tie breaking. Show why increasing timestamps do not imply causality or detect concurrency; compare vector-clock costs.",
-  "interview_q_fa": "برای سه process، send/receive و رخداد محلی را با Lamport clock شماره‌گذاری کن. با tie-breaker process ID ترتیب کامل بساز. یک مثال نشان بده که L(a)&lt;L(b) علت‌ومعلولی بودن را اثبات نمی‌کند؛ vector clock و هزینه‌اش را مقایسه کن.",
+  "interview_q_en": "Picture this — you've got three processes passing messages. Label local events and messages using Lamport clocks and process-ID tie breaking. Show why increasing timestamps like L(a)<L(b) don't imply causality or detect concurrency; compare your vector-clock costs.",
+  "interview_q_fa": "فرض کن سه تا process داری. send/receive و رخداد محلی رو با Lamport clock شماره‌گذاری کن. با tie-breaker از process ID ترتیب کامل بساز. یه مثال بزن که نشون بده L(a)<L(b) علت‌ومعلولی بودن رو اثبات نمی‌کنه؛ vector clock و هزینه‌ش رو هم مقایسه کن.",
   "mental_en": "A Lamport clock is a numbering machine, not a truth machine: it stamps every event so the stamps sort nicely and never contradict a message chain. Messages are the only facts; stamps are just labels that respect them.",
   "mental_fa": "ساعت <span class=\"ltr\">Lamport</span> ماشین شماره‌گذاری است نه ماشین حقیقت: به هر رخداد مهری می‌زند که خوب مرتب شود و هرگز با زنجیره پیام تناقض نکند. پیام‌ها تنها واقعیت‌اند؛ مهرها فقط برچسب‌هایی‌اند که به آن‌ها احترام می‌گذارند.",
   "mistakes": [

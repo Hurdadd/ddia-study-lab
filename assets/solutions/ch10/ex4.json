@@ -136,8 +136,8 @@
       "a_en": "Indeterminate, always. A timeout means the outcome is unknown: the request, the write, or the response may each have been lost — the classic ambiguity. The checker must try both branches (took effect / never did) and accept if either validates. Modeling it as failed turns a late-taking-effect write into a false violation; modeling it as done hides real ones.",
       "a_fa": "نامعلوم، همیشه. timeout یعنی نتیجه نامشخص است: درخواست یا نوشتن یا پاسخ هرکدام ممکن است گم شده باشند — همان ابهام کلاسیک. خطی‌سنج باید هر دو شاخه را امتحان کند (اثرکرد / هرگز-نکرد) و با معتبر شدن هرکدام قبول دهد. شکست مدل کردنش، نوشتنِ دیراثر را نقض دروغین می‌کند؛ شدنی مدل کردنش نقض‌های واقعی را پنهان می‌کند.",
       "level": "staff",
-      "q_en": "Do you model a timed-out write as failed or indeterminate, and why?",
-      "q_fa": "timeout یک write را failed حساب می‌کنی یا indeterminate؟ چرا؟"
+      "q_en": "Do you model your timed-out write as failed or indeterminate, and why?",
+      "q_fa": "حالا timeout یه write رو failed حساب می‌کنی یا indeterminate؟ چرا؟"
     },
     {
       "a_en": "No. Ten thousand passing windows prove ten thousand windows, not the system: the next execution, the next deploy, the next peak-load interleaving is unjudged. Finite testing raises confidence; only protocol proof (model checking) plus continuous production probing (version probes, divergence monitors) carry the guarantee forward. Say what the checker covers: the sampled windows.",
@@ -147,8 +147,8 @@
       "q_fa": "خطی‌سنج روی ده‌هزار history نمونه قبول می‌دهد؛ آیا سیستم خطی‌پذیر است؟"
     }
   ],
-  "interview_q_en": "Check a small register history while preserving real-time precedence and reordering overlapping operations. Design bounded search, model pending/indeterminate operations and explain the limits of sampled histories.",
-  "interview_q_fa": "یک history کوچک شامل invoke/return read و write را روی register خطی‌سنجی کن. ترتیب real-time را حفظ و عملیات هم‌پوشان را جابه‌جا کن. برای test harness bounded search طراحی کن؛ pending operation و timeout نامعلوم را درست مدل کن.",
+  "interview_q_en": "Honestly, you've got a small register history with invoke/return reads and writes to check. Preserve real-time precedence and reorder overlapping operations. Design bounded search for your test harness, model pending/indeterminate operations and explain the limits of sampled histories.",
+  "interview_q_fa": "قضیه اینه که یه history کوچک داری شامل invoke/return از read و write که باید روی register خطی‌سنجی کنی. ترتیب real-time رو حفظ کن و عملیات هم‌پوشان رو جابه‌جا کن. برای test harness bounded search طراحی کن؛ pending operation و timeout نامعلوم رو درست مدل کن.",
   "mental_en": "A checker is a courtroom, not a crystal ball: the history is the testimony, precedence is the law, and the verdict binds only the case before it. Overlapping operations are free citizens — the law constrains only what finished before another began.",
   "mental_fa": "خطی‌سنج دادگاه است نه گوی بلورین: history شهادت است و تقدم قانون و رأی فقط پرونده پیش رو را مقید می‌کند. عملیات‌های هم‌پوشان شهروندان آزادند — قانون فقط چیزی را قید می‌کند که قبل از شروع دیگری تمام شده.",
   "mistakes": [
