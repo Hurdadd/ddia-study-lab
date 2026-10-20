@@ -45,12 +45,12 @@
       "a_en": "Slice p99 before theorizing: by region/AZ, device or app version, cache-hit vs miss, downstream shard. Usual suspects: one slow dependency shard, a cache-miss cohort hitting the database, or large-payload responses dominating the tail. Fix the biggest cohort first, then re-slice. Averages improving while p99 stays bad means you optimized the cohort that was already fine.",
       "a_fa": "قبل از نظریه، p99 را برش بزن: بر اساس ریجن/AZ، دستگاه یا نسخه اپ، hit/miss کش، شارد پایین‌دستی. مظنون‌های همیشگی: یک شارد کند وابستگی، گروه cache-miss، یا پاسخ‌های پرحجم که دم را تصاحب کرده‌اند. اول بزرگ‌ترین گروه را درست کن، بعد دوباره برش بزن.",
       "level": "senior",
-      "q_en": "The average latency is excellent but p99 is poor. Which user groups do you investigate?",
-      "q_fa": "میانگین عالی است ولی p99 خراب؛ کدام گروه کاربران را بررسی می‌کنی؟"
+      "q_en": "Your average looks great but p99 is on fire — which user groups do you dig into first?",
+      "q_fa": "میانگین عالیه ولی p99 خرابه — اول سراغ کدوم گروه کاربرا می‌ری؟"
     }
   ],
-  "interview_q_en": "Define SLI/SLO with measurement windows, latency percentiles and availability for order-status reads; draw the line between success, timeout and dependency failure; design error budget and burn-rate alerts; separate internal SLO from contractual SLA.",
-  "interview_q_fa": "برای استعلام وضعیت سفارش SLI و SLO با بازه اندازه‌گیری، صدک تأخیر و دسترس‌پذیری تعریف کن؛ مرز success و timeout و خطای وابستگی را روشن کن؛ error budget و هشدار burn rate را طراحی کن و SLO داخلی را از SLA قراردادی جدا کن.",
+  "interview_q_en": "Rule of thumb: for order-status lookups, define SLIs and SLOs with measurement windows, latency percentiles, and availability. Draw the line between success, timeout, and dependency errors; design the error budget and burn-rate alerts — and keep your internal SLO separate from the contractual SLA.",
+  "interview_q_fa": "یه ترفند مصاحبه‌ای: برای استعلام وضعیت سفارش SLI و SLO با بازهٔ اندازه‌گیری، latency percentile و availability تعریف کن. مرز success و timeout و خطای وابستگی رو روشن کن؛ error budget و هشدار burn rate رو طراحی کن و SLO داخلی رو از تعهد قراردادی SLA جدا کن.",
   "mental_en": "An SLI is good events divided by eligible events. An SLO targets that ratio over a window. Its error budget bounds tolerated failure and informs release/reliability decisions. An SLA specifies contractual scope and consequences; its looser threshold in this example is a contract choice, not a universal requirement.",
   "mental_fa": "SLI نسبت رویدادهای خوب به رویدادهای واجد شرایط است. SLO هدفی برای همین نسبت در یک پنجره است؛ error budget سهم شکست مجاز را مشخص می‌کند تا تصمیم انتشار و کار قابلیت اطمینان مبنای مشترک داشته باشد. SLA قرارداد با دامنه و پیامد مشخص است و در این مثال آستانهٔ آسان‌تری از SLO دارد؛ این تفاوت یک انتخاب قراردادی است، نه تعریف الزامی SLA.",
   "mistakes": [

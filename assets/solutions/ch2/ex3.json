@@ -42,8 +42,8 @@
       "a_en": "Expand–migrate–contract with both binaries live. (1) Expand: add the new column as nullable (or a new event field old code ignores); new binary writes both, reads old. (2) Migrate: backfill, dual-read and compare. (3) Contract: switch reads to new, drop old writes, then drop the old column — only after no old binary remains. Rollback before contract = route traffic back; after contract it needs the reverse migration. Never rename in place in one release.",
       "a_fa": "به ترتیب expand–migrate–contract با هر دو باینری زنده. (۱) Expand: ستون جدید nullable (یا فیلد رویداد تازه که کد قدیم نادیده می‌گیرد)؛ باینری جدید هر دو را می‌نویسد و قدیمی را می‌خواند. (۲) Migrate: backfill و dual-read با مقایسه. (۳) Contract: خواندن‌ها به جدید، حذف نوشتن قدیم، بعد حذف ستون قدیم — فقط وقتی هیچ باینری قدیمی نمانده. rollback قبل از contract = برگرداندن ترافیک.",
       "level": "senior",
-      "q_en": "Old and new binaries coexist during rolling deployment. How do you roll out a schema change?",
-      "q_fa": "در rolling upgrade نسخه‌های قدیم و جدید هم‌زمان فعال‌اند؛ تغییر schema را چگونه منتشر می‌کنی؟"
+      "q_en": "Old and new binaries are live side by side in a rolling upgrade — how do you ship the schema change?",
+      "q_fa": "حالا موقع rolling upgrade نسخهٔ قدیم و جدید کنار هم بالا هستن — تغییر schema رو چطور منتشر می‌کنی؟"
     },
     {
       "q_fa": "چرا failover جای backup restore را نمی‌گیرد؟",
@@ -53,8 +53,8 @@
       "level": "staff"
     }
   ],
-  "interview_q_en": "Design an order API with database and queue that survives one host or one AZ failure. Name failure domains, quorum, fencing, session state, health checks, surviving-AZ capacity and RPO/RTO; explain zero-downtime release and rollback.",
-  "interview_q_fa": "یک API ثبت سفارش با پایگاه داده و صف طراحی کن که خرابی یک ماشین یا AZ را تحمل کند. failure domain، quorum، fencing، session state، health check، ظرفیت AZ باقی‌مانده و RPO/RTO را مشخص کن. انتشار سازگار و rollback بدون توقف را توضیح بده.",
+  "interview_q_en": "Picture this: one machine — or a whole AZ — just died, and nobody notices. Design an order API with its database and queue that pulls that off. Spell out failure domains, quorum, fencing, session state, health checks, leftover-AZ capacity, and RPO/RTO — plus compatible rolling upgrades and downtime-free rollback.",
+  "interview_q_fa": "نوبتی هم باشه نوبت تحمل خرابیه: یه API ثبت سفارش با پایگاه داده و صف طراحی کن که نبود یه ماشین یا یه AZ رو حس نکنه. failure domain، quorum، fencing، session state، health check، ظرفیت AZ باقی‌مونده و RPO/RTO رو روشن کن؛ انتشار سازگار و rollback بدون توقف رو هم توضیح بده.",
   "mental_en": "Two machines are not two of everything. Draw every single point of failure first — data plane and control plane, state and stateless — then kill each one on paper. Anything you did not kill on paper will kill you in production.",
   "mental_fa": "دو ماشین یعنی دو تا از همه‌چیز نیست. اول هر نقطه شکست واحد را بکش — data plane و control plane، stateدار و stateless — بعد هرکدام را روی کاغذ بکش. هرچه را روی کاغذ نکشی، در پروداکشن تو را می‌کشد.",
   "mistakes": [
