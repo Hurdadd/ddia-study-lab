@@ -19,10 +19,10 @@ class Page(HTMLParser):
 files=[ROOT/'exercise-audit.html',ROOT/'index.html',*ROOT.glob('ch*/index.html')]
 parsed={p.resolve():Page(p) for p in files}
 data=json.loads((ROOT/'assets/exercise-audit.json').read_text());es=data['exercises']
-assert len(es)==47 and len({(e['chapter'],e['number']) for e in es})==47
-assert Counter(e['priority'] for e in es)=={'core':23,'role':21,'extra':3}
-assert Counter(e['level'] for e in es)=={'foundation':4,'senior':27,'staff':16}
-audit=parsed[ROOT/'exercise-audit.html'];assert len(audit.items)==47
+assert len(es)==49 and len({(e['chapter'],e['number']) for e in es})==49
+assert Counter(e['priority'] for e in es)=={'core':25,'role':21,'extra':3}
+assert Counter(e['level'] for e in es)=={'foundation':4,'senior':29,'staff':16}
+audit=parsed[ROOT/'exercise-audit.html'];assert len(audit.items)==49
 corrected=[e for e in es if e['decision']=='correct']
 assert len(corrected)==16
 for e in corrected:
@@ -58,4 +58,4 @@ for path,page in list(parsed.items()):
    if dest not in parsed:parsed[dest]=Page(dest)
    assert unquote(url.fragment) in parsed[dest].ids,f'Missing anchor: {path} → {link}'
 assert (ROOT/'exercise-audit.html').read_text().count('aria-current="page"')==1
-print('PASS: 47 bilingual briefs, levels/priorities, 14 chapters, unique IDs and local links')
+print('PASS: 49 bilingual briefs, levels/priorities, 14 chapters, unique IDs and local links')

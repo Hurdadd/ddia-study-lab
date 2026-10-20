@@ -4,11 +4,11 @@
 
 **A distributed-systems study lab. An AI platform design workshop.**
 
-Learn *Designing Data-Intensive Applications* (2nd ed.) with **113 interactive diagrams** in **Persian and English** — chapter notes, step-by-step narration, 47 exercises and an interview pack.
+Learn *Designing Data-Intensive Applications* (2nd ed.) with **113 interactive diagrams** in **Persian and English** — chapter notes, step-by-step narration, 49 exercises and an interview pack.
 
 <a href="#build-understanding-before-infrastructure"><img src="assets/badges/status.svg" alt="Status: design prototype"></a> <a href="LICENSE"><img src="assets/badges/license.svg" alt="License: AGPL-3.0-only"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/languages.svg" alt="Documentation: Persian and English"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/website.svg" alt="Website: public"></a>
 
-14 chapters · 113 interactive diagrams · 47 exercises · 15 ADRs · 1 capstone
+14 chapters · 113 interactive diagrams · 49 exercises · 15 ADRs · 1 capstone
 
 [**Explore the live site ↗**](https://ddia-study-lab.vercel.app/) &nbsp;·&nbsp; [**Enter the capstone**](https://ddia-study-lab.vercel.app/final-project/index.html#overview) &nbsp;·&nbsp; [**Start at Chapter 1**](https://ddia-study-lab.vercel.app/ch1-tradeoffs/index.html)
 
@@ -34,7 +34,7 @@ Most distributed-systems notes stop at definitions. Most AI-platform repos start
 | :--- | :--- |
 | 📚 **14 bilingual chapters** | Persian + English, each with an at-a-glance table, frequent interview questions, common mistakes and a 5-minute checklist |
 | 📊 **113 interactive diagrams** | Dataflows, lifecycles, UML and decision trees — every one followed by a step-by-step narration, as if a teacher stood at the board |
-| 🧪 **47 reviewed exercises** | Leveled, prioritized, with interview briefs — plus a [2026 assessment & Senior/Staff path](https://ddia-study-lab.vercel.app/exercise-audit.html) |
+| 🧪 **49 reviewed exercises** | Leveled, prioritized, with interview briefs — plus a [2026 assessment & Senior/Staff path](https://ddia-study-lab.vercel.app/exercise-audit.html) |
 | 🏗️ **Capstone: Own the Stack** | One AI platform, five capabilities, fifteen ADRs with rationale, alternatives, validation and revisit triggers |
 | 🧮 **Editable estimates** | Workload & cost arithmetic with 12 explicit assumptions and limits — change the numbers, see what breaks |
 | 🛟 **Recovery with reasons** | Failure-specific RPO/RTO targets with derivation budgets and planned drills, not slogans |
@@ -166,7 +166,7 @@ docs/            development, recovery, deployment and third-party notices
 
 | ✅ Implemented & usable | 🔧 Proposed, not built |
 | :--- | :--- |
-| 14 bilingual chapters, 113 diagrams, 47 exercises | Platform APIs, workers, database, CDC pipelines |
+| 14 bilingual chapters, 113 diagrams, 49 exercises | Platform APIs, workers, database, CDC pipelines |
 | 15 ADRs, estimates, recovery budgets, drill guide | Model serving, real evaluations, DR automation |
 | Animated request flow & synthetic developer POV | Measured SLOs, benchmarks, production deployment |
 
