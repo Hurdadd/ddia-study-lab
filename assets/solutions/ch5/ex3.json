@@ -26,8 +26,8 @@
   },
   "design_en": "<p><b>Components:</b> orchestrator (schedules, owns the version gate), durable log (write-ahead, per-invocation history), step executors (reserve/charge/ship, each keyed), compensation handlers (refund, release, cancel-parcel). <b>Write path:</b> execute step → append result → report. <b>Read path (replay):</b> load history → re-walk code with same ids → skip logged, run open. <b>Keys:</b> <code>order:{id}:reserve:{v}</code>, <code>order:{id}:charge:{v}</code>, <code>order:{id}:ship:{v}</code>.</p>",
   "design_fa": "<p><b>اجزا:</b> orchestrator (زمان‌بندی، مالک دروازه نسخه)، لاگ پایدار (write-ahead، تاریخچه هر invocation)، اجراکننده‌های گام (رزرو/شارژ/ارسال، هرکدام کلیددار)، جبران‌کننده‌ها (بازپرداخت، آزادسازی، لغو مرسوله). <b>مسیر نوشتن:</b> اجرای گام ← نوشتن نتیجه ← اعلام. <b>مسیر خواندن (بازپخش):</b> بارگذاری تاریخچه ← قدم‌زدن دوباره کد با همان شناسه‌ها ← ثبت‌شده رد، باز اجرا. <b>کلیدها:</b> <code>order:{id}:reserve:{v}</code> و charge و ship.</p>",
-  "interview_q_en": "Design inventory/payment/shipping workflow recovery with stable step IDs, durable results and compensation. Version changes to step order, branching and payloads for running invocations.",
-  "interview_q_fa": "workflow موجودی، پرداخت و ارسال را در برابر crash و retry طراحی کن. شناسهٔ هر گام، log پایدار، نتیجهٔ ذخیره‌شده و compensation را مشخص کن. تغییر ترتیب گام‌ها، branching و schema را برای invocationهای در جریان نسخه‌بندی کن و هزینهٔ recovery را بگو.",
+  "interview_q_en": "Picture this, friend — a real workflow with inventory, payment, and shipping. Design it so crashes and retries don't blow it apart. Pin down each step's ID, the durable log, stored results, and compensation. Version step reordering, branching, and payload schemas for invocations already in flight, and state the recovery cost.",
+  "interview_q_fa": "نوبتی هم باشه نوبت workflow واقعیه: موجودی و پرداخت و ارسال. طوری طراحیش کن که crash و retry نترکونتش. شناسهٔ هر گام و log پایدار و نتیجهٔ ذخیره‌شده و compensation رو مشخص کن. تغییر ترتیب گام‌ها و branching و schema رو برای invocationهای در جریان نسخه‌بندی کن و خرج recovery رو هم بگو.",
   "mental_en": "The engine has total amnesia after a crash except for one thing: the durable log. Replay is re-walking the same code path with the same step ids and asking the log at every step: done already? Then reuse. Compensation is not time travel — it is a new forward step that undoes an old effect (refund after charge).",
   "mental_fa": "موتور پس از کرش فراموشی کامل دارد جز یک چیز: لاگ پایدار. بازپخش یعنی قدم‌زدن دوباره همان مسیر کد با همان شناسه‌ها و پرسیدن از لاگ در هر گام: قبلاً انجام شده؟ پس استفاده مجدد. جبران سفر در زمان نیست — گام تازه روبه‌جلوست که اثر قدیمی را خنثی می‌کند (بازپرداخت پس از شارژ).",
   "number": 3,
@@ -94,8 +94,8 @@
   ],
   "followups": [
     {
-      "q_fa": "provider ارسال idempotency key ندارد؛ تضمینت چه تغییری می‌کند؟",
-      "q_en": "The shipping provider has no idempotency key. How does that change your guarantee?",
+      "q_fa": "provider ارسال idempotency key نداره. تضمینت چطور عوض می‌شه؟",
+      "q_en": "The shipping provider has no idempotency key. How does your guarantee change?",
       "a_fa": "تضمین از «اثر دقیقاً یک‌بار» به «حداکثر یک مرسوله بی‌صاحب + مغایرت‌گیری» می‌لغزد: retry کور ممنوع، چون هر تلاش ممکن است مرسوله تازه بسازد. به‌جایش: ship را یک بار صدا بزن، نتیجه نامشخص را «نامعلوم» ثبت کن، و جاروی مغایرت‌گیری (تطبیق مرسوله‌ها با شناسه سفارش در سمت خودت) اثر را قطعی کند. هزینه recovery همان جاروست.",
       "a_en": "The guarantee slides from 'exactly-once effects' to 'at most one orphan parcel + reconciliation': blind retries are banned, since each attempt may mint a fresh parcel. Instead: call ship once, record an unclear outcome as 'unknown', and let a reconciliation sweep (matching parcels to your order id on your side) settle the effect. Recovery cost is that sweep.",
       "level": "staff"

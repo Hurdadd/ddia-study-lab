@@ -15,8 +15,8 @@
       "fa": "فیلد تازه <span class=\"ltr\">email</span> با تگ تازه ۴ است؛ تگ بازنشسته دوباره استفاده نمی‌شود."
     }
   ],
-  "interview_q_en": "Compare JSON, MessagePack and Protobuf, decode one tag, then add email. Test unknown-field preservation in binary round-trips against JSON conversion or field-by-field copying.",
-  "interview_q_fa": "با یک رکورد کوچک تفاوت JSON، MessagePack و Protobuf را در schema، حجم و debugging توضیح بده. یک tag را دستی decode کن. فیلد email اضافه کن و دو مسیر binary round-trip و تبدیل به JSON را از نظر حفظ unknown field مقایسه کن.",
+  "interview_q_en": "Honestly, friend, you've got one small record and you want to feel the cost of JSON versus MessagePack versus Protobuf. Explain how they differ in schema, size, and debugging. Decode one tag by hand. Then add an email field and compare two paths — a binary round-trip against a JSON conversion — in terms of keeping unknown fields.",
+  "interview_q_fa": "داستان از این قراره که یه رکورد کوچیک داری و می‌خوای خرج JSON و MessagePack و Protobuf رو بفهمی. فرقشون توی schema و حجم و debugging رو بگو. یه tag رو دستی decode کن. بعد فیلد email رو اضافه کن و دو مسیر رو مقایسه کن: binary round-trip در برابر تبدیل به JSON، از نظر حفظ unknown field.",
   "mental_en": "Think of the bytes as a letter and the schema as the reader's dictionary. JSON posts the full words every time; Protobuf posts short numbered codes and both sides agree on the codebook in advance. When a new word (tag 4) arrives that the old reader never learned, the only question that matters is: does the old reader pocket the sealed envelope untouched, or open it, copy out the words it knows, and throw the rest away?",
   "mental_fa": "بایت‌ها را نامه و <span class=\"ltr\">schema</span> را لغت‌نامه خواننده فرض کن. <span class=\"ltr\">JSON</span> هر بار واژه‌های کامل را پست می‌کند؛ <span class=\"ltr\">Protobuf</span> کدهای شماره‌دار کوتاه می‌فرستد و دو طرف از قبل روی دفترچه کد توافق کرده‌اند. وقتی واژه تازه (تگ ۴) می‌رسد که خواننده قدیمی نیاموخته، فقط یک سؤال مهم است: خواننده قدیمی پاکت دربسته را دست‌نخورده نگه می‌دارد، یا بازش می‌کند، واژه‌هایی که می‌شناسد را رونویسی می‌کند و بقیه را دور می‌ریزد؟",
   "number": 1,
@@ -85,8 +85,8 @@
       "a_en": "The bytes for tag 4 never make it into the fresh message: the proxy decodes into a model that only has fields 1–3, then re-encodes from that model. The email is gone for every downstream reader, even though nothing errored. The fix is to forward opaque bytes (or upgrade the proxy's schema) instead of copying recognized fields.",
       "a_fa": "بایت‌های تگ ۴ اصلاً به پیام تازه نمی‌رسند: پراکسی به مدلی decode می‌کند که فقط فیلدهای ۱ تا ۳ را دارد، بعد از همان مدل دوباره encode می‌کند. <span class=\"ltr\">email</span> برای هر خواننده پایین‌دستی رفته، با این‌که هیچ خطایی رخ نداده. راه‌حل: به‌جای کپی فیلدهای شناخته‌شده، بایت‌های ناشناخته را دست‌نخورده عبور بده (یا schema پراکسی را به‌روز کن).",
       "level": "senior",
-      "q_en": "An old proxy copies recognized fields into a fresh message. What data disappears?",
-      "q_fa": "proxy قدیمی پیام را field-by-field به پیام جدید کپی می‌کند؛ چه داده‌ای گم می‌شود؟"
+      "q_en": "An old proxy copies a message field-by-field into a fresh one. What data quietly disappears?",
+      "q_fa": "یه proxy قدیمی پیام رو field-by-field توی پیام جدید کپی می‌کنه. چه داده‌ای گم می‌شه؟"
     }
   ],
   "mistakes": [
