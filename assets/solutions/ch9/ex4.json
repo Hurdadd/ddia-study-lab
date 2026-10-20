@@ -2,27 +2,27 @@
   "alternatives": [
     {
       "en": "At-most-once delivery as the safety statement ('each message delivered at most once'): simpler to observe on the wire, but a lost message is then a safety-preserving data loss — it hides progress failures inside a green light. Prefer the effect-based statement unless the transport truly cannot redeliver.",
-      "fa": "تحویل at-most-once به‌عنوان گزارهٔ safety («هر پیام حداکثر یک‌بار تحویل می‌شود»): روی سیم ساده‌تر دیده می‌شود ولی پیام گمشده بعد گم‌شدن داده با چراغ سبز safety است — شکست‌های progress را داخل چراغ سبز پنهان می‌کند. مگر وقتی transport واقعاً نمی‌تواند redeliver کند، گزارهٔ مبتنی بر اثر را ترجیح بده."
+      "fa": "تحویل at-most-once به‌عنوان گزارهٔ safety («هر پیام حداکثر یک‌بار تحویل می‌شه»): روی سیم ساده‌تر دیده می‌شه، ولی پیامِ گمشده بعدِ گم‌شدن داده با چراغ سبز safety حساب می‌شه — شکست‌های progress رو داخل چراغ سبز پنهان می‌کنه. مگر وقتی transport واقعاً نمی‌تونه redeliver کنه، گزارهٔ مبتنی بر اثر رو ترجیح بده."
     },
     {
       "en": "End-to-end acknowledgments plus operator replay for liveness: instead of promising automatic progress, promise detection (every un-acked message is visible) plus a runbooked replay path. Right when automatic redelivery is unsafe (non-idempotent effects) — liveness becomes a human-in-the-loop bound, stated honestly.",
-      "fa": "تأیید سرتاسری به‌علاوهٔ بازپخش اپراتوری برای liveness: به‌جای قول progress خودکار، قول تشخیص بده (هر پیام تأییدنشده visible است) به‌علاوهٔ مسیر بازپخش runbookشده. درست وقتی redelivery خودکار ناامن است (اثرهای non-idempotent) — آن‌وقت liveness به کران human-in-the-loop صادقانه‌اعلام‌شده تبدیل می‌شود."
+      "fa": "تأیید سرتاسری به‌علاوهٔ بازپخش اپراتوری برای liveness: به‌جای قولِ progress خودکار، قولِ تشخیص بده (هر پیام تأییدنشده visibleـه) به‌علاوهٔ یه مسیر بازپخش که runbookشده. درست وقتی redelivery خودکار ناامنه (اثرهای non-idempotent) — اون‌وقت liveness به کرانِ human-in-the-loopِ صادقانه‌اعلام‌شده تبدیل می‌شه."
     }
   ],
-  "answer_en": "Safety: no message takes effect twice — a property of application effects, enforced by dedup state that must survive the restart that causes the redelivery. Liveness: every valid message eventually takes effect, but only under stated recovery assumptions (the partition heals, capacity exists, a deadline bounds the wait). The two fail independently: a permanent partition breaks liveness alone, a lost dedup set breaks safety alone, and a reject-all service keeps safety vacuously green while nothing progresses.",
-  "answer_fa": "Safety: هیچ پیامی دو بار اثر نمی‌کند — خاصیت اثرهای اپلیکیشن که با حالت dedup اجرا می‌شود و باید از restartای که redelivery را می‌سازد جان سالم به‌در ببرد. Liveness: هر پیام معتبر بالاخره اثر می‌کند ولی فقط زیر فرض‌های بازیابی اعلام‌شده (پارتیشن خوب می‌شود، ظرفیت هست و deadline انتظار را کران می‌کند). این دو مستقل می‌شکنند: پارتیشن دائمی فقط liveness را می‌شکند، مجموعهٔ dedup گمشده فقط safety را و سرویس reject-all در حالی‌که هیچ‌چیز پیش نمی‌رود safety را به‌صورت vacuous سبز نگه می‌دارد.",
+  "answer_en": "You've got two properties, and each one guards something different. Safety: no message takes effect twice — and that's a property of the application effects, not of the deliveries; it's enforced by dedup state that has to survive the very restart that causes the redelivery. Liveness: every valid message eventually takes effect, but only under stated recovery assumptions (the partition heals, capacity exists, a deadline bounds the wait). The two fail independently: a permanent partition breaks liveness alone, a lost dedup set breaks safety alone, and a reject-all service keeps safety vacuously green while nothing progresses. And the punchline: a green safety light with no progress metric beside it is just a lie.",
+  "answer_fa": "دو تا خاصیت داری و هرکدوم یه چیزی رو نگه می‌دارن. Safety: هیچ پیامی دو بار اثر نمی‌کنه — و این خاصیتِ اثرهای اپلیکیشنه، نه تحویل‌ها؛ اجرا می‌شه با حالت dedup که باید از همون restartی که redelivery می‌سازه جان سالم به در ببره. Liveness: هر پیام معتبر بالاخره اثر می‌کنه، ولی فقط زیر فرض‌های بازیابیِ اعلام‌شده (پارتیشن خوب می‌شه، ظرفیت هست، deadline انتظار رو کران می‌کنه). این دو مستقل می‌شکنن: پارتیشن دائمی فقط liveness رو می‌شکنه، مجموعهٔ dedup گمشده فقط safety رو، و سرویس reject-all در حالی که هیچی پیش نمی‌ره، safety رو به‌صورت vacuous سبز نگه می‌داره. نکتهٔ آخر: چراغ سبزِ safety بدون معیار progress فقط یه دروغه.",
   "assumptions": [
     {
-      "en": "One queue consumer, string message IDs, redelivery possible after any crash or partition (at-least-once transport).",
-      "fa": "یک مصرف‌کنندهٔ صف و شناسه‌های رشته‌ای پیام و امکان redelivery بعد از هر crash یا پارتیشن (transport از نوع at-least-once)."
+      "en": "Picture it: one queue consumer, string message IDs, and redelivery possible after any crash or partition (at-least-once transport).",
+      "fa": "فرض کن یه مصرف‌کنندهٔ صف داری، شناسه‌های رشته‌ای پیام، و redelivery بعد از هر crash یا پارتیشن ممکنه (transport از نوع at-least-once)."
     },
     {
-      "en": "Effects are per-message counters in the demo (teaching stand-ins for real application effects).",
-      "fa": "اثرها در دمو شمارندهٔ هر پیام‌اند (جانشین آموزشی اثرهای واقعی اپلیکیشن)."
+      "en": "Here's the setup: the effects are per-message counters in the demo (teaching stand-ins for real application effects).",
+      "fa": "قضیه اینه که: اثرها توی دمو شمارندهٔ هر پیام‌ان (جانشین آموزشیِ اثرهای واقعی اپلیکییشن)."
     },
     {
-      "en": "Liveness deadlines are teaching bounds ('eventually' always ships with a stated time, network and capacity assumption).",
-      "fa": "deadlineهای liveness کران‌های آموزشی‌اند («بالاخره» همیشه با فرض اعلام‌شدهٔ زمان و شبکه و ظرفیت می‌آید)."
+      "en": "One last thing: the liveness deadlines are teaching bounds ('eventually' always ships with a stated time, network and capacity assumption).",
+      "fa": "دیگه وقتشه بریم سراغ آخرین فرض: deadlineهای liveness کران‌های آموزشی‌ان («بالاخره» همیشه با فرض اعلام‌شدهٔ زمان و شبکه و ظرفیت میاد)."
     }
   ],
   "code": {
@@ -35,7 +35,7 @@
     "status": "verified"
   },
   "design_en": "<p>Consumer state, two structures: <code>dedup: Set[messageID]</code> (seen means effected) and <code>effects: Map[messageID, count]</code>, updated in one atomic step — check-then-apply under the same lock, persisted before the ack. Delivery contract: at-least-once transport with unbounded redelivery; the consumer absorbs all of it. Liveness contract, stated per queue: valid messages take effect within <code>T</code> provided the partition heals within <code>H</code> and consumer capacity stays above arrival rate — a bound with three named assumptions, not a bare 'eventually'.</p>",
-  "design_fa": "<p>حالت مصرف‌کننده با دو ساختار: <code>dedup: Set[messageID]</code> (دیده‌شده یعنی اثرکرده) و <code>effects: Map[messageID, count]</code> که در یک گام اتمیک به‌روز می‌شوند — بررسی-بعد-اعمال زیر همان قفل و persist قبل از تأیید. قرارداد تحویل: transport از نوع at-least-once با redelivery بی‌کران؛ مصرف‌کننده همه را جذب می‌کند. قرارداد liveness که برای هر صف اعلام می‌شود: پیام‌های معتبر ظرف <code>T</code> اثر می‌کنند به‌شرط این‌که پارتیشن ظرف <code>H</code> خوب شود و ظرفیت مصرف‌کننده بالای نرخ رسیدن بماند — کرانی با سه فرض نام‌دار، نه یک «بالاخره» لخت.</p>",
+  "design_fa": "<p>حالت مصرف‌کننده با دو ساختار: <code>dedup: Set[messageID]</code> (دیده‌شده یعنی اثرکرده) و <code>effects: Map[messageID, count]</code> که در یه گام اتمیک به‌روز می‌شن — بررسی-بعد-اعمال زیر همون قفل، و persist قبل از تأیید. قرارداد تحویل: transport از نوع at-least-once با redelivery بی‌کران؛ مصرف‌کننده همه رو جذب می‌کنه. قرارداد liveness که برای هر صف اعلام می‌شه: پیام‌های معتبر ظرف <code>T</code> اثر می‌کنن، به شرط این‌که پارتیشن ظرف <code>H</code> خوب بشه و ظرفیت مصرف‌کننده بالای نرخ رسیدن بمونه — کرانی با سه فرض نام‌دار، نه یه «بالاخره» لخت.</p>",
   "diagrams": [
     {
       "caption_en": "Transit, redelivery, absorption — and the two wrong settlements",
@@ -47,39 +47,39 @@
       "made": "archify",
       "narration": {
         "failure_en": "Trace the security-labelled arrows: Redelivered to Double Effect (dedup lost across the restart), Partitioned to Starved (the cut never heals), Sent to Dropped (every message refused). Three arrows, three ways to settle wrong — and only the first touches safety.",
-        "failure_fa": "پیکان‌های برچسب امنیتی را دنبال کن: از Redelivered به Double Effect (dedup در restart گم شده)، از Partitioned به Starved (برش هرگز خوب نمی‌شود) و از Sent به Dropped (هر پیام رد می‌شود). سه پیکان و سه راه اشتباه تسویه شدن — و فقط اولی به safety دست می‌زند.",
+        "failure_fa": "پیکان‌های برچسب امنیتی رو دنبال کن: از Redelivered به Double Effect (dedup توی restart گم شده)، از Partitioned به Starved (برش هرگز خوب نمی‌شه) و از Sent به Dropped (هر پیام رد می‌شه). سه پیکان، سه راهِ اشتباه تسویه شدن — و فقط اولی به safety دست می‌زنه.",
         "guarantee_en": "The figure shows every delivery outcome and which property each wrong settlement breaks. It does not set the time bounds — those live in the liveness contract, per queue.",
-        "guarantee_fa": "شکل هر سرنوشت تحویل را نشان می‌دهد و این‌که هر تسویهٔ اشتباه کدام خاصیت را می‌شکند. کران‌های زمانی را تعیین نمی‌کند — آن‌ها در قرارداد liveness و برای هر صف زندگی می‌کنند.",
+        "guarantee_fa": "شکل هر سرنوشت تحویل رو نشون می‌ده و این‌که هر تسویهٔ اشتباه کدوم خاصیت رو می‌شکنه. کران‌های زمانی رو تعیین نمی‌کنه — اون‌ها توی قرارداد liveness و برای هر صف زندگی می‌کنن.",
         "nonguarantee_en": "It does not say which wrong settlement your system saw last week — run the four probes (the assembly) to find out.",
-        "nonguarantee_fa": "نمی‌گوید سیستم تو هفتهٔ پیش کدام تسویهٔ اشتباه را دیده — چهار probe (اسمبل) را اجرا کن تا بفهمی.",
+        "nonguarantee_fa": "نمی‌گه سیستم تو هفتهٔ پیش کدوم تسویهٔ اشتباه رو دیده — چهار probe (اسمبل) رو اجرا کن تا بفهمی.",
         "point_en": "The decision points are the exits from Redelivered: op-new goes to Applied Once, op-seen to Absorbed, dedup-lost to Double Effect. Same arrival, three settlements — the dedup set is the whole difference.",
-        "point_fa": "نقطه‌های تصمیم خروجی‌های Redeliveredاند: op تازه به Applied Once می‌رود و op دیده‌شده به Absorbed و dedup گمشده به Double Effect. رسیدن یکسان و سه تسویه — مجموعهٔ dedup کل فرق است.",
+        "point_fa": "نقطه‌های تصمیم، خروجی‌های Redelivered‌ان: op تازه به Applied Once می‌ره، op دیده‌شده به Absorbed، و dedup گمشده به Double Effect. رسیدن یکسان، سه تسویه — مجموعهٔ dedup کل فرقه.",
         "scenario_en": "One message, many possible lives. Walk the main rail from Sent to Applied Once, detour through backoff and partition, then read the four terminal settlements and name which property each breaks.",
-        "scenario_fa": "یک پیام با زندگی‌های ممکن بسیار. ریل اصلی را از Sent تا Applied Once برو، از backoff و پارتیشن میان‌بر بزن و بعد چهار تسویهٔ پایانی را بخوان و بگو هرکدام کدام خاصیت را می‌شکند.",
+        "scenario_fa": "یه پیام با کلی زندگیِ ممکن. ریل اصلی رو از Sent تا Applied Once برو، از backoff و پارتیشن میان‌بر بزن، و بعد چهار تسویهٔ پایانی رو بخون و بگو هرکدوم کدوم خاصیت رو می‌شکنه.",
         "steps": [
           {
             "en": "Main rail: Sent enters Transit; first delivery reaches Applied Once with the dedup recorded — the happy path.",
-            "fa": "ریل اصلی: Sent وارد Transit می‌شود؛ اولین تحویل با ثبت dedup به Applied Once می‌رسد — مسیر خوش."
+            "fa": "ریل اصلی: Sent وارد Transit می‌شه؛ اولین تحویل با ثبت dedup به Applied Once می‌رسه — مسیر خوش."
           },
           {
             "en": "Retry detour: a timeout parks in Backing Off (unknown outcome), the retry fires, and the message returns as Redelivered.",
-            "fa": "میان‌بر retry: یک timeout در Backing Off پارک می‌کند (نتیجهٔ نامشخص) و retry شلیک می‌کند و پیام به‌صورت Redelivered برمی‌گردد."
+            "fa": "میان‌بر retry: یه timeout توی Backing Off پارک می‌کنه (نتیجهٔ نامشخص)، retry شلیک می‌کنه، و پیام به‌صورت Redelivered برمی‌گرده."
           },
           {
             "en": "Partition detour: the link dies into Partitioned; healing returns to Redelivered, never healing slides to Starved — liveness broken, safety untouched.",
-            "fa": "میان‌بر پارتیشن: لینک به Partitioned می‌میرد؛ خوب شدن به Redelivered برمی‌گردد و هرگز خوب نشدن به Starved می‌لغزد — liveness شکسته و safety دست‌نخورده."
+            "fa": "میان‌بر پارتیشن: لینک به Partitioned می‌ره؛ خوب شدن به Redelivered برمی‌گرده و هرگز خوب نشدن به Starved می‌لغزه — liveness شکسته، safety دست‌نخورده."
           },
           {
             "en": "Three settlements from Redelivered: op-new applies once, op-seen absorbs, dedup-lost doubles — plus Dropped for the reject-all service.",
-            "fa": "سه تسویه از Redelivered: op تازه یک‌بار اعمال می‌شود و op دیده‌شده جذب می‌شود و dedup گمشده دوتایی می‌کند — به‌علاوهٔ Dropped برای سرویس reject-all."
+            "fa": "سه تسویه از Redelivered: op تازه یک‌بار اعمال می‌شه، op دیده‌شده جذب می‌شه، و dedup گمشده دوتایی می‌کنه — به‌علاوهٔ Dropped برای سرویس reject-all."
           }
         ]
       },
       "selfcheck": {
         "a_en": "Starved: the message is valid and nothing applied twice (safety holds), but it never takes effect because the partition never heals (liveness violated). The missing piece is the healing assumption.",
-        "a_fa": "Starved: چون پیام معتبر است و هیچ‌چیز دو بار اعمال نشده (safety می‌ماند) ولی چون پارتیشن هرگز خوب نمی‌شود اثر نمی‌کند (liveness شکسته). قطعهٔ گمشده فرض خوب شدن است.",
+        "a_fa": "Starved: چون پیام معتبره و هیچی دو بار اعمال نشده (safety می‌مونه)، ولی چون پارتیشن هرگز خوب نمی‌شه اثر نمی‌کنه (liveness شکسته). قطعهٔ گمشده، فرضِ خوب شدنه.",
         "q_en": "A message sits in Starved. Which property holds, which is violated, and what assumption is missing?",
-        "q_fa": "پیامی در Starved نشسته. کدام خاصیت می‌ماند و کدام شکسته و کدام فرض گم است؟"
+        "q_fa": "یه پیام توی Starved نشسته. کدوم خاصیت می‌مونه و کدوم شکسته و کدوم فرض گم شده؟"
       },
       "source": "assets/diagram-specs/solutions/ch9/sol4-step1-effect-lifecycle.json"
     },
@@ -93,39 +93,39 @@
       "made": "archify",
       "narration": {
         "failure_en": "Run the probes left to right: the never-healing partition verdicts Liveness Down with safety untouched; the storm verdicts Both Hold; the wiped dedup verdicts Safety Down with progress intact; the reject-all verdicts Safety Vacuous with liveness dead. Each probe breaks at most one thing — that independence is the finding.",
-        "failure_fa": "probeها را چپ‌به‌راست اجرا کن: پارتیشن هرگزخوب‌نشونده رأی Liveness Down می‌دهد با safety دست‌نخورده؛ طوفان رأی Both Hold می‌دهد؛ dedup پاک‌شده رأی Safety Down می‌دهد با progress سالم؛ reject-all رأی Safety Vacuous می‌دهد با liveness مرده. هر probe حداکثر یک‌چیز را می‌شکند — همان استقلال یافته است.",
+        "failure_fa": "probeها رو چپ‌به‌راست اجرا کن: پارتیشنِ هرگزخوب‌نشونده رأی Liveness Down می‌ده با safety دست‌نخورده؛ طوفان رأی Both Hold می‌ده؛ dedup پاک‌شده رأی Safety Down می‌ده با progress سالم؛ reject-all رأی Safety Vacuous می‌ده با liveness مرده. هر probe حداکثر یه چیز رو می‌شکنه — همون استقلالی که پیدا شد.",
         "guarantee_en": "The figure proves the four independence claims by construction — one probe per claim. It does not set your T, H, or capacity numbers — those are per-queue measurements.",
-        "guarantee_fa": "شکل هر چهار ادعای استقلال را با ساختار اثبات می‌کند — برای هر ادعا یک probe. اعداد T و H و ظرفیت تو را تعیین نمی‌کند — آن‌ها اندازه‌گیری‌های هر صف‌اند.",
+        "guarantee_fa": "شکل هر چهار ادعای استقلال رو با ساختار اثبات می‌کنه — برای هر ادعا یه probe. اعداد T و H و ظرفیت تو رو تعیین نمی‌کنه — اون‌ها اندازه‌گیری‌های هر صف‌ان.",
         "nonguarantee_en": "It does not cover Byzantine writers or consensus — this drill assumes crash and network faults only.",
-        "nonguarantee_fa": "نویسنده‌های بیزانسی یا consensus را پوشش نمی‌دهد — این drill فقط خطاهای crash و شبکه را فرض می‌کند.",
+        "nonguarantee_fa": "نویسنده‌های بیزانسی یا consensus رو پوشش نمی‌ده — این drill فقط خطاهای crash و شبکه رو فرض می‌کنه.",
         "point_en": "The decision point is the probe order: partition first (liveness alone), storm second (both hold), dedup third (safety alone), reject-all last (vacuous). Run them in another order and the independence pattern still holds — the order is pedagogical, the verdicts are structural.",
-        "point_fa": "نقطهٔ تصمیم ترتیب probe است: اول پارتیشن (فقط liveness)، دوم طوفان (هر دو می‌مانند)، سوم dedup (فقط safety) و آخر reject-all (vacuous). به ترتیب دیگر اجراشان کن الگوی استقلال هنوز می‌ماند — ترتیب آموزشی است و رأی‌ها ساختاری‌اند.",
+        "point_fa": "نقطهٔ تصمیم، ترتیب probeـه: اول پارتیشن (فقط liveness)، دوم طوفان (هر دو می‌مونن)، سوم dedup (فقط safety)، و آخر reject-all (vacuous). به ترتیب دیگه اجراشون کن، الگوی استقلال باز هم می‌مونه — ترتیب آموزشیه، رأی‌ها ساختاری‌ان.",
         "scenario_en": "Four failure injections, four verdicts, one rule. Start at Inject Failure and walk the probe rail; each question drops one verdict, and the Rule at the end collects the assumptions every liveness claim must state.",
-        "scenario_fa": "چهار تزریق خرابی و چهار رأی و یک قاعده. از Inject Failure شروع کن و ریل probe را برو؛ هر سؤال یک رأی می‌اندازد و Rule آخر فرض‌هایی را جمع می‌کند که هر ادعای liveness باید اعلام کند.",
+        "scenario_fa": "چهار تزریق خرابی، چهار رأی، یک قاعده. از Inject Failure شروع کن و ریل probe رو برو؛ هر سؤال یه رأی می‌ندازه و Rule آخر فرض‌هایی رو جمع می‌کنه که هر ادعای liveness باید اعلام کنه.",
         "steps": [
           {
             "en": "Partition Heals? No drops Liveness Down: the valid message never effects, nothing applies twice — assumptions needed: heal plus capacity.",
-            "fa": "سؤال خوب شدن پارتیشن؟ نه به Liveness Down می‌رسد: پیام معتبر هرگز اثر نمی‌کند و هیچ‌چیز دو بار اعمال نمی‌شود — فرض‌های لازم: خوب شدن به‌علاوهٔ ظرفیت."
+            "fa": "سؤال خوب شدن پارتیشن؟ «نه» به Liveness Down می‌رسه: پیام معتبر هرگز اثر نمی‌کنه و هیچی دو بار اعمال نمی‌شه — فرض‌های لازم: خوب شدن به‌علاوهٔ ظرفیت."
           },
           {
             "en": "Redelivery Storm? Absorbed drops Both Hold: the same ID many times still effects once — bounds still stated.",
-            "fa": "سؤال طوفان تحویل دوباره؟ جذب‌شده به Both Hold می‌رسد: همان شناسه بارها هنوز یک‌بار اثر می‌کند — کران‌ها هنوز اعلام می‌شوند."
+            "fa": "سؤال طوفان تحویل دوباره؟ جذب‌شده به Both Hold می‌رسه: همون شناسه بارها هنوز یک‌بار اثر می‌کنه — کران‌ها هنوز اعلام می‌شن."
           },
           {
             "en": "Dedup Survives? No drops Safety Down: the wiped set double-applies — persist the dedup state.",
-            "fa": "سؤال زنده ماندن dedup؟ نه به Safety Down می‌رسد: مجموعهٔ پاک‌شده دو بار اعمال می‌کند — حالت dedup را persist کن."
+            "fa": "سؤال زنده ماندن dedup؟ «نه» به Safety Down می‌رسه: مجموعهٔ پاک‌شده دو بار اعمال می‌کنه — حالت dedup رو persist کن."
           },
           {
             "en": "Reject Everything? drops Safety Vacuous and walks to the Rule: zero effects, zero progress — admit to progress.",
-            "fa": "سؤال رد همه‌چیز؟ به Safety Vacuous می‌رسد و به Rule می‌رود: صفر اثر و صفر progress — برای progress پذیرش بگیر."
+            "fa": "سؤال رد همه‌چیز؟ به Safety Vacuous می‌رسه و به Rule می‌ره: صفر اثر و صفر progress — برای progress پذیرش بگیر."
           }
         ]
       },
       "selfcheck": {
         "a_en": "Safety: nothing applied twice, so the safety property holds — vacuously, on zero effects. Liveness is dead because no valid message ever effects. A green safety light with zero progress is the signature of a reject-all outage.",
-        "a_fa": "Safety: چون هیچ‌چیز دو بار اعمال نشده خاصیت safety می‌ماند — به‌صورت vacuous روی صفر اثر. liveness مرده چون هیچ پیام معتبری هرگز اثر نمی‌کند. چراغ سبز safety با صفر progress امضای outage از نوع reject-all است.",
+        "a_fa": "Safety: چون هیچی دو بار اعمال نشده، خاصیت safety می‌مونه — به‌صورت vacuous روی صفر اثر. liveness مرده چون هیچ پیام معتبری هرگز اثر نمی‌کنه. چراغ سبز safety با صفر progress، امضای outage از نوع reject-allـه.",
         "q_en": "The dashboard shows safety green and progress zero. Which probe fired, and what does green mean here?",
-        "q_fa": "داشبورد safety سبز و progress صفر نشان می‌دهد. کدام probe شلیک کرده و سبز اینجا چه معنایی دارد؟"
+        "q_fa": "داشبورد safety سبز و progress صفر نشون می‌ده. کدوم probe شلیک کرده و سبز اینجا چه معنایی داره؟"
       },
       "source": "assets/diagram-specs/solutions/ch9/sol4-safety-liveness.json"
     }
@@ -133,35 +133,35 @@
   "failures": [
     {
       "en": "Permanent partition: the valid message never arrives — liveness violated, safety untouched. Guard with the stated healing assumption plus buffering and replay on heal; without the assumption the liveness claim is a wish.",
-      "fa": "پارتیشن دائمی: پیام معتبر هرگز نمی‌رسد — liveness شکسته و safety دست‌نخورده. نگهبان: فرض اعلام‌شدهٔ خوب شدن به‌علاوهٔ بافر و بازپخش هنگام خوب شدن؛ بدون فرض، ادعای liveness آرزوست."
+      "fa": "پارتیشن دائمی: پیام معتبر هرگز نمی‌رسه — liveness شکسته، safety دست‌نخورده. نگهبان: فرض اعلام‌شدهٔ خوب شدن به‌علاوهٔ بافر و بازپخش هنگام خوب شدن؛ بدون فرض، ادعای liveness یه آرزوئه."
     },
     {
       "en": "Dedup state lost across restart: the redelivery that healing brings double-applies — safety violated while liveness holds. Guard by persisting the dedup set before acking, replicated with the effects.",
-      "fa": "گم شدن حالت dedup در restart: تحویل دوباره‌ای که خوب شدن می‌آورد دو بار اعمال می‌کند — safety شکسته ولی liveness می‌ماند. نگهبان: persist کردن مجموعهٔ dedup قبل از تأیید، تکثیرشده با اثرها."
+      "fa": "گم شدن حالت dedup در restart: تحویل دوباره‌ای که خوب شدن میاره دو بار اعمال می‌کنه — safety شکسته، ولی liveness می‌مونه. نگهبان: persist کردن مجموعهٔ dedup قبل از تأیید، تکثیرشده با اثرها."
     },
     {
       "en": "Reject-all outage (poison config, closed gate): every message refused — safety vacuously green, liveness dead, and the dashboard lies by omission. Guard with a progress metric (effected-per-minute) beside every safety light, paging when progress hits zero.",
-      "fa": "outage از نوع reject-all (پیکربندی مسموم یا گیت بسته): هر پیام رد می‌شود — safety به‌صورت vacuous سبز و liveness مرده و داشبورد با حذف دروغ می‌گوید. نگهبان: معیار progress (اثرکرده در دقیقه) کنار هر چراغ safety و پیج وقتی progress صفر شد."
+      "fa": "outage از نوع reject-all (پیکربندی مسموم یا گیت بسته): هر پیام رد می‌شه — safety به‌صورت vacuous سبز، liveness مرده، و داشبورد با حذف دروغ می‌گه. نگهبان: معیار progress (اثرکرده در دقیقه) کنار هر چراغ safety، و پیج وقتی progress صفر شد."
     },
     {
       "en": "At-most-once delivery sold as 'no duplicates, no loss': a dropped message is counted as success by the safety metric while the business effect never happens. Guard by stating effects, not deliveries — count effected messages, redeliver the rest, and let liveness own the gap.",
-      "fa": "تحویل at-most-once که به‌عنوان «بدون تکراری و بدون گم‌شدن» فروخته شود: پیام انداخته‌شده در معیار safety موفق شمرده می‌شود ولی اثر کسب‌وکاری هرگز رخ نمی‌دهد. نگهبان: اثرها را اعلام کن نه تحویل‌ها را — پیام‌های اثرکرده را بشمار و بقیه را redeliver کن و بگذار liveness مالک شکاف باشد."
+      "fa": "تحویل at-most-once که به‌عنوان «بدون تکراری و بدون گم‌شدن» فروخته بشه: پیامِ انداخته‌شده توی معیار safety موفق شمرده می‌شه ولی اثر کسب‌وکاری هرگز رخ نمی‌ده. نگهبان: اثرها رو اعلام کن، نه تحویل‌ها رو — پیام‌های اثرکرده رو بشمار، بقیه رو redeliver کن، و بذار liveness مالک شکاف باشه."
     }
   ],
   "followups": [
     {
       "a_en": "Safety — and that is exactly why the answer is interesting. With zero effects there are zero duplications, so 'no message takes effect twice' holds vacuously; the dashboard light stays green. Liveness ('every valid message eventually takes effect') is dead: nothing progresses. The lesson: a safety light without a progress metric is a lie by omission — always pair them, and page on effected-per-minute hitting zero, not on safety alone.",
-      "a_fa": "Safety — و دقیقاً به همین دلیل جواب جالب است. با صفر اثر، صفر تکراری هست، پس «هیچ پیامی دو بار اثر نمی‌کند» به‌صورت vacuous می‌ماند؛ چراغ داشبورد سبز می‌ماند. liveness («هر پیام معتبر بالاخره اثر می‌کند») مرده: هیچ‌چیز پیش نمی‌رود. درس: چراغ safety بدون معیار progress دروغ با حذف است — همیشه جفتشان کن و روی صفر شدن اثرکرده-در-دقیقه پیج بده، نه فقط روی safety.",
+      "a_fa": "Safety — و دقیقاً به همین دلیله جواب جالبیه. با صفر اثر، صفر تکراری هست، پس «هیچ پیامی دو بار اثر نمی‌کنه» به‌صورت vacuous می‌مونه؛ چراغ داشبورد سبز می‌مونه. liveness («هر پیام معتبر بالاخره اثر می‌کنه») مرده: هیچی پیش نمی‌ره. درس: چراغ safety بدون معیار progress، دروغ با حذفه — همیشه جفتشون کن و روی صفر شدنِ اثرکرده-در-دقیقه پیج بده، نه فقط روی safety.",
       "level": "senior",
       "q_en": "Your service rejects every message. Which property can still look healthy?",
       "q_fa": "حالا سیستم همه پیام‌ها رو رد می‌کنه؛ کدوم خاصیت ظاهراً سالم می‌مونه؟"
     },
     {
       "a_en": "Yes — the dedup-lost scenario is exactly the reverse: m1 is delivered, the crash wipes the dedup set, the redelivery applies m1 a second time (effects={m1=2}). Safety is violated — one message, two effects — while liveness holds, because m1 did take effect (twice). So the independence runs both ways: progress without safety (double-apply) and safety without progress (partition, reject-all). Any design review must ask for both counterexamples, not just the fashionable one.",
-      "a_fa": "بله — سناریوی dedup گمشده دقیقاً برعکس است: m1 تحویل می‌شود و crash مجموعهٔ dedup را پاک می‌کند و تحویل دوباره m1 را بار دوم اعمال می‌کند (effects={m1=2}). safety شکسته — یک پیام و دو اثر — ولی liveness می‌ماند چون m1 اثر کرد (دو بار). پس استقلال هر دو طرف می‌رود: progress بدون safety (اعمال دوباره) و safety بدون progress (پارتیشن و reject-all). هر بازبینی طراحی باید هر دو ضدمثال را بخواهد، نه فقط مد روز را.",
+      "a_fa": "بله — سناریوی dedup گمشده دقیقاً برعکسه: m1 تحویل می‌شه، crash مجموعهٔ dedup رو پاک می‌کنه، و تحویل دوبارهٔ m1 بار دوم اعمال می‌شه (effects={m1=2}). safety شکسته — یه پیام و دو اثر — ولی liveness می‌مونه چون m1 اثر کرد (دو بار). پس استقلال از هر دو طرف می‌ره: progress بدون safety (اعمال دوباره) و safety بدون progress (پارتیشن و reject-all). هر بازبینی طراحی باید هر دو ضدمثال رو بخواد، نه فقط مدِ روز رو.",
       "level": "staff",
       "q_en": "You showed liveness breaking alone. Can safety break while progress continues?",
-      "q_fa": "نشان دادی liveness تنها می‌شکند. آیا safety می‌تواند بشکند ولی progress ادامه داشته باشد؟"
+      "q_fa": "نشون دادی liveness تنها می‌شکنه. آیا safety می‌تونه بشکنه ولی progress ادامه داشته باشه؟"
     }
   ],
   "interview_q_en": "Honestly, you've got a queue to reason about. Define no duplicate application effects as safety and eventual valid-message effects under recovery as liveness. Cover permanent partitions, redelivery and missing dedup state. Give a counterexample and an explicit timing assumption for each claim.",
@@ -171,15 +171,15 @@
   "mistakes": [
     {
       "en": "Stating safety on deliveries ('at most once') and calling it done: a lost message preserves at-most-once delivery while the business effect vanishes. Safety must be stated on effects, or loss hides inside the guarantee.",
-      "fa": "اعلام safety روی تحویل‌ها («حداکثر یک‌بار») و تمام دانستنش: پیام گمشده تحویل at-most-once را نگه می‌دارد ولی اثر کسب‌وکاری ناپدید می‌شود. safety باید روی اثرها اعلام شود وگرنه گم‌شدن داخل تضمین پنهان می‌شود."
+      "fa": "اعلام safety روی تحویل‌ها («حداکثر یک‌بار») و تموم دانستنش: پیام گمشده تحویل at-most-once رو نگه می‌داره ولی اثر کسب‌وکاری ناپدید می‌شه. safety باید روی اثرها اعلام بشه، وگرنه گم‌شدن داخل تضمین پنهان می‌شه."
     },
     {
-      "en": "Promising liveness without recovery assumptions ('every message is eventually delivered'): eventually is not a time, a partition is not a delay, and a full disk is not a network. Unconditional liveness is a wish — name heal, capacity, and deadline or withdraw the claim.",
-      "fa": "قول liveness بدون فرض‌های بازیابی («هر پیام بالاخره تحویل می‌شود»): بالاخره زمان نیست و پارتیشن تأخیر نیست و دیسک پر شبکه نیست. liveness بی‌قید آرزوست — خوب شدن و ظرفیت و deadline را نام ببر یا ادعا را پس بگیر."
+      "en": "Promising liveness without recovery assumptions ('every message is eventually delivered'): eventually is not a time, a partition is not a delay, and a full disk is not a network. Unconditional liveness is a wish — name heal, capacity and deadline or withdraw the claim.",
+      "fa": "قول liveness بدون فرض‌های بازیابی («هر پیام بالاخره تحویل می‌شه»): بالاخره زمان نیست، پارتیشن تأخیر نیست، دیسک پر هم شبکه نیست. liveness بی‌قید آرزوئه — خوب شدن و ظرفیت و deadline رو نام ببر، یا ادعا رو پس بگیر."
     },
     {
       "en": "Reading safety-green as healthy during a reject-all outage: zero effects means zero duplications, so the light stays green while the business stands still. Every safety dashboard needs its progress twin.",
-      "fa": "خواندن سبز safety به‌معنای سلامت در outage از نوع reject-all: صفر اثر یعنی صفر تکراری، پس چراغ سبز می‌ماند ولی کسب‌وکار ایستاده. هر داشبورد safety دوقلوی progress خودش را می‌خواهد."
+      "fa": "خوندنِ سبزِ safety به‌معنای سلامت، توی outage از نوع reject-all: صفر اثر یعنی صفر تکراری، پس چراغ سبز می‌مونه ولی کسب‌وکار ایستاده. هر داشبورد safety دوقلوی progress خودش رو می‌خواد."
     }
   ],
   "number": 4,
@@ -191,33 +191,33 @@
   "steps": [
     {
       "en": "Count effects, not deliveries: the wire may duplicate, lose, or reorder — the application effect per message ID is the only thing the business feels. 'Applied once per ID' is the safety sentence; everything else is transport.",
-      "fa": "اثرها را بشمار نه تحویل‌ها را: سیم ممکن است تکراری و گم و جابه‌جا کند — اثر اپلیکیشن برای هر شناسهٔ پیام تنها چیزی است که کسب‌وکار حس می‌کند. «یک‌بار اعمال برای هر شناسه» همان جملهٔ safety است؛ بقیه transport است.",
+      "fa": "اثرها رو بشمار، نه تحویل‌ها رو: سیم ممکنه تکراری و گم و جابه‌جا کنه — اثر اپلیکیشن برای هر شناسهٔ پیام تنها چیزیه که کسب‌وکار حس می‌کنه. «یک‌بار اعمال برای هر شناسه» همون جملهٔ safetyـه؛ بقیه‌اش transportـه.",
       "t_en": "Effects, not deliveries",
       "t_fa": "اثرها نه تحویل‌ها"
     },
     {
       "en": "Enforce safety with surviving dedup: check-then-apply under one atomic step, persisted before the ack, so the restart that triggers redelivery cannot wipe the memory of the first effect. Dedup is the fence; the set is its posts.",
-      "fa": "safety را با dedup زنده‌مانده اجرا کن: بررسی-بعد-اعمال در یک گام اتمیک و persist قبل از تأیید، تا restartای که redelivery را می‌سازد نتواند خاطرهٔ اثر اول را پاک کند. dedup همان نرده است و مجموعه میخ‌هایش.",
+      "fa": "safety رو با dedupِ زنده‌مانده اجرا کن: بررسی-بعد-اعمال توی یه گام اتمیک، و persist قبل از تأیید، تا اون restartای که redelivery می‌سازه نتونه خاطرهٔ اثر اول رو پاک کنه. dedup همون نرده‌ست و اون مجموعه، میخ‌های همون نرده.",
       "t_en": "Dedup that survives",
       "t_fa": "dedup که زنده می‌ماند"
     },
     {
       "en": "Bound liveness with three named assumptions: the partition heals within H, consumer capacity stays above arrivals, and every valid message effects within T. A permanent partition then breaks exactly the assumption it names — liveness violated, safety untouched.",
-      "fa": "liveness را با سه فرض نام‌دار کران کن: پارتیشن ظرف H خوب می‌شود و ظرفیت مصرف‌کننده بالای رسیدن‌ها می‌ماند و هر پیام معتبر ظرف T اثر می‌کند. آن‌وقت پارتیشن دائمی دقیقاً همان فرضی را می‌شکند که نام می‌برد — liveness شکسته و safety دست‌نخورده.",
+      "fa": "liveness رو با سه فرضِ نام‌دار کران کن: پارتیشن ظرف H خوب می‌شه، ظرفیت مصرف‌کننده بالای رسیدن‌ها می‌مونه، و هر پیام معتبر ظرف T اثر می‌کنه. اون‌وقت پارتیشن دائمی دقیقاً همون فرضی رو می‌شکنه که اسم برده — liveness شکسته، safety دست‌نخورده.",
       "t_en": "Liveness with assumptions",
       "t_fa": "liveness با فرض‌ها"
     },
     {
       "en": "Prove independence with the four-cell matrix: redelivery holds both, partition breaks liveness only, dedup-loss breaks safety only, reject-all holds safety vacuously with liveness dead. Any property that cannot break alone is two properties wearing one name.",
-      "fa": "استقلال را با ماتریس چهارخانه اثبات کن: تحویل دوباره هر دو را نگه می‌دارد و پارتیشن فقط liveness را می‌شکند و گم‌شدن dedup فقط safety را و reject-all با liveness مرده safety را به‌صورت vacuous نگه می‌دارد. هر خاصیتی که نتواند تنها بشکند دو خاصیت است با یک نام.",
+      "fa": "استقلال رو با ماتریس چهارخونه اثبات کن: تحویل دوباره هر دو رو نگه می‌داره، پارتیشن فقط liveness رو می‌شکنه، گم‌شدن dedup فقط safety رو، و reject-all با liveness مرده safety رو به‌صورت vacuous نگه می‌داره. هر خاصیتی که نتونه تنها بشکنه، دو خاصیت با یه اسمـه.",
       "t_en": "Four cells, independent",
       "t_fa": "چهار خانه و مستقل"
     }
   ],
   "tests_en": "Invariants: no message ID ever exceeds one effect while dedup persists; every valid message effects within T while the three assumptions hold; effected-per-minute stays above zero whenever arrivals are non-zero. Measure with: a partition drill (cut the link past H, assert liveness alarm with safety green), a restart drill (kill after effects, redeliver, assert no double), and a reject-all drill (refuse everything, assert the progress metric pages while safety stays green).",
-  "tests_fa": "ناورداها: هیچ شناسهٔ پیامی تا وقتی dedup می‌ماند از یک اثر بیشتر نمی‌شود؛ هر پیام معتبر تا وقتی سه فرض می‌مانند ظرف T اثر می‌کند؛ اثرکرده-در-دقیقه تا وقتی رسیدن‌ها غیرصفرند بالای صفر می‌ماند. بسنج با: drill پارتیشن (لینک را بیشتر از H ببر و assert کن هشدار liveness با safety سبز می‌آید)، drill در restart (بعد از اثرها بکش و redeliver کن و assert کن دوتایی نیست) و drill در reject-all (همه‌چیز را رد کن و assert کن معیار progress با سبز ماندن safety پیج می‌دهد).",
-  "worked_en": "<p>Teaching matrix from the demo run: redelivery of m1 with dedup gives effects={m1=1, m2=1} — SAFETY HOLDS, LIVENESS HOLDS. A permanent partition (m3 never arrives) — SAFETY HOLDS on nothing-applied-twice, LIVENESS VIOLATED on never-effected. Dedup wiped across restart gives effects={m1=2} — SAFETY VIOLATED, LIVENESS HOLDS. Reject-all gives effects={} — SAFETY HOLDS vacuously, LIVENESS VIOLATED. Four cells, four verdicts, zero shared fate.</p>",
-  "worked_fa": "<p>ماتریس آموزشی از اجرای دمو: تحویل دوبارهٔ m1 با dedup می‌دهد effects={m1=1, m2=1} — SAFETY می‌ماند و LIVENESS می‌ماند. پارتیشن دائمی (m3 هرگز نمی‌رسد) — SAFETY روی هیچ‌چیز-دوبار-اعمال‌نشده می‌ماند و LIVENESS روی هرگز-اثرنکرده می‌شکند. پاک شدن dedup در restart می‌دهد effects={m1=2} — SAFETY می‌شکند و LIVENESS می‌ماند. reject-all می‌دهد effects={} — SAFETY به‌صورت vacuous می‌ماند و LIVENESS می‌شکند. چهار خانه و چهار رأی و صفر سرنوشت مشترک.</p>",
-  "reasoning_fa": "<p>safety یعنی هیچ اجرای مجاز به حالت ممنوع نرسد؛ یک counterexample آن را رد می‌کند. liveness یعنی با فرض پیشرفت شبکه، پردازنده و ظرفیت، کار بالاخره تمام شود؛ timeout یک آزمایش محدود نمی‌تواند آن را برای همهٔ اجراها ثابت کند. deadline عملیاتی هدف محصول است و با eventually در مدل نظری یکسان نیست. at-most-once می‌تواند duplicate را منع کند ولی با دورریختن پیام، پیشرفت کسب‌وکاری را از بین ببرد.</p>",
-  "reasoning_en": "<p>Safety excludes forbidden states in every permitted execution; one counterexample refutes it. Liveness requires eventual completion under network, processor and capacity progress assumptions; a finite timeout test cannot prove it universally. An operational deadline differs from theoretical eventually. At-most-once can prevent duplicates while discarded messages destroy business progress.</p>"
+  "tests_fa": "ناورداها: هیچ شناسهٔ پیامی تا وقتی dedup می‌مونه از یه اثر بیشتر نمی‌شه؛ هر پیام معتبر تا وقتی سه فرض پابرجان، ظرف T اثر می‌کنه؛ اثرکرده-در-دقیقه تا وقتی رسیدن‌ها غیرصفرن بالای صفر می‌مونه. بسنج با: drill پارتیشن (لینک رو بیشتر از H ببر و assert کن هشدار liveness با safety سبز میاد)، drill در restart (بعد از اثرها بکش، redeliver کن و assert کن دوتایی نیست) و drill در reject-all (همه‌چیز رو رد کن و assert کن معیار progress با سبز ماندن safety پیج می‌ده).",
+  "worked_en": "<p>Teaching matrix from the demo run: redelivery of m1 with dedup gives effects={m1=1, m2=1} — SAFETY HOLDS, LIVENESS HOLDS. A permanent partition (m3 never arrives) — SAFETY HOLDS on nothing-applied-twice, LIVENESS VIOLATED on never-effected. Dedup wiped across restart gives effects={m1=2} — SAFETY VIOLATED, LIVENESS HOLDS. Reject-all gives effects={} — SAFETY HOLDS vacuously, LIVENESS VIOLATED. Four cells, four verdicts, zero shared fate — every cell votes on its own, and none of them votes on behalf of another.</p>",
+  "worked_fa": "<p>ماتریس آموزشی از اجرای دمو: تحویل دوبارهٔ m1 با dedup می‌ده effects={m1=1, m2=1} — SAFETY می‌مونه و LIVENESS می‌مونه. پارتیشن دائمی (m3 هرگز نمی‌رسه) — SAFETY روی هیچ‌چیز-دوبار-اعمال‌نشده می‌مونه و LIVENESS روی هرگز-اثرنکرده می‌شکنه. پاک شدن dedup در restart می‌ده effects={m1=2} — SAFETY می‌شکنه و LIVENESS می‌مونه. reject-all می‌ده effects={} — SAFETY به‌صورت vacuous می‌مونه و LIVENESS می‌شکنه. چهار خونه، چهار رأی، صفر سرنوشت مشترک. یعنی هر خونه رأی خودش رو می‌ده و هیچ‌کدوم به‌جای دیگری رأی نمی‌ده.</p>",
+  "reasoning_fa": "<p>چرا این مدل به این تمرین می‌خورد: safety یعنی هیچ اجرای مجاز به حالت ممنوع نرسد؛ یک counterexample همین را رد می‌کند. liveness یعنی با فرض پیشرفت شبکه، پردازنده و ظرفیت، کار بالاخره تمام شود؛ تستِ محدودِ timeout نمی‌تواند آن را برای همهٔ اجراها ثابت کند. واحدها: تعداد اجرا و زمانِ اثر — deadline عملیاتی هدف محصول است و با eventually در مدل نظری یکی نیست. at-most-once می‌تواند duplicate را منع کند ولی با دور ریختن پیام، پیشرفت کسب‌وکاری را از بین می‌برد. و اگر فرض‌ها عوض شوند: با پارتیشن دائمی یا ظرفیت کم، liveness می‌شکند ولی safety پابرجا می‌ماند — پس ادعای liveness باید همراه اسمِ فرض‌هایش گفته شود، نه جدا از آن.</p>",
+  "reasoning_en": "<p>Why this model fits: safety means no permitted execution reaches a forbidden state, and one counterexample refutes it. Liveness means the work eventually finishes under progress assumptions about the network, the processor and capacity; a bounded timeout test cannot prove it for every execution. Units: executions and effect time — an operational deadline is a product goal and is not the same as eventually in the theoretical model. At-most-once can prevent duplicates while discarded messages destroy business progress. And when the assumptions move: with a permanent partition or thin capacity, liveness breaks while safety stays intact — which is exactly why the liveness claim has to ship with its assumptions named.</p>"
 }
