@@ -1,18 +1,18 @@
 {
-  "answer_en": "Give every step a stable id (<span class=\"ltr\">order id + step name + code version</span>), append each result to the durable log BEFORE reporting success, and replay by re-walking with the same ids: logged steps are skipped with old results returned. Irreversible steps get forward compensations (saga), never rollbacks in time. Ship step-order, branch or payload changes as a NEW code version — in-flight invocations finish on the old one. Recovery cost is bounded replay reads plus, for the keyless shipper, a reconciliation sweep.",
-  "answer_fa": "به هر گام شناسه پایدار بده (<span class=\"ltr\">order id + step name + code version</span>)، نتیجه هر گام را <b>پیش</b> از اعلام موفقیت در لاگ پایدار بنویس، و بازپخش را با همان شناسه‌ها دوباره قدم بزن: گام‌های ثبت‌شده رد می‌شوند و نتیجه قبلی‌شان برمی‌گردد. گام‌های برگشت‌ناپذیر جبران روبه‌جلو (<span class=\"ltr\">saga</span>) می‌گیرند، نه بازگشت در زمان. تغییر ترتیب، شاخه یا payload را با نسخه <b>تازه</b> کد منتشر کن — invocationهای در جریان با همان قدیمی تمام می‌شوند. هزینه recovery خواندن‌های محدود بازپخش است به‌علاوه، برای ارسال‌کننده بدون کلید، یک جاروی مغایرت‌گیری.",
+  "answer_en": "Here's the thing: after a crash the engine remembers nothing, so your whole job is to rebuild everything from the log. Give every step a stable id (<span class=\"ltr\">order id + step name + code version</span>), append each result to the durable log BEFORE reporting success, and replay by re-walking with the same ids: logged steps get skipped and their old results come back. Irreversible steps get forward compensations (saga), never a rollback in time. Ship step-order, branch or payload changes as a NEW code version — in-flight invocations finish on the old one. Recovery cost is the bounded replay reads plus, for the keyless shipper, one reconciliation sweep. The log is the engine's only memory — treat it that way.",
+  "answer_fa": "قضیه اینه که موتور بعد از کرش هیچی یادش نمی‌مونه، پس کارِ تو اینه که همه‌چیز رو از لاگ بازسازی کنی. به هر گام شناسهٔ پایدار بده (<span class=\"ltr\">order id + step name + code version</span>)، نتیجهٔ هر گام رو <b>پیش</b> از اعلام موفقیت توی لاگ پایدار بنویس، و بازپخش رو با همون شناسه‌ها دوباره قدم بزن: گام‌های ثبت‌شده رد می‌شن و نتیجهٔ قبلی‌شون برمی‌گرده. گام‌های برگشت‌ناپذیر جبران روبه‌جلو (<span class=\"ltr\">saga</span>) می‌گیرن، نه بازگشت در زمان. تغییر ترتیب، شاخه یا payload رو با نسخهٔ <b>تازه</b> کد منتشر کن — invocationهای در جریان با همون قدیمی تموم می‌شن. هزینهٔ recovery هم بازپخشِ محدودِ تاریخچه‌ست، به‌علاوه یه جاروی مغایرت‌گیری برای ارسال‌کنندهٔ بدون کلید. یادت باشه: لاگ، تنها حافظهٔ موتوره.",
   "assumptions": [
     {
-      "en": "Teaching three-step order workflow: reserve stock, charge card, ship parcel. Crash may strike anywhere, including between the effect and the log append — the worst case.",
-      "fa": "گردش‌کار آموزشی سه‌گامی سفارش: رزرو موجودی، شارژ کارت، ارسال مرسوله. کرش هرجا ممکن است، از جمله میان اثر و نوشتن لاگ — بدترین حالت."
+      "en": "Picture this: a teaching three-step order workflow — reserve stock, charge card, ship parcel. A crash can strike anywhere, including between the effect and the log append. That's the worst case.",
+      "fa": "تصور کن یه گردش‌کار آموزشی سه‌گامی برای سفارش: رزرو موجودی، شارژ کارت، ارسال مرسوله. کرش می‌تونه هرجا بزنه — از جمله بین اثر و نوشتن لاگ. بدترین حالت."
     },
     {
-      "en": "Payment gateway accepts an idempotency key; the base-design shipper dedups on our step id. The keyless shipper is the follow-up scenario.",
-      "fa": "درگاه پرداخت کلید idempotency می‌پذیرد؛ ارسال‌کننده طرح پایه روی شناسه گام ما تکراری‌زدایی می‌کند. ارسال‌کننده بدون کلید سناریوی پیگیری است."
+      "en": "The payment gateway accepts an idempotency key, and the base-design shipper dedups on our step id. The keyless shipper is the follow-up scenario.",
+      "fa": "درگاه پرداخت کلید idempotency رو می‌پذیره؛ ارسال‌کنندهٔ طرح پایه روی شناسهٔ گام ما تکراری‌زدایی می‌کنه. ارسال‌کنندهٔ بدون کلید همون سناریوی پیگیریه."
     },
     {
-      "en": "Recovery-cost numbers below are teaching bounds for this workflow, not measured traces.",
-      "fa": "اعداد هزینه recovery پایین کران‌های آموزشی همین گردش‌کارند، نه ردپای اندازه‌گیری‌شده."
+      "en": "The recovery-cost numbers below are teaching bounds for this workflow, not measured traces.",
+      "fa": "اعداد هزینهٔ recovery پایین، کران‌های آموزشی همین گردش‌کارن — نه ردپای اندازه‌گیری‌شده."
     }
   ],
   "code": {
@@ -24,95 +24,95 @@
     "run_fa": "javac WorkflowDemo.java && java WorkflowDemo — فقط استاندارد جاوا (JDK 27)، فوری. فرایند را ذهنی پیش از خط ship بکش: خط‌های بازپخش دقیقاً همان چیزی است که restart چاپ می‌کند.",
     "status": "verified"
   },
-  "design_en": "<p><b>Components:</b> orchestrator (schedules, owns the version gate), durable log (write-ahead, per-invocation history), step executors (reserve/charge/ship, each keyed), compensation handlers (refund, release, cancel-parcel). <b>Write path:</b> execute step → append result → report. <b>Read path (replay):</b> load history → re-walk code with same ids → skip logged, run open. <b>Keys:</b> <code>order:{id}:reserve:{v}</code>, <code>order:{id}:charge:{v}</code>, <code>order:{id}:ship:{v}</code>.</p>",
-  "design_fa": "<p><b>اجزا:</b> orchestrator (زمان‌بندی، مالک دروازه نسخه)، لاگ پایدار (write-ahead، تاریخچه هر invocation)، اجراکننده‌های گام (رزرو/شارژ/ارسال، هرکدام کلیددار)، جبران‌کننده‌ها (بازپرداخت، آزادسازی، لغو مرسوله). <b>مسیر نوشتن:</b> اجرای گام ← نوشتن نتیجه ← اعلام. <b>مسیر خواندن (بازپخش):</b> بارگذاری تاریخچه ← قدم‌زدن دوباره کد با همان شناسه‌ها ← ثبت‌شده رد، باز اجرا. <b>کلیدها:</b> <code>order:{id}:reserve:{v}</code> و charge و ship.</p>",
+  "design_en": "<p><b>Components:</b> an orchestrator (schedules, owns the version gate), the durable log (write-ahead, per-invocation history), the step executors (reserve/charge/ship, each keyed), and the compensation handlers (refund, release, cancel-parcel). <b>Write path:</b> execute step → append result → report. <b>Read path (replay):</b> load history → re-walk the code with the same ids → skip what's logged, run what's open. <b>Keys:</b> <code>order:{id}:reserve:{v}</code>, <code>order:{id}:charge:{v}</code>, <code>order:{id}:ship:{v}</code>.</p>",
+  "design_fa": "<p><b>اجزا:</b> orchestrator (زمان‌بندی، مالک دروازهٔ نسخه)، لاگ پایدار (write-ahead، تاریخچهٔ هر invocation)، اجراکننده‌های گام (رزرو/شارژ/ارسال، هرکدام کلیددار)، جبران‌کننده‌ها (بازپرداخت، آزادسازی، لغو مرسوله). <b>مسیر نوشتن:</b> اجرای گام ← نوشتن نتیجه ← اعلام. <b>مسیر خواندن (بازپخش):</b> بارگذاری تاریخچه ← قدم‌زدن دوبارهٔ کد با همون شناسه‌ها ← ثبت‌شده رد، باز اجرا. <b>کلیدها:</b> <code>order:{id}:reserve:{v}</code> و charge و ship.</p>",
   "interview_q_en": "Picture this, friend — a real workflow with inventory, payment, and shipping. Design it so crashes and retries don't blow it apart. Pin down each step's ID, the durable log, stored results, and compensation. Version step reordering, branching, and payload schemas for invocations already in flight, and state the recovery cost.",
   "interview_q_fa": "نوبتی هم باشه نوبت workflow واقعیه: موجودی و پرداخت و ارسال. طوری طراحیش کن که crash و retry نترکونتش. شناسهٔ هر گام و log پایدار و نتیجهٔ ذخیره‌شده و compensation رو مشخص کن. تغییر ترتیب گام‌ها و branching و schema رو برای invocationهای در جریان نسخه‌بندی کن و خرج recovery رو هم بگو.",
-  "mental_en": "The engine has total amnesia after a crash except for one thing: the durable log. Replay is re-walking the same code path with the same step ids and asking the log at every step: done already? Then reuse. Compensation is not time travel — it is a new forward step that undoes an old effect (refund after charge).",
-  "mental_fa": "موتور پس از کرش فراموشی کامل دارد جز یک چیز: لاگ پایدار. بازپخش یعنی قدم‌زدن دوباره همان مسیر کد با همان شناسه‌ها و پرسیدن از لاگ در هر گام: قبلاً انجام شده؟ پس استفاده مجدد. جبران سفر در زمان نیست — گام تازه روبه‌جلوست که اثر قدیمی را خنثی می‌کند (بازپرداخت پس از شارژ).",
+  "mental_en": "Picture the engine after a crash: total amnesia, with exactly one exception — the durable log. Replay means walking the same code path again with the same step ids and asking the log at every step: already done? Then reuse the old result. And compensation isn't time travel — it's a fresh forward step that undoes an old effect (a refund after the charge). Simple? Sure — and that simplicity is the whole design.",
+  "mental_fa": "تصور کن موتور پس از کرش جز یه چیز هیچ یادش نمی‌مونه: لاگ پایدار. بازپخش یعنی دوباره قدم زدن روی همون مسیر کد با همون شناسه‌ها و پرسیدن از لاگ در هر گام: قبلاً انجام شده؟ پس همون نتیجه رو دوباره استفاده کن. جبران هم سفر در زمان نیست — یه گام تازهٔ روبه‌جلوئه که اثر قدیمی رو خنثی می‌کنه (بازپرداخت بعد از شارژ). ساده‌ست؟ آره، ولی همین سادگی کل کار رو می‌سازه.",
   "number": 3,
   "slug": "durable-workflow",
   "sources": [
     "idempotency",
     "atlassian"
   ],
-  "tests_en": "Crash-inject before and after each log append and confirm no step runs twice with effect; duplicate-deliver every step result and confirm reuse; replay an old history against reordered code and confirm the version gate pins it to the old version; run every compensation and confirm the end state. Track replay lag, duplicate-effect counter and reconciliation queue depth.",
-  "tests_fa": "پیش و پس از هر نوشتن لاگ کرش تزریق کن و مطمئن شو هیچ گامی دو بار اثر نمی‌گذارد؛ نتیجه هر گام را تکراری تحویل بده و استفاده مجدد را ببین؛ تاریخچه قدیمی را با کد جابه‌جاشده بازپخش کن و ببین دروازه نسخه آن را به نسخه قدیمی میخ می‌کند؛ هر جبران را اجرا کن و حالت پایانی را ببین. lag بازپخش، شمارنده اثر تکراری و عمق صف مغایرت‌گیری را بپا.",
+  "tests_en": "Crash-inject before and after each log append and confirm no step ever runs twice with effect; duplicate-deliver every step result and confirm the reuse; replay an old history against reordered code and confirm the version gate pins it to the old version; run every compensation and confirm the end state. Track the replay lag, the duplicate-effect counter and the reconciliation queue depth.",
+  "tests_fa": "پیش و پس از هر نوشتن لاگ کرش تزریق کن و مطمئن شو هیچ گامی دو بار اثر نمی‌ذاره؛ نتیجهٔ هر گام رو تکراری تحویل بده و استفادهٔ مجدد رو ببین؛ تاریخچهٔ قدیمی رو با کد جابه‌جاشده بازپخش کن و ببین دروازهٔ نسخه اون رو به نسخهٔ قدیمی میخ می‌کنه؛ هر جبران رو اجرا کن و حالت پایانی رو ببین. lag بازپخش، شمارندهٔ اثر تکراری و عمق صف مغایرت‌گیری رو هم بپا.",
   "steps": [
     {
       "t_fa": "شناسه پایدار",
       "t_en": "Stable ids",
-      "fa": "شناسه هر گام از سه تکه ساخته می‌شود: شناسه سفارش + نام گام + نسخه کد (<code>order:1001:ship:v1</code>). در retry همان شناسه تکرار می‌شود، پس اثر دوباره با همان کلید به مقصد می‌رسد و تکراری‌زدایی ممکن می‌شود.",
-      "en": "Each step id has three parts: order id + step name + code version (<code>order:1001:ship:v1</code>). Retries repeat the same id, so a repeated effect reaches the destination under the same key and dedups."
+      "fa": "شناسهٔ هر گام از سه تکه ساخته می‌شه: شناسهٔ سفارش + اسم گام + نسخهٔ کد (<code>order:1001:ship:v1</code>). توی retry همون شناسه تکرار می‌شه، پس اثر دوباره با همون کلید به مقصد می‌رسه و تکراری‌زدایی ممکن می‌شه.",
+      "en": "Each step id is built from three parts: order id + step name + code version (<code>order:1001:ship:v1</code>). A retry repeats the same id, so a repeated effect reaches the destination under the same key and can be deduped."
     },
     {
       "t_fa": "اول لاگ، بعد اعلام",
       "t_en": "Log first, then report",
-      "fa": "نتیجه هر گام موفق پیش از اعلام موفقیت در لاگ پایدار نوشته می‌شود. اگر کرش میان اثر و لاگ بیفتد، گام «باز» می‌ماند و دوباره اجرا می‌شود — برای همین اثرها باید idempotent باشند.",
-      "en": "Each successful step's result lands in the durable log before success is reported. A crash between effect and log leaves the step 'open' to run again — which is why effects must be idempotent."
+      "fa": "نتیجهٔ هر گام موفق، پیش از اعلام موفقیت، توی لاگ پایدار نوشته می‌شه. اگه کرش بین اثر و لاگ بیفته، گام «باز» می‌مونه و دوباره اجرا می‌شه — برای همین اثرها باید idempotent باشن.",
+      "en": "Each successful step's result lands in the durable log before the success is reported. A crash between the effect and the log leaves the step 'open' to run again — which is exactly why the effects have to be idempotent."
     },
     {
       "t_fa": "بازپخش و تحویل تکراری",
       "t_en": "Replay and duplicates",
-      "fa": "restart تاریخچه را می‌خواند و با همان شناسه‌ها قدم می‌زند: reserve و charge رد می‌شوند (نتیجه قدیمی برمی‌گردد) و فقط ship باز اجرا می‌شود. تحویل تکراری نتیجه ship هم فقط reuse است، نه مرسوله دوم.",
-      "en": "The restart loads history and re-walks with the same ids: reserve and charge are skipped (old results returned) and only ship re-runs. Duplicate delivery of the ship result is also just reuse, never a second parcel."
+      "fa": "restart تاریخچه رو می‌خونه و با همون شناسه‌ها قدم می‌زنه: reserve و charge رد می‌شن (نتیجهٔ قدیمی برمی‌گرده) و فقط ship باز اجرا می‌شه. تحویل تکراریِ نتیجهٔ ship هم فقط reuse هست، نه مرسولهٔ دوم.",
+      "en": "The restart loads the history and re-walks with the same ids: reserve and charge get skipped (the old results come back) and only ship runs again. A duplicate delivery of the ship result is just reuse as well — never a second parcel."
     },
     {
       "t_fa": "جبران روبه‌جلو",
       "t_en": "Forward compensation",
-      "fa": "اگر ship پس از charge ناممکن شود، تاریخ به عقب برنمی‌گردد: گام تازه refund شارژ را برمی‌گرداند و release موجودی را آزاد می‌کند. هر جبران خودش شناسه پایدار و نتیجه ثبت‌شده دارد.",
-      "en": "If shipping becomes impossible after charging, history does not rewind: a fresh refund step returns the charge and a release step frees the stock. Each compensation carries its own stable id and logged result."
+      "fa": "اگه ship بعد از charge ناممکن بشه، تاریخ به عقب برنمی‌گرده: یه گام تازهٔ refund شارژ رو برمی‌گردونه و یه گام release موجودی رو آزاد می‌کنه. هر جبران خودش شناسهٔ پایدار و نتیجهٔ ثبت‌شده داره.",
+      "en": "If shipping becomes impossible after the charge, history doesn't rewind: a fresh refund step gives the charge back and a release step frees the stock. Every compensation carries its own stable id and its own logged result."
     },
     {
       "t_fa": "نسخه‌بندی و هزینه",
       "t_en": "Versioning and cost",
-      "fa": "تغییر ترتیب گام‌ها، شاخه‌بندی یا payload با نسخه تازه (v2) منتشر می‌شود؛ invocationهای در جریان با v1 تمام می‌شوند چون تاریخچه v1 فقط با کد v1 قدم زده می‌شود. هزینه recovery: بازخوانی تاریخچه (کران آموزشی: تعداد گام‌ها) به‌علاوه جاروی مغایرت‌گیری برای ارسال‌کننده بدون کلید.",
-      "en": "Step-order, branch or payload changes ship as a new version (v2); in-flight invocations finish on v1 because v1 history is only ever walked by v1 code. Recovery cost: re-reading history (teaching bound: number of steps) plus a reconciliation sweep for the keyless shipper."
+      "fa": "تغییر ترتیب گام‌ها، شاخه‌بندی یا payload با نسخهٔ تازه (v2) منتشر می‌شه؛ invocationهای در جریان با v1 تموم می‌شن، چون تاریخچهٔ v1 فقط با کد v1 قدم زده می‌شه. هزینهٔ recovery هم بازخوانی تاریخچه (کران آموزشی: تعداد گام‌ها) به‌علاوهٔ جاروی مغایرت‌گیری برای ارسال‌کنندهٔ بدون کلید.",
+      "en": "Step-order, branch or payload changes ship as a new version (v2); in-flight invocations finish on v1, because v1 history is only ever walked by v1 code. Recovery cost: re-reading the history (teaching bound: the number of steps) plus a reconciliation sweep for the keyless shipper."
     }
   ],
-  "worked_en": "<p>Teaching run <code>order-1001</code> (real program output): reserve and charge execute and log; the crash hits before ship; the restart replays both as <b>skip, reuse</b>; ship executes once and logs; a duplicate ship delivery reuses <b>parcel-9</b>. End state: 3 logged keys, 1 parcel, 1 charge — replay cost 2 history reads, 0 repeated effects.</p>",
-  "worked_fa": "<p>اجرای آموزشی <code>order-1001</code> (خروجی واقعی برنامه): reserve و charge اجرا و ثبت می‌شوند؛ کرش پیش از ship می‌زند؛ restart هر دو را با <b>skip, reuse</b> بازپخش می‌کند؛ ship یک بار اجرا و ثبت می‌شود؛ تحویل تکراری ship همان <b>parcel-9</b> را استفاده می‌کند. حالت پایانی: ۳ کلید ثبت‌شده، ۱ مرسوله، ۱ شارژ — هزینه بازپخش ۲ خواندن تاریخچه، ۰ اثر تکراری.</p>",
+  "worked_en": "<p>Teaching run <code>order-1001</code> (real program output): reserve and charge execute and log; the crash hits before ship; the restart replays both as <b>skip, reuse</b>; ship executes once and logs; a duplicate ship delivery reuses <b>parcel-9</b>. End state: 3 logged keys, 1 parcel, 1 charge — replay cost 2 history reads, 0 repeated effects. One parcel, one charge, however many times it crashes.</p>",
+  "worked_fa": "<p>اجرای آموزشی <code>order-1001</code> (خروجی واقعی برنامه): reserve و charge اجرا و ثبت می‌شن؛ کرش پیش از ship می‌زنه؛ restart هر دو رو با <b>skip, reuse</b> بازپخش می‌کنه؛ ship یک بار اجرا و ثبت می‌شه؛ تحویل تکراریِ ship همون <b>parcel-9</b> رو استفاده می‌کنه. حالت پایانی: ۳ کلید ثبت‌شده، ۱ مرسوله، ۱ شارژ — هزینهٔ بازپخش ۲ خواندن تاریخچه، ۰ اثر تکراری. یعنی یه مرسوله و یه برداشت، هرچند بار هم کرش کنی.</p>",
   "alternatives": [
     {
-      "fa": "کوروگرافی رویدادی بدون orchestrator: هر سرویس به رویداد قبلی واکنش نشان می‌دهد. هزینه: تاریخچه پراکنده، بازپخش و نسخه‌بندی سخت‌تر، جبران بدون مالک واحد.",
-      "en": "Event choreography with no orchestrator: each service reacts to the previous event. Cost: scattered history, harder replay and versioning, compensation with no single owner."
+      "fa": "کوروگرافی رویدادی بدون orchestrator: هر سرویس به رویداد قبلی واکنش نشون می‌ده. هزینه‌اش هم اینه: تاریخچه پراکنده، بازپخش و نسخه‌بندی سخت‌تر، جبران بدون مالک واحد.",
+      "en": "Event choreography with no orchestrator: each service reacts to the previous event. The bill: scattered history, harder replay and versioning, and compensation with nobody clearly owning it."
     }
   ],
   "failures": [
     {
-      "fa": "کرش میان اثر ship و نوشتن لاگ: ship دوباره اجرا می‌شود. با تکراری‌زدایی روی شناسه، مرسوله دوم ساخته نمی‌شود؛ بدون کلید، جاروی مغایرت‌گیری مرسوله‌های بی‌صاحب را به سفارش وصل می‌کند.",
-      "en": "Crash between the ship effect and the log write: ship re-runs. With dedup on the step id no second parcel is made; without a key, the reconciliation sweep attaches orphan parcels to the order."
+      "fa": "کرش بین اثر ship و نوشتن لاگ: ship دوباره اجرا می‌شه. با تکراری‌زدایی روی شناسه، مرسولهٔ دوم ساخته نمی‌شه؛ بدون کلید، جاروی مغایرت‌گیری مرسوله‌های بی‌صاحب رو به سفارش وصل می‌کنه.",
+      "en": "A crash between the ship effect and the log write: ship re-runs. With dedup on the step id, no second parcel is made; without a key, the reconciliation sweep attaches the orphan parcels back to the order."
     },
     {
-      "fa": "بازپخش تاریخچه v1 با کد v2 جابه‌جاشده: دروازه نسخه جلوی قدم‌زدن اشتباه را می‌گیرد و invocation را به کد v1 میخ می‌کند.",
+      "fa": "بازپخش تاریخچهٔ v1 با کد v2 جابه‌جاشده: دروازهٔ نسخه جلوی قدم‌زدن اشتباه رو می‌گیره و invocation رو به کد v1 میخ می‌کنه.",
       "en": "Replaying v1 history against reordered v2 code: the version gate blocks the wrong walk and pins the invocation to v1 code."
     },
     {
-      "fa": "شکست خود جبران (مثلاً refund ناموفق): جبران retry می‌شود با همان شناسه؛ پس از پایان بودجه، هشدار انسانی با حالت دقیق لاگ — invocation نه «نیمه‌تمام رها» بلکه «منتظر اقدام» است.",
-      "en": "The compensation itself fails (e.g. refund rejected): it retries under the same id; after the budget, a human alert with the exact log state — the invocation is 'awaiting action', never 'abandoned halfway'."
+      "fa": "شکستِ خودِ جبران (مثلاً refund ناموفق): جبران با همون شناسه retry می‌شه؛ پس از تموم شدن بودجه، هشدار انسانی با حالت دقیق لاگ — invocation نه «نیمه‌تمام رها»، بلکه «منتظر اقدام».",
+      "en": "The compensation itself fails (say, the refund is rejected): it retries under the same id; once the budget is spent, a human alert goes out with the exact log state — the invocation is 'awaiting action', never 'abandoned halfway'."
     }
   ],
   "followups": [
     {
       "q_fa": "provider ارسال idempotency key نداره. تضمینت چطور عوض می‌شه؟",
       "q_en": "The shipping provider has no idempotency key. How does your guarantee change?",
-      "a_fa": "تضمین از «اثر دقیقاً یک‌بار» به «حداکثر یک مرسوله بی‌صاحب + مغایرت‌گیری» می‌لغزد: retry کور ممنوع، چون هر تلاش ممکن است مرسوله تازه بسازد. به‌جایش: ship را یک بار صدا بزن، نتیجه نامشخص را «نامعلوم» ثبت کن، و جاروی مغایرت‌گیری (تطبیق مرسوله‌ها با شناسه سفارش در سمت خودت) اثر را قطعی کند. هزینه recovery همان جاروست.",
-      "a_en": "The guarantee slides from 'exactly-once effects' to 'at most one orphan parcel + reconciliation': blind retries are banned, since each attempt may mint a fresh parcel. Instead: call ship once, record an unclear outcome as 'unknown', and let a reconciliation sweep (matching parcels to your order id on your side) settle the effect. Recovery cost is that sweep.",
+      "a_fa": "تضمین از «اثر دقیقاً یک‌بار» می‌لغزه به «حداکثر یه مرسولهٔ بی‌صاحب + مغایرت‌گیری»: retry کور ممنوعه، چون هر تلاش ممکنه مرسولهٔ تازه بسازه. به‌جایش: ship رو یه بار صدا بزن، نتیجهٔ نامشخص رو «نامعلوم» ثبت کن، و بذار جاروی مغایرت‌گیری (تطبیق مرسوله‌ها با شناسهٔ سفارش، توی سمت خودت) اثر رو قطعی کنه. هزینهٔ recovery همون جاروئه.",
+      "a_en": "The guarantee slides from 'exactly-once effects' down to 'at most one orphan parcel + reconciliation': blind retries are banned, because each attempt may mint a fresh parcel. Instead: call ship once, record the unclear outcome as 'unknown', and let a reconciliation sweep (matching parcels to your order id on your side) settle the effect. That sweep is the recovery cost — and it's the price of no key.",
       "level": "staff"
     }
   ],
   "mistakes": [
     {
-      "fa": "قول «exactly-once» برای اثر بیرونی. لاگ پایدار اجرای دقیقاً یک‌بار می‌دهد، نه اثر دقیقاً یک‌بار — اثر به کلید مقصد وابسته است.",
-      "en": "Promising 'exactly-once' for outside effects. The durable log delivers exactly-once execution, not exactly-once effects — effects depend on the destination's key."
+      "fa": "قول «exactly-once» برای اثر بیرونی. لاگ پایدار اجرای دقیقاً یک‌بار می‌ده، نه اثر دقیقاً یک‌بار — اثر به کلیدِ مقصد وابسته‌ست.",
+      "en": "Promising 'exactly-once' for outside effects. The durable log gives you exactly-once execution, not exactly-once effects — the effect depends on the destination's key."
     },
     {
-      "fa": "استفاده از عدد تصادفی یا ساعت سیستم در کد workflow. بازپخش باید قطعی باشد؛ همان ورودی، همان قدم‌ها.",
-      "en": "Using random numbers or the system clock in workflow code. Replay must be deterministic; same input, same walk."
+      "fa": "استفاده از عدد تصادفی یا ساعت سیستم توی کد workflow. بازپخش باید قطعی باشه؛ همون ورودی، همون قدم‌ها.",
+      "en": "Using random numbers or the system clock in workflow code. Replay has to be deterministic — same input, same walk."
     },
     {
-      "fa": "جابه‌جایی آزاد ترتیب گام‌ها روی invocationهای در جریان. تاریخچه قدیمی فقط با منطق قدیمی قدم زده می‌شود — تغییر، نسخه تازه می‌خواهد.",
-      "en": "Freely reordering steps over in-flight invocations. Old history is only ever walked by old logic — change needs a new version."
+      "fa": "جابه‌جایی آزادِ ترتیب گام‌ها روی invocationهای در جریان. تاریخچهٔ قدیمی فقط با منطق قدیمی قدم زده می‌شه — تغییر، نسخهٔ تازه می‌خواد.",
+      "en": "Freely reordering steps over in-flight invocations. Old history is only ever walked by old logic — a change needs a new version."
     }
   ],
   "diagrams": [
@@ -122,40 +122,40 @@
       "source": "assets/diagram-specs/solutions/ch5/sol3a-replay.json",
       "kind_fa": "توالی",
       "kind_en": "sequence",
-      "caption_fa": "کرش پیش از ship: فقط گام باز اجرا می‌شود",
+      "caption_fa": "کرش پیش از ship: فقط گام باز اجرا می‌شه",
       "caption_en": "Crash before ship: only the open step re-runs",
       "height": 640,
       "narration": {
-        "scenario_fa": "سفارش ۱۰۰۱ شارژ شده ولی نتیجه ship ثبت نشده و worker مرده. دو نوار را بالا‌به‌پایین بخوان.",
-        "scenario_en": "Order 1001 is charged but the ship result was never logged and the worker died. Read the two bands top to bottom.",
+        "scenario_fa": "سفارش ۱۰۰۱ شارژ شده، ولی نتیجهٔ ship ثبت نشده و worker مرده. دو نوار رو بالا‌به‌پایین بخون.",
+        "scenario_en": "Order 1001 is charged, but the ship result was never logged and the worker died. Read the two bands top to bottom.",
         "steps": [
           {
-            "fa": "نوار اول: شارژ، ثبت نتیجه C، بعد ship — و کرش پیش از ثبت نتیجه S.",
-            "en": "First band: charge, log result C, then ship — and the crash lands before result S is logged."
+            "fa": "نوار اول: شارژ، ثبت نتیجهٔ C، بعد ship — و کرش پیش از ثبت نتیجهٔ S.",
+            "en": "First band: charge, log result C, then ship — and the crash lands before result S ever gets logged."
           },
           {
-            "fa": "نوار دوم با retry شروع می‌شود؛ موتور از لاگ می‌پرسد: C انجام‌شده، S باز.",
+            "fa": "نوار دوم با retry شروع می‌شه؛ موتور از لاگ می‌پرسه: C انجام‌شده، S باز.",
             "en": "Band two opens with the retry; the engine asks the log: C done, S open."
           },
           {
-            "fa": "فقط ship با همان شناسه دوباره می‌رود و «parcel-9 (deduped)» برمی‌گردد؛ پایان «order complete».",
-            "en": "Only ship goes again under the same id and 'parcel-9 (deduped)' returns; the end reads 'order complete'."
+            "fa": "فقط ship با همون شناسه دوباره می‌ره و «parcel-9 (deduped)» برمی‌گرده؛ پایان «order complete».",
+            "en": "Only ship goes again under the same id and 'parcel-9 (deduped)' comes back; the end reads 'order complete'."
           }
         ],
-        "point_fa": "نقطه تصمیم پرسش از لاگ است: کدام گام باز است؟ فقط همان اجرا می‌شود.",
+        "point_fa": "نقطهٔ تصمیم پرسش از لاگه: کدوم گام بازه؟ فقط همون اجرا می‌شه.",
         "point_en": "The decision point is the log lookup: which step is open? Only that one runs.",
-        "failure_fa": "اگر نتیجه C ثبت نشده بود، شارژ هم دوباره می‌رفت — و کلید idempotency درگاه جلوی برداشت دوم را می‌گرفت.",
-        "failure_en": "Had result C never been logged, charging would re-run too — and the gateway idempotency key would block the second debit.",
-        "guarantee_fa": "شکل قرارداد بازپخش را نشان می‌دهد: رد ثبت‌شده‌ها، اجرای بازها.",
-        "guarantee_en": "The figure shows the replay contract: skip the logged, run the open.",
-        "nonguarantee_fa": "اثر دقیقاً یک‌بار را نشان نمی‌دهد — آن به کلید مقصد بیرونی وابسته است.",
-        "nonguarantee_en": "It does not show exactly-once effects — those depend on the outside destination's key."
+        "failure_fa": "اگه نتیجهٔ C ثبت نشده بود، شارژ هم دوباره می‌رفت — و کلید idempotency درگاه جلوی برداشت دوم رو می‌گرفت.",
+        "failure_en": "Had result C never been logged, charging would re-run too — and the gateway's idempotency key would block the second debit.",
+        "guarantee_fa": "شکل قرارداد بازپخش رو نشون می‌ده: ردِ ثبت‌شده‌ها، اجرای بازها.",
+        "guarantee_en": "The figure shows the replay contract: skip what's logged, run what's open.",
+        "nonguarantee_fa": "اثر دقیقاً یک‌بار رو نشون نمی‌ده — اون به کلید مقصد بیرونی وابسته‌ست.",
+        "nonguarantee_en": "It doesn't show exactly-once effects — those depend on the outside destination's key."
       },
       "selfcheck": {
-        "q_fa": "چرا موتور پس از کرش شارژ را دوباره اجرا نمی‌کند؟",
+        "q_fa": "چرا موتور بعد از کرش شارژ رو دوباره اجرا نمی‌کنه؟",
         "q_en": "Why doesn't the engine re-run the charge after the crash?",
-        "a_fa": "چون نتیجه C در لاگ پایدار است؛ بازپخش ثبت‌شده را رد می‌کند و نتیجه قبلی را برمی‌گرداند.",
-        "a_en": "Because result C sits in the durable log; replay skips logged steps and returns the old result."
+        "a_fa": "چون نتیجهٔ C توی لاگ پایداره؛ بازپخش ثبت‌شده رو رد می‌کنه و نتیجهٔ قبلی رو برمی‌گردونه.",
+        "a_en": "Because result C sits in the durable log; the replay skips logged steps and hands back the old result."
       }
     },
     {
@@ -168,36 +168,36 @@
       "caption_en": "Invocation states: main path, retry, compensation, terminal",
       "height": 640,
       "narration": {
-        "scenario_fa": "یک invocation سفارش از Triggered تا Done یا Compensated. نوار main را چپ‌به‌راست بخوان، بعد انحراف‌ها را.",
+        "scenario_fa": "یه invocation سفارش از Triggered تا Done یا Compensated. نوار main رو چپ‌به‌راست بخون، بعد انحراف‌ها رو.",
         "scenario_en": "One order invocation from Triggered to Done or Compensated. Read the main lane left to right, then the exits.",
         "steps": [
           {
-            "fa": "مسیر اصلی پنج حالت دارد: Triggered، Running، Result Logged، Version Gate، Done — همه در نوار main.",
+            "fa": "مسیر اصلی پنج حالت داره: Triggered، Running، Result Logged، Version Gate، Done — همه توی نوار main.",
             "en": "The main path holds five states: Triggered, Running, Result Logged, Version Gate, Done — all on the main lane."
           },
           {
-            "fa": "کرش از Running به Retrying می‌رود (همان ستون) و با همان شناسه برمی‌گردد؛ پایان بودجه یعنی Failed.",
-            "en": "A crash leaves Running for Retrying (same column) and returns under the same id; a spent budget means Failed."
+            "fa": "کرش از Running می‌ره به Retrying (همون ستون) و با همون شناسه برمی‌گرده؛ تموم شدن بودجه یعنی Failed.",
+            "en": "A crash leaves Running for Retrying (same column) and comes back under the same id; a spent budget means Failed."
           },
           {
-            "fa": "دروازه نسخه تاریخچه قدیمی را به کد قدیمی میخ می‌کند؛ بن‌بست به Compensating و بعد Compensated پایانه می‌رسد.",
-            "en": "The version gate pins old history to old code; a dead end reaches Compensating, then terminal Compensated."
+            "fa": "دروازهٔ نسخه تاریخچهٔ قدیمی رو به کد قدیمی میخ می‌کنه؛ بن‌بست به Compensating و بعد Compensated پایانه می‌رسه.",
+            "en": "The version gate pins the old history to the old code; a dead end reaches Compensating, then the terminal Compensated."
           }
         ],
-        "point_fa": "دو نقطه تصمیم: دروازه نسخه (کدام کد قدم می‌زند؟) و خروج از Running (retry یا جبران؟).",
-        "point_en": "Two decision points: the version gate (which code walks?) and the exit from Running (retry or compensate?).",
-        "failure_fa": "جبران ناموفق در همان حلقه retry می‌ماند تا بودجه؛ invocation «منتظر اقدام» می‌شود، نه رها.",
-        "failure_en": "A failed compensation stays in the retry loop until the budget; the invocation becomes 'awaiting action', never abandoned.",
-        "guarantee_fa": "شکل نشان می‌دهد هر invocation دقیقاً در یک پایانه می‌ایستد: Done، Failed یا Compensated.",
+        "point_fa": "دو نقطهٔ تصمیم: دروازهٔ نسخه (کدوم کد قدم می‌زنه؟) و خروج از Running (retry یا جبران؟).",
+        "point_en": "Two decision points: the version gate (which code walks the history?) and the exit from Running (retry or compensate?).",
+        "failure_fa": "جبران ناموفق توی همون حلقهٔ retry می‌مونه تا بودجه ته بیاد؛ invocation «منتظر اقدام» می‌شه، نه رها.",
+        "failure_en": "A failed compensation stays in the retry loop until the budget runs out; the invocation becomes 'awaiting action', never abandoned.",
+        "guarantee_fa": "شکل نشون می‌ده هر invocation دقیقاً توی یکی از پایانه‌ها می‌ایسته: Done، Failed یا Compensated.",
         "guarantee_en": "The figure shows every invocation ends in exactly one terminal: Done, Failed or Compensated.",
-        "nonguarantee_fa": "ترتیب پیام‌های واقعی روی سیم را نشان نمی‌دهد — آن کار نمودار توالی است.",
-        "nonguarantee_en": "It does not show the actual message order on the wire — that is the sequence diagram's job."
+        "nonguarantee_fa": "ترتیب پیام‌های واقعی روی سیم رو نشون نمی‌ده — اون کار نمودار توالیه.",
+        "nonguarantee_en": "It doesn't show the actual message order on the wire — that's the sequence diagram's job."
       },
       "selfcheck": {
-        "q_fa": "چرا Compensated در نوار terminal است ولی Done در main؟",
+        "q_fa": "چرا Compensated توی نوار terminal هست ولی Done توی main؟",
         "q_en": "Why is Compensated on the terminal lane while Done stays on main?",
-        "a_fa": "هر دو پایانه‌اند ولی معنای متفاوت: Done موفقیت مسیر اصلی است، Compensated پایان مسیر جبران پس از بن‌بست.",
-        "a_en": "Both are terminal but mean different things: Done is main-path success, Compensated ends the compensation path after a dead end."
+        "a_fa": "هر دو پایانه‌ان، ولی معنای متفاوتی دارن: Done موفقیت مسیر اصلیه، Compensated پایان مسیر جبران بعد از بن‌بست.",
+        "a_en": "Both are terminal, but they mean different things: Done is main-path success, Compensated ends the compensation path after a dead end."
       }
     },
     {
@@ -209,43 +209,43 @@
       "caption_en": "Durable order workflow: steps, retry, compensation, version gate",
       "height": 640,
       "narration": {
-        "scenario_fa": "همان سفارش ۱۰۰۱ روی یک صفحه: پنج گام main، نوار retry، جبران و دروازه نسخه. از Start شروع کن.",
-        "scenario_en": "The same order 1001 on one page: five main steps, the retry strip, compensation and the version gate. Start at Start.",
+        "scenario_fa": "همون سفارش ۱۰۰۱ روی یه صفحه: پنج گام main، نوار retry، جبران و دروازهٔ نسخه. از Start شروع کن.",
+        "scenario_en": "The same order 1001 on one page: five main steps, the retry strip, compensation and the version gate. Start at Start and follow it through.",
         "steps": [
           {
-            "fa": "سطر main: پنج جعبه با guard روی هر یال — فقط گام ثبت‌شده جلو می‌رود.",
+            "fa": "سطر main: پنج جعبه با guard روی هر یال — فقط گام ثبت‌شده جلو می‌ره.",
             "en": "Main row: five boxes with a guard on each edge — only a logged step advances."
           },
           {
-            "fa": "نوار آبی: قانون retry — همان شناسه، استفاده از نتیجه ثبت‌شده.",
+            "fa": "نوار آبی: قانون retry — همون شناسه، استفاده از نتیجهٔ ثبت‌شده.",
             "en": "Blue strip: the retry rule — same step id, reuse of the logged result."
           },
           {
-            "fa": "پایین: دروازه نسخه (بازپخش v1 با کد v1) و مسیر جبران به Compensated پایانه.",
-            "en": "Below: the version gate (v1 replay on v1 code) and the compensation path to terminal Compensated."
+            "fa": "پایین: دروازهٔ نسخه (بازپخش v1 با کد v1) و مسیر جبران به Compensated پایانه.",
+            "en": "Below: the version gate (v1 replay on v1 code) and the compensation path to the terminal Compensated."
           },
           {
-            "fa": "دو سطر پانوشت: تغییرها نسخه تازه می‌خواهند؛ بدون کلید ارسال، retry کور ممنوع و مغایرت‌گیری لازم.",
+            "fa": "دو سطر پانوشت: تغییرها نسخهٔ تازه می‌خون؛ بدون کلید ارسال، retry کور ممنوعه و مغایرت‌گیری لازمه.",
             "en": "Two footer lines: changes need a new version; without a ship key, blind retry is banned and reconciliation is required."
           }
         ],
-        "point_fa": "نقطه تصمیم هر یال است: guard برقرار و نتیجه ثبت شده؟",
-        "point_en": "The decision point is every edge: guard holds and result logged?",
-        "failure_fa": "کرش میان اثر و لاگ را روی فلش ship دنبال کن: گام باز می‌ماند، دوباره با همان شناسه می‌رود.",
-        "failure_en": "Trace a crash between effect and log on the ship arrow: the step stays open and goes again under the same id.",
-        "guarantee_fa": "شکل کل استدلال را یک‌جا جمع می‌کند: شناسه، لاگ، جبران، نسخه.",
-        "guarantee_en": "The figure gathers the whole argument on one page: ids, log, compensation, versions.",
-        "nonguarantee_fa": "زمان‌بندی دقیق کرش و ترتیب پیام‌ها را نشان نمی‌دهد — آن‌ها در دو نمودار گام‌اند.",
-        "nonguarantee_en": "It does not show exact crash timing or message order — those live in the two step diagrams."
+        "point_fa": "نقطهٔ تصمیم هر یاله: guard برقراره و نتیجه ثبت شده؟",
+        "point_en": "The decision point is every edge: does the guard hold and is the result logged?",
+        "failure_fa": "کرش بین اثر و لاگ رو روی فلش ship دنبال کن: گام باز می‌مونه، دوباره با همون شناسه می‌ره.",
+        "failure_en": "Trace a crash between the effect and the log on the ship arrow: the step stays open and goes again under the same id.",
+        "guarantee_fa": "شکل کلِ استدلال رو یه‌جا جمع می‌کنه: شناسه، لاگ، جبران، نسخه.",
+        "guarantee_en": "The figure gathers the whole argument onto one page: ids, log, compensation, versions.",
+        "nonguarantee_fa": "زمان‌بندی دقیقِ کرش و ترتیب پیام‌ها رو نشون نمی‌ده — اون‌ها توی دو نمودار گام‌ان.",
+        "nonguarantee_en": "It doesn't show the exact crash timing or the message order — those live in the two step diagrams."
       },
       "selfcheck": {
-        "q_fa": "کدام دو جمله پانوشت، دو پیگیری مصاحبه را جواب می‌دهند؟",
+        "q_fa": "کدوم دو جملهٔ پانوشت، دو پیگیری مصاحبه رو جواب می‌دن؟",
         "q_en": "Which two footer lines answer the two interview follow-ups?",
-        "a_fa": "«تغییرها نسخه تازه» (نسخه‌بندی invocationهای در جریان) و «بدون کلید، retry کور ممنوع» (تضمین ضعیف‌شده ارسال).",
-        "a_en": "'Changes need a new version' (versioning in-flight invocations) and 'no key, no blind retry' (the weakened shipping guarantee)."
+        "a_fa": "«تغییرها نسخهٔ تازه» (نسخه‌بندیِ invocationهای در جریان) و «بدون کلید، retry کور ممنوع» (تضمین ضعیف‌شدهٔ ارسال).",
+        "a_en": "'Changes need a new version' (versioning the in-flight invocations) and 'no key, no blind retry' (the weakened shipping guarantee)."
       }
     }
   ],
-  "reasoning_fa": "<p>نتیجهٔ step باید ثبت شود تا replay همان تصمیم را ادامه دهد؛ اما crash پس از charge و پیش از ثبت نتیجه هنوز مبهم است. کلید ثابتِ همان step به gateway اجازه می‌دهد retry را همان عملیات بداند؛ شناسهٔ تازه در هر retry این خاصیت را از بین می‌برد. نسخهٔ workflow در invocation ثبت می‌شود تا replay بعد از deploy کد جدید مسیر دیگری نرود. تعداد step و هزینهٔ recovery، ویژگی سناریو هستند و باید با تعداد invocation و مدت retention مقیاس داده شوند.</p>",
-  "reasoning_en": "<p>Persist each step result so replay follows the original decision. A crash after charging but before logging is still ambiguous; a stable step key lets the gateway recognize the retry, while a new key per retry defeats it. Bind workflow version to invocation so deployments do not change replay paths. Recovery cost scales with invocation count, step count and retention, not a universal constant.</p>"
+  "reasoning_fa": "<p>نتیجهٔ step باید ثبت بشه تا replay همون تصمیم رو ادامه بده؛ اما crash پس از charge و پیش از ثبت نتیجه هنوز مبهمه. کلیدِ ثابتِ همون step به gateway اجازه می‌ده retry رو همون عملیات بشناسه؛ شناسهٔ تازه در هر retry این خاصیت رو از بین می‌بره. نسخهٔ workflow توی invocation ثبت می‌شه تا replay بعد از deploy کد جدید مسیر دیگه‌ای نره. تعداد step و هزینهٔ recovery هم ویژگیِ سناریوئن و باید با تعداد invocation و مدت retention مقیاس داده بشن.</p>",
+  "reasoning_en": "<p>Persist each step result so the replay follows the original decision. A crash after charging but before logging is still ambiguous; a stable step key lets the gateway recognize the retry, while a fresh key on every retry throws that away. Bind the workflow version to the invocation so a deployment can't change the replay path. And the recovery cost scales with the invocation count, the step count and the retention window — it isn't a universal constant.</p>"
 }
