@@ -32,7 +32,7 @@
   <h1 class="reveal"><span class="fa">تعریف نیازمندی‌های غیرعملکردی</span><span class="en">Defining nonfunctional requirements</span></h1>
   <p class="lede reveal">
     <span class="fa">تو این فصل کیفیت سرویس رو تبدیل می‌کنیم به سؤال‌هایی که می‌شه سنجید: جواب چقدر طول می‌کشه، سیستم چقدر بار تحمل می‌کنه و موقع خرابی چی می‌شه؟ هدف حفظ کردن عددها نیست؛ باید بفهمی هر عدد برای کاربر چه حسی می‌سازه.</span>
-    <span class="en">In this chapter we turn service quality into questions you can actually measure: how slow is too slow, how much load is too much, and what happens when pieces die? Don’t memorize numbers — learn what each number feels like for the user.</span>
+    <span class="en">How long does a user wait? How much traffic can the service handle? What happens when a component breaks? In this chapter, you'll turn those questions into requirements you can test. Give each number a meaning before you memorize it.</span>
   </p>
   <div class="meta-row reveal">
     <span><b><span class="fa">۹</span><span class="en">9</span></b> <span class="fa">نمودار تعاملی</span><span class="en">interactive diagrams</span></span><span class="dot">·</span>
@@ -112,16 +112,17 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس نیاز غیرعملکردی وقتی به درد می‌خوره که مقدار، شرایط بار و تعریف موفقیت مشخص باشه — وگرنه حرفه، نه قرارداد.</p>
 </div>
 <p>مثال‌های این فصل قصه‌های کلاسین از کارهای روزمره‌ست، نه افشای معماری یه شرکت خاص. عددها رو برای فهم انتخاب کردیم.</p></div>
-    <div class="en"><p>
-      A <b>functional requirement</b> says WHAT the software does: pages, buttons, what each click returns.
-      A <b>nonfunctional requirement</b> says HOW: fast, reliable, secure, compliant, maintainable.
-      These often go unwritten because they look “obvious” — but they’re half the job:
-      software too slow or too flaky to use basically doesn’t exist.
-    </p></div>
+    <div class="en"><p>“Return search results” tells you what the software does. That's a <b>functional requirement</b>. “Return them quickly under a stated load” tells you how well it needs to work. That's a <b>nonfunctional requirement</b>.</p><p>Speed, reliability, security, compliance and maintainability need to be stated, even when they seem obvious. A feature that people can't use because it's too slow or unreliable hasn't met their need.</p><p>The examples here are teaching scenarios based on everyday engineering work. They don't describe a particular company's architecture, and the numbers are chosen to make the ideas easier to follow.</p>
+<div class="callout" data-en-example="example-ch2-0">
+<p class="example-title"><b>Example: A search requirement you can test</b></p>
+<p><b>Setup:</b> At <code dir="ltr">1000 req/s</code>, the API's target is to finish at least 99% of successful requests within <code dir="ltr">300 ms</code>.</p>
+<p><b>Walk through it:</b> The load test records the arrival rate, errors and response-time distribution together. Ten quick responses don't establish the target.</p>
+<p><b>What this tells you:</b> A useful nonfunctional requirement states the value, the load conditions and what counts as success. That gives the test something concrete to check.</p>
+</div></div>
   </div>
 
   <div class="fa"><p>تو این فصل می‌چسبیم به چهار تا از این نیازمندی‌ها (بقیه مثل security بیرون کتابه):</p></div>
-  <div class="en"><p>This chapter sticks to four of them (the rest, like security, live outside this book):</p></div>
+  <div class="en"><p>We'll work through four of these requirements. Other areas, such as security, are outside this book's scope:</p></div>
   <div class="fa"><ul>
     <li><b>Performance:</b> تعریف و سنجش سرعت سیستم</li>
     <li><b>Reliability:</b> درست کار کردن، حتی وقتی یه چیزی می‌ترکه</li>
@@ -129,18 +130,15 @@
     <li><b>Maintainability:</b> آسون نگه‌داشتن نگه‌داری بلندمدت سیستم</li>
   </ul></div>
   <div class="en"><ul>
-    <li><b>Performance:</b> naming and measuring how fast the thing is</li>
-    <li><b>Reliability:</b> working right even when pieces blow up</li>
-    <li><b>Scalability:</b> growing compute muscle as load grows</li>
-    <li><b>Scalability:</b> effectively adding compute capacity as load grows</li>
-    <li><b>Maintainability:</b> keeping the system easy to babysit for years</li>
-  </ul></div>
+<li><b>Performance:</b> define and measure how quickly the system responds and how much work it completes</li>
+<li><b>Reliability:</b> keep doing the right thing when components break</li>
+<li><b>Scalability:</b> add capacity effectively as load grows</li>
+<li><b>Maintainability:</b> keep the system understandable, operable and changeable over time</li>
+</ul></div>
   <div class="fa"><p>
     لغت‌های این فصل پایهٔ فصل‌های بعدیه؛ برای همین کتاب با یه کیس عینی شروع می‌کنه — بزن بریم.
   </p></div>
-  <div class="en"><p>
-    This chapter’s vocabulary holds up the later ones — that’s why the book opens with a real case. Let’s dive in.
-  </p></div>
+  <div class="en"><p>You'll use this vocabulary throughout the later chapters. Start with a timeline people can open and refresh; it gives each term a concrete job.</p></div>
 
   <div class="diagram">
     <div class="cap">
@@ -159,7 +157,13 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس نیاز غیرعملکردی وقتی به درد می‌خوره که مقدار، شرایط بار و تعریف موفقیت مشخص باشه — وگرنه حرفه، نه قرارداد.</p>
 </div>
 <p>این نقشه را مثل چهار ستون کنار هم بخوانید. ستون اول (<span class="ltr">Performance</span>): زمان پاسخ، توان عملیاتی، صدک‌ها و SLO/SLA — موضوع بخش ۲. ستون دوم (<span class="ltr">Reliability</span>): فرق خرابی جزء و خرابی کل، نبود نقطهٔ شکست واحد، تزریق خرابی و مرور بی‌سرزنش — بخش ۳. ستون سوم (<span class="ltr">Scalability</span>): توصیف بار، مقیاس عمودی یا افقی، بازاندیشی با هر ۱۰ برابر رشد — بخش ۴. ستون چهارم (<span class="ltr">Maintainability</span>): قابلیت اجرا، سادگی و تکامل‌پذیری — بخش ۵. پانوشت پایین شکل هم مرز کتاب را می‌گوید: امنیت و انطباق بیرون از دامنه‌اند.</p></div>
-    <div class="en"><p>Read this map as four pillars side by side. First pillar (<span class="ltr">Performance</span>): response time, throughput, percentiles and SLO/SLA — section 2. Second (<span class="ltr">Reliability</span>): fault vs failure, no single point of failure, fault injection and blameless reviews — section 3. Third (<span class="ltr">Scalability</span>): describing load, scaling up or out, rethinking at every 10x — section 4. Fourth (<span class="ltr">Maintainability</span>): operability, simplicity and evolvability — section 5. The footnote states the book’s boundary: security and compliance are out of scope.</p></div>
+    <div class="en"><div class="callout" data-en-example="example-ch2-0">
+<p class="example-title"><b>Example: A search requirement you can test</b></p>
+<p><b>Setup:</b> At <code dir="ltr">1000 req/s</code>, the API's target is to finish at least 99% of successful requests within <code dir="ltr">300 ms</code>.</p>
+<p><b>Walk through it:</b> The load test records the arrival rate, errors and response-time distribution together. Ten quick responses don't establish the target.</p>
+<p><b>What this tells you:</b> A useful nonfunctional requirement states the value, the load conditions and what counts as success. That gives the test something concrete to check.</p>
+</div>
+<p>Read the four pillars side by side. The first, <span class="ltr">Performance</span>, takes you to response time, throughput, percentiles and SLO/SLA in section 2. The second, <span class="ltr">Reliability</span>, covers faults, failures, single points of failure, fault injection and blameless reviews in section 3.</p><p>The third, <span class="ltr">Scalability</span>, asks how load grows and whether to scale up or out, with a fresh look at each 10x increase in section 4. The fourth, <span class="ltr">Maintainability</span>, covers operability, simplicity and evolvability in section 5. Check the footnote too: security and compliance are outside the book's scope.</p></div>
   </div>
 </section>
 
@@ -178,11 +182,13 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس روش دوم خوندن رو سبک می‌کنه، ولی هزینه می‌ره سمت انتشار پست و تازه نگه داشتن فهرست — بار از دوش خوندن برداشته می‌شه، می‌افته رو دوش نوشتن.</p>
 </div>
 </div>
-    <div class="en"><p>
-      Say we’re building an X-style (old Twitter) network: people post, people follow.
-      The star of the show is the <b>home timeline</b>: fresh posts from folks you follow.
-      Everything naps in one relational database with three tables: <code>users</code>, <code>posts</code>, <code>follows</code>. Cozy — for now.
-    </p></div>
+    <div class="en"><p>Picture an X-style network, formerly Twitter: people post and follow each other. The <b>home timeline</b> shows recent posts from the people a user follows. Start with three relational tables: <code>users</code>, <code>posts</code> and <code>follows</code>.</p><p>The design question is simple: assemble the timeline when someone opens it, or prepare it when a post is published? Moving that work changes which part of the system pays for it.</p>
+<div class="callout" data-en-example="example-ch2-1">
+<p class="example-title"><b>Example: Building one user’s timeline</b></p>
+<p><b>Setup:</b> User <code dir="ltr">u1</code> follows 200 people, and the page needs 20 posts.</p>
+<p><b>Walk through it:</b> You can collect and sort those 200 authors' posts at read time, or keep a prepared list of post IDs for <code dir="ltr">u1</code>.</p>
+<p><b>What this tells you:</b> The prepared list makes reads cheaper. Publication and keeping the list fresh take more work instead. The work moved; it didn't disappear.</p>
+</div></div>
   </div>
 
   <h3><span class="fa">اعداد بار کاری (برای فهمِ اثرِ بار بر طراحی)</span><span class="en">Workload numbers (memorize these — interviews ask for them)</span></h3>
@@ -200,10 +206,16 @@
     <li>روزانه <b>۵۰۰ میلیون پست</b> ≈ میانگین <b>۵,۸۰۰ پست/ثانیه</b>؛ اوج مراسم خاص تا <b>۱۵۰,۰۰۰ پست/ثانیه</b> — آتیش‌بازی.</li>
     <li>هر کاربر میانگین <b>۲۰۰ نفر</b> رو دنبال می‌کنه و <b>۲۰۰ فالوور</b> داره (ولی توزیع خیلی کجه: اکثرا فالوور کم، چند تا سلبریتی بالای ۱۰۰ میلیون).</li>
   </ul></div>
-  <div class="en"><ul>
-    <li><b>500 million posts</b> per day ≈ an average of <b>5,800 posts/second</b>; special-event peaks up to <b>150,000 posts/second</b>.</li>
-    <li>Each user follows <b>200 people</b> on average and has <b>200 followers</b> (but yikes, the skew: most have a handful, a few celebrities top 100 million).</li>
-  </ul></div>
+  <div class="en"><p>Counting users alone won't tell you the load. You also need request rates, data volume, the read/write ratio and where traffic concentrates. Use these case-study inputs:</p><ul>
+<li><b>500 million posts</b> per day ≈ <b>5,800 posts/second</b> on average, with special-event peaks up to <b>150,000 posts/second</b>.</li>
+<li>Each user follows <b>200 people</b> and has <b>200 followers</b> on average. The distribution is uneven: most have few followers; a few celebrities have more than 100 million.</li>
+</ul>
+<div class="callout" data-en-example="example-ch2-2">
+<p class="example-title"><b>Example: Calculating polling load</b></p>
+<p><b>Setup:</b> A million active users refresh every <code dir="ltr">5 s</code>.</p>
+<p><b>Walk through it:</b> That's <code dir="ltr">1,000,000 / 5 = 200,000 req/s</code>. With 200 followees per user, each request can also need to merge several authors' posts.</p>
+<p><b>What this tells you:</b> User count alone doesn't tell you the required capacity. Include the refresh interval and the work per request.</p>
+</div></div>
 
   <h3 id="s1-0"><span class="fa">نمودار ER — اسکیمای شبکهٔ اجتماعی</span><span class="en">ER diagram — the social-network schema</span></h3>
   <div class="diagram">
@@ -241,25 +253,13 @@
       و چون «derived» ـه، می‌تونیم از پیش بسازیمش — همون راه‌حلی که تو نمودار بعدی می‌بینی.
     </p>
     </div>
-    <div class="en">
-    <p>
-      This is an ER diagram: boxes are entities (tables), arrows are foreign-key flings with cardinality — the database’s ID card.
-      Start at the left box: <span class="ltr">“users”</span>, subtitled “PK user_id, name”.
-      Two arrows walk out of it: “1..N writes” up to <span class="ltr">“posts”</span>
-      (“PK post_id, FK sender_id, ts”), and “1..N follower” downward to the <span class="ltr">“follows”</span> table.
-    </p>
-    <p>
-      The follows table wears the “join table” tag, flashing two foreign keys: follower_id and followee_id.
-      The dashed “N..1 followee” arrow from follows to users spells it out: each follows row points at two users,
-      one follower, one followee — and that one line is what makes the timeline query hurt.
-    </p>
-    <p>
-      Now glance right at the <span class="ltr">“Home Timeline”</span> box, tagged “derived view”.
-      Two fat arrows land on it: “JOIN follows” from posts, “JOIN posts” from follows.
-      That’s exactly the pricey query from above: 2M queries/second × 200 followers ≈ 400M lookups/second — sit with that number a moment.
-      And since it’s “derived”, we can just prebuild it — the fix waiting in the next diagram.
-    </p>
-    </div>
+    <div class="en"><div class="callout" data-en-example="example-ch2-1">
+<p class="example-title"><b>Example: Building one user’s timeline</b></p>
+<p><b>Setup:</b> User <code dir="ltr">u1</code> follows 200 people, and the page needs 20 posts.</p>
+<p><b>Walk through it:</b> You can collect and sort those 200 authors' posts at read time, or keep a prepared list of post IDs for <code dir="ltr">u1</code>.</p>
+<p><b>What this tells you:</b> The prepared list makes reads cheaper. Publication and keeping the list fresh take more work instead. The work moved; it didn't disappear.</p>
+</div>
+<p>Read the boxes as tables and the arrows as foreign-key relationships with cardinality. Begin on the left with <span class="ltr">“users”</span>, labelled “PK user_id, name”. The “1..N writes” arrow leads to <span class="ltr">“posts”</span>, labelled “PK post_id, FK sender_id, ts”. The “1..N follower” arrow leads to <span class="ltr">“follows”</span>.</p><p>The follows table is a join table with two foreign keys, follower_id and followee_id. Follow the dashed “N..1 followee” arrow back to users. Each follows row points to two users: the person following and the person being followed. The timeline query has to use those relationships to find the right posts.</p><p>Now look at <span class="ltr">“Home Timeline”</span> on the right, labelled “derived view”. The incoming arrows say “JOIN follows” and “JOIN posts”. Under the case-study assumptions, 2M queries/second × 200 followees ≈ 400M lookups/second. Because the timeline is derived, you can prepare it ahead of time. That's the option to compare next.</p></div>
   </div>
 
   <h3><span class="fa">راه‌حل اولیه: کوئری JOIN + Polling (چرا شکست می‌خورد)</span><span class="en">First attempt: JOIN query + polling (why it fails)</span></h3>
@@ -272,20 +272,23 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس polling همیشه ممنوع نیست؛ توی این بار، هزینهٔ تکرار بی‌تغییر علت فشاره — ۱۲ بار همون جواب!</p>
 </div>
 </div>
-  <div class="en"><p>
-    The timeline query is a <code>JOIN</code> of <code>posts</code> and <code>follows</code>, newest first, <code>LIMIT 1000</code>.
-    Now let every client hammer it every 5 seconds (<span class="ltr">polling</span>) with 10 million users online:
-  </p></div>
+  <div class="en"><p>The read-time approach runs a <code>JOIN</code> over <code>posts</code> and <code>follows</code>, sorts newest first, and applies <code>LIMIT 1000</code>. Even without a new post, each refresh repeats that work. Try <span class="ltr">polling</span> every 5 seconds with 10 million users online:</p>
+<div class="callout" data-en-example="example-ch2-3">
+<p class="example-title"><b>Example: Repeating a query when nothing changed</b></p>
+<p><b>Setup:</b> User <code dir="ltr">u1</code> queries followed accounts' posts every 5 seconds. No new posts arrive for a minute.</p>
+<p><b>Walk through it:</b> The same join and sort run 12 times. A cache or sending changes can reduce that repeated calculation.</p>
+<p><b>What this tells you:</b> Polling isn't always wrong. In this workload, repeating unchanged work is the pressure to address. Twelve queries can still return the same answer.</p>
+</div></div>
   <div class="fa"><ul>
     <li><b>۲ میلیون کوئری تایم‌لاین در ثانیه</b> (۱۰ میلیون ÷ ۵ ثانیه) — حساب کتابش با تو</li>
     <li>هر کوئری باید پست‌های ۲۰۰ نفر رو جمع کنه ← <b>۴۰۰ میلیون lookup در ثانیه</b> — اون هم تو حالت میانگین! نفست بند اومد؟</li>
     <li>کاربرهایی که ده‌ها هزار نفر رو دنبال می‌کنن، عملاً این کوئری رو ناممکن می‌کنن — تمام.</li>
   </ul></div>
   <div class="en"><ul>
-    <li><b>2 million timeline queries a second</b> (10M ÷ 5s) — do the math with me</li>
-    <li>Each query must round up 200 people’s posts → <b>400M lookups/second</b> — and that’s the AVERAGE case. Breathe.</li>
-    <li>Folks following tens of thousands make this query flat-out impossible. Game over for the naive plan.</li>
-  </ul></div>
+<li><b>2 million timeline queries a second</b>: 10M ÷ 5s.</li>
+<li>Each query collects posts from 200 followees: about <b>400M lookups/second</b> under this average-case estimate.</li>
+<li>Users following tens of thousands make the read-time query much more expensive.</li>
+</ul><p>The refresh interval and work per query matter just as much as the user count.</p></div>
 
   <h3 id="s1-1"><span class="fa">راه‌حل بهتر: Materialization و Fan-out on Write</span><span class="en">Better fix: materialization and fan-out on write</span></h3>
   <div class="fa">
@@ -297,9 +300,13 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس یه نوشتن اولیه ۱۰۰۰ تا نوشتن مشتق می‌سازه. برای نویسندهٔ خیلی پرطرفدار می‌تونی ادغام موقع خوندن رو جدا بررسی کنی — سلبریتی استثناست، یادت باشه.</p>
 </div>
 </div>
-  <div class="en"><p>
-    Flip it: instead of assembling at read time, precompute the answer and keep it warm:
-  </p></div>
+  <div class="en"><p>Move the work earlier. Prepare a timeline per user and update it when posts arrive, so opening the page reads a ready-made list. That's materialization with fan-out on write: cheaper reads, more work at publication time.</p>
+<div class="callout" data-en-example="example-ch2-4">
+<p class="example-title"><b>Example: Fan-out when a post is published</b></p>
+<p><b>Setup:</b> Post <code dir="ltr">p9</code> comes from an author with 1,000 followers.</p>
+<p><b>Walk through it:</b> A worker adds <code dir="ltr">p9</code> to 1,000 timelines. Later, each reader opens a prepared list.</p>
+<p><b>What this tells you:</b> One original write creates 1,000 derived writes. For a very popular author, consider merging posts at read time instead. The follower distribution changes the cost.</p>
+</div></div>
   <div class="fa"><ol>
     <li><b>Push به‌جای Poll:</b> سرور پست‌های تازه رو هل بده سمت فالوورهای آنلاین.</li>
     <li><b>Materialized View:</b> برای هر کاربر یه تایم‌لاین آماده نگه دار (مثل رسوندن نامه به صندوق پستی — پستچی باش).</li>
@@ -310,14 +317,12 @@
     <li>تو اوج بار تحویل‌ها رو بنداز تو صف (<span class="ltr">enqueue</span>)؛ تایم‌لاین‌ها همچنان تند بالا میان چون از کش میان.</li>
   </ol></div>
   <div class="en"><ol>
-    <li><b>Push instead of poll:</b> the server shoves fresh posts at online followers.</li>
-    <li><b>Materialized view:</b> keep a ready-made timeline per user (play postman: letters straight to mailboxes).</li>
-    <li><b>Fan-out:</b> somebody posts, that post lands in every follower’s timeline.
-      Downstream requests per original request — that ratio is the <b>fan-out factor</b>. Learn the name.</li>
-    <li>Do the math: 5,800 posts/s × 200 followers ≈ <b>1.16M timeline writes/second</b> —
-      a lot, sure — but a giant saving next to 400M lookups/second. Deal of the century.</li>
-    <li>At peak, toss deliveries in a queue (<span class="ltr">enqueue</span>); timelines still snap open because they come from cache.</li>
-  </ol></div>
+<li><b>Push instead of poll:</b> send new posts to online followers.</li>
+<li><b>Materialized view:</b> keep a prepared timeline for each user.</li>
+<li><b>Fan-out:</b> publishing one post adds it to each follower's timeline. The number of downstream operations per original operation is the <b>fan-out factor</b>.</li>
+<li>With these inputs, 5,800 posts/s × 200 followers ≈ <b>1.16M timeline writes/second</b>. Compare that with 400M lookups/second in the read-time design.</li>
+<li>At peak load, <span class="ltr">enqueue</span> the deliveries. Reads still use the cached timeline while queued updates catch up.</li>
+</ol></div>
 
   <div class="callout warn">
     <div class="tag"><span class="fa">حالت‌های حدی (Extreme Cases)</span><span class="en">Edge cases</span></div>
@@ -326,9 +331,9 @@
       <li><b>سلبریتی با میلیون‌ها فالوور:</b> حذف نوشتن‌ها قبول نیست. راه‌حل: پست‌های سلبریتی رو جدا ذخیره کن و موقع خوندن با تایم‌لاین آماده <b>قاطی</b> کن.</li>
     </ul></div>
     <div class="en"><ul>
-      <li><b>Glutton following thousands:</b> they never read it all anyway, so dropping some writes (sampling) is fine — nobody mourns them.</li>
-      <li><b>Celebrity with millions of followers:</b> dropping writes is not acceptable. Fix: store celebrity posts separately and <b>merge</b> them with the materialized timeline at read time.</li>
-    </ul></div>
+<li><b>A user following thousands:</b> sampling some timeline writes can reduce work in this design, since the user won't read every post.</li>
+<li><b>A celebrity with millions of followers:</b> keep those posts separately and <b>merge</b> them into the prepared timeline at read time. This avoids a write to every follower's timeline for each celebrity post.</li>
+</ul></div>
   </div>
 
   <div class="diagram">
@@ -380,38 +385,13 @@
       نتیجه همون trade-off معروفه: خوندن ارزون و نوشتن گرون؛ ۱.۱۶ میلیون نوشتن/ثانیه رو قبول می‌کنیم تا ۴۰۰ میلیون lookup/ثانیه رو حذف کنیم — معامله رو یادت باشه.
     </p>
     </div>
-    <div class="en">
-    <p>
-      This is a sequence diagram: six players left to right, under three separate bands — let’s meet them.
-      First, roll call: <span class="ltr">“Author”</span> (“posts 5,800/s”),
-      <span class="ltr">“Publish API”</span> (“ingest post”), <span class="ltr">“Posts DB”</span> (“system of record”),
-      <span class="ltr">“Fan-out Worker”</span> (“per-follower insert”), <span class="ltr">“Timeline Cache”</span> (“materialized view”)
-      and <span class="ltr">“Reader App”</span> (“home timeline”). The three bands on top are:
-      <span class="ltr">“Publish”</span>, <span class="ltr">“Fan-out on write”</span> and <span class="ltr">“Read home timeline”</span>.
-    </p>
-    <p>
-      Start with band one, <span class="ltr">“Publish”</span>. The fat “POST /posts” arrow runs from Author to Publish API,
-      then the fat “insert post” arrow from Publish API to Posts DB — tagged “system of record”, the post’s true home.
-      The “post id” arrow bounces back from Posts DB to Publish API, and the write path closes with “201 created” to Author. Done.
-    </p>
-    <p>
-      Band two, <span class="ltr">“Fan-out on write”</span>: the dashed “enqueue delivery” arrow runs from Publish API to Fan-out Worker —
-      post delivery lands in a queue that soaks spikes up to 150,000 posts/s. Then the fat “insert per follower” arrow runs
-      from Fan-out Worker to Timeline Cache: the post drops into every follower’s timeline — the label reads
-      “fan-out factor 200: about 1.16M timeline writes/s”. The “ack” arrow bounces from Timeline Cache back to Fan-out Worker.
-    </p>
-    <p>
-      Band three, <span class="ltr">“Read home timeline”</span>: the fat “GET home timeline” arrow runs from Reader App to Timeline Cache,
-      and the “1,000 recent posts” return fetches the latest thousand. The label reads “served from cache, no joins”:
-      reading the timeline is one cache hit — no <code>JOIN</code>, no sorting. And the last dashed arrow, “push new items”,
-      flies straight from Fan-out Worker to Reader App: “push replaces polling every 5s”.
-    </p>
-    <p>
-      The lesson hides in the two dashed arrows, <span class="ltr">“enqueue delivery”</span> and <span class="ltr">“push new items”</span>:
-      both are <span class="ltr">async</span> (see “async trace” in the legend) — a queue for the rush hour, push instead of polling.
-      The payoff is the famous trade-off: cheap reads, pricey writes; we swallow 1.16M writes/second to kill 400M lookups/second — remember the deal.
-    </p>
-    </div>
+    <div class="en"><div class="callout" data-en-example="example-ch2-4">
+<p class="example-title"><b>Example: Fan-out when a post is published</b></p>
+<p><b>Setup:</b> Post <code dir="ltr">p9</code> comes from an author with 1,000 followers.</p>
+<p><b>Walk through it:</b> A worker adds <code dir="ltr">p9</code> to 1,000 timelines. Later, each reader opens a prepared list.</p>
+<p><b>What this tells you:</b> One original write creates 1,000 derived writes. For a very popular author, consider merging posts at read time instead. The follower distribution changes the cost.</p>
+</div>
+<p>Read this sequence diagram from top to bottom. The six participants run left to right: <span class="ltr">“Author”</span> (“posts 5,800/s”), <span class="ltr">“Publish API”</span> (“ingest post”), <span class="ltr">“Posts DB”</span> (“system of record”), <span class="ltr">“Fan-out Worker”</span> (“per-follower insert”), <span class="ltr">“Timeline Cache”</span> (“materialized view”) and <span class="ltr">“Reader App”</span> (“home timeline”). The three bands separate <span class="ltr">“Publish”</span>, <span class="ltr">“Fan-out on write”</span> and <span class="ltr">“Read home timeline”</span>.</p><p>In <span class="ltr">“Publish”</span>, follow “POST /posts” from Author to Publish API, then “insert post” into Posts DB. This is the authoritative write. “post id” returns to the API, which replies “201 created” to the author.</p><p>In <span class="ltr">“Fan-out on write”</span>, the dashed “enqueue delivery” arrow hands the fan-out work to a queue. The diagram uses a peak of 150,000 posts/s. “insert per follower” adds the post to the Timeline Cache, followed by “ack”. The label “fan-out factor 200: about 1.16M timeline writes/s” uses the average publication rate.</p><p>In <span class="ltr">“Read home timeline”</span>, Reader App sends “GET home timeline” to the cache and receives “1,000 recent posts”. The prepared list avoids a read-time <code>JOIN</code> and sort. The dashed “push new items” arrow sends updates to online readers instead of polling every 5s.</p><p>Check the two dashed arrows, <span class="ltr">“enqueue delivery”</span> and <span class="ltr">“push new items”</span>. Both are <span class="ltr">async</span>; the legend calls this an “async trace”. The queue absorbs bursts and push avoids repeated polling. Under these assumptions, the design trades 400M lookups/second for about 1.16M timeline writes/second. Reads get cheaper because writes do more work.</p></div>
   </div>
 
   <div class="callout">
@@ -422,12 +402,7 @@
       <b>۳) حالت حدی رو فراموش نکن</b> (سلبریتی و کاربر پرمصرف) — اینجا خیلی‌ها لو می‌رن.
       همین الگو تو دنیاهای دیگه هم تکرار می‌شه: مثلاً گزارش‌های مالی دوره‌ای رو «متریالایز» می‌کنن تا خوندن تند بمونه و خرجش رو موقع نوشتن بدن.
     </p></div>
-    <div class="en"><p>
-      This case is literally the famous “Design Twitter Timeline” question. A strong answer has three layers — listen up:
-      <b>1) run the numbers</b> (load), <b>2) name the trade-off</b> (materialized view: cheap reads, pricey writes),
-      <b>3) never skip the edge case</b> (celebrities and power users) — that’s where most people slip.
-      Same pattern everywhere: periodic financial reports get “materialized” so reads stay fast, and the bill lands at write time.
-    </p></div>
+    <div class="en"><p>For a “Design Twitter Timeline” discussion, build the answer in three steps: <b>1) calculate the load</b>, <b>2) explain the trade-off</b> of a materialized view, and <b>3) handle the extremes</b>, including celebrities and users who follow many people.</p><p>You can reuse that reasoning elsewhere. A prepared financial report also makes reads faster by doing more work when the source data changes.</p></div>
   </div>
 </section>
 <!-- ============ SECTION 2 ============ -->
@@ -443,12 +418,11 @@
     </tbody>
   </table></div>
   <div class="en"><table>
-    <thead><tr><th>Metric</th><th>Definition</th><th>Case-study example</th></tr></thead>
-    <tbody>
-      <tr><td><span class="ltr">Response Time</span></td><td>Stopwatch from user click to answer in hand (seconds/milliseconds)</td><td>Timeline load time</td></tr>
-      <tr><td><span class="ltr">Throughput</span></td><td>Requests or bytes per second; every box has a ceiling</td><td>Posts/second, timeline writes/second</td></tr>
-    </tbody>
-  </table></div>
+<thead><tr><th>Metric</th><th>Definition</th><th>Case-study example</th></tr></thead>
+<tbody>
+<tr><td><span class="ltr">Response Time</span></td><td>Elapsed time from the user's action to receiving the answer (seconds or milliseconds)</td><td>Timeline load time</td></tr>
+<tr><td><span class="ltr">Throughput</span></td><td>Requests completed or bytes processed per second</td><td>Posts per second, timeline writes per second</td></tr>
+</tbody></table></div>
 
   <div class="callout">
     <div class="tag"><span class="fa">زیر ذره‌بین</span><span class="en">Under the lens</span></div>
@@ -464,16 +438,11 @@
         بقیه با اینکه زود تموم می‌شن، کند به نظر می‌رسن. ← <b>response time رو سمت کلاینت اندازه بگیر، نه سرور.</b> — اینو با طلا بنویس.</li>
     </ul></div>
     <div class="en"><ul>
-      <li><b>How they relate:</b> load climbs, <span class="ltr">response time</span> climbs; the villain is <b>queueing</b>.
-        Near the hardware ceiling, queue delay goes vertical. Boom.</li>
-      <li><b>The four-piece formula:</b> <span class="ltr">response time</span> (what the client feels) =
-        <span class="ltr">service time</span> (real work) + <span class="ltr">queueing delay</span> (loitering in line) +
-        <span class="ltr">network latency</span> (road trip). Add the three.</li>
-      <li><b>Jitter:</b> even the same request twice takes different times: context switches, lost packets and retransmission,
-        <span class="ltr">garbage collection</span> hiccups, <span class="ltr">page faults</span>, even a rack’s mechanical shiver! The world is noisy.</li>
-      <li><b>Head-of-line blocking:</b> a server only juggles a few tasks, so a few slow ones clog the line behind them;
-        the rest look slow though their own work is quick. → <b>Measure at the client, not the server.</b> Write that in gold.</li>
-    </ul></div>
+<li><b>How they relate:</b> as load approaches capacity, <span class="ltr">response time</span> can rise sharply because of <b>queueing</b>. Requests spend more time waiting even if the work itself stays short.</li>
+<li><b>Separate the pieces:</b> <span class="ltr">response time</span> at the client includes <span class="ltr">service time</span>, plus <span class="ltr">queueing delay</span>, plus <span class="ltr">network latency</span>. Measure the whole path, then find which part grew.</li>
+<li><b>Jitter:</b> repeating the same request doesn't guarantee the same time. Context switches, packet loss and retransmission, <span class="ltr">garbage collection</span>, <span class="ltr">page faults</span> and even mechanical vibration can change it.</li>
+<li><b>Head-of-line blocking:</b> a few slow requests can hold up others behind them when concurrency is limited. <b>Measure response time at the client</b> so that waiting doesn't disappear from the result.</li>
+</ul></div>
   </div>
 
   <div class="callout warn">
@@ -487,13 +456,13 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس service time همون زمان اجرای کاره؛ response time انتظار رو هم داره. throughput هم تعداد کار تموم‌شده توی واحد زمانه — سه‌تا عدد جدا، قاطی‌شون نکن.</p>
 </div>
 </div>
-    <div class="en"><p>
-      Long queue → slow answers → client timeouts → retries → even more load. This death spiral
-      (<span class="ltr">retry storm</span>) can pin the system down long after the rush is over.
-      Antidotes: <span class="ltr">exponential backoff</span> (retry gaps that grow and jitter),
-      <span class="ltr">circuit breaker</span> or <span class="ltr">token bucket</span> (stop knocking on the broken door for a while),
-      <span class="ltr">load shedding</span> (saying no on purpose) and <span class="ltr">backpressure</span> (tell clients to slow down).
-    </p></div>
+    <div class="en"><p>Follow the loop: a longer queue means slower responses; clients time out and retry; those retries add more load. A <span class="ltr">retry storm</span> can keep the service overloaded after the original traffic spike has passed.</p><p>Break the loop with <span class="ltr">exponential backoff</span> and jitter to spread retries, a <span class="ltr">circuit breaker</span> to stop calling an unhealthy dependency, a <span class="ltr">token bucket</span> to limit the request rate, <span class="ltr">load shedding</span> to reject work deliberately, and <span class="ltr">backpressure</span> to tell upstream callers to slow down. A bigger queue alone doesn't fix excess load.</p>
+<div class="callout" data-en-example="example-ch2-5">
+<p class="example-title"><b>Example: Response time and capacity</b></p>
+<p><b>Setup:</b> A worker processes a request in <code dir="ltr">20 ms</code>, but the request spends <code dir="ltr">180 ms</code> waiting in a queue.</p>
+<p><b>Walk through it:</b> The server-side response time is <code dir="ltr">200 ms</code>. Several workers might collectively complete <code dir="ltr">1000 req/s</code>.</p>
+<p><b>What this tells you:</b> Service time measures the work. Response time also includes waiting. Throughput counts completed work per unit of time. Keep those three measurements separate.</p>
+</div></div>
   </div>
 
   <h3 id="s2-0"><span class="fa">نمودار وضعیت — از اضافه‌بار تا فروپاشی پایدار</span><span class="en">State diagram — from overload to stable collapse</span></h3>
@@ -536,29 +505,13 @@
       همون‌طور که فلش چین‌چین «reboot / reset» نشون می‌ده، گاهی فقط یه ری‌استارت برش می‌گردونه به «Healthy» — دکمهٔ پاور، آخرین راه.
     </p>
     </div>
-    <div class="en">
-    <p>
-      This is a state machine — read it like a comic strip. Start at the top lane,
-      <span class="ltr">“Service health”</span>: the <span class="ltr">“Healthy”</span> start box (“load within capacity”).
-      The “load grows” arrow reaches <span class="ltr">“Near Overload”</span> (“throughput at capacity”),
-      and from there the fat “near capacity” arrow yeets us into the middle lane: <span class="ltr">“Overload spiral”</span>. The whirlpool.
-    </p>
-    <p>
-      In this lane three boxes sit in sequence: <span class="ltr">“Queueing”</span> (“response time rises”) →
-      “delay exceeds timeout” → <span class="ltr">“Client Timeouts”</span> (“requests abandoned”) →
-      dashed “clients retry” → <span class="ltr">“Retry Storm”</span> (“requests multiply”).
-      Now the scariest arrow on the page: “more load” loops from “Retry Storm” back to “Queueing”. Goosebumps?
-      A loop that feeds itself — eating its own tail.
-    </p>
-    <p>
-      Three escape hatches out of this spiral. The “levers applied” guard arrow heads to the
-      <span class="ltr">“Mitigations”</span> lane: the <span class="ltr">“Mitigation On”</span> box (“backoff, breaker, shedding”),
-      then “queue drains” to <span class="ltr">“Recovered”</span>.
-      But the “no reset” arrow takes another path: to <span class="ltr">“Metastable Failure”</span> —
-      subtitled “persists after load drops”. The rush is over and the system still won’t get up;
-      as the dashed “reboot / reset” arrow admits, sometimes only a restart drags it back to “Healthy” — the power button, last resort.
-    </p>
-    </div>
+    <div class="en"><div class="callout" data-en-example="teacher-4">
+<p class="example-title"><b>Example: The overload and retry loop</b></p>
+<p><b>Setup:</b> The service can process 100 requests per second, but 120 arrive.</p>
+<p><b>Walk through it:</b> The queue and timeouts grow. If 30 requests retry immediately, arrivals rise to 150. Admission control, backoff and a retry budget need to control that load.</p>
+<p><b>What this tells you:</b> A larger queue only buys time. To recover, admitted work has to fit capacity. More retries can keep the overload going.</p>
+</div>
+<p>Start in the <span class="ltr">“Service health”</span> lane at <span class="ltr">“Healthy”</span>, labelled “load within capacity”. Follow “load grows” to <span class="ltr">“Near Overload”</span>, where throughput reaches capacity. The “near capacity” arrow leads into <span class="ltr">“Overload spiral”</span>.</p><p>Read that loop carefully. <span class="ltr">“Queueing”</span> raises response time. “delay exceeds timeout” leads to <span class="ltr">“Client Timeouts”</span>. The dashed “clients retry” arrow reaches <span class="ltr">“Retry Storm”</span>, then “more load” loops back to Queueing. Each retry can make the next request wait longer.</p><p>For the recovery path, follow “levers applied” into <span class="ltr">“Mitigations”</span>. At <span class="ltr">“Mitigation On”</span>, backoff, a breaker and shedding let the queue drain toward <span class="ltr">“Recovered”</span>. The alternative “no reset” path leads to <span class="ltr">“Metastable Failure”</span>, labelled “persists after load drops”. The dashed “reboot / reset” arrow shows a last-resort route back to Healthy. The point is to control admitted work before the queue and retries keep each other alive.</p></div>
   </div>
 
   <h3 id="s2-2"><span class="fa">میانگین در برابر Percentile</span><span class="en">Mean vs percentiles</span></h3>
@@ -571,9 +524,13 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس هدف صدک باید مشخص باشه. میانگین خوب می‌تونه با تجربهٔ بد یه گروه از کاربرها همراه باشه — میانگین دروغگوی خوش‌روئه!</p>
 </div>
 </div>
-  <div class="en"><p>
-    Response time isn’t a number, friend — it’s a whole crowd. Treat it like one:
-  </p></div>
+  <div class="en"><p>A mean response time compresses many different waits into one number. Look at the distribution too: what share of requests finished before a given time, and how long did the slowest group wait?</p>
+<div class="callout" data-en-example="example-ch2-6">
+<p class="example-title"><b>Example: An average can hide the slowest requests</b></p>
+<p><b>Setup:</b> Out of 1,000 requests, 990 finish in <code dir="ltr">10 ms</code> and 10 take <code dir="ltr">1000 ms</code>.</p>
+<p><b>Walk through it:</b> The mean is <code dir="ltr">19.9 ms</code>. With the nearest-rank method, <code dir="ltr">p99=10 ms</code> and <code dir="ltr">p99.9=1000 ms</code>.</p>
+<p><b>What this tells you:</b> Choose the percentile explicitly. A good-looking mean can coexist with a poor experience for a smaller group of users.</p>
+</div></div>
   <div class="fa"><ul>
     <li><b>میانگین (mean):</b> برای حدس سقف throughput خوبه، ولی «معمولی بودن» حس کاربر رو نشون نمی‌ده.</li>
     <li><b>میانه / p50:</b> نصف درخواست‌ها تندتر و نصف کندتر — بهترین معیار برای «کاربر معمولی چقدر معطله».</li>
@@ -582,12 +539,11 @@
       پولدارترین مشتری‌ان (سابقهٔ خرید زیاد). بهینه کردن p99.99 گرون و کم‌بازده از آب دراومد — تهش نرو.</li>
   </ul></div>
   <div class="en"><ul>
-    <li><b>Mean:</b> handy for guessing the throughput ceiling, but it won’t tell you how “normal” users feel.</li>
-    <li><b>Median / p50:</b> half quicker, half slower — the best answer to “how long does a normal user hang around”.</li>
-    <li><b>p95, p99, p999:</b> for meeting the unlucky ones (outliers). p95 = 1.5s means 5 in 100 wait 1.5s or more.</li>
-    <li><b>Tail latency:</b> the top percentiles. Amazon nails internal services to <b>p99.9</b> because the slowest users are
-      the richest customers (long purchase history). Chasing p99.99 turned out pricey with peanuts to show — don’t go there.</li>
-  </ul></div>
+<li><b>Mean:</b> useful for estimating throughput capacity, but it doesn't show the typical user's wait.</li>
+<li><b>Median / p50:</b> half the requests finish sooner and half later.</li>
+<li><b>p95, p99, p999:</b> show the slower end of the distribution. In the example, p95 = 1.5s means roughly 5 in 100 requests wait 1.5s or longer.</li>
+<li><b>Tail latency:</b> the high percentiles. The book's Amazon example uses <b>p99.9</b> because customers with long purchase histories could have slower requests. It reports less benefit for the cost of improving p99.99. Read that as the book's example, rather than a statement of a company's policy today.</li>
+</ul></div>
 
   <div class="diagram">
     <div class="cap">
@@ -606,7 +562,13 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس هدف صدک باید مشخص باشه. میانگین خوب می‌تونه با تجربهٔ بد یه گروه از کاربرها همراه باشه — میانگین دروغگوی خوش‌روئه!</p>
 </div>
 <p>میله‌ها رو از چپ بخون: بیشتر درخواست‌ها (<span class="ltr">most users</span>) سمت چپ و تندن، بعد میله‌ها کوتاه و کوتاه‌تر می‌شن تا دم باریک سمت راست (<span class="ltr">tail: rare but real</span>). چهار تا خط‌چین عمودی رو به ترتیب نگاه کن: <span class="ltr">p50 median</span> وسط شلوغی، <span class="ltr">mean</span> یه ذره جلوتر چون پرت‌ها می‌کشوننش راست، <span class="ltr">p95</span> و <span class="ltr">p99 tail</span> تو دل دم. جملهٔ پایین شکل حکم رو می‌گه: ۵ تا از هر ۱۰۰ درخواست از p95 کندترن — میانگین قایمشون می‌کنه.</p></div>
-    <div class="en"><p>Read the bars left to right, friend: the crowd (<span class="ltr">most users</span>) hugs the left, fast; bars shrink into the skinny right tail (<span class="ltr">tail: rare but real</span>). Four dashed lines in order: <span class="ltr">p50 median</span> in the thick of it, <span class="ltr">mean</span> a step ahead because outliers yank it right, <span class="ltr">p95</span> and <span class="ltr">p99 tail</span> deep in the tail. Bottom line verdict: 5 in 100 requests lag past p95 — and the average hides every one of them.</p></div>
+    <div class="en"><div class="callout" data-en-example="example-ch2-6">
+<p class="example-title"><b>Example: An average can hide the slowest requests</b></p>
+<p><b>Setup:</b> Out of 1,000 requests, 990 finish in <code dir="ltr">10 ms</code> and 10 take <code dir="ltr">1000 ms</code>.</p>
+<p><b>Walk through it:</b> The mean is <code dir="ltr">19.9 ms</code>. With the nearest-rank method, <code dir="ltr">p99=10 ms</code> and <code dir="ltr">p99.9=1000 ms</code>.</p>
+<p><b>What this tells you:</b> Choose the percentile explicitly. A good-looking mean can coexist with a poor experience for a smaller group of users.</p>
+</div>
+<p>Follow the bars from left to right. <span class="ltr">most users</span> sit in the fast group on the left; the smaller bars stretch into the right-hand <span class="ltr">tail: rare but real</span>. The dashed <span class="ltr">p50 median</span> line sits in the main group. The <span class="ltr">mean</span> is further right because slow requests pull it upward. <span class="ltr">p95</span> and <span class="ltr">p99 tail</span> mark the tail.</p><p>The bottom label asks you to notice the requests beyond p95: about 5 in 100. A reasonable-looking average doesn't tell you how long that group waited.</p></div>
   </div>
 
   <div class="callout">
@@ -620,13 +582,10 @@
         راه درستش جمع کردن هیستوگرام‌هاست — همین.</li>
     </ul></div>
     <div class="en"><ul>
-      <li>Where one user request fans out to several <span class="ltr">backend</span> calls, high percentiles are life-or-death
-        (Diagram 2 shows why).</li>
-      <li>Computing percentiles: a sliding 10-ish-minute window + estimation libs like
-        <span class="ltr">HdrHistogram</span>, <span class="ltr">t-digest</span>, <span class="ltr">OpenHistogram</span>, <span class="ltr">DDSketch</span>.</li>
-      <li><b>Warning:</b> averaging percentiles (to mush machines together or blur time) is <b>math crimes</b>;
-        the right way is adding histograms. Full stop.</li>
-    </ul></div>
+<li>If a user request waits on several <span class="ltr">backend</span> calls, one slow call can delay the answer. Diagram 2 follows that path.</li>
+<li>Estimate percentiles over a defined sliding window, such as 10 minutes, using a suitable summary: <span class="ltr">HdrHistogram</span>, <span class="ltr">t-digest</span>, <span class="ltr">OpenHistogram</span> or <span class="ltr">DDSketch</span>.</li>
+<li><b>Don't average percentiles.</b> To combine machines or time windows, merge the underlying samples or compatible histograms and preserve their sample counts. Then calculate the combined percentile.</li>
+</ul></div>
   </div>
 
   <h3 id="s2-3"><span class="fa">SLO، SLA و نمودار ۲</span><span class="en">SLO, SLA and Diagram 2</span></h3>
@@ -644,10 +603,16 @@
     <li><b>SLO</b> (Service Level Objective): هدف درونی خودمون — مثلاً «میانه &lt; 200ms و p99 &lt; 1s و ۹۹.۹٪ درخواست‌های معتبر بدون خطا».</li>
     <li><b>SLA</b> (Service Level Agreement): قرارداد بیرونی دربارهٔ جریمهٔ نقض SLO (مثلاً پس دادن پول).</li>
   </ul></div>
-  <div class="en"><ul>
-    <li><b>SLO</b> (Service Level Objective): our own inside target — e.g. “median &lt; 200ms, p99 &lt; 1s, 99.9% of valid requests error-free”.</li>
-    <li><b>SLA</b> (Service Level Agreement): the outside contract on what breaching the SLO costs you (e.g. giving money back).</li>
-  </ul></div>
+  <div class="en"><p>Keep the engineering target separate from the customer contract. Both need clear metrics, measurement windows and conditions.</p><ul>
+<li><b>SLO</b> (Service Level Objective): an internal target, for example “median &lt; 200ms, p99 &lt; 1s, 99.9% of valid requests error-free”.</li>
+<li><b>SLA</b> (Service Level Agreement): the customer contract, including any agreed consequences for missing its target, such as a refund.</li>
+</ul>
+<div class="callout" data-en-example="example-ch2-7">
+<p class="example-title"><b>Example: An error budget</b></p>
+<p><b>Setup:</b> Use a teaching SLO of <code dir="ltr">99.9%</code> success across one million requests in a month.</p>
+<p><b>Walk through it:</b> That leaves room for at most 1,000 unsuccessful requests. An SLA may separately define compensation for missing its contractual target.</p>
+<p><b>What this tells you:</b> The SLO is the engineering target. A contractual consequence applies only if the SLA includes it. Keep the target and agreement distinct.</p>
+</div></div>
 
   <div class="diagram">
     <div class="cap">
@@ -697,38 +662,13 @@
       برای همین درصدهای بالای تأخیر (مثل p99) رو باید سمت کلاینت و جدا برای هر فراخوانی دید — نسخهٔ شفابخش همینه.
     </p>
     </div>
-    <div class="en">
-    <p>
-      Another sequence diagram, five players. From the left: <span class="ltr">“End User”</span> (“sees response time”),
-      then <span class="ltr">“Frontend API”</span> (“one user request”), then three backends:
-      <span class="ltr">“Recommendation”</span> (“fast service”), <span class="ltr">“Timeline Svc”</span> (“slow service”)
-      and <span class="ltr">“Ads Svc”</span> (“fast service”). Two frames on top name the route:
-      <span class="ltr">“Fan-out to backends”</span> and <span class="ltr">“Rejoin at the slowest”</span>.
-    </p>
-    <p>
-      Start at the top: the fat “GET /home” arrow runs from End User to Frontend API, and its side label is the golden measurement rule —
-      “response time is what the client measures”: the client’s stopwatch counts, not the server’s feelings. Whose watch? The client’s.
-      In the “Fan-out to backends” frame, three parallel arrows share one label: “call: network 2ms” from Frontend API
-      to all three services — one user request fans out to several backends (even side by side), each call paying 2ms of network toll.
-    </p>
-    <p>
-      Now read the returns one by one; every reply has two ingredients: queue delay + service time.
-      Recommendation hands back “queue 2ms + service 25ms”, Ads Svc “queue 5ms + service 20ms” — both speedy.
-      But Timeline Svc (“slow service”) hands back “queue 180ms + service 40ms”; the label on that one reads
-      “head-of-line blocking in the queue”: a few slow requests piled up behind themselves, stretching the queue to 180ms.
-      Timeline’s 180ms queue drags the whole request down — one sleepy camel slows the caravan.
-    </p>
-    <p>
-      In the <span class="ltr">“Rejoin at the slowest”</span> frame it all adds up: the final “200 OK in 230ms” arrow returns from Frontend API to End User —
-      the number the user actually feels. The closing label stamps the verdict: “the slowest call dominates the whole request”;
-      speedy parallel calls can’t save you, because the whole request lasts exactly as long as the <b>slowest</b> call.
-    </p>
-    <p>
-      The lesson is <span class="ltr">tail latency amplification</span>: even when only a few backend calls dawdle,
-      each user request rolls the dice several times, the odds of catching a slow one climb, and the user feels it.
-      That’s why high percentiles (like p99) belong at the client, measured per call — the prescription.
-    </p>
-    </div>
+    <div class="en"><div class="callout" data-en-example="review-9">
+<p class="example-title"><b>Example: Amplifying tail latency</b></p>
+<p><b>Setup:</b> A page waits for 100 independent services. Assume each has a 1% chance of exceeding the latency threshold.</p>
+<p><b>Walk through it:</b> The chance that at least one exceeds it is <code dir="ltr">1 - 0.99^100 ≈ 63.4%</code>.</p>
+<p><b>What this tells you:</b> A rare delay per service becomes common across a large fan-out. The independence assumption matters to this calculation; keep it attached to the number.</p>
+</div>
+<p>Meet the five participants from left to right: <span class="ltr">“End User”</span>, <span class="ltr">“Frontend API”</span>, <span class="ltr">“Recommendation”</span>, <span class="ltr">“Timeline Svc”</span> and <span class="ltr">“Ads Svc”</span>. The frames separate <span class="ltr">“Fan-out to backends”</span> from <span class="ltr">“Rejoin at the slowest”</span>. You'll follow one page request through parallel calls and back to the user.</p><p>“GET /home” starts the client's stopwatch. The Frontend API calls all three services in parallel; each outbound arrow says “call: network 2ms”. Count that network time as part of what the client waits for.</p><p>Read the returns next. Recommendation has “queue 2ms + service 25ms”; Ads Svc has “queue 5ms + service 20ms”. Timeline Svc has “queue 180ms + service 40ms”. Most of its delay is waiting in a queue, labelled “head-of-line blocking in the queue”. Faster computation alone won't remove that 180ms wait.</p><p>At <span class="ltr">“Rejoin at the slowest”</span>, the frontend waits for the required replies before sending “200 OK in 230ms”. The <b>slowest</b> call dominates the answer, with the rest of the path contributing too. The two faster calls don't cancel out the slow one.</p><p>That's <span class="ltr">tail latency amplification</span>: each extra required backend call adds another chance to encounter a slow response. Measure the full request at the client and look at each call's high percentiles to find the delay.</p></div>
   </div>
 
   <div class="diagram">
@@ -786,44 +726,13 @@
       یعنی حدود <span class="ltr">40٪</span> توانِ پایدارِ بیشتر زیر SLO حساس به دم، در ارزیابیِ گزارش‌شده روی <span class="ltr">B200</span> — یادت باشه، این عددها گزارشِ همان منبع‌اند، نه قانونِ عام.
     </p>
     </div>
-    <div class="en">
-    <p>
-      Read this diagram as four lanes from left to right: <span class="ltr">“01 / Request”</span>, <span class="ltr">“02 / Prefill”</span>,
-      <span class="ltr">“03 / Memory”</span> and <span class="ltr">“04 / Decode”</span>.
-      Here's the thing: prefill (building KV memory for the prompt) is split off from decode (token-by-token generation)
-      so each can be sized on its own hardware.
-      Start at <span class="ltr">“Client Request”</span> (“long-context prompt”, tagged “100K-token class”);
-      the bold “new prompt” arrow lands on the <span class="ltr">“Cache-Aware Router”</span> (“cold vs warm estimate” —
-      the gatekeeper guessing how much of the prompt was seen before, “reuse check”).
-    </p>
-    <p>
-      Now take the router's fork: the “cold prompt” arrow (“low cache reuse (reported)”) goes to the
-      <span class="ltr">“Pre-Prefill Tier”</span> (“cold prompts, full compute” — the tier that primes the cache),
-      and the bold “warm prompt” arrow (“high cache reuse (reported)”) goes straight to the
-      <span class="ltr">“Prefill Pool”</span> (“warm requests, cache read” — the fast path).
-      The point is simple: a cold prompt pays full compute, a warm one only pays a cache read — and that split
-      keeps their delays from mixing.
-    </p>
-    <p>
-      Think of the memory lane as three shelves: <span class="ltr">“GPU Memory”</span> (“L1 KV blocks” — the fastest shelf),
-      <span class="ltr">“Host DRAM”</span> (“L2 KV blocks” — the near tier) and the
-      <span class="ltr">“Distributed Cache”</span> (“L3 over RDMA” — the cluster-wide shelf).
-      The dashed “new KV blocks” arrow (“cache fill (reported)”) runs from Pre-Prefill into the Distributed Cache,
-      so freshly computed blocks get written down. Then two return arrows feed the Prefill Pool:
-      “KV fetch over RDMA” (“RDMA bulk fetch (reported)”) from the Distributed Cache, and
-      “local KV reuse” (“no transfer needed (reported)”) from GPU Memory — if the KV block already lives there, no transfer happens.
-    </p>
-    <p>
-      Two arrows close the path into the <span class="ltr">“Decode Pool”</span> (“latency-isolated” on “B200 GPUs”):
-      the “TTFT path” (“warm hit (reported)”) from the Prefill Pool, and “cold prefill output” (“cold path (reported)”)
-      from the Distributed Cache. Finally “generated tokens” flows from the Decode Pool to
-      <span class="ltr">“Response”</span> (“tokens to client” — streaming).
-      The tail-latency punchline: by isolating decode from prefill and reusing repeated prefixes,
-      the reported setup holds about <span class="ltr">1.1 QPS/GPU</span> versus a <span class="ltr">0.75</span> baseline —
-      roughly <span class="ltr">40%</span> more sustained throughput under a tail-sensitive SLO in the reported
-      <span class="ltr">B200</span> evaluation. Treat those as that source's reported numbers, not universal law.
-    </p>
-    </div>
+    <div class="en"><div class="callout" data-en-example="teacher-7">
+<p class="example-title"><b>Example: Warm and cold prompts take different paths</b></p>
+<p><b>Setup:</b> A client sends a long, 100K-token prompt. The router estimates how much has been seen before.</p>
+<p><b>Walk through it:</b> A cold prompt goes to Pre-Prefill for full computation and cache fill. A warm prompt goes to the Prefill Pool to read prepared KV memory. The memory tiers are GPU Memory, Host DRAM and Distributed Cache over RDMA.</p>
+<p><b>What this tells you:</b> Separating prefill from decode and reusing prefixes helps control the tail and sustained throughput in the reported setup: about 1.1 QPS/GPU against a 0.75 baseline. Those are the source's reported results for its conditions, not a universal guarantee.</p>
+</div>
+<p>Take the four lanes from left to right: <span class="ltr">“01 / Request”</span>, <span class="ltr">“02 / Prefill”</span>, <span class="ltr">“03 / Memory”</span> and <span class="ltr">“04 / Decode”</span>. Prefill builds KV memory for the prompt; decode generates tokens one at a time. This reported design separates them so each can use its own hardware capacity.</p><p>Begin at <span class="ltr">“Client Request”</span>, labelled “long-context prompt” and “100K-token class”. The “new prompt” arrow reaches <span class="ltr">“Cache-Aware Router”</span>. Its “cold vs warm estimate” and “reuse check” labels ask how much of the prompt has already been processed.</p><p>Follow the fork. A cold prompt with low reported cache reuse goes to <span class="ltr">“Pre-Prefill Tier”</span> for full computation and cache fill. A warm prompt with high reported reuse goes to <span class="ltr">“Prefill Pool”</span>, where the path reuses prepared KV memory. Keep the cold and warm paths separate as you trace them.</p><p>The memory lane has three tiers: <span class="ltr">“GPU Memory”</span> holds L1 KV blocks, <span class="ltr">“Host DRAM”</span> holds L2 KV blocks, and <span class="ltr">“Distributed Cache”</span> provides L3 over RDMA. “new KV blocks” fills the distributed cache. “KV fetch over RDMA” brings blocks into the Prefill Pool; “local KV reuse” needs no transfer when the block is already on the GPU.</p><p>The warm “TTFT path” and the cold “cold prefill output” path lead into the latency-isolated <span class="ltr">“Decode Pool”</span> on B200 GPUs. “generated tokens” then streams to <span class="ltr">“Response”</span>. By separating prefill and decode and reusing repeated prefixes, the source reports about <span class="ltr">1.1 QPS/GPU</span> against a <span class="ltr">0.75</span> baseline, roughly <span class="ltr">40%</span> more sustained throughput under its tail-sensitive SLO in the reported <span class="ltr">B200</span> evaluation. Those are that source's reported results, with that setup's conditions.</p></div>
   </div>
   <div class="fa"><p class="small">منبعِ مورد صنعتی: گزارش Together AI دربارهٔ استنتاج تفکیک‌شدهٔ کش‌آگاه (۴ مارس ۲۰۲۶) — <a href="https://www.together.ai/blog/cache-aware-disaggregated-inference">Cache-Aware Disaggregated Inference</a>.</p></div>
   <div class="en"><p class="small">Industry-case source: the Together AI report on cache-aware disaggregated inference (2026-03-04) — <a href="https://www.together.ai/blog/cache-aware-disaggregated-inference">Cache-Aware Disaggregated Inference</a>.</p></div>
@@ -843,16 +752,13 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس خاموشی یه قطعه fault ـه؛ اگه هدف سرویس حفظ بشه failure توی سطح کاربر رخ نداده — قطعه مرد، سرویس زنده.</p>
 </div>
 </div>
-    <div class="en">
-    <p>
-      Reliability means “<b>continuing to work correctly, even when something breaks</b>”: the program does its job,
-      tolerates user mistakes, performs well enough, and grants no unauthorized access.
-    </p>
-    <p>
-      <b><span class="ltr">Fault</span> (part failure):</b> one component stops working (a disk, a machine, a dependency).<br>
-      <b><span class="ltr">Failure</span> (whole failure):</b> the system as a whole stops serving the user (breaches the SLO).
-    </p>
-    </div>
+    <div class="en"><p>Reliability means <b>continuing to work correctly under stated conditions</b>. That includes doing the requested job, handling user mistakes, performing well enough and preventing unauthorized access. Fault tolerance helps keep a broken component from becoming a broken service.</p><p><b><span class="ltr">Fault</span>:</b> a component stops working, such as a disk, machine or dependency.<br><b><span class="ltr">Failure</span>:</b> the system no longer provides the service the user needs, for example by breaching its SLO. Keep the two levels separate.</p>
+<div class="callout" data-en-example="example-ch2-8">
+<p class="example-title"><b>Example: A component stops; the service continues</b></p>
+<p><b>Setup:</b> Three replicas sit behind a router. One replica shuts down.</p>
+<p><b>Walk through it:</b> A health check removes it from routing. The two remaining replicas take requests, provided they have enough capacity for the load.</p>
+<p><b>What this tells you:</b> Losing the component is a fault. If the service target still holds, it hasn't become a user-level failure. Check the surviving capacity too.</p>
+</div></div>
   </div>
 
   <div class="callout">
@@ -867,14 +773,12 @@
         مکانیزم‌های تحمل خرابی همیشه تمرین بخورن؛ خیلی از باگ‌های بحرانی تو «مدیریت خطا» قایم شدن نه تو مسیر اصلی — آتش‌نشانی رو باید تمرین داد.</li>
     </ul></div>
     <div class="en"><ul>
-      <li>A <b>fault-tolerant</b> system keeps serving despite a specified set of faults.</li>
-      <li>Any part whose failure you cannot tolerate is a <b>Single Point of Failure (SPOF)</b>.</li>
-      <li>Fault tolerance is always bounded (e.g. at most 2 of N disks, or 1 of 3 nodes). Tolerating “any number of faults” is meaningless!</li>
-      <li>On the fan-out path, if the timeline-updating machine dies, another must continue with no loss and no duplicate posts
-        → <span class="ltr">exactly-once semantics</span> (Chapter 12).</li>
-      <li><b>Fault injection and chaos engineering:</b> counterintuitively, deliberately killing random processes keeps
-        fault-tolerance machinery always exercised; many critical bugs live in error handling, not the happy path.</li>
-    </ul></div>
+<li>A <b>fault-tolerant</b> system keeps serving through a specified set of faults.</li>
+<li>A component whose failure the service can't tolerate is a <b>Single Point of Failure (SPOF)</b>.</li>
+<li>State the limit: for example, at most 2 of N disks, or 1 of 3 nodes. “Any number of faults” isn't a useful guarantee.</li>
+<li>If a timeline worker dies, its replacement needs to continue without lost or duplicate posts. That goal needs <span class="ltr">exactly-once semantics</span> within a defined boundary; Chapter 12 examines the mechanism.</li>
+<li><b>Fault injection and chaos engineering:</b> controlled faults exercise recovery paths. Test the error handling too; many serious bugs appear there rather than on the normal path.</li>
+</ul></div>
   </div>
 
   <h3 id="s3-1"><span class="fa">سه منبع خرابی: سخت‌افزار، نرم‌افزار، انسان</span><span class="en">Three fault sources: hardware, software, humans</span></h3>
@@ -906,13 +810,26 @@
         <li>کل دیتاسنتر ممکنه بره هوا (برق، آتیش، سیل، حتی طوفان خورشیدی) — آره، واقعاً.</li>
         <li>جواب: افزونگی (<span class="ltr">RAID</span>، برق دوگانه، رپلیکا) + پخش شدن تو چند تا <span class="ltr">availability zone</span> — تخم‌مرغ‌ها رو یه سبد نچین.</li>
       </ul></div>
-      <div class="en"><ul>
-        <li>2–5% of hard disks fail per year; in a 10,000-disk cluster ≈ one failure a day.</li>
-        <li>SSDs are a bit better (0.5–1%) but see an uncorrectable error ~once a year.</li>
-        <li>Roughly 1 in 1,000 machines has a CPU core that occasionally returns wrong results; RAM can flip bits.</li>
-        <li>A whole datacenter can be lost (power, fire, flood, even solar storms).</li>
-        <li>Answer: redundancy (<span class="ltr">RAID</span>, dual power, replicas) + spreading across <span class="ltr">availability zones</span>.</li>
-      </ul></div>
+      <div class="en"><p>Hardware faults, software bugs and mistaken operations need different recovery paths. A live copy cannot undo every kind of damage.</p>
+<div class="callout" data-en-example="example-ch2-9">
+<p class="example-title"><b>Example: Three faults need three recovery methods</b></p>
+<p><b>Setup:</b> A replica's disk fails, a new release crashes on certain inputs, and an incorrect command deletes a table.</p>
+<p><b>Walk through it:</b> A healthy replica covers the disk failure. Rolling back the release limits the bug. The deletion needs a restore or point-in-time recovery.</p>
+<p><b>What this tells you:</b> Live replicas don't replace backups. A mistaken deletion can be replicated to every copy. Pick the recovery method for the fault.</p>
+</div>
+<p>Plan for a failed component and a way to continue serving while recovering it. The book's hardware examples give a sense of the scale:</p><ul>
+<li>Hard disks: 2–5% fail per year; a 10,000-disk cluster sees roughly one failure a day.</li>
+<li>SSDs: 0.5–1% fail per year, with an uncorrectable error around once a year.</li>
+<li>Roughly 1 in 1,000 machines has a CPU core that occasionally returns a wrong result; RAM can also flip bits.</li>
+<li>Power loss, fire, flood or even solar storms can affect a whole datacenter.</li>
+<li>Use redundancy, such as <span class="ltr">RAID</span>, dual power and replicas, and spread it across <span class="ltr">availability zones</span>. Check that the copies don't share the failure you're trying to survive.</li>
+</ul>
+<div class="callout" data-en-example="example-ch2-10">
+<p class="example-title"><b>Example: Losing a disk</b></p>
+<p><b>Setup:</b> Replica A stores data on a local disk, and that disk fails.</p>
+<p><b>Walk through it:</b> B continues serving from its healthy copy. Rebuild A from a snapshot and the subsequent log.</p>
+<p><b>What this tells you:</b> Redundancy needs the right failure boundaries. Two processes on the same disk aren't independent of that disk's failure.</p>
+</div></div>
     </div>
     <div class="cardmini">
       <h4><span class="fa">نرم‌افزار (خطرناک‌تر چون همبسته است)</span><span class="en">Software (riskier because it is correlated)</span></h4>
@@ -929,12 +846,18 @@
         <li>فرآیند سرکش که منبع مشترک (CPU، حافظه، نوار شبکه) رو می‌خوره؛ سرویس وابسته که کند می‌شه؛ رفتارهای یهویی.</li>
         <li><b>خرابی آبشاری:</b> درد یه تیکه می‌فته به جون تیکهٔ بعدی، اون رو خفه و کند می‌کنه و زنجیره ادامه داره — دومینو.</li>
       </ul></div>
-      <div class="en"><ul>
-        <li>All nodes run one software ⇒ one bug fells them all at once.</li>
-        <li>Examples: the 2012 leap-second bug that hung Java apps; the firmware bug killing SSDs after exactly 32,768 hours.</li>
-        <li>Rogue processes eating shared resources (CPU, memory, network); slow dependencies; emergent behavior.</li>
-        <li><b>Cascading failure:</b> one component’s trouble overloads and slows the next, and the chain continues.</li>
-      </ul></div>
+      <div class="en"><p>Making more copies of the same buggy software can copy the fault too. Match the recovery method to the failure:</p><ul>
+<li>A shared software bug can affect every node running that version.</li>
+<li>The examples include the 2012 leap-second bug that hung Java apps and SSD firmware that failed after exactly 32,768 hours.</li>
+<li>A process can consume shared CPU, memory or network capacity; a dependency can slow down; interactions can produce unexpected behavior.</li>
+<li><b>Cascading failure:</b> one component's trouble overloads the next, which passes the pressure onward.</li>
+</ul>
+<div class="callout" data-en-example="example-ch2-11">
+<p class="example-title"><b>Example: A bug shared by every copy</b></p>
+<p><b>Setup:</b> Input <code dir="ltr">size=-1</code> crashes the new worker version.</p>
+<p><b>Walk through it:</b> Deploy that version to 20 replicas and you copy the bug 20 times. A canary and a rollback path limit how far a bad release spreads.</p>
+<p><b>What this tells you:</b> Replication helps with independent hardware faults. A shared code bug can hit every copy at once. More replicas won't remove that bug.</p>
+</div></div>
     </div>
   </div>
 
@@ -949,13 +872,12 @@
       <li>به جواب‌های ساده‌لوحانه شک کن: نه «بوب باید دقت می‌کرد»، نه «بک‌اند رو با Haskell بنویسیم» — هر دو فرار از مسئله‌ست.</li>
     </ul></div>
     <div class="en"><ul>
-      <li>Studies show <b>operator config changes</b> are the top cause of outages; hardware faults are only 10–25% of cases.</li>
-      <li>Blaming “human error” is counterproductive; what we call human error is a <b>symptom</b>, not a cause — the problem is in the socio-technical system.</li>
-      <li>Fixes: thorough testing (manual + <span class="ltr">property testing</span>), rollback for config changes,
-        gradual rollout, transparent monitoring, and interfaces that make the right thing easy.</li>
-      <li>A <b><span class="ltr">blameless postmortem</span></b> culture: after an incident, details are shared without fear of punishment so the organization learns.</li>
-      <li>Distrust naive answers: neither “Bob should have been careful” nor “rewrite the backend in Haskell”.</li>
-    </ul></div>
+<li>The studies discussed here put <b>operator configuration changes</b> among the leading causes of outages; hardware accounts for 10–25% of cases.</li>
+<li>“Human error” describes a <b>symptom</b>. Keep investigating the tools, permissions, review process and recovery options that allowed the error to cause an outage.</li>
+<li>Use manual tests and <span class="ltr">property testing</span>, reversible configuration changes, gradual rollout, clear monitoring and interfaces that make safe actions easy.</li>
+<li>A <b><span class="ltr">blameless postmortem</span></b> shares what happened without fear of punishment so the team can prevent a repeat.</li>
+<li>“Bob should have been more careful” and “rewrite the backend in Haskell” both leave the actual prevention mechanism unexplained.</li>
+</ul></div>
   </div>
 
   <h3 id="s3-2"><span class="fa">نمودار ۳ — از SPOF به معماری متحمل خرابی</span><span class="en">Diagram 3 — from SPOF to a fault-tolerant architecture</span></h3>
@@ -1009,40 +931,13 @@
       چون Load Balancer همیشه یه گرهٔ سالم دم دست داره.
     </p>
     </div>
-    <div class="en">
-    <p>
-      This is an architecture diagram, and the whole figure sits inside two bounded frames:
-      <span class="ltr">“Availability Zone A”</span> (“AZ-a”) and <span class="ltr">“Availability Zone B”</span> (“AZ-b”).
-      Outside both frames, at the top, sits the <span class="ltr">“Users”</span> box (“web / mobile”).
-      Inside frame A are two boxes: <span class="ltr">“Load Balancer”</span> (“health checks”) and <span class="ltr">“Service Node A”</span>
-      (“stateless handlers”), plus <span class="ltr">“Primary DB”</span> (“writes accepted”).
-      Frame B mirrors them: <span class="ltr">“Service Node B”</span> (“stateless handlers”) and <span class="ltr">“Replica DB”</span>
-      (“failover target”).
-    </p>
-    <p>
-      Follow the normal traffic path: the “HTTPS” arrow goes from Users to Load Balancer, and the bold “route request” arrow
-      from Load Balancer to Service Node A. The “health checks” subtitle earns its meaning here: the Load Balancer spreads traffic
-      across two <span class="ltr">stateless</span> nodes via <span class="ltr">health checks</span>. Then “read / write” runs from Service Node A to Primary DB —
-      the primary that accepts writes only in frame A.
-    </p>
-    <p>
-      Now the failure path: the dashed “failover” arrow goes from Load Balancer to Service Node B. Meaning:
-      a node failure ⇒ <span class="ltr">failover</span>; since nodes are stateless, the Load Balancer can steer traffic to the healthy node.
-      The “read / write” arrow from Service Node B reaches Replica DB — the box whose “failover target” subtitle declares exactly that role:
-      the replica is the failover target.
-    </p>
-    <p>
-      And the last arrow, dashed “async replication”, runs from Primary DB to Replica DB: primary and replica stay current via
-      <span class="ltr">async replication</span>. The whole design rests on each node sitting in a separate
-      <b>availability zone</b> — because faults are correlated and one rack or region can fall together;
-      if both nodes shared one frame, the frame’s failure would take both, and we would be back at a <span class="ltr">SPOF</span>.
-    </p>
-    <p>
-      The lesson: redundancy instead of a single point of failure, and fault tolerance always bounded (here: one node or one zone).
-      The operational bonus of this same architecture is <b>rolling upgrades</b> — restart nodes one by one with no <span class="ltr">downtime</span>,
-      since the Load Balancer always has a healthy node.
-    </p>
-    </div>
+    <div class="en"><div class="callout" data-en-example="example-ch2-8">
+<p class="example-title"><b>Example: A component stops; the service continues</b></p>
+<p><b>Setup:</b> Three replicas sit behind a router. One replica shuts down.</p>
+<p><b>Walk through it:</b> A health check removes it from routing. The two remaining replicas take requests, provided they have enough capacity for the load.</p>
+<p><b>What this tells you:</b> Losing the component is a fault. If the service target still holds, it hasn't become a user-level failure. Check the surviving capacity too.</p>
+</div>
+<p>Begin with the two failure boundaries: <span class="ltr">“Availability Zone A”</span> (“AZ-a”) and <span class="ltr">“Availability Zone B”</span> (“AZ-b”). <span class="ltr">“Users”</span> sit outside them. Zone A contains a <span class="ltr">“Load Balancer”</span>, <span class="ltr">“Service Node A”</span> with stateless handlers, and <span class="ltr">“Primary DB”</span>, which accepts writes. Zone B contains <span class="ltr">“Service Node B”</span> and <span class="ltr">“Replica DB”</span>, labelled “failover target”.</p><p>Follow normal traffic: HTTPS reaches the Load Balancer, then “route request” reaches Service Node A. The nodes are <span class="ltr">stateless</span>, and <span class="ltr">health checks</span> help the balancer find a healthy one. The service's “read / write” path reaches the primary database.</p><p>Now trace the dashed path to Service Node B. Service-node <span class="ltr">failover</span> moves traffic to the healthy handler. The database path points at the replica as the failover target; handling writes there requires the database failover as well. Rerouting the API alone doesn't complete that step.</p><p>The dashed primary-to-replica arrow is <span class="ltr">async replication</span>. Keep its lag in mind when reasoning about recovery. Separate <b>availability zones</b> protect against a shared zone failure; two nodes inside the same failed zone don't. Also inspect shared dependencies, including the load balancer, before claiming there's no <span class="ltr">SPOF</span>.</p><p>The diagram's intended tolerance is bounded: a node or a zone, with enough surviving capacity and a working failover path. The same service-node redundancy supports <b>rolling upgrades</b>: restart nodes one at a time while healthy nodes serve traffic. Avoiding <span class="ltr">downtime</span> still depends on that capacity and compatible changes.</p></div>
   </div>
 </section>
 
@@ -1061,11 +956,13 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس ظرفیت نوشتن موقعیت، جست‌وجوی مکانی و تاریخچه باید جدا سنجیده بشن؛ «مقیاس‌پذیر» یه عدد واحد نیست.</p>
 </div>
 </div>
-    <div class="en"><p>
-      Scalability is your system’s ability to survive <b>growing load</b>. It’s not a badge you slap on;
-      saying “X is scalable” means nothing by itself. The sharper questions are:
-      if load grows *this* way, what are our moves? How do we add muscle? When do we smash into this architecture’s ceiling?
-    </p></div>
+    <div class="en"><p>“This system is scalable” leaves out the useful part. Scalable for which <b>growing load</b>, while keeping which quality target? Describe how the load changes, what resources or design changes maintain performance, and where this architecture reaches its limit.</p>
+<div class="callout" data-en-example="example-ch2-12">
+<p class="example-title"><b>Example: Which dimension needs to scale?</b></p>
+<p><b>Setup:</b> Ten thousand drivers send a location every 5 seconds: <code dir="ltr">2000 update/s</code>.</p>
+<p><b>Walk through it:</b> A hundred thousand drivers raise that to <code dir="ltr">20,000 update/s</code>, even if ride-search traffic stays the same.</p>
+<p><b>What this tells you:</b> Measure capacity for location writes, spatial search and history separately. “Scalable” isn't a single number.</p>
+</div></div>
   </div>
 
   <div class="callout warn">
@@ -1075,11 +972,7 @@
       نگرانی برای مقیاس خیالی یا تلاش دورریختیه (بهینه‌سازی زودرس) یا بدتر: تو رو تو یه طراحی خشک قفل می‌کنه.
       وقتی محصول گرفت، گلوگاه‌ها رو می‌بینی و اون‌وقت نوبت فکر کردن به مقیاسه — عجله نکن، نوبتت می‌رسه.
     </p></div>
-    <div class="en"><p>
-      New product, few users? Engineering’s main job is keeping things “simple and bendy” so you learn fast — be a student first.
-      Sweating imaginary scale is either burned effort (premature optimization) or worse: it locks you in concrete.
-      Once the thing takes off, the bottlenecks will wave at you — *then* it’s scale o’clock. Don’t rush; your turn comes.
-    </p></div>
+    <div class="en"><p>For a new product with few users, keep the system simple enough to learn from and easy enough to change. Building for imaginary scale can waste effort or lock the team into a design before the needs are clear.</p><p>Watch real growth and capacity headroom. When the product grows, measure the bottlenecks and revise the design around them.</p></div>
   </div>
 
   <h3><span class="fa">فهم بار و دو سؤال کلیدی</span><span class="en">Understanding load, and two key questions</span></h3>
@@ -1100,13 +993,18 @@
     <li><b>سؤال دوم:</b> برای ثابت نگه‌داشتن performance، چقدر باید منابع اضافه کنی؟</li>
     <li><b>مقیاس‌پذیری خطی:</b> دو برابر منابع ⇐ دو برابر بار با performance ثابت (آرزوه، ولی نادره؛ معمولاً خرج تندتر از خطی بالا می‌ره).</li>
   </ul></div>
-  <div class="en"><ul>
-    <li><b>Describe the load:</b> requests/second, GB/day, concurrent-user peaks, read/write ratio, cache hit rate, items per user — the load’s ID card.
-      Sometimes the average calls the shots; sometimes a few edge cases (hello, celebrities) run the whole show — never underestimate the giants.</li>
-    <li><b>First question:</b> same boxes, double the load — what happens to performance?</li>
-    <li><b>Second question:</b> how much hardware do we buy to keep performance flat?</li>
-    <li><b>Linear scalability:</b> double boxes ⇒ double load, same speed (the dream, rarely real; the bill usually climbs faster than linear).</li>
-  </ul></div>
+  <div class="en"><p>Ask two questions: what happens if load grows on the same resources, and what resources would keep performance steady?</p><ul>
+<li><b>Describe the load:</b> requests/second, GB/day, peak concurrent users, read/write ratio, cache hit rate and items per user. Inspect averages and extremes, such as celebrity traffic.</li>
+<li><b>First question:</b> on fixed resources, what happens to performance when load doubles?</li>
+<li><b>Second question:</b> how much additional hardware or design work keeps performance at the target?</li>
+<li><b>Linear scalability:</b> twice the resources handle twice the load at the same performance. Don't assume this; costs can grow faster than load.</li>
+</ul>
+<div class="callout" data-en-example="example-ch2-13">
+<p class="example-title"><b>Example: Two capacity-test questions</b></p>
+<p><b>Setup:</b> At <code dir="ltr">500 req/s</code>, the result is <code dir="ltr">p99=100 ms</code>. At <code dir="ltr">1000 req/s</code>, it rises to <code dir="ltr">900 ms</code>.</p>
+<p><b>Walk through it:</b> First find why the queue grows on the fixed hardware. Then measure which resources or design changes would keep response time at <code dir="ltr">100 ms</code>.</p>
+<p><b>What this tells you:</b> Doubling traffic doesn't automatically mean doubling CPU. A lock or disk may be the limit. Find that limit before buying more capacity.</p>
+</div></div>
 
   <h3 id="s4-1"><span class="fa">مدل‌های مقیاس‌پذیری</span><span class="en">Scalability models</span></h3>
   <div class="fa"><table>
@@ -1129,26 +1027,11 @@
       </tr>
     </tbody>
   </table></div>
-  <div class="en"><table>
-    <thead><tr><th>Architecture</th><th>Idea</th><th>Main weakness</th></tr></thead>
-    <tbody>
-      <tr>
-        <td><span class="ltr">Shared-Memory</span> (scale up)</td>
-        <td>One beefier beast with more cores/RAM/disk; muscle via threads and processes</td>
-        <td>The bill climbs faster than linear; bottlenecks veto any true doubling</td>
-      </tr>
-      <tr>
-        <td><span class="ltr">Shared-Disk</span> (NAS / SAN)</td>
-        <td>Several boxes with their own CPU/RAM, one shared disk closet — separate flats, shared storage</td>
-        <td>Fighting over resources plus lock tolls caps your scale (grandpa’s on-prem warehouse style)</td>
-      </tr>
-      <tr>
-        <td><span class="ltr">Shared-Nothing</span> (scale out)</td>
-        <td>Lone-wolf nodes with their own CPU/RAM/disk; handshakes in software over the wire</td>
-        <td>Demands explicit <span class="ltr">sharding</span> plus every distributed headache ever</td>
-      </tr>
-    </tbody>
-  </table></div>
+  <div class="en"><table><thead><tr><th>Architecture</th><th>Idea</th><th>Main weakness</th></tr></thead><tbody>
+<tr><td><span class="ltr">Shared-Memory</span> (scale up)</td><td>One machine with more cores, RAM and disk; parallel work through threads and processes</td><td>Costs can grow faster than capacity; bottlenecks limit gains</td></tr>
+<tr><td><span class="ltr">Shared-Disk</span> (NAS / SAN)</td><td>Several machines with separate CPU/RAM and shared storage</td><td>Resource contention and locking limit scale</td></tr>
+<tr><td><span class="ltr">Shared-Nothing</span> (scale out)</td><td>Each node has its own CPU/RAM/disk and coordinates over the network</td><td>Requires explicit <span class="ltr">sharding</span> and distributed coordination</td></tr>
+</tbody></table></div>
   <div class="fa">
 <p>تو مقیاس عمودی یه ماشین قوی‌تر می‌گیری؛ تو افقی ماشین‌های بیشتری اضافه می‌کنی. اینکه حافظه و دیسک مشترکن یا جدا، خرج هماهنگی رو عوض می‌کنه — خونهٔ مشترک، دعوای مشترک.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch2-14">
@@ -1158,10 +1041,13 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس تقسیم‌پذیری کار و هزینهٔ هماهنگی تعیین می‌کنه روش افقی چقدر سود بده — همهٔ کارها افقی نمی‌شن.</p>
 </div>
 </div>
-  <div class="en"><p>
-    <span class="ltr">Cloud-native</span> databases that split storage from compute look like shared-disk’s cooler cousin:
-    but instead of a dusty filesystem they hand you a purpose-built database API — the old scaling headaches not included.
-  </p></div>
+  <div class="en"><p>Scaling up gives one machine more capacity. Scaling out adds machines. Which resources they share changes the coordination work. <span class="ltr">Cloud-native</span> databases that separate storage and compute may resemble shared-disk designs, but expose a purpose-built database API instead of a shared filesystem. You still need to measure the limits of that design.</p>
+<div class="callout" data-en-example="example-ch2-14">
+<p class="example-title"><b>Example: Scaling up and scaling out</b></p>
+<p><b>Setup:</b> A job takes 10 minutes on 8 cores, and its memory is full.</p>
+<p><b>Walk through it:</b> Adding RAM and cores to that machine is scale-up. Splitting the input across machines is scale-out, with data transfer and result merging to account for.</p>
+<p><b>What this tells you:</b> How well the work splits, and what coordination costs, determine the benefit of scale-out. Not every job divides cheaply.</p>
+</div></div>
 
   <h3 id="s4-2"><span class="fa">اصول مقیاس‌پذیری + نمودار ۴</span><span class="en">Scalability principles + Diagram 4</span></h3>
 <div class="fa">
@@ -1180,12 +1066,18 @@
     <li><b>تیکه‌تیکه کردن به اجزای مستقل:</b> اصل پشت میکروسرویس و sharding و پردازش جریانی و shared-nothing. هنر اینه «خط رو کجا بکشی».</li>
     <li><b>بیشتر از نیاز پیچیده‌ش نکن:</b> اگه دیتابیس تک‌ماشینی کار رو می‌کنه، همون بهتر. ۵ تا سرویس از ۵۰ تا ساده‌تره؛ autoscaling برای بار قابل پیش‌بینی سورپرایز عملیاتی کمتری داره — ساده بمون تا مجبور شی.</li>
   </ul></div>
-  <div class="en"><ul>
-    <li><b>There is no magic scaling sauce:</b> 100K requests/s × 1KB is a different animal from 3 requests/min × 2GB — same throughput, different universe. Don’t let the number fool you.</li>
-    <li><b>What works at one load dies at 10x:</b> redraw the architecture every order of magnitude; planning two orders ahead is burning money.</li>
-    <li><b>Chop into independent parts:</b> the soul of microservices, sharding, streaming and shared-nothing. The art is exactly where you cut.</li>
-    <li><b>Don’t gild the lily:</b> if one box’s database does the job, keep it. 5 services beat 50 for sanity; autoscaling predictable load hides fewer landmines. Stay simple until you can’t.</li>
-  </ul></div>
+  <div class="en"><p>Measure the bottleneck before buying more of a resource. Extra capacity in the wrong place may leave response time unchanged.</p><ul>
+<li><b>The workload matters:</b> 100K requests/s × 1KB and 3 requests/min × 2GB have roughly the same byte throughput, but very different request sizes and rates.</li>
+<li><b>Revisit at 10x growth:</b> a design that works at one scale may need changes at the next order of magnitude. Planning several orders ahead can waste effort.</li>
+<li><b>Find useful boundaries:</b> microservices, sharding, streaming and shared-nothing designs split work into independent parts. Where you split determines the coordination cost.</li>
+<li><b>Keep the necessary complexity:</b> use a single-machine database if it meets the need. Operating 5 services is simpler than 50. Predictable load also makes autoscaling easier to reason about.</li>
+</ul>
+<div class="callout" data-en-example="example-ch2-15">
+<p class="example-title"><b>Example: Adding capacity at the wrong bottleneck</b></p>
+<p><b>Setup:</b> Ten API servers use only 30% CPU, while database connections wait on a lock.</p>
+<p><b>Walk through it:</b> Adding 10 API servers creates more requests waiting on the same lock. Shortening the transaction holding the lock is a more direct fix.</p>
+<p><b>What this tells you:</b> More capacity helps when it addresses the limiting resource. Measure what's blocking progress before adding servers.</p>
+</div></div>
 
   <div class="diagram">
     <div class="cap">
@@ -1237,40 +1129,13 @@
       و هر بار که بار یه مرتبه بزرگ شد، همین مسیر رو دوباره برو («new order of magnitude») — چرخه رو فراموش نکن.
     </p>
     </div>
-    <div class="en">
-    <p>
-      This is a workflow diagram, friend: three bounded frames — <span class="ltr">“01 / Understand Load”</span>,
-      <span class="ltr">“02 / Scaling Decision”</span> and <span class="ltr">“EX / Revisit”</span>, with three stage names floating above:
-      <span class="ltr">“Describe the load”</span>, <span class="ltr">“Ask and decide”</span> and <span class="ltr">“Scale and review”</span>.
-      Flow starts in frame one, decides in frame two, and loops with frame three. Round and round.
-    </p>
-    <p>
-      In frame <span class="ltr">“01 / Understand Load”</span> two boxes stand in line: <span class="ltr">“Load Metrics”</span>
-      (“QPS, GB/day, peaks”), then the fat “collect” arrow to <span class="ltr">“Access Profile”</span>
-      (“read/write, cache hits”) with the little “avg vs extremes” tag — describe the load:
-      volume (queries/second, GB/day, peaks) plus access pattern (read/write ratio, cache hits) — averages AND edge cases, both.
-    </p>
-    <p>
-      From “Access Profile” the “feed” arrow dives into the <span class="ltr">“Two questions before scaling”</span> club
-      in frame <span class="ltr">“02 / Scaling Decision”</span>. Two question boxes live there: first up,
-      <span class="ltr">“Load Doubles?”</span> (“fixed resources: then what” — same boxes, double the crowd, what breaks?),
-      then “answer both” to <span class="ltr">“Cost to Hold SLA?”</span> (“resources for same speed”; question two: how much hardware buys the same speed?).
-      Both answers ride the fat “decide” arrow into <span class="ltr">“Scaling Model”</span>: its “up, shared-disk, out” subtitle
-      names the three scalability plays, and the “minimal complexity” tag is the house rule.
-    </p>
-    <p>
-      Now the “grow” arrow from “Scaling Model” drops into frame <span class="ltr">“EX / Revisit”</span>:
-      the <span class="ltr">“Revisit per 10x”</span> box (“rethink architecture”). But wait, there’s more;
-      the dashed “new order of magnitude” arrow loops all the way back from “Revisit per 10x” into “Load Doubles?”.
-      It’s a loop, friend: every fresh order of magnitude, redraw the architecture and revisit the questions.
-    </p>
-    <p>
-      The lesson is the list you just read: no magic scaling sauce,
-      what works at one load dies at 10x, and never gold-plate.
-      The arrows even spell the order: describe first (“collect”), answer both (“answer both”), then decide (“decide”),
-      and every time load jumps an order of magnitude, walk it again (“new order of magnitude”). See you next loop.
-    </p>
-    </div>
+    <div class="en"><div class="callout" data-en-example="example-ch2-15">
+<p class="example-title"><b>Example: Adding capacity at the wrong bottleneck</b></p>
+<p><b>Setup:</b> Ten API servers use only 30% CPU, while database connections wait on a lock.</p>
+<p><b>Walk through it:</b> Adding 10 API servers creates more requests waiting on the same lock. Shortening the transaction holding the lock is a more direct fix.</p>
+<p><b>What this tells you:</b> More capacity helps when it addresses the limiting resource. Measure what's blocking progress before adding servers.</p>
+</div>
+<p>Read the workflow through three frames: <span class="ltr">“01 / Understand Load”</span>, <span class="ltr">“02 / Scaling Decision”</span> and <span class="ltr">“EX / Revisit”</span>. The stage names above them are <span class="ltr">“Describe the load”</span>, <span class="ltr">“Ask and decide”</span> and <span class="ltr">“Scale and review”</span>. You'll measure, decide, then return to the questions as load grows.</p><p>Inside <span class="ltr">“01 / Understand Load”</span>, begin at <span class="ltr">“Load Metrics”</span>, labelled “QPS, GB/day, peaks”. The “collect” arrow reaches <span class="ltr">“Access Profile”</span>, labelled “read/write, cache hits”. The “avg vs extremes” tag asks you to look at the distribution too. Averages alone can miss the workload that sets the limit.</p><p>Follow “feed” into <span class="ltr">“Two questions before scaling”</span> inside <span class="ltr">“02 / Scaling Decision”</span>. <span class="ltr">“Load Doubles?”</span> asks what happens on fixed resources. “answer both” leads to <span class="ltr">“Cost to Hold SLA?”</span>, asking what resources keep the target performance. The “decide” arrow reaches <span class="ltr">“Scaling Model”</span>, where “up, shared-disk, out” are the options and “minimal complexity” is the constraint.</p><p>Then follow “grow” into <span class="ltr">“EX / Revisit”</span> and <span class="ltr">“Revisit per 10x”</span>. The dashed “new order of magnitude” arrow loops back to Load Doubles? at each 10x increase. Measure the changed load, ask both questions again, and revise the design where the evidence calls for it.</p><p>The order matters: collect the load, answer both capacity questions, choose a model, then revisit it with growth. Adding machines is one possible answer. Finding the actual limit comes first.</p></div>
   </div>
 </section>
 <!-- ============ SECTION 5 ============ -->
@@ -1288,10 +1153,13 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس تغییر مرحله‌ای زمان تشخیص و بازگشت می‌ده؛ حذف فوری فیلد قدیمی انتشار نسخهٔ قبلی رو ناممکن می‌کنه — پل رو پشت سرت خراب نکن.</p>
 </div>
 </div>
-    <div class="en"><p>
-      Software doesn’t rust like a car, friend — but requirements drift, environments shift, and bugs happen.
-      Most of software’s money burns in <b>maintenance</b>, not day-one coding. Three guardian angels: <b>operability, simplicity, evolvability</b>.
-    </p></div>
+    <div class="en"><p>Can the team understand the system, run it and change it safely? That's <b>maintainability</b>. Much of software's cost arrives after the first release, as requirements, environments and bugs change. Keep three concerns in view: <b>operability, simplicity and evolvability</b>.</p>
+<div class="callout" data-en-example="example-ch2-16">
+<p class="example-title"><b>Example: A change you can understand and reverse</b></p>
+<p><b>Setup:</b> The application will replace <code dir="ltr">phone</code> with <code dir="ltr">country_code</code> and <code dir="ltr">number</code>.</p>
+<p><b>Walk through it:</b> Add and populate the new fields first. Check the data before enabling the new read path. Remove the old field later.</p>
+<p><b>What this tells you:</b> Staging the change leaves time to detect problems and roll back. Deleting the old field immediately can make the old application version unusable.</p>
+</div></div>
   </div>
 
   <div class="grid2">
@@ -1312,14 +1180,20 @@
         <li>رفتار قابل پیش‌بینی، غافلگیری ممنوع.</li>
         <li>اتوماسیون شمشیر دو لبه‌ست: موردهای خاص همیشه یه آدم کاربلد می‌خوان.</li>
       </ul></div>
-      <div class="en"><ul>
-        <li>Watching key metrics + observability gear for runtime behavior — eyes open.</li>
-        <li>No pet machines (any node can nap for maintenance).</li>
-        <li>Clear docs and mental model: “I poke X, Y happens” — zero surprises.</li>
-        <li>Sane defaults + override rights; self-healing + a manual steering wheel. Both.</li>
-        <li>Boringly predictable behavior. Surprises banned.</li>
-        <li>Automation cuts both ways: weird cases always want a skilled human at the wheel.</li>
-      </ul></div>
+      <div class="en"><p>Operability gives the team a clear view of the running service and practical ways to manage problems.</p><ul>
+<li>Monitor key metrics and use observability to understand runtime behavior.</li>
+<li>Avoid depending on a particular machine; any node should be replaceable or available for maintenance.</li>
+<li>Document the operating model so people can predict what an action will do.</li>
+<li>Provide safe defaults and explicit overrides, automatic recovery and manual controls.</li>
+<li>Prefer predictable behavior over operational surprises.</li>
+<li>Keep skilled operators able to handle cases the automation doesn't cover.</li>
+</ul>
+<div class="callout" data-en-example="example-ch2-17">
+<p class="example-title"><b>Example: Finding the cause of a slow request</b></p>
+<p><b>Setup:</b> Request <code dir="ltr">r42</code> travels from the API to the database. The full path takes <code dir="ltr">1200 ms</code>.</p>
+<p><b>Walk through it:</b> A trace shows that <code dir="ltr">1100 ms</code> is spent waiting for a connection, rather than executing SQL. The active-connection metric supports that finding.</p>
+<p><b>What this tells you:</b> A shared request identifier and queue metrics show where to act. “The system is slow” doesn't tell the team which part to fix.</p>
+</div></div>
     </div>
     <div class="cardmini">
       <h4><span class="fa">Simplicity — پیچیدگی را مهار کن</span><span class="en">Simplicity — tame complexity</span></h4>
@@ -1335,11 +1209,17 @@
         <li>جدا کردن پیچیدگی ذاتی (مال خود مسئله) از اکتسابی (مال ابزار) — به درد می‌خوره ولی کامل نیست.</li>
         <li>بهترین اسلحه ضد پیچیدگی: <b>انتزاع (Abstraction)</b> — مثل SQL که چیدمان دیسک و درخواست‌های همزمان و به‌هم‌ریختگی بعد crash رو قایم می‌کنه.</li>
       </ul></div>
-      <div class="en"><ul>
-        <li>A big tangled project earns the name “<span class="ltr">big ball of mud</span>”; complexity invites bugs every time you touch it.</li>
-        <li>Essential vs accidental complexity: a handy but leaky bucket.</li>
-        <li>The finest anti-complexity weapon: <b>abstraction</b> — SQL hiding disk layouts, concurrent stampedes and post-crash messes since forever.</li>
-      </ul></div>
+      <div class="en"><p>A simple design makes important rules visible and avoids unnecessary dependencies when they change.</p><ul>
+<li>A <span class="ltr">big ball of mud</span> is a tangled system where a small change can trigger bugs elsewhere.</li>
+<li>Distinguish essential complexity from accidental complexity. The distinction helps, even though the boundary isn't always clear.</li>
+<li>Use <b>abstraction</b> to hide details that callers don't need. SQL, for example, hides disk layout, concurrency handling and crash recovery behind a query interface.</li>
+</ul>
+<div class="callout" data-en-example="example-ch2-18">
+<p class="example-title"><b>Example: One rule instead of two copies</b></p>
+<p><b>Setup:</b> A “purchase above 500” discount rule is copied into the web code and a worker, with different implementations.</p>
+<p><b>Walk through it:</b> Move the rule into one domain module. Both paths use the same logic and inputs.</p>
+<p><b>What this tells you:</b> Now a threshold change happens in one place. Simplicity reduces independent rules and dependencies, rather than merely counting fewer lines.</p>
+</div></div>
     </div>
   </div>
 
@@ -1352,11 +1232,10 @@
         کم کردن برگشت‌ناپذیری ⇐ انعطاف بیشتر. همیشه راه برگشت بذار.</li>
     </ul></div>
     <div class="en"><ul>
-      <li>Requirements never sit still, friend: fresh facts, fresh priorities, fresh laws, growth. Stability is a mirage.</li>
-      <li>Simple, <b>loosely coupled</b> systems bend without breaking; we call that data-system agility evolvability.</li>
-      <li><b>Irreversibility</b> is change’s nemesis: marching from database A to B with the bridges burned is far scarier — don’t torch your way home.
-        Keep an exit open ⇒ stay flexible. Always.</li>
-    </ul></div>
+<li>New information, priorities, laws and growth change requirements over time.</li>
+<li>Simple, <b>loosely coupled</b> parts are easier to change. That ability to adapt is evolvability.</li>
+<li><b>Irreversibility</b> makes changes riskier. A migration from database A to B is easier to manage when the team has a way back. Preserve that option while checking the new path.</li>
+</ul></div>
   </div>
 
   <div class="diagram">
@@ -1376,7 +1255,13 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس تغییر مرحله‌ای زمان تشخیص و بازگشت می‌ده؛ حذف فوری فیلد قدیمی انتشار نسخهٔ قبلی رو ناممکن می‌کنه — پل رو پشت سرت خراب نکن.</p>
 </div>
 <p>گرهٔ مرکزی (<span class="ltr">Nonfunctional Requirements</span>) رو بخون و شش تا یال رو دونه‌دونه دنبال کن: <span class="ltr">story</span> به قصهٔ تایم‌لاین (۵۰۰ میلیون پست در روز)، <span class="ltr">measure</span> به Performance با p99 و SLO، <span class="ltr">survive</span> به Reliability بدون SPOF، <span class="ltr">grow</span> به Scalability با بازنگری هر ۱۰ برابر، <span class="ltr">simplify</span> به Maintainability برای تکامل امن، و <span class="ltr">recall</span> به بستهٔ ۲۰ سؤالی مصاحبه. هر یال یه فعله: قصه بگو، اندازه بگیر، زنده بمون، رشد کن، ساده کن، مرور کن — شش تا فعل، کل فصل.</p></div>
-    <div class="en"><p>Read the hub (<span class="ltr">Nonfunctional Requirements</span>) and walk the six edges one by one: <span class="ltr">story</span> → the timeline saga (500M posts/day), <span class="ltr">measure</span> → performance with p99 and SLO, <span class="ltr">survive</span> → reliability with zero SPOF, <span class="ltr">grow</span> → scalability redrawn every 10x, <span class="ltr">simplify</span> → maintainability for safe evolution, <span class="ltr">recall</span> → the 20-question interview pack. Six edges, six verbs: narrate, measure, survive, grow, simplify, recall — the whole chapter in your pocket.</p></div>
+    <div class="en"><div class="callout" data-en-example="example-ch2-16">
+<p class="example-title"><b>Example: A change you can understand and reverse</b></p>
+<p><b>Setup:</b> The application will replace <code dir="ltr">phone</code> with <code dir="ltr">country_code</code> and <code dir="ltr">number</code>.</p>
+<p><b>Walk through it:</b> Add and populate the new fields first. Check the data before enabling the new read path. Remove the old field later.</p>
+<p><b>What this tells you:</b> Staging the change leaves time to detect problems and roll back. Deleting the old field immediately can make the old application version unusable.</p>
+</div>
+<p>Begin at <span class="ltr">Nonfunctional Requirements</span> and follow its six branches. <span class="ltr">story</span> leads to the timeline case with 500M posts/day. <span class="ltr">measure</span> leads to performance, p99 and SLOs. <span class="ltr">survive</span> leads to reliability and checking for SPOFs.</p><p>Continue with <span class="ltr">grow</span>: revisit scalability at each 10x increase. <span class="ltr">simplify</span> leads to maintainability and safe changes. <span class="ltr">recall</span> leads to the 20-question interview pack. Use those six verbs to recall the chapter: tell the story, measure, survive faults, grow, simplify and review.</p></div>
   </div>
 </section>
 
@@ -1409,22 +1294,22 @@
   <div class="en"><table>
     <thead><tr><th>Term</th><th>One-line definition</th><th>Interview keyword</th></tr></thead>
     <tbody>
-      <tr><td><span class="ltr">Response Time</span></td><td>What the client’s watch says</td><td>Queue + service + network</td></tr>
-      <tr><td><span class="ltr">Throughput</span></td><td>Requests or bytes per second — line speed</td><td>Hardware ceiling</td></tr>
-      <tr><td><span class="ltr">Latency</span></td><td>Time loitering, not working</td><td>Network delay, queueing</td></tr>
-      <tr><td><span class="ltr">p50 / p95 / p99</span></td><td>What share beats this number</td><td>Tail latency</td></tr>
-      <tr><td><span class="ltr">Tail Latency Amplification</span></td><td>More backend calls, likelier the whole thing crawls</td><td>Slowest call has the last word</td></tr>
-      <tr><td><span class="ltr">SLO / SLA</span></td><td>Our promise / the customer’s contract</td><td>Percentiles + availability</td></tr>
-      <tr><td><span class="ltr">Materialized View</span></td><td>Answer, cooked in advance</td><td>Cheap reads, pricey writes</td></tr>
-      <tr><td><span class="ltr">Fan-out</span></td><td>How requests multiply downstream</td><td>×200 in the timeline case</td></tr>
-      <tr><td><span class="ltr">Metastable Failure</span></td><td>Overload that outlives the rush</td><td>Retry storm</td></tr>
-      <tr><td><span class="ltr">Fault vs Failure</span></td><td>One brick vs the whole wall</td><td>Two levels, one event</td></tr>
-      <tr><td><span class="ltr">SPOF</span></td><td>The one brick you can’t lose</td><td>Single point of failure</td></tr>
-      <tr><td><span class="ltr">Fault Injection</span></td><td>Break it on purpose, practice recovery</td><td>Chaos engineering</td></tr>
-      <tr><td><span class="ltr">Blameless Postmortem</span></td><td>Autopsy, not trial</td><td>Blame the system, not the human</td></tr>
-      <tr><td><span class="ltr">Scalability</span></td><td>Surviving heavier load</td><td>Not one-dimensional</td></tr>
-      <tr><td><span class="ltr">Shared-Nothing</span></td><td>Lone nodes + software handshakes</td><td>Scale out + sharding</td></tr>
-      <tr><td><span class="ltr">Operability / Simplicity / Evolvability</span></td><td>Three guardian angels</td><td>That’s where the money burns</td></tr>
+      <tr><td><span class="ltr">Response Time</span></td><td>Time observed by the client</td><td>Queue + service + network</td></tr>
+      <tr><td><span class="ltr">Throughput</span></td><td>Requests completed or bytes processed per second</td><td>Hardware ceiling</td></tr>
+      <tr><td><span class="ltr">Latency</span></td><td>Waiting time in this terminology</td><td>Network delay, queueing</td></tr>
+      <tr><td><span class="ltr">p50 / p95 / p99</span></td><td>Threshold for a stated share of requests</td><td>Tail latency</td></tr>
+      <tr><td><span class="ltr">Tail Latency Amplification</span></td><td>More required calls increase the chance of a slow response</td><td>Slowest required call dominates</td></tr>
+      <tr><td><span class="ltr">SLO / SLA</span></td><td>Internal quality target / customer contract</td><td>Percentiles + availability</td></tr>
+      <tr><td><span class="ltr">Materialized View</span></td><td>Query result prepared in advance</td><td>Cheaper reads, more write work</td></tr>
+      <tr><td><span class="ltr">Fan-out</span></td><td>Downstream operations per original operation</td><td>×200 in the timeline case</td></tr>
+      <tr><td><span class="ltr">Metastable Failure</span></td><td>Overload that persists after incoming load falls</td><td>Retry storm</td></tr>
+      <tr><td><span class="ltr">Fault vs Failure</span></td><td>Component fault vs service failure</td><td>Two levels, one event</td></tr>
+      <tr><td><span class="ltr">SPOF</span></td><td>A component whose failure stops the required service</td><td>Single point of failure</td></tr>
+      <tr><td><span class="ltr">Fault Injection</span></td><td>Controlled faults to exercise recovery</td><td>Chaos engineering</td></tr>
+      <tr><td><span class="ltr">Blameless Postmortem</span></td><td>Incident review without assigning blame</td><td>Find systemic ways to prevent recurrence</td></tr>
+      <tr><td><span class="ltr">Scalability</span></td><td>Maintaining quality as a specified load grows</td><td>Not one-dimensional</td></tr>
+      <tr><td><span class="ltr">Shared-Nothing</span></td><td>Independent resources with network coordination</td><td>Scale out + sharding</td></tr>
+      <tr><td><span class="ltr">Operability / Simplicity / Evolvability</span></td><td>Running, understanding and changing the system</td><td>Long-term maintenance cost</td></tr>
     </tbody>
   </table></div>
 
@@ -1438,7 +1323,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا آزمون بار نرخ ورودی، خطا و توزیع زمان پاسخ رو با هم ثبت می‌کنه؛ صرف جواب سریع به ۱۰ تا درخواست معیار نیست.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس نیاز غیرعملکردی وقتی به درد می‌خوره که مقدار، شرایط بار و تعریف موفقیت مشخص باشه — وگرنه حرفه، نه قرارداد.</p>
 </div></div>
-    <div class="en"><p>It says HOW, not WHAT: fast, reliable, scalable, maintainable, secure, compliant. The what is features; the how is everything else.</p></div>
+    <div class="en"><p>A nonfunctional requirement states how well a feature needs to work. Performance, reliability, scalability, maintainability, security and compliance are examples. Give each requirement a metric, a load condition and a way to decide whether it was met.</p>
+<div class="callout" data-en-example="example-ch2-0">
+<p class="example-title"><b>Example: A search requirement you can test</b></p>
+<p><b>Setup:</b> At <code dir="ltr">1000 req/s</code>, the API's target is to finish at least 99% of successful requests within <code dir="ltr">300 ms</code>.</p>
+<p><b>Walk through it:</b> The load test records the arrival rate, errors and response-time distribution together. Ten quick responses don't establish the target.</p>
+<p><b>What this tells you:</b> A useful nonfunctional requirement states the value, the load conditions and what counts as success. That gives the test something concrete to check.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۲. چرا polling برای تایم‌لاین شکست می‌خورد؟ اعدادش را بگو.</span><span class="en">2. Why does polling fail for the timeline? Give the numbers.</span></summary>
@@ -1449,7 +1340,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا حساب کن: نرخ درخواست <code dir="ltr">1,000,000 / 5 = 200,000 req/s</code> ـه؛ با دنبال کردن ۲۰۰ نفر، هر درخواست ممکنه دادهٔ چند نویسنده رو قاطی کنه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس تعداد کاربر به‌تنهایی ظرفیت لازم رو نمی‌گه. فاصلهٔ polling و هزینهٔ هر درخواست هم تعیین‌کننده‌ان — فقط سرشماری نکن.</p>
 </div></div>
-    <div class="en"><p>10M users asking every 5s → 2M queries/second; each merges 200 followees → 400M lookups/second. The numbers condemn polling — case closed.</p></div>
+    <div class="en"><p>Polling repeats work at a rate set by the user count and refresh interval, even when nothing changes. In this case, 10M users refreshing every 5s create 2M queries/second. Collecting posts from 200 followees gives the rough 400M lookups/second estimate. Check both the frequency and cost of a refresh.</p>
+<div class="callout" data-en-example="example-ch2-2">
+<p class="example-title"><b>Example: Calculating polling load</b></p>
+<p><b>Setup:</b> A million active users refresh every <code dir="ltr">5 s</code>.</p>
+<p><b>Walk through it:</b> That's <code dir="ltr">1,000,000 / 5 = 200,000 req/s</code>. With 200 followees per user, each request can also need to merge several authors' posts.</p>
+<p><b>What this tells you:</b> User count alone doesn't tell you the required capacity. Include the refresh interval and the work per request.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۳. fan-out و fan-out factor را تعریف کن.</span><span class="en">3. Define fan-out and the fan-out factor.</span></summary>
@@ -1460,7 +1357,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا worker شناسهٔ <code dir="ltr">p9</code> رو به ۱۰۰۰ تا timeline اضافه می‌کنه؛ خواننده بعداً فقط فهرست آماده رو می‌خونه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس یه نوشتن اولیه ۱۰۰۰ تا نوشتن مشتق می‌سازه. برای نویسندهٔ خیلی پرطرفدار می‌تونی ادغام موقع خوندن رو جدا بررسی کنی — سلبریتی استثناست، یادت باشه.</p>
 </div></div>
-    <div class="en"><p>One request in, several out — the multiplication factor is the fan-out factor. Timeline math: each post × 200 followers ≈ 1.16M writes/second.</p></div>
+    <div class="en"><p>One action creates several downstream operations. The ratio is the fan-out factor. For the timeline example, 5,800 posts/second × 200 followers per post ≈ 1.16M timeline writes/second. Keep the original rate and the multiplier visible.</p>
+<div class="callout" data-en-example="example-ch2-4">
+<p class="example-title"><b>Example: Fan-out when a post is published</b></p>
+<p><b>Setup:</b> Post <code dir="ltr">p9</code> comes from an author with 1,000 followers.</p>
+<p><b>Walk through it:</b> A worker adds <code dir="ltr">p9</code> to 1,000 timelines. Later, each reader opens a prepared list.</p>
+<p><b>What this tells you:</b> One original write creates 1,000 derived writes. For a very popular author, consider merging posts at read time instead. The follower distribution changes the cost.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۴. Materialized View چه چیزی را قربانی می‌کند؟</span><span class="en">4. What does a materialized view sacrifice?</span></summary>
@@ -1471,7 +1374,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا worker شناسهٔ <code dir="ltr">p9</code> رو به ۱۰۰۰ تا timeline اضافه می‌کنه؛ خواننده بعداً فقط فهرست آماده رو می‌خونه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس یه نوشتن اولیه ۱۰۰۰ تا نوشتن مشتق می‌سازه. برای نویسندهٔ خیلی پرطرفدار می‌تونی ادغام موقع خوندن رو جدا بررسی کنی — سلبریتی استثناست، یادت باشه.</p>
 </div></div>
-    <div class="en"><p>Reads go on a diet, writes hit the gym. Every change must visit every view; at rush hour, deliveries wait in line.</p></div>
+    <div class="en"><p>A materialized view makes reads cheaper by preparing the answer early. Building, storing and updating it cost work. If updates are asynchronous, measure freshness too: the prepared answer can lag behind its source.</p>
+<div class="callout" data-en-example="example-ch2-4">
+<p class="example-title"><b>Example: Fan-out when a post is published</b></p>
+<p><b>Setup:</b> Post <code dir="ltr">p9</code> comes from an author with 1,000 followers.</p>
+<p><b>Walk through it:</b> A worker adds <code dir="ltr">p9</code> to 1,000 timelines. Later, each reader opens a prepared list.</p>
+<p><b>What this tells you:</b> One original write creates 1,000 derived writes. For a very popular author, consider merging posts at read time instead. The follower distribution changes the cost.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۵. مسئلهٔ سلبریتی‌ها چطور حل می‌شود؟</span><span class="en">5. How is the celebrity problem solved?</span></summary>
@@ -1482,7 +1391,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا برای عادی‌ها fan-out موقع نوشتن اجرا می‌شه؛ پست نویسندهٔ بزرگ موقع خوندن با فهرست آماده ادغام می‌شه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس از ۲۰ میلیون نوشتن برای یه پست جلوگیری می‌شه؛ در عوض خوندن باید دو مسیر رو ادغام کنه — همون معاملهٔ همیشگی.</p>
 </div></div>
-    <div class="en"><p>Celebrities get their own shelf; their posts join the timeline at read time — millions of writes dodged. Heavy-follow gluttons? Skim some writes, nobody weeps.</p></div>
+    <div class="en"><p>Use a hybrid. Fan out ordinary authors' posts when they publish; merge a celebrity's posts into the prepared list when someone reads. That avoids millions of writes for a single celebrity post, at the cost of extra read-time work. For users following unusually many accounts, the case also considers sampling writes.</p>
+<div class="callout" data-en-example="review-5">
+<p class="example-title"><b>Example: Reading a celebrity’s post</b></p>
+<p><b>Setup:</b> An ordinary author has 500 followers; a celebrity has 20 million.</p>
+<p><b>Walk through it:</b> Fan out the ordinary author's posts at write time. Merge the celebrity's posts into the prepared timeline at read time.</p>
+<p><b>What this tells you:</b> This avoids 20 million derived writes for one celebrity post. Reading now has to merge two paths. That's the trade to explain.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۶. response time، service time و latency چه فرقی دارند؟</span><span class="en">6. How do response time, service time and latency differ?</span></summary>
@@ -1493,7 +1408,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا زمان پاسخ سمت سرور <code dir="ltr">200 ms</code> ـه؛ با چند worker ممکنه مجموعاً <code dir="ltr">1000 req/s</code> تموم بشه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس service time همون زمان اجرای کاره؛ response time انتظار رو هم داره. throughput هم تعداد کار تموم‌شده توی واحد زمانه — سه‌تا عدد جدا، قاطی‌شون نکن.</p>
 </div></div>
-    <div class="en"><p>Response time = the client’s stopwatch; service time = hands-on work; queueing = thumb-twiddling; latency = any non-working time (bus rides included).</p></div>
+    <div class="en"><p>Response time is the full wait the client observes. Service time is the actual processing; queueing is the wait before that processing. Sources use “latency” in different ways, so define it before comparing numbers. Then you can tell which part of the request needs attention.</p>
+<div class="callout" data-en-example="example-ch2-5">
+<p class="example-title"><b>Example: Response time and capacity</b></p>
+<p><b>Setup:</b> A worker processes a request in <code dir="ltr">20 ms</code>, but the request spends <code dir="ltr">180 ms</code> waiting in a queue.</p>
+<p><b>Walk through it:</b> The server-side response time is <code dir="ltr">200 ms</code>. Several workers might collectively complete <code dir="ltr">1000 req/s</code>.</p>
+<p><b>What this tells you:</b> Service time measures the work. Response time also includes waiting. Throughput counts completed work per unit of time. Keep those three measurements separate.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۷. چرا به‌جای میانگین از percentile استفاده می‌کنیم؟</span><span class="en">7. Why use percentiles instead of the mean?</span></summary>
@@ -1504,7 +1425,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا میانگین <code dir="ltr">19.9 ms</code> ـه؛ با روش nearest-rank، ـی <code dir="ltr">p99=10 ms</code> و <code dir="ltr">p99.9=1000 ms</code> می‌شه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس هدف صدک باید مشخص باشه. میانگین خوب می‌تونه با تجربهٔ بد یه گروه از کاربرها همراه باشه — میانگین دروغگوی خوش‌روئه!</p>
 </div></div>
-    <div class="en"><p>The mean flatters and hides: blind to the typical user, bullied by outliers. Median (p50) for the typical soul; p95/p99/p999 for the suffering tail.</p></div>
+    <div class="en"><p>The mean hides the shape of the distribution. The median, p50, shows the middle; p95, p99 and p999 show the slower end. Look at both the typical wait and the tail before deciding whether the service feels fast enough.</p>
+<div class="callout" data-en-example="example-ch2-6">
+<p class="example-title"><b>Example: An average can hide the slowest requests</b></p>
+<p><b>Setup:</b> Out of 1,000 requests, 990 finish in <code dir="ltr">10 ms</code> and 10 take <code dir="ltr">1000 ms</code>.</p>
+<p><b>Walk through it:</b> The mean is <code dir="ltr">19.9 ms</code>. With the nearest-rank method, <code dir="ltr">p99=10 ms</code> and <code dir="ltr">p99.9=1000 ms</code>.</p>
+<p><b>What this tells you:</b> Choose the percentile explicitly. A good-looking mean can coexist with a poor experience for a smaller group of users.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۸. مثالِ کتاب دربارهٔ <span class="ltr">p99.9</span> و <span class="ltr">p99.99</span> چه بده‌بستانی را نشان می‌دهد؟</span><span class="en">8. Why is Amazon strict on p99.9 but not p99.99?</span></summary>
@@ -1515,7 +1442,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کاهش موارد ۸ثانیه‌ای به ۴ ثانیه p99.99 رو بهتر می‌کنه؛ ممکن است p99.9 و بخش بزرگی از تجربهٔ کاربران تغییر نکند.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> هزینهٔ اصلاح باید با کاربرانِ متأثر و هدف محصول سنجیده شود؛ این اعداد فرض آموزشی‌اند، نه نقلِ آمار کتاب.</p>
 </div></div>
-    <div class="en"><p>The slowest users are usually your richest fans (long purchase history) — worth pampering. But p99.99 (one request in 10,000)? Brutally pricey, peanuts back, and at the mercy of cosmic randomness. Pick your battles.</p></div>
+    <div class="en"><p>The book's example connects slower responses with valuable customers who have longer purchase histories. Improving that tail can matter. But pushing from p99.9 to p99.99, one request in 10,000, can cost much more for less benefit. Compare the affected users with the product target. Treat the example as historical context, rather than a company's fixed policy today.</p>
+<div class="callout" data-en-example="review-8">
+<p class="example-title"><b>Example: Improving two parts of the tail</b></p>
+<p><b>Setup:</b> Suppose <code dir="ltr">p99.9=1 s</code> and <code dir="ltr">p99.99=8 s</code>, while the product target is defined at p99.9.</p>
+<p><b>Walk through it:</b> Reducing the 8-second cases to 4 seconds improves p99.99. It may leave p99.9 and most users' experience unchanged.</p>
+<p><b>What this tells you:</b> Compare the improvement's cost with the affected users and the product target. These are teaching numbers, rather than statistics quoted from the book.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۹. tail latency amplification چیست؟</span><span class="en">9. What is tail latency amplification?</span></summary>
@@ -1526,7 +1459,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا حساب کن: احتمال اینکه حداقل یکیشون کند بشه <code dir="ltr">1 - 0.99^100 ≈ 63.4%</code> ـه. شانس بد آوردن خیلی زیاده!</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس حتی اگه کندی هر سرویس نادر باشه، fan-out بزرگ صفحه رو زیاد معطل می‌کنه. فرض استقلال توی این حساب مهمه — یادت باشه.</p>
 </div></div>
-    <div class="en"><p>One request, several backends: a single slowpoke drags the whole answer down. More calls, more dice rolls against you.</p></div>
+    <div class="en"><p>If a page needs several backend replies, one slow reply can delay the whole page. Each extra required call adds another chance to encounter that delay. Parallel calls don't remove the need to wait for the slowest required result.</p>
+<div class="callout" data-en-example="review-9">
+<p class="example-title"><b>Example: Amplifying tail latency</b></p>
+<p><b>Setup:</b> A page waits for 100 independent services. Assume each has a 1% chance of exceeding the latency threshold.</p>
+<p><b>Walk through it:</b> The chance that at least one exceeds it is <code dir="ltr">1 - 0.99^100 ≈ 63.4%</code>.</p>
+<p><b>What this tells you:</b> A rare delay per service becomes common across a large fan-out. The independence assumption matters to this calculation; keep it attached to the number.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۱۰. SLO و SLA چه تفاوتی دارند؟</span><span class="en">10. How do SLO and SLA differ?</span></summary>
@@ -1537,7 +1476,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا حداکثر ۱۰۰۰ تا درخواست ناموفق توی بودجه می‌گنجه؛ SLA ممکنه برای نقض هدف قراردادی جبران مالی تعیین کنه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس SLO هدف مهندسیه؛ پیامد قراردادی فقط وقتی مطرحه که SLA چنین تعهدی داشته باشه — SLO قوله، SLA سند محضریه.</p>
 </div></div>
-    <div class="en"><p>SLO = the promise we make ourselves (p99 under 1s, 99.9% clean). SLA = the paper we sign with the customer about what missing it costs (hello, refunds).</p></div>
+    <div class="en"><p>An SLO is an engineering quality target, such as p99 under 1s and 99.9% successful valid requests. An SLA is the customer agreement, including any consequences it defines for a breach. State the metric, measurement window and conditions for each. A refund follows from the contract, rather than from the SLO label alone.</p>
+<div class="callout" data-en-example="example-ch2-7">
+<p class="example-title"><b>Example: An error budget</b></p>
+<p><b>Setup:</b> Use a teaching SLO of <code dir="ltr">99.9%</code> success across one million requests in a month.</p>
+<p><b>Walk through it:</b> That leaves room for at most 1,000 unsuccessful requests. An SLA may separately define compensation for missing its contractual target.</p>
+<p><b>What this tells you:</b> The SLO is the engineering target. A contractual consequence applies only if the SLA includes it. Keep the target and agreement distinct.</p>
+</div></div>
   </details>
   <details><summary><span class="fa">۱۱. چرا میانگین گرفتن از percentileها اشتباه است؟</span><span class="en">11. Why is averaging percentiles wrong?</span></summary>
     <div class="fa"><p>میانگین صدک‌های چند تا مجموعه، صدک مجموعهٔ قاطی‌شده نیست — غلطه. برای ترکیب باید خود داده یا خلاصهٔ قابل‌قاطی مثل هیستوگرام مناسب رو با تعداد نمونه‌ها داشته باشی.</p>
@@ -1547,7 +1492,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا میانگین دو تا p99 به هر گروه وزن برابر می‌ده — غلطه! برای p99 کل باید نمونه‌ها یا histogram قابل‌ادغام رو تجمیع کرد.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس صدک روی رتبهٔ درخواست‌های کل تعریف می‌شه، نه میانگین رتبه‌های دو گروه با اندازهٔ متفاوت. میانگین صدک‌ها صدک نیست — اینو قاب کن.</p>
 </div></div>
-    <div class="en"><p>Math crime alert: the median of medians is NOT the overall median. Merging machines or time slices? Add histograms (HdrHistogram, t-digest, DDSketch are your friends).</p></div>
+    <div class="en"><p>Averaging percentiles doesn't give the percentile of the combined requests. Even the median of medians can be wrong. Merge the samples or compatible summaries, such as histograms or suitable HdrHistogram, t-digest and DDSketch data, while retaining sample counts. Calculate the combined percentile from that merged distribution.</p>
+<div class="callout" data-en-example="review-11">
+<p class="example-title"><b>Example: Percentiles from two groups don’t add up</b></p>
+<p><b>Setup:</b> Group A has 1,000 fast requests; group B has 10 slow requests. Each reports its own p99.</p>
+<p><b>Walk through it:</b> Averaging the two p99 values gives the groups equal weight despite their different sizes. For the overall p99, combine samples or mergeable histograms.</p>
+<p><b>What this tells you:</b> A percentile ranks requests in the combined population. Averaging two group percentiles doesn't produce that rank.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۱۲. fault و failure را از هم جدا کن.</span><span class="en">12. Separate fault from failure.</span></summary>
@@ -1558,7 +1509,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا health check مسیر اون رو قطع می‌کنه و دو replica باقی‌مونده درخواست‌ها رو می‌گیرن؛ ظرفیت باقی‌مونده باید بار رو تحمل کنه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس خاموشی یه قطعه fault ـه؛ اگه هدف سرویس حفظ بشه failure توی سطح کاربر رخ نداده — قطعه مرد، سرویس زنده.</p>
 </div></div>
-    <div class="en"><p>Fault = one brick cracks (disk, box, dependency). Failure = the whole wall falls on the user (SLO breach). Same story, different zoom level.</p></div>
+    <div class="en"><p>A fault means a component broke: a disk, machine or dependency. A failure means the system no longer delivers the required service, for example by missing its SLO. Fault tolerance tries to stop the component problem from reaching the user.</p>
+<div class="callout" data-en-example="example-ch2-8">
+<p class="example-title"><b>Example: A component stops; the service continues</b></p>
+<p><b>Setup:</b> Three replicas sit behind a router. One replica shuts down.</p>
+<p><b>Walk through it:</b> A health check removes it from routing. The two remaining replicas take requests, provided they have enough capacity for the load.</p>
+<p><b>What this tells you:</b> Losing the component is a fault. If the service target still holds, it hasn't become a user-level failure. Check the surviving capacity too.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۱۳. SPOF چیست؟ مثال بزن.</span><span class="en">13. What is a SPOF? Give an example.</span></summary>
@@ -1569,7 +1526,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا هیچ درخواست کاربر به اون پنج replica نمی‌رسه، با اینکه همه سالمن! مسیر ورودی جایگزین باید واقعاً بتونه ترافیک رو هدایت کنه — روی کاغذ نه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس همین وابستگی مشترک SPOF ـه. زیاد کردن replicaهای پشت اون، خرابی خود ورودی رو پوشش نمی‌ده — در ورودی رو قفل کردی، پنجره‌ها فایده ندارن.</p>
 </div></div>
-    <div class="en"><p>The one brick holding the roof: a database with zero replicas, a lonely load balancer. Cure? Copies plus spreading across zones. No heroes, just redundancy.</p></div>
+    <div class="en"><p>A single point of failure is a component whose loss stops the required service because there's no working alternative. A database with no replica or a lone load balancer can play that role. Inspect the whole request path; extra service replicas don't protect a shared entry point.</p>
+<div class="callout" data-en-example="review-13">
+<p class="example-title"><b>Example: A lone load balancer</b></p>
+<p><b>Setup:</b> Five replicas are healthy, but the only incoming load balancer shuts down.</p>
+<p><b>Walk through it:</b> No user requests reach the replicas. The alternative entry path has to be able to route traffic in practice.</p>
+<p><b>What this tells you:</b> That shared dependency is the SPOF. More replicas behind it won't protect against the entry point's failure.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۱۴. چرا خرابی‌های نرم‌افزاری از سخت‌افزاری بدترند؟</span><span class="en">14. Why are software faults worse than hardware ones?</span></summary>
@@ -1580,7 +1543,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا توزیع همون نسخه روی ۲۰ تا replica، باگ رو ۲۰ بار تکثیر می‌کنه؛ canary و امکان rollback دامنهٔ اثر انتشار رو محدود می‌کنن.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس replication خرابی مستقل سخت‌افزار رو بهتر پوشش می‌ده؛ خطای مشترک کد می‌تونه همهٔ کپی‌ها رو هم‌زمان بزنه — باگ همه‌جا پخش می‌شه، نگران باش.</p>
 </div></div>
-    <div class="en"><p>Correlation is the villain: every node runs the same software, so one bug is everybody’s bug (2012 leap-second, killer SSD firmware — remember?). Bonus horrors: rogue processes hogging the buffet, slow dependencies, domino cascades.</p></div>
+    <div class="en"><p>Nodes running the same version can share the same bug. The book's examples include the 2012 leap-second problem and SSD firmware failure. Resource-hungry processes, slow dependencies and cascading failures add other shared risks. Replication helps with independent hardware faults; canaries and rollback help limit a bad release.</p>
+<div class="callout" data-en-example="example-ch2-11">
+<p class="example-title"><b>Example: A bug shared by every copy</b></p>
+<p><b>Setup:</b> Input <code dir="ltr">size=-1</code> crashes the new worker version.</p>
+<p><b>Walk through it:</b> Deploy that version to 20 replicas and you copy the bug 20 times. A canary and a rollback path limit how far a bad release spreads.</p>
+<p><b>What this tells you:</b> Replication helps with independent hardware faults. A shared code bug can hit every copy at once. More replicas won't remove that bug.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۱۵. fault injection و chaos engineering چه فایده‌ای دارند؟</span><span class="en">15. What is fault injection and chaos engineering good for?</span></summary>
@@ -1591,7 +1560,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا آزمون زمان تشخیص، خطاهای کاربر، backlog و زمان ترمیم رو می‌سنجه و با معیار پذیرش مقایسه می‌کنه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس تمرین خرابی فرض «failover کار می‌کنه» رو آزمایش می‌کنه. دامنه و معیار آزمون باید از پیش معلوم باشن — بدون معیار، فقط نمایشه.</p>
 </div></div>
-    <div class="en"><p>Break things on purpose and on schedule: it keeps the safety gear oiled, because the nastiest bugs squat on the error path, never the sunny one.</p></div>
+    <div class="en"><p>Introduce a controlled fault to test the alternate path, alerts and recovery. Define the scope and acceptance criteria first, then measure what happens. The test should answer whether failover works under those conditions.</p>
+<div class="callout" data-en-example="review-15">
+<p class="example-title"><b>Example: A bounded fault-injection test</b></p>
+<p><b>Setup:</b> In a test environment under a stated load, disconnect replica B for 30 seconds.</p>
+<p><b>Walk through it:</b> Measure detection time, user errors, backlog and recovery time. Compare them with the acceptance criteria.</p>
+<p><b>What this tells you:</b> The test checks the claim that failover works. Set the scope and criteria before injecting the fault so the result answers a real question.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۱۶. چرا «خطای انسانی» را علت حادثه نمی‌دانیم؟</span><span class="en">16. Why isn’t “human error” the cause of an incident?</span></summary>
@@ -1602,7 +1577,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا preview تعداد ردیف و دامنهٔ tenant رو نشون می‌ده و دسترسی محدود اجازهٔ حذف tenant ـی B رو نمی‌ده.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس بررسی باید برسه به نبود حفاظ. گفتن «اپراتور اشتباه کرد» سازوکار جلوگیری از تکرار رو مشخص نمی‌کنه — آدم خطا می‌کنه، سیستم باید نذاره.</p>
 </div></div>
-    <div class="en"><p>Because it’s a flare from a socio-technical mess; data says operator config edits top the outage charts. Right answer: blameless postmortems, better guardrails — hug the human, fix the system.</p></div>
+    <div class="en"><p>A person's action may trigger an incident, but “they made a mistake” doesn't explain how to prevent a repeat. Check tool design, permissions, review and rollback. A blameless postmortem helps the team find those improvements and share what happened.</p>
+<div class="callout" data-en-example="review-16">
+<p class="example-title"><b>Example: A guardrail for deletion</b></p>
+<p><b>Setup:</b> An operator intends to delete tenant A's records, but the command is missing its tenant condition.</p>
+<p><b>Walk through it:</b> A preview shows the row count and tenant scope. Restricted permissions prevent the operator from deleting tenant B's data.</p>
+<p><b>What this tells you:</b> Investigate missing guardrails as well as the action. “The operator made a mistake” alone doesn't identify a way to prevent the next incident.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۱۷. scalability چرا یک برچسب یک‌بعدی نیست؟</span><span class="en">17. Why isn’t scalability a one-dimensional label?</span></summary>
@@ -1613,7 +1594,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا افزایش به ۱۰۰ هزار راننده نرخ رو می‌رسونه به <code dir="ltr">20,000 update/s</code>، حتی اگه تعداد جست‌وجوی سفر ثابت بمونه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس ظرفیت نوشتن موقعیت، جست‌وجوی مکانی و تاریخچه باید جدا سنجیده بشن؛ «مقیاس‌پذیر» یه عدد واحد نیست.</p>
 </div></div>
-    <div class="en"><p>Because it hinges on HOW load grows. Two questions, always: same boxes, what breaks? Same speed, what does it cost? Plus: when do we hit this architecture’s ceiling?</p></div>
+    <div class="en"><p>Scalability depends on which load grows and which quality target needs to hold. Ask two questions: what happens on fixed resources, and what resources or changes keep performance steady? Then identify where the current architecture reaches its limit.</p>
+<div class="callout" data-en-example="example-ch2-12">
+<p class="example-title"><b>Example: Which dimension needs to scale?</b></p>
+<p><b>Setup:</b> Ten thousand drivers send a location every 5 seconds: <code dir="ltr">2000 update/s</code>.</p>
+<p><b>Walk through it:</b> A hundred thousand drivers raise that to <code dir="ltr">20,000 update/s</code>, even if ride-search traffic stays the same.</p>
+<p><b>What this tells you:</b> Measure capacity for location writes, spatial search and history separately. “Scalable” isn't a single number.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۱۸. shared-memory، shared-disk و shared-nothing را مقایسه کن.</span><span class="en">18. Compare shared-memory, shared-disk and shared-nothing.</span></summary>
@@ -1624,7 +1611,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا توی shared-nothing هر سرور حافظه و دیسک خودش رو داره و داده از شبکه جابه‌جا می‌شه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس گلوگاه و دامنهٔ خرابی‌شون فرق داره. زیاد کردن CPU توی هر سه مدل یه رفتار نداره — مدل رو بشناس، بعد نسخه بپیچ.</p>
 </div></div>
-    <div class="en"><p>Shared-memory (scale up): one big beast, bills steeper than linear. Shared-disk (NAS/SAN): one closet, fights over the key. Shared-nothing (scale out): lone wolves, near-linear dreams — but somebody must do the sharding dishes.</p></div>
+    <div class="en"><p>Shared-memory means processors use common memory, typically scaling up one machine. Shared-disk means separate nodes use common storage, such as NAS/SAN. Shared-nothing means each node owns its CPU, memory and disk and coordinates over the network, usually with sharding. Each model puts contention and coordination in different places.</p>
+<div class="callout" data-en-example="review-18">
+<p class="example-title"><b>Example: Three resource-sharing models</b></p>
+<p><b>Setup:</b> Two CPUs may share RAM. Two servers may instead share only disk storage.</p>
+<p><b>Walk through it:</b> In shared-nothing, each server has its own memory and disk, and data moves over the network.</p>
+<p><b>What this tells you:</b> The bottlenecks and failure boundaries differ. Adding CPU won't have the same effect in all three models. Identify the sharing model first.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۱۹. چرا طراحی برای مقیاسِ فرضی می‌تواند به یک محصولِ تازه آسیب بزند؟</span><span class="en">19. Why shouldn’t a startup worry about scale?</span></summary>
@@ -1635,7 +1628,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا ساخت پیشاپیش ۳۲ تا shard، مسیر join و migration و پایش رو پیچیده می‌کنه و وقت تیم رو از قابلیت‌های لازم می‌گیره.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس به‌جای ظرفیت خیالی، بار و حاشیهٔ ظرفیت فعلی رو اندازه بگیر و مرز نیاز به تغییر رو ثبت کن — برای فردا آماده باش، ولی امروز رو خراب نکن.</p>
 </div></div>
-    <div class="en"><p>Because job one is learning, staying simple and bendy; daydreaming about fantasy scale either burns effort or pours your design in concrete. Win first, meet the bottlenecks, redraw per 10x. In that order.</p></div>
+    <div class="en"><p>Watch actual growth, but don't spend the team's time on complexity for imaginary demand. Keep the design simple and changeable while measuring capacity and headroom. Revisit it at each 10x increase. Being prepared means knowing when to change, rather than building every possible future design now.</p>
+<div class="callout" data-en-example="review-19">
+<p class="example-title"><b>Example: Imaginary scale, real work</b></p>
+<p><b>Setup:</b> A new product has a thousand users. A load test shows that one database meets the target.</p>
+<p><b>Walk through it:</b> Building 32 shards in advance complicates joins, migrations and monitoring, taking time away from needed features.</p>
+<p><b>What this tells you:</b> Measure current load and headroom, and record the point where the design needs to change. Prepare for growth without making today's work harder than necessary.</p>
+</div></div>
   </details>
 
   <details><summary><span class="fa">۲۰. سه اصل maintainability و مثال irreversibility؟</span><span class="en">20. The three maintainability principles, plus an irreversibility example?</span></summary>
@@ -1646,7 +1645,13 @@
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا اول فیلدهای تازه افزوده و پر می‌شن؛ خوندن نسخهٔ جدید بعد کنترل داده فعال می‌شه؛ حذف فیلد قدیمی می‌افته به بعد.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس تغییر مرحله‌ای زمان تشخیص و بازگشت می‌ده؛ حذف فوری فیلد قدیمی انتشار نسخهٔ قبلی رو ناممکن می‌کنه — پل رو پشت سرت خراب نکن.</p>
 </div></div>
-    <div class="en"><p>Operability (ops life, easy), simplicity (brains get it, via abstraction), evolvability (change stays cheap). Irreversibility horror story: moving databases with the bridges burned — reversible beats brave, every time.</p></div>
+    <div class="en"><p>Operability makes the system easier to run. Simplicity makes it easier to understand. Evolvability makes it easier to change. Irreversible decisions, such as a database migration with no way back, make future work riskier. Keep a recovery or rollback path while validating the change.</p>
+<div class="callout" data-en-example="example-ch2-16">
+<p class="example-title"><b>Example: A change you can understand and reverse</b></p>
+<p><b>Setup:</b> The application will replace <code dir="ltr">phone</code> with <code dir="ltr">country_code</code> and <code dir="ltr">number</code>.</p>
+<p><b>Walk through it:</b> Add and populate the new fields first. Check the data before enabling the new read path. Remove the old field later.</p>
+<p><b>What this tells you:</b> Staging the change leaves time to detect problems and roll back. Deleting the old field immediately can make the old application version unusable.</p>
+</div></div>
   </details>
 
   <h3 id="s6-3"><span class="fa">۶.۳ اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">6.3 Common interview mistakes</span></h3>
@@ -1659,13 +1664,13 @@
     <li>«خطای انسانی» رو مقصر دونستن به‌جای تحلیل سیستمی — آدم رو ول کن، سیستم رو درست کن.</li>
   </ul></div>
   <div class="en"><ul>
-    <li>Quoting “mean response time” and stopping there — half an answer.</li>
-    <li>Calling “X scalable” with no load, no growth story — just a slogan.</li>
-    <li>No numbers on the table (400M lookups vs 1.16M writes) — engineers talk numbers.</li>
-    <li>Blanking on edge cases (celebrities, peaks, power users) — where everyone slips.</li>
-    <li>Mushing fault and failure together, or ghosting SPOF.</li>
-    <li>Pointing at “human error” instead of the system — hug the human, fix the machine.</li>
-  </ul></div>
+<li>Giving only mean response time, without percentiles or the distribution.</li>
+<li>Calling a system scalable without stating the load and how it grows.</li>
+<li>Skipping the case-study comparison: 400M lookups vs 1.16M writes.</li>
+<li>Leaving out celebrities, traffic peaks and users with unusually many followees.</li>
+<li>Confusing a fault with a failure, or overlooking a SPOF.</li>
+<li>Stopping at “human error” instead of finding ways to prevent recurrence.</li>
+</ul></div>
 
   <h3 id="s6-4"><span class="fa">۶.۴ چک‌لیست مرور ۵ دقیقه‌ای قبل از مصاحبه</span><span class="en">6.4 Five-minute pre-interview checklist</span></h3>
   <div class="fa"><ol>
@@ -1677,13 +1682,13 @@
     <li>سه فرشتهٔ maintainability + irreversibility — در خروج رو باز بذار.</li>
   </ol></div>
   <div class="en"><ol>
-    <li>Rattle off the timeline numbers eyes closed: 5,800 posts/s, ×200 followers, 1.16M writes/s, 400M lookups/s.</li>
-    <li>Response/service/latency/queueing in one breath + why the client holds the stopwatch.</li>
-    <li>p50/p95/p99 + tail amplification + the “averaging percentiles is a sin” rule.</li>
-    <li>Fault vs failure, SPOF, chaos engineering — the survival triangle.</li>
-    <li>Three scaling plays + two questions before you build — ask first, pour concrete later.</li>
-    <li>Three guardian angels + irreversibility — always leave the exit open.</li>
-  </ol></div>
+<li>Explain the timeline estimates: 5,800 posts/s, ×200 followers, 1.16M writes/s and 400M lookups/s.</li>
+<li>Separate response time, service time, latency and queueing, then explain why the client measures the full wait.</li>
+<li>Explain p50/p95/p99 and tail amplification, and why you can't average percentiles.</li>
+<li>Distinguish fault from failure, find a SPOF and describe a controlled chaos test.</li>
+<li>Compare the three scaling models and ask both capacity questions before choosing one.</li>
+<li>Explain the three maintainability concerns and the cost of irreversibility.</li>
+</ol></div>
 </section>
 
 <!-- ============ SECTION 7 ============ -->
