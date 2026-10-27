@@ -1,14 +1,18 @@
 <div align="center">
 
-<img src="assets/readme-banner.svg" alt="Own the Stack — Make Your Own AI Platform. By hurdad ashouri." width="100%">
+# DDIA Study Lab
 
-**A distributed-systems study lab. An AI platform design workshop.**
+### Learn *Designing Data-Intensive Applications* by playing with it.
 
-Learn *Designing Data-Intensive Applications* (2nd ed.) with **113 interactive diagrams** in **Persian and English** — chapter notes, step-by-step narration, 49 exercises and an interview pack.
+Interactive diagrams, step-by-step narration, 49 exercises and an interview pack for every chapter of DDIA (2nd ed.) — in **Persian and English**. Then use what you learned in a capstone: design an AI platform.
+
+<img src="assets/demo.gif" alt="Tracing a route through the leader-failover diagram: PATH, pick Client, pick Follower 2, and the shortest path lights up" width="80%">
+
+<sub>Leader failover (chapter 6): pick a start and an end node, and the diagram lights up the path between them.</sub>
 
 <a href="#build-understanding-before-infrastructure"><img src="assets/badges/status.svg" alt="Status: design prototype"></a> <a href="LICENSE"><img src="assets/badges/license.svg" alt="License: AGPL-3.0-only"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/languages.svg" alt="Documentation: Persian and English"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/website.svg" alt="Website: public"></a>
 
-14 chapters · 113 interactive diagrams · 49 exercises · 15 ADRs · 1 capstone
+14 chapters · interactive diagrams · 49 exercises · 15 ADRs · 1 capstone
 
 [**Explore the live site ↗**](https://ddia-study-lab.vercel.app/) &nbsp;·&nbsp; [**Enter the capstone**](https://ddia-study-lab.vercel.app/final-project/index.html#overview) &nbsp;·&nbsp; [**Start at Chapter 1**](https://ddia-study-lab.vercel.app/ch1-tradeoffs/index.html)
 
