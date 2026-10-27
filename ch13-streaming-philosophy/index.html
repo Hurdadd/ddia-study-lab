@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/ddia.css">
 <link rel="stylesheet" href="../assets/exercise-audit.css">
+<link rel="stylesheet" href="../assets/concept-labs.css">
 </head>
 <body>
 
@@ -79,6 +80,20 @@
   <a class="lvl2" href="#s6-3"><span class="fa">۶.۳. اشتباهات رایج</span><span class="en">6.3. Common mistakes</span></a>
   <a class="lvl2" href="#s6-4"><span class="fa">۶.۴. چک‌لیست ۵ دقیقه‌ای</span><span class="en">6.4. Five-minute checklist</span></a>
   <a href="#s7"><span class="fa">۷. تمرین‌های عملی</span><span class="en">7. Hands-on exercises</span></a>
+
+
+
+<!-- concept-lab-toc:start -->
+<a href="#try-rebuild"><span class="en">Try it: Rebuild a projection from its source</span><span class="fa">امتحان کن: بازسازی نما از مرجع داده</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-unique"><span class="en">Try it: Two people claim the same username</span><span class="fa">امتحان کن: دو نفر یک نام کاربری را می‌گیرند</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-reconcile"><span class="en">Try it: A late event after the window closed</span><span class="fa">امتحان کن: رویداد دیررسیده بعد از بسته‌شدن پنجره</span></a>
+<!-- concept-lab-toc:end -->
 </nav>
 
 <main class="doc">
@@ -450,6 +465,16 @@
 </div>
 </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-rebuild" data-lab="rebuild" data-chapter="13">
+<h3><span class="en">Rebuild a projection from its source</span><span class="fa">بازسازی نما از مرجع داده</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
+
+
 
 <section id="s2">
 <h2 class="reveal"><span class="secnum"><span class="fa">۲</span><span class="en">2</span></span> <span class="fa">batch و stream در کنار هم</span><span class="en">Batch and stream together</span></h2>
@@ -619,6 +644,14 @@
 </div>
 </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-reconcile" data-lab="reconcile" data-chapter="13">
+<h3><span class="en">A late event after the window closed</span><span class="fa">رویداد دیررسیده بعد از بسته‌شدن پنجره</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <section id="s3">
 <h2 class="reveal"><span class="secnum"><span class="fa">۳</span><span class="en">3</span></span> <span class="fa">unbundle کردنِ پایگاه داده</span><span class="en">Unbundling the database</span></h2>
@@ -1890,6 +1923,14 @@ COMMIT;</pre>
 </div>
 </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-unique" data-lab="unique" data-chapter="13">
+<h3><span class="en">Two people claim the same username</span><span class="fa">دو نفر یک نام کاربری را می‌گیرند</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <section id="s6">
 <h2 class="reveal"><span class="secnum"><span class="fa">۶</span><span class="en">6</span></span> <span class="fa">بستهٔ مصاحبه</span><span class="en">Interview pack</span></h2>
@@ -2249,6 +2290,12 @@ COMMIT;</pre>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">فرض کن API انتقال بین دو حساب داری. request ID رو از client تا DB ببر. payload و نتیجه رو به ID بچسبون؛ UNIQUE، debit و credit و log باید اتمیک باشن. پاسخ commit گم‌شده و retry رو تحلیل کن و projection موجودی رو مستقل از log بساز.</span><span class="en">Picture this, you&#x27;re designing a transfer API between two accounts. You carry a request ID end to end, from client to DB. You bind payload and result to that ID; your UNIQUE constraint, debit and credit, and log commit together. You handle the lost commit response plus retry, and you rebuild balance projections independently from the log.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">دو transfer یکسان با ID متفاوت رو مجاز می‌دونی</span><span class="en">You allow two identical transfers with different IDs</span></li><li><span class="fa">همون ID با payload متفاوت رو رد می‌کنی</span><span class="en">You reject a reused ID with a different payload</span></li><li><span class="fa">balance invariant و نتیجه replay رو حفظ می‌کنی</span><span class="en">You preserve your balance invariant and replay result</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">دو درخواست هم‌زمان با یه ID برسن؛ پاسخ موفق یا pending رو چطور تعیین می‌کنی؟</span><span class="en">Two requests with the same ID arrive concurrently. How do you return success or pending?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۲–۴ ساعت</span><span class="en">Extended hands-on laboratory · estimated 2–4 hours</span></summary><div class="fa"><p><b>شناسه سرتاسری در عمل:</b> یه فرم انتقال موجودی ساده (دو حساب + مبلغ) با پایگاه رابطه‌ای بساز که به‌جای دو UPDATE مستقیم، اول <span class="ltr">request_id</span> یکتا رو با قید UNIQUE درج می‌کنه (الگوی مثال 13-2). بعد سناریوی «COMMIT رفت ولی پاسخ گم شد + retry کاربر» رو شبیه‌سازی کن و نشون بده بالانس‌ها دقیقاً یه بار عوض می‌شن. بعد ستون درخواست‌ها رو به‌عنوان لاگ رویداد در نظر بگیر و یه مصرف‌کننده جدا بنویس که بالانس‌ها رو فقط از همون لاگ بازسازی می‌کنه.</p></div><div class="en"><p><b>End-to-end IDs in practice:</b> build a simple balance-transfer form (two accounts + amount) on a relational database that, instead of two direct UPDATEs, first inserts a unique request_id under a UNIQUE constraint (the Example 13-2 pattern). Then simulate "COMMIT went through but the reply was lost + user retry" and show balances change exactly once. Next treat your requests column as an event log and write a separate consumer that rebuilds balances only from that log.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch13-ex1"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-1"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/" target="_blank" rel="noopener">AWS · safe retries with idempotent APIs</a> · <a href="https://www.postgresql.org/docs/18/transaction-iso.html" target="_blank" rel="noopener">PostgreSQL 18 · transaction isolation</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch13-ex1"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
 <article class="exercise-block" id="exercise-2" data-reviewed-exercise="2">
 <h3><span class="fa">تمرین ۲ — مهاجرتِ دوگانه</span><span class="en">Exercise 2 — Dual migration</span></h3>
@@ -2257,6 +2304,12 @@ COMMIT;</pre>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">تصور کن schema کاتالوگ رو با یه log مرجع و دو projection قدیم و جدید مهاجرت می‌دی. backfill و catch-up، shadow read، canary، rollback و زمان حذف نسخه قدیم رو تعریف کن. bug تو projection جدید و lag تزریق کن؛ مالکیت compatibility و write path رو هم شفاف نگه دار.</span><span class="en">Think of it, you&#x27;re migrating a catalog with one shared input log and independent old and new projections. You define backfill, catch-up, shadow reads, canary routing, rollback, and when you retire the old view. You inject a projection bug and lag; and you keep write ownership and compatibility explicit.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">درصد ترافیک رو با feature flag برگشت‌پذیر جابه‌جا می‌کنی</span><span class="en">You route traffic reversibly with a feature flag</span></li><li><span class="fa">schema جدید رو قبل از آماده‌شدن زیر بار خواندن نمی‌بری</span><span class="en">You don&#x27;t serve reads from the new schema before it&#x27;s ready</span></li><li><span class="fa">چک صحت، هزینه دو نسخه و cutover criteria رو روشن می‌کنی</span><span class="en">You spell out validation, dual-view cost, and cutover criteria</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">کاربر بعد از خوندن schema جدید داده‌ای بنویسه که نسخه قدیم نمی‌فهمه؛ rollback هنوز ممکنه؟</span><span class="en">A client writes data the old schema can&#x27;t represent after reading the new schema. Is rollback still possible?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳–۶ ساعت</span><span class="en">Extended hands-on laboratory · estimated 3–6 hours</span></summary><div class="fa"><p><b>مهاجرت دوگانه:</b> یه API لیست محصولات با دو نسخه schema بساز (قدیم: یه جدول تخت؛ جدید: جدول + جدول جزئیات) که هر دو از یه لاگ ورودی مشترک با دو projection مستقل تغذیه می‌شن. درصدی از ترافیک خواندن رو به نمای تازه بفرست، یه باگ عمدی تو projection تازه بذار، و مسیر rollback (برگردوندن 100٪ ترافیک به نمای قدیم) رو تمرین کن.</p></div><div class="en"><p><b>Dual migration:</b> build a product-list API with two schema versions (old: one flat table; new: table + details table) fed by two independent projections from one shared input log. Send a percent of read traffic to the fresh view, plant a deliberate bug in the fresh projection, and practice the rollback path (returning 100% of traffic to the old view).</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch13-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a> · <a href="https://www.amazon.jobs/content/en/how-we-hire/sde-iii-interview-prep" target="_blank" rel="noopener">Amazon · SDE III interview preparation</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch13-ex2"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
 <article class="exercise-block" id="exercise-3" data-reviewed-exercise="3">
 <h3><span class="fa">تمرین ۳ — پرداختِ چندshardیِ مینیاتوری</span><span class="en">Exercise 3 — Miniature multishard payment</span></h3>
@@ -2265,6 +2318,12 @@ COMMIT;</pre>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">داستان از این قراره که انتقال مبدأ، مقصد و کارمزد رو با سه log و پردازش قطعی طراحی می‌کنی. رکورد framed با checksum و fsync، رزرو موجودی، تصمیم پایدار، outbox و dedup رو مشخص کن. crash بعد از انتشار بخشی از خروجی رو بازیابی کن و فرق integrity نهایی، pending state و رؤیت اتمیک رو بگو.</span><span class="en">Here&#x27;s the thing, you&#x27;re designing source, destination, and fee transfers with three logs and deterministic processing. You pin down framed checksummed records with fsync, reserved funds, a persistent decision, an outbox, and dedup. You recover after publishing only some outputs. And you spell out the difference between pending funds, final integrity, and atomic visibility.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">تصمیم رو تو retry با موجودی متفاوت از نو نمی‌گیری</span><span class="en">You keep one persistent deterministic decision across retries</span></li><li><span class="fa">پول در حال انتقال رو تو حسابداری نشون می‌دی</span><span class="en">You account for your pending funds</span></li><li><span class="fa">جبران یا پیشبرد تصمیم رو با مدرک انتخاب می‌کنی</span><span class="en">You spell out your visibility guarantees</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">مقصد برای همیشه بسته شده باشه؛ پرداخت pending رو چطور حل می‌کنی؟</span><span class="en">The destination account closes permanently. How do you resolve your pending transfer?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۶–۱۲ ساعت</span><span class="en">Extended hands-on laboratory · estimated 6–12 hours</span></summary><div class="fa"><p>سه shard مبدأ، مقصد و کارمزد با پردازنده تک‌نخ و لاگ فایلی بساز. قرارداد فایل [length,payload,checksum]، fsync پیش از ACK، و recovery دم ناقص رو تعریف کن؛ خرابی میانی رو بی‌صدا دور ننداز. تصمیم و رزرو وجه و تعهد انتشار outbox باید از یه رکورد پایدار قابل بازسازی باشن. هر leg کلید (payment_id,leg_type) داره؛ مقصد اثر و dedup رو با هم پایدار می‌کنه. بعد از هر انتشار crash بده و پس از restart همون تصمیم ذخیره‌شده رو replay کن. مبلغ pending رو به تفکیک leg حساب کن تا پرداختی که تو مقصد اعمال شده دوباره تو pending شمرده نشه؛ جمع اقتصادی فقط تو یه مرز منطقی مشترک قابل سنجشه. همگرایی نهایی، رؤیت اتمیک بین shardها نمی‌ده؛ تأخیر بی‌نهایت و leg ناموفق به وضعیت محصول و پروتکل reconciliation و compensation مشخص نیاز داره.</p></div><div class="en"><p>Build source, destination, and fee shards with single-thread processors and file logs. Define [length,payload,checksum], fsync-before-ACK, and truncated-tail recovery; never silently discard interior corruption. Reconstruct your decision, reservation, and outbox obligation from one durable record. Identify each leg by (payment_id,leg_type); persist destination dedup with its effect. Crash after each publication and replay the stored decision after restart. Track pending per leg so credited funds aren't counted again as pending; economic conservation needs a common logical observation boundary. Eventual convergence doesn't give you cross-shard atomic visibility. Indefinite delay or a permanently failed leg needs an explicit product state plus a reconciliation and compensation protocol.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch13-ex3"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-3"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/" target="_blank" rel="noopener">AWS · safe retries with idempotent APIs</a> · <a href="https://jepsen.io/consistency/models" target="_blank" rel="noopener">Jepsen · consistency models</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch13-ex3"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
 <article class="exercise-block" id="exercise-4" data-reviewed-exercise="4">
 <h3><span class="fa">تمرین ۴ — حسابرسیِ سرتاسری</span><span class="en">Exercise 4 — End-to-end auditing</span></h3>
@@ -2273,6 +2332,12 @@ COMMIT;</pre>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">حالا برای انتقال یا projection یه auditor مستقل طراحی کن که log مرجع رو تا checkpoint مشخص بازپخش می‌کنه. state واقعی رو تو همون مرز مقایسه کن، mismatch و lag رو جدا بشمار و missing update تزریق کن. حدود تشخیص bug مشترک، هزینه و repair امن رو توضیح بده.</span><span class="en">Honestly, you build an independent auditor for a transfer or projection that replays your authoritative log to a stated checkpoint. You compare actual state at that same boundary, count mismatch and lag separately, inject a missing update, and explain shared-bug limits, cost, and safe repair.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">stateهای دو زمان متفاوت رو با هم مقایسه نمی‌کنی</span><span class="en">You compare state at the same checkpoint</span></li><li><span class="fa">checker رو کپی همون تابع buggy نمی‌کنی؛ مستقل می‌نویسیش</span><span class="en">You recompute independently instead of rerunning the buggy function</span></li><li><span class="fa">تشخیص رو با repair خودکار بی‌قید یکی نمی‌دونی</span><span class="en">You separate detection from safe repair</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">لاگ ورودی خودش ناقص باشه؛ auditor دیگه چی رو نمی‌تونه ثابت کنه؟</span><span class="en">The input log itself is incomplete. What can your auditor no longer prove?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۲–۴ ساعت</span><span class="en">Extended hands-on laboratory · estimated 2–4 hours</span></summary><div class="fa"><p><b>حسابرسی سرتاسری:</b> برای یکی از تمرین‌های بالا یه checker جدا بنویس که مستقل از کد اصلی، لاگ ورودی رو می‌خونه و state مشتق رو بازمحاسبه و با state واقعی مقایسه می‌کنه (ایده «اجرای مجدد مشتق برای چک»). یه خرابی خاموش (مثلاً update گم‌شده تو یه replica) تزریق کن تا بفهمی checker کی مچش رو می‌گیره.</p></div><div class="en"><p><b>End-to-end auditing:</b> for one of the exercises above, write a separate checker that independently reads the input log, recomputes the derived state, and compares it with the real state (the "re-run the derivative for checking" idea). Inject a silent failure (e.g. a lost update in one replica) and see when your checker catches it.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch13-ex4"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-4"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://jepsen.io/consistency/models" target="_blank" rel="noopener">Jepsen · consistency models</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch13-ex4"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
 </div>
 
@@ -2309,5 +2374,6 @@ COMMIT;</pre>
 </footer>
 
 <script src="../assets/site.js"></script>
+<script src="../assets/concept-labs.js" defer></script>
 </body>
 </html>

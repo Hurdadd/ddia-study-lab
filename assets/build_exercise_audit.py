@@ -208,3 +208,5 @@ page='''<!DOCTYPE html><html lang="fa" dir="rtl" data-hue="mint" data-title-fa="
 (ROOT/'exercise-audit.html').write_text(page)
 assert len(ITEMS)==49 and len({(e['chapter'],e['number']) for e in ITEMS})==49
 print('Built 49 reviewed briefs, 14 labelled chapters and one linked audit.')
+import build_concept_labs
+build_concept_labs.build()

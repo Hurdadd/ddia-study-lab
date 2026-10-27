@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/ddia.css">
 <link rel="stylesheet" href="../assets/exercise-audit.css">
+<link rel="stylesheet" href="../assets/concept-labs.css">
 </head>
 <body>
 
@@ -77,6 +78,20 @@
   <a class="lvl2" href="#s7-3"><span class="fa">۷.۳. اشتباهات رایج</span><span class="en">7.3 Common mistakes</span></a>
   <a class="lvl2" href="#s7-4"><span class="fa">۷.۴. چک‌لیست ۵ دقیقه‌ای</span><span class="en">7.4 Five-minute checklist</span></a>
   <a href="#s8"><span class="fa">۸. تمرین‌های عملی</span><span class="en">8. Hands-on exercises</span></a>
+
+
+
+<!-- concept-lab-toc:start -->
+<a href="#try-retry"><span class="en">Try it: Timeout does not mean rollback</span><span class="fa">امتحان کن: timeout به معنی rollback نیست</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-fencing"><span class="en">Try it: A paused client wakes up with an old lock</span><span class="fa">امتحان کن: کلاینت متوقف‌شده با قفل قدیمی بیدار می‌شود</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-timeout"><span class="en">Try it: Slow or dead?</span><span class="fa">امتحان کن: کند است یا مرده؟</span></a>
+<!-- concept-lab-toc:end -->
 </nav>
 
 <main class="doc">
@@ -325,6 +340,14 @@
     <div class="fa"><p>اگه نود «مرده‌اعلام‌شده» واقعاً زنده باشه و وسط کاری (مثلاً فرستادن ایمیل) باشه، نود جایگزین همون کار رو دوباره انجام می‌ده → <b>اثر دوباره</b>. اگه سیستم از قبل شلوغ باشه، جابه‌جا شدن بار می‌تونه زنجیره‌ای از اعلام مرگ بسازه تا جایی که همه، همه رو مرده بدونن و کل سیستم بخوابه — این دام معروفه.</p></div><div class="en"><p>If the “declared-dead” node's actually alive and mid-task (say, sending an email), its replacement does the same task again → <b>duplicate effect</b>. And the shifted load can chain death declarations till everyone calls everyone dead and the whole system halts.</p></div>
   </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-timeout" data-lab="timeout" data-chapter="9">
+<h3><span class="en">Slow or dead?</span><span class="fa">کند است یا مرده؟</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <!-- ============ SECTION 2 ============ -->
 <section id="s2">
@@ -405,6 +428,16 @@
     </ul></div>
   </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-retry" data-lab="retry" data-chapter="9">
+<h3><span class="en">Timeout does not mean rollback</span><span class="fa">timeout به معنی rollback نیست</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
+
+
 
 <!-- ============ SECTION 3 ============ -->
 <section id="s3">
@@ -656,6 +689,14 @@
     <div class="fa"><p>امنیت یه lease فقط به «یکی بودن دارنده» نیست — این رو نمی‌شه تضمین کرد. چیزی که می‌تونی تضمین کنی اینه که <b>نوشته‌های کهنه بی‌اثر بشن</b>. fencing دقیقاً همینه: یه ترتیب قطعی افزایشی که storage اجراش می‌کنه، حتی اگه زامبی‌ها هنوز زنده باشن — اینو قاب کن.</p></div><div class="en"><p>A lease's safety isn't about “having exactly one holder” — nobody can guarantee that. What you can guarantee is that <b>stale writes take no effect</b>. That's exactly fencing: a strictly increasing order enforced by storage, even while zombies still walk.</p></div>
   </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-fencing" data-lab="fencing" data-chapter="9">
+<h3><span class="en">A paused client wakes up with an old lock</span><span class="fa">کلاینت متوقف‌شده با قفل قدیمی بیدار می‌شود</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <!-- ============ SECTION 5 ============ -->
 <section id="s5">
@@ -1132,6 +1173,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">فرض کن یه شمارنده یا پرداخت داری که درخواست، commit یا پاسخش ممکنه گم بشه. history هر حالت رو نشون بده. پروتکل رو با request ID، result lookup، payload binding و retention طراحی کن؛ deadline، backoff+jitter و retry budget رو هم اضافه کن.</span><span class="en">Picture this — you&#x27;ve got a counter or payment where the request, commit or reply can vanish. Trace each history. Design request ID, result lookup, payload binding and retention, then add deadlines, backoff with jitter and your retry budget.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">timeout رو با عدم اجرا یکی نمی‌گیری</span><span class="en">You keep timeout indeterminate, not failed</span></li><li><span class="fa">قصد مشتری رو تو ID درخواست نگه می‌داری</span><span class="en">You preserve caller intent in your request ID</span></li><li><span class="fa">retry تو همه لایه‌ها بار رو چندبرابر نمی‌کنه</span><span class="en">Your layered retries don&#x27;t multiply load</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا سه لایه داری که هر کدوم تا سه بار retry می‌کنن. حداکثر چند تلاش به downstream می‌رسه؟ حساب کن.</span><span class="en">You&#x27;ve got three layers each making up to three attempts. What&#x27;s your maximum downstream attempts?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۱–۲ ساعت</span><span class="en">Extended hands-on laboratory · estimated 1–2 hours</span></summary><div class="fa"><p>یه سرویس ساده بنویس که یه شمارنده رو زیاد می‌کنه و یه کلاینت که درخواست می‌فرسته. به‌صورت تصادفی یکی از سه حالت نمودار ۱ رو شبیه‌سازی کن (درخواست گم، سرور کرش، پاسخ گم). حالا retry رو اضافه کن و نشون بده بدون idempotency، شمارنده بیش از یه بار زیاد می‌شه. <b>سوال:</b> چه تغییری تو پروتکل، تکرار رو بی‌اثر می‌کنه؟</p></div><div class="en"><p>Write a simple service bumping a counter plus a client sending requests. Randomly simulate one of Diagram 1's three states (lost request, crashed server, lost reply). Now add retry and show the counter over-increments without idempotency. <b>Question:</b> which protocol change neutralizes your repeats?</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch9-ex1"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-1"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/" target="_blank" rel="noopener">AWS · safe retries with idempotent APIs</a> · <a href="https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/" target="_blank" rel="noopener">AWS · timeouts, backoff and jitter</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch9-ex1"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
     <article class="exercise-block" id="exercise-2" data-reviewed-exercise="2">
 <h3><span class="fa">تمرین ۲ — clock skew و عدم‌قطعیت اندازه‌گیری</span><span class="en">Exercise 2 — clock skew and measurement uncertainty</span></h3>
@@ -1140,6 +1187,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">تصور کن می‌خوای wall clock و monotonic clock رو تو deadline، اندازه‌گیری duration و LWW مقایسه کنی. skew رو با دو host/VM مستقل یا ساعت mock تزریق کن. uncertainty ناشی از زمان نمونه‌برداری رو گزارش کن و نشون بده timestamp آینده چطور write واقعی بعدی رو می‌پوشونه.</span><span class="en">Here&#x27;s the thing — you&#x27;ve got wall and monotonic clocks to sort out. Compare them for durations, deadlines and LWW. Inject skew with independent hosts/VMs or an explicitly mocked clock. Report your sampling uncertainty and show how a future timestamp hides a later real write.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">monotonic clock رو بین ماشین‌ها مقایسه نمی‌کنی</span><span class="en">You never compare monotonic clocks across hosts</span></li><li><span class="fa">skew واقعی رو با skew شبیه‌سازی‌شده قاطی نمی‌کنی و برچسب جدا می‌زنی</span><span class="en">You label real versus mock skew</span></li><li><span class="fa">rollback ساعت و uncertainty رو در نظر می‌گیری</span><span class="en">You&#x27;ve covered clock steps and sampling uncertainty</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا NTP ساعت رو step می‌کنه؛ timeout و TTL برنامه باید از کدوم clock استفاده کنن؟</span><span class="en">NTP steps your wall clock. Which clock should your timeouts and TTL durations use?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۱–۲ ساعت</span><span class="en">Extended hands-on laboratory · estimated 1–2 hours</span></summary><div class="fa"><p>روی دو host/VM با ساعت مستقل، نمونه‌های CLOCK_REALTIME و مدت‌های CLOCK_MONOTONIC رو ثبت کن. offset ساعت دوم نسبت به اول رو با timestamp exchange و RTT اندازه بگیر؛ عدم‌قطعیت مسیر نامتقارن و زمان پردازش رو ثبت کن و فرض‌های استفاده از RTT/2 رو توضیح بده. مقدارهای monotonic دو host رو از هم کم نکن چون مبدأ مشترک ندارن. دو کانتینر روی یه Linux host معمولاً CLOCK_REALTIME مشترک دارن. بدون زیرساخت، +۲۵۰ میلی‌ثانیه رو تو clock mock تزریق کن و همه خروجی‌ها رو شبیه‌سازی برچسب بزن. نشون بده LWW مبتنی بر ساعت دیواری چطور نوشتن واقعاً دیرتر رو کنار می‌ذاره و لازم نیست ساعت واقعی سیستم کاربر رو عوض کنی.</p></div><div class="en"><p>On two independent-clock hosts/VMs, record your CLOCK_REALTIME samples and local CLOCK_MONOTONIC durations. Estimate the second wall clock's offset using timestamp exchange and RTT; document processing and asymmetric-delay uncertainty and your assumptions behind RTT/2. Never subtract monotonic timestamps from different hosts: their origins differ. Two containers on one Linux host normally share CLOCK_REALTIME. Without infrastructure inject +250ms into a mock clock and label every output simulated. Show wall-clock LWW discarding a genuinely later write; you've no need to change the user's real system clock.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch9-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://man7.org/linux/man-pages/man7/time_namespaces.7.html" target="_blank" rel="noopener">Linux · time namespaces and realtime</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch9-ex2"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
     <article class="exercise-block" id="exercise-3" data-reviewed-exercise="3">
 <h3><span class="fa">تمرین ۳ — fencing token عملی</span><span class="en">Exercise 3 — fencing tokens in practice</span></h3>
@@ -1148,6 +1201,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">قضیه اینه که کارگر A با lease و token=7 pause می‌شه و B با token=8 می‌نویسه؛ بعد A بیدار می‌شه. storage باید stale epoch رو اتمیک رد کنه. چند write معتبر تو یه epoch رو از duplicate operation جدا کن و برای token allocation و دوام highest-seen شرط تعریف کن.</span><span class="en">Think of it — owner A pauses at token 7, B grabs token 8 and writes, then A wakes up. Enforce atomic stale-epoch rejection in storage. Distinguish multiple legitimate same-epoch writes from duplicate operations and pin down token allocation plus highest-token durability.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">انقضای lease به‌تنهایی جلوی stale write رو نمی‌گیره</span><span class="en">You don&#x27;t trust lease expiry alone against stale writes</span></li><li><span class="fa">token کمتر رد می‌شه؛ token برابر semantics جدا می‌خواد</span><span class="en">You separate epoch identity from operation identity</span></li><li><span class="fa">بررسی token تو خود storage انجام می‌شه</span><span class="en">You&#x27;ve got storage-enforced durable fencing</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا storage restart می‌شه و highest token رو فراموش می‌کنه. چه خطایی ممکنه پیش بیاد؟</span><span class="en">Your storage restarts and forgets the highest fencing token. What failure becomes possible?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۱–۳ ساعت</span><span class="en">Extended hands-on laboratory · estimated 1–3 hours</span></summary><div class="fa"><p>lock service با lease و epoch افزایشی و storage بادوام بساز. تو یه تراکنش، epoch کمتر از highest_epoch رو رد کن و برای epoch تازه high-water mark و اثر رو با هم پایدار کن. تو یه epoch، op_id تازه باید مجاز باشه و retry همون op_id باید بی‌اثر باشه. A با epoch=7 متوقف می‌شه؛ B با epoch=8 تو storage fence رو ثبت می‌کنه و دو write متفاوت انجام می‌ده؛ بعد A برمی‌گرده و رد می‌شه. تأکید کن صرف صدور lease جدید تا قبل از رؤیت epoch تو storage، fence رو فعال نمی‌کنه. restart storage، تکرار عملیات و جابه‌جایی پیام‌ها رو با assertion مستقل بسنج.</p></div><div class="en"><p>Build your lease/epoch service and durable storage. In one transaction reject epoch below highest_epoch and persist a newer epoch with the effect. A new op_id in the same epoch is valid; retrying an old op_id is a no-op. Pause A at epoch 7; B installs epoch 8 at storage and performs two distinct writes; resume A and reject it. Issuing the lease alone doesn't activate your storage fence until storage observes it. Assert behavior across storage restart, operation retries and reordered messages.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch9-ex3"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-3"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://martin.kleppmann.com/2016/02/08/how-to-do-distributed-locking.html" target="_blank" rel="noopener">Kleppmann · distributed locking and fencing</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch9-ex3"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
     <article class="exercise-block" id="exercise-4" data-reviewed-exercise="4">
 <h3><span class="fa">تمرین ۴ — safety/liveness</span><span class="en">Exercise 4 — safety/liveness</span></h3>
@@ -1156,6 +1215,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">داستان از این قراره که یه صف داری. safety رو این‌طور تعریف کن: «اثر پیام بیش از یه بار اعمال نشه» و liveness رو این‌طور: «پیام معتبر تحت بازیابی شبکه بالاخره اثر کنه». partition دائمی، redelivery و گم‌شدن dedup رو تحلیل کن. برای هر ادعا یه counterexample و فرض زمانی روشن بده.</span><span class="en">Honestly, you&#x27;ve got a queue to reason about. Define no duplicate application effects as safety and eventual valid-message effects under recovery as liveness. Cover permanent partitions, redelivery and missing dedup state. Give a counterexample and an explicit timing assumption for each claim.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">delivery رو از application effect جدا می‌کنی</span><span class="en">You separate delivery from your application effects</span></li><li><span class="fa">liveness رو بدون فرض شبکه/ظرفیت قول نمی‌دی</span><span class="en">You don&#x27;t promise liveness without network/capacity assumptions</span></li><li><span class="fa">مثال نقض safety رو حتی با وجود progress نشون می‌دی</span><span class="en">You&#x27;ve got independent safety/liveness counterexamples</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا سیستم همه پیام‌ها رو رد می‌کنه؛ کدوم خاصیت ظاهراً سالم می‌مونه؟</span><span class="en">Your service rejects every message. Which property can still look healthy?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۱–۲ ساعت</span><span class="en">Extended hands-on laboratory · estimated 1–2 hours</span></summary><div class="fa"><p>برای یه سرویس صف‌محور ساده، دو خاصیت safety و liveness بنویس (مثلاً «هر پیام حداکثر یه بار تحویل می‌شه» و «هر پیام ارسال‌شده بالاخره تحویل می‌شه»). بعد یه سناریوی خرابی شبکه طراحی کن که liveness رو بشکنه ولی safety رو نه. <b>آیا برعکسش ممکنه؟</b></p></div><div class="en"><p>For a simple queue-based service, write two properties — one safety, one liveness (e.g. “each message is delivered at most once” and “each sent message is eventually delivered”). Then design a network failure breaking liveness but not safety. <b>Is the reverse possible?</b></p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch9-ex4"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-4"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://jepsen.io/consistency/models" target="_blank" rel="noopener">Jepsen · consistency models</a> · <a href="https://kafka.apache.org/41/design/design/" target="_blank" rel="noopener">Kafka 4.1 · design and delivery semantics</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch9-ex4"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   </div>
 
@@ -1186,5 +1251,6 @@
 </footer>
 
 <script src="../assets/site.js"></script>
+<script src="../assets/concept-labs.js" defer></script>
 </body>
 </html>

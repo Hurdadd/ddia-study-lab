@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/ddia.css">
 <link rel="stylesheet" href="../assets/exercise-audit.css">
+<link rel="stylesheet" href="../assets/concept-labs.css">
 </head>
 <body>
 
@@ -70,6 +71,20 @@
   <a class="lvl2" href="#s9-3"><span class="fa">۹.۳. اشتباهات رایج</span><span class="en">9.3. Common mistakes</span></a>
   <a class="lvl2" href="#s9-4"><span class="fa">۹.۴. چک‌لیست ۵ دقیقه‌ای</span><span class="en">9.4. Five-minute checklist</span></a>
   <a href="#s10"><span class="fa">۱۰. تمرین‌های عملی</span><span class="en">10. Hands-on exercises</span></a>
+
+
+
+<!-- concept-lab-toc:start -->
+<a href="#try-wal"><span class="en">Try it: What survives a crash?</span><span class="fa">امتحان کن: بعد از خرابی چه چیزی می‌ماند؟</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-scan"><span class="en">Try it: Find the latest value of a key</span><span class="fa">امتحان کن: پیدا کردن آخرین مقدار یک کلید</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-btree"><span class="en">Try it: A page split meets a crash</span><span class="fa">امتحان کن: شکستن صفحه و خرابی</span></a>
+<!-- concept-lab-toc:end -->
 </nav>
 
 <main class="doc">
@@ -243,6 +258,14 @@ $ db_get 42</pre>
 <p>Follow the three boxes from left to right. “Append-only log” shows <span class="ltr">db_set</span> adding a record at the end, with <span class="ltr">O(1)</span> sequential write work in this simple model. The “cheap writes” arrow reaches “The read problem”: <span class="ltr">db_get</span> searches the lines, giving <span class="ltr">O(n)</span> reads.</p><p>The “slow reads” arrow leads to “Add a derived index”. Its sorted structure gives <span class="ltr">O(log n)</span> lookup work. Read the bottom panel too: the extra access path needs storage and maintenance on writes. Pick it for a query you actually need.</p></div>
 </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-scan" data-lab="scan" data-chapter="4">
+<h3><span class="en">Find the latest value of a key</span><span class="fa">پیدا کردن آخرین مقدار یک کلید</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <section id="s2">
   <h2 class="reveal"><span class="secnum"><span class="fa">۲</span><span class="en">2</span></span><span class="fa">ذخیره‌سازی Log-Structured</span><span class="en">Log-structured storage</span></h2>
@@ -431,6 +454,16 @@ $ db_get 42</pre>
 <p><b>What this tells you:</b> Embedded execution reduces network overhead. It doesn't by itself supply a system-wide backup or replication plan.</p>
 </div></div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-wal" data-lab="wal" data-chapter="4">
+<h3><span class="en">What survives a crash?</span><span class="fa">بعد از خرابی چه چیزی می‌ماند؟</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
+
+
 
 <section id="s3">
   <h2 class="reveal"><span class="secnum"><span class="fa">۳</span><span class="en">3</span></span><span class="fa">B-Tree</span><span class="en">B-trees</span></h2>
@@ -688,6 +721,14 @@ $ db_get 42</pre>
     </div><div class="en"><p>The guarantee also depends on the storage stack honoring <code>fsync</code>. The chapter describes operating-system and SSD power-cut tests where reported success didn't mean the expected data was safe. Use <span class="ltr">checksums</span> to detect damaged pages and log blocks; checksums don't repair the data themselves.</p><p>Recovery must be <span class="ltr">idempotent</span>, and <span class="ltr">checkpoints</span> limit replay and let old log segments be removed safely. WAL isn't specific to B-trees: an LSM can use it to recover an unflushed <span class="ltr">memtable</span>. Immutable SSTables protect completed files, while the log protects recent changes still in memory. Another design is <span class="ltr">shadow paging</span>, using new pages and an atomic root switch.</p></div>
   </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-btree" data-lab="btree" data-chapter="4">
+<h3><span class="en">A page split meets a crash</span><span class="fa">شکستن صفحه و خرابی</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <section id="s4">
   <h2 class="reveal"><span class="secnum"><span class="fa">۴</span><span class="en">4</span></span><span class="fa">مقایسهٔ B-Tree و LSM</span><span class="en">Comparing B-trees and LSM-trees</span></h2>
@@ -1745,6 +1786,12 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">فرض کن یه workload داری که نوشتنش حسابی زیاده. point read و range read هم داری. حالا بگو LSM و B-tree کدوم به کارت میاد و چرا. مسیر write رو بکش: WAL، memtable، SSTable، compaction و tombstone. حساب کن اگه crash دقیقاً بین flush و ثبت manifest بترکه چی می‌شه. آخرش بگو کی write amplification و read amplification و space amplification بالا می‌ره و خرجش رو کی می‌ده.</span><span class="en">Picture this, friend — you&#x27;ve got a write-heavy workload with point reads and range reads. You&#x27;ll compare LSM and B-tree and say which one fits and why. Sketch the write path: WAL, memtable, SSTable, compaction, and tombstone. Work out what happens if a crash hits between flush and the manifest record. Finish by saying when write, read, and space amplification blow up, and who pays that cost.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">durability رو با index توی حافظه قاطی نمی‌کنی</span><span class="en">You keep durability separate from the in-memory index</span></li><li><span class="fa">تازه‌ترین نسخه و tombstone رو درست انتخاب می‌کنی</span><span class="en">You pick the newest version and tombstones correctly</span></li><li><span class="fa">برای benchmark دادهٔ خام، fsync و cache رو مشخص می‌کنی</span><span class="en">You pin down raw data, fsync, and cache for the benchmark</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">اگه tombstone رو وسط compaction بندازی دور، کی رکورد قدیمی زنده برمی‌گرده؟</span><span class="en">When you drop a tombstone during compaction, when does an old value come back to life?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۶–۱۲ ساعت</span><span class="en">Extended hands-on laboratory · estimated 6–12 hours</span></summary><div class="fa"><p>با همون دو تا تابع bash بخش ۱ شروع کن و قدم‌به‌قدم جلو برو. اول hash index توی حافظه بساز که بعد از restart خودش رو بازسازی کنه. بعد memtable بذار که با flush می‌ره توی یه فایل مرتب (یه <span class="ltr">SSTable</span> ساده) و خوندن از جدید به قدیمه. بعد دو تا سگمنت رو merge کن: تازه‌ترین مقدار می‌مونه و حذف با tombstone. آخرش یه آزمایش بنویس: یک میلیون نوشتن تصادفی، بعد مجموع بایت‌های نوشته‌شده روی دیسک تقسیم‌بر دادهٔ خام یعنی write amplification، و مقایسهٔ زمان ۱۰ هزار خواندن نقطه‌ای در برابر یه range query.</p></div><div class="en"><p>Start from section 1's two bash functions and build step by step, friend. First an in-memory hash index that rebuilds itself after restart. Then a memtable that flushes into a sorted file (a simple SSTable) with newest-to-oldest reads. Then merge two segments: the newest value wins and deletes use tombstones. Finish with a test: a million random writes, total disk bytes over raw data as write amplification, and 10k point reads timed against one range query.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch4-ex1"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-1"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://careers.microsoft.com/v2/global/en/hiring-tips/technical-interviewing" target="_blank" rel="noopener">Microsoft · technical interviewing</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch4-ex1"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   <article class="exercise-block" id="exercise-2" data-reviewed-exercise="2">
 <h3><span class="fa">تمرین ۲ — انباردادهٔ ستونی از صفر</span><span class="en">Exercise 2 — a columnar warehouse from scratch</span></h3>
@@ -1753,6 +1800,12 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">تصور کن گزارش فروش می‌خوای: مجموع فروش هر دسته‌بندی به تفکیک روز هفته. جدول fact فروش و dimensionهای محصول و تاریخ رو بچین. SQL، partition key، sort key و ستون‌هایی که خونده می‌شن رو مشخص کن. بعد حساب کن skew، cardinality، bitmap و عوض شدن دسته‌بندی محصول وسط تاریخ چه دردی درست می‌کنه.</span><span class="en">Think of it like this, friend — you need daily category sales broken down by weekday. You&#x27;ll lay out the sales fact plus product and date dimensions. Give the SQL, the partition key, the sort key, and the exact columns you read. Then work out the pain from skew, cardinality, bitmaps, and a product changing category over time.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">pruning رو با کمتر خوندن ستون قاطی نمی‌کنی</span><span class="en">You separate column pruning from block pruning</span></li><li><span class="fa">تعریف تاریخی category رو روشن می‌کنی</span><span class="en">You nail down what a historical category means</span></li><li><span class="fa">compression رو با cardinality و order توجیه می‌کنی</span><span class="en">You justify compression with cardinality and order</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">فروش پارسال رو با دسته‌بندی امروز گزارش می‌دی یا دسته‌بندی روز فروش؟</span><span class="en">Should last year&#x27;s sales use today&#x27;s category or the category at the time of sale?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳–۶ ساعت</span><span class="en">Extended hands-on laboratory · estimated 3–6 hours</span></summary><div class="fa"><p>یه جدول fact فروش بساز (تاریخ، محصول، فروشگاه، تعداد، مبلغ) با دو جدول بعد تاریخ و محصول. برای کوئری «مجموع فروش هر دسته‌بندی به تفکیک روز هفته در سال گذشته» sort keyهای منطقی برای فایل‌های ستونی انتخاب کن، SQL رو بنویس و بگو دقیقاً کدوم ستون‌ها و کدوم بلوک‌ها خونده می‌شن. بعد ستون «دسته‌بندی محصول» با ۵ مقدار متمایز رو دستی با bitmap و run-length فشرده کن و فیلتر <span class="ltr">WHERE category = A AND weekday = 2</span> رو با عملیات بیتی اجرا کن.</p></div><div class="en"><p>Design a sales fact table (date, product, store, quantity, amount) plus date and product dimension tables, friend. For "last year's total sales per category by weekday", pick sensible sort keys for the columnar files, write the SQL, and say exactly which columns and blocks get read. Then hand-encode the product-category column (5 distinct values) with bitmaps plus run-length compression, and run <span class="ltr">WHERE category = A AND weekday = 2</span> with bitwise ops.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch4-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://careers.microsoft.com/v2/global/en/hiring-tips/technical-interviewing" target="_blank" rel="noopener">Microsoft · technical interviewing</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch4-ex2"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   <article class="exercise-block" id="exercise-3" data-reviewed-exercise="3">
 <h3><span class="fa">تمرین ۳ — ایندکس جست‌وجو: از متن تا بردار</span><span class="en">Exercise 3 — a search index: from text to vectors</span></h3>
@@ -1761,12 +1814,24 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">قضیه اینه که قراره جست‌وجوی محصول بسازی: inverted index، فیلتر و vector index. برای red AND apples بگو اشتراک postings چطور کار می‌کنه. برای regex مثل /appl./ اول با trigram ثابت app و ppl فقط نامزد جمع کن، بعد خود regex رو روی نامزدها چک کن. توی IVF با nprobe=1، عدد recall@k رو نسبت به exact top-k و p95 latency بسنج. آخرش hybrid ranking و جداسازی tenant رو هم حساب کن.</span><span class="en">Here&#x27;s the thing, friend — you&#x27;re building product search with an inverted index, filters, and a vector index. For red AND apples, explain the postings intersection. For a regex like /appl./, first gather candidates from the fixed trigrams app and ppl, then verify each candidate with the regex itself. In IVF with nprobe=1, measure recall@k against exact top-k plus p95 latency. Then weigh hybrid ranking and tenant isolation too.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">فیلتر نامزد رو با match قطعی قاطی نمی‌کنی</span><span class="en">You don&#x27;t confuse candidate filtering with verified matches</span></li><li><span class="fa">ground truth دقیق ANN و recall@k رو درست تعریف می‌کنی</span><span class="en">You define exact ground truth and recall@k correctly</span></li><li><span class="fa">تازگی، ACL و خرج retrieval رو هم می‌بینی</span><span class="en">You cover freshness, ACLs, and retrieval cost</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">اگه regex هیچ trigram ثابتی نداشته باشه یا فیلتر خیلی محدود باشه، چه راه جایگزینی داری؟</span><span class="en">What fallback do you have when a regex has no fixed trigram at all, or the filter is super selective?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳–۶ ساعت</span><span class="en">Extended hands-on laboratory · estimated 3–6 hours</span></summary><div class="fa"><p>برای ۱۱ سند کوتاه یه inverted index بساز و red AND apples رو با اشتراک postingها جواب بده. trigram index رو هم از سه‌حرفی‌های همون متن بساز. برای regex سادهٔ /appl./ از app و ppl نامزد بگیر، بعد خود regex رو روی تک‌تک نامزدها اجرا کن. یه نامزد الکی مثل <span class="ltr">app ... ppl</span> هم قاطی کن تا معلوم بشه چرا تأیید لازمه. بردارهای ۱۰۰۰بعدی و پنج خوشهٔ IVF فقط سناریوی فکریه؛ اگه نسخهٔ کوچیک‌تر ساختی برچسبش رو روشن بزن. exact top-k و نحوهٔ فاصله و tie-breaking رو ثابت نگه دار، بعد recall@k = <span class="ltr">|ANN_k ∩ exact_k|/k</span> و p95 زمان کوئری رو برای چند nprobe بسنج. از ۱۱ سند نتیجهٔ production درنیار. محدودیت tenant رو هم قبل از retrieval اعمال کن.</p></div><div class="en"><p>Build an inverted index over 11 short documents and answer red AND apples by intersecting postings. Build the trigram index from three-letter substrings of the same text. For the plain regex /appl./, take candidates from app and ppl postings, then run the regex itself on every candidate. Add one false candidate like <span class="ltr">app ... ppl</span> so the need for verification is obvious. 1000-D vectors in five IVF clusters are only a thought experiment — label any smaller synthetic demo clearly. Fix exact top-k, distance, and tie-breaking, then measure recall@k = <span class="ltr">|ANN_k ∩ exact_k|/k</span> and p95 query time across several nprobe values. Don't draw production conclusions from 11 documents. Apply tenant restrictions before retrieval.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch4-ex3"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-3"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a> · <a href="https://docs.pinecone.io/guides/operations/moving-to-production" target="_blank" rel="noopener">Pinecone · production checklist</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch4-ex3"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   <article class="exercise-block" id="exercise-4">
 <h3><span class="fa">تمرین ۴ — یک میلیارد بردار و قبض منفجرشدهٔ HNSW</span><span class="en">Exercise 4 — a billion vectors and the exploding HNSW bill</span></h3>
 <div class="exercise-labels"><span class="exercise-label level-senior"><span class="fa">L2 · Senior</span><span class="en">L2 · Senior</span></span><span class="exercise-label priority-role"><span class="fa">مطالعهٔ موردی صنعت</span><span class="en">Industry case study</span></span><span class="exercise-label"><span class="fa">۳۰ دقیقه بحث</span><span class="en">30 min discussion</span></span></div>
 <details class="interview-brief" open><summary><span class="fa">صورت تمرین (حل‌نشده — اول خودت طرح بزن)</span><span class="en">Unsolved brief — sketch your own design first</span></summary><p><span class="fa">تصور کن سال ۲۰۲۵ه و سرویس جست‌وجوی برداری تو یه میلیارد بردار ۷۶۸بعدی رو سرو می‌کنه. ایندکس HNSW حافظه‌محور قبض ماشین‌ها رو ترکنده و هر بیلد تازه ساعت‌ها طول می‌کشه. مأموریت تو: ایندکس رو از نو طراحی کن — چند تا پارتیشن و با چی ساخته می‌شن، بردارها چطور فشرده می‌شن، مسیر بیلد آفلاین از مسیر سرو آنلاین چطور جدا می‌مونه، و هر کوئری دقیقاً چه مراحلی رو طی می‌کنه. حل قدم‌به‌قدم تو صفحهٔ حل‌هاست، ولی اول خودت یه طرح بزن بعد برو سراغش.</span><span class="en">Picture this: it is 2025 and your vector search serves a billion 768-dim vectors. The memory-resident HNSW index is blowing up the machine bill, and every fresh build takes hours. Your mission: redesign the index — how many partitions and built how, how vectors get compressed, how the offline build path stays decoupled from the online serve path, and exactly which stages each query passes through. The step-by-step solution is on the solutions page, but sketch your own design first, then go read it.</span></p><h4><span class="fa">قرارداد طراحی: چی باید مشخص کنی</span><span class="en">Design contract: what you must pin down</span></h4><ul><li><span class="fa">پارتیشن‌بندی: چند تا پارتیشن، با چه الگوریتمی، و جای هر بردار کجا ثبت می‌شه</span><span class="en">Partitioning: how many partitions, built by which algorithm, and where each vector's assignment is recorded</span></li><li><span class="fa">فشرده‌سازی: با چه codecای، چند برابر کوچک‌سازی، و recall@k رو نسبت به چه ground truthای می‌سنجی</span><span class="en">Compression: which codec, how much shrinkage, and which ground truth your recall@k is measured against</span></li><li><span class="fa">بیلد در برابر سرو: بیلد آفلاین چی تولید می‌کنه، سرو آنلاین موقع استارت چی رو می‌بره تو حافظه، و نسخهٔ تازه چطور منتشر می‌شه</span><span class="en">Build versus serve: what the offline build produces, what online serving loads into memory at startup, and how a fresh version is published</span></li><li><span class="fa">مسیر کوئری: probe، اسکن تقریبی، fetch بردارهای full-precision، re-rank دقیق — هر مرحله چی می‌خونه و چی برمی‌گردونه</span><span class="en">Query path: probe, approximate scan, full-precision fetch, exact re-rank — what each stage reads and returns</span></li><li><span class="fa">قرارداد عملیاتی: سقف زمان بیلد، p95 تأخیر کوئری، و هزینه به‌ازای کوئری نسبت به وضع موجود</span><span class="en">Operational contract: build time budget, query p95 latency, and cost per query versus the status quo</span></li></ul></details>
 <p class="exercise-evidence"><a href="diagrams/databricks-vector-search.html"><span class="fa">نمودار کیس صنعتی</span><span class="en">Industry case diagram</span></a> · <a href="https://www.databricks.com/blog/decoupled-design-billion-scale-vector-search" target="_blank" rel="noopener">Databricks · decoupled design for billion-scale vector search</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?chapter=4"><span class="en">Explore this chapter in the studio</span><span class="fa">این فصل را در استودیو آزمایش کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
 <div class="doc-nav"><a href="../ch3-data-models/index.html"><span class="fa">→ فصل ۳: مدل‌های داده و زبان‌های کوئری</span><span class="en">→ Chapter 3: Data models and query languages</span></a><a href="../ch5-encoding-evolution/index.html"><span class="fa">فصل ۵: کدگذاری و تکامل ←</span><span class="en">Chapter 5: Encoding and evolution →</span></a></div></section>
 
@@ -1782,5 +1847,6 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 </footer>
 
 <script src="../assets/site.js"></script>
+<script src="../assets/concept-labs.js" defer></script>
 </body>
 </html>

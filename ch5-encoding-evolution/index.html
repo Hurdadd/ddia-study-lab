@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/ddia.css">
 <link rel="stylesheet" href="../assets/exercise-audit.css">
+<link rel="stylesheet" href="../assets/concept-labs.css">
 </head>
 <body>
 
@@ -70,6 +71,20 @@
   <a class="lvl2" href="#s5-3"><span class="fa">۵.۳. اشتباهات رایج</span><span class="en">5.3. Common mistakes</span></a>
   <a class="lvl2" href="#s5-4"><span class="fa">۵.۴. چک‌لیست ۵ دقیقه‌ای</span><span class="en">5.4. Five-minute checklist</span></a>
   <a href="#s6"><span class="fa">۶. تمرین‌های عملی</span><span class="en">6. Hands-on exercises</span></a>
+
+
+
+<!-- concept-lab-toc:start -->
+<a href="#try-schema"><span class="en">Try it: An old service edits a new record</span><span class="fa">امتحان کن: سرویس قدیمی یک رکورد جدید را ویرایش می‌کند</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-rolling"><span class="en">Try it: Add a field during a rolling upgrade</span><span class="fa">امتحان کن: افزودن فیلد در حین rolling upgrade</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-rename"><span class="en">Try it: Rename a field with old readers still running</span><span class="fa">امتحان کن: تغییر نام فیلد وقتی خوانندهٔ قدیمی هنوز کار می‌کند</span></a>
+<!-- concept-lab-toc:end -->
 </nav>
 
 <main class="doc">
@@ -312,6 +327,14 @@
     </div><div class="en"><p>Check the <b>decoder contract</b>, rather than assuming a schema guarantees preservation. Protobuf binary messages can retain unknown fields, but converting to JSON or copying only known fields can lose them. Avro resolution ignores fields absent from the reader's schema; it doesn't promise to carry their bytes through a rewrite.</p><p>Preserve the information explicitly or update only the intended fields. Test the complete read-modify-write path.</p><p class="small">See the <a href="https://protobuf.dev/programming-guides/proto3/#unknowns" target="_blank" rel="noopener">Protobuf unknown-field rules</a> and <a href="https://avro.apache.org/docs/1.12.0/specification/#schema-resolution" target="_blank" rel="noopener">Avro schema-resolution rules</a>.</p></div>
   </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-rolling" data-lab="rolling" data-chapter="5">
+<h3><span class="en">Add a field during a rolling upgrade</span><span class="fa">افزودن فیلد در حین rolling upgrade</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <section id="s3">
   <h2 class="reveal"><span class="secnum"><span class="fa">۳</span><span class="en">3</span></span><span class="fa">قالب‌های کدگذاری</span><span class="en">Encoding formats</span></h2>
@@ -844,6 +867,24 @@ message Person {
     </div><div class="en"><p><b>Data outlives code</b>, so check name, type and default changes against historical records too. Each can change what a reader sees.</p><p>The red path <span class="ltr">no, mixed fleet</span> leads to <span class="ltr">Breaking Change</span> and <span class="ltr">roll back</span>. The five states and two gates are prompts to find that incompatibility before rollout. Plan the transition around readers and data lifetimes, including a rollback path.</p></div>
   </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-schema" data-lab="schema" data-chapter="5">
+<h3><span class="en">An old service edits a new record</span><span class="fa">سرویس قدیمی یک رکورد جدید را ویرایش می‌کند</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-rename" data-lab="rename" data-chapter="5">
+<h3><span class="en">Rename a field with old readers still running</span><span class="fa">تغییر نام فیلد وقتی خوانندهٔ قدیمی هنوز کار می‌کند</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
+
+
 
 <section id="s4">
   <h2 class="reveal"><span class="secnum"><span class="fa">۴</span><span class="en">4</span></span><span class="fa">حالت‌های جریان داده</span><span class="en">Dataflow modes</span></h2>
@@ -1554,6 +1595,12 @@ message Person {
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">داستان از این قراره که یه رکورد کوچیک داری و می‌خوای خرج JSON و MessagePack و Protobuf رو بفهمی. فرقشون توی schema و حجم و debugging رو بگو. یه tag رو دستی decode کن. بعد فیلد email رو اضافه کن و دو مسیر رو مقایسه کن: binary round-trip در برابر تبدیل به JSON، از نظر حفظ unknown field.</span><span class="en">Honestly, friend, you&#x27;ve got one small record and you want to feel the cost of JSON versus MessagePack versus Protobuf. Explain how they differ in schema, size, and debugging. Decode one tag by hand. Then add an email field and compare two paths — a binary round-trip against a JSON conversion — in terms of keeping unknown fields.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">tag و varint رو می‌فهمی، عدد حفظ نمی‌کنی</span><span class="en">You get tags and varints without memorizing totals</span></li><li><span class="fa">runtime و نوع تبدیل رو مشخص می‌کنی</span><span class="en">You name the runtime and the conversion type</span></li><li><span class="fa">سازگاری wire رو با سازگاری API قاطی نمی‌کنی</span><span class="en">You keep wire compatibility apart from API compatibility</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">یه proxy قدیمی پیام رو field-by-field توی پیام جدید کپی می‌کنه. چه داده‌ای گم می‌شه؟</span><span class="en">An old proxy copies a message field-by-field into a fresh one. What data quietly disappears?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۱–۲ ساعت</span><span class="en">Extended hands-on laboratory · estimated 1–2 hours</span></summary><div class="fa"><p>رکورد <code>{"userName": "Martin", "favoriteNumber": 1337, "interests": ["daydreaming", "hacking"]}</code> رو بردار. اول با قواعد MessagePack (بایت نوع + طول) و بعد با قواعد varint و tag پروتوباف بخش ۳.۴ دستی کدش کن و بایت‌ها رو بشمار؛ باید نزدیک ۶۶ و ۳۳ بایت بشی. بعد یه فیلد تازه (<code>email</code>) با tag شماره ۴ اضافه کن و نشون بده کد قدیمیت که tag شماره ۴ رو نمی‌شناسه چطور رکورد رو round-trip می‌کنه بدون اینکه داده‌ای بترکه.</p></div><div class="en"><p>Take the record <code>{"userName": "Martin", "favoriteNumber": 1337, "interests": ["daydreaming", "hacking"]}</code>, friend. First hand-encode it with MessagePack rules (type plus length bytes), then with protobuf varint and tag rules from section 3.4, and count the bytes — you should land near 66 and 33. Then add a fresh <code>email</code> field with tag 4 and show how your old code, which doesn't know tag 4, still round-trips the record without losing anything.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch5-ex1"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-1"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://protobuf.dev/programming-guides/proto3/" target="_blank" rel="noopener">Protobuf · proto3 language guide</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch5-ex1"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   <article class="exercise-block" id="exercise-2" data-reviewed-exercise="2">
 <h3><span class="fa">تمرین ۲ — تکاملِ schema زیرِ فشار</span><span class="en">Exercise 2 — schema evolution under pressure</span></h3>
@@ -1562,6 +1609,12 @@ message Person {
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">حالا می‌ری سراغ Avro و Protobuf زیر فشار. افزودن فیلد و rename و تغییر cardinality رو چک کن. جهت writer→reader رو دقیق بگو، فرمت binary و JSON رو مشخص کن، و نقش tag و default و alias رو روشن کن. تغییر scalar-to-array رو با فیلد جدید و دورهٔ dual compatibility منتشر کن. آخرش compatibility test و rollback هم بذار.</span><span class="en">Rule of thumb, friend: always name the direction first. Compare Avro and Protobuf on field addition, renames, and cardinality changes. State the writer→reader direction, the binary versus JSON format, and the exact role of tags, defaults, and aliases. Ship a scalar-to-array change with a new field plus a dual-compatibility window, with compatibility tests and a rollback plan.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">روشن می‌کنی backward یعنی reader جدید با writer قدیم</span><span class="en">You spell out that backward means new reader with old writer</span></li><li><span class="fa">rename توی Avro رو دوطرفهٔ خودکار فرض نمی‌کنی</span><span class="en">You don&#x27;t treat an Avro rename as automatically two-way</span></li><li><span class="fa">packed بودن numeric و repeated رشته‌ای lossy رو می‌بینی</span><span class="en">You catch packed numerics and lossy repeated strings</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">consumerهای قدیمی ماه‌ها عقبن. کی tag یا فیلد قدیمی رو حذف می‌کنی؟</span><span class="en">Old consumers are months behind. When do you finally delete the old field or tag?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۲–۴ ساعت</span><span class="en">Extended hands-on laboratory · estimated 2–4 hours</span></summary><div class="fa"><p>برای پروفایل کاربر schemaهای Avro و Protobuf بنویس با نسخهٔ runtime مشخص. افزودن فیلد و rename و singular→repeated رو در هر دو جهت <span class="ltr">old writer→new reader</span> و <span class="ltr">new writer→old reader</span> آزمایش کن. توی Avro مقدار default سمت reader و جهت alias رو صریح بنویس؛ nullable بودن به‌تنهایی default نمی‌سازه. توی Protobuf tag رو ثابت نگه دار و فرق binary با JSON رو بسنج: حفظ unknown field در binary round-trip در برابر حذفش در JSON یا کپی field-by-field. برای cardinality نوع scalar و message و packed بودن رو مشخص کن و فقط به parse موفق بسنده نکن — باید همهٔ مقدارها چک بشن. مسیر امن رو با فیلد و tag تازه و دورهٔ dual-read و dual-write و آزمون rollback طراحی کن؛ معیار قبولی «حفظ معنا»ست.</p></div><div class="en"><p>Write Avro and Protobuf user-profile schemas with named runtime versions. Test field addition, rename, and singular→repeated in both <span class="ltr">old-writer→new-reader</span> and <span class="ltr">new-writer→old-reader</span> directions. In Avro, state the reader default and the alias direction explicitly — nullable alone gives you no default. In Protobuf, keep tags fixed and compare binary with JSON: unknown-field preservation in a binary round-trip versus dropping it in JSON or field-by-field copies. For cardinality, pin down the scalar/message type and packed encoding, and don't stop at successful parsing — verify every value. Design the safe path with a new field and new tag, a dual-read/dual-write window, and rollback tests. Semantic preservation is the acceptance bar.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch5-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://protobuf.dev/programming-guides/proto3/" target="_blank" rel="noopener">Protobuf · proto3 language guide</a> · <a href="https://avro.apache.org/docs/1.12.0/specification/" target="_blank" rel="noopener">Avro 1.12 · schema resolution</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch5-ex2"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   <article class="exercise-block" id="exercise-3" data-reviewed-exercise="3">
 <h3><span class="fa">تمرین ۳ — از تئوری تا عملیات</span><span class="en">Exercise 3 — from theory to operations</span></h3>
@@ -1570,6 +1623,12 @@ message Person {
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">نوبتی هم باشه نوبت workflow واقعیه: موجودی و پرداخت و ارسال. طوری طراحیش کن که crash و retry نترکونتش. شناسهٔ هر گام و log پایدار و نتیجهٔ ذخیره‌شده و compensation رو مشخص کن. تغییر ترتیب گام‌ها و branching و schema رو برای invocationهای در جریان نسخه‌بندی کن و خرج recovery رو هم بگو.</span><span class="en">Picture this, friend — a real workflow with inventory, payment, and shipping. Design it so crashes and retries don&#x27;t blow it apart. Pin down each step&#x27;s ID, the durable log, stored results, and compensation. Version step reordering, branching, and payload schemas for invocations already in flight, and state the recovery cost.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">شناسه بین retryها ثابت می‌مونه</span><span class="en">Your IDs stay stable across retries</span></li><li><span class="fa">پرداخت و ارسال بیرونی با قرارداد idempotency پوشش داده می‌شن</span><span class="en">External payment and shipping sit behind an idempotency contract</span></li><li><span class="fa">کد جدید replay تاریخچهٔ قدیم رو نمی‌شکنه</span><span class="en">New code doesn&#x27;t break replay of old histories</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">provider ارسال idempotency key نداره. تضمینت چطور عوض می‌شه؟</span><span class="en">The shipping provider has no idempotency key. How does your guarantee change?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳–۶ ساعت</span><span class="en">Extended hands-on laboratory · estimated 3–6 hours</span></summary><div class="fa"><p>یه workflow سه‌مرحله‌ای «ثبت‌سفارش» بساز (موجودی، پرداخت، ارسال) که قابل بازپخشه. برای هر گام شناسهٔ idempotency تعریف کن، مشخص کن دقیقاً چی توی log پایدار می‌ره و بنویس اگه مرحلهٔ سوم دوبار اجرا بشه چی می‌شه. آخرش سه تا تغییر کد که بازپخش invocationهای در جریان رو می‌شکنن فهرست کن و برای هرکدوم راه «نسخهٔ جدا» رو شرح بده.</p></div><div class="en"><p>Design a replayable three-step "place-order" workflow (inventory, payment, shipping), friend. Define one idempotency ID per step, pin down exactly what lands in the durable log, and write out what happens if step three runs twice. Finish by listing three code changes that break in-flight replay, with the "separate version" remedy for each.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch5-ex3"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-3"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/" target="_blank" rel="noopener">AWS · safe retries with idempotent APIs</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch5-ex3"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
 <div class="doc-nav"><a href="../ch4-storage-retrieval/index.html"><span class="fa">→ فصل ۴: ذخیره‌سازی و بازیابی</span><span class="en">→ Chapter 4: Storage and retrieval</span></a><a href="../ch6-replication/index.html"><span class="fa">فصل ۶: تکثیر ←</span><span class="en">Chapter 6: Replication →</span></a></div></section>
 
@@ -1585,5 +1644,6 @@ message Person {
 </footer>
 
 <script src="../assets/site.js"></script>
+<script src="../assets/concept-labs.js" defer></script>
 </body>
 </html>

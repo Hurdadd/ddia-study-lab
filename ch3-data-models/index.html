@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/ddia.css">
 <link rel="stylesheet" href="../assets/exercise-audit.css">
+<link rel="stylesheet" href="../assets/concept-labs.css">
 </head>
 <body>
 
@@ -70,6 +71,20 @@
   <a class="lvl2" href="#s6-3"><span class="fa">۶.۳. اشتباهات رایج</span><span class="en">6.3. Common mistakes</span></a>
   <a class="lvl2" href="#s6-4"><span class="fa">۶.۴. چک‌لیست ۵ دقیقه‌ای</span><span class="en">6.4. Five-minute checklist</span></a>
   <a href="#s7"><span class="fa">۷. تمرین‌های عملی</span><span class="en">7. Hands-on exercises</span></a>
+
+
+
+<!-- concept-lab-toc:start -->
+<a href="#try-models"><span class="en">Try it: Rename once, or update every copy?</span><span class="fa">امتحان کن: یک تغییر نام یا اصلاح همهٔ کپی‌ها؟</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-eventlog"><span class="en">Try it: Fix a wrong fee after the fact</span><span class="fa">امتحان کن: اصلاح کارمزد اشتباه بعد از وقوع</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-hops"><span class="en">Try it: Friends of friends of friends</span><span class="fa">امتحان کن: دوستِ دوستِ دوست</span></a>
+<!-- concept-lab-toc:end -->
 </nav>
 
 <main class="doc">
@@ -629,6 +644,16 @@
 <p>Start with <span class="ltr">“A · Relational: tables + foreign keys”</span> on the left. The <span class="ltr">“person”</span> box lists <span class="ltr">“person_id      PK”</span>, <span class="ltr">“first_name”</span> and <span class="ltr">“last_name”</span>. The <span class="ltr">“job”</span> box lists <span class="ltr">“job_id         PK”</span>, <span class="ltr">“person_id      FK”</span>, <span class="ltr">“title”</span> and <span class="ltr">“start_date”</span>. Between them, a line with a composition diamond has <span class="ltr">“1”</span> by person and <span class="ltr">“0..*”</span> by job. One person can have zero or more jobs, and each job belongs to one person. The <span class="ltr">“person_id”</span> label identifies the foreign key.</p><p>In the middle, <span class="ltr">“B · Document: one self-contained tree”</span> contains <span class="ltr">“resume  (one JSON document)”</span>. Its fields are <span class="ltr">“_id”</span>, <span class="ltr">“name”</span>, <span class="ltr">“jobs: [ { title, start_date }, … ]”</span>, <span class="ltr">“education: [ ... ]”</span> and <span class="ltr">“skills: [ ... ]”</span>. Below it, <span class="ltr">“job (embedded, not a table)”</span> has <span class="ltr">“title”</span> and <span class="ltr">“start_date”</span>. The composition diamond and labels <span class="ltr">“1”</span> and <span class="ltr">“0..* embedded”</span> show that these jobs live inside the resume document. There's no separate job table to join for this read.</p><p>On the right, <span class="ltr">“C · Graph: nodes and relationships are first-class”</span> has three node types: <span class="ltr">“(:Person)”</span> with <span class="ltr">“name”</span> and <span class="ltr">“born”</span>, <span class="ltr">“(:Company)”</span> with <span class="ltr">“name”</span> and <span class="ltr">“industry”</span>, and <span class="ltr">“(:City)”</span> with <span class="ltr">“name”</span> and <span class="ltr">“country”</span>. Their arrows are <span class="ltr">“[:WORKS_AT {since}]”</span>, <span class="ltr">“[:LIVES_IN]”</span> and <span class="ltr">“[:LOCATED_IN]”</span>. Notice <span class="ltr">“{since}”</span>: the employment relationship itself holds its start date. A plain foreign key doesn't hold that property; a relational association row can.</p><p>The notes under the panels compare the costs. Relational rows use references and read-time JOINs. The document groups one user's tree, while duplicated shared fields need updates. The graph makes relationships and traversals explicit; the paths and data visited affect query cost.</p><p>The object-relational mismatch is the gap between separate rows and the application's nested object. A document brings that tree together. A graph is a natural option when the question asks who connects to what. Choose around the question you'll actually run.</p></div>
   </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-models" data-lab="models" data-chapter="3">
+<h3><span class="en">Rename once, or update every copy?</span><span class="fa">یک تغییر نام یا اصلاح همهٔ کپی‌ها؟</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
+
+
 <!-- ============ SECTION 2 ============ -->
 <section id="s2">
   <h2 class="reveal"><span class="secnum"><span class="fa">۲</span><span class="en">2</span></span> <span class="fa">مدل‌های گرافی</span><span class="en">Graph models</span></h2>
@@ -809,6 +834,14 @@ RETURN person.name</pre>
 <p><b>What this tells you:</b> The engine chooses how to execute the traversal. SPARQL uses triple patterns and Datalog uses relational rules to express this kind of question.</p>
 </div></div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-hops" data-lab="hops" data-chapter="3">
+<h3><span class="en">Friends of friends of friends</span><span class="fa">دوستِ دوستِ دوست</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <!-- ============ SECTION 3 ============ -->
 <section id="s3">
@@ -998,6 +1031,14 @@ RETURN person.name</pre>
 <p>Start in the <span class="ltr">“Booking states”</span> lane. <span class="ltr">“Open”</span>, labelled “registration starts”, follows “capacity set” to <span class="ltr">“Available”</span>. Then <code>SEAT_BOOKED</code> moves the state to <span class="ltr">“Reserved”</span>, and <code>PAYMENT_RECEIVED</code> moves it to <span class="ltr">“Confirmed”</span>. The transition names describe past events, rather than commands waiting for approval.</p><p>From Reserved, <code>SEAT_CANCELED</code> leads down to <span class="ltr">“Canceled”</span> in <span class="ltr">“Terminal states”</span>. The dashed “seat released” arrow returns availability to Available. Releasing a seat doesn't delete the record of the canceled booking.</p><p>On the right, “mistake found” leads from Confirmed to <span class="ltr">“Correction Event”</span> in the <span class="ltr">“Corrections”</span> lane. Its label says “new event, never edit”. A “compensating event” restores availability. The correction becomes part of the history too. Check the transition's conditions, especially when an old message arrives late.</p></div>
   </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-eventlog" data-lab="eventlog" data-chapter="3">
+<h3><span class="en">Fix a wrong fee after the fact</span><span class="fa">اصلاح کارمزد اشتباه بعد از وقوع</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 <!-- ============ SECTION 4 ============ -->
 <section id="s4">
   <h2 class="reveal"><span class="secnum"><span class="fa">۴</span><span class="en">4</span></span> <span class="fa">DataFrame، ماتریس و آرایه</span><span class="en">DataFrames, matrices and arrays</span></h2>
@@ -1547,6 +1588,12 @@ RETURN person.name</pre>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">فرض کن کاتالوگ محصول داری با برند، چند دسته‌بندی برای هر محصول و نظر کاربرا. مدل رابطه‌ای و سندی رو کنار هم طراحی کن؛ سه query پرتکرار، pagination، رشد نظرات، uniqueness و تغییر برند رو روشن کن. schema و index رو بکش و انتخابت رو با بار توجیه کن.</span><span class="en">Picture this: a product catalog with brands, multiple categories per product, and user reviews. Design it both relational and document-style. Pin down your three hottest queries, pagination, review growth, uniqueness, and brand renames. Sketch the schema and indexes, then pick a side and defend it with the workload.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">cardinality و FK و index رو روشن می‌گه</span><span class="en">Spells out cardinality, keys, and indexes</span></li><li><span class="fa">آرایهٔ بی‌انتهای نظرات رو توی سند تلمبار نمی‌کنه</span><span class="en">Won&#x27;t stuff an endless review array into one doc</span></li><li><span class="fa">انتخابش رو با query و consistency توجیه می‌کنه</span><span class="en">Justifies the pick with queries and consistency</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">اگه محصول توی چند دسته باشه و نظرا میلیونی بشن — مدلت چطور عوض می‌شه؟</span><span class="en">Now a product lives in several categories and reviews go into the millions — how does your model change?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۱–۲ ساعت</span><span class="en">Extended hands-on laboratory · estimated 1–2 hours</span></summary><div class="fa"><p>فرض کن یه فروشگاه اینترنتی داری با محصول، دسته‌بندی، برند و نظر کاربرا. دو مدل بنویس: یکی رابطه‌ای (با جدول‌ها و کلیدهای لازم) و یکی سندی (JSON). برای هرکدوم بگو کدوم کوئری‌ها ساده‌ست، کدوما join یا کد اضافه می‌خوان و خودت کدوم رو برمی‌داری — چرا؟</p></div><div class="en"><p>Picture this: an online shop with products, categories, brands, and user reviews. Write two modellings: one relational (with tables and keys) and one document-based (JSON). For each, say which queries are easy, which need joins or extra code, and which you'd pick — and why?</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch3-ex1"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-1"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://www.amazon.jobs/content/en/how-we-hire/sde-iii-interview-prep" target="_blank" rel="noopener">Amazon · SDE III interview preparation</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch3-ex1"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   <article class="exercise-block" id="exercise-2" data-reviewed-exercise="2">
 <h3><span class="fa">تمرین ۲ — تصمیم نرمال‌سازی</span><span class="en">Exercise 2 — the normalization call</span></h3>
@@ -1555,6 +1602,12 @@ RETURN person.name</pre>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">حفظ کن: لوگوی یه برند روی صد هزار محصول دیده می‌شه. reference و embedding و read model مشتق رو مقایسه کن؛ خرج خواندن، fan-out تغییر، stale data و شکست وسط batch update رو بگو و انتخابت رو با حد تازگی قابل قبول توجیه کن.</span><span class="en">Rule of thumb: one brand logo shows up on 100,000 products. Compare references, embedding, and a derived read model. Weigh read cost, update fan-out, stale reads, and dying halfway through a batch update — and justify your pick with an acceptable freshness bound.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">کپی رو بدون مسیر update پیشنهاد نمی‌ده</span><span class="en">Never proposes copies without an update path</span></li><li><span class="fa">خواندن سریع رو با خرج نوشتن تاخت می‌زنه</span><span class="en">Trades fast reads against write cost</span></li><li><span class="fa">مرجع حقیقت و نسخهٔ logo رو می‌گه</span><span class="en">Names the authority and the logo version</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا به‌روزرسانی وسط محصولات بترکه — چی رو retry می‌کنی؟</span><span class="en">The logo update dies halfway through the products — what do you retry?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳۰–۶۰ دقیقه</span><span class="en">Extended hands-on laboratory · estimated 30–60 minutes</span></summary><div class="fa"><p>حفظ کن: توی همون فروشگاه، لوگوی برند توی صفحهٔ محصول دیده می‌شه و اگه لوگو عوض بشه درد شروع می‌شه. دو طرح بده (کپی لوگو توی هر محصول، در برابر جدول برند با ارجاع) و هرکدوم رو با خرج خواندن/نوشتن و ریسک ناسازگاری بسنج.</p></div><div class="en"><p>Rule of thumb: in the same shop, the brand logo shows on every product page, so a logo change hurts. Sketch two designs (logo copied into each product vs a referenced brand table) and weigh each by read/write cost and inconsistency risk.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch3-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a> · <a href="https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html" target="_blank" rel="noopener">Debezium · outbox event router</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch3-ex2"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   <article class="exercise-block" id="exercise-3" data-reviewed-exercise="3">
 <h3><span class="fa">تمرین ۳ — event sourcing برای رزرو سینما</span><span class="en">Exercise 3 — event sourcing for cinema booking</span></h3>
@@ -1563,6 +1616,12 @@ RETURN person.name</pre>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">تصور کن رزرو سینما داری با event log و سه projection وضعیت صندلی، فروش و بلیت. دو درخواست هم‌زمان برای یه صندلی، انقضای hold، لغو و اصلاح رزرو رو توضیح بده؛ invariant رو توی write path اعمال کن و replay رو از ارسال دوبارهٔ بلیت جدا کن.</span><span class="en">Think of it: cinema bookings on an event log, with seat, sales, and ticket projections. Handle two requests racing for one seat, hold expiry, cancellation, and fixing a booking. Enforce the invariant at the write boundary — and keep replay far away from re-sending tickets.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">یه صندلی دو تا رزرو تأییدشده نمی‌گیره</span><span class="en">One seat never gets two confirmed bookings</span></li><li><span class="fa">command و event و compensating event رو جدا می‌دونه</span><span class="en">Keeps commands apart from events and compensating events</span></li><li><span class="fa">projection و اثر بیرونی رو idempotent می‌کنه</span><span class="en">Makes projections and side effects idempotent</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا SeatHeld دیر برسه و SeatReleased قبلاً پردازش شده باشه — چی کار می‌کنی؟</span><span class="en">SeatHeld shows up late but SeatReleased is already processed — what do you do?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۲–۴ ساعت</span><span class="en">Extended hands-on laboratory · estimated 2–4 hours</span></summary><div class="fa"><p>تصور کن سیستم رزرو صندلی سینما داری: فهرست رویدادها رو بنویس (نام‌ها به زمان گذشته)، سه projection تعریف کن (وضعیت صندلی‌ها، گزارش فروش، چاپ بلیت) و بگو اگه کاربری اشتباه رزرو کرد با یه رویداد تازه چطور اصلاحش می‌کنی. یه حالت هم پیدا کن که پردازش دوباره‌ش خطرناک باشه.</p></div><div class="en"><p>Think of it: a cinema seat-booking system. List the events (past-tense names), define three projections (seat status, sales report, ticket printing), and say how a mistaken booking gets fixed with a fresh event. Then find one case where replaying is dangerous.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch3-ex3"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-3"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/" target="_blank" rel="noopener">AWS · safe retries with idempotent APIs</a> · <a href="https://www.amazon.jobs/content/en/how-we-hire/sde-iii-interview-prep" target="_blank" rel="noopener">Amazon · SDE III interview preparation</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch3-ex3"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   <div class="doc-nav">
     <a href="../ch2-nonfunctional/index.html"><span class="fa">→ فصل ۲: تعریف نیازمندی‌های غیرعملکردی</span><span class="en">→ Chapter 2: Defining nonfunctional requirements</span></a>
@@ -1582,5 +1641,6 @@ RETURN person.name</pre>
 </footer>
 
 <script src="../assets/site.js"></script>
+<script src="../assets/concept-labs.js" defer></script>
 </body>
 </html>

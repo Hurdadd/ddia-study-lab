@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/ddia.css">
 <link rel="stylesheet" href="../assets/exercise-audit.css">
+<link rel="stylesheet" href="../assets/concept-labs.css">
 </head>
 <body>
 
@@ -67,6 +68,20 @@
   <a class="lvl2" href="#s6-3"><span class="fa">۶.۳. اشتباهات رایج</span><span class="en">6.3. Common mistakes</span></a>
   <a class="lvl2" href="#s6-4"><span class="fa">۶.۴. چک‌لیست ۵ دقیقه‌ای</span><span class="en">6.4. Five-minute checklist</span></a>
   <a href="#s7"><span class="fa">۷. تمرین‌های عملی</span><span class="en">7. Hands-on exercises</span></a>
+
+
+
+<!-- concept-lab-toc:start -->
+<a href="#try-outbox"><span class="en">Try it: The order exists. Where is its event?</span><span class="fa">امتحان کن: سفارش ثبت شد؛ رویدادش کجاست؟</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-olap"><span class="en">Try it: A heavy report meets checkout</span><span class="fa">امتحان کن: گزارش سنگین در برابر پرداخت</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-rpc"><span class="en">Try it: A call that can disappear</span><span class="fa">امتحان کن: فراخوانی که می‌تواند گم شود</span></a>
+<!-- concept-lab-toc:end -->
 </nav>
 
 <main class="doc">
@@ -449,6 +464,14 @@
       <p>Finish with the dashed arrow from <span class="ltr">Data Science</span> to <span class="ltr">Prod Services</span>, labelled <span class="ltr">reverse ETL</span>. The trained model goes back into operations. All three rows build <em>derived</em> data from facts recorded elsewhere. Follow the source before trusting the copy.</p></div>
   </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-olap" data-lab="olap" data-chapter="1">
+<h3><span class="en">A heavy report meets checkout</span><span class="fa">گزارش سنگین در برابر پرداخت</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <!-- ============ SECTION 2 ============ -->
 <section id="s2">
@@ -560,6 +583,16 @@
 <p>Follow one piece of data through the lanes. The top lane is <span class="ltr">Authoritative data</span>: <span class="ltr">Created</span> → <span class="ltr">Recorded</span> in the <span class="ltr">source of truth</span> → <span class="ltr">Change Captured</span>. From there, two arrows lead into <span class="ltr">Derived copies</span>. One says <span class="ltr">refresh</span> and updates rebuildable copies; the other says <span class="ltr">ETL pipeline</span> and builds the read-only analytical copy.</p><p>Don't stop at the middle lane. At <span class="ltr">End of life</span>, <span class="ltr">Deleted</span> is labelled with the right to be forgotten. Deleting the original row doesn't finish the job. You have to account for the derived copies too, and immutable logs make that harder. Follow the copies all the way to deletion.</p></div>
   </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-outbox" data-lab="outbox" data-chapter="1">
+<h3><span class="en">The order exists. Where is its event?</span><span class="fa">سفارش ثبت شد؛ رویدادش کجاست؟</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
+
+
 
 <!-- ============ SECTION 3 ============ -->
 <section id="s3">
@@ -874,6 +907,14 @@
     <div class="en"><p>When you mention retries in an interview, explain <b><span class="ltr">idempotency</span></b> too. A request can succeed even though its response never arrives. Sending it again mustn't create a second charge. A stable request key and an operation that handles repeated attempts are the mechanism; naming the pattern alone isn't enough.</p></div>
   </div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-rpc" data-lab="rpc" data-chapter="1">
+<h3><span class="en">A call that can disappear</span><span class="fa">فراخوانی که می‌تواند گم شود</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <!-- ============ SECTION 5 ============ -->
 <section id="s5">
@@ -1313,6 +1354,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">فرض کن یه فروشگاه داری که سفارش ثبت می‌کنه و کش، جست‌وجو، گزارش و پیشنهاد محصول هم داره. اول بگو مرجع هر واقعیت کجاست و کدوم نما مشتقه. بعد حساب کن: اگه سفارش commit بشه ولی انتشار رویداد بترکه چی می‌شه؟ قرارداد تازگی هر نما، مسیر بازسازیش و خرج حداقل معماری رو هم بگو.</span><span class="en">Picture this: you&#x27;ve got a shop that takes orders, plus cache, search, reporting, and recommendations. Say which store is the authority for each fact and which views are derived. Then tell me: what happens when the order commits but publishing the event blows up? Spell out each view&#x27;s freshness contract, how you&#x27;d rebuild it, and the cheapest architecture that still works.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">می‌گه مرجع هر واقعیت کجاست و کدوم نما مشتقه</span><span class="en">Names the authority for each fact</span></li><li><span class="fa">dual write و outbox/CDC و idempotency رو با هم مقایسه می‌کنه</span><span class="en">Compares dual write with outbox/CDC and idempotency</span></li><li><span class="fa">برای تازگی و بازسازی یه معیار قابل اندازه‌گیری می‌ده</span><span class="en">Gives measurable freshness and rebuild criteria</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا مشتری سفارش رو ثبت می‌کنه ولی توی جست‌وجو نمی‌بینتش — حال کاربر رو چطور خوب نگه می‌داری؟</span><span class="en">Your customer places an order but can&#x27;t find it in search yet — how do you keep them happy?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳۰–۶۰ دقیقه</span><span class="en">Extended hands-on laboratory · estimated 30–60 minutes</span></summary><div class="fa"><p>حالا اینا رو داری: پایگاه داده سفارش‌ها، کش وضعیت سفارش، ایندکس جست‌وجوی سفارش‌ها، گزارش ماهانه فروش، مدل پیشنهاد محصول. برای هرکدوم بگو <span class="ltr">system of record</span>ـه یا <span class="ltr">derived</span> و چرا. بعد حساب کن: با یه سفارش تازه، کدوم سیستم‌ها باید به‌روز بشن و خبرش با چه مکانیزمی پخش می‌شه؟</p></div><div class="en"><p>Here's your lineup: the orders database, the order-status cache, the order search index, the monthly sales report, and the recommendation model. For each, say <span class="ltr">system of record</span> or <span class="ltr">derived</span> — and why. Then tell me: when a fresh order lands, which systems must update, and how does the news travel?</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch1-ex1"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-1"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://www.amazon.jobs/content/en/how-we-hire/sde-iii-interview-prep" target="_blank" rel="noopener">Amazon · SDE III interview preparation</a> · <a href="https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html" target="_blank" rel="noopener">Debezium · outbox event router</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch1-ex1"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   <article class="exercise-block" id="exercise-2" data-reviewed-exercise="2">
 <h3><span class="fa">تمرین ۲ — تصمیم توزیع</span><span class="en">Exercise 2 — the distribution decision</span></h3>
@@ -1321,6 +1368,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">تصور کن روزانه دو میلیون سفارش داری با اوج ده‌برابری، گزارش فروش و قانونی که داده باید توی یه کشور بمونه. اول اندازهٔ رکورد، read/write ratio، SLO و رشد رو روشن کن. بعد سه طرح تک‌گره، primary+replica و sharding رو با عدد و رقم ظرفیت مقایسه کن؛ بکاپ، failover و جای داده رو هم حساب کن.</span><span class="en">Think of it: 2M orders a day, 10x peaks, sales analytics, and a law keeping data inside one country. First pin down record size, read/write ratio, SLOs, and growth. Then compare single-node, primary/replica, and sharded designs with real capacity numbers — and cover backup, failover, and where the data lives.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">میانگین رو با peak قاطی نمی‌کنه</span><span class="en">Keeps average apart from peak</span></li><li><span class="fa">residency رو با اجبار sharding یکی نمی‌دونه</span><span class="en">Keeps residency apart from forced sharding</span></li><li><span class="fa">threshold مهاجرت و خرج عملیات رو می‌گه</span><span class="en">Names migration thresholds and operating cost</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">اگه حجم پنج برابر بشه و بودجه نصف — اول کدوم تیکه رو دست می‌زنی؟</span><span class="en">Data grows 5x and your budget gets cut in half — which piece do you touch first?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳۰–۶۰ دقیقه</span><span class="en">Extended hands-on laboratory · estimated 30–60 minutes</span></summary><div class="fa"><p>تصور کن روزانه ۲ میلیون سفارش داری، تیم فروش گزارش تحلیلی می‌خواد و قانون می‌گه داده کاربرا باید داخل کشور بمونه. برای هر سه بگو دقیقاً کی از «تک‌ماشین» به «توزیع‌شده» می‌رسی، دلیلت چیه و کم‌خرج‌ترین معماری که کارت رو راه می‌ندازه چه شکلیه.</p></div><div class="en"><p>Think of it: 2M orders/day, analytical reports for the sales team, and a law keeping user data inside the country. For each, say exactly when you'd move from “single-node” to “distributed”, why, and what the cheapest architecture that does the job looks like.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch1-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://www.amazon.jobs/content/en/how-we-hire/sde-iii-interview-prep" target="_blank" rel="noopener">Amazon · SDE III interview preparation</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch1-ex2"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   <article class="exercise-block" id="exercise-3" data-reviewed-exercise="3">
 <h3><span class="fa">تمرین ۳ — چالش GDPR</span><span class="en">Exercise 3 — the GDPR challenge</span></h3>
@@ -1329,6 +1382,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">داستان از این قراره: یه کاربر می‌گه داده‌م رو پاک کن. رد درخواست رو از مرجع تا کش، ایندکس، لاگ، بکاپ و مجموعهٔ آموزش دنبال کن. جداسازی PII، retention، بازنویسی سگمنت و حذف کلید رمز رو مقایسه کن؛ بگو چی نباید با restore دوباره زنده بشه و کدوم تصمیم تفسیر حقوقی می‌خواد.</span><span class="en">Here&#x27;s the thing: a user asks you to delete their data. Trace that request from the record through the cache, index, log, backup, and training data. Compare PII separation, retention, segment rewriting, and key deletion — then say what must never come back to life on restore, and which call needs a lawyer.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">همهٔ کپی‌ها رو تا restore پوشش می‌ده</span><span class="en">Covers every copy through restore</span></li><li><span class="fa">محدودیت crypto-shredding و لینک‌پذیری رو می‌دونه</span><span class="en">Knows key-deletion limits and re-linkability</span></li><li><span class="fa">تأیید حذف رو با مدرک و SLA داخلی طراحی می‌کنه</span><span class="en">Designs deletion proof with an internal SLA</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا یه مصرف‌کنندهٔ قدیمی دقیقاً موقع حذف آفلاین باشه — چه تضمینی می‌دی؟</span><span class="en">Now an old consumer is offline for the whole deletion — what guarantee can you still give?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۱–۲ ساعت</span><span class="en">Extended hands-on laboratory · estimated 1–2 hours</span></summary><div class="fa"><p>فرض کن سیستمت روی <span class="ltr">append-only event log</span> ساخته شده و کاربر می‌گه داده‌م رو پاک کن. چه راه‌های مهندسی داری؟ هر راه رو با تریدآفش بگو.</p></div><div class="en"><p>Picture this: your system is built on an <span class="ltr">append-only event log</span> and a user asks for deletion. What engineering moves do you have? Give each option with its trade-off.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch1-ex3"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-3"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://commission.europa.eu/law/law-topic/data-protection/information-business-and-organisations/principles-gdpr_en" target="_blank" rel="noopener">European Commission · GDPR principles</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch1-ex3"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   <div class="doc-nav">
     <a href="../index.html"><span class="fa">→ بازگشت به نقشه راه</span><span class="en">→ Back to the roadmap</span></a>
@@ -1348,5 +1407,6 @@
 </footer>
 
 <script src="../assets/site.js"></script>
+<script src="../assets/concept-labs.js" defer></script>
 </body>
 </html>

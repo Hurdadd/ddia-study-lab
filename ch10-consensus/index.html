@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/ddia.css">
 <link rel="stylesheet" href="../assets/exercise-audit.css">
+<link rel="stylesheet" href="../assets/concept-labs.css">
 </head>
 <body>
 
@@ -76,6 +77,20 @@
   <a class="lvl2" href="#s6-3"><span class="fa">۶.۳. اشتباهات رایج</span><span class="en">6.3. Common mistakes</span></a>
   <a class="lvl2" href="#s6-4"><span class="fa">۶.۴. چک‌لیست ۵ دقیقه‌ای</span><span class="en">6.4. Five-minute checklist</span></a>
   <a href="#s7"><span class="fa">۷. تمرین‌های عملی</span><span class="en">7. Hands-on exercises</span></a>
+
+
+
+<!-- concept-lab-toc:start -->
+<a href="#try-quorum"><span class="en">Try it: A leader needs a majority</span><span class="fa">امتحان کن: رهبر به اکثریت نیاز دارد</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-lamport"><span class="en">Try it: Which write came later?</span><span class="fa">امتحان کن: کدام نوشتن بعدتر بود؟</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-ephemeral"><span class="en">Try it: The lock holder disappears</span><span class="fa">امتحان کن: دارندهٔ قفل ناپدید می‌شود</span></a>
+<!-- concept-lab-toc:end -->
 </nav>
 
 <main class="doc">
@@ -814,6 +829,14 @@
   </div>
 
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-lamport" data-lab="lamport" data-chapter="10">
+<h3><span class="en">Which write came later?</span><span class="fa">کدام نوشتن بعدتر بود؟</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <!-- ============ SECTION 3 ============ -->
 <section id="s3">
@@ -1121,6 +1144,16 @@
   </div>
 
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-quorum" data-lab="quorum" data-chapter="10">
+<h3><span class="en">A leader needs a majority</span><span class="fa">رهبر به اکثریت نیاز دارد</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
+
+
 
 <!-- ============ SECTION 4 ============ -->
 <section id="s4">
@@ -1245,6 +1278,14 @@
   </ul></div>
 
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-ephemeral" data-lab="ephemeral" data-chapter="10">
+<h3><span class="en">The lock holder disappears</span><span class="fa">دارندهٔ قفل ناپدید می‌شود</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <!-- ============ SECTION 5 ============ -->
 <section id="s5">
@@ -1713,6 +1754,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">فرض کن سه تا process داری. send/receive و رخداد محلی رو با Lamport clock شماره‌گذاری کن. با tie-breaker از process ID ترتیب کامل بساز. یه مثال بزن که نشون بده L(a)&lt;L(b) علت‌ومعلولی بودن رو اثبات نمی‌کنه؛ vector clock و هزینه‌ش رو هم مقایسه کن.</span><span class="en">Picture this — you&#x27;ve got three processes passing messages. Label local events and messages using Lamport clocks and process-ID tie breaking. Show why increasing timestamps like L(a)&lt;L(b) don&#x27;t imply causality or detect concurrency; compare your vector-clock costs.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">قاعده receive=max(local,received)+1 رو درست پیاده می‌کنی</span><span class="en">You get the receive rule right: receive=max(local,received)+1</span></li><li><span class="fa">ترتیب کل رو با causality یکی نمی‌گیری</span><span class="en">You keep total order separate from causality</span></li><li><span class="fa">یادت هست concurrency از Lamport قابل تشخیص نیست</span><span class="en">You know Lamport can&#x27;t detect concurrency</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا دو رخداد داری بدون هیچ پیام. چه timestampهایی می‌تونن داشته باشن؟</span><span class="en">What timestamps can your two independent events with no messages have?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۱–۲ ساعت</span><span class="en">Extended hands-on laboratory · estimated 1–2 hours</span></summary><div class="fa"><p>سه پروسه ساده بنویس که پیام رد و بدل می‌کنن و هر کدوم ساعت Lamport خودشون رو دارن. قاعده «افزایش هنگام رخداد» و «رسیدن به max هنگام دریافت» رو پیاده و تست کن. بعد سناریوی نمودار ۵ رو اجرا کن و نشون بده ترتیب نهایی timestampها دقیقاً <span class="ltr">(1,A) &lt; (1,C) &lt; (2,B)</span> می‌شه. <b>سوال:</b> چه ورودی‌ای نشون می‌ده که این ساعت «هم‌زمانی» رو تشخیص نمی‌ده؟</p></div><div class="en"><p>Write three small processes that exchange messages, each keeping its own Lamport clock. Implement “increment on event” and “catch up to max on receive” and test them. Then run Diagram 5's scenario and show your final timestamp order is exactly <span class="ltr">(1,A) &lt; (1,C) &lt; (2,B)</span>. <b>Question:</b> what input shows this clock can't detect “concurrency”?</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch10-ex1"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-1"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://lamport.azurewebsites.net/pubs/time-clocks.pdf" target="_blank" rel="noopener">Lamport · Time, Clocks, and Ordering · 1978</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch10-ex1"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
     <article class="exercise-block" id="exercise-2" data-reviewed-exercise="2">
 <h3><span class="fa">تمرین ۲ — quorum و نقض خطی‌پذیری</span><span class="en">Exercise 2 — quorums and a linearizability violation</span></h3>
@@ -1721,6 +1768,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">تصور کن سه تا replica داری و write در جریانه که هنوز فقط به یکیش رسیده. دو تا quorum read بساز که اولی جدید و دومی قدیمی می‌خونه. بعد الگوریتم register رو با version مرتب و write-back به اکثریت پیش از برگشتن read مشخص کن. برای multi-writer مرحله query پیش از write و فرض membership ثابت رو تحلیل کن.</span><span class="en">Here&#x27;s the thing — you&#x27;ve got three replicas and an in-flight write that&#x27;s reached only one. Construct new-then-old quorum reads, then specify ordered versions and majority write-back before returning a read. Discuss a query phase for multiple writers, fixed membership and crash assumptions.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">w=3 تأییدشده روی همه رو با partial write یکی نمی‌گیری</span><span class="en">You separate partial writes from acknowledged w=3 writes</span></li><li><span class="fa">background repair رو با synchronous quorum write-back جدا می‌کنی</span><span class="en">You separate background repair from quorum write-back</span></li><li><span class="fa">فرض‌های version، crash و concurrent writer رو روشن می‌کنی</span><span class="en">You&#x27;ve nailed version and writer assumptions</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا اگه یه reader بعد از خوندن مقدار جدید و قبل از write-back بمیره، کدوم read باید completed حساب بشه؟</span><span class="en">Your reader crashes after seeing the new value but before write-back. Should that read count as completed?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳–۶ ساعت</span><span class="en">Extended hands-on laboratory · estimated 3–6 hours</span></summary><div class="fa"><p>سه replica ابتدا v1 دارن. write تک‌نویسنده با هدف w=3 فقط n1 رو به v2 رسونده و هنوز کامل نشده. read اول با r=2 از {n1,n2} مقدار v2 و read دوم که بعد از پایان اول شروع می‌شه از {n2,n3} مقدار v1 می‌گیره؛ history رو رسم کن و نقض new-then-old رو ثابت کن. نسخه اصلاح‌شده، max نسخه رو پیش از پاسخ read به quorum دوگرهی write-back می‌کنه و replica هرگز به نسخه کمتر عقب نمی‌گرده. قبل و بعد از write-back crash تزریق کن و completed رو از دید caller تعریف کن. read repair پس‌زمینه این شرط رو نمی‌ده. مدل SWMR با عضویت ثابت رو صریح بنویس؛ برای MWMR query timestamp قبل از write، tag یکتای مرتب و quorum مناسب لازمه.</p></div><div class="en"><p>Start three replicas at v1. Your incomplete single-writer write targeting w=3 has updated only n1 to v2. Read1 from {n1,n2} with r=2 returns v2; Read2 starts after Read1 completes and returns v1 from {n2,n3}. Draw the history and prove new-then-old violates linearizability. Fix it with maximum-version write-back to a two-node quorum before returning, with replicas rejecting version regression. Inject crashes before and after write-back; completion is observed by the caller. Background repair doesn't satisfy the condition. State fixed-membership SWMR assumptions; MWMR additionally needs pre-write timestamp queries, uniquely ordered tags and suitable quorums.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch10-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://groups.csail.mit.edu/tds/papers/Attiya/JACM95.pdf" target="_blank" rel="noopener">Attiya, Bar-Noy, Dolev · atomic registers · 1995</a> · <a href="https://jepsen.io/consistency/models" target="_blank" rel="noopener">Jepsen · consistency models</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch10-ex2"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
     <article class="exercise-block" id="exercise-3" data-reviewed-exercise="3">
 <h3><span class="fa">تمرین ۳ — مولدِ شناسه‌ی oracle با failover</span><span class="en">Exercise 3 — an oracle ID generator with failover</span></h3>
@@ -1729,6 +1782,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">حالا مولد ID رو با رزرو پایدار بازه طراحی کن و crash وسط دسته رو تحلیل کن. uniqueness، gap-free، ترتیب تخصیص و ترتیب مشاهده real-time رو جدا تعریف کن. طرح مرکزی، UUID و shard-prefixed ID رو مقایسه کن؛ برای failover، allocator رو fence کن.</span><span class="en">Think of it — you&#x27;re building an ID generator. Persist range reservations before issuing IDs and crash mid-range. Separate uniqueness, gaplessness, allocation order and real-time observation. Compare a centralized allocator, UUIDs and shard-prefixed IDs; fence your failover.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">high-water mark رو قبل از صدور ID پایدار می‌کنی</span><span class="en">You persist your high-water mark before issuing IDs</span></li><li><span class="fa">gap رو از duplicate جدا می‌کنی</span><span class="en">You separate gaps from duplicate IDs</span></li><li><span class="fa">نیاز به هماهنگی رو به ضمانت ordering وصل می‌کنی</span><span class="en">You tie coordination to your ordering guarantee</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا دو تا node بازه جدا دارن؛ آیا IDهای صادرشده به ترتیب زمان جهانی زیاد می‌شن؟</span><span class="en">Two nodes issue IDs from disjoint ranges. Do your IDs increase in global real-time order?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۲–۴ ساعت</span><span class="en">Extended hands-on laboratory · estimated 2–4 hours</span></summary><div class="fa"><p>مولد شناسه، high-water mark دسته رو قبل از تحویل اولین ID پایدار می‌کنه. دسته ۱ تا ۵ رو رزرو کن، ۱ تا ۳ رو بده، crash کن و از ۶ شروع کن؛ نبود تکرار و مجازبودن gap رو assert کن. بعد دو allocator با بازه بادوام جدا یا namespace جدا بساز و یکتایی رو بیازما. uniqueness، gap-free، ترتیب تخصیص و ترتیب real-time پاسخ‌های غیرهم‌پوشان رو جدا تعریف کن؛ batching و چند allocator ممکنه ترتیب جهانی رو از بین ببره. تو failover هیچ بازه رزروشده رو دوباره واگذار نکن و reserve بعدی رو با epoch تو storage محافظت کن. fence روی reserve به‌تنهایی پاسخ‌های باقی‌مونده تو RAM رهبر قدیم رو متوقف نمی‌کنه؛ برای ترتیب جهانی، مسیر پاسخ هم باید مالک معتبر رو کنترل کنه.</p></div><div class="en"><p>Persist each batch high-water mark before issuing its first ID. Reserve 1..5, issue 1..3, crash and restart at 6; assert no duplicates with allowed gaps. Then implement two allocators with durably disjoint ranges or namespaces and test uniqueness. Define uniqueness, gap-free allocation, allocation order and real-time ordering of non-overlapping responses separately; batching across allocators can break global order. Never reassign reserved ranges after failover, and epoch-fence future reservations at storage. A reserve fence alone can't stop an old leader serving its remaining RAM IDs; global ordering also needs a valid-owner check on the response path.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch10-ex3"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-3"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://www.amazon.jobs/content/en/how-we-hire/sde-iii-interview-prep" target="_blank" rel="noopener">Amazon · SDE III interview preparation</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch10-ex3"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
     <article class="exercise-block" id="exercise-4" data-reviewed-exercise="4">
 <h3><span class="fa">تمرین ۴ — خطی‌سنجِ ساده</span><span class="en">Exercise 4 — a mini linearizability checker</span></h3>
@@ -1737,6 +1796,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">قضیه اینه که یه history کوچک داری شامل invoke/return از read و write که باید روی register خطی‌سنجی کنی. ترتیب real-time رو حفظ کن و عملیات هم‌پوشان رو جابه‌جا کن. برای test harness bounded search طراحی کن؛ pending operation و timeout نامعلوم رو درست مدل کن.</span><span class="en">Honestly, you&#x27;ve got a small register history with invoke/return reads and writes to check. Preserve real-time precedence and reorder overlapping operations. Design bounded search for your test harness, model pending/indeterminate operations and explain the limits of sampled histories.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">completion قبل از invocation بعدی تقدم اجباری داره</span><span class="en">You enforce real-time precedence before the next invocation</span></li><li><span class="fa">خواندن stale بعد از write تمام‌شده رو رد می‌کنی</span><span class="en">You reject stale reads after a completed write</span></li><li><span class="fa">یادت هست checker اثبات همه اجراهای آینده نیست</span><span class="en">You know your checker can&#x27;t prove all future runs</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا timeout یه write رو failed حساب می‌کنی یا indeterminate؟ چرا؟</span><span class="en">Do you model your timed-out write as failed or indeterminate, and why?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۴–۸ ساعت</span><span class="en">Extended hands-on laboratory · estimated 4–8 hours</span></summary><div class="fa"><p>یه key-value store ساده بساز و یه تست‌کننده که زمان شروع و پایان هر read/write رو ثبت می‌کنه. بعد الگوریتمی بنویس که بررسی می‌کنه آیا می‌شه این عملیات‌ها رو تو یه ترتیب معتبر register چید (هر read مقدار آخرین write قبل خودش رو برگردونه) طوری که ترتیب زمان واقعی هم رعایت بشه. <b>سوال:</b> با اجرای این خطی‌سنج روی پیاده‌سازی «خواندن از replica»، کدوم اجراها رد می‌شن؟</p></div><div class="en"><p>Build a tiny key-value store plus a tester recording each read/write's start and end time. Then write an algorithm checking whether these operations fit a valid register order (each read returning the latest write before it) that also respects real-time order. <b>Question:</b> running this checker on a “read from any replica” implementation, which executions fail?</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch10-ex4"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-4"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://jepsen.io/consistency/models" target="_blank" rel="noopener">Jepsen · consistency models</a> · <a href="https://groups.csail.mit.edu/tds/papers/Attiya/JACM95.pdf" target="_blank" rel="noopener">Attiya, Bar-Noy, Dolev · atomic registers · 1995</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch10-ex4"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   </div>
 
@@ -1765,5 +1830,6 @@
 </footer>
 
 <script src="../assets/site.js"></script>
+<script src="../assets/concept-labs.js" defer></script>
 </body>
 </html>
