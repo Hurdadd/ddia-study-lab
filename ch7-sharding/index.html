@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/ddia.css">
 <link rel="stylesheet" href="../assets/exercise-audit.css">
+<link rel="stylesheet" href="../assets/concept-labs.css">
 </head>
 <body>
 
@@ -69,6 +70,20 @@
   <a href="#s6-3" class="lvl2"><span class="fa">۶.۳. اشتباهات رایج</span><span class="en">6.3. Common mistakes</span></a>
   <a href="#s6-4" class="lvl2"><span class="fa">۶.۴. چک‌لیست ۵ دقیقه‌ای</span><span class="en">6.4. Five-minute checklist</span></a>
   <a href="#s7"><span class="fa">۷. تمرین‌های عملی</span><span class="en">7. Hands-on exercises</span></a>
+
+
+
+<!-- concept-lab-toc:start -->
+<a href="#try-hotkey"><span class="en">Try it: One popular key, three shards</span><span class="fa">امتحان کن: یک کلید محبوب، سه shard</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-rebalance"><span class="en">Try it: Add a fourth node</span><span class="fa">امتحان کن: افزودن گره چهارم</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-secondary"><span class="en">Try it: Search by color across shards</span><span class="fa">امتحان کن: جست‌وجو بر اساس رنگ در بین شاردها</span></a>
+<!-- concept-lab-toc:end -->
 </nav>
 
 <main class="doc">
@@ -785,6 +800,24 @@ result = merge(values)                    # e.g. summing counters</pre>
 </div>
 
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-hotkey" data-lab="hotkey" data-chapter="7">
+<h3><span class="en">One popular key, three shards</span><span class="fa">یک کلید محبوب، سه shard</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-rebalance" data-lab="rebalance" data-chapter="7">
+<h3><span class="en">Add a fourth node</span><span class="fa">افزودن گره چهارم</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
+
+
 
 <section id="s4">
 
@@ -1295,6 +1328,14 @@ result = merge(values)                    # e.g. summing counters</pre>
 </div>
 
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-secondary" data-lab="secondary" data-chapter="7">
+<h3><span class="en">Search by color across shards</span><span class="fa">جست‌وجو بر اساس رنگ در بین شاردها</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <section id="s6">
 
@@ -1697,6 +1738,12 @@ result = merge(values)                    # e.g. summing counters</pre>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">فرض کن یک ماه داده سنسور داری. حالا این چهارتا رو کنار هم بذار و مقایسه کن: timestamp-range، sensor:timestamp range، hash(sensor_id) و hash(full_key). هم بار لحظه‌ای رو حساب کن، هم جمع کل ماه رو. بعد به من بگو: query «یک ماهِ یک سنسور» تو هر طرح چه مسیری می‌ره؟ سنسور پرنرخ کجا hotspot می‌سازه؟ و repartitioning رو چطور انجام می‌دی؟</span><span class="en">Picture this — you&#x27;ve got one month of sensor data. Compare timestamp ranges, sensor:timestamp ranges, hash(sensor_id) and hash(full_key). Measure both your instantaneous load and your monthly total. Then tell me: what&#x27;s the query path for “one month of one sensor” in each design? Where does your hot sensor build a hotspot? How&#x27;d you repartition?</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">جمع ماهانه رو قاطی hotspot لحظه‌ای نمی‌کنی و هر دو رو با عدد نشون می‌دی</span><span class="en">You measure the instantaneous hotspot, you don&#x27;t let monthly totals hide it</span></li><li><span class="fa">hash روی sensor_id رو با hash روی full key یکی نمی‌گیری</span><span class="en">You keep hash(sensor_id) separate from hash(full_key)</span></li><li><span class="fa">query fan-out و write skew رو با عدد و حساب مشخص می‌کنی</span><span class="en">You&#x27;ve quantified query fan-out and write skew</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا فرض کن یه سنسور به‌تنهایی ۴۰٪ نوشتن‌ها رو می‌ده. تو کلید partition چی رو عوض می‌کنی؟</span><span class="en">One sensor&#x27;s now generating 40% of all writes. How do you change your partition key?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۲–۴ ساعت</span><span class="en">Extended hands-on laboratory · estimated 2–4 hours</span></summary><div class="fa"><p>فرض کن یه دیتابیس زمان‌سری سنسور داری (کلید = timestamp). این سه‌تا طرح sharding رو روی یک ماه داده مصنوعی پیاده کن: key-range با کلید timestamp، key-range با کلید <code>sensor_id:timestamp</code>، و hash-range. پخش نوشتن بین shardها رو اندازه بگیر و hotspot رو با عدد نشون بده. بعد trade-off «range scan یک ماهِ یک سنسور» رو تو هر سه‌تا بسنج. آخرش بگو: هر کدوم رو برای چه نوع query انتخاب می‌کنی و چرا؟</p></div><div class="en"><p>Design a sharding scheme for your sensor time-series database (key = timestamp): implement three alternatives (key-range on a timestamp key, key-range on a <code>sensor_id:timestamp</code> key, and hash-range) over one synthetic month of data. Measure your write spread across shards, show the hotspot in numbers, and weigh the “one month of one sensor range scan” trade-off in all three. Which do you pick for which query type, and why?</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch7-ex1"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-1"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://careers.microsoft.com/v2/global/en/hiring-tips/technical-interviewing" target="_blank" rel="noopener">Microsoft · technical interviewing</a> · <a href="https://www.amazon.jobs/content/en/how-we-hire/sde-iii-interview-prep" target="_blank" rel="noopener">Amazon · SDE III interview preparation</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch7-ex1"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
 
 <article class="exercise-block" id="exercise-2" data-reviewed-exercise="2">
@@ -1706,6 +1753,12 @@ result = merge(values)                    # e.g. summing counters</pre>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">تصور کن node اضافه یا کم می‌شه. این سه‌تا رو مقایسه کن: modulo، rendezvous و fixed logical shards با جدول مالکیت. درصد حرکت رو برای mapping مشخص حساب کن. بعد تصمیم بگیر: skew چی می‌شه؟ node سنگین‌تر چه وزنی می‌گیره؟ failure و replication رو چطور پوشش می‌دی؟ و مهاجرت تدریجی رو قدم‌به‌قدم چطور می‌بری جلو؟</span><span class="en">Here&#x27;s the thing — nodes join and leave, and you&#x27;ve got to handle it. Compare modulo, rendezvous and fixed logical shards with an explicit ownership map. Estimate your movement percentage for a concrete mapping. Then call it: what&#x27;s your skew? How do you weight nodes? How do you cover failure and replication? How&#x27;d you run a staged handoff?</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">ثبات hash بعد از restart رو تضمین می‌کنی</span><span class="en">You&#x27;ve got a stable hash function across restarts</span></li><li><span class="fa">حرکت واقعی داده رو از تغییر routing جدا حساب می‌کنی</span><span class="en">You separate real data movement from routing changes</span></li><li><span class="fa">fixed shard رو بدون ownership policy مقایسه نمی‌کنی</span><span class="en">You don&#x27;t compare fixed shards without an explicit ownership policy</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا یه node جدید اومده با دو برابر ظرفیت. چطور balancing می‌کنی بدون اینکه همه کلیدها رو جابه‌جا کنی؟</span><span class="en">A new node&#x27;s got twice the capacity. How do you rebalance without moving every key?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۱–۳ ساعت</span><span class="en">Extended hands-on laboratory · estimated 1–3 hours</span></summary><div class="fa"><p>یه <span class="ltr">rendezvous hashing</span> ساده و یه طرح «تعداد ثابت shard» پیاده کن. اضافه و حذف node رو شبیه‌سازی کن (از ۱۰ به ۱۱ و از ۱۰ به ۹) و درصد کلیدهای جابه‌جاشده رو تو هر دو اندازه بگیر. با حالت <code>hash % N</code> مقایسه کن. منحنی «جابه‌جایی در برابر تغییر اندازه خوشه» رو رسم کن و جواب بده: برای چه الگوی رشدی، کدوم روش کمترین جابه‌جایی داده رو می‌ده؟</p></div><div class="en"><p>Implement a simple <span class="ltr">rendezvous hashing</span> and a “fixed shard count”. Simulate node joins and leaves (10→11 and 10→9), measure your moved-key percentage in both and compare with <code>hash % N</code>. Plot your “moves vs cluster-size change” curve and answer: for which growth pattern does each method move the least data?</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch7-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://careers.microsoft.com/v2/global/en/hiring-tips/technical-interviewing" target="_blank" rel="noopener">Microsoft · technical interviewing</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch7-ex2"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
 
 <article class="exercise-block" id="exercise-3" data-reviewed-exercise="3">
@@ -1715,6 +1768,12 @@ result = merge(values)                    # e.g. summing counters</pre>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">قضیه اینه که چهار تا shard داری. روشون local و global secondary index طراحی کن. write path، تک‌شرط و دوشرط، scatter-gather، failure جزئی و lag رو مقایسه کن. یه تغییر چندtermی رو با outbox/version مدیریت کن و تعداد RPC، p99 و هزینه consistency رو مشخص کن.</span><span class="en">Think of it — you&#x27;ve got four shards to index. Design local and global secondary indexes over them. Compare writes, one/two predicates, scatter-gather, partial failures and lag. Handle a “one write, several terms” change with outbox/version, and pin down your RPC counts, p99 and consistency cost.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">source shard و index shard رو جدا جدا می‌شماری</span><span class="en">You count base and index shards separately</span></li><li><span class="fa">index غیراتمیک رو مرجع حقیقت حساب نمی‌کنی</span><span class="en">You don&#x27;t treat a derived non-atomic index as truth</span></li><li><span class="fa">benchmark محلی رو به cluster واقعی تعمیم نمی‌دی</span><span class="en">You don&#x27;t draw network conclusions from local timing</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا index یه کالا رو نشون می‌ده ولی حذفش تو مرجع ثبت شده. خواننده باید چی کار کنه؟</span><span class="en">The index returns a product you&#x27;ve already deleted from the record. What does your reader do?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۴–۸ ساعت</span><span class="en">Extended hands-on laboratory · estimated 4–8 hours</span></summary><div class="fa"><p>روی چهار فایل SQLite (به‌جای چهار shard) دو مدل secondary index بساز: (الف) index محلی داخل هر shard با خواندن scatter-gather، (ب) یه global index جدا که با مقدار shard شده. بار نوشتن/خواندن (تک‌شرط و دوشرطه) رو اجرا کن و latency (میانه و p99) و تعداد shardهای درگیر هر عملیات رو گزارش کن. بعد سناریوی «یه نوشتن، چند term» رو بدون تراکنش اجرا کن و نشون بده سازگاری index چی می‌شه.</p></div><div class="en"><p>On four SQLite files (as four shards) build two secondary-index models: (a) a per-shard local index with scatter-gather reads, (b) a separate global index sharded by value. Run your write/read workload (single- and double-condition), report latency (median and p99) and shards engaged per operation. Then run a “one write, several terms” scenario with no transaction and show what happens to index consistency.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch7-ex3"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-3"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html" target="_blank" rel="noopener">Debezium · outbox event router</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch7-ex3"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
 
 <article class="exercise-block" id="exercise-4">
@@ -1723,6 +1782,12 @@ result = merge(values)                    # e.g. summing counters</pre>
 <p class="small"><span class="fa">این تمرین بیرونِ مجموعهٔ بازبینی‌شده است؛ حل آموزشی‌اش را در صفحهٔ حل‌ها ببین.</span><span class="en">This exercise sits outside the reviewed set; its worked solution lives on the solutions page.</span></p>
 <details class="interview-brief" open><summary><span class="fa">صورت تمرین (حل‌نشده — اول خودت تلاش کن)</span><span class="en">Problem brief (unsolved — try it first)</span></summary><p><span class="fa">تصور کن سال ۲۰۲۳ است: یک primary تنها زیر حدود ۱۰۰ برابر رشد دیتابیس از ۲۰۲۰ دارد له می‌شود و downtime هم ممنوع است. گزارش تیم Figma نقشهٔ راه را داده: اول sharding منطقی پشت viewهای Postgres (مسیریابی hash با DBProxy)، بعد — وقتی viewها تأیید شدند — کپی کامل فیزیکی روی چند هاست، بعد gate و cutover. تو طراح این مهاجرت زنده‌ای: ترتیب فازها را بچین، شرط عبور هر gate را مشخص کن، و برای هر فاز یک مسیر برگشت (rollback) نام ببر که در چند ثانیه جواب بدهد.</span><span class="en">Picture 2023: a single lonely primary is groaning under roughly 100x database growth since 2020, and downtime is off the table. The Figma team's report sketches the escape route: logical sharding first, behind Postgres views (hash routing through DBProxy), then — once the views prove themselves — a full physical copy onto several hosts, then a gate and a cutover. You're designing this live migration: order the phases, name each gate's passing condition, and give every phase a rollback path that answers in seconds.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">ترتیب دو فاز و دلیلش: چرا کپی فیزیکی بعد از تأیید viewها می‌آید</span><span class="en">The two-phase order and its reason: why the physical copy waits for proven views</span></li><li><span class="fa">شرط هر gate: چه چیزی اندازه گرفته می‌شود و چه عددی قبول است</span><span class="en">Each gate's condition: what gets measured and what counts as passing</span></li><li><span class="fa">rollback ارزان هر فاز: کدام برگشت فقط یک flag است و کدامش هماهنگی می‌خواهد</span><span class="en">Each phase's cheap rollback: which way back is just a flag flip and which needs coordination</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">viewها overhead را از بودجه رد کنند؛ قدم بعدی‌ات چیست؟</span><span class="en">The views blow past the overhead budget. What's your next move?</span></p></details>
 <p class="exercise-evidence"><a href="diagrams/figma-reshard-rollout.html"><span class="fa">نمودار کیس صنعتی</span><span class="en">Industry case diagram</span></a> · <a href="https://www.figma.com/blog/how-figmas-databases-team-lived-to-tell-the-scale/" target="_blank" rel="noopener">Figma · how Figma's databases team lived to tell the scale</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?chapter=7"><span class="en">Explore this chapter in the studio</span><span class="fa">این فصل را در استودیو آزمایش کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
 
 <div class="doc-nav">
@@ -1743,5 +1808,6 @@ result = merge(values)                    # e.g. summing counters</pre>
 </footer>
 
 <script src="../assets/site.js"></script>
+<script src="../assets/concept-labs.js" defer></script>
 </body>
 </html>

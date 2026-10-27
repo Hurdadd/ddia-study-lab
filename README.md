@@ -4,7 +4,7 @@
 
 ### Learn *Designing Data-Intensive Applications* by playing with it.
 
-Interactive diagrams, step-by-step narration, 49 exercises and an interview pack for every chapter of DDIA (2nd ed.) — in **Persian and English**. Then use what you learned in a capstone: design an AI platform.
+Interactive diagrams, **43 hands-on labs** inside the chapters, an **offline exercise studio with 84 system-design exercises**, step-by-step narration and an interview pack for every chapter of DDIA (2nd ed.) — in **Persian and English**. Then use what you learned in a capstone: design an AI platform.
 
 <img src="assets/demo.gif" alt="Tracing a route through the leader-failover diagram: PATH, pick Client, pick Follower 2, and the shortest path lights up" width="80%">
 
@@ -12,15 +12,30 @@ Interactive diagrams, step-by-step narration, 49 exercises and an interview pack
 
 <a href="#build-understanding-before-infrastructure"><img src="assets/badges/status.svg" alt="Status: design prototype"></a> <a href="LICENSE"><img src="assets/badges/license.svg" alt="License: AGPL-3.0-only"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/languages.svg" alt="Documentation: Persian and English"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/website.svg" alt="Website: public"></a>
 
-14 chapters · interactive diagrams · 49 exercises · 15 ADRs · 1 capstone
+14 chapters · interactive diagrams · 43 inline labs · 84 studio exercises · 15 ADRs · 1 capstone
 
 [**Explore the live site ↗**](https://ddia-study-lab.vercel.app/) &nbsp;·&nbsp; [**Enter the capstone**](https://ddia-study-lab.vercel.app/final-project/index.html#overview) &nbsp;·&nbsp; [**Start at Chapter 1**](https://ddia-study-lab.vercel.app/ch1-tradeoffs/index.html)
+
+[**Open the exercise studio ↗**](https://ddia-study-lab.vercel.app/studio/index.html) &nbsp;·&nbsp; [**Try a lab in Chapter 6**](https://ddia-study-lab.vercel.app/ch6-replication/index.html#try-replication) &nbsp;·&nbsp; [Studio docs](docs/STUDIO.md)
 
 Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd)**
 
 ⭐ If this helps you learn, [star the repo](https://github.com/Hurdadd/ddia-study-lab) and share it with someone preparing for system-design interviews.
 
 </div>
+
+## Quick facts (for humans and AI agents)
+
+- **What it is:** a free, static study site for *Designing Data-Intensive Applications* (2nd ed.) plus a system-design practice studio. No backend, no account, no API key; everything runs in the browser.
+- **Languages:** Persian (RTL) and English, light and dark themes.
+- **Covers:** replication, sharding, transactions, consensus, storage engines, batch and stream processing, CDC, exactly-once, schema evolution, ethics.
+- **Interactive parts:** 113 diagrams, 43 inline labs (3 per chapter, 4 in chapter 6), and an exercise studio with 84 exercises. Run an exercise to see packets flow, bottlenecks appear and a pass/fail verdict.
+- **Entry points:** [`index.html`](index.html), `ch1-tradeoffs/` to `ch14-doing-right/`, [`studio/index.html`](studio/index.html), [`final-project/index.html`](final-project/index.html).
+- **Machine-readable summary:** [`llms.txt`](llms.txt). Studio internals: [`docs/STUDIO.md`](docs/STUDIO.md).
+- **Run it:** `python3 -m http.server 8766 --bind 127.0.0.1`, then open `http://127.0.0.1:8766/`.
+- **License:** AGPL-3.0-only. Independent project, not affiliated with the book's authors or O'Reilly.
+
+*Keywords: DDIA, Designing Data-Intensive Applications, distributed systems, system design interview, replication, sharding, consensus, interactive labs, Persian, Farsi, فارسی, طراحی سیستم.*
 
 ## Why this repo exists
 
@@ -38,11 +53,29 @@ Most distributed-systems notes stop at definitions. Most AI-platform repos start
 | :--- | :--- |
 | 📚 **14 bilingual chapters** | Persian + English, each with an at-a-glance table, frequent interview questions, common mistakes and a 5-minute checklist |
 | 📊 **113 interactive diagrams** | Dataflows, lifecycles, UML and decision trees — every one followed by a step-by-step narration, as if a teacher stood at the board |
+| 🔬 **43 inline labs** | Three short experiments in each chapter: pick a decision, step through events, replay the whole flow and see what survives a crash, retry or lag |
+| 🛠️ **Exercise studio** | Draw a design, press **Run** and watch packets flow, then get a verdict, a score, a reference and a step-by-step solution, all offline |
 | 🧪 **49 reviewed exercises** | Leveled, prioritized, with interview briefs — plus a [2026 assessment & Senior/Staff path](https://ddia-study-lab.vercel.app/exercise-audit.html) |
 | 🏗️ **Capstone: Own the Stack** | One AI platform, five capabilities, fifteen ADRs with rationale, alternatives, validation and revisit triggers |
 | 🧮 **Editable estimates** | Workload & cost arithmetic with 12 explicit assumptions and limits — change the numbers, see what breaks |
 | 🛟 **Recovery with reasons** | Failure-specific RPO/RTO targets with derivation budgets and planned drills, not slogans |
 | 🎭 **Developer POV** | A synthetic seven-scene journey through the proposed platform, including worker interruption and resume |
+
+## Learn by doing: labs and the exercise studio
+
+Every chapter has hands-on labs right after the section that explains the idea. Pick a decision (for example synchronous or asynchronous replication), advance one event at a time, or press **Play whole flow** to watch each scenario run to its outcome.
+
+![A chapter lab: a write, a held replication message and a stale read](docs/media/chapter-lab.gif)
+
+The **exercise studio** is a separate practice area for the 84 exercises (49 from the chapters, 35 classic problems such as a URL shortener or a chat system). Build a design on a canvas, press **Run**, and see packets flow along every edge, overloaded nodes drop requests, and a verdict card name the bottleneck. Then score it, compare with the exercise's reference design and open the step-by-step solution. There is no AI and no network call; saved work stays in your browser.
+
+![Studio run: packets flow along the edges and a verdict card appears](docs/media/studio-run.gif)
+
+| Part | Where | Details |
+| :--- | :--- | :--- |
+| Inline labs | the end of each teaching section in every chapter | [`assets/concept-labs.js`](assets/concept-labs.js), 43 deterministic models with tests |
+| Exercise studio | [`studio/index.html`](studio/index.html) | [Studio docs](docs/STUDIO.md): Run, verdict, scoring, walkthrough, deep links |
+| Chapter exercise → studio | `studio/index.html?exercise=ch8-ex4` | Opens that exercise with its reference |
 
 ## The 14-chapter roadmap
 
@@ -158,7 +191,8 @@ CI is supplied at `.github/ci-templates/checks.yml` and is currently **inactive*
 
 ```text
 assets/          shared styles, scripts, generators and checks
-ch*/             fourteen bilingual chapters and diagrams
+ch*/             fourteen bilingual chapters, diagrams and inline labs
+studio/          the offline exercise studio (assets/studio*.js, assets/studio-data.js)
 final-project/   capstone, ADRs, estimates, recovery and evidence ledgers
 docs/            development, recovery, deployment and third-party notices
 .github/         contribution templates and the inactive CI template
@@ -170,7 +204,7 @@ docs/            development, recovery, deployment and third-party notices
 
 | ✅ Implemented & usable | 🔧 Proposed, not built |
 | :--- | :--- |
-| 14 bilingual chapters, 113 diagrams, 49 exercises | Platform APIs, workers, database, CDC pipelines |
+| 14 bilingual chapters, 113 diagrams, 43 labs, 49 exercises, 84-exercise studio | Platform APIs, workers, database, CDC pipelines |
 | 15 ADRs, estimates, recovery budgets, drill guide | Model serving, real evaluations, DR automation |
 | Animated request flow & synthetic developer POV | Measured SLOs, benchmarks, production deployment |
 

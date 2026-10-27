@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/ddia.css">
 <link rel="stylesheet" href="../assets/exercise-audit.css">
+<link rel="stylesheet" href="../assets/concept-labs.css">
 </head>
 <body>
 
@@ -82,6 +83,20 @@
   <a class="lvl2" href="#s6-3"><span class="fa">۶.۳. اشتباهات رایج</span><span class="en">6.3. Common mistakes</span></a>
   <a class="lvl2" href="#s6-4"><span class="fa">۶.۴. چک‌لیست ۵ دقیقه‌ای</span><span class="en">6.4. Five-minute checklist</span></a>
   <a href="#s7"><span class="fa">۷. تمرین‌های عملی</span><span class="en">7. Hands-on exercises</span></a>
+
+
+
+<!-- concept-lab-toc:start -->
+<a href="#try-batch"><span class="en">Try it: Retry a task without duplicating output</span><span class="fa">امتحان کن: بازتلاش task بدون خروجی تکراری</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-combiner"><span class="en">Try it: Shrink the shuffle</span><span class="fa">امتحان کن: کوچک‌کردن shuffle</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-rerun"><span class="en">Try it: Rerun a job whose input moved</span><span class="fa">امتحان کن: اجرای دوبارهٔ کاری که ورودی‌اش تغییر کرد</span></a>
+<!-- concept-lab-toc:end -->
 </nav>
 
 <main class="doc">
@@ -278,6 +293,14 @@
   </div>
 
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-rerun" data-lab="rerun" data-chapter="11">
+<h3><span class="en">Rerun a job whose input moved</span><span class="fa">اجرای دوبارهٔ کاری که ورودی‌اش تغییر کرد</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <!-- ============ SECTION 2 ============ -->
 <section id="s2">
@@ -932,6 +955,16 @@
   </div>
 
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-batch" data-lab="batch" data-chapter="11">
+<h3><span class="en">Retry a task without duplicating output</span><span class="fa">بازتلاش task بدون خروجی تکراری</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
+
+
 
 <!-- ============ SECTION 4 ============ -->
 <section id="s4">
@@ -1420,6 +1453,14 @@
   </div>
 
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-combiner" data-lab="combiner" data-chapter="11">
+<h3><span class="en">Shrink the shuffle</span><span class="fa">کوچک‌کردن shuffle</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <!-- ============ SECTION 5 ============ -->
 <section id="s5">
@@ -2090,6 +2131,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">فرض کن لاگت از RAM بزرگ‌تره و قراره top URLها رو دربیاری. حساب کن hash aggregation کجا جواب می‌ده و کجا external sort. یادت باشه cardinality، سقف RAM، spill، هزینه I/O و approximate counting رو شفاف کنی. بنچمارکتت هم باید ورودی و خروجی برابر با memory cap مشخص داشته باشه، و آستانه شکست رو فقط برای همون محیط خودت گزارش کنی.</span><span class="en">Picture this, your logs don&#x27;t fit in RAM and you&#x27;ve got to find the top URLs. You compare hash aggregation against external sort, and you spell out cardinality, your RAM cap, spill behavior, I/O cost, and approximate counting. You run a fair benchmark with equal outputs under one stated memory cap, and you report the breaking point for your own setup only.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">working set رو به distinct keys و overhead گره می‌زنی، حدس نمی‌زنی</span><span class="en">You tie working set to cardinality and object overhead</span></li><li><span class="fa">OOM رو با کندی معمولی قاطی نمی‌کنی</span><span class="en">You don&#x27;t mistake OOM for ordinary slowness</span></li><li><span class="fa">sort spill و hash spill/partition رو جدا حساب می‌کنی</span><span class="en">You account for sort spill and hash spill and partitioning separately</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">حالا فقط top-100 تقریبی بخوای، کدوم قید رو شل می‌کنی؟</span><span class="en">If you only need an approximate top-100, which constraint do you relax?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۲–۴ ساعت</span><span class="en">Extended hands-on laboratory · estimated 2–4 hours</span></summary><div class="fa"><p>فرض کن یه فایل لاگ چند صد هزار خطی داری، یا لاگ واقعی وب‌سرورت رو بردار. اول pipeline واقعی <code>cat | awk | sort | uniq -c | sort -r -n | head</code> رو اجرا و زمان بگیر. بعد همون کار رو با hash aggregation تو پایتون بزن و مقایسه کن. حالا ورودی رو بزرگ کن تا working set از حافظه بزنه بیرون و نگاه کن چی می‌شه. <b>سوال:</b> تو محیط خودت، با چند URL متمایز روش hash از sort کندتر یا ناممکن می‌شه، و چرا؟</p></div><div class="en"><p>Build a sample log file (a few hundred thousand lines) or grab a real web-server log. Run the full <code>cat | awk | sort | uniq -c | sort -r -n | head</code> pipeline with real commands and time it. Then do the same job with hash aggregation in Python and compare. Now grow the input until your working set outgrows memory and watch what breaks. <b>Question:</b> in your own setup, at how many distinct URLs does hashing lose to sort, and why?</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch11-ex1"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-1"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://careers.microsoft.com/v2/global/en/hiring-tips/technical-interviewing" target="_blank" rel="noopener">Microsoft · technical interviewing</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch11-ex1"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
     <article class="exercise-block" id="exercise-2" data-reviewed-exercise="2">
 <h3><span class="fa">تمرین ۲ — sort-merge join روی دو فایلِ بزرگ‌تر از حافظه</span><span class="en">Exercise 2 — sort-merge join on two bigger-than-memory files</span></h3>
@@ -2098,6 +2145,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">تصور کن کلیک‌های بزرگ داری و به‌ازای هر user فقط یه پروفایل یکتا. هر دو جریان جدا رو با external sort برحسب user_id مرتب کن و با streaming merge join بچسبونشون. یادت باشه null و missing profile و skew رو تعریف کنی. بعد جریان mixed reducer رو بذار کنارش که توش profile-first secondary sort یا buffering لازمه، و بگو قرارداد این دو مدل چه فرقی داره.</span><span class="en">Think of it, you&#x27;ve got huge clicks and just one unique profile per user. You externally sort both separate streams by user_id and join them with a streaming merge join. You define null and missing profiles plus skew. Then you contrast that with a mixed reducer stream where you need profile-first secondary sort or buffering, and you explain why the two contracts differ.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">sort بزرگ‌تر از حافظه رو با spill واقعی روی دیسک انجام می‌دی</span><span class="en">You spill a bigger-than-memory sort to disk for real</span></li><li><span class="fa">uniqueness پروفایل و join type رو مشخص می‌کنی</span><span class="en">You pin down profile uniqueness and the join type</span></li><li><span class="fa">دو sorted stream جدا رو با mixed reducer قاطی نمی‌کنی</span><span class="en">You don&#x27;t confuse two sorted streams with a mixed reducer</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">اگه به‌ازای هر user چند نسخه تاریخی از پروفایل داشته باشی، کلیک باید به کدوم نسخه بچسبه؟</span><span class="en">With multiple historical profiles per user, which version should a click join to?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳–۶ ساعت</span><span class="en">Extended hands-on laboratory · estimated 3–6 hours</span></summary><div class="fa"><p>دو CSV کلیک (user_id,url,ts) و پروفایل یکتا (user_id,dob) بساز که از سقف chunk مرتب‌سازی بزرگ‌تر باشن. هر دو رو با spill واقعی به دیسک برحسب user_id مرتب کن و با دو cursor روشون left join بزن؛ برای پروفایل گمشده NULL بده و metric ثبت کن. توضیح بده چرا join فقط به O(1) state پروفایل نیاز داره، ولی حافظه sort و merge fan-in رو باید جدا حساب کنی. بعد یه جریان mixed reducer بساز که توش کلیک زودتر از پروفایل می‌رسه، و هزینه buffering رو با profile-first secondary sort مقایسه کن. ترتیب ts فقط وقتی لازمه که قرارداد خروجی بخوادش. skew و پروفایل تکراری رو هم تست کن و سیاست reject یا aggregation رو صریح بنویس.</p></div><div class="en"><p>Create clicks (user_id,url,ts) and unique profiles (user_id,dob) CSVs larger than your sort chunk limit. Externally sort both by user_id with real disk spills, then left-join them with two cursors; emit NULL and a metric for missing profiles. Explain why the join needs only O(1) profile state while you still account for sort memory and merge fan-in separately. Then build a mixed reducer stream where clicks arrive before profiles, and compare buffering cost against profile-first secondary sort. Timestamp order matters only if your output contract demands it. Test skew and duplicate profiles with an explicit reject or aggregation policy.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch11-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://careers.microsoft.com/v2/global/en/hiring-tips/technical-interviewing" target="_blank" rel="noopener">Microsoft · technical interviewing</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch11-ex2"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
     <article class="exercise-block" id="exercise-3" data-reviewed-exercise="3">
 <h3><span class="fa">تمرین ۳ — یک shuffle ساده</span><span class="en">Exercise 3 — a mini shuffle</span></h3>
@@ -2106,6 +2159,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">قضیه اینه که می‌خوای shuffle برای group-by بسازی. partition یکسان، sort محلی و merge تو reducer رو طراحی کن. حساب کن hot key، حجم شبکه، combiner و checksum فایل میانی چی می‌شن. حالا خروجی یه mapper خراب می‌شه؛ بگو دقیقاً چی رو بر اساس کدوم lineage دوباره اجرا می‌کنی.</span><span class="en">Here&#x27;s the thing, you&#x27;re building the shuffle for a group-by. You design identical partitioning, mapper-local sorting, and the reducer merge. You work through hot keys, network volume, the combiner, and checksums on intermediate files. Then one mapper&#x27;s output corrupts, so you say exactly what you rerun and which lineage makes it safe.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">hash رو تو همه workerها ثابت و مشترک نگه می‌داری</span><span class="en">You keep one stable shared hash across workers</span></li><li><span class="fa">retry هر mapper رو با attempt جدا و ایزوله اجرا می‌کنی</span><span class="en">You isolate each mapper retry in its own attempt</span></li><li><span class="fa">side effect بیرونی رو وسط replay راه نمی‌دی چون قرارداد رو می‌شکنه</span><span class="en">You keep external side effects out so your retries stay deterministic and safe</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">یه key نصف داده رو داشته باشه، چطور reducer رو از hotspot نجات می‌دی؟</span><span class="en">One key holds half your records. How do you save your reducer from the hotspot?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۴–۸ ساعت</span><span class="en">Extended hands-on laboratory · estimated 4–8 hours</span></summary><div class="fa"><p>یه shuffle چند-worker بنویس: N کارگر که رکوردها رو با <code>hash(key) % N</code> partition می‌کنن، هر worker به‌ازای هر partition یه فایل مرتب می‌نویسه (مثل m1r2)، و مرحله reduce فایل‌های هر partition رو mergesort می‌کنه. روی داده نمونه تست کن که همه رکوردهای هم‌کلید کنار هم برسن. <b>سوال:</b> اگه یه فایل میانی یه worker خراب بشه، برای ادامه job دقیقاً چی رو دوباره اجرا می‌کنی — و چرا اجراش امنه؟</p></div><div class="en"><p>Write a multi-worker shuffle: N workers partitioning records by <code>hash(key) % N</code>, each worker writing one sorted file per partition (like m1r2), with the reduce stage mergesorting each partition's files. Test on sample data that same-key records all land together. <b>Question:</b> if one worker's intermediate file corrupts, what exactly do you rerun to continue the job — and why is rerunning it safe?</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch11-ex3"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-3"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://careers.microsoft.com/v2/global/en/hiring-tips/technical-interviewing" target="_blank" rel="noopener">Microsoft · technical interviewing</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch11-ex3"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
     <article class="exercise-block" id="exercise-4" data-reviewed-exercise="4">
 <h3><span class="fa">تمرین ۴ — شبیه‌سازیِ بازتلاش و all-or-nothing</span><span class="en">Exercise 4 — simulating retry and all-or-nothing</span></h3>
@@ -2114,6 +2173,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">داستان از این قراره که یه job چندtaskی روی ورودی immutable داری. attempt output جدا و manifest نسخه‌دار طراحی کن. crash وسط write و قبل از publish تزریق کن. یادت باشه خواننده باید همیشه یه نسخه کامل و ثابت ببینه؛ CAS و atomic pointer و cleanup و retry رو متناسب با همون storage خودت انتخاب کن.</span><span class="en">Honestly, you&#x27;ve got a multi-task job over immutable inputs. You design versioned attempt outputs plus a manifest. You inject a crash mid-write and another one just before publish. Remember, your readers must always see one complete pinned version, so you pick your CAS or atomic pointer, cleanup, and retry to match your storage.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">task commit رو با job publish قاطی نمی‌کنی</span><span class="en">You separate task completion from job publication</span></li><li><span class="fa">خواننده manifest رو یه بار pin می‌کنه و باهاش کار می‌کنه</span><span class="en">You let each reader pin one manifest version</span></li><li><span class="fa">partial attempt و نسخه قدیمی رو امن جمع می‌کنی</span><span class="en">You clean up partial attempts and old versions safely</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">دو job هم‌زمان روی یه نام خروجی publish کنن، کدوم نسخه برنده می‌شه؟</span><span class="en">Two jobs publish to the same output name at once. Which version wins?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳–۶ ساعت</span><span class="en">Extended hands-on laboratory · estimated 3–6 hours</span></summary><div class="fa"><p>یه job چندtaskی بساز که shardهای ورودی immutable رو به shardهای خروجی تبدیل می‌کنه. بعد یه «خراب‌کننده» اضافه کن: با یه احتمال مشخص، وسط نوشتن خروجی یه task بمیره. منطق retry رو پیاده کن: خروجی ناقص رو پاک کن، task رو دوباره اجرا کن، و فقط وقتی همه موفق شدن commit کن. آخرش تست کن: خواننده یا «کل نتیجه» رو می‌بینه یا هیچی، حتی با چند خرابی وسط راه. <b>سوال:</b> اگه به‌جای پاک‌کردن خروجی ناقص نگهش داری و task رو دوباره اجرا کنی، چه نتیجه‌ای ممکنه بگیری؟</p></div><div class="en"><p>Build a multi-task job turning immutable input shards into output shards. Then add a "killer": with some probability, die mid-way through writing one task's output. Implement your retry logic: delete partial output, rerun the task, and commit only after everything succeeds. Finally test it: readers see either "the whole result" or nothing, even with several mid-way failures. <b>Question:</b> if you keep partial output instead of deleting it, then rerun the task — what could you end up with?</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch11-ex4"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-4"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a> · <a href="https://jepsen.io/consistency/models" target="_blank" rel="noopener">Jepsen · consistency models</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch11-ex4"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
   </div>
 
@@ -2142,5 +2207,6 @@
 </footer>
 
 <script src="../assets/site.js"></script>
+<script src="../assets/concept-labs.js" defer></script>
 </body>
 </html>

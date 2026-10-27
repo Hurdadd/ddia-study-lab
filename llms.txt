@@ -1,0 +1,30 @@
+# DDIA Study Lab
+
+> Bilingual (Persian RTL and English) study site for "Designing Data-Intensive Applications", 2nd edition, by Martin Kleppmann and Chris Riccomini. 14 chapters, 113 interactive diagrams, 43 inline hands-on labs, an offline system-design exercise studio with 84 exercises, an interview pack and an AI-platform capstone. Static HTML/CSS/JS, no backend, no API key. Independent project, not affiliated with the authors or O'Reilly.
+
+Live site: https://ddia-study-lab.vercel.app/
+Source: https://github.com/Hurdadd/ddia-study-lab
+License: AGPL-3.0-only (original work by hurdad ashouri)
+
+## Start here
+- [Chapter 1, trade-offs in data systems](https://ddia-study-lab.vercel.app/ch1-tradeoffs/index.html): first chapter; chapters ch1 to ch14 follow the book order
+- [Exercise studio](https://ddia-study-lab.vercel.app/studio/index.html): draw a design, press Run to see packets flow and bottlenecks, score it, compare with a reference
+- [Exercise audit and study path](https://ddia-study-lab.vercel.app/exercise-audit.html): 49 reviewed chapter exercises, leveled for Senior and Staff interviews
+- [Capstone: Own the Stack](https://ddia-study-lab.vercel.app/final-project/index.html): one AI platform designed with requirements, estimates, 15 ADRs, animated request flow and recovery targets
+
+## Topics covered
+Trade-offs in data systems; nonfunctional requirements and percentiles; data models and query languages; storage engines (LSM-tree, B-tree, columnar); encoding and schema evolution; replication (leader, follower, leaderless, quorum); sharding and rebalancing; transactions, isolation levels, 2PC; the trouble with distributed systems (timeouts, clocks, fencing); linearizability, logical clocks, consensus; batch processing; stream processing, CDC, exactly-once; derived data and dataflow; ethics, bias, privacy and consent.
+
+## Inline labs (in every chapter)
+Each lab is a deterministic state machine: choose a decision, step through events, watch what survives a crash, retry or lag. Examples: outbox vs dual write, async vs sync failover, write skew, 2PC coordinator crash, fencing tokens, quorum overlap, Lamport vs wall-clock ordering, consumer redelivery. Source: assets/concept-labs.js. Check: node assets/check_concept_labs.cjs.
+
+## Exercise studio
+84 exercises (49 from the chapters, 35 classic system-design problems). Components, replicas and capacity are editable. Run simulates a request rate and reports throughput, latency and the bottleneck. Local rubric score, step-by-step solution and reference design per exercise, with no AI and no network calls. Source: assets/studio.js, assets/studio-engine.js. Docs: docs/STUDIO.md. Deep link: studio/index.html?exercise=ch8-ex4
+
+## Run locally
+python3 -m http.server 8766 --bind 127.0.0.1, then open http://127.0.0.1:8766/
+
+## Optional
+- [Studio documentation](https://ddia-study-lab.vercel.app/docs/STUDIO.md)
+- [Development guide](https://ddia-study-lab.vercel.app/docs/DEVELOPMENT.md)
+- [Changelog](https://ddia-study-lab.vercel.app/CHANGELOG.md)

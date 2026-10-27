@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/ddia.css">
 <link rel="stylesheet" href="../assets/exercise-audit.css">
+<link rel="stylesheet" href="../assets/concept-labs.css">
 </head>
 <body>
 
@@ -80,6 +81,20 @@
   <a class="lvl2" href="#s7-3"><span class="fa">۷.۳. اشتباهات رایج</span><span class="en">7.3. Common mistakes</span></a>
   <a class="lvl2" href="#s7-4"><span class="fa">۷.۴. چک‌لیست ۵ دقیقه‌ای</span><span class="en">7.4. Five-minute checklist</span></a>
   <a href="#s8"><span class="fa">۸. تمرین‌های عملی</span><span class="en">8. Hands-on exercises</span></a>
+
+
+
+<!-- concept-lab-toc:start -->
+<a href="#try-consumer"><span class="en">Try it: Crash between the effect and acknowledgement</span><span class="fa">امتحان کن: خرابی بین اثر و تأیید پیام</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-logbroker"><span class="en">Try it: A new consumer joins late</span><span class="fa">امتحان کن: مصرف‌کنندهٔ جدید دیر می‌رسد</span></a>
+<!-- concept-lab-toc:end -->
+
+<!-- concept-lab-toc:start -->
+<a href="#try-ordering"><span class="en">Try it: Create then delete, seen backwards</span><span class="fa">امتحان کن: ساخت و بعد حذف، معکوس دیده می‌شود</span></a>
+<!-- concept-lab-toc:end -->
 </nav>
 
 <main class="doc">
@@ -478,6 +493,24 @@
   </p></div>
 <div class="en"><p>The fix is a <span class='ltr'><b>dead letter queue (DLQ)</b></span>: instead of retrying forever, the message moves to a separate queue so the consumers stay free. You normally monitor that DLQ — every message in it is an error, and the operator decides: drop it forever, fix it by hand and replay it, or fix the consumer code. DLQs are common in most queueing systems, and log-based and stream-processing systems support them now too.</p></div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-consumer" data-lab="consumer" data-chapter="12">
+<h3><span class="en">Crash between the effect and acknowledgement</span><span class="fa">خرابی بین اثر و تأیید پیام</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-ordering" data-lab="ordering" data-chapter="12">
+<h3><span class="en">Create then delete, seen backwards</span><span class="fa">ساخت و بعد حذف، معکوس دیده می‌شود</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
+
+
 
 <section id="s3">
 <h2 class="reveal"><span class="secnum"><span class="fa">۳</span><span class="en">3</span></span> <span class="fa">بروکرهای لاگ‌محور</span><span class="en">Log-based brokers</span></h2>
@@ -603,6 +636,14 @@
   </ul></div>
 <div class="en"><ul><li><b>Only that consumer suffers</b> — everyone else's service is undisturbed. That's a big operational win: you can consume the production log for experimental development and debugging without worrying about the live service. When the consumer is off or crashed, its resource consumption stops — all that remains is its offset. (Unlike traditional brokers, where you have to purge a dormant consumer's queues so they don't eat the active consumers' memory.)</li><li><span class='ltr'><b>Replay</b></span>: in a traditional broker consumption is destructive, but in a log-based one it is like reading a file — a read-only operation that doesn't change the log. The only side effect is advancing the offset, and that's the consumer's own business; so you can raise a copy of the consumer at yesterday's offset, write the output somewhere else, and reprocess the past with different code as many times as you like — exactly like batch separating derived data from input with a repeatable transform.</li></ul></div>
 </section>
+<!-- concept-lab:start -->
+<section class="concept-lab" id="try-logbroker" data-lab="logbroker" data-chapter="12">
+<h3><span class="en">A new consumer joins late</span><span class="fa">مصرف‌کنندهٔ جدید دیر می‌رسد</span></h3>
+<p><span class="en">Try the concept here: choose an action, inspect the state, then advance one event at a time.</span><span class="fa">همین‌جا مفهوم را امتحان کن؛ یک کار انتخاب کن، وضعیت را ببین و رویدادها را قدم‌به‌قدم جلو ببر.</span></p>
+<noscript><p><span class="en">Enable JavaScript to run this local experiment.</span><span class="fa">برای اجرای این آزمایش محلی جاوااسکریپت را فعال کن.</span></p></noscript>
+</section>
+<!-- concept-lab:end -->
+
 
 <section id="s4">
 <h2 class="reveal"><span class="secnum"><span class="fa">۴</span><span class="en">4</span></span> <span class="fa">پایگاه داده‌ها و استریم‌ها</span><span class="en">Databases and streams</span></h2>
@@ -1844,6 +1885,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">فرض کن از Kafka با سه partition می‌خونی و click count رو تو DB نگه می‌داری. اثر و checkpoint هر (topic,partition) رو تو یه تراکنش ذخیره کن. یادت باشه last_offset هر کاربر فقط با key-to-partition ثابت معنا داره. crash، گم‌شدن ACK، rebalance و consumer کهنه رو با fencing و replay مرتب تحلیل کن.</span><span class="en">Picture this, you&#x27;re counting clicks from three Kafka partitions into a database. You commit each (topic,partition) effect and checkpoint together in one transaction. Remember, a per-user last_offset means something only with fixed key-to-partition routing. You walk through crashes, lost ACKs, rebalances, and stale consumers with fencing and ordered replay.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">offset دو partition جدا رو با هم مقایسه نمی‌کنی</span><span class="en">You never compare offsets across partitions</span></li><li><span class="fa">اثر و checkpoint رو اتمیک با هم commit می‌کنی</span><span class="en">You commit output and checkpoint atomically</span></li><li><span class="fa">پرش offset، writer هم‌زمان و rebalance رو پوشش می‌دی</span><span class="en">You cover offset jumps, concurrent writers, and rebalances</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">تعداد partitionها عوض بشه و کاربر جابه‌جا بشه، dedup key رو چطور مهاجرت می‌دی؟</span><span class="en">Partition count changes and a user moves. How do you migrate the dedup identity?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۴–۸ ساعت</span><span class="en">Extended hands-on laboratory · estimated 4–8 hours</span></summary><div class="fa"><p>تاپیک clicks با سه پارتیشن و routing ثابت user_id داری. جدول click_counts(user_id,total) و consumer_checkpoints(topic,partition,last_offset,owner_epoch) با کلید مرکب بساز. برای هر پارتیشن، سطر checkpoint رو تو تراکنش قفل کن، epoch رو چک کن، فقط رکوردهای مرتب بعد از last_offset رو اعمال کن و totalها و آخرین offset واقعاً پردازش‌شده رو با هم commit کن؛ ACK بروکر بعد از commit میاد. هم‌زمانی دو batch تو یه epoch رو هم باید با قفل و شرط تراکنشی کنترل کنی. epoch گروه Kafka خودکار DB رو fence نمی‌کنه: انتقال مالکیت باید epoch معتبر رو تو sink نصب کنه. crash، گم‌شدن ACK، replay، مالک کهنه و دو پارتیشن با offset یکسان رو تست کن. checkpoint فعال رو با TTL پاک نکن؛ نبود تاریخچه لازم یا تغییر routing به cutover، event_id و بازسازی صریح نیاز داره.</p></div><div class="en"><p>Use a three-partition clicks topic with fixed user_id routing. Create click_counts(user_id,total) and consumer_checkpoints(topic,partition,last_offset,owner_epoch) with a composite checkpoint key. Lock the partition checkpoint inside a transaction, validate the epoch, process ordered records newer than last_offset, and commit totals plus the last actually processed offset together; your broker ACK follows the commit. Serialize batches even within one epoch. Kafka group epochs don't automatically fence your database: ownership transfer must install a valid epoch at the sink. Test crashes, lost ACKs, replay, stale owners, and equal offsets in different partitions. Never expire active checkpoints by TTL; missing history or routing changes need explicit cutover, event IDs, and rebuilding.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch12-ex1"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-1"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://kafka.apache.org/41/design/design/" target="_blank" rel="noopener">Kafka 4.1 · design and delivery semantics</a> · <a href="https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/" target="_blank" rel="noopener">AWS · safe retries with idempotent APIs</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch12-ex1"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
 
 <article class="exercise-block" id="exercise-2" data-reviewed-exercise="2">
@@ -1853,6 +1900,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">تصور کن search و click رو با session و event time تو پنجره یک‌ساعته join می‌کنی. هر دو arrival order، dedup و تعریف CTR رو پوشش بده. watermark، idle partition، allowed lateness و اصلاحیه رو بر اساس داده lateness خودت انتخاب کن؛ تو throughput ده‌برابری هم state و backpressure رو برآورد کن.</span><span class="en">Think of it, you&#x27;re joining search and click by session and event time in a one-hour window. You handle either arrival order, dedup, and your CTR definition. You pick your watermark, idle-partition policy, allowed lateness, and corrections from your own lateness data; then you estimate state and backpressure at tenfold throughput.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">processing time رو با event time قاطی نمی‌کنی</span><span class="en">You don&#x27;t confuse event time with processing time</span></li><li><span class="fa">join چندبه‌چند رو بی‌دلیل بادکنک نمی‌کنی که CTR چند برابر شه</span><span class="en">You don&#x27;t let many-to-many joins inflate your CTR</span></li><li><span class="fa">late-drop و correction رو با metric جدا می‌سنجی</span><span class="en">You metric late drops and corrections separately</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">یه partition بیکار watermark رو نگه داره، پنجره‌ها رو چطور می‌بندی؟</span><span class="en">An idle partition holds back your watermark. How do you close windows safely?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳–۶ ساعت</span><span class="en">Extended hands-on laboratory · estimated 3–6 hours</span></summary><div class="fa"><p>برای نرخ کلیک، می‌خوای استریم جستجو و کلیک رو با session id و پنجره یک‌ساعته join کنی. تصمیم بگیر و مستدل بنویس: (الف) اگه کلیک قبل از جستجو برسه state رو چطور می‌چینی که هر دو ترتیب جواب بده؛ (ب) timeout بستن پنجره رو چند دقیقه بعد از پایان ساعت می‌ذاری و watermark رو از کجا می‌گیری؛ (پ) با دیررس بعد از بستن چی کار می‌کنی — بی‌خیال می‌شی یا اصلاحیه می‌دی؟ اثر هر کدوم روی متریک «نرخ کلیک» چیه و چطور متریکش می‌کنی؛ (ت) اگه throughput ده برابر بشه، state بافر چقدر رشد می‌کنه و کدوم بخشش رو می‌بری روی دیسک؟</p></div><div class="en"><p>For click rate, you want to join the search and click streams on session id with a one-hour window. Decide and justify in writing: (a) if a click arrives before the search, how do you arrange state so both orders work; (b) how many minutes past the hour do you set the closing timeout, and where do you get the watermark from; (c) what do you do with post-close laggards — ignore or correct? What's each choice's effect on your "click rate" metric, and how do you metric it; (d) if throughput grows tenfold, how much does your buffer state grow and which part do you move to disk?</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch12-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://kafka.apache.org/41/design/design/" target="_blank" rel="noopener">Kafka 4.1 · design and delivery semantics</a> · <a href="https://www.atlassian.com/company/careers/resources/interviewing/engineering" target="_blank" rel="noopener">Atlassian · engineering interview handbook</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch12-ex2"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
 
 <article class="exercise-block" id="exercise-3" data-reviewed-exercise="3">
@@ -1862,6 +1915,12 @@
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">قضیه اینه که می‌خوای ایندکس جستجو بسازی بدون dual write، با قرارداد event مستقل از schema داخلی. تراکنش business+outbox، snapshot سازگار مرجع و مرز LSN رو مشخص کن. dedup با event-ID رو از state فشرده با entity key و tombstone جدا کن؛ lag، WAL retention، rebuild و schema change رو تست کن.</span><span class="en">Here&#x27;s the thing, you&#x27;re building a search view with no dual writes and an event contract independent of your internal schema. You pin down business+outbox atomicity, a consistent record snapshot, and its LSN boundary. You separate event-ID dedup from compacted state with entity keys and tombstones; then you test lag, WAL retention, rebuilds, and schema changes.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">gap و duplicate موقع snapshot و replay رو پوشش می‌دی</span><span class="en">You cover snapshot gaps, duplicates, and replay</span></li><li><span class="fa">کلید compaction و معنای delete رو صریح می‌کنی</span><span class="en">You spell out your compaction key and delete semantics</span></li><li><span class="fa">فشار snapshot رو صفر فرض نمی‌کنی و throttling می‌ذاری</span><span class="en">You never assume zero snapshot pressure and you throttle it</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">سطرهای قدیمی outbox که purge شدن، مصرف‌کننده جدید state کامل رو از کجا می‌سازه؟</span><span class="en">Old outbox rows have been purged. Where does your new consumer get complete state?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۴–۸ ساعت</span><span class="en">Extended hands-on laboratory · estimated 4–8 hours</span></summary><div class="fa"><p>business row و outbox(event_id,entity_key,entity_version,type,payload) رو تو یه تراکنش بنویس. snapshot کامل داده مرجع رو با پروتکل connector و مرز LSN سازگار بگیر؛ فقط خوندن LSN قبل یا بعد یه SELECT تضمین هماهنگی نمی‌ده. شروع کم‌ریسک، snapshot رسمی connector هست؛ snapshot از replica فقط با پشتیبانی نسخه و هماهنگی مرز مجازه. topic رویداد با حفظ ترتیب هر entity و event_id برای dedup، و state topic اختیاری با کلید entity و compaction رو جدا تعریف کن؛ مقدار null روی کلید entity نقش tombstone داره. بار IO، CPU، lag و WAL رو با بودجه اعلام‌شده محدود کن؛ قول «بی‌فشار» یا «همیشه تازه» نده. bootstrap اول snapshot رو نصب می‌کنه بعد تغییرها رو با version guard اعمال می‌کنه تا replay کهنه state رو عقب نبره. kill و restart، delete، purge شدن outbox و توقف بیش از retention رو با checksum تو مرز یکسان تست کن؛ ساخت projection نباید به موندن کل تاریخ outbox تکیه کنه.</p></div><div class="en"><p>Write business rows and outbox(event_id,entity_key,entity_version,type,payload) atomically. Grab a complete record snapshot aligned with a consistent LSN using the connector protocol; reading an LSN around an arbitrary SELECT won't coordinate it. Start with the connector's supported snapshot mode; replica snapshots need version support and coordinated boundaries. Define an event topic with per-entity ordering plus event-ID dedup separately from an optional entity-keyed compacted state topic; null values at entity keys encode tombstones. Budget your I/O, CPU, replica lag, and WAL: never promise zero load or perpetual freshness. Install the snapshot before ordered catch-up and use version guards so stale replay can't drag state backward. Test kill and restart, deletes, purged outbox, and retention overruns with checksums at a common boundary; your projection rebuilds can't depend on keeping every historical outbox row.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch12-ex3"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-3"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html" target="_blank" rel="noopener">Debezium · outbox event router</a> · <a href="https://debezium.io/documentation/reference/stable/connectors/postgresql.html" target="_blank" rel="noopener">Debezium · PostgreSQL snapshot and streaming</a> · <a href="https://kafka.apache.org/41/design/design/" target="_blank" rel="noopener">Kafka 4.1 · design and delivery semantics</a></p>
+
+
+
+<!-- exercise-studio:start -->
+<a class="exercise-studio-link" href="../studio/index.html?exercise=ch12-ex3"><span class="en">Open this exercise in the studio</span><span class="fa">این تمرین را در استودیو باز کن</span><span aria-hidden="true"> →</span></a>
+<!-- exercise-studio:end -->
 </article>
 <div class="doc-nav">
 <a href="../ch11-batch-processing/index.html"><span class="fa">→ فصل ۱۱: پردازش دسته‌ای</span><span class="en">→ Chapter 11: Batch Processing</span></a>
@@ -1881,5 +1940,6 @@
 </footer>
 
 <script src="../assets/site.js"></script>
+<script src="../assets/concept-labs.js" defer></script>
 </body>
 </html>
