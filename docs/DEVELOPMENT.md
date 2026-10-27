@@ -1,6 +1,8 @@
 # Development
 
 Use Python 3.10+ and a static HTTP server. No model keys or database are needed.
+The exercise studio and inline chapter experiments also run statically; build
+steps, tests and model limits are documented in [STUDIO](STUDIO.md).
 Run `python3 assets/build_final_project.py` after editing the capstone generators or
 JSON ledgers, then `python3 assets/check_final_project.py` and
 `python3 assets/structcheck.py index.html final-project/index.html`.

@@ -35,6 +35,10 @@ PAGES={
   title='Make Your Own AI Platform — DDIA Capstone Workshop',
   en='Design an AI platform step by step from DDIA ideas: requirements, estimates, 15 ADRs, an animated request flow and recovery targets.',
   fa='کارگاه طراحی پلتفرم هوش مصنوعی با ایده‌های DDIA: نیازمندی، برآورد، ADR، جریان درخواست انیمیشنی و اهداف بازیابی.'),
+ 'studio/index.html':dict(
+  title='DDIA Exercise Studio: Design, Run and Score System Designs',
+  en='Draw a system design on a canvas, run it against a request rate to see packets flow and bottlenecks appear, then compare with a reference and a step-by-step solution. 84 exercises, runs offline in the browser.',
+  fa='استودیوی تمرین طراحی سیستم: طرح را روی بوم بکش، با نرخ درخواست اجرا کن و جریان و گلوگاه را ببین، بعد با طرح مرجع و راه‌حل گام‌به‌گام مقایسه کن. ۸۴ تمرین، آفلاین در مرورگر.'),
  'exercise-audit.html':dict(
   title='DDIA Exercise Audit: Interview Prep & Senior/Staff Path',
   en='Reviewed DDIA exercises for system-design interviews, leveled by priority, with a 2026 assessment and a Senior/Staff study path.',
@@ -101,7 +105,7 @@ def inject(rel,s):
 def sitemap(out):
     rels=['index.html']+[str(p.relative_to(out)) for p in sorted(out.glob('ch[0-9]*/index.html'),key=lambda p:int(re.match(r'ch(\d+)',p.parent.name)[1]))]
     rels+=[str(p.relative_to(out)) for p in sorted(out.glob('ch[0-9]*/solutions.html'),key=lambda p:int(re.match(r'ch(\d+)',p.parent.name)[1]))]
-    rels+=['final-project/index.html','exercise-audit.html']
+    rels+=['final-project/index.html','studio/index.html','exercise-audit.html']
     urls=''.join(f'<url><loc>{BASE}/{r.removesuffix("index.html")}</loc></url>' for r in rels if (out/r).exists())
     return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+urls+'</urlset>\n'
 
@@ -115,9 +119,9 @@ if __name__=='__main__':
     # self-check: every chapter is covered and a second pass changes nothing
     import tempfile
     root=Path(__file__).resolve().parent.parent;tmp=Path(tempfile.mkdtemp())
-    for r in [*root.glob('ch[0-9]*/*.html'),root/'exercise-audit.html',root/'final-project/index.html']:
+    for r in [*root.glob('ch[0-9]*/*.html'),root/'exercise-audit.html',root/'final-project/index.html',root/'studio/index.html']:
         d=tmp/r.relative_to(root);d.parent.mkdir(parents=True,exist_ok=True);d.write_text(r.read_text())
     apply(tmp);first={p:p.read_text() for p in tmp.rglob('*.html')}
     apply(tmp);assert all(p.read_text()==s for p,s in first.items()),'not idempotent'
-    assert sum('application/ld+json' in s for s in first.values())==30,'expected 14 chapters + 14 solutions + 2 pages'
+    assert sum('application/ld+json' in s for s in first.values())==31,'expected 14 chapters + 14 solutions + 3 pages'
     print('seo_meta ok;',sitemap(tmp).count('<url>'),'urls')
