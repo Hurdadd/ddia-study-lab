@@ -37,15 +37,16 @@ a crash, a retry or a lagging replica.
 ## Studio workspace
 
 - Choose one of **84 exercises**: 49 chapter exercises and 35 classic system-design problems.
-- Add components, connect protocols and edit capacity, replicas and latency.
+- Add components, click the round source port and then the destination to draw an arrow. Double-click an arrow to edit its label, protocol, endpoints and flow kind.
+- Right-click a node, arrow, annotation or blank canvas for contextual editing, duplication, deletion, reversal and undo/redo. Shift+F10 opens the same menu from the keyboard. Notes and pen strokes can be dragged; text notes can be edited.
+- Selection, Connect, Pan, Undo and Redo are visible in the canvas toolbar. Components carry category colors and type icons; generated bilingual node names follow the selected language.
+- Capacity (including zero), replicas, latency, labels and design notes are editable in Settings.
 - **Run** (header, Simulate tab or the pill on the canvas) simulates the selected
   request rate. Packets move along every active edge, receiving nodes glow, and an
   overloaded node drops packets in red. A verdict card says whether the design holds
   the load, names the bottleneck, and offers **Score it**.
-- **Step-by-step solution** (Task tab): one complete local walkthrough, with no AI
-  involved: understand, clarify requirements, estimate load, build the components,
-  trace a request, break it, and weigh the trade-offs. It can show the reference on
-  the canvas or copy it into your design.
+- **Solution walkthrough**: the 49 chapter exercises use the authored solution steps, assumptions, worked examples, failure histories, common mistakes, alternatives and answered follow-ups. Their original diagrams open inside the studio; compatible dataflow figures can be copied onto the editable canvas. Classic problems show their individual design hints.
+- A reasoning figure is distinct from a request-capacity graph: loading one never invents QPS or latency for version barriers, timing or conditional histories.
 - Compare your design with the exercise-specific reference in its own read-only tab.
 - Record tradeoffs, annotate the canvas, save designs, export or share them.
 - Use the interview timer, the structural evaluation and the local progress dashboard.
@@ -53,7 +54,9 @@ a crash, a retry or a lagging replica.
 Deep links used by the chapters: `studio/index.html?exercise=ch8-ex4` opens one
 exercise and `studio/index.html?chapter=8` opens the first exercise of a chapter.
 
-Evaluation is a transparent educational rubric. It cannot prove consistency,
+Evaluation reports **reference structure coverage**: component multiplicities (35 points), directed typed connections (35) and component-neighbour roles (30). A reference covers its own criteria at 100%; deleting edges reduces coverage. Equivalent designs can be valid despite lower reference coverage. This is not an automatic correctness grade. Workload results and exercise-specific reasoning questions are separate; generic replica and utilization targets no longer deduct exercise points.
+
+It cannot prove consistency,
 correctness, production capacity or readiness for a particular interview level.
 Several different designs can satisfy a brief. Reference designs are discussion
 sketches, not the only accepted answer; read the linked worked solution too.
@@ -66,18 +69,17 @@ Do not put private data into a design you share.
 ## Reference designs
 
 The 49 chapter exercises each have their own reference topology, written in
-`assets/exercise_references.py` (nodes, edges, a bilingual note). Replicas are sized
-by `assets/size_references.cjs` so every reference carries the default 1000 QPS;
-the result lands in `assets/reference_sizing.json`. The 35 classic problems keep
+`assets/exercise_references.py` (nodes, edges, a bilingual note). The catalog builder attaches authored lessons from `assets/solutions/chN/exN.json`. Replica counts are illustrative teaching inputs, not a promise that each design meets every load. The legacy sizing helper produces a separate report; the builder does not consume it. The 35 classic problems keep
 the reference topology of the public SysDes project they were adapted from.
 
 ## Build and verify
 
 ```sh
 python3 assets/build_studio_data.py      # catalog: 38 components, 84 exercises
-node assets/size_references.cjs          # only after editing exercise_references.py
 python3 assets/build_concept_labs.py     # inserts the labs into the chapters
-node assets/check_studio_engine.cjs
+npm ci
+npm run test:studio
+npm run test:studio:browser             # server above + Chrome; PW_CHANNEL may override
 node assets/check_concept_labs.cjs
 python3 assets/build_site.py
 node assets/make_readme_gifs.cjs         # re-records docs/media/*.gif (needs ffmpeg and Chrome)
@@ -95,3 +97,9 @@ project's static, bilingual environment. The 35 classic problems and the compone
 catalog values are adapted from SysDes data, and that repository publishes no
 licence file, so their reuse terms are not confirmed. Browser observations and
 extracted evidence are kept as local development records, not published site content.
+
+## Request and background flows
+
+Solid arrows are synchronous request dependencies. Dashed background and control arrows remain editable and count toward reference structure, but are excluded from the request-throughput and latency calculation. Their queue growth, lag, eventual completion and failures require separate histories; the simulator states this explicitly. The generator classifies replication, event consumers and metadata/monitoring flows by component role, and the inspector can change any classification. A failed logical node still takes all of that node’s replicas down; replica count alone does not model automatic failover.
+
+The chapter 6 solution distinguishes log receipt, durability and replay before a replica may serve a read. See the [PostgreSQL synchronous_commit documentation](https://www.postgresql.org/docs/current/runtime-config-wal.html#GUC-SYNCHRONOUS-COMMIT).

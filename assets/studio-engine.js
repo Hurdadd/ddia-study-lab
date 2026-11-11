@@ -48,7 +48,10 @@
       if (byId.get(edge.source).type === 'note' || byId.get(edge.target).type === 'note') { errors.push('Design notes cannot carry request edges.'); continue; }
       const protocol = edge.protocol === undefined ? 'RPC' : edge.protocol;
       if (!text(protocol) || protocol.length > 80) { errors.push('Invalid edge protocol.'); continue; }
-      clean.edges.push({ id: edge.id, source: edge.source, target: edge.target, protocol });
+      if (edge.label !== undefined && !text(edge.label)) { errors.push('Invalid edge label.'); continue; }
+      const kind = edge.kind || 'request';
+      if (!['request', 'background', 'control'].includes(kind)) { errors.push('Invalid connection kind.'); continue; }
+      clean.edges.push({ id: edge.id, source: edge.source, target: edge.target, protocol, kind, ...(edge.label !== undefined ? { label: edge.label } : {}) });
     }
     if (!clean.nodes.some(n => n.type !== 'note')) warnings.push('Add a traffic component to run the simulation.');
     const topology = sortGraph(clean);
@@ -71,23 +74,27 @@
   }
 
   function simulate(input, opts = {}) {
+    if (input && Array.isArray(input.nodes) && input.nodes.some(n => n.config && n.config.diagramOnly === true)) return { valid: false, nodes: [], events: [], throughput: null, latencyMs: null, warnings: [tr(opts, 'This is a reasoning diagram, not a traffic network. Use the exercise design tab for capacity simulation; versions, conditions and timing must be checked in the worked history.', 'این نمودار استدلال است و شبکهٔ ترافیک نیست. برای شبیه‌سازی ظرفیت به طرح تمرین برگرد؛ نسخه‌ها، شرط‌ها و ترتیب زمانی را با تاریخچهٔ حل بررسی کن.')], assumptions: [] };
     const validation = validateGraph(input);
     const assumptions = [
       tr(opts, 'Illustrative steady-state requests per second and service times; not benchmarks, p99 or an SLO prediction.', 'نرخ درخواست و زمان خدمت آموزشی‌اند؛ benchmark، p99 یا پیش‌بینی SLO نیستند.'),
       tr(opts, 'Load balancers split equally; other branches copy requests to every dependency. Cache and CDN forward all writes plus cache misses.', 'توزیع‌کننده بار را مساوی تقسیم می‌کند؛ شاخه‌های دیگر درخواست را به همهٔ وابستگی‌ها می‌فرستند. کش و CDN نوشتن‌ها و miss را عبور می‌دهند.'),
       tr(opts, 'Replica capacity scales ideally. No quorum, replication lag, transactional safety, retries or geographic latency is modeled.', 'ظرفیت نسخه‌ها ایده‌آل جمع می‌شود؛ quorum، lag، صحت تراکنش، retry و تأخیر جغرافیایی مدل نشده‌اند.'),
-      tr(opts, 'Latency sums service time along the longest dependency path; asynchronous branches are shown as dependencies. Queue backlog is growth in requests per second.', 'تأخیر جمع زمان خدمت طولانی‌ترین مسیر وابستگی است؛ شاخهٔ ناهمگام هم وابستگی حساب می‌شود. backlog رشد درخواست در ثانیه است.'),
+      tr(opts, 'Latency sums service time along request edges only. Background and control edges are excluded; their lag and eventual completion need separate histories. Queue backlog on request paths is growth in requests per second.', 'تأخیر فقط روی اتصال‌های درخواست جمع می‌شود. اتصال پس‌زمینه و کنترلی حذف است؛ lag و اتمام آن‌ها تاریخچهٔ جدا می‌خواهد. backlog صف در مسیر درخواست، رشد درخواست در ثانیه است.'),
     ];
     const stopped = warnings => ({ valid: false, nodes: [], events: [], throughput: null, latencyMs: null, warnings, assumptions });
     if (!validation.valid) return stopped(validation.errors);
-    const graph = validation.graph, topology = sortGraph(graph);
-    if (topology.cyclic) return stopped(validation.warnings);
+    const graph = validation.graph, originalRoots = new Set(sortGraph(graph).roots.map(n => n.id));
+    const topology = sortGraph({ ...graph, edges: graph.edges.filter(e => e.kind === 'request') });
+    if (topology.cyclic) return stopped([tr(opts, 'Cyclic request paths are unsupported. Mark replication/control flows separately or remove the request cycle.', 'چرخهٔ درخواست پشتیبانی نمی‌شود. جریان تکثیر و کنترل را جدا مشخص کن یا چرخهٔ درخواست را بردار.')]);
     if (!topology.nodes.length) return stopped(validation.warnings);
-    const comps = componentMap(), warnings = validation.warnings.slice(), stats = new Map(), events = [];
+    const comps = componentMap(), warnings = validation.warnings.filter(w => !w.startsWith('Cyclic')), stats = new Map(), events = [];
+    if (graph.edges.some(e => e.kind !== 'request')) warnings.push(tr(opts, 'Dashed background/control flows do not contribute to request latency or throughput. Their capacity, lag and failures have not been simulated.', 'جریان پس‌زمینه و کنترل خط‌چین در تأخیر و توان درخواست حساب نشده‌اند؛ ظرفیت، lag و خرابی آن‌ها شبیه‌سازی نشده است.'));
     const totalQPS = finite(opts.qps, 1000), readRatio = finite(opts.readRatio, .8, 1), hit = finite(opts.cacheHitRate, .8, 1);
     const selectedRoot = opts.entryNode && topology.roots.find(n => n.id === opts.entryNode);
     const clients = topology.roots.filter(n => n.type === 'client');
-    const trafficRoots = selectedRoot ? [selectedRoot] : clients.length ? clients : topology.roots;
+    const trafficRoots = selectedRoot ? [selectedRoot] : clients.length ? clients : topology.roots.filter(n => originalRoots.has(n.id));
+    if (!trafficRoots.length) return stopped([tr(opts, 'Choose an entry node or add a client request path.', 'یک گرهٔ ورودی انتخاب کن یا مسیر درخواست کاربر اضافه کن.')]);
     const active = new Set();
     function mark(nodeId) { if (active.has(nodeId)) return; active.add(nodeId); topology.outgoing.get(nodeId).forEach(e => mark(e.target)); }
     trafficRoots.forEach(n => mark(n.id));
@@ -132,6 +139,7 @@
   }
 
   function evaluate(input, problem = {}, opts = {}) {
+    if (problem.reference) return evaluateExercise(input, problem, opts);
     const validation = validateGraph(input), run = simulate(input, opts), fa = opts.lang === 'fa';
     const limitations = [tr(opts, 'Transparent structural practice rubric, not proof of availability, correctness or exercise completion.', 'معیار شفاف تمرین ساختاری است؛ اثبات دسترس‌پذیری، صحت یا اتمام تمرین نیست.'), tr(opts, 'Read the exercise signals and solution. Consistency, privacy, transactions and recovery require arguments or execution traces beyond this graph.', 'معیارهای تمرین و حل را بخوان؛ سازگاری، حریم خصوصی، تراکنش و بازیابی به استدلال یا تاریخچهٔ اجرا نیاز دارند.')];
     if (!validation.valid || !run.valid) return { total: 0, categories: ['Scalability', 'Availability', 'Latency', 'Cost', 'Trade-offs'].map(name => ({ name, score: 0, max: 20, feedback: run.warnings })), feedback: run.warnings, checks: [], limitations };
@@ -169,6 +177,48 @@
     const categoryNames = { Scalability: 'مقیاس‌پذیری', Availability: 'دسترس‌پذیری', Latency: 'تأخیر', Cost: 'هزینه', 'Trade-offs': 'موازنه‌ها' };
     const categories = Object.keys(categoryNames).map(key => { const own = checks.filter(c => c.category === key); return { name: fa ? categoryNames[key] : key, score: own.filter(c => c.passed).length * 10, max: 20, feedback: own.filter(c => !c.passed).map(c => c.label) }; });
     return { total: categories.reduce((sum, c) => sum + c.score, 0), categories, checks, feedback: checks.filter(c => !c.passed).map(c => c.label), limitations, signals: fa ? problem.signalsFa || [] : problem.signalsEn || [] };
+  }
+
+  // Coverage is deliberately separate from workload fitness and human reasoning.
+  // No special-case reference IDs or free points for merely loading an answer.
+  function evaluateExercise(input, problem, opts) {
+    const validation = validateGraph(input), reference = validateGraph(problem.reference);
+    const fa = opts.lang === 'fa', L = (en, persian) => fa ? persian : en;
+    const graph = validation.valid ? validation.graph : { nodes: [], edges: [] };
+    const expected = reference.valid ? reference.graph : { nodes: [], edges: [] };
+    const counts = values => values.reduce((m, key) => m.set(key, (m.get(key) || 0) + 1), new Map());
+    const nodeTypes = g => g.nodes.filter(n => n.type !== 'note').map(n => n.type);
+    const links = g => {
+      const byId = new Map(g.nodes.map(n => [n.id, n.type]));
+      return g.edges.map(e => `${byId.get(e.source)} → ${byId.get(e.target)} [${e.kind}]`);
+    };
+    const roles = g => g.nodes.filter(n => n.type !== 'note').map(n => {
+      const byId = new Map(g.nodes.map(x => [x.id, x.type]));
+      return `${n.type} [${g.edges.filter(e => e.target === n.id).map(e => byId.get(e.source)).sort()}] [${g.edges.filter(e => e.source === n.id).map(e => byId.get(e.target)).sort()}]`;
+    });
+    const category = (name, required, actual, max) => {
+      const need = counts(required), have = counts(actual), missing = [];
+      let matched = 0;
+      for (const [key, count] of need) {
+        matched += Math.min(count, have.get(key) || 0);
+        if ((have.get(key) || 0) < count) missing.push(`${key} × ${count - (have.get(key) || 0)}`);
+      }
+      return { name, max, score: required.length ? Math.round(max * matched / required.length) : (graph.nodes.length ? max : 0), feedback: missing };
+    };
+    const categories = [
+      category(L('Component coverage', 'پوشش اجزا'), nodeTypes(expected), nodeTypes(graph), 35),
+      category(L('Directed connections', 'اتصال‌های جهت‌دار'), links(expected), links(graph), 35),
+      category(L('Component roles and neighbours', 'نقش و همسایه‌های اجزا'), roles(expected), roles(graph), 30),
+    ];
+    if (!validation.valid) categories.forEach(c => { c.score = 0; c.feedback = validation.errors; });
+    const checks = categories.map(c => ({ category: c.name, label: c.name, passed: c.score === c.max,
+      detail: c.feedback.length ? L('Missing from this reference alternative: ', 'کمبود نسبت به این گزینهٔ مرجع: ') + c.feedback.join('; ') : L('All structural items in this alternative are represented.', 'همهٔ موارد ساختاری این گزینه نمایش داده شده‌اند.') }));
+    return { mode: 'exercise-coverage', total: categories.reduce((sum, c) => sum + c.score, 0), categories, checks,
+      feedback: checks.filter(c => !c.passed).map(c => c.detail), workload: simulate(input, opts),
+      manualReview: fa ? problem.signalsFa || [] : problem.signalsEn || [],
+      limitations: [L('This is structural coverage of one reference alternative, not proof of a correct solution. Other architectures can be valid; review the exercise reasoning separately.', 'این عدد پوشش ساختاری یک گزینهٔ مرجع است، نه اثبات حل صحیح. معماری‌های دیگر هم می‌توانند معتبر باشند؛ استدلال تمرین را جدا بررسی کن.'),
+        L('Load, latency and failure results are reported separately. Generic replica or utilization targets do not deduct exercise points.', 'نتیجهٔ بار، تأخیر و خرابی جدا گزارش می‌شود. تعداد نسخه یا مصرف ظرفیت عمومی از امتیاز تمرین کم نمی‌کند.')]
+    };
   }
 
   function coach(question, graph, problem = {}, opts = {}) {

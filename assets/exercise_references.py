@@ -6,7 +6,7 @@ They are editable discussion sketches, not correctness proofs.
 """
 
 REFS = {
-    'ch1-ex1': (['client', 'app-server|Order service / سرویس سفارش|2', 'sql-db|Orders: system of record / مرجع سفارش|2', 'queue|Order events / رویداد سفارش|2', 'search|Search view (derived) / نمای جست‌وجو', 'nosql-db|Product read store (derived) / مخزن خواندن مشتق', 'warehouse|Reporting (derived) / گزارش'],
+    'ch1-ex1': (['client', 'app-server|Order service / سرویس سفارش|2', 'sql-db|Orders + transactional outbox / سفارش و outbox اتمیک|2', 'queue|CDC / outbox relay: order events / انتشار رویداد|2', 'search|Search view (derived) / نمای جست‌وجو', 'nosql-db|Product read store (derived) / مخزن خواندن مشتق', 'warehouse|Reporting (derived) / گزارش'],
                 '1>2,2>3,3>4,4>5,4>6,4>7',
                 'Only the order store is authoritative; search, cache and reports are rebuilt from its event stream.',
                 'فقط مخزن سفارش مرجع است؛ جست‌وجو، کش و گزارش از جریان رویدادهای آن بازسازی می‌شوند.'),
@@ -28,8 +28,8 @@ REFS = {
                 'صدک‌های تأخیر و در دسترس‌بودن در API اندازه‌گیری می‌شوند نه داخل دیتابیس.'),
     'ch2-ex3': (['client', 'load-balancer|Multi-AZ entry / ورودی چندمنطقه|2', 'app-server|Order API across AZs / API در چند AZ|3', 'sql-db|Primary + standby / اصلی و آماده‌باش|2', 'queue|Replicated queue / صف تکثیری|3', 'worker|Workers / کارگرها|2', 'monitoring|Failure detection / تشخیص خرابی'],
                 '1>2,2>3,3>4,3>5,5>6,3>7',
-                'Every tier has at least two replicas in separate failure domains, so one machine or AZ can die unnoticed.',
-                'هر لایه دست‌کم دو replica در دامنه‌های خرابی جدا دارد؛ پس مرگ یک ماشین یا AZ دیده نمی‌شود.'),
+                'Replica count alone does not establish AZ survival. Place replicas in independent AZs, reserve N-1 capacity, specify detection and failover, and test the client-visible interruption and RPO.',
+                'تعداد replica به‌تنهایی تحمل خرابی AZ را ثابت نمی‌کند. نسخه‌ها را در AZ مستقل قرار بده؛ ظرفیت N-1، تشخیص خرابی، failover، وقفهٔ قابل مشاهده و RPO را مشخص و آزمایش کن.'),
     'ch3-ex1': (['client', 'app-server|Catalog API / API کاتالوگ|2', 'sql-db|Relational: products, brands, categories / رابطه‌ای|2', 'nosql-db|Document: product with embedded reviews / سندی|2', 'cache|Hot product pages / صفحه‌های داغ'],
                 '1>2,2>3,2>4,2>5,5>3',
                 'The same catalog modeled both ways: joins and many-to-many in SQL, one-document reads in the document store.',
@@ -66,8 +66,8 @@ REFS = {
                 '1>2,2>3,3>4,3>5,5>6,5>7,5>8',
                 'Each step has an ID and a durable record, so a crash and retry resumes instead of repeating or losing work.',
                 'هر مرحله شناسه و رکورد پایدار دارد؛ پس بعد از خرابی ادامه می‌دهد نه تکرار یا گم‌شدن.'),
-    'ch6-ex1': (['client', 'load-balancer|Session-aware routing / مسیریابی مبتنی بر نشست|2', 'app-server|Profile API / API پروفایل|2', 'sql-db|Leader: writes / رهبر نوشتن|2', 'sql-db|Follower: reads / پیرو خواندن|2', 'cache|Last-write token / توکن آخرین نوشتن'],
-                '1>2,2>3,3>4,3>5,4>5,3>6,6>4',
+    'ch6-ex1': (['client', 'load-balancer|Session-aware routing / مسیریابی مبتنی بر نشست|2', 'app-server|Read router: ownWrite or version barrier / مسیریاب خواندن|2', 'sql-db|Leader: writes / رهبر نوشتن|2', 'sql-db|Follower: reads / پیرو خواندن|2', 'custom|Shared session LSN floor / کف نسخهٔ نشست بین دستگاه‌ها'],
+                '1>2,2>3,3>4,3>5,4>5,3>6',
                 'Route a user to the leader (or a follower that has caught up to their token) to get read-your-writes.',
                 'کاربر را به رهبر (یا پیروی که به توکنش رسیده) بفرست تا خواندنِ نوشتهٔ خودش را ببیند.'),
     'ch6-ex2': (['client|Phone / تلفن', 'client|Laptop / لپ‌تاپ', 'api-gateway', 'app-server|Cart API / API سبد|2', 'nosql-db|Replica A / نسخه A', 'nosql-db|Replica B / نسخه B', 'worker|Merge, no lost removals / ادغام'],
@@ -200,8 +200,8 @@ REFS = {
                 'هر جریان داده شخصی به یک هدف و رضایت قابل‌پس‌گرفتن وصل است و در لاگ ممیزی ثبت می‌شود.'),
     'ch14-ex4': (['scheduler|Retention scheduler / زمان‌بند نگه‌داری', 'worker|Purge job / کار پاک‌سازی', 'sql-db|Operational data / داده عملیاتی|2', 'warehouse|k-anonymized aggregates / تجمیع ناشناس', 'object-storage|Backups with expiry / پشتیبان با انقضا', 'config-service|Legal-hold registry / رجیستری توقیف قانونی'],
                 '1>2,2>3,2>4,2>5,6>2',
-                'Periodic purge deletes expired data everywhere, skips records under legal hold, and keeps only aggregates that cannot re-identify.',
-                'پاک‌سازی دوره‌ای داده منقضی را همه‌جا حذف می‌کند، موارد توقیف قانونی را رد می‌کند و فقط تجمیع‌های غیرقابل‌شناسایی را نگه می‌دارد.'),
+                'Periodic purge deletes expired data everywhere, skips records under legal hold, and retains aggregates only after measuring linkage and re-identification risk; k-anonymity alone is insufficient.',
+                'پاک‌سازی دوره‌ای داده منقضی را همه‌جا حذف می‌کند، موارد توقیف قانونی را رد می‌کند و تجمیع را فقط پس از ارزیابی خطر پیوند و بازشناسایی نگه می‌دارد؛ k-anonymity به‌تنهایی کافی نیست.'),
 }
 
 

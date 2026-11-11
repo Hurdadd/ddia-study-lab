@@ -9,8 +9,8 @@
     {
       "t_en": "Own writes: let the leader pay the bill",
       "t_fa": "نوشته‌ی خودت را بخوان: قیمتش را leader می‌دهد",
-      "en": "Send reads of keys the user may have just written to the leader (or a synchronous follower): always fresh, and it always costs you leader load. The one-minute all-from-leader window and dropping over-lagging followers from the read path are that same idea with a timer attached — honest only as a heuristic, because lag has no bound.",
-      "fa": "نوشته‌هایی که کاربر شاید همین حالا نوشته، برن پیش leader (یا یک follower هم‌زمان): همیشه تازه، همیشه به قیمت بار leader. پنجره‌ی یک‌دقیقه‌ایِ «همه‌چیز از leader» و حذف followerهای عقب‌افتاده از مسیر خواندن، همان ایده‌اند با یک تایمر — و فقط به‌عنوان heuristic صادق‌اند، چون lag کران ندارد."
+      "en": "Send reads of keys the user may have just written to the leader (or a follower that has demonstrably applied that write; a replication ACK alone is insufficient): always fresh, and it always costs you leader load. The one-minute all-from-leader window and dropping over-lagging followers from the read path are that same idea with a timer attached — honest only as a heuristic, because lag has no bound.",
+      "fa": "نوشته‌هایی که کاربر شاید همین حالا نوشته، برن پیش leader (یا followerای که اعمال همان نوشته را ثابت کرده؛ ACK تکثیر به‌تنهایی کافی نیست): همیشه تازه، همیشه به قیمت بار leader. پنجره‌ی یک‌دقیقه‌ایِ «همه‌چیز از leader» و حذف followerهای عقب‌افتاده از مسیر خواندن، همان ایده‌اند با یک تایمر — و فقط به‌عنوان heuristic صادق‌اند، چون lag کران ندارد."
     },
     {
       "t_en": "Monotonic and causal: pin it or compare it",
@@ -35,14 +35,14 @@
       "fa": "sleep ثابت پیش از خواندن: ارزان‌ترین چیز برای نوشتن و بی‌هیچ تضمینی — فقط به‌عنوان heuristic پنهان‌سازی تأخیر نگهش دار، و بگذار barrier همچنان درستی را اجرا کند."
     },
     {
-      "en": "Synchronous or semisynchronous replication: followers are fresh by construction, but one slow follower stalls every write. Freshness just moved its price over to availability.",
-      "fa": "تکثیر هم‌زمان یا نیمه‌هم‌زمان: followerها ذاتاً تازه‌اند، ولی یک follower کند هر نوشته را متوقف می‌کند — یعنی قیمت تازگی را به availability منتقل کردی."
+      "en": "Receiving or flushing a replicated log is not the same as applying it. PostgreSQL synchronous_commit=remote_apply waits for visibility on the confirming synchronous standbys; other replicas may still lag. Read from a confirmed replica or enforce the version barrier. Waiting for acknowledgements adds latency and can block writes when the required standbys are unavailable.",
+      "fa": "دریافت یا پایدار شدن لاگ با اعمال شدن آن یکسان نیست. در PostgreSQL تنظیم synchronous_commit=remote_apply تا قابل‌مشاهده شدن تراکنش روی standbyهای هم‌زمانِ تأییدکننده صبر می‌کند؛ نسخه‌های دیگر هنوز ممکن است عقب باشند. از نسخهٔ تأییدشده بخوان یا barrier نسخه را اعمال کن. انتظار تأیید، تأخیر می‌افزاید و با قطع standbyهای لازم می‌تواند نوشتن را متوقف کند."
     }
   ],
   "failures": [
     {
-      "en": "The primary dies right after the ACK with async replication: ACKed-but-unreplicated writes vanish, so read-your-writes against the new leader misses the user's own write. Guard: semisynchronous replication, or state the loss window honestly.",
-      "fa": "اگر primary دقیقاً بعد از ACK بترکه و تکثیر ناهمزمان باشد، نوشته‌های تأییدشده ولی تکثیرنشده گم می‌شوند؛ آن‌وقت read-your-writes به leader تازه می‌خورد و نوشته‌ی خودِ کاربر را از دست می‌دهد. نگهبان: تکثیر نیمه‌هم‌زمان، یا اعلام صادقانه‌ی پنجره‌ی گم‌شدن."
+      "en": "If the primary fails after an ACK but before async replicas receive the write, promoting a stale replica can lose an acknowledged write. State the RPO; require durable replication to the eligible failover candidates and a failover protocol that preserves acknowledged history. A semisynchronous receipt ACK alone does not prove read visibility or a safe choice of new leader.",
+      "fa": "اگر primary پس از ACK و پیش از رسیدن نوشته به نسخه‌های ناهم‌زمان قطع شود، ارتقای نسخهٔ کهنه می‌تواند نوشتهٔ تأییدشده را از دست بدهد. RPO را مشخص کن؛ تکثیر پایدار به نامزدهای مجاز ارتقا و پروتکل failover حافظ تاریخچهٔ تأییدشده لازم است. ACK دریافت در تکثیر نیمه‌هم‌زمان به‌تنهایی نه قابل‌خواندن بودن نوشته را ثابت می‌کند نه انتخاب رهبر امن را."
     },
     {
       "en": "The pinned replica dies and the session re-pins to a staler one: monotonic reads regress silently. Guard: carry the seen-version floor across the re-pin and refuse replicas below it.",
@@ -256,6 +256,6 @@
     "amazon",
     "atlassian"
   ],
-  "reasoning_fa": "<p>بذار ساده بگم چرا این مدل به این تمرین می‌خوره. پنجره‌ی یک‌دقیقه‌ای خواندن از leader یک heuristic است — replica می‌تواند بیش از یک دقیقه عقب باشد. توکن آخرین write را مقایسه می‌کنیم چون applied_version ≥ required_version مستقیم نشان می‌دهد همان write به replica رسیده. اگر بعد از سه ثانیه صبر به leader برگردیم، آن سه ثانیه فقط بودجه‌ی انتظارِ تجربه‌ی کاربر است، نه تضمین رسیدن replica. پس بودجه را از deadline کل درخواست کم کن. و یک چیز دیگر را قاطی نکن: freshness با latency پاسخ فرق دارد — تازه بودن یعنی «نسخه‌ی درست»، سریع بودن یعنی «همین الان رسید».</p>",
-  "reasoning_en": "<p>Here is why this model fits the exercise. A one-minute leader-read window is a heuristic: lag can exceed it. Compare the last write's token because applied_version ≥ required_version directly proves that the same write reached the replica. Falling back after three seconds spends a user waiting budget, not a replication guarantee — so derive that budget from the remaining request deadline. And keep two things apart: freshness is \"the right version\", latency is \"it arrived fast\". Don't mix them up.</p>"
+  "reasoning_fa": "<p>بذار ساده بگم چرا این مدل به این تمرین می‌خوره. پنجره‌ی یک‌دقیقه‌ای خواندن از leader یک heuristic است — replica می‌تواند بیش از یک دقیقه عقب باشد. توکن آخرین write را مقایسه می‌کنیم چون applied_version ≥ required_version مستقیم نشان می‌دهد همان write به replica رسیده. اگر بعد از سه ثانیه صبر به leader برگردیم، آن سه ثانیه فقط بودجه‌ی انتظارِ تجربه‌ی کاربر است، نه تضمین رسیدن replica. پس بودجه را از deadline کل درخواست کم کن. و یک چیز دیگر را قاطی نکن: freshness با latency پاسخ فرق دارد — تازه بودن یعنی «نسخه‌ی درست»، سریع بودن یعنی «همین الان رسید».</p><p><a href=\"https://www.postgresql.org/docs/current/runtime-config-wal.html#GUC-SYNCHRONOUS-COMMIT\">مستندات رسمی PostgreSQL: معنای synchronous_commit</a></p>",
+  "reasoning_en": "<p>Here is why this model fits the exercise. A one-minute leader-read window is a heuristic: lag can exceed it. Compare the last write's token because applied_version ≥ required_version directly proves that the same write reached the replica. Falling back after three seconds spends a user waiting budget, not a replication guarantee — so derive that budget from the remaining request deadline. And keep two things apart: freshness is \"the right version\", latency is \"it arrived fast\". Don't mix them up.</p><p><a href=\"https://www.postgresql.org/docs/current/runtime-config-wal.html#GUC-SYNCHRONOUS-COMMIT\">PostgreSQL documentation: synchronous_commit semantics</a></p>"
 }

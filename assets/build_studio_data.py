@@ -2,6 +2,8 @@
 """Generate the offline studio catalog from the maintained exercise audit."""
 import json
 import sys
+import re
+from html import unescape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -3130,6 +3132,22 @@ def source_reference(reference):
              for i, e in enumerate(reference['edges']) if e['source'] in first and e['target'] in first]
     return {'nodes': nodes, 'edges': edges}
 
+def classify_flows(graph):
+    """Keep out-of-band work out of synchronous request estimates."""
+    nodes = {n['id']: n for n in graph['nodes']}
+    for edge in graph['edges']:
+        source, target = nodes[edge['source']], nodes[edge['target']]
+        if target['type'] in ('monitoring', 'config-service', 'service-discovery'):
+            edge.update(kind='control', label='Metadata / سنجه و تنظیمات')
+        elif source['type'] in ('sql-db', 'nosql-db') and target['type'] in ('sql-db', 'nosql-db'):
+            edge.update(kind='background', label='Replication / تکثیر', protocol='Replication')
+        elif (source['type'] in ('sql-db', 'nosql-db') and target['type'] == 'queue') or source['type'] in ('queue', 'pubsub'):
+            edge.update(kind='background', label='Async events / رویداد ناهمگام', protocol='Async')
+        else:
+            edge.setdefault('kind', 'request')
+    return graph
+
+
 def build():
     components = []
     for ident, label, fa, category, qps, latency, description, description_fa in SPECS:
@@ -3144,10 +3162,43 @@ def build():
                              icon=source['icon'], scalable=source['scalable'], stateful=source['stateful'],
                              description=source['description'])
     problems = []
-    for ex in json.loads((ROOT / 'assets/exercise-audit.json').read_text())['exercises']:
+    for ex in json.loads((ROOT / 'assets/exercise-audit.json').read_text(encoding='utf-8'))['exercises']:
         starter_types, reference_types, fanout = TEMPLATES[ex['chapter']]
         ident = f"ch{ex['chapter']}-ex{ex['number']}"
         reference, note_en, note_fa = exercise_references.build(ident)
+        solution_path = ROOT / f"assets/solutions/ch{ex['chapter']}/ex{ex['number']}.json"
+        solution = json.loads(solution_path.read_text(encoding='utf-8'))
+        def plain(value):
+            if isinstance(value, str):
+                return unescape(re.sub('<[^>]+>', '', value))
+            if isinstance(value, list):
+                return [plain(v) for v in value]
+            if isinstance(value, dict):
+                return {k: plain(v) for k, v in value.items()}
+            return value
+        lesson = plain({k: solution[k] for k in ('steps', 'assumptions', 'answer_en', 'answer_fa', 'worked_en', 'worked_fa', 'alternatives', 'failures', 'mistakes', 'followups') if k in solution})
+        lesson['diagrams'] = [{**plain(d), 'href': f"../{ex['folder']}/{d['file']}"} for d in solution.get('diagrams', [solution.get('diagram', {})]) if d.get('file')]
+        for diagram in lesson['diagrams']:
+            source = ROOT / diagram.get('source', 'missing')
+            if not source.is_file():
+                continue
+            spec = json.loads(source.read_text(encoding='utf-8'))
+            if spec.get('diagram_type') != 'dataflow' or not spec.get('nodes'):
+                continue
+            type_map = {'external': 'client', 'database': 'sql-db', 'backend': 'custom', 'frontend': 'custom', 'queue': 'queue', 'cache': 'cache'}
+            nodes = [{'id': n['id'], 'type': type_map.get(n.get('type'), 'custom'), 'label': n['label'],
+                      'x': 70 + n.get('stage', i) * 280, 'y': 70 + n.get('row', 0) * 150,
+                      'replicas': 1, 'config': {'diagramOnly': True, 'notes': n.get('sublabel', '')}}
+                     for i, n in enumerate(spec['nodes'])]
+            ids = {n['id'] for n in nodes}
+            edges, pairs = [], set()
+            for i, flow in enumerate(spec.get('flows', [])):
+                pair = (flow.get('from'), flow.get('to'))
+                if pair[0] not in ids or pair[1] not in ids or pair[0] == pair[1] or pair in pairs:
+                    continue
+                pairs.add(pair)
+                edges.append({'id': f'flow{i}', 'source': pair[0], 'target': pair[1], 'protocol': 'Concept', 'label': flow.get('label', '')})
+            diagram['editableGraph'] = {'nodes': nodes, 'edges': edges}
         problems.append({
             'id': f"ch{ex['chapter']}-ex{ex['number']}",
             'titleFa': ex['title_fa'], 'titleEn': ex['title_en'],
@@ -3157,7 +3208,8 @@ def build():
             **{k: ex[k] for k in ('folder', 'chapter', 'number', 'level', 'priority', 'minutes')},
             'solutionHref': f"../{ex['folder']}/solutions.html#sol-{ex['number']}",
             'lessonHref': f"../{ex['folder']}/index.html",
-            'starter': graph(starter_types), 'reference': reference,
+            'starter': graph(starter_types), 'reference': classify_flows(reference),
+            'lesson': lesson,
             'referenceNoteFa': note_fa + ' این طرح قابل ویرایش است؛ استدلال کامل در لینک حل تمرین است.',
             'referenceNoteEn': note_en + ' This sketch is editable; the full reasoning is in the linked solution.',
         })
@@ -3176,13 +3228,13 @@ def build():
             'signalsFa': [f'{fa[5]} را توضیح می‌دهد', 'فرض بار و خرابی قابل اندازه‌گیری می‌نویسد', 'یک تغییر را آزمایش و هزینه و محدودیت صحتش را ثبت می‌کند'],
             'chapter': 0, 'number': 0, 'folder': None, 'level': source['difficulty'].lower(), 'priority': 'practice', 'minutes': 42,
             'tags': source['tags'], 'solutionHref': None, 'lessonHref': None,
-            'starter': {'nodes': [], 'edges': []}, 'reference': source_reference(source['referenceSolution']),
+            'starter': {'nodes': [], 'edges': []}, 'reference': classify_flows(source_reference(source['referenceSolution'])),
             'referenceNoteFa': 'توپولوژی مرجع از نسخهٔ مشاهده‌شدهٔ SysDes است؛ رسم گراف تضمین صحت واقعی نیست.',
             'referenceNoteEn': 'Reference topology matches the captured SysDes design; the diagram is not a correctness guarantee.',
         })
     result = {'components': components, 'problems': problems, 'tradeoffs': [dict(id=source['id'], titleEn=source['title'], titleFa=tf, en=e, fa=f, textEn=e, textFa=f, source=source) for source, (i, t, tf, e, f) in zip(ORIGINAL_DATA['tradeoffs'], COMPARISONS)], 'componentAliases': COMPONENT_ALIASES}
     output = '/* Generated by assets/build_studio_data.py; all capacity values are illustrative. */\n(function(root){\n  const data = ' + json.dumps(result, ensure_ascii=False, separators=(',', ':')) + ';\n  root.DDIAStudioData = data;\n  if (typeof module === "object" && module.exports) module.exports = data;\n})(typeof globalThis !== "undefined" ? globalThis : window);\n'
-    (ROOT / 'assets/studio-data.js').write_text(output)
+    (ROOT / 'assets/studio-data.js').write_text(output, encoding='utf-8')
     print(f"Studio catalog: {len(components)} components, {len(problems)} exercises")
 
 
