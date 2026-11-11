@@ -22,6 +22,30 @@ for name in ['index.html','exercise-audit.html','README.md','CONTRIBUTING.md','C
  shutil.copy2(ROOT/name,OUT/name)
 import seo_meta
 seo_meta.apply(OUT)
+
+# Instrument the generated static export, not the hundreds of source pages.
+# Vercel Web Analytics uses anonymized, cookieless pageviews.
+def inject_web_analytics(output_dir: Path) -> int:
+ count = 0
+ snippet = (
+  '  <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>\n'
+  '  <script defer src="/_vercel/insights/script.js"></script>\n'
+ )
+ for page in output_dir.rglob('*.html'):
+  html = page.read_text(encoding='utf-8')
+  if '/_vercel/insights/script.js' in html or 'cdn.vercel-insights.com' in html:
+   continue
+  head_end = html.lower().find('</head>')
+  if head_end < 0:
+   continue
+  page.write_text(html[:head_end] + snippet + html[head_end:], encoding='utf-8')
+  count += 1
+ return count
+
+tracked_pages = inject_web_analytics(OUT)
+if tracked_pages == 0:
+ raise RuntimeError('No HTML pages were instrumented for Web Analytics')
+print(f'Injected Vercel Web Analytics into {tracked_pages} HTML pages')
 assert not list(OUT.rglob('.env*'))
 assert not (OUT/'PRODUCT.md').exists()
 assert not (OUT/'HANDOFF_EXERCISE_SOLUTIONS_FA.md').exists()
