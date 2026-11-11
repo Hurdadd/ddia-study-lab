@@ -46,10 +46,9 @@ Activation and verification:
    `python3 assets/check_publication.py --export`.
 3. Confirm `public/index.html`, `public/studio/index.html`, and a chapter
    page contain exactly one `/_vercel/insights/script.js` reference.
-4. Deploy this build to the existing `own-the-stack` production project
-   (the last deployment came from Vercel CLI; a GitHub push alone does
-   **not** redeploy it). Run `vercel --prod` from the linked project
-   checkout using the team's authorized Vercel account.
+4. Merge or push the reviewed change to `main`. The GitHub integration
+   builds and deploys it automatically to the existing `own-the-stack`
+   production project. Wait for Vercel to report READY before verification.
 5. Open https://ddia-study-lab.vercel.app/ as a real browser visitor.
    Verify the analytics script loads and a view request succeeds, then
    check Analytics in the project dashboard. Historical traffic before
@@ -57,3 +56,16 @@ Activation and verification:
 
 Revert the analytics injection in `assets/build_site.py` and redeploy
 if collection must be disabled; also disable Web Analytics in Vercel.
+
+## Automatic Git deployment
+
+The `own-the-stack` project in team `hurdad` is connected to
+`Hurdadd/ddia-study-lab` through the Vercel GitHub integration.
+Updates to the production branch `main` trigger a production deployment;
+other branches use preview deployments under the existing protection settings.
+No Vercel token in GitHub Actions and no scheduled polling job are needed.
+
+The committed `vercel.json` runs `python3 assets/build_site.py` and serves
+`public/`. Check the deployment commit SHA and READY state in the Vercel
+dashboard before assuming a merge is live. The production domain stays
+https://ddia-study-lab.vercel.app/.
