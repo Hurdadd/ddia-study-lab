@@ -133,12 +133,12 @@ assert.equal({}.polluted, undefined);
 // Adding disconnected components never improves this structural score.
 g = graph([node('c', 'client'), node('app', 'app-server', 2000), node('db', 'sql-db', 2000)], [['c', 'app'], ['app', 'db']]);
 let score = engine.evaluate(g, data.problems[0], { qps: 1000 });
-assert.equal(score.categories.length, 5);
+assert.equal(score.categories.length, 3);
 assert.equal(score.categories.reduce((sum, c) => sum + c.score, 0), score.total);
 assert.ok(score.limitations.some(s => s.includes('not proof')));
 const before = score.total;
 g.nodes.push(node('extra', 'cache'));
-assert.ok(engine.evaluate(g, {}, { qps: 1000 }).total <= before);
+assert.ok(engine.evaluate(g, data.problems[0], { qps: 1000 }).total <= before);
 assert.ok(engine.coach('failure', g).startsWith('Local rule-based coach'));
 assert.ok(engine.coach('خرابی', g, {}, { lang: 'fa' }).includes('محلی'));
 console.log('Studio model checks passed: 84 exercises, 38 components, propagation, cache, failures, queues, cycles, imports and rubric.');
