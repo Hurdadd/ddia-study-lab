@@ -462,7 +462,7 @@ def build_index(terms, chapters, figures_n):
     parts.append('<body>\n\n')
     parts.append(topbar('../', 'glossary'))
     parts.append('''<section class="doc-hero">
-  <div class="blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+  <div class="blobs gl-blobs" aria-hidden="true"><i class="b1"></i><i class="b2"></i></div>
   <p class="crumb"><a href="../index.html">''' + bi('نقشه راه', 'Roadmap') + '''</a>/ ''' + bi('واژه‌نامه', 'Glossary') + '''</p>
   <h1><span class="fa">هر واژه، از زندگی روزمره تا کد</span><span class="en">Every term, from real life to real code</span></h1>
   <p class="lede">
