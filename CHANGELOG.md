@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+- Added a 39-term bilingual glossary at `glossary/index.html`. Every entry is written
+  twice: an everyday analogy first, then the technical account, then the trap the
+  analogy hides. Each term also carries a one-sentence definition used by the hover
+  preview, and entries link back to the first chapter section that mentions them.
+- Chapters now mark the first mentions of a technical term with a dotted underline:
+  hovering (or keyboard focus) previews the definition in the current language, and
+  clicking opens the entry. Marking is deliberately sparse — three per term per
+  language and four per paragraph — and skips code, links, diagram stages, compact
+  metadata rows and the exercise studio.
+- `assets/glossary.json` is the single source of truth; `python3 assets/build_glossary.py`
+  writes both the page and the hover data, and `python3 assets/check_glossary.py`
+  fails when the committed artefacts, the entry anchors or the page wiring drift.
+  `build_site.py` publishes the new directory and the sitemap includes it.
+
 ## 0.4.0 — 2026-10-20
 
 - Rewrote the whole study set in the "friend explaining system design" voice:
