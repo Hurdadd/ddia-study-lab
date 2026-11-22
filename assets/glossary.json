@@ -9646,7 +9646,8 @@
     "encoded",
     "decode",
     "decoder",
-    "decoding"
+    "decoding",
+    "JSON"
    ],
    "related": [
     "backward-compatibility"
@@ -14048,7 +14049,11 @@
     "shard",
     "shards",
     "sharded",
-    "shardable"
+    "shardable",
+    "partition",
+    "partitions",
+    "partitioning",
+    "partitioned"
    ],
    "related": [
     "hot-spot",
@@ -19351,7 +19356,8 @@
     "Lamport clock",
     "Lamport clocks",
     "Lamport timestamp",
-    "logical clock"
+    "logical clock",
+    "Lamport"
    ],
    "related": [
     "vector-clock",
@@ -20332,7 +20338,9 @@
     "batch processing",
     "batch job",
     "batch jobs",
-    "batch"
+    "batch",
+    "job",
+    "jobs"
    ],
    "related": [
     "stream-processing",
@@ -25690,6 +25698,249 @@
     }
    ],
    "chapter_ref": "ch14-doing-right"
+  },
+  {
+   "id": "join",
+   "term": "join",
+   "term_fa": "پیوند (join)",
+   "chapter": 3,
+   "chapters": [
+    3,
+    11
+   ],
+   "tier": "A",
+   "aliases": [
+    "join",
+    "joins",
+    "joining",
+    "inner join",
+    "outer join"
+   ],
+   "hook_fa": "دو جدول، یک سؤال: این ردیف به آن ردیف چه ربطی دارد؟",
+   "hook_en": "Two tables, one question: which row belongs with which?",
+   "one_liner_fa": "چسباندن ردیف‌های دو مجموعه بر اساس یک شرط مشترک.",
+   "one_liner_en": "Sticking rows of two sets together on a shared condition.",
+   "daily_fa": "دو دفتر داری: یکی سفارش‌ها با شمارهٔ مشتری و کالا، یکی مشتری‌ها با شماره و آدرس. برای فرستادن هر بسته باید سفارش را به آدرس صاحبش وصل کنی. همین است: تطبیق دو دفتر روی شمارهٔ مشتری. اگر شماره در دفتر مشتری‌ها نبود، بسته بی‌آدرس می‌ماند.",
+   "daily_en": "You keep two notebooks: one with orders (customer number, item) and one with customers (number, address). To post each parcel you must attach the order to its owner's address. That is all a join is: matching two notebooks on the customer number. If a number is missing from the customer book, the parcel has nowhere to go.",
+   "everyday_fa": "کتابخانه‌ای را تصور کن که دو فهرست دارد: برگهٔ امانت‌ها و کارت کتاب‌ها. برای اینکه بدانی کدام کتاب بیشتر امانت رفته، باید هر برگهٔ امانت را به کارت همان کتاب وصل کنی. وقتی هر دو فهرست کوچک‌اند، ورق زدن و پیدا کردن تکی کار چند دقیقه است. وقتی میلیون‌ها برگه داری، کسی برگه‌به‌برگه نمی‌گردد: اول هر دو فهرست را بر اساس همان شماره مرتب می‌کنی (یا تقسیم می‌کنی روی سبدهای هشی) و بعد دو فهرست مرتب را کنار هم راه می‌بری. اینجا معلوم می‌شود چرا پیوند گران است: هزینه‌اش در جست‌وجو نیست، در مرتب‌کردن و جابه‌جا کردنِ داده است.",
+   "everyday_en": "Picture a library with two lists: loan slips and book cards. To learn which book is borrowed most, you must attach every slip to that book's card. With two small lists you can flip through and match by hand in minutes. With millions of slips nobody works leaf by leaf: you first sort both lists by the same number — or spread them across hash buckets — and then walk the two sorted lists side by side. That is where the cost of a join shows up: not in the search, but in sorting and moving data.",
+   "figure": {
+    "kind": "pipeline",
+    "cap_fa": "پیوند دو ورودی را روی یک کلید مشترک تطبیق می‌دهد و یک خروجی می‌سازد؛ کارِ سخت، هم‌جاکردنِ دو طرف است.",
+    "cap_en": "A join matches two inputs on a shared key and produces one output; the hard part is co-locating both sides.",
+    "items": [
+     {
+      "fa": "دو جدول",
+      "en": "Two tables",
+      "sub_fa": "سفارش و مشتری",
+      "sub_en": "orders, customers"
+     },
+     {
+      "fa": "تطبیق روی کلید",
+      "en": "Match on key",
+      "sub_fa": "شمارهٔ مشتری",
+      "sub_en": "customer id"
+     },
+     {
+      "fa": "یک نتیجه",
+      "en": "One result",
+      "sub_fa": "ردیف‌های کامل",
+      "sub_en": "combined rows"
+     }
+    ]
+   },
+   "technical_fa": "پیوند ردیف‌های دو مجموعه را بر اساس یک شرط مشترک ترکیب می‌کند: در SQL با JOIN و در داده‌های توزیع‌شده با هم‌جاکردن دو طرف روی کلید پیوند. سه الگوریتم فیزیکی رایج است. حلقهٔ تودرتو، که برای هر ردیف یک طرف طرف دیگر را می‌گردد؛ ساده است و برای مجموعه‌های کوچک کافی. پیوند هشی، که هر دو طرف را روی تعداد ثابتی سبد تقسیم می‌کند و هر سبد را جدا پیوند می‌زند؛ برای مجموعه‌های بزرگ و بدون ترتیب مناسب است. پیوند مرتب‌سازی-ادغام، که هر دو طرف را روی کلید مرتب می‌کند و بعد مثل دو لیست مرتب جلو می‌رود؛ وقتی خروجی هم باید مرتب باشد ارزان‌تر تمام می‌شود. در پردازش توزیع‌شده، هر سه الگوریتم به یک چیز نیاز دارند: ردیف‌های هم‌کلید باید روی یک ماشین باشند، و همین یعنی shuffle. اگر یکی از دو طرف کوچک باشد، به‌جای shuffle می‌شود آن را به همه فرستاد (broadcast join) و شبکه را نجات داد.",
+   "technical_en": "A join combines rows of two sets on a shared condition: in SQL with JOIN, in distributed data by co-locating both sides on the join key. Three physical algorithms dominate. Nested loop, which scans the other side for every row; simple, fine for small sets. Hash join, which partitions both sides into a fixed number of buckets and joins each bucket separately; good for large unordered sets. Sort-merge join, which sorts both sides on the key and walks them together; cheaper when the output must be sorted anyway. In distributed processing all three need the same thing: rows with the same key must sit on the same machine, and that means a shuffle. If one side is small, it can be broadcast to every worker instead, saving the shuffle.",
+   "numbers": [
+    {
+     "v": "1 key",
+     "k_fa": "بدون کلید مشترک، پیوند یا ممکن نیست یا باید همه را جابه‌جا کند",
+     "k_en": "without a common key a join either fails or moves everything"
+    },
+    {
+     "v": "N × M",
+     "k_fa": "حجم نتیجه به تعداد تطبیق‌ها بستگی دارد، نه به تعداد ردیف‌ها",
+     "k_en": "the result scales with matches, not with row counts"
+    }
+   ],
+   "sections": [
+    {
+     "h_fa": "چرا پیوند گران‌ترین عملگر است",
+     "h_en": "Why join is the expensive operator",
+     "p_fa": "در یک پرس‌وجوی تحلیلی، بیشتر زمان معمولاً به پیوند می‌رود و بیشتر خرابی‌ها هم از همان‌جا می‌آید. دلیل اول، حرکت داده است: برای اینکه ردیف‌های هم‌کلید کنار هم برسند، باید یا هر دو طرف مرتب شوند یا روی شبکه shuffle شوند، و این کار به اندازهٔ دادهٔ هر دو جدول هزینه دارد، نه به اندازهٔ نتیجه. دلیل دوم، کجی است: اگر یک کلید مشترک بسیار پرتکرار باشد، همان یک سبد چند برابر بقیه بزرگ می‌شود و یک ماشین همه را انجام می‌دهد. دلیل سوم، تکرار است: اگر کلید پیوند یکتا نباشد، هر ردیف سمت چپ با چند ردیف سمت راست جفت می‌شود و نتیجه از انتظار بزرگ‌تر می‌شود؛ گاهی چند برابر.",
+     "p_en": "In an analytical query most of the time usually goes to the join, and most of the failures come from there. First, data movement: for rows of the same key to meet, both sides must be sorted or shuffled across the network, and that costs the size of both tables, not the size of the result. Second, skew: if one join key is very frequent, that single bucket grows to several times the others and one machine does all the work. Third, duplication: if the join key is not unique, each left row pairs with several right rows and the result is larger than expected — sometimes many times larger."
+    }
+   ],
+   "pitfall_fa": "پیوند زدن روی کلیدی که یکتا نیست و بعد تعجب کردن از اینکه تعداد ردیف‌ها چند برابر شد. یک کلید پیوند که در یک طرف تکراری است، مثل ضرب‌کردن دو مجموعه است، نه اضافه کردنشان؛ و اگر بعد از پیوند جمع بزنی، عدد چند بار حساب شده است.",
+   "pitfall_en": "Joining on a non-unique key and then being surprised that the row count multiplied. A duplicated key on one side multiplies the sets rather than adding them; if you sum after the join, several values have been counted more than once.",
+   "related": [
+    "relational-model",
+    "shuffle",
+    "external-sort",
+    "hash-join"
+   ],
+   "chapter_ref": "ch3-data-models"
+  },
+  {
+   "id": "hash",
+   "term": "hash",
+   "term_fa": "هش",
+   "chapter": 4,
+   "chapters": [
+    4,
+    7,
+    11
+   ],
+   "tier": "A",
+   "aliases": [
+    "hash",
+    "hashes",
+    "hashing",
+    "hash function"
+   ],
+   "hook_fa": "چطور هر کلید همیشه به همان عدد می‌رسد؟",
+   "hook_en": "How does a key always land on the same number?",
+   "one_liner_fa": "تابعی که هر ورودی را به یک عدد ثابت تبدیل می‌کند، برای پخش یکنواخت و پیدا کردن سریع.",
+   "one_liner_en": "A function that turns any input into a fixed number, for even spreading and fast lookup.",
+   "daily_fa": "در پارکینگ، بلیت شمارهٔ ۴۷ را به قفسهٔ شمارهٔ ۷ می‌فرستند، چون رقم آخرش ۷ است. هر بار همان بلیت به همان قفسه می‌رود، و کسی لازم نیست یادش بماند کجا گذاشته — فقط قاعده را بلد است.",
+   "daily_en": "In a car park, ticket 47 is sent to rack seven because its last digit is seven. The same ticket always goes to the same rack, and nobody has to remember where it went — you only know the rule.",
+   "everyday_fa": "کتابخانه‌ای را تصور کن که کتاب‌ها را بر اساس حرف اولشان در قفسه می‌چیند. حرف اول یک قاعده است که همیشه یک جواب می‌دهد، پس پیدا کردن کتاب با دانستن اسمش ممکن است. ولی دو نکتهٔ مهم هم دارد. اول، همهٔ کتاب‌هایی که با «م» شروع می‌شوند در یک قفسه جمع می‌شوند؛ یکنواختی واقعی وجود ندارد. دوم، اگر قفسه پر شود و کتابخانه طبقهٔ تازه بسازد، قاعده عوض می‌شود و بخش بزرگی از کتاب‌ها باید جابه‌جا شوند. هر دو نکته دقیقاً همان مشکلاتی است که هر سیستم هشی هم با آن دست‌وپنجه نرم می‌کند.",
+   "everyday_en": "Picture a library that shelves books by their first letter. The first letter is a rule that always gives the same answer, so a book can be found by knowing its title. But two important things follow. Every book starting with the same letter piles into one shelf; real uniformity does not exist. And if that shelf fills and the library adds a floor, the rule changes and a large share of the books must move. Both issues are exactly what every hash-based system wrestles with.",
+   "figure": {
+    "kind": "pipeline",
+    "cap_fa": "کلید وارد تابع هش می‌شود و شمارهٔ سبد بیرون می‌آید؛ همان کلید، همیشه همان سبد.",
+    "cap_en": "A key goes into the hash function and a bucket number comes out; same key, same bucket.",
+    "items": [
+     {
+      "fa": "کلید",
+      "en": "Key",
+      "sub_fa": "مثلاً عدد ۴۷",
+      "sub_en": "say 47"
+     },
+     {
+      "fa": "تابع هش",
+      "en": "Hash function",
+      "sub_fa": "قطعی",
+      "sub_en": "deterministic"
+     },
+     {
+      "fa": "شمارهٔ سبد",
+      "en": "Bucket number",
+      "sub_fa": "۴۷ تقسیم بر ۱۰",
+      "sub_en": "47 mod 10"
+     }
+    ]
+   },
+   "technical_fa": "تابع هش هر ورودی را به یک عدد با طول ثابت تبدیل می‌کند و سه خصلت لازم دارد: قطعی باشد (همان ورودی همیشه همان خروجی)، خروجی‌اش یکنواخت پخش شود، و محاسبه‌اش ارزان باشد. برخورد (collision) طبیعی است: دو کلید مختلف می‌توانند به یک سبد برسند، و سیستم باید با زنجیره‌کردن یا جست‌وجوی باز کنارش بیاید. هش در سه جای معماری تکرار می‌شود. در ایندکس هشی، که پیدا کردن سریع است ولی پیمایش بازه‌ای ممکن نیست چون ترتیب از دست رفته. در تقسیم داده، که کلید به سبد، و سبد به shard نگاشت می‌شود. و در پیوند هشی، که دو مجموعه بر اساس کلید پیوند به یک سبد می‌روند تا بتوانند کنار هم تطبیق داده شوند. هش رمزنگاری‌شی چیز دیگری است: برای یکپارچگی و امضا، نه برای تقسیم داده.",
+   "technical_en": "A hash function maps any input to a fixed-size number and needs three properties: deterministic (same input, same output), evenly distributed output, and cheap to compute. Collisions are normal: two different keys can land in one bucket, and the system must cope with chaining or open addressing. Hashing recurs in three architectural places: a hash index, which is fast for lookups but cannot serve range scans because order is gone; partitioning, where a key maps to a bucket and a bucket to a shard; and hash join, where both sets go to a bucket by join key so they can be matched side by side. A cryptographic hash is a different animal: for integrity and signatures, not for distributing data.",
+   "numbers": [
+    {
+     "v": "1 bucket",
+     "k_fa": "هر کلید دقیقاً به یک سبد می‌رسد، اگر تابع ثابت بماند",
+     "k_en": "a key lands in exactly one bucket, as long as the function is fixed"
+    },
+    {
+     "v": "N → N+1",
+     "k_fa": "با mod N، تغییر تعداد سبدها تقریباً همهٔ کلیدها را جابه‌جا می‌کند",
+     "k_en": "with mod N, changing the bucket count moves almost every key"
+    }
+   ],
+   "sections": [
+    {
+     "h_fa": "چرا mod N شکننده است",
+     "h_en": "Why mod N is brittle",
+     "p_fa": "اگر تعداد سبدها ثابت باشد، mod N یک انتخاب کامل است: ارزان، قطعی، و بدون نیاز به حافظه. مشکل دقیقاً وقتی شروع می‌شود که N عوض شود. با رفتن از N به N+1، تقریباً هر کلید باقی‌ماندهٔ متفاوتی می‌گیرد و مجبور است جابه‌جا شود؛ یعنی یک ماشین اضافه می‌کنی و تقریباً همهٔ داده جابه‌جا می‌شود. راه‌حل‌های عملی دو دسته‌اند: تعداد سبد را ثابت و بزرگ بگیر و در طول رشد فقط سبدها را بین ماشین‌ها جابه‌جا کن، یا از هش سازگار استفاده کن که با تغییر تعداد گره‌ها فقط همان بخش کوچکی که باید، جابه‌جا می‌شود.",
+     "p_en": "If the bucket count never changes, mod N is a perfect choice: cheap, deterministic, stateless. The trouble starts exactly when N changes. Going from N to N+1 gives almost every key a different remainder and forces a move; you add one machine and almost all the data moves. Practical answers split two ways: fix a large bucket count and only move buckets between machines as you grow, or use consistent hashing, where changing the node count moves only the small part that must move."
+    }
+   ],
+   "pitfall_fa": "قاطی کردن هش با رمزنگاری. تابع هش فقط یک قاعدهٔ تقسیم است و هیچ تضمین امنیتی ندارد؛ دو کلید می‌توانند عمداً به یک سبد بیایند. اگر امنیت یا یکپارچگی می‌خواهی، همان تابع کافی نیست و به هش رمزنگاری‌شی و مقایسهٔ محتوا نیاز داری.",
+   "pitfall_en": "Confusing a hash with cryptography. A hash function is just a distribution rule with no security guarantee; two keys can deliberately collide. If you need security or integrity, the plain function is not enough and you need a cryptographic hash plus a content comparison.",
+   "related": [
+    "hash-sharding",
+    "hash-index",
+    "hash-join",
+    "consistent-hashing"
+   ],
+   "chapter_ref": "ch4-storage-retrieval"
+  },
+  {
+   "id": "snapshot",
+   "term": "snapshot",
+   "term_fa": "عکس لحظه‌ای (snapshot)",
+   "chapter": 8,
+   "chapters": [
+    8,
+    12
+   ],
+   "tier": "A",
+   "aliases": [
+    "snapshot",
+    "snapshots"
+   ],
+   "hook_fa": "می‌خواهی بدانی در یک لحظه، همه چیز چه شکلی بود.",
+   "hook_en": "You want to know what everything looked like at one instant.",
+   "one_liner_fa": "نمای سازگارِ وضعیت در یک لحظهٔ منطقی، که تغییرهای بعدی در آن دیده نمی‌شوند.",
+   "one_liner_en": "A consistent view of the state at one logical instant, unaffected by later changes.",
+   "daily_fa": "قبل از اینکه حسابدار دفتر را باز کند و شروع به خط‌زدن کند، از صفحه عکس می‌گیری. ده دقیقه بعد دفتر پر از تغییر است، ولی عکس همان وضع اول را نشان می‌دهد. عکس دروغ نمی‌گوید؛ فقط دربارهٔ لحظهٔ خودش حرف می‌زند.",
+   "daily_en": "Before the accountant opens the ledger and starts crossing things out, you photograph the page. Ten minutes later the book is full of changes, but the photo still shows the original state. The photo is not lying; it only speaks about its own moment.",
+   "everyday_fa": "عکس یادگاری خانوادگی را تصور کن. همه برای یک لحظه می‌ایستند و عکس گرفته می‌شود؛ بعد از آن هر کسی موهایش را درست می‌کند، ولی عکس عوض نمی‌شود. حالا برعکسش را ببین: اگر عکاس بدون اینکه بگوید «ایست»، از جمعیتِ در حال حرکت عکس بگیرد، نتیجه یک تصویر تار است که نه وضع قبل است و نه وضع بعد. بیشتر خرابی‌های پشتیبان‌گیری از همین جنس است: کپی‌ای که در میانهٔ تغییر گرفته شده و هیچ لحظه‌ای را نشان نمی‌دهد.",
+   "everyday_en": "Think of a family photograph. Everyone holds still for a moment and the picture is taken; afterwards people fix their hair, but the picture does not change. Now the reverse: if the photographer shoots a moving crowd without saying “hold still”, the result is a blur that is neither the state before nor the state after. Most backup failures are exactly this: a copy taken mid-change that represents no instant at all.",
+   "figure": {
+    "kind": "timeline",
+    "cap_fa": "عکس در یک لحظه گرفته می‌شود و بعد از آن ثابت می‌ماند، هرچند وضعیت عوض شود.",
+    "cap_en": "A snapshot is taken at one instant and stays fixed while the state moves on.",
+    "items": [
+     {
+      "fa": "لحظهٔ عکس",
+      "en": "snapshot time",
+      "note_fa": "وضعیت ثبت شد",
+      "note_en": "state recorded"
+     },
+     {
+      "fa": "تغییرها",
+      "en": "changes",
+      "note_fa": "ردیف عوض شد",
+      "note_en": "a row changed"
+     },
+     {
+      "fa": "خواندن عکس",
+      "en": "read the snapshot",
+      "note_fa": "همان وضع قبلی",
+      "note_en": "the older state"
+     }
+    ]
+   },
+   "technical_fa": "عکس لحظه‌ای یعنی یک «برش» سازگار از وضعیت در یک نقطهٔ منطقی از زمان: هیچ تراکنشی نصفه در آن دیده نمی‌شود، و تغییرهایی که بعد از آن نقطه کامیت شده‌اند در آن نیستند. سه کاربرد اصلی دارد. اول، در جداسازی: در snapshot isolation هر تراکنش از یک عکس می‌خواند و نسخه‌های قدیمی نگه داشته می‌شوند تا آن عکس معتبر بماند؛ بهایش فضای اضافه و نیاز به پاک‌سازی نسخه‌های مرده است. دوم، در پشتیبان‌گیری: یک پشتیبان معتبر باید از یک نقطهٔ سازگار گرفته شود، یا با کمک لاگ تراکنشی به آن نقطه برسد. سوم، در پردازش جریانی: چک‌پوینت، عکسی از وضعیت عملگرها به‌همراه آفست ورودی است، تا بعد از خرابی بتوان از همان نقطه ادامه داد.",
+   "technical_en": "A snapshot is a consistent cut of the state at one logical point in time: no transaction is caught half-applied, and changes committed after that point are absent. It has three main uses. In isolation: under snapshot isolation each transaction reads from a snapshot, and old versions are retained so that snapshot stays valid — paid for in space and in cleaning up dead versions. In backup: a valid backup must be taken at a consistent point, or brought to one using the transaction log. In stream processing: a checkpoint is a snapshot of operator state together with the input offset, so work can resume from there after a failure.",
+   "numbers": [
+    {
+     "v": "1 instant",
+     "k_fa": "عکس، وضعیت یک لحظهٔ منطقی است، نه یک بازه",
+     "k_en": "a snapshot is one logical instant, not a range"
+    },
+    {
+     "v": "2 parts",
+     "k_fa": "چک‌پوینت جریانی: وضعیت عملگرها + آفست ورودی",
+     "k_en": "a stream checkpoint: operator state plus input offset"
+    }
+   ],
+   "sections": [
+    {
+     "h_fa": "چرا کپی‌کردن فایل، پشتیبان نیست",
+     "h_en": "Why copying files is not a backup",
+     "p_fa": "اگر فایل‌های یک پایگاه دادهٔ در حال کار را کپی کنی، ممکن است بعضی صفحه‌ها مربوط به بعد از یک تراکنش باشند و بعضی قبل از آن. نتیجه یک تصویر ناسازگار است که هیچ لحظه‌ای را نشان نمی‌دهد — نه وضع قبل، نه وضع بعد. به همین دلیل ابزارهای پشتیبان‌گیری یا از قابلیت عکس خودِ موتور استفاده می‌کنند، یا فایل‌ها را همراه با لاگ تراکنشی کپی می‌کنند و هنگام بازیابی لاگ را تا نقطهٔ سازگار بازپخش می‌کنند. تفاوت این دو، همان تفاوت «عکس با اجازهٔ ایست» و «عکس از جمعیت در حال حرکت» است.",
+     "p_en": "If you copy the files of a running database, some pages may belong after a transaction and some before it. The result is an inconsistent image that represents no instant — neither before nor after. That is why backup tools either use the engine's own snapshot facility, or copy the files along with the transaction log and replay the log to a consistent point during restore. The difference is the one between photographing a crowd that was asked to stand still and one that was not."
+    }
+   ],
+   "pitfall_fa": "فکر کردن این‌که «عکس گرفتن» خودش رایگان است. نگه‌داشتن یک عکس معتبر یعنی نگه‌داشتن نسخه‌های قدیمی؛ اگر نسخه‌ها را زودتر پاک کنی، عکسی که باز است ناگهان بی‌اعتبار می‌شود و تراکنش‌های درازمدت خراب می‌شوند. مرزِ پاک‌سازی باید همیشه عقب‌تر از قدیمی‌ترین عکسِ در حال استفاده باشد.",
+   "pitfall_en": "Assuming taking a snapshot is free. Keeping a snapshot valid means keeping old versions; clean them up too early and an open snapshot suddenly becomes invalid, breaking long-running transactions. The cleanup horizon must always stay behind the oldest snapshot still in use.",
+   "related": [
+    "snapshot-isolation",
+    "mvcc",
+    "checkpoint",
+    "backup-restore"
+   ],
+   "chapter_ref": "ch8-transactions"
   }
  ]
 }

@@ -82,6 +82,7 @@ window.DDIA_GLOSSARY = {
 "event-sourcing",
 "graph-model",
 "impedance-mismatch",
+"join",
 "keyset-pagination",
 "locality",
 "materialized-view",
@@ -103,6 +104,7 @@ window.DDIA_GLOSSARY = {
 "durability",
 "fsync",
 "group-commit",
+"hash",
 "hash-index",
 "in-memory-db",
 "index",
@@ -195,6 +197,7 @@ window.DDIA_GLOSSARY = {
 "repeatable-read",
 "serializability",
 "skip-locked",
+"snapshot",
 "snapshot-isolation",
 "ssi",
 "stored-procedure",
@@ -1188,6 +1191,22 @@ window.DDIA_GLOSSARY = {
 "page":"ch3/index.html",
 "section":""
 },
+"join":{
+"term":"join",
+"term_fa":"پیوند (join)",
+"aliases":[
+"join",
+"joins",
+"joining",
+"inner join",
+"outer join"
+],
+"one_liner_fa":"چسباندن ردیف‌های دو مجموعه بر اساس یک شرط مشترک.",
+"one_liner_en":"Sticking rows of two sets together on a shared condition.",
+"chapter":3,
+"page":"ch3/index.html",
+"section":""
+},
 "keyset-pagination":{
 "term":"keyset pagination",
 "term_fa":"صفحه‌بندی کلیدمحور",
@@ -1494,6 +1513,21 @@ window.DDIA_GLOSSARY = {
 "page":"ch4/index.html",
 "section":""
 },
+"hash":{
+"term":"hash",
+"term_fa":"هش",
+"aliases":[
+"hash",
+"hashes",
+"hashing",
+"hash function"
+],
+"one_liner_fa":"تابعی که هر ورودی را به یک عدد ثابت تبدیل می‌کند، برای پخش یکنواخت و پیدا کردن سریع.",
+"one_liner_en":"A function that turns any input into a fixed number, for even spreading and fast lookup.",
+"chapter":4,
+"page":"ch4/index.html",
+"section":""
+},
 "hash-index":{
 "term":"hash index",
 "term_fa":"ایندکس هشی",
@@ -1761,7 +1795,8 @@ window.DDIA_GLOSSARY = {
 "encoded",
 "decode",
 "decoder",
-"decoding"
+"decoding",
+"JSON"
 ],
 "one_liner_fa":"تبدیل داده به قالبی از بایت که طرف مقابل دوباره از آن داده بسازد.",
 "one_liner_en":"Turning data into a byte layout that the other side can turn back into data.",
@@ -2473,7 +2508,11 @@ window.DDIA_GLOSSARY = {
 "shard",
 "shards",
 "sharded",
-"shardable"
+"shardable",
+"partition",
+"partitions",
+"partitioning",
+"partitioned"
 ],
 "one_liner_fa":"شکستن داده به تیکه‌های جدا که هر رکورد فقط توی یک تیکه می‌نشیند.",
 "one_liner_en":"Splitting data into disjoint pieces so each record lives in exactly one piece.",
@@ -2829,6 +2868,19 @@ window.DDIA_GLOSSARY = {
 ],
 "one_liner_fa":"برداشتن کاری که هنوز دست کسی نیست و رد کردن بقیه، به‌جای ایستادن در صف.",
 "one_liner_en":"Take the next job nobody is already holding, and step over the rest instead of queueing.",
+"chapter":8,
+"page":"ch8/index.html",
+"section":""
+},
+"snapshot":{
+"term":"snapshot",
+"term_fa":"عکس لحظه‌ای (snapshot)",
+"aliases":[
+"snapshot",
+"snapshots"
+],
+"one_liner_fa":"نمای سازگارِ وضعیت در یک لحظهٔ منطقی، که تغییرهای بعدی در آن دیده نمی‌شوند.",
+"one_liner_en":"A consistent view of the state at one logical instant, unaffected by later changes.",
 "chapter":8,
 "page":"ch8/index.html",
 "section":""
@@ -3337,7 +3389,8 @@ window.DDIA_GLOSSARY = {
 "Lamport clock",
 "Lamport clocks",
 "Lamport timestamp",
-"logical clock"
+"logical clock",
+"Lamport"
 ],
 "one_liner_fa":"شمارنده‌ای که با هر رویداد یکی جلو می‌رود و با هر خبر، از خبر جلو می‌زند.",
 "one_liner_en":"A counter that ticks on every event and jumps past every message it receives.",
@@ -3490,7 +3543,9 @@ window.DDIA_GLOSSARY = {
 "batch processing",
 "batch job",
 "batch jobs",
-"batch"
+"batch",
+"job",
+"jobs"
 ],
 "one_liner_fa":"خواندن یک‌جای داده‌ای که اندازه‌اش معلوم است و ساختن خروجی تازه از آن.",
 "one_liner_en":"Reading a data set of known size in one go and producing a fresh output from it.",

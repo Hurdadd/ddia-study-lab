@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- The glossary grew from 39 terms to 284, one for every technical term the Persian
+- The glossary grew from 39 terms to 287, one for every technical term the Persian
   chapters actually use, and every entry got deeper. Each one now runs: a jargon-free
   everyday scene, an analogy, a generated diagram, the technical account, key
   numbers, one or more long-form sections, an optional comparison table, the usual
@@ -25,6 +25,10 @@
   language, and the hover now advertises the diagram too.
 - The homepage gained a glossary band with the live term count, and
   `assets/check_glossary.py` now fails if that number drifts from the data.
+- Three hubs were added after the vocabulary audit: `join` (two inputs, one
+  result), `hash` (a key to a bucket) and `snapshot` (one consistent instant), plus
+  synonym aliases so `partition`, `job`, `JSON` and `Lamport` resolve to the entry
+  that already explains them.
 - `assets/check_glossary.py` checks the index, every chapter page, every card, every
   figure caption, every marker definition, every internal link and every chapter
   page's asset wiring.

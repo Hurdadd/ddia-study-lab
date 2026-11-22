@@ -30,7 +30,7 @@ Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd
 - **Languages:** Persian (RTL) and English, light and dark themes.
 - **Covers:** replication, sharding, transactions, consensus, storage engines, batch and stream processing, CDC, exactly-once, schema evolution, ethics.
 - **Interactive parts:** 113 diagrams, 43 inline labs (3 per chapter, 4 in chapter 6), and an exercise studio with 84 exercises. Run an exercise to see packets flow, bottlenecks appear and a pass/fail verdict.
-- **Glossary:** 284 technical terms get a dotted underline in the chapters; hover previews a one-line definition and clicking opens the entry — a jargon-free everyday scene, an analogy, a generated diagram, the technical account with key numbers, longer sections and the usual trap. The index lives at [`glossary/index.html`](glossary/index.html) and every chapter has its own page of entries.
+- **Glossary:** 287 technical terms get a dotted underline in the chapters; hover previews a one-line definition and clicking opens the entry — a jargon-free everyday scene, an analogy, a generated diagram, the technical account with key numbers, longer sections and the usual trap. The index lives at [`glossary/index.html`](glossary/index.html) and every chapter has its own page of entries.
 - **Entry points:** [`index.html`](index.html), `ch1-tradeoffs/` to `ch14-doing-right/`, [`glossary/index.html`](glossary/index.html), [`studio/index.html`](studio/index.html), [`final-project/index.html`](final-project/index.html).
 - **Machine-readable summary:** [`llms.txt`](llms.txt). Studio internals: [`docs/STUDIO.md`](docs/STUDIO.md).
 - **Run it:** `python3 -m http.server 8766 --bind 127.0.0.1`, then open `http://127.0.0.1:8766/`.
@@ -55,7 +55,7 @@ Most distributed-systems notes stop at definitions. Most AI-platform repos start
 | 📚 **14 bilingual chapters** | Persian + English, each with an at-a-glance table, frequent interview questions, common mistakes and a 5-minute checklist |
 | 📊 **113 interactive diagrams** | Dataflows, lifecycles, UML and decision trees — every one followed by a step-by-step narration, as if a teacher stood at the board |
 | 🔬 **43 inline labs** | Three short experiments in each chapter: pick a decision, step through events, replay the whole flow and see what survives a crash, retry or lag |
-| 🔤 **284-term glossary** | Jargon words in a chapter are dotted; hover for a one-line definition, click for the full entry — a jargon-free everyday scene, an analogy, a generated diagram, the technical account with key numbers, then the usual trap |
+| 🔤 **287-term glossary** | Jargon words in a chapter are dotted; hover for a one-line definition, click for the full entry — a jargon-free everyday scene, an analogy, a generated diagram, the technical account with key numbers, then the usual trap |
 | 🛠️ **Exercise studio** | Draw a design, press **Run** and watch packets flow, then get a verdict, a score, a reference and a step-by-step solution, all offline |
 | 🧪 **49 reviewed exercises** | Leveled, prioritized, with interview briefs — plus a [2026 assessment & Senior/Staff path](https://ddia-study-lab.vercel.app/exercise-audit.html) |
 | 🏗️ **Capstone: Own the Stack** | One AI platform, five capabilities, fifteen ADRs with rationale, alternatives, validation and revisit triggers |
