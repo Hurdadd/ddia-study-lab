@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Check the inline glossary end to end.
+"""Check the glossary end to end.
 
-1. assets/glossary.json validates and the committed artefacts are in step.
-2. Every term has a card on the generated page and a row in the hover data.
-3. Every page that mentions a term loads the stylesheet and the scripts.
+1. assets/glossary.json validates and every committed page matches the builder.
+2. Every term has a full card on its chapter page and a row in the hover data.
+3. The index lists every term exactly once and every link resolves.
+4. Every figure has a caption and its own marker definition.
+5. Every chapter page that marks terms loads the glossary stylesheet and scripts.
 
 Run: python3 assets/check_glossary.py
 """
@@ -12,40 +14,109 @@ import json, re, subprocess, sys
 
 ROOT = Path(__file__).resolve().parent.parent
 TERMS = ROOT / 'assets' / 'glossary.json'
-PAGE = ROOT / 'glossary' / 'index.html'
+INDEX = ROOT / 'glossary' / 'index.html'
 JS = ROOT / 'assets' / 'glossary-data.js'
 
+PREVIEW = '--preview' in sys.argv
 problems = []
 
 # 1. generator agreement
-proc = subprocess.run([sys.executable, str(ROOT / 'assets' / 'build_glossary.py'), '--check'],
+proc = subprocess.run([sys.executable, str(ROOT / 'assets' / 'build_glossary.py'), '--check']
+                      + (['--preview'] if PREVIEW else []),
                       capture_output=True, text=True)
 if proc.returncode != 0:
-    problems.append('build_glossary.py --check failed: ' + (proc.stdout + proc.stderr).strip()[:400])
+    problems.append('build_glossary.py --check failed: ' + (proc.stdout + proc.stderr).strip()[:800])
 
 doc = json.loads(TERMS.read_text(encoding='utf-8'))
 terms = doc['terms']
 ids = [t['id'] for t in terms]
 
-# 2. page and data coverage
-page = PAGE.read_text(encoding='utf-8')
+index_page = INDEX.read_text(encoding='utf-8')
 data = JS.read_text(encoding='utf-8')
-for tid in ids:
-    if 'id="%s"' % tid not in page:
-        problems.append('page is missing card #%s' % tid)
+
+pages = {}
+for t in terms:
+    path = INDEX.parent / ('ch%d' % t['chapter']) / 'index.html'
+    if not path.exists():
+        problems.append('missing chapter page %s' % path.relative_to(ROOT))
+        pages[t['chapter']] = ''
+    else:
+        pages[t['chapter']] = path.read_text(encoding='utf-8')
+
+# 2. a full card per term, on the right page
+for t in terms:
+    tid = t['id']
+    body = pages.get(t['chapter'], '')
+    if 'id="%s"' % tid not in body:
+        problems.append('page for chapter %d is missing card #%s' % (t['chapter'], tid))
+        continue
+    card = re.search(r'<article class="gl-card" id="%s".*?</article>' % re.escape(tid), body, re.S)
+    if not card:
+        continue
+    html = card.group(0)
+    for need, label in (('<div class="gl-block daily">', 'everyday example'),
+                        ('<div class="gl-block tech">', 'technical block')):
+        if need not in html:
+            problems.append('#%s has no %s' % (tid, label))
+    has_fig = '<figure class="gl-fig"' in html
+    if t.get('figure') and not has_fig:
+        problems.append('#%s declares a figure but renders none' % tid)
+    if not t.get('figure') and has_fig:
+        problems.append('#%s renders a figure it does not declare' % tid)
     if '"%s":{' % tid not in data:
         problems.append('hover data is missing #%s' % tid)
-for need in ('glossary.css', 'glossary-data.js', 'glossary.js'):
-    if need not in page:
-        problems.append('page does not load %s' % need)
 
-# every href the page links to must resolve inside the repo
-for href in re.findall(r'href="(\.\./[^"#?]+)"', page):
-    target = (PAGE.parent / href).resolve()
-    if not target.exists():
-        problems.append('broken link on the glossary page: %s' % href)
+# 3. the index lists every term once, and its links point at a real page and anchor
+rows = re.findall(r'<a class="gl-row" href="ch(\d+)/index\.html#([a-z0-9-]+)"', index_page)
+seen = {}
+for ch, tid in rows:
+    if tid in seen:
+        problems.append('index lists #%s twice' % tid)
+    seen[tid] = int(ch)
+for t in terms:
+    if t['id'] not in seen:
+        problems.append('index does not list #%s' % t['id'])
+    elif seen[t['id']] != t['chapter']:
+        problems.append('#%s is listed under chapter %d but lives in %d'
+                        % (t['id'], seen[t['id']], t['chapter']))
+for ch, tid in rows:
+    body = pages.get(int(ch))
+    if body is not None and 'id="%s"' % tid not in body:
+        problems.append('index link #%s does not resolve on chapter page %s' % (tid, ch))
 
-# 3. pages that use the glossary must load its assets, in the right relative form
+# 4. figures: captions and per-figure markers
+total_fig = 0
+for ch, body in pages.items():
+    for need in ('glossary.css', 'glossary-data.js', 'glossary.js'):
+        if '../assets/%s' % need not in body:
+            problems.append('chapter page %d does not load %s' % (ch, need))
+    used = set(re.findall(r'marker-end="url\(#(f\d+)\)"', body))
+    defined = set(re.findall(r'<marker id="(f\d+)"', body))
+    for m in sorted(used - defined):
+        problems.append('chapter %d uses marker #%s but never defines it' % (ch, m))
+    figs = len(re.findall(r'<figure class="gl-fig"', body))
+    total_fig += figs
+    if figs != len(re.findall(r'<figcaption>', body)):
+        problems.append('chapter %d: %d figures but %d captions'
+                        % (ch, figs, len(re.findall(r'<figcaption>', body))))
+declared_fig = sum(1 for t in terms if t.get('figure'))
+if total_fig != declared_fig:
+    problems.append('%d figures rendered for %d declared' % (total_fig, declared_fig))
+
+# 5. links out of the glossary pages resolve inside the repo
+check_paths = [(INDEX, index_page)]
+for ch in pages:
+    check_paths.append((INDEX.parent / ('ch%d' % ch) / 'index.html', pages[ch]))
+for path, body in check_paths:
+    for href in re.findall(r'href="((?:\.\./)[^"#?]+)"', body):
+        target = (path.parent / href).resolve()
+        # a preview build has no page for a chapter whose terms are not written yet
+        if PREVIEW and re.search(r'(?:^|/)ch\d+/index\.html$', href) and not target.exists():
+            continue
+        if not target.exists():
+            problems.append('broken link on %s: %s' % (path.relative_to(ROOT), href))
+
+# 6. the pages that mark terms must load the glossary, in the right relative form
 wired = 0
 for path in sorted(ROOT.glob('ch*/index.html')):
     s = path.read_text(encoding='utf-8')
@@ -57,7 +128,22 @@ root = (ROOT / 'index.html').read_text(encoding='utf-8')
 if 'assets/glossary.js' not in root:
     problems.append('index.html does not load the glossary assets')
 
-# 4. the data file must not claim terms the page does not have
+# 7. the homepage advertises a count; it must be the real one
+m = None if PREVIEW else re.search(r'<section class="gloss-band".*?</section>', root, re.S)
+if not m and not PREVIEW:
+    problems.append('index.html lost the glossary band')
+elif m:
+    fa = re.search(r'<span class="fa">([۰-۹]+) واژه', m.group(0))
+    en = re.search(r'<span class="en">(\d+) terms', m.group(0))
+    want = len(terms)
+    if en and int(en.group(1)) != want:
+        problems.append('homepage says %s terms, glossary has %d' % (en.group(1), want))
+    if fa:
+        fa_n = int(fa.group(1).translate(str.maketrans('۰۱۲۳۴۵۶۷۸۹', '0123456789')))
+        if fa_n != want:
+            problems.append('homepage says %d terms in Persian, glossary has %d' % (fa_n, want))
+
+# 8. the data file must not claim terms that have no page
 declared = set(re.findall(r'"([a-z0-9-]+)":\{"term"', data))
 for tid in sorted(declared - set(ids)):
     problems.append('hover data declares an unknown term: %s' % tid)
@@ -67,5 +153,6 @@ if problems:
         print('FAIL: ' + p)
     sys.exit(1)
 
-print('PASS: %d terms across %d chapters; %d chapter pages wired; page, hover data and JSON in step'
-      % (len(terms), len({t['chapter'] for t in terms}), wired))
+print('PASS: %d terms across %d chapter pages, %d figures; %d chapter pages wired; '
+      'index, pages, hover data and JSON in step'
+      % (len(terms), len(pages), total_fig, wired))

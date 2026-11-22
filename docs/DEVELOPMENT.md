@@ -8,22 +8,41 @@ JSON ledgers, then `python3 assets/check_final_project.py` and
 `python3 assets/structcheck.py index.html final-project/index.html`.
 Run `python3 assets/build_site.py` to create the isolated `public/` export.
 
-## Inline glossary
+## Glossary
 
 `assets/glossary.json` is the single source of truth for the technical terms. Each
-entry carries a bilingual one-line definition (the hover preview), an everyday
-analogy, the technical account, and the trap the analogy usually hides.
+entry is written twice (Persian and English) and carries, in this order: a one-line
+definition for the hover preview, a jargon-free everyday scene, an analogy, an
+optional generated diagram, the technical account, key numbers, longer sections, an
+optional comparison table, the usual trap, and related terms.
 
-    python3 assets/build_glossary.py    # writes glossary/index.html and assets/glossary-data.js
-    python3 assets/check_glossary.py    # validates the data, both artefacts and the page wiring
+Every entry also has a `tier`. Tier A must ship a figure and at least one long-form
+section; tier B is a full but shorter entry. The floor each tier has to clear is in
+`FLOOR` in `assets/build_glossary.py`, and the checker enforces it, so a thin entry
+fails the build rather than shipping.
 
-Edit the JSON, never the two generated files. `assets/glossary.js` marks the first
-mention of a term inside each chapter section with a dotted underline, previews the
-definition on hover or keyboard focus, and links to the entry. Marking is capped at
-three per term per language and four per paragraph, so a long chapter does not fill
-with marks; add `data-no-glossary` to opt a subtree out. `section` in an entry is
-optional: without it the builder anchors the entry to the first chapter section that
-mentions the term.
+    python3 assets/build_glossary.py    # writes glossary/ and assets/glossary-data.js
+    python3 assets/check_glossary.py    # validates data, pages, figures and wiring
+    python3 assets/build_glossary.py --preview   # build only the terms that exist
+
+One page for every entry would run to several megabytes, so the glossary is published
+as `glossary/index.html` (every term, one row each, searchable) plus
+`glossary/ch<N>/index.html` (the full entries for one chapter). Links from a chapter
+point at the exact page and anchor. `assets/glossary-data.js` carries only the
+one-line definitions, so it stays small enough to load on every chapter page.
+
+Diagrams are generated, not drawn: `assets/figures.py` renders a declared spec
+(`split`, `compare`, `pipeline`, `ladder`, `timeline`, `grid`, `ring`, `quorum`,
+`bars`) into inline SVG with no colour literals, so light, dark, RTL and LTR all work
+and the page stays `file://` safe. `figures.validate()` is the contract; label lengths
+are part of it. Add a new kind by adding a renderer and a validation branch together.
+
+`assets/glossary.js` marks the first mentions of a term in a chapter with a dotted
+underline, previews the definition on hover or keyboard focus, and links to the entry.
+Marking is capped at two per term per language and four per paragraph, so a long
+chapter does not fill with marks; add `data-no-glossary` to opt a subtree out.
+`section` in an entry is optional: without it the builder anchors the entry to the
+first chapter section that mentions the term.
 
 For browser verification use Node 22+, `npm ci`, and `npm run test:browser` with the
 local server running on port 8766. Chrome is the default. Alternatively run

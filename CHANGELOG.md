@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- The glossary grew from 39 terms to 284, one for every technical term the Persian
+  chapters actually use, and every entry got deeper. Each one now runs: a jargon-free
+  everyday scene, an analogy, a generated diagram, the technical account, key
+  numbers, one or more long-form sections, an optional comparison table, the usual
+  trap, and related terms. Entries carry a tier: tier A must ship a figure and at
+  least one section, tier B is a full but shorter entry, and the checker refuses an
+  entry that falls below its floor.
+- Diagrams are generated, not drawn. `assets/figures.py` renders a declared spec into
+  inline SVG in nine shapes — split, compare, pipeline, ladder, timeline, grid, ring,
+  quorum, bars — with no colour literals, so light, dark, RTL and LTR all work and the
+  page stays `file://` safe. 223 entries carry one; label lengths and structure are
+  validated before the page is written.
+- One page for 284 entries would be several megabytes, so the glossary is published
+  as an index (`glossary/index.html`) plus one page per chapter
+  (`glossary/ch<N>/index.html`). The index lists every term on one line, searchable in
+  both languages; the chapter pages carry the full entries, a pager and a "see in
+  context" link into the chapter itself. Chapter marks now resolve to the exact page
+  and anchor.
+- `assets/glossary-data.js` keeps only the hover definitions (128 KB), so every
+  chapter page can load it. Marking stays capped at two mentions per term per
+  language, and the hover now advertises the diagram too.
+- The homepage gained a glossary band with the live term count, and
+  `assets/check_glossary.py` now fails if that number drifts from the data.
+- `assets/check_glossary.py` checks the index, every chapter page, every card, every
+  figure caption, every marker definition, every internal link and every chapter
+  page's asset wiring.
+
 - Added a 39-term bilingual glossary at `glossary/index.html`. Every entry is written
   twice: an everyday analogy first, then the technical account, then the trap the
   analogy hides. Each term also carries a one-sentence definition used by the hover

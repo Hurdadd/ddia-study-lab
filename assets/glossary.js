@@ -16,16 +16,20 @@
   function lang() { return docEl.getAttribute("lang") === "fa" ? "fa" : "en"; }
   function pick(obj, field) { return obj[field + "_" + lang()] || obj[field + "_en"] || ""; }
 
-  /* ---- where the glossary page lives, resolved from this script's own URL ---- */
+  /* ---- where the glossary lives, resolved from this script's own URL ---- */
   var self = document.currentScript ||
     document.querySelector('script[src$="glossary.js"]') ||
     document.querySelector('script[src*="glossary.js"]');
-  var GLOSSARY_URL = "glossary/index.html";
+  var SITE_ROOT = null;
   if (self && self.src) {
-    try { GLOSSARY_URL = new URL("../glossary/index.html", self.src).href; } catch (e) {}
+    try { SITE_ROOT = new URL("../", self.src).href; } catch (e) {}
   }
+  /* entries live on a per-chapter page, so the data says which one */
   function entryUrl(id) {
-    return GLOSSARY_URL.split("#")[0] + "#" + id;
+    var t = terms[id] || {};
+    var rel = "glossary/" + (t.page || "index.html");
+    try { return new URL(rel, SITE_ROOT || location.href).href + "#" + id; }
+    catch (e) { return "glossary/" + (t.page || "index.html") + "#" + id; }
   }
 
   /* ---------------------------------------------------------------- marking */
@@ -193,7 +197,7 @@
     var more = document.createElement("p");
     more.className = "more";
     more.innerHTML = '<i aria-hidden="true">&rarr;</i>' +
-      (fa ? "<span>مثال روزمره + توضیح فنی</span>" : "<span>Everyday example + technical detail</span>");
+      (fa ? "<span>مثال روزمره، نمودار و توضیح فنی</span>" : "<span>Everyday example, diagram and technical detail</span>");
 
     p.appendChild(label);
     if (body.textContent) p.appendChild(body);
@@ -251,38 +255,46 @@
   /* ---------------------------------------------------- glossary page tools */
 
   function pageTools() {
+    var list = document.getElementById("gl-list");
     var grid = document.getElementById("gl-grid");
-    if (!grid) return;
+    if (!list && !grid) return;
     var input = document.getElementById("gl-search");
-    var chips = Array.prototype.slice.call(document.querySelectorAll("[data-gl-chapter]"));
-    var cards = Array.prototype.slice.call(grid.querySelectorAll(".gl-card"));
     var count = document.getElementById("gl-count");
     var empty = document.getElementById("gl-empty");
-    var activeChapter = "all";
+    var groups = Array.prototype.slice.call(
+      (list || grid).querySelectorAll(".gl-chgroup, .gl-section"));
+    /* index page: one row per term. chapter page: full cards, no filter UI. */
+    var rows = list ? Array.prototype.slice.call(list.querySelectorAll(".gl-row")) : [];
+    var cards = grid ? Array.prototype.slice.call(grid.querySelectorAll(".gl-card")) : [];
+    var items = list ? rows : cards;
 
-    /* Searchable text is read from the card itself, minus the labels, so the page
-       carries no duplicated index and both languages stay searchable. */
-    function haystack(card) {
-      var clone = card.cloneNode(true);
-      var drop = clone.querySelectorAll("h3, .gl-related, .gl-chapter");
+    function haystack(el) {
+      var clone = el.cloneNode(true);
+      var drop = clone.querySelectorAll("h3, .gl-related, .gl-chapter, .gl-deep, .gl-vs, .gl-stats");
       for (var i = 0; i < drop.length; i++) drop[i].parentNode.removeChild(drop[i]);
       return clone.textContent.toLowerCase().replace(/\s+/g, " ");
     }
-    cards.forEach(function (card) { card._hay = haystack(card); });
+    items.forEach(function (el) { el._hay = haystack(el); });
 
     function apply() {
       var q = (input && input.value || "").trim().toLowerCase();
       var shown = 0;
-      cards.forEach(function (card) {
-        var hay = card._hay || "";
-        var ch = card.getAttribute("data-chapter");
-        var ok = (activeChapter === "all" || ch === activeChapter) && (!q || hay.indexOf(q) !== -1);
-        card.hidden = !ok;
+      items.forEach(function (el) {
+        var ok = !q || (el._hay || "").indexOf(q) !== -1;
+        el.hidden = !ok;
         if (ok) shown++;
       });
-      if (count) count.textContent = shown + " / " + cards.length;
+      /* a chapter heading with nothing under it reads as a bug, not as an empty result */
+      groups.forEach(function (g) {
+        var any = false;
+        var list2 = g.querySelectorAll(".gl-row, .gl-card");
+        for (var i = 0; i < list2.length; i++) { if (!list2[i].hidden) { any = true; break; } }
+        g.hidden = !any;
+      });
+      if (count) count.textContent = shown + " / " + items.length;
       if (empty) empty.hidden = shown > 0;
     }
+
     if (input) {
       input.addEventListener("input", apply);
       input.addEventListener("keydown", function (e) {
@@ -300,13 +312,6 @@
           .observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
       }
     }
-    chips.forEach(function (chip) {
-      chip.addEventListener("click", function () {
-        activeChapter = chip.getAttribute("data-gl-chapter");
-        chips.forEach(function (c) { c.setAttribute("aria-pressed", String(c === chip)); });
-        apply();
-      });
-    });
     apply();
   }
 
