@@ -8,7 +8,7 @@ OUT=ROOT/'public'
 if OUT.exists(): shutil.rmtree(OUT)
 OUT.mkdir()
 allowed={'.html','.css','.js','.json','.svg','.png','.webp','.jpg','.woff2','.txt'}
-for source in [ROOT/'assets',ROOT/'studio',ROOT/'final-project',ROOT/'docs',*sorted(ROOT.glob('ch[0-9]*'))]:
+for source in [ROOT/'assets',ROOT/'glossary',ROOT/'studio',ROOT/'final-project',ROOT/'docs',*sorted(ROOT.glob('ch[0-9]*'))]:
  for p in source.rglob('*'):
   if not p.is_file() or p.suffix not in allowed: continue
   if any(s.startswith('.') or s=='__pycache__' for s in p.relative_to(ROOT).parts): continue

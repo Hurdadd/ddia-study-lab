@@ -1,0 +1,208 @@
+/* DDIA Study — inline glossary: hoverable technical terms + a dedicated explanation page.
+   Extends assets/ddia.css tokens (cream/cocoa, pastel hue, Vazirmatn/Nunito).
+   file:// safe: no fetch, no modules, no dependencies. */
+
+/* ---------- the term itself ---------- */
+.term{
+  color:inherit;
+  text-decoration:underline;
+  text-decoration-style:dotted;
+  text-decoration-thickness:1.5px;
+  text-underline-offset:.3em;
+  text-decoration-color:var(--hue-deep);
+  border-radius:4px;
+  cursor:help;
+  transition:background .18s var(--ease), text-decoration-color .18s var(--ease);
+}
+.term:hover,.term:focus-visible{
+  background:var(--ground-3);
+  background:color-mix(in srgb, var(--hue) 55%, transparent);
+  text-decoration-color:var(--ink);
+  color:var(--ink);
+}
+.term:focus-visible{outline:3px solid #ff7e49; outline-offset:3px}
+.term::after{
+  content:"?";
+  font-family:var(--font-display);
+  font-size:.55em; font-weight:900;
+  vertical-align:super; line-height:.4;
+  color:var(--hue-deep);
+  opacity:.45;
+  margin-inline-start:.1em;
+  transition:opacity .18s var(--ease);
+}
+.term:hover::after,.term:focus-visible::after{opacity:.95}
+html[data-theme="dark"] .term::after{color:var(--hue)}
+/* the pastel wash must stay dark enough for near-white ink */
+html[data-theme="dark"] .term:hover,
+html[data-theme="dark"] .term:focus-visible{
+  background:var(--ground-3);
+  background:color-mix(in srgb, var(--hue) 20%, transparent);
+}
+
+/* ---------- hover / focus preview ---------- */
+.term-pop{
+  position:fixed; z-index:80;
+  max-width:min(360px,calc(100vw - 20px));
+  padding:14px 18px;
+  background:var(--ground-2);
+  color:var(--ink);
+  border:1px solid var(--line);
+  border-inline-start:6px solid var(--hue-deep);
+  border-radius:16px;
+  box-shadow:0 14px 40px rgb(48 40 40/.16), 0 2px 6px rgb(48 40 40/.08);
+  font-size:15px; line-height:1.85;
+  opacity:0; visibility:hidden;
+  transform:translateY(6px);
+  transition:opacity .16s var(--ease), transform .16s var(--ease), visibility .16s;
+  pointer-events:none;
+}
+html[lang="en"] .term-pop{line-height:1.6; font-size:14.5px}
+.term-pop.is-on{opacity:1; visibility:visible; transform:none}
+.term-pop b{
+  display:block;
+  font-family:var(--font-display); font-weight:900; font-size:.82rem;
+  letter-spacing:.03em; color:var(--hue-deep);
+  margin-bottom:4px;
+}
+html[data-theme="dark"] .term-pop{border-inline-start-color:var(--hue); box-shadow:0 18px 44px rgb(0 0 0/.5)}
+html[data-theme="dark"] .term-pop b{color:var(--hue)}
+.term-pop p{margin:0; max-width:none}
+.term-pop .more{
+  margin-top:8px; font-size:.8rem; font-weight:800; color:var(--muted);
+  display:flex; align-items:center; gap:6px;
+}
+.term-pop .more i{font-style:normal; color:var(--hue-deep)}
+html[lang="fa"] .term-pop .more i{transform:scaleX(-1)}
+html[data-theme="dark"] .term-pop .more i{color:var(--hue)}
+@media (hover:none), (pointer:coarse){
+  .term-pop{display:none}
+  .term{cursor:pointer}
+}
+
+/* ---------- the glossary page ---------- */
+.gl-tools{
+  position:sticky; top:0; z-index:40;
+  display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+  padding:14px 0 12px; margin:0 0 26px;
+  background:var(--ground);
+  border-bottom:2px solid var(--line);
+}
+.gl-search{
+  flex:1 1 260px; min-width:180px;
+  font:inherit; font-size:15px;
+  padding:11px 16px;
+  background:var(--ground-2); color:var(--ink);
+  border:2px solid var(--line); border-radius:999px;
+}
+.gl-search::placeholder{color:var(--faint)}
+.gl-search:focus{outline:none; border-color:var(--ink)}
+.gl-chips{display:flex; flex-wrap:wrap; gap:8px}
+.gl-chip{
+  font-family:var(--font-display); font-size:13.5px; font-weight:800;
+  background:var(--ground-2); color:var(--muted);
+  border:2px solid var(--line); border-radius:999px;
+  padding:7px 15px; cursor:pointer;
+  transition:background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+}
+.gl-chip:hover{color:var(--ink); border-color:var(--ink); transform:translateY(-1px)}
+.gl-chip[aria-pressed="true"]{background:var(--ink); color:var(--ground); border-color:var(--ink)}
+.gl-count{font-size:13.5px; font-weight:800; color:var(--faint); margin-inline-start:auto; font-variant-numeric:tabular-nums}
+
+.gl-grid{display:grid; gap:22px; margin:0 0 40px}
+.gl-empty{
+  padding:34px 26px; border:2px dashed var(--line); border-radius:18px;
+  color:var(--muted); text-align:center;
+}
+
+.gl-card{
+  position:relative;
+  background:var(--ground-2);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:26px 28px 24px;
+  scroll-margin-top:96px;
+  transition:border-color .2s var(--ease), box-shadow .2s var(--ease);
+}
+.gl-card:hover{border-color:var(--hue-deep)}
+.gl-card:target{
+  border-color:var(--hue-deep);
+  box-shadow:0 0 0 4px var(--hue);
+}
+.gl-card[hidden]{display:none}
+
+.gl-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 14px; margin:0 0 4px}
+.gl-head h2{
+  font-size:1.5rem; font-weight:900; margin:0;
+  direction:ltr; unicode-bidi:isolate;
+}
+html[lang="fa"] .gl-head h2{font-family:var(--font-mono); font-size:1.22rem; letter-spacing:-.01em}
+.gl-alias{
+  font-size:.86rem; font-weight:800; color:var(--hue-deep);
+  background:var(--ground-3); border-radius:999px; padding:2px 11px;
+  direction:ltr; unicode-bidi:isolate;
+}
+html[data-theme="dark"] .gl-alias{color:var(--hue)}
+.gl-chapter{
+  margin-inline-start:auto;
+  font-size:12.5px; font-weight:800; color:var(--muted);
+  text-decoration:none; white-space:nowrap;
+  border-bottom:2px solid var(--line);
+}
+.gl-chapter:hover{color:var(--ink); border-color:var(--hue-deep)}
+.gl-hook{
+  font-size:1.02rem; font-weight:700; color:var(--muted);
+  margin:.2em 0 1.1em; max-width:60ch;
+}
+.gl-block{margin:0 0 18px}
+.gl-block h3{
+  display:flex; align-items:center; gap:9px;
+  font-family:var(--font-display);
+  font-size:.78rem; font-weight:900; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--hue-deep); margin:0 0 6px;
+}
+html[data-theme="dark"] .gl-block h3{color:var(--hue)}
+.gl-block h3 span.dot{
+  width:9px; height:9px; border-radius:50%;
+  background:var(--hue); border:2px solid var(--hue-deep); flex:none;
+}
+.gl-block p{margin:0; max-width:68ch; line-height:1.95}
+html[lang="en"] .gl-block p{line-height:1.75}
+.gl-card .everyday p{
+  padding-inline-start:16px;
+  border-inline-start:3px solid var(--hue);
+}
+.gl-card .pitfall p{color:var(--muted); font-size:15.5px}
+.gl-related{display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; align-items:center}
+.gl-related span.lbl{font-size:12.5px; font-weight:800; color:var(--faint); letter-spacing:.04em}
+.gl-related a{
+  font-size:13.5px; font-weight:800; text-decoration:none;
+  color:var(--ink); background:var(--ground-3);
+  border-radius:999px; padding:4px 13px;
+  transition:background .18s var(--ease), color .18s var(--ease);
+}
+.gl-related a:hover{background:var(--ink); color:var(--ground)}
+.gl-card .en,.gl-card .fa{display:inline}
+.gl-card p > .fa + .en,.gl-card p > .en + .fa{margin-inline-start:.25em}
+
+/* landing on a term from a chapter: a short, once-only highlight */
+@keyframes gl-land{0%{box-shadow:0 0 0 0 var(--hue)}100%{box-shadow:0 0 0 14px transparent}}
+.gl-card:target{animation:gl-land .9s var(--ease)}
+
+@media (max-width:640px){
+  .gl-card{padding:20px 18px}
+  .gl-head h2{font-size:1.28rem}
+  .gl-chapter{margin-inline-start:0; flex-basis:100%}
+  .gl-tools{padding:10px 0}
+  .gl-search{flex-basis:100%}
+  /* one scrolling rail instead of three stacked rows of chapter chips */
+  .gl-chips{flex-wrap:nowrap; overflow-x:auto; padding-bottom:4px; scrollbar-width:none; -ms-overflow-style:none}
+  .gl-chips::-webkit-scrollbar{display:none}
+  .gl-chip{flex:none}
+  .gl-count{margin-inline-start:0}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .term-pop,.gl-card,.term,.gl-chip,.gl-related a{transition:none}
+  .gl-card:target{animation:none}
+}

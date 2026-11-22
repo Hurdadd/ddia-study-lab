@@ -105,7 +105,7 @@ def inject(rel,s):
 def sitemap(out):
     rels=['index.html']+[str(p.relative_to(out)) for p in sorted(out.glob('ch[0-9]*/index.html'),key=lambda p:int(re.match(r'ch(\d+)',p.parent.name)[1]))]
     rels+=[str(p.relative_to(out)) for p in sorted(out.glob('ch[0-9]*/solutions.html'),key=lambda p:int(re.match(r'ch(\d+)',p.parent.name)[1]))]
-    rels+=['final-project/index.html','studio/index.html','exercise-audit.html']
+    rels+=['glossary/index.html','final-project/index.html','studio/index.html','exercise-audit.html']
     urls=''.join(f'<url><loc>{BASE}/{r.removesuffix("index.html")}</loc></url>' for r in rels if (out/r).exists())
     return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+urls+'</urlset>\n'
 

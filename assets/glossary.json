@@ -1,0 +1,1048 @@
+{
+  "meta": {
+    "version": 1,
+    "note": "Single source of truth for the inline glossary. Edit this file, then run python3 assets/build_glossary.py.",
+    "tone": "everyday analogy first, then the technical account, then the usual trap",
+    "generated": [
+      "glossary/index.html",
+      "assets/glossary-data.js"
+    ]
+  },
+  "terms": [
+    {
+      "id": "system-of-record",
+      "term": "system of record",
+      "term_fa": "منبع حقیقت",
+      "chapter": 1,
+      "chapter_ref": "ch1-tradeoffs",
+      "aliases": [
+        "system of record",
+        "systems of record",
+        "source of truth"
+      ],
+      "hook_fa": "وقتی دو نسخه با هم اختلاف دارند، کدام را باور می‌کنی؟",
+      "hook_en": "When two copies disagree, which one do you believe?",
+      "one_liner_fa": "مرجع رسمی و تصدیق‌شدهٔ یک واقعیت؛ نسخه‌های دیگر فقط از آن مشتق شده‌اند.",
+      "one_liner_en": "The authoritative home of a fact; every other copy is derived from it.",
+      "everyday_fa": "دفتر ثبت اسناد را تصور کن. تو ممکن است عکسِ سند را در گوشی داشته باشی و یک کپی هم در کشوی خانه، ولی وقتی اختلافی پیش بیاید، آن چیزی معتبر است که در دفتر رسمی ثبت شده. دفتر، منبع حقیقت است و کپی‌ها فقط برای راحتی تو هستند.",
+      "everyday_en": "Picture a land registry office. You may keep a photo of your deed on your phone and another copy in a drawer, but when ownership is disputed, the registry is what counts. The registry is the source of truth; your copies are only conveniences.",
+      "technical_fa": "در معماری داده، system of record همان انبارِ داده‌ای است که دربارهٔ یک واقعیت حقِ آخرین حرف را دارد: جدول سفارش، ردیف کاربر، تراکنش حساب. هر چیز دیگری — ایندکس جست‌وجو، کش، خلاصهٔ تحلیلی — دادهٔ مشتق است و باید بشود از همان منبع بازساخت. همین تقسیم، مرز میان «حقیقت» و «نما» را می‌سازد.",
+      "technical_en": "In a data architecture, the system of record is the store that has the final word on a fact: the order table, the user row, the ledger entry. Everything else — a search index, a cache, an analytics rollup — is derived data that must be reconstructible from the source. That split is the boundary between truth and view.",
+      "pitfall_fa": "رایج‌ترین خطا این است که یک ایندکس جست‌وجو عملاً به منبع حقیقت تبدیل شود؛ بعد یک روز ایندکس از دست می‌رود و معلوم می‌شود داده‌ای برای بازسازی‌اش نداریم.",
+      "pitfall_en": "The common failure is letting a search index quietly become the de facto source of truth — then one day the index is lost and nothing is left to rebuild it from.",
+      "related": [
+        "derived-data"
+      ]
+    },
+    {
+      "id": "derived-data",
+      "term": "derived data",
+      "term_fa": "دادهٔ مشتق",
+      "chapter": 1,
+      "chapter_ref": "ch1-tradeoffs",
+      "aliases": [
+        "derived data",
+        "derived dataset",
+        "derived datasets"
+      ],
+      "hook_fa": "هر چیزی که می‌شود دوباره ساخت، لازم نیست حقیقت باشد.",
+      "hook_en": "Anything you can rebuild does not have to be the truth.",
+      "one_liner_fa": "داده‌ای که از دادهٔ دیگر محاسبه یا کپی شده و در اصل قابل بازسازی است.",
+      "one_liner_en": "Data computed or copied from other data, and therefore rebuildable rather than authoritative.",
+      "everyday_fa": "فکر کن تقویم گوشی‌ات را از ایمیل‌هایت می‌سازی و جلسه‌ها از متن ایمیل استخراج می‌شوند. اگر تقویم پاک شود، فقط یک بار sync می‌کنی و همه‌چیز برمی‌گردد. آن تقویم حقیقت نیست؛ نمایی از حقیقت است.",
+      "everyday_en": "Think of a phone calendar built from your email, with meetings extracted from message text. Wipe the calendar and one resync restores it. The calendar is not the truth; it is a view of the truth.",
+      "technical_fa": "هر ایندکس جست‌وجو، کش، materialized view، انبار تحلیلی و حتی گزارش شبانه، دادهٔ مشتق است. چون بازسازی‌پذیر است، می‌توان جدا مقیاس‌اش داد، از نو ساختش، یا فناوری پشتش را عوض کرد — بدون آن‌که به منبع حقیقت دست زد. فصل ۱۳ همین ایده را تا تفکیک کامل پایگاه داده می‌برد.",
+      "technical_en": "Search indexes, caches, materialized views, analytical stores and nightly reports are all derived data. Because it is rebuildable, you can scale it, rebuild it, or replace the technology behind it without touching the source of truth. Chapter 13 pushes this idea all the way to unbundling the database.",
+      "pitfall_fa": "«مشتق» به معنای «بی‌ارزش» نیست؛ به معنای «قابل بازسازی» است. اگر بازسازی‌اش گران یا ناقص باشد، عملاً به یک منبع حقیقتِ پنهان تبدیل شده.",
+      "pitfall_en": "“Derived” does not mean disposable — it means rebuildable. If rebuilding is expensive or lossy, that store has quietly become a hidden source of truth.",
+      "related": [
+        "system-of-record",
+        "unbundling"
+      ]
+    },
+    {
+      "id": "tail-latency",
+      "term": "tail latency",
+      "term_fa": "تأخیر دنباله",
+      "chapter": 2,
+      "chapter_ref": "ch2-nonfunctional",
+      "aliases": [
+        "tail latency",
+        "p99 latency",
+        "p999",
+        "p99"
+      ],
+      "hook_fa": "میانگین دروغ می‌گوید؛ دنبالهٔ توزیع را نگاه کن.",
+      "hook_en": "The mean lies. Look at the tail.",
+      "one_liner_fa": "کندترین درصدِ درخواست‌ها (مثلاً p99) که تجربهٔ کاربر را خراب می‌کند، حتی وقتی میانگین خوب به نظر می‌رسد.",
+      "one_liner_en": "The slowest slice of requests (say p99) that ruins real user experience even when the average looks fine.",
+      "everyday_fa": "صد نفر در صف نانوایی ایستاده‌اند. نود‌و‌نه نفر در دو دقیقه نان می‌گیرند و یکی سه ساعت معطل می‌شود. میانگین چیزی حدود چهار دقیقه درمی‌آید و همه‌چیز خوب به نظر می‌رسد؛ ولی آن یک نفر تجربهٔ فاجعه‌ای داشته و احتمالاً دیگر برنمی‌گردد.",
+      "everyday_en": "A hundred people queue at a bakery. Ninety-nine are served in two minutes and one waits three hours. The average comes out around four minutes and looks fine — yet that one person had a disastrous experience and probably never comes back.",
+      "technical_fa": "p99 یعنی صدک نودونهم: یک درصد درخواست‌ها از این عدد کندترند. عدد را روی بازهٔ زمانی و بار مشخص اندازه بگیر. نکتهٔ کلیدی fan-out است: اگر صفحه‌ای صد سرویس را صدا بزند و هر سرویس با احتمال یک درصد کند شود، احتمال این‌که حداقل یکی کند باشد تقریباً ۶۳ درصد است (۱ منهای ۰٫۹۹ به توان ۱۰۰). پس یک p99 خوب در هر سرویس، می‌تواند p99 بدی در صفحه بسازد.",
+      "technical_en": "p99 is the 99th percentile: one request in a hundred is slower than this number. Measure it over a defined window and load. The key complication is fan-out: if a page calls a hundred services and each is slow with one percent probability, the chance that at least one is slow is about 63 percent (one minus 0.99 to the power of 100). Good per-service p99 can still produce a bad page p99.",
+      "pitfall_fa": "گزارش دادن p99 از سرور بدون در نظر گرفتن کلاینت و صف‌ها؛ و مقایسهٔ p99 دو سیستم با n متفاوت، چون صدک به تعداد نمونه حساس است.",
+      "pitfall_en": "Reporting server-side p99 while ignoring client queues, and comparing p99 across systems with very different sample counts.",
+      "related": [
+        "slo"
+      ]
+    },
+    {
+      "id": "slo",
+      "term": "SLO",
+      "term_fa": "هدف سطح سرویس",
+      "chapter": 2,
+      "chapter_ref": "ch2-nonfunctional",
+      "aliases": [
+        "SLO",
+        "SLOs",
+        "service level objective",
+        "service-level objective"
+      ],
+      "hook_fa": "هدف از نیاز کاربر می‌آید، نه از توان امروز سیستم.",
+      "hook_en": "The target comes from user need, not from today's hardware.",
+      "one_liner_fa": "هدف کمی و صریح برای کیفیت یک سرویس، همراه با بودجهٔ خطا برای وقتی که از هدف عبور می‌کنی.",
+      "one_liner_en": "An explicit numeric target for service quality, paired with an error budget for when you cross it.",
+      "everyday_fa": "با یک دوست قرار می‌گذاری «ساعت ۹ می‌رسم». اگر ۹:۱۵ برسی، قرار شکسته. SLO همان ساعت ۹ است؛ نه میانگینی از همهٔ ساعت‌هایی که تا حالا رسیده‌ای. و اگر ماهی یک بار دیر برسی، هنوز کل قرار را باخته‌ای — یک بودجهٔ کوچک خطا داری.",
+      "everyday_en": "You promise a friend, “I'll be there by nine.” Arriving at 9:15 breaks the promise. The SLO is nine o'clock, not the average of every time you have ever arrived. Miss it once a month and you are still drawing down a small error budget.",
+      "technical_fa": "SLO یک هدف برای یک SLI است: نشانگرِ اندازه‌گیری‌شده (مثل نسبت خواندن‌های زیر ۲۰۰ میلی‌ثانیه) روی یک بازهٔ مشخص (مثل ۲۸ روز). ۹۹٫۹ درصد در ۲۸ روز یعنی بودجهٔ خطایی در حدود ۴۰ دقیقه. SLA قرارداد بیرونی با پیامد حقوقی است؛ SLO هدف درونی است که به SLA خدمت می‌کند. هشدار را روی نرخ مصرف بودجه ببند، نه روی یک جهش تکی.",
+      "technical_en": "An SLO targets an SLI: a measured indicator such as the share of reads under 200 ms, over a defined window such as 28 days. 99.9 percent over 28 days is an error budget of roughly 40 minutes. An SLA is the external contract with consequences; the SLO is the internal target that serves it. Alert on budget burn rate, not on a single spike.",
+      "pitfall_fa": "انتخاب SLO بر اساس چیزی که سیستم امروز انجام می‌دهد. آن‌وقت هدف، وضع موجود را تأیید می‌کند و دیگر چیزی را هدایت نمی‌کند.",
+      "pitfall_en": "Setting the SLO from what the system already does today. The target then ratifies the status quo instead of steering it.",
+      "related": [
+        "tail-latency"
+      ]
+    },
+    {
+      "id": "normalization",
+      "term": "normalization",
+      "term_fa": "نرمال‌سازی",
+      "chapter": 3,
+      "chapter_ref": "ch3-data-models",
+      "aliases": [
+        "normalization",
+        "normalisation",
+        "normalize",
+        "normalized"
+      ],
+      "hook_fa": "هر واقعیت، فقط یک جا.",
+      "hook_en": "Every fact, written once.",
+      "one_liner_fa": "شکستن داده به روابط بدون تکرار، تا هر واقعیت فقط در یک محل زندگی کند.",
+      "one_liner_en": "Splitting data into repetition-free relations so each fact lives in exactly one place.",
+      "everyday_fa": "دفترچهٔ تلفن خانواده را تصور کن. اگر شمارهٔ مادر را در ده صفحه بنویسی و شماره عوض شود، باید ده جا اصلاح کنی و یک جا را فراموش می‌کنی. اگر یک بار بنویسی و بقیه به همان ارجاع بدهند، یک اصلاح کافی است.",
+      "everyday_en": "Think of a family phone book. Write your mother's number on ten pages, and when it changes you must edit ten places — and you will forget one. Write it once and reference it everywhere else, and one edit is enough.",
+      "technical_fa": "در مدل رابطه‌ای، نرمال‌سازی (فرم‌های نرمال، تا 3NF و BCNF) تکرار را حذف می‌کند و وابستگی‌های تابعی نامناسب را می‌شکند؛ خواندن با join بازسازی می‌شود. هزینه‌اش این است که خواندن به joinهای بیشتر و نوشتن به چند جدول نیاز پیدا می‌کند. غیرنرمال‌سازی آگاهانه، دقیقاً همین معامله را برعکس می‌کند: خواندن محلی‌تر، به قیمت کار بیشتر هنگام به‌روزرسانی.",
+      "technical_en": "In the relational model, normalization (up to 3NF and BCNF) removes repetition and breaks unsuitable functional dependencies; reads reconstruct the picture with joins. The cost is more joins per read and multiple tables per write. Deliberate denormalization makes the opposite trade: more local reads, in exchange for more work at update time.",
+      "pitfall_fa": "این تصور که نرمال‌سازی همیشه بهتر است. برای یک نمای خواندنی سنگین، نسخهٔ غیرنرمال ِعامدانه گاهی پاسخ درست است — به شرط آن‌که مسیر به‌روزرسانی‌اش را نوشته باشی.",
+      "pitfall_en": "Assuming normalization is always better. For a read-heavy view, a deliberately denormalized copy is sometimes the right answer — provided you have written down how it gets updated.",
+      "related": [
+        "schema-on-read"
+      ]
+    },
+    {
+      "id": "schema-on-read",
+      "term": "schema-on-read",
+      "term_fa": "طرح‌واره هنگام خواندن",
+      "chapter": 3,
+      "chapter_ref": "ch3-data-models",
+      "aliases": [
+        "schema-on-read",
+        "schema on read",
+        "schema-on-write",
+        "schema on write"
+      ],
+      "hook_fa": "ساختار را در لحظهٔ خواندن تفسیر می‌کنی، نه در لحظهٔ نوشتن.",
+      "hook_en": "The structure is interpreted at read time, not enforced at write time.",
+      "one_liner_fa": "الگویی که طرح‌واره را هنگام خواندن روی داده اعمال می‌کند، نه هنگام نوشتن.",
+      "one_liner_en": "A pattern that applies structure when reading the data, rather than enforcing it when writing.",
+      "everyday_fa": "یک جعبهٔ کارتون پر از وسایل که هیچ برچسبی ندارد. هر وقت چیزی بخواهی، می‌گردی و همان لحظه تصمیم می‌گیری چه داری. ریختن وسایل در جعبه سریع است؛ پیدا کردنشان پر از حدس و گشتن.",
+      "everyday_en": "A cardboard box of stuff with no labels. Whenever you need something, you dig and decide on the spot what you have. Tossing things in is fast; finding them is guesswork.",
+      "technical_fa": "در schema-on-read هیچ اعمالِ طرح‌واره‌ای هنگام نوشتن نیست؛ سند، فایل JSON یا کلید-مقدار همان‌طور که هست ذخیره می‌شود و خواننده تفسیرش می‌کند. مقابلش schema-on-write است که در پایگاه‌دادهٔ رابطه‌ای هنگام درج اعمال می‌شود. سود: انعطاف نوشتن و پذیرش داده‌های ناهمگون. هزینه: درستی و ابزار و کشفِ ساختار به کد خواننده منتقل می‌شود.",
+      "technical_en": "With schema-on-read nothing is enforced at write time; a document, JSON file or key-value blob is stored as-is and the reader interprets it. Its opposite is schema-on-write, enforced at insert in a relational database. The gain is write flexibility and tolerance for heterogeneous data. The cost is that correctness, tooling and structure discovery move into reader code.",
+      "pitfall_fa": "schema-on-read یعنی «بدون طرح‌واره»، نه «بدون ساختار». ساختار همیشه وجود دارد؛ فقط حالا در ذهن نویسنده و داخل کد خواننده پنهان شده و بی‌سروصدا تغییر می‌کند.",
+      "pitfall_en": "Schema-on-read means no enforced schema, not no structure. The structure still exists — it has just moved into the writer's head and the reader's code, where it drifts silently.",
+      "related": [
+        "normalization"
+      ]
+    },
+    {
+      "id": "b-tree",
+      "term": "B-tree",
+      "term_fa": "درخت B",
+      "chapter": 4,
+      "chapter_ref": "ch4-storage-retrieval",
+      "aliases": [
+        "B-tree",
+        "B-trees",
+        "B tree"
+      ],
+      "hook_fa": "چند پرش، و رکورد جلوی توست.",
+      "hook_en": "A few hops and the record is in front of you.",
+      "one_liner_fa": "ساختمان ایندکسی از صفحه‌های مرتب و شاخه‌بندی‌شده که با چند پرش به رکورد می‌رسد.",
+      "one_liner_en": "An index built from sorted pages in a branching structure that reaches a record in a few hops.",
+      "everyday_fa": "پیدا کردن کلمه در یک فرهنگ لغت کاغذی. ورق نمی‌زنی صفحه‌به‌صفحه؛ انگشتت را می‌گذاری وسط، می‌بینی کلمه کجاست، و بازه را نصف می‌کنی. چند بار نصف‌کردن و رسیدی. ضمناً از هر کلمه می‌توانی به ترتیب جلو بروی، چون صفحه‌ها مرتب‌اند.",
+      "everyday_en": "Finding a word in a paper dictionary. You do not flip page by page; you open the middle, see which half the word is in, and halve the range. A few halvings and you are there — and because the pages are sorted, you can also walk forward in order.",
+      "technical_fa": "درخت متوازن که هر گره‌اش یک صفحهٔ با اندازهٔ ثابت است: آرایهٔ مرتبِ کلیدها به‌همراه اشاره‌گر به فرزندان. برای میلیون‌ها ردیف، عمق سه یا چهار سطح است، یعنی سه یا چهار خواندن صفحه از دیسک. نوشتن، درخت را در جای خودش به‌روز می‌کند و همین باعث می‌شود نویسه‌های تکه‌تکه روی دیسک پخش شوند؛ WAL هم برای تحمل خرابی کنارش می‌نشیند. پیمایش بازه‌ای در آن طبیعی و ارزان است.",
+      "technical_en": "A balanced tree where each node is one fixed-size page: a sorted array of keys plus pointers to children. With millions of rows the depth is three or four — three or four page reads from disk. A write updates the tree in place, which is why writes scatter across the disk; a write-ahead log sits beside it for crash recovery. Range scans come naturally.",
+      "pitfall_fa": "فکر کردن این‌که درخت باید همیشه در حافظه بماند. عملاً گلوگاه، خواندن صفحه است: هر سطح بیشتر یا صفحهٔ بزرگ‌تر، مستقیماً تأخیر را بالا می‌برد.",
+      "pitfall_en": "Assuming the tree stays in memory. In practice the page read is the bottleneck: each extra level or oversized page raises latency directly.",
+      "related": [
+        "lsm-tree",
+        "write-amplification"
+      ]
+    },
+    {
+      "id": "lsm-tree",
+      "term": "LSM-tree",
+      "term_fa": "درخت LSM",
+      "chapter": 4,
+      "chapter_ref": "ch4-storage-retrieval",
+      "aliases": [
+        "LSM-tree",
+        "LSM tree",
+        "LSM-trees",
+        "LSM"
+      ],
+      "hook_fa": "اول بنویس، بعد مرتب کن.",
+      "hook_en": "Write first, sort later.",
+      "one_liner_fa": "ساختمانی که نوشتن‌ها را در حافظه جمع و مرتب می‌کند و بعد پشت‌سرهم روی دیسک می‌ریزد.",
+      "one_liner_en": "A structure that buffers writes in memory, keeps them sorted, and flushes them to disk in sequence.",
+      "everyday_fa": "دفتر یادداشت روزانه. هر روز کارها را سریع و بی‌ترتیب می‌نویسی، و هر چند وقت یک بار همهٔ دفترها را مرتب می‌کنی و دفترهای قدیمی را با هم ادغام می‌کنی. نوشتن فوق‌سریع است؛ ولی برای پیدا کردن یک چیز باید چند دفتر را بگردی.",
+      "everyday_en": "A daily notebook. Every day you jot things down fast and unsorted, then periodically sort the notebooks and merge the old ones together. Writing is very fast; finding one item means checking several notebooks.",
+      "technical_fa": "نوشتن‌ها اول به memtable (نگاشت مرتب در حافظه) و لاگِ WAL می‌روند؛ وقتی پر شد، به‌صورت SSTable — فایل مرتب و تغییرناپذیر — روی دیسک ریخته می‌شود. compaction در پس‌زمینه، SSTableها را ادغام می‌کند و نسخه‌های قدیمی و حذف‌شده را دور می‌ریزد. خواندن از جدیدترین لایه به قدیمی‌ترین می‌گردد و bloom filter خیلی از جست‌وجوهای بی‌ثمر را حذف می‌کند. نوشتن ترتیبی است، پس توانِ نوشتن بالا می‌رود.",
+      "technical_en": "Writes land in a memtable (an in-memory sorted map) plus a write-ahead log; when it fills, it is flushed as an SSTable — a sorted, immutable file on disk. Background compaction merges SSTables and drops superseded and deleted versions. Reads check the newest run and work backwards, with bloom filters skipping most fruitless lookups. Because writes are sequential, write throughput is high.",
+      "pitfall_fa": "فرض کردن این‌که LSM برای هر باری بهتر است. compaction پس‌زمینه باند پهن دیسک را می‌بلعد و می‌تواند p99 را دقیقاً در شلوغ‌ترین ساعت خراب کند.",
+      "pitfall_en": "Assuming LSM-trees win every workload. Background compaction eats disk bandwidth and can wreck p99 exactly during the busiest hour.",
+      "related": [
+        "b-tree",
+        "write-amplification"
+      ]
+    },
+    {
+      "id": "write-amplification",
+      "term": "write amplification",
+      "term_fa": "تقویت نوشتن",
+      "chapter": 4,
+      "chapter_ref": "ch4-storage-retrieval",
+      "aliases": [
+        "write amplification",
+        "read amplification",
+        "space amplification"
+      ],
+      "hook_fa": "نوشتی یک خط، ولی دیسک چند برابرش را دید.",
+      "hook_en": "You wrote one line; the disk saw many times that.",
+      "one_liner_fa": "نسبت بایت‌هایی که واقعاً روی دیسک نوشته می‌شوند به بایت‌هایی که برنامه خواسته بنویسد.",
+      "one_liner_en": "The ratio of bytes actually written to storage to the bytes the application asked to write.",
+      "everyday_fa": "می‌خواهی یک جملهٔ دو خطی را در دفتر اصلاح کنی، ولی برای این‌که صفحه قابل خواندن بماند مجبوری کل صفحه را پاک کنی و از نو بنویسی. از نظر تو یک ویرایش کوچک بود؛ از نظر کاغذ، کل صفحه.",
+      "everyday_en": "You want to fix one two-line sentence in a notebook, but to keep the page readable you erase the whole page and rewrite it. From your side it was a small edit; from the paper's side it was a page.",
+      "technical_fa": "در LSM-tree، compaction مداوم SSTableها را بازنویسی می‌کند؛ در B-tree، هر نوشتن یک صفحهٔ کامل به‌علاوهٔ WAL و گاهی double-write را لمس می‌کند؛ در ذخیره‌سازی ستونی و فشرده، بازنویسی بلوک‌ها هم اضافه می‌شود. عدد را به‌صورت نسبت (بایت نوشته‌شده تقسیم بر بایت منطقی) بسنج و کنارِ read amplification و space amplification بگذار. این سه با هم، اثر واقعی یک موتور ذخیره‌سازی را نشان می‌دهند.",
+      "technical_en": "In an LSM-tree, compaction keeps rewriting SSTables; in a B-tree, every write touches a whole page plus the log and sometimes a double-write; columnar and compressed stores add block rewrites on top. Measure it as a ratio (bytes written over logical bytes) and read it beside read and space amplification. Together, the three describe what a storage engine really costs you.",
+      "pitfall_fa": "سنجیدن توان نوشتن با «تعداد رکورد بر ثانیه» به‌جای «بایت»؛ با این معیار تفاوت LSM و B-tree به‌کلی پنهان می‌شود.",
+      "pitfall_en": "Benchmarking writes in records per second instead of bytes. That metric hides the difference between an LSM-tree and a B-tree almost entirely.",
+      "related": [
+        "lsm-tree",
+        "b-tree"
+      ]
+    },
+    {
+      "id": "encoding",
+      "term": "encoding",
+      "term_fa": "کدگذاری",
+      "chapter": 5,
+      "chapter_ref": "ch5-encoding-evolution",
+      "aliases": [
+        "encoding",
+        "encodings",
+        "encode",
+        "encoded"
+      ],
+      "hook_fa": "داده در حافظه، بایت روی سیم.",
+      "hook_en": "Data in memory, bytes on the wire.",
+      "one_liner_fa": "تبدیل داده در حافظه به بایتی که می‌شود ذخیره یا فرستاد — و برگرداندن دوبارهٔ آن.",
+      "one_liner_en": "Turning in-memory data into bytes that can be stored or sent, and back again.",
+      "everyday_fa": "فرستادن غذا با پیک. باید غذا را در ظرفی بسته‌بندی کنی، و کسی که تحویل می‌گیرد باید همان بسته‌بندی را بشناسد تا بازش کند. اگر ظرف را عوض کنی و گیرنده نداند، غذا سالم است ولی به دستش نمی‌آید.",
+      "everyday_en": "Sending food by courier. You must pack it in a container, and the person receiving it must recognise that container to open it. Change the container without telling them and the food is fine but unreachable.",
+      "technical_fa": "کدگذاری زبان‌های مختلفی دارد: JSON و XML خوانا ولی حجیم؛ Protobuf و Thrift با طرح‌واره و تگ‌های شماره‌ای؛ Avro که طرح‌وارهی نویسنده را همراه داده می‌برد و هنگام خواندن با طرح‌وارهٔ خواننده تطبیق می‌دهد. انتخاب، هم روی اندازه و سرعت اثر می‌گذارد و هم روی این‌که فردا بتوانی فیلد اضافه کنی بدون آن‌که مصرف‌کنندهٔ قدیمی بشکند.",
+      "technical_en": "Encodings come in families: JSON and XML are readable but bulky; Protobuf and Thrift carry a schema and numeric field tags; Avro ships the writer's schema with the data and resolves it against the reader's schema. The choice affects size and speed, and also whether you can add a field tomorrow without breaking an existing consumer.",
+      "pitfall_fa": "اشتباه گرفتن کدگذاری با مدل داده. JSON یک کدگذاری است؛ مدل رابطه‌ای یک مدل داده. این دو در دو لایهٔ جداگانه از معماری تصمیم گرفته می‌شوند.",
+      "pitfall_en": "Confusing encoding with data model. JSON is an encoding; the relational model is a data model. They are decisions in two different architectural layers.",
+      "related": [
+        "backward-compatibility"
+      ]
+    },
+    {
+      "id": "backward-compatibility",
+      "term": "backward compatibility",
+      "term_fa": "سازگاری با گذشته",
+      "chapter": 5,
+      "chapter_ref": "ch5-encoding-evolution",
+      "aliases": [
+        "backward compatibility",
+        "backward-compatible",
+        "forward compatibility",
+        "forward-compatible"
+      ],
+      "hook_fa": "قدیمی و جدید همیشه هم‌زمان زنده‌اند.",
+      "hook_en": "Old and new are always alive at the same time.",
+      "one_liner_fa": "کد جدید بتواند دادهٔ قدیمی را بخواند؛ و برعکسش، کد قدیمی دادهٔ جدید را نادیده بگیرد بدون شکستن.",
+      "one_liner_en": "New code can read old data; and in the other direction, old code can tolerate new data.",
+      "everyday_fa": "اپلیکیشنی روی گوشی‌ات که هنوز آپدیت نشده با سروری که دیروز آپدیت شده حرف می‌زند. اگر اپ قدیمی همچنان کار کند، سرویس جدید با مشتری قدیمی سازگار مانده. همیشه هر دو نسخه هم‌زمان زنده‌اند، پس هر دو جهت لازم است.",
+      "everyday_en": "An app on your phone that has not updated yet talks to a server updated yesterday. If the old app still works, the new service stayed compatible with an old client. Both versions are always alive at once, so you need both directions.",
+      "technical_fa": "سازگاری رو‌به‌جلو (backward) یعنی کد جدید داده یا پیام قدیمی را می‌خواند. سازگاری رو‌به‌عقب (forward) یعنی کد قدیمی دادهٔ جدید را می‌خواند و فیلدهای ناشناس را نادیده می‌گیرد. در ارتقای تدریجی (rolling upgrade) هر دو حالت هم‌زمان رخ می‌دهند. تگ‌های رزرو‌شده در Protobuf، مقدار پیش‌فرض در Avro، و حفظ فیلدهای ناشناخته در JSON همه برای همین‌اند.",
+      "technical_en": "Backward compatibility means new code reads old data or messages. Forward compatibility means old code reads new data and ignores unknown fields. During a rolling upgrade both happen at once. Reserved tags in Protobuf, explicit defaults in Avro, and preserving unknown fields in JSON all exist to make that survivable.",
+      "pitfall_fa": "کافی دانستن سازگاری در یک جهت. بدترش: بازنویسی یک سند JSON که فیلدهای ناشناس را بی‌سروصدا دور می‌ریزد و دادهٔ نسخهٔ جدید را نابود می‌کند.",
+      "pitfall_en": "Assuming one direction is enough. Worse: rewriting a JSON document and silently dropping the unknown fields, destroying data the newer version wrote.",
+      "related": [
+        "encoding"
+      ]
+    },
+    {
+      "id": "replication-lag",
+      "term": "replication lag",
+      "term_fa": "تأخیر تکثیر",
+      "chapter": 6,
+      "chapter_ref": "ch6-replication",
+      "aliases": [
+        "replication lag",
+        "replication-lags"
+      ],
+      "hook_fa": "کپی همیشه کمی عقب‌تر از اصل است.",
+      "hook_en": "The copy is always a little behind the original.",
+      "one_liner_fa": "فاصلهٔ زمانی میان نوشته‌شدن روی رهبر و دیده‌شدن همان نوشتن روی یک دنباله‌رو.",
+      "one_liner_en": "The time gap between a write landing on the leader and the same write becoming visible on a follower.",
+      "everyday_fa": "یک گروه پیام‌رسان با دو گوشی. پیام روی گوشی اول فوری می‌آید و روی گوشی دوم چند ثانیه بعد. اگر با گوشی دوم جواب بدهی، ممکن است در مورد پیامی حرف بزنی که هنوز روی گوشی اول نیست.",
+      "everyday_en": "A group chat seen on two phones. The message appears instantly on one and a few seconds later on the other. Reply from the lagging phone and you may be answering something the first phone has not seen yet.",
+      "technical_fa": "تأخیر، طبیعی است؛ عددش را اندازه بگیر و بر اساسش طراحی کن. سه تضمینی که کاربر انتظار دارد و باید صریح ساخته شوند: خواندنِ نوشته‌های خودت (ارسال خواندن‌های کاربر به رهبر یا نشست‌های چسبیده)، خواندن یکنوا (کاربر نباید به عقب برگردد)، و خواندنِ به‌هم‌سازگار که نسخه‌های قبلی را نشان دهد. تأخیر زیاد یعنی replicaهای خواندن، دادهٔ کهنه سرو می‌کنند و مقایسه‌های «آخرین وضعیت» بی‌معنی می‌شوند.",
+      "technical_en": "Some lag is normal; measure it and design against the number. Three guarantees users expect and you must build explicitly: read-your-writes (route the author's reads to the leader or pin the session), monotonic reads (a user must never travel backwards), and consistent-prefix reads. Large lag means read replicas serve stale data and any “latest state” comparison becomes meaningless.",
+      "pitfall_fa": "سنجیدن تأخیر با میانگین. تأخیر توزیع دنباله‌دار است و لحظه‌های بدش دقیقاً همان‌وقتی است که کاربر تازه چیزی نوشته.",
+      "pitfall_en": "Measuring lag as an average. Lag is tail-heavy, and its bad moments land exactly when a user just wrote something.",
+      "related": [
+        "failover",
+        "split-brain"
+      ]
+    },
+    {
+      "id": "failover",
+      "term": "failover",
+      "term_fa": "جابه‌جایی نقش",
+      "chapter": 6,
+      "chapter_ref": "ch6-replication",
+      "aliases": [
+        "failover",
+        "fail over",
+        "failovers"
+      ],
+      "hook_fa": "رهبر می‌افتد؛ کی پشت فرمان می‌نشیند؟",
+      "hook_en": "The leader falls. Who takes the wheel?",
+      "one_liner_fa": "فرایند تشخیص خرابی رهبر و ارتقای یک دنباله‌رو به‌جای او.",
+      "one_liner_en": "The process of noticing a failed leader and promoting a follower to replace it.",
+      "everyday_fa": "رانندهٔ اتوبوس وسط راه مریض می‌شود. رانندهٔ دوم پشت فرمان می‌آید، ولی قبل از حرکت باید مطمئن شود دفتر مسافرها و مقصد درست به او رسیده. اگر این تحویل ناقص باشد، مسیر عوض می‌شود.",
+      "everyday_en": "The bus driver falls ill mid-route. A second driver takes the wheel, but before moving must be sure the passenger manifest and the destination reached them intact. A sloppy handover changes the route.",
+      "technical_fa": "failover سه بخش دارد: تشخیص (heartbeat و timeout)، انتخاب رهبر جدید (انتخاب یا اجماع)، و تغییر مسیر کلاینت‌ها. سخت‌ترین قسمت، تصمیمِ درست است: اگر رهبر قدیمی فقط کند شده باشد و از کار نیفتاده، ارتقای دیگری دو رهبر می‌سازد. به همین دلیل عملاً به یک سرویس هماهنگی یا اجماع نیاز داری، و باید مشخص کنی نوشته‌های تأییدنشدهٔ رهبر قدیم چه می‌شوند.",
+      "technical_en": "Failover has three parts: detection (heartbeats and timeouts), electing the new leader (election or consensus), and repointing clients. The hard part is the judgment: if the old leader is merely slow rather than dead, promoting another creates two leaders. That is why this needs a coordination service or consensus, and why you must decide what happens to the old leader's unacknowledged writes.",
+      "pitfall_fa": "failover را مثل یک کلید برق تصور کردن. دادهٔ ریخته‌شده و نوشته‌های تأییدنشده همان جا جا می‌مانند و کسی سراغشان نمی‌رود.",
+      "pitfall_en": "Treating failover like a light switch. In-flight writes and unacknowledged data stay exactly where they were, and nobody goes back for them.",
+      "related": [
+        "split-brain",
+        "replication-lag",
+        "fencing-token"
+      ]
+    },
+    {
+      "id": "split-brain",
+      "term": "split brain",
+      "term_fa": "مغز دو نیمه",
+      "chapter": 6,
+      "chapter_ref": "ch6-replication",
+      "aliases": [
+        "split brain",
+        "split-brain",
+        "split brained"
+      ],
+      "hook_fa": "دو رهبر، دو حقیقت.",
+      "hook_en": "Two leaders, two truths.",
+      "one_liner_fa": "وضعیتی که در آن دو گره هم‌زمان خودشان را رهبر می‌دانند و هر دو می‌پذیرند بنویسند.",
+      "one_liner_en": "A state where two nodes both believe they are the leader and both accept writes.",
+      "everyday_fa": "دو شعبهٔ یک فروشگاه که تماسشان با هم قطع می‌شود. هر شعبه فکر می‌کند شعبهٔ اصلی است و خودش موجودی را تنظیم می‌کند. وقتی ارتباط برمی‌گردد، دو دفتر با دو عدد متفاوت روی میز است.",
+      "everyday_en": "Two branches of one shop lose contact. Each decides it is the head office and adjusts stock on its own. When the link returns, two ledgers with two different totals sit on the table.",
+      "technical_fa": "علت اصلی شبکهٔ تقسیم‌شده است: رهبر با بخشی از خوشه قطع می‌شود، بقیه گره‌ها رهبر جدید انتخاب می‌کنند و هر دو تا مدتی می‌نویسند. راه‌حل‌ها: اکثریت (کوئروم) برای نوشتن، fence کردن رهبر قدیم با توکن یا lease، و تعیین سیاست صریح برای آشتی‌دادن یا دورریختن نوشته‌های مغلوب. سکوت در این تصمیم، یعنی انتخاب گزینهٔ «دادهٔ ناسازگار».",
+      "technical_en": "The usual cause is a network partition: the leader is cut off from part of the cluster, the rest elect a new leader, and both accept writes for a while. The fixes are a write quorum, fencing the old leader with a token or lease, and an explicit policy for reconciling or discarding the losing writes. Staying silent on that decision means choosing inconsistent data by default.",
+      "pitfall_fa": "فرض کردن این‌که شبکه یا سالم است یا کاملاً قطع. حالت واقعی، قطعِ جزئی و نامتقارن است و همان چیزی است که دو رهبر می‌سازد.",
+      "pitfall_en": "Assuming the network is either healthy or fully down. The real state is partial and asymmetric, and that is exactly what produces two leaders.",
+      "related": [
+        "failover",
+        "network-partition",
+        "fencing-token"
+      ]
+    },
+    {
+      "id": "crdt",
+      "term": "CRDT",
+      "term_fa": "نوع دادهٔ مقاوم به تعارض",
+      "chapter": 6,
+      "chapter_ref": "ch6-replication",
+      "aliases": [
+        "CRDT",
+        "CRDTs",
+        "conflict-free replicated data type"
+      ],
+      "hook_fa": "دو نفر هم‌زمان بنویسند، نتیجه همیشه یکی است.",
+      "hook_en": "Two people write at once; the result is still one answer.",
+      "one_liner_fa": "نوع داده‌ای که نوشتن‌های هم‌زمان روی چند replica را طوری ترکیب می‌کند که به هماهنگی نیاز نباشد.",
+      "one_liner_en": "A data type whose concurrent writes on several replicas combine so that no coordination is needed.",
+      "everyday_fa": "فهرست خرید مشترک خانه. تو از آشپزخانه «شیر» اضافه می‌کنی و هم‌خانه‌ات از راه «نان» اضافه می‌کند، هر دو بدون هماهنگی. آخرش فهرست هر دو را دارد. برای شمارنده هم همین‌طور: هر دو یکی اضافه می‌کنند و عدد درست درمی‌آید.",
+      "everyday_en": "A shared household shopping list. You add milk from the kitchen while your flatmate adds bread from the road, with no coordination. The list ends up with both. Counters work the same way: both increment and the total is still correct.",
+      "technical_fa": "CRDTها برای هر replica یک ساختار دارند که ترکیبشان خواص جبری لازم را دارد: جابه‌جایی‌پذیر، شرکت‌پذیر و خودتوان، تا ترتیب رسیدن به‌روزرسانی‌ها نتیجه را عوض نکند. نمونه‌ها: مجموعهٔ رشد‌یابنده، شمارندهٔ PN، و ثبت‌های مبتنی بر ساعت منطقی برای حل تعارض. هزینه‌شان حافظهٔ بیشتر و سخت‌ترشدنِ معنیِ حذف است؛ در عوض آفلاین و چند‌رهبری را بدون هماهنگی تحمل می‌کنند.",
+      "technical_en": "A CRDT gives each replica a structure whose merge satisfies the required algebraic properties — commutative, associative and idempotent — so the delivery order of updates cannot change the outcome. Examples are grow-only sets, positive-negative counters, and clock-based registers for conflict resolution. The cost is extra metadata and a subtler meaning of deletion; the reward is offline and multi-leader operation without coordination.",
+      "pitfall_fa": "فکر کردن این‌که CRDT «هر» تعارضی را حل می‌کند. برای یک قاعدهٔ تجاری مثل «موجودی نباید منفی شود» هنوز به هماهنگی یا طراحی صریح نیاز داری.",
+      "pitfall_en": "Believing a CRDT resolves any conflict. A business rule such as “stock must never go negative” still needs coordination or explicit design.",
+      "related": [
+        "split-brain",
+        "consensus"
+      ]
+    },
+    {
+      "id": "sharding",
+      "term": "sharding",
+      "term_fa": "شاردینگ",
+      "chapter": 7,
+      "chapter_ref": "ch7-sharding",
+      "aliases": [
+        "sharding",
+        "shard",
+        "shards",
+        "sharded",
+        "shardable"
+      ],
+      "hook_fa": "یک ماشین جواب نمی‌دهد؛ داده را تکه می‌کنی.",
+      "hook_en": "One machine is not enough, so you split the data.",
+      "one_liner_fa": "تقسیم یک مجموعهٔ دادهٔ بزرگ به تکه‌های مستقل روی ماشین‌های مختلف، تا هر ماشین فقط سهم خودش را نگه دارد.",
+      "one_liner_en": "Splitting one large dataset into independent pieces across machines, so each machine holds only its share.",
+      "everyday_fa": "یک کتابخانهٔ شهر با دو میلیون کتاب را تصور کن. اگر همه در یک ساختمان باشند، صف تحویل و فضای قفسه تمام می‌شود. پس کتاب‌ها را بین چند شعبه پخش می‌کنی؛ مثلاً بر اساس حرف اول نام خانوادگی نویسنده: الف تا ب در شعبهٔ شمال، پ تا ث در شعبهٔ مرکز. حالا هر کسی باید اول بداند کتابش در کدام شعبه است.",
+      "everyday_en": "Picture a city library with two million books. In one building the queue and the shelves fail. So you distribute the books across branches — say by the author's surname: A to B in the north branch, C to D downtown. Now every visitor must first work out which branch holds their book.",
+      "technical_fa": "شاردینگ همان تقسیم‌بندی افقی داده است: انتخاب یک partition key، نگاشت هر مقدار کلید به یک shard، و مسیریابی درخواست به شارد درست. در DDIA سه تصمیم کلیدی روی هم سوار می‌شوند: با چه کلیدی تقسیم کنی (و کدام درخواست‌ها را چند‌شاردی می‌کند)، shardها را چگونه جابه‌جا و بازتوازن کنی، و درخواست از کجا بفهمد به کدام شارد برود. تکثیر در هر شارد جدا انجام می‌شود، پس sharding و replication دو محور مستقل‌اند.",
+      "technical_en": "Sharding is horizontal partitioning: choose a partition key, map each key value to a shard, and route each request to the right shard. In DDIA three decisions stack on top of each other: which key you split by (and which queries become cross-shard), how shards are moved and rebalanced, and how a request discovers its shard. Replication runs independently inside each shard, so sharding and replication are two separate axes.",
+      "pitfall_fa": "شروع با شاردینگ به‌عنوان اولین قدم مقیاس‌پذیری. تا وقتی یک ماشین با replica و ایندکس و کش کافی است، شاردینگ فقط پیچیدگی و محدودیت تراکنش اضافه می‌کند.",
+      "pitfall_en": "Reaching for sharding as the first scaling step. While one machine with replicas, indexes and caching still suffices, sharding adds only complexity and cross-shard transaction limits.",
+      "related": [
+        "hot-spot",
+        "consistent-hashing",
+        "rebalancing",
+        "secondary-index"
+      ]
+    },
+    {
+      "id": "hot-spot",
+      "term": "hot spot",
+      "term_fa": "نقطهٔ داغ",
+      "chapter": 7,
+      "chapter_ref": "ch7-sharding",
+      "aliases": [
+        "hot spot",
+        "hot spots",
+        "hotspot",
+        "hotspots",
+        "hot key",
+        "hot keys",
+        "hot shard",
+        "hot shards"
+      ],
+      "hook_fa": "همه به یک باجه صف می‌زنند.",
+      "hook_en": "Everyone queues at one counter.",
+      "one_liner_fa": "یک کلید یا شارد که بارش به‌شکل نامتناسبی از بقیه بیشتر است، هرچند کل داده بین شاردها پخش شده.",
+      "one_liner_en": "One key or shard carrying disproportionately more load than the rest, even though the data is evenly spread.",
+      "everyday_fa": "یک بانک با ده باجه، ولی همهٔ مشتری‌ها فقط با باجهٔ شمارهٔ ۳ کار دارند چون فقط همان باجه قسط‌ها را می‌دهد. ده باجه داری و عملاً یکی کار می‌کند. تقسیم درست مساحت سالن، صف را حل نکرد؛ تقسیم درست کار حل می‌کند.",
+      "everyday_en": "A bank with ten counters where everyone only queued at counter three, because only that counter handles loan payments. You have ten counters and effectively one. Splitting the room evenly did not fix the queue; splitting the work does.",
+      "technical_fa": "نقطهٔ داغ از نامتعادلی کلیدها می‌آید، نه از حجم داده: مثلاً یک سلبریتی در شبکهٔ اجتماعی، یا کلید مربوط به امروز در دادهٔ زمان‌محور. راه‌حل‌ها: افزودن جزء تصادفی به کلید برای تقسیم یک کلید روی چند شارد، کلید مرکب با دامنهٔ طبيعي مانند user_id پیش از timestamp، و cache یا replica اختصاصی برای کلیدهای داغ. تشخیصش هم نیاز به اندازه‌گیری توزیع بار دارد، نه فقط اندازهٔ shardها.",
+      "technical_en": "A hot spot comes from key imbalance, not data volume: a celebrity account in a social graph, or the key for today in time-series data. Options include appending a random suffix to spread one key over several shards, composing the key so a natural dimension such as user_id precedes a timestamp, and giving hot keys a dedicated cache or replica. Detecting it takes a load-distribution measurement, not just a shard-size check.",
+      "pitfall_fa": "حرکت دادن داده به شارد دیگر بدون تغییر کلید. کلید داغ در شارد جدید هم داغ می‌ماند؛ مشکل، کلید است نه مکانش.",
+      "pitfall_en": "Moving the data to another shard without changing the key. A hot key stays hot in its new home; the problem is the key, not its address.",
+      "related": [
+        "sharding",
+        "rebalancing"
+      ]
+    },
+    {
+      "id": "consistent-hashing",
+      "term": "consistent hashing",
+      "term_fa": "هش سازگار",
+      "chapter": 7,
+      "chapter_ref": "ch7-sharding",
+      "aliases": [
+        "consistent hashing",
+        "hash ring",
+        "hash-ring",
+        "hashring"
+      ],
+      "hook_fa": "یک نفر اضافه می‌شود، بقیه سرِ جایشان می‌مانند.",
+      "hook_en": "One node joins; everyone else stays put.",
+      "one_liner_fa": "روشی برای نگاشت کلید به گره که با افزودن یا حذف یک گره، فقط سهم کوچکی از کلیدها جابه‌جا می‌شود.",
+      "one_liner_en": "A way to map keys onto nodes so that adding or removing one node moves only a small share of keys.",
+      "everyday_fa": "بازار میوه‌ای را تصور کن که بساط‌ها را دور یک میدان گرد چیده‌اند. هر مشتری سراغ نزدیک‌ترین بساط به ورودی خودش می‌رود. یک بساط جدید وسط میدان باز می‌کند؛ فقط مشتری‌هایی که در همان قوس بودند عوض می‌شوند، نه کل بازار.",
+      "everyday_en": "Picture a market with stalls arranged around a circular square. Each customer walks to the nearest stall to their entrance. When a new stall opens, only customers in that arc change — not the whole market.",
+      "technical_fa": "کلیدها و گره‌ها هر دو روی یک حلقهٔ هش قرار می‌گیرند و هر کلید به اولین گره در جهت ساعت می‌رسد. با افزودن گره، فقط کلیدهای قوس آن گره جابه‌جا می‌شوند؛ با modulo ساده، تغییر n تقریباً همهٔ کلیدها را جابه‌جا می‌کند. برای رفع نامتعادلی، هر گره مجازی چند جای مختلف روی حلقه می‌گیرد. هزینه‌اش پیچیدگی مفهوم و نگاه‌داشتنِ نگاشت است.",
+      "technical_en": "Keys and nodes are both placed on a hash ring, and each key belongs to the first node clockwise. Adding a node moves only that arc's keys; a modulo-of-n scheme moves almost everything when n changes. To counter imbalance, each node claims several virtual positions on the ring. The price is conceptual overhead and a mapping you must maintain.",
+      "pitfall_fa": "فکر کردن این‌که هش سازگار نامتعادلی را حل می‌کند. یک گرهٔ خوش‌شانس می‌تواند قوس بزرگی بگیرد؛ بدون گره‌های مجازی، توزیع یکنواخت نمی‌شود.",
+      "pitfall_en": "Assuming consistent hashing removes imbalance. A lucky node can still land a large arc; without virtual nodes the distribution is not uniform.",
+      "related": [
+        "sharding",
+        "rebalancing",
+        "hot-spot"
+      ]
+    },
+    {
+      "id": "rebalancing",
+      "term": "rebalancing",
+      "term_fa": "بازتوازن",
+      "chapter": 7,
+      "chapter_ref": "ch7-sharding",
+      "aliases": [
+        "rebalancing",
+        "rebalance",
+        "rebalanced",
+        "resharding",
+        "reshard"
+      ],
+      "hook_fa": "بار جابه‌جا شده؛ داده هم باید جابه‌جا شود.",
+      "hook_en": "The load moved; now the data must follow.",
+      "one_liner_fa": "جابه‌جایی داده و بار از یک شارد به شاردهای دیگر، تا توزیع دوباره متعادل شود.",
+      "one_liner_en": "Moving data and load between shards so the distribution is balanced again.",
+      "everyday_fa": "در کلاس پنجاه صندلی داری و یک نفر جدید می‌آید. می‌توانی همه را بلند کنی و از نو بنشانی، یا فقط چند نفر را کنار صندلی خالی جابه‌جا کنی. راه اول ساده و استرس‌آور است، راه دوم کم‌هزینه — به شرطی که وسط کار کلاس به‌هم نریزد.",
+      "everyday_en": "Fifty chairs in a classroom and one new arrival. You can make everyone stand and re-seat them, or shuffle a few people next to the empty chair. The first is simple and disruptive; the second is cheap, provided the class does not fall apart mid-move.",
+      "technical_fa": "سه راه رایج: تعداد shard ثابت و فقط حرکت شارد بین گره‌ها، shardهای بیشمار بیش از تعداد گره، و شاردینگ تقسیم‌شده به نسبت (که برای هر شارد حد بالا تعیین می‌کند). هر کدام باید بدون توقف کار کنند: نوشتن روی شارد قدیم تا پایان انتقال، خواندن از شارد جدید، و یک قدم نهایی که اتمیک باشد. خطر اصلی، هماهنگی خودِ انتقال است، نه اندازهٔ داده.",
+      "technical_en": "Three common schemes: a fixed number of shards moved between nodes, many more shards than nodes, and proportional splitting where each shard has an upper bound. All of them must work without downtime: keep writing to the old shard until the move completes, read from the new one, and finish with an atomic step. The danger is coordinating the move, not the size of the data.",
+      "pitfall_fa": "اندازه‌گیری تعادل با «حجم داده روی هر شارد». shardهای هم‌اندازه می‌توانند بار بسیار نامتوازن داشته باشند؛ معیار باید نرخ درخواست باشد.",
+      "pitfall_en": "Measuring balance by data volume per shard. Equal-sized shards can carry very unequal load; the metric you want is request rate.",
+      "related": [
+        "sharding",
+        "hot-spot"
+      ]
+    },
+    {
+      "id": "secondary-index",
+      "term": "secondary index",
+      "term_fa": "ایندکس ثانویه",
+      "chapter": 7,
+      "chapter_ref": "ch7-sharding",
+      "aliases": [
+        "secondary index",
+        "secondary indexes",
+        "secondary indices",
+        "global index",
+        "local index"
+      ],
+      "hook_fa": "ایندکس هم باید تقسیم شود — و اینجا دردسر شروع می‌شود.",
+      "hook_en": "The index must be sharded too — and that is where it hurts.",
+      "one_liner_fa": "ایندکسی که روی فیلدی غیر از کلید اصلی ساخته می‌شود و در سیستم شاردشده، یا محلی است یا سراسری.",
+      "one_liner_en": "An index built on a field other than the primary key, which in a sharded system is either local or global.",
+      "everyday_fa": "کتابی که فصل‌هایش بین چند جلد پخش شده. فهرست الفبایی آخر کتاب برای جلد اول فقط جلد اول را می‌شناسد؛ اگر بخواهی همه‌جا را بگردی، باید هر چهار جلد را باز کنی. راه دیگر: یک فهرست مرکزی که می‌داند هر موضوع در کدام جلد است.",
+      "everyday_en": "A book whose chapters are split across four volumes. The index at the back of volume one knows only volume one, so a full search means opening all four. Alternatively you keep one central index that knows which volume holds each topic.",
+      "technical_fa": "دو مدل داریم. ایندکس محلی (document-partitioned): هر شارد ایندکس خودش را روی دادهٔ خودش می‌سازد؛ نوشتن ارزان است ولی خواندن روی فیلد ثانویه باید به همهٔ شاردها برود (scatter/gather) و نتیجه را ادغام کند. ایندکس سراسری: ایندکس خودش بر اساس اصطلاحات تقسیم می‌شود و هر ورودی به شاردِ ردیف اشاره می‌کند؛ خواندن تک‌شارد و ارزان است، ولی نوشتن کند و هماهنگ‌شده می‌شود و اغلب asynchronous است.",
+      "technical_en": "Two models. A local (document-partitioned) index is built by each shard over its own data: writes are cheap, but a read on a secondary field must fan out to every shard (scatter/gather) and merge results. A global (term-partitioned) index is itself sharded by indexed value, with each entry pointing at the owning shard: reads touch a single shard and are cheap, while writes become slower, coordinated, and often asynchronous.",
+      "pitfall_fa": "مقایسهٔ غافلانهٔ این دو. ایندکس سراسری خواندن را سریع می‌کند ولی نوشتن را کند و در نهایت ناسازگار؛ اگر PODR (نوشتن و خواندن) داری، تفاوت فاحشی می‌بینی.",
+      "pitfall_en": "Comparing the two carelessly. A global index makes reads fast but writes slow and eventually inconsistent; if you need read-your-writes, that difference is stark.",
+      "related": [
+        "sharding"
+      ]
+    },
+    {
+      "id": "isolation-level",
+      "term": "isolation level",
+      "term_fa": "سطح ایزولاسیون",
+      "chapter": 8,
+      "chapter_ref": "ch8-transactions",
+      "aliases": [
+        "isolation level",
+        "isolation levels",
+        "weak isolation"
+      ],
+      "hook_fa": "تراکنش‌ها هم‌زمان‌اند؛ سؤال این است چقدر همدیگر را ببینند.",
+      "hook_en": "Transactions overlap; the question is how much they see of each other.",
+      "one_liner_fa": "قراردادِ صریحی که می‌گوید تراکنش‌های هم‌زمان چه ناهنجاری‌هایی مجازند نشان بدهند.",
+      "one_liner_en": "An explicit contract describing which anomalies concurrent transactions are allowed to exhibit.",
+      "everyday_fa": "چند نفر هم‌زمان یک سند مشترک را ویرایش می‌کنند. یک حالت این است که هر کس فقط نسخهٔ خودش را ببیند و آخرش چیزی قاطی شود؛ حالت دیگر این است که نوبتی کار کنند و دیگری نبیند تا کار تمام شود. سطح ایزولاسیون همان انتخابِ میانه‌ای است که بین این دو می‌گذاری.",
+      "everyday_en": "Several people edit one shared document at once. At one extreme everyone edits their own invisible copy and the merge gets confusing; at the other they take strict turns. An isolation level is the middle ground you choose between those ends.",
+      "technical_fa": "از ضعیف به قوی: read committed (فقط نوشته‌های تأییدشده دیده می‌شود، ولی خواندن‌های تکراری می‌توانند فرق کنند)، snapshot isolation/MVCC (همهٔ خواندن‌ها از یک لحظهٔ مشخص)، و serializable (نتیجه معادل اجرای سریال). هر سطح، مجموعهٔ مشخصی از ناهنجاری‌ها را مجاز می‌داند: خواندن کثیف، خواندن تکراری، lost update، write skew و فانتوم. سطح را از روی نیاز انتخاب کن، نه از روی چیزی که پایگاه‌داده به‌طور پیش‌فرض می‌دهد.",
+      "technical_en": "From weak to strong: read committed (only committed writes are visible, but repeated reads may differ), snapshot isolation via MVCC (all reads from one instant), and serializable (the outcome equals some serial order). Each level permits a defined set of anomalies: dirty read, non-repeatable read, lost update, write skew and phantoms. Choose the level from your actual need, not from the database default.",
+      "pitfall_fa": "تصور این‌که «تراکنش» یعنی «سریال». خیلی از پایگاه‌داده‌های محبوب به‌طور پیش‌فرض snapshot isolation می‌دهند، نه سریال‌پذیری — و write skew دقیقاً در همین شکاف زندگی می‌کند.",
+      "pitfall_en": "Assuming “transactional” means “serializable”. Many popular databases default to snapshot isolation, not serializability — and write skew lives in exactly that gap.",
+      "related": [
+        "serializability",
+        "mvcc",
+        "write-skew"
+      ]
+    },
+    {
+      "id": "serializability",
+      "term": "serializability",
+      "term_fa": "سریال‌پذیری",
+      "chapter": 8,
+      "chapter_ref": "ch8-transactions",
+      "aliases": [
+        "serializability",
+        "serializable",
+        "serializable isolation",
+        "serialisable"
+      ],
+      "hook_fa": "نتیجه همان است که اگر نوبتی اجرا می‌شد.",
+      "hook_en": "The outcome equals some one-at-a-time order.",
+      "one_liner_fa": "تضمینی که می‌گوید اجرای هم‌زمان تراکنش‌ها معادل اجرای سریال (یکی پس از دیگری) آن‌هاست.",
+      "one_liner_en": "The guarantee that concurrent transactions produce some outcome equivalent to running them one after another.",
+      "everyday_fa": "دو نفر هم‌زمان از دو شعبهٔ بانک پول برداشت می‌کنند. سریال‌پذیری یعنی نتیجه دقیقاً همان چیزی باشد که اگر یکی صبر می‌کرد و بعد دیگری می‌آمد رخ می‌داد. مهم این است که ترتیب واقعی نوبت‌ها را ندانیم؛ فقط نتیجه باید با *یک* ترتیب ممکن سازگار باشد.",
+      "everyday_en": "Two people withdraw money at two branches at the same time. Serializability means the result is exactly what would have happened if one had waited and the other followed. Crucially, you never learn the real interleaving; the result only has to match *some* valid order.",
+      "technical_fa": "سه راه اصلی اجرا: قفل دو‌فازی (2PL) که با گرفتن قفل خواندن/نوشتن و رهاکردن در پایان کار، تعارض را از اول می‌بندد؛ اجرای سریال با ترتیبِ به‌دست‌آمده از یک base clock (مانند Calvin یا VoltDB)؛ و serializable snapshot isolation (SSI) که روی MVCC می‌نشیند و تعارض را هنگام commit تشخیص می‌دهد و تراکنش را برمی‌گرداند. هر سه، تعارض را جدی می‌گیرند — که یعنی هزینهٔ تأخیر، قفل یا retry هم دارد.",
+      "technical_en": "Three main implementations: two-phase locking, which prevents conflicts up front by holding read and write locks until commit; deterministic serial execution ordered by a clock (as in Calvin or VoltDB); and serializable snapshot isolation, layered on MVCC, which detects conflicts at commit and aborts. All three take conflicts seriously, which means they cost latency, locks or retries.",
+      "pitfall_fa": "فکر کردن این‌که سریال‌پذیری «آزاد» است. هر سه روش، یا منتظر می‌مانند یا تراکنش را برمی‌گردانند؛ در بار بالا نرخ retry می‌تواند غیرمنتظره بالا برود.",
+      "pitfall_en": "Treating serializability as free. Every implementation either waits or aborts; under load the retry rate can climb unexpectedly.",
+      "related": [
+        "isolation-level",
+        "mvcc",
+        "write-skew"
+      ]
+    },
+    {
+      "id": "mvcc",
+      "term": "MVCC",
+      "term_fa": "کنترل هم‌زمانی چندنسخه‌ای",
+      "chapter": 8,
+      "chapter_ref": "ch8-transactions",
+      "aliases": [
+        "MVCC",
+        "multi-version concurrency control",
+        "multi-version"
+      ],
+      "hook_fa": "خوندن، کسی را قفل نمی‌کند.",
+      "hook_en": "A read never blocks a writer.",
+      "one_liner_fa": "روشی که برای هر ردیف چند نسخه نگه می‌دارد تا خواندن‌ها از یک عکس لحظه‌ای کار کنند و نوشتن‌ها را قفل نکنند.",
+      "one_liner_en": "A technique that keeps several versions per row so reads work from a consistent snapshot without blocking writes.",
+      "everyday_fa": "ویکی نسخه‌دار. هر ویرایش نسخهٔ خودش را می‌سازد، و هر خواننده همان نسخه‌ای را می‌بیند که وقتی شروع کرده موجود بوده. دو نفر می‌توانند بی‌آنکه روی دست هم بیفتند کار کنند؛ فقط نسخه‌های قدیمی باید هر چند وقت یک بار جمع شوند.",
+      "everyday_en": "A versioned wiki. Every edit creates a version, and each reader sees the version that existed when they started. Two people work without stepping on each other; the old versions just need cleaning out eventually.",
+      "technical_fa": "به‌جای به‌روزرسانی در جای خود، نسخهٔ تازه نوشته می‌شود و نسخهٔ قبلی برای تراکنش‌های در جریان باقی می‌ماند. نوشتن، قفل خواندن نمی‌گیرد و خواندن، قفل نمی‌گیرد؛ هر تراکنش یک snapshot می‌بیند. این پایهٔ snapshot isolation است. هزینه‌اش: هر ردیف چند نسخه و سرباری برای پاک‌سازی نسخه‌های مرده، و اینکه در بار نوشتن سنگین، ایندکس‌ها هم چند نسخه‌ای می‌شوند.",
+      "technical_en": "Instead of updating a row in place, a new version is written and the old one stays alive for in-flight transactions. Writers do not block readers and readers take no locks; each transaction sees a snapshot. That is the foundation of snapshot isolation. The cost is several versions per row, cleanup work for dead versions, and multi-version indexes under heavy write load.",
+      "pitfall_fa": "تصور این‌که snapshot isolation همان سریال‌پذیری است. MVCC فقط یک عکس ثابت می‌دهد؛ ولی دو تراکنش می‌توانند بر اساس همان عکس، کار متناقض انجام دهند (همان write skew).",
+      "pitfall_en": "Thinking snapshot isolation is serializability. MVCC gives you a stable snapshot, but two transactions can still act inconsistently on that snapshot — that is write skew.",
+      "related": [
+        "isolation-level",
+        "serializability"
+      ]
+    },
+    {
+      "id": "write-skew",
+      "term": "write skew",
+      "term_fa": "انحراف نوشتن",
+      "chapter": 8,
+      "chapter_ref": "ch8-transactions",
+      "aliases": [
+        "write skew",
+        "write-skew"
+      ],
+      "hook_fa": "هر کدام درست تصمیم گرفتند؛ با هم غلط شد.",
+      "hook_en": "Each decided correctly; together they were wrong.",
+      "one_liner_fa": "ناهنجاری‌ای که دو تراکنش هم‌زمان، هر یک بر اساس نسخهٔ خودش، قانونی را می‌شکنند که فقط با دیدن هم‌زمانی نقض می‌شد.",
+      "one_liner_en": "An anomaly where two concurrent transactions each act on their own snapshot and jointly break a rule neither would break alone.",
+      "everyday_fa": "قانون بیمارستان: همیشه باید حداقل دو پزشک کشیک باشند. دو پزشک، هر یک هم‌زمان درخواست مرخصی می‌دهد. هر کدام سیستم را می‌بیند و می‌گوید «دو نفر کشیک‌اند، اگر من بروم یکی می‌ماند، پس اشکالی ندارد». هر دو می‌روند و بیمارستان بی‌پزشک می‌ماند.",
+      "everyday_en": "Hospital rule: at least two doctors on call at all times. Two doctors request leave at the same moment. Each checks the rota and reasons, “two are on call; if I go, one remains, so it is fine.” Both go, and the ward has nobody.",
+      "technical_fa": "در snapshot isolation هر تراکنش فقط نوشته‌های خودش را می‌بیند و همان snapshot مشترک را می‌خواند. دو تراکنش، دو ردیف متفاوت را می‌خوانند و هر کدام ردیفی *دیگر* را می‌نویسند — پس تعارض نوشتنِ مستقیم وجود ندارد و سیستم مانعی نمی‌بیند. برای گرفتنش یا به سریال‌پذیری واقعی (2PL یا SSI) نیاز داری، یا باید تراکنش را طوری بسازی که یک ردیف مشترک را لمس کند و تعارض را به سطح پایگاه‌داده بکشاند.",
+      "technical_en": "Under snapshot isolation each transaction sees only its own writes and reads the same shared snapshot. Two transactions read different rows and each writes a *different* row, so there is no direct write conflict and nothing stops them. Catching it needs true serializability (2PL or SSI), or a schema change that forces the transactions to touch one shared row and turn the conflict into something the database can see.",
+      "pitfall_fa": "گشتن دنبال تعارض در نوشتن‌ها. write skew در خواندن‌ها و در *نبودِ* تعارض نوشتن مستقیم پنهان می‌شود؛ ابزارهای تشخیص تعارض کلاسیک آن را نمی‌بینند.",
+      "pitfall_en": "Looking for the conflict in the writes. Write skew hides in reads, and in the absence of a direct write conflict — so classic conflict detection does not see it.",
+      "related": [
+        "isolation-level",
+        "serializability",
+        "mvcc"
+      ]
+    },
+    {
+      "id": "lost-update",
+      "term": "lost update",
+      "term_fa": "به‌روزرسانی گم‌شده",
+      "chapter": 8,
+      "chapter_ref": "ch8-transactions",
+      "aliases": [
+        "lost update",
+        "lost updates",
+        "read-modify-write"
+      ],
+      "hook_fa": "دو نفر یک عدد را از ۱۰ به ۱۱ بردند؛ نتیجه ۱۱ شد، نه ۱۲.",
+      "hook_en": "Two people raised one number from 10 to 11; the result was 11, not 12.",
+      "one_liner_fa": "ناهنجاری‌ای که در آن خواندن-تغییر-نوشتنِ دو تراکنش هم‌زمان، یکی نوشتن دیگری را دور می‌ریزد.",
+      "one_liner_en": "An anomaly where two concurrent read-modify-write cycles overwrite each other, silently discarding one increment.",
+      "everyday_fa": "دو نفر هم‌زمان یک فایل مشترک را باز می‌کنند که در آن نوشته شده «۱۰ بازدیدکننده». هر دو عدد را می‌خوانند، هر دو ۱۱ می‌نویسند، هر دو ذخیره می‌کنند. فایل که ذخیره شود، ۱۱ را نشان می‌دهد — یک بازدیدکننده به هوا رفت.",
+      "everyday_en": "Two people open a shared file reading “10 visitors”. Both read ten, both type eleven, both save. The file shows eleven — one visitor went missing.",
+      "technical_fa": "الگوی read-modify-write وقتی محافظت نشود، به‌روزرسانی گم‌شده می‌سازد. راه‌حل‌ها: به‌روزرسانی اتمیک در خود پایگاه‌داده (مثل UPDATE ... SET n = n + 1)، قفل ردیف یا SELECT FOR UPDATE، قفل خوش‌بینانه با نسخه (compare-and-set روی version)، یا این‌که تراکنش با snapshot isolation و بررسی نسخه، در تعارض رد شود. هر کدام باید صریحاً انتخاب شود؛ هیچ‌کدام پیش‌فرض نیست.",
+      "technical_en": "An unprotected read-modify-write pattern produces lost updates. The fixes are an atomic update in the database itself (UPDATE ... SET n = n + 1), a row lock or SELECT FOR UPDATE, optimistic concurrency with compare-and-set on a version column, or letting a snapshot-isolation transaction detect the version conflict and abort. Each has to be chosen explicitly; none is the default.",
+      "pitfall_fa": "اعتماد به این‌که یک retry ساده کافی است. retry روی خواندن-تغییر-نوشتنِ شکسته، همان شکست را تکرار می‌کند مگر این‌که نوشتن، شرطی یا اتمیک باشد.",
+      "pitfall_en": "Trusting a plain retry. Retrying a broken read-modify-write repeats the same failure unless the write is conditional or atomic.",
+      "related": [
+        "isolation-level",
+        "write-skew"
+      ]
+    },
+    {
+      "id": "clock-skew",
+      "term": "clock skew",
+      "term_fa": "اختلاف ساعت",
+      "chapter": 9,
+      "chapter_ref": "ch9-distributed-trouble",
+      "aliases": [
+        "clock skew",
+        "clock-skew",
+        "skewed clock"
+      ],
+      "hook_fa": "ساعت دو ماشین هرگز دقیقاً یکی نیست.",
+      "hook_en": "Two machines never agree on the time.",
+      "one_liner_fa": "اختلاف میان ساعت‌های ماشین‌های مختلف که باعث می‌شود ترتیب رویدادها با مهر زمانی مبهم شود.",
+      "one_liner_en": "The disagreement between machine clocks that makes timestamp ordering of events ambiguous.",
+      "everyday_fa": "دو ساعت دیواری در دو اتاق؛ یکی پنج دقیقه جلوست. دو نفر در دو اتاق یک اتفاق را ثبت می‌کنند. وقتی دفترها را کنار هم بگذاری، به نظر می‌رسد اتفاقِ اتاق دوم *قبل* از اتفاقِ اتاق اول افتاده، در حالی که واقعاً بعد از آن بوده.",
+      "everyday_en": "Two wall clocks in two rooms, one running five minutes ahead. Two people log an event in each room. Put the logs side by side and the second room's event appears to precede the first, when in fact it followed.",
+      "technical_fa": "ساعت‌های معمول (wall clock) با NTP هم‌گام می‌شوند و هم‌گام‌سازی هرگز کامل نیست: می‌توانند پرش کنند، عقب بروند یا در اثر هم‌گام‌سازی به عقب بجهند. ساعت یکنوا (monotonic) برای اندازه‌گیری فاصله خوب است ولی مبدأ مشترکی بین ماشین‌ها ندارد. برای ترتیب‌دادن باید یا از ساعت منطقی (شمارندهٔ Lamport، ساعت برداری) استفاده کنی، یا از مهر زمانیِ ترکیبی که به مرز عدم‌قطعیت احترام بگذارد، یا ترتیب را به یک سرویسِ سریال‌کننده بسپاری.",
+      "technical_en": "Wall clocks are synchronised by NTP and that sync is never complete: they can jump, drift, or step backwards after a correction. Monotonic clocks measure intervals well but share no origin across machines. To order events you need logical clocks (Lamport counters, vector clocks), a hybrid timestamp that respects the uncertainty bound, or you hand ordering to a sequencing service.",
+      "pitfall_fa": "استفاده از مهر زمانی سرور در منطق کسب‌وکار («آخرین نوشتن برنده»). با اختلاف ساعت، «آخرین» می‌تواند دیرتر باشد ولی زمانش زودتر ثبت شده باشد.",
+      "pitfall_en": "Using server timestamps in business logic such as “last write wins”. Under skew, the truly latest write can carry the earlier timestamp.",
+      "related": [
+        "network-partition",
+        "fencing-token"
+      ]
+    },
+    {
+      "id": "network-partition",
+      "term": "network partition",
+      "term_fa": "تقسیم شبکه",
+      "chapter": 9,
+      "chapter_ref": "ch9-distributed-trouble",
+      "aliases": [
+        "network partition",
+        "network partitions",
+        "network split"
+      ],
+      "hook_fa": "شبکه سالم نیست؛ فقط یا کند است یا قطع.",
+      "hook_en": "The network is not fine; it is slow or severed.",
+      "one_liner_fa": "وضعیتی که در آن دو گروه از گره‌ها نمی‌توانند به هم برسند، هرچند هر گروه زنده است و کار می‌کند.",
+      "one_liner_en": "A state where two groups of nodes cannot reach each other, even though each group is alive and working.",
+      "everyday_fa": "دو تیم که فقط با پیام‌رسان هماهنگ می‌کنند. اینترنت یک طرف قطع می‌شود. هر تیم زنده است، کارش را ادامه می‌دهد، و هیچ‌کدام نمی‌داند طرف دیگر چه کرده. وقتی اینترنت برمی‌گردد، باید بفهمی کدام تصمیم‌ها با هم ناسازگارند.",
+      "everyday_en": "Two teams coordinating only through chat. One side loses connectivity. Both are alive and keep working, and neither knows what the other did. When the link returns, you must work out which decisions contradict each other.",
+      "technical_fa": "شبکهٔ توزیع‌شده زمان‌بندی ندارد: تأخیر نامحدود است و عدم‌دریافت پاسخ، هم می‌تواند یعنی «خراب» هم «کند». پس نمی‌توانی صرفاً از نبودِ پاسخ نتیجه بگیری. انتخاب واقعی این است: در همین وضعیت، برای حفظ سازگاری نوشتن را متوقف کن (CP)، یا نوشتن را بپذیر و بعد آشتی بده (AP). هر دو معتبرند؛ اما فکر کردن اینکه «شبکه معمولاً سالم است» یک انتخاب سوم نیست، یک فرض پنهان است.",
+      "technical_en": "A distributed network has no timing guarantees: delays are unbounded and a missing reply may mean “dead” or merely “slow”. So you cannot infer failure from silence. The real choice is to stop accepting writes to preserve consistency, or accept them and reconcile later. Both are legitimate; assuming “the network is usually fine” is not a third option, it is a hidden assumption.",
+      "pitfall_fa": "با timeout، «مرده» و «کند» را یکی گرفتن. یک گرهٔ کند به‌عنوان مرده علامت می‌خورد، رهبر جدید انتخاب می‌شود، و گرهٔ کند برمی‌گردد — و دو رهبر داری.",
+      "pitfall_en": "Treating “dead” and “slow” as the same thing via a timeout. The slow node is marked dead, a new leader is elected, the slow node returns — and you have two leaders.",
+      "related": [
+        "split-brain",
+        "clock-skew",
+        "fencing-token"
+      ]
+    },
+    {
+      "id": "fencing-token",
+      "term": "fencing token",
+      "term_fa": "توکن حصار",
+      "chapter": 9,
+      "chapter_ref": "ch9-distributed-trouble",
+      "aliases": [
+        "fencing token",
+        "fencing tokens",
+        "fencing"
+      ],
+      "hook_fa": "کارت قدیمی سوخته است، حتی اگر هنوز معتبر به نظر برسد.",
+      "hook_en": "The old card is burned, even if it still looks valid.",
+      "one_liner_fa": "شمارهٔ یکتای افزایشی که با هر انتخاب رهبر بزرگ‌تر می‌شود و منبعِ داده، درخواست‌های نسخهٔ قدیمی را رد می‌کند.",
+      "one_liner_en": "A monotonic number issued with each leadership term, letting a resource reject writes from a superseded leader.",
+      "everyday_fa": "نگهبان ساختمانی که فقط کارت‌های با شمارهٔ بالاتر از آخرین شمارهٔ دیده‌شده را قبول می‌کند. یک کارت قدیمی هنوز در جیب کسی است، ولی شماره‌اش کوچک‌تر است و در باز نمی‌شود. لازم نیست مطمئن باشی کارت قدیمی نابود شده؛ کافی است نتواند اثر بگذارد.",
+      "everyday_en": "A building guard who only accepts a card numbered higher than the last one seen. An old card may still be in someone's pocket, but its number is lower and the door stays shut. You never need to prove the old card was destroyed — only that it cannot act.",
+      "technical_fa": "مسئله این است که رهبر قدیم ممکن است هنوز زنده باشد و نوشتن بفرستد؛ lease و heartbeat فقط احتمال را کم می‌کنند. راه‌حل: هر بار انتخاب رهبر، یک شمارهٔ افزایشی از یک سرویسِ سریال‌کننده بگیر و آن را همراه هر درخواست بفرست. منبعِ داده، شمارهٔ کوچک‌تر از آخرین شمارهٔ دیده‌شده را رد می‌کند. به این ترتیب امنیتِ عملیات به ساعت و network timeout تکیه نمی‌کند، بلکه به یک مقایسهٔ ساده و اتمیک وابسته است.",
+      "technical_en": "The problem is that a superseded leader may still be alive and sending writes; leases and heartbeats only lower the probability. The fix: take an increasing number from a sequencing service on every leadership change and attach it to each request. The resource rejects any number lower than the highest it has seen. Safety then rests on a simple atomic comparison rather than on clocks and timeouts.",
+      "pitfall_fa": "فکر کردن این‌که «lease کافی است». اگر پردازه برای مدت طولانی متوقف شود (GC یا بار سنگین)، lease تمام می‌شود ولی پردازه خودش خبر ندارد — و بدون fence، دوباره می‌نویسد.",
+      "pitfall_en": "Believing a lease is enough. If a process pauses long enough — GC or heavy load — the lease expires without the process noticing, and without fencing it simply writes again.",
+      "related": [
+        "network-partition",
+        "failover",
+        "split-brain"
+      ]
+    },
+    {
+      "id": "linearizability",
+      "term": "linearizability",
+      "term_fa": "خطی‌پذیری",
+      "chapter": 10,
+      "chapter_ref": "ch10-consensus",
+      "aliases": [
+        "linearizability",
+        "linearizable",
+        "linearisable"
+      ],
+      "hook_fa": "بلیت آخر فروخته شد؛ دیگر هیچ‌کس نباید ببیند موجود است.",
+      "hook_en": "The last ticket sold; nobody may still see one available.",
+      "one_liner_fa": "تضمینی که سیستم مثل یک نسخهٔ واحد و آنی رفتار می‌کند: هر خواندن، آخرین نوشتنِ تأییدشده پیش از خودش را می‌بیند.",
+      "one_liner_en": "The guarantee that the system behaves like a single instantaneous copy: every read returns the latest acknowledged write before it.",
+      "everyday_fa": "بلیت فروشی کنسرت. آخرین بلیت فروخته می‌شود و پرداخت تأیید می‌شود. از این لحظه، هر کسی که موجودی را می‌پرسد باید بگوید «تمام شد». اگر یک باجهٔ دیگر همچنان بلیت نشان بدهد، تجربه دیگر «کمی کهنه» نیست؛ دروغ است.",
+      "everyday_en": "A concert ticket desk. The last ticket is sold and the payment is acknowledged. From that instant, anyone asking for availability must hear “sold out”. If another counter still shows a ticket, that is not slightly stale, it is a false answer.",
+      "technical_fa": "خطی‌پذیری نقطهٔ مقابل نهایی‌بودن (eventual consistency) است: هر عملیات در بازهٔ خودش، در یک نقطهٔ زمانی بین فراخوانی و پاسخ اثر می‌گذارد و همهٔ کلاینت‌ها همان ترتیب را می‌بینند. تأیید یک نوشتن باید واقعاً یعنی «از این به بعد همه می‌بینند». این تضمین، شبکهٔ توزیع‌شده را به یک ماشین تک‌نقطه‌ای تبدیل می‌کند و به همین دلیل گران است: برای انجامش باید یا به اجماع تکیه کنی یا به یک گرهٔ اصلی. با خواندن از replicaهای تأخیردار، خطی‌پذیری نمی‌گیری.",
+      "technical_en": "Linearizability is the opposite of eventual consistency: each operation takes effect at a single instant between its call and its response, and all clients observe the same order. An acknowledged write must genuinely mean “everyone sees this from now on”. That guarantee collapses a distributed system into a single-machine illusion, which is why it is expensive: it needs consensus or a single leader. Reading from lagging replicas does not give you linearizability.",
+      "pitfall_fa": "اشتباه گرفتن خطی‌پذیری با سریال‌پذیری. سریال‌پذیری دربارهٔ *تراکنش‌ها* است؛ خطی‌پذیری دربارهٔ *تک‌عملیات* روی یک شیء. یک سیستم می‌تواند یکی را داشته باشد و دیگری را نه.",
+      "pitfall_en": "Confusing linearizability with serializability. Serializability is about transactions; linearizability is about single-object operations. A system can have one without the other.",
+      "related": [
+        "consensus",
+        "quorum"
+      ]
+    },
+    {
+      "id": "consensus",
+      "term": "consensus",
+      "term_fa": "اجماع",
+      "chapter": 10,
+      "chapter_ref": "ch10-consensus",
+      "aliases": [
+        "consensus",
+        "consensuses"
+      ],
+      "hook_fa": "چند ماشین باید روی یک چیز توافق کنند، حتی وقتی بعضی‌شان خاموش‌اند.",
+      "hook_en": "Several machines must agree on one thing, even while some are down.",
+      "one_liner_fa": "فرایندی که در آن مجموعه‌ای از گره‌ها روی یک مقدار یا یک ترتیب واحد به توافق می‌رسند و آن توافق برنمی‌گردد.",
+      "one_liner_en": "A process by which a set of nodes agrees on one value or one order, and the agreement cannot later be undone.",
+      "everyday_fa": "خانواده‌ای که باید تصمیم بگیرد امشب شام چه باشد، و قرار است تصمیم قطعی باشد. بعضی‌ها گوشی‌شان خاموش است. کافی نیست اکثریت «فعلاً موافق» باشند؛ باید چیزی تضمین کند که اگر تصمیم بعداً عوض شود، آن تغییر هم دوباره با همان قاعده گرفته شود.",
+      "everyday_en": "A family deciding tonight's dinner, with the decision meant to be final while some phones are off. A majority being “currently in favour” is not enough; something must guarantee that if the decision changes later, the change is agreed by the same rule.",
+      "technical_fa": "در عمل، اجماع به‌صورت «تک‌مقدار در هر دور» پیدا می‌شود: گره‌ها دور به دور رأی می‌دهند و تا وقتی مقدار قبلی تأیید نشده، مقدار تازه‌ای انتخاب نمی‌شود. Raft، Paxos و Zab همین کار را می‌کنند. کل هزینه‌اش این است که هر تصمیم به یک رفت‌و‌برگشت با اکثریت نیاز دارد، پس اجماع برای هر عملیات مناسب نیست. سراغش می‌روی برای: انتخاب رهبر، نگه‌داشتن یک ترتیب کلی، و پیکربندی خوشه. جالب اینکه اجماع همان چیزی است که می‌توان با آن یک سرویس AI یا صف را از گم‌شدن پیام نجات داد.",
+      "technical_en": "In practice consensus is found as “one value per round”: nodes vote round by round and no new value is chosen until the previous one is settled. Raft, Paxos and Zab all do this. The whole cost is that every decision needs a round trip with a majority, which is why consensus does not belong on every operation. You reach for it for leader election, a total order of events, and cluster configuration.",
+      "pitfall_fa": "استفاده از اجماع برای همه چیز. اگر هر نوشتن یک دور کامل رأی‌گیری بخواهد، تأخیر و توان اجرا دیگر با بار واقعی سرویس نمی‌خواند.",
+      "pitfall_en": "Using consensus for everything. If every write needs a full voting round, latency and throughput no longer match the real workload.",
+      "related": [
+        "quorum",
+        "linearizability",
+        "split-brain"
+      ]
+    },
+    {
+      "id": "quorum",
+      "term": "quorum",
+      "term_fa": "کوئروم",
+      "chapter": 10,
+      "chapter_ref": "ch10-consensus",
+      "aliases": [
+        "quorum",
+        "quorums"
+      ],
+      "hook_fa": "اکثریت کافی است، به شرطی که خواندن و نوشتن روی هم بیفتند.",
+      "hook_en": "A majority suffices, provided reads and writes overlap.",
+      "one_liner_fa": "حداقل تعداد گره‌هایی که باید در یک خواندن یا نوشتن شرکت کنند تا نتیجه معتبر شمرده شود.",
+      "one_liner_en": "The minimum number of nodes that must take part in a read or write for the result to count.",
+      "everyday_fa": "هیئت‌مدیرهٔ یک شرکت با پنج عضو. رأی وقتی معتبر است که حداقل سه نفر رأی بدهند. دو نفر با هم می‌توانند جلسه بگذارند و تصمیم بگیرند، ولی آن تصمیم رسمی نیست تا سه نفر به آن برسند. همهٔ پنج نفر هم لازم نیستند؛ بعضی در سفرند.",
+      "everyday_en": "A five-member board. A vote counts only when at least three members vote. Two can meet and agree, but the decision is not official until three are reached. Not everyone is needed — some are travelling.",
+      "technical_fa": "اگر n replica داری و نوشتن w را لازم دارد و خواندن r را، تا وقتی w + r > n باشد، هر مجموعهٔ خواندن با هر مجموعهٔ نوشتن حتماً هم‌پوشانی دارد. با ۳ گره، w=2 و r=2 یعنی خواندن و نوشتن هر دو اکثریت می‌خواهند و یک گره می‌تواند بیفتد. با w=1 و r=n خواندن سریع‌تر می‌شود ولی نوشتن شکننده‌تر. کوئروم کارایی را با تحمل خرابی معامله می‌کند — و هیچ‌کدام از این دو، خطی‌پذیری را تضمین نمی‌کند مگر با خواندن‌های تعمیری.",
+      "technical_en": "With n replicas, a write needing w nodes and a read needing r nodes, as long as w + r > n every read set must overlap every write set. With three nodes, w=2 and r=2 means both sides need a majority and one node may fail. w=1 with r=n makes reads fast but writes fragile. A quorum trades throughput against fault tolerance — and none of it guarantees linearizability without read repair.",
+      "pitfall_fa": "انتخاب w و r بر اساس فرمول، بی‌توجه به این‌که گره‌های کند w را کند می‌کنند. کوئروم روی تأخیرِ بدترین گره تکیه می‌کند، نه روی سرعت متوسط.",
+      "pitfall_en": "Picking w and r from the formula while ignoring that slow nodes set the pace. A quorum waits on the slowest required node, not the average one.",
+      "related": [
+        "consensus",
+        "linearizability",
+        "replication-lag"
+      ]
+    },
+    {
+      "id": "mapreduce",
+      "term": "MapReduce",
+      "term_fa": "مپ‌ردیوس",
+      "chapter": 11,
+      "chapter_ref": "ch11-batch-processing",
+      "aliases": [
+        "MapReduce",
+        "map-reduce",
+        "map reduce"
+      ],
+      "hook_fa": "یک کار بزرگ را بکن هزار کار کوچک، بعد جمعشان کن.",
+      "hook_en": "Turn one big job into many small ones, then add them up.",
+      "one_liner_fa": "الگوی پردازش دسته‌ای که کار را به map (روی هر تکهٔ داده) و reduce (تجمیع بر اساس کلید) می‌شکند.",
+      "one_liner_en": "A batch processing pattern that splits work into map (per data chunk) and reduce (per-key aggregation).",
+      "everyday_fa": "می‌خواهی تعداد کلمه‌های یک کتاب هزار‌صفحه‌ای را بشماری. به چند دوست می‌دهی: هر نفر صد صفحه برمی‌دارد و فهرست «کلمه و تعداد» را می‌سازد (map). بعد همه فهرست‌ها را کنار هم می‌گذاری و تعداد هر کلمه را جمع می‌زنی (reduce). هیچ‌کس لازم نیست کل کتاب را بخواند.",
+      "everyday_en": "You want to count words in a thousand-page book. You hand out hundred-page slices: each friend produces a list of word and count (map). Then you stack the lists and total each word (reduce). Nobody has to read the whole book.",
+      "technical_fa": "موتورهای دسته‌ای بر همین الگو سوارند: ورودیِ نامتغیر، چند مرحلهٔ map که داده را پردازش می‌کند، یک shuffle که رکوردها را بر اساس کلید جمع می‌کند، و reduce که تجمیع می‌کند. نوشتن به خروجی نیست، پس اگر مرحله‌ای بشکند کل کار از اول تکرار می‌شود — و همین سادگی، تحمل خرابی را ممکن می‌کند. نقطهٔ ضعفش تأخیر است: برای گزارشِ کامل عالی است، برای پاسخِ فوری نه.",
+      "technical_en": "Batch engines follow this shape: immutable input, several map stages, a shuffle that groups records by key, and reduce stages that aggregate. Nothing is written in place, so a failed stage simply reruns the whole job — and that simplicity is what makes fault tolerance possible. Its weakness is latency: excellent for a complete report, useless for an immediate answer.",
+      "pitfall_fa": "استفاده از MapReduce برای کاری که به‌روزرسانی تدریجی می‌خواهد. اگر باید دقیقه‌ای یک بار نتیجه را ببینی، جریان داده و پردازش جریانی ابزار درست‌اند.",
+      "pitfall_en": "Using MapReduce for work that needs incremental updates. If you must see results within a minute, streaming dataflow is the right tool.",
+      "related": [
+        "shuffle"
+      ]
+    },
+    {
+      "id": "shuffle",
+      "term": "shuffle",
+      "term_fa": "شافل",
+      "chapter": 11,
+      "chapter_ref": "ch11-batch-processing",
+      "aliases": [
+        "shuffle",
+        "shuffling",
+        "shuffled"
+      ],
+      "hook_fa": "همه‌چیز را جمع کن، بر اساس کلید دوباره پخش کن.",
+      "hook_en": "Gather everything, then deal it out by key.",
+      "one_liner_fa": "مرحله‌ای که رکوردهای خروجی map بر اساس کلید سازمان‌دهی می‌شوند تا همهٔ مقادیر یک کلید کنار هم برسند.",
+      "one_liner_en": "The stage that reorganises map output by key so all values for a key arrive together.",
+      "everyday_fa": "پخش کردن کارت بین چهار بازیکن. اول همهٔ کارت‌ها را از روی میز جمع می‌کنی و مرتب می‌کنی، بعد می‌دهی — اگر نمی‌توانی نگهشان داری باید روی دیسک بگذاری‌شان. همان جمع‌کردن و مرتب‌کردن، اگر سنگین باشد، همه‌چیز را کند می‌کند.",
+      "everyday_en": "Dealing cards to four players. First you gather every card off the table and sort it, then you deal. If you cannot hold them all, you must stage them on disk. That gather-and-sort is the part that slows everything down when it gets big.",
+      "technical_fa": "shuffle یعنی بازتوزیع داده بین ماشین‌ها تا هر reducer کلیدهای مربوط به خودش را بگیرد: نوشتن پارتیشن‌های میانی روی دیسک، شبکه، و مرتب‌سازی و ادغام. گلوگاه اصلی کارهای دسته‌ای همین‌جاست، نه در محاسبهٔ map. اگر یک کلید از بقیه بسیار پرتکرار باشد، یک reducer همهٔ کار را به دوش می‌کشد (نقطهٔ داغ در سطح کلید) و راه‌حل‌ها هم مانند شاردینگ است: نمک زدن به کلید یا split کردن کلیدهای داغ.",
+      "technical_en": "A shuffle redistributes data between machines so each reducer receives its own keys: writing intermediate partitions to disk, moving them over the network, then sorting and merging. This is the real bottleneck of batch jobs, not the map computation. If one key dominates, a single reducer carries the whole load — a key-level hot spot — and the fixes mirror sharding: salting keys or splitting the hot ones.",
+      "pitfall_fa": "بهینه‌کردن map در حالی که هزینه در shuffle است. یک تابع map سریع‌تر، روی کارِ کندِ شبکه و دیسک اثری ندارد.",
+      "pitfall_en": "Optimising map functions while the cost sits in the shuffle. A faster mapper does nothing for a network-and-disk-bound job.",
+      "related": [
+        "mapreduce",
+        "hot-spot"
+      ]
+    },
+    {
+      "id": "event-time",
+      "term": "event time",
+      "term_fa": "زمان رویداد",
+      "chapter": 12,
+      "chapter_ref": "ch12-stream-processing",
+      "aliases": [
+        "event time",
+        "event-time",
+        "processing time",
+        "processing-time"
+      ],
+      "hook_fa": "زمانی که اتفاق افتاد، با زمانی که فهمیدی یکی نیست.",
+      "hook_en": "When it happened is not when you found out.",
+      "one_liner_fa": "تفکیک زمانِ وقوع یک رویداد (event time) از زمانی که سیستم آن را پردازش کرد (processing time).",
+      "one_liner_en": "The distinction between when an event actually happened (event time) and when the system handled it (processing time).",
+      "everyday_fa": "نامه‌ای که رویش تاریخ دوشنبه خورده، ولی پنجشنبه به دستت می‌رسد. اگر بر اساس تاریخ نامه بشماری، دوشنبه را می‌شمری؛ اگر بر اساس روزی که پاکت را باز کردی بشماری، پنجشنبه. برای «این ماه چه شد؟» تاریخ نامه درست است. برای «الان چه کاری دارم؟» روزِ باز کردن درست است.",
+      "everyday_en": "A letter dated Monday that reaches you on Thursday. Counting by the letter's date means Monday; counting by the day you opened it means Thursday. For “what happened this month?” the letter's date is right. For “what must I do now?” the day you opened it is right.",
+      "technical_fa": "رویدادها با تأخیر می‌رسند و بی‌ترتیب‌اند، پس با processing time به نتایج ناپایدار و تکرارناپذیر می‌رسی: یک پنجره را دوباره اجرا کنی، عدد دیگری می‌گیری. با event time نتیجه تکرارپذیر است، ولی باید منتظر رویدادهای دیررس بمانی و برایشان قاعده داشته باشی. تصمیم اصلی این است که پنجره‌ها را بر چه پایه‌ای بسازی؛ این انتخاب بر همهٔ چیزهای بعدی اثر می‌گذارد.",
+      "technical_en": "Events arrive late and out of order, so processing-time windows give irreproducible results: rerun the same window and you get a different number. Event-time windows are reproducible, but you must wait for late events and hold a policy for them. The core decision is which clock your windows are built on; it determines everything downstream.",
+      "pitfall_fa": "اندازه‌گیری «نرخ فعلی» با پنجرهٔ event time. پنجرهٔ رویدادی تا وقتی همهٔ دادهٔ دیررس نرسیده، عدد نهایی نیست — و برای داشبورد زنده، این عدد مکرراً عقب می‌کشد.",
+      "pitfall_en": "Measuring a live rate in event-time windows. An event-time window is not final until late data settles, so a live dashboard will keep revising its number downward.",
+      "related": [
+        "watermark",
+        "exactly-once"
+      ]
+    },
+    {
+      "id": "watermark",
+      "term": "watermark",
+      "term_fa": "واترمارک",
+      "chapter": 12,
+      "chapter_ref": "ch12-stream-processing",
+      "aliases": [
+        "watermark",
+        "watermarks"
+      ],
+      "hook_fa": "تا این خط، دیگر منتظر دیررس‌ها نمی‌مانی.",
+      "hook_en": "Past this line, you stop waiting for stragglers.",
+      "one_liner_fa": "نشانگری در جریان که می‌گوید دادهٔ زودتر از این نقطه عملاً رسیده و پنجره را می‌توان نهایی کرد.",
+      "one_liner_en": "A marker in the stream saying data earlier than this point has effectively arrived, so the window can be closed.",
+      "everyday_fa": "دفتر پست: مهلت پستی را اعلام می‌کنی — «نامه‌ای که بعد از سه‌شنبه برسد، در محمولهٔ این ماه نمی‌آید». این یک پیش‌بینی است، نه یقین. اگر نامه‌ای دیرتر برسد، تصمیمت را عوض می‌کنی یا آن را به ماه بعد می‌فرستی.",
+      "everyday_en": "A postal deadline: “anything arriving after Tuesday misses this month's shipment.” That is a forecast, not a certainty. If a letter shows up later, you either revise your decision or push it to next month.",
+      "technical_fa": "واترمارک یک مرز تخمینی است که می‌گوید دیگر انتظار رویدادی با زمان کوچک‌تر از آن نداری. وقتی واترمارک از پایان یک پنجره بگذرد، پنجره بسته و نتیجهٔ آن نهایی می‌شود. واترمارک همیشه تخمین است: یا محافظه‌کارانه است (دیر می‌بندی، ولی کمتر از دست می‌دهی) یا جسورانه (سریع، ولی رویدادهای دیررس جا می‌مانند). هر دو выбор مشروع‌اند، به شرطی که صریح باشند و بتوانی بعداً رکوردهای رد‌شده را ببینی.",
+      "technical_en": "A watermark is an estimated boundary: you no longer expect events with an earlier event time. Once the watermark passes the end of a window, the window closes and its result is final. A watermark is always an estimate — conservative means late closes and fewer losses, aggressive means speed and stranded stragglers. Both are legitimate, provided the choice is explicit and rejected records remain inspectable.",
+      "pitfall_fa": "فرض این‌که واترمارک «تضمین» است. رویداد دیررس همیشه ممکن است؛ باید بدانی در آن حالت چه می‌شود: کنار گذاشتن، پس‌فرستادن به خروجی دیررس، یا بازکردن دوبارهٔ پنجره.",
+      "pitfall_en": "Treating the watermark as a guarantee. Late events are always possible; you must know what happens then — drop, side-output, or reopen the window.",
+      "related": [
+        "event-time",
+        "exactly-once"
+      ]
+    },
+    {
+      "id": "exactly-once",
+      "term": "exactly-once",
+      "term_fa": "دقیقاً یک بار",
+      "chapter": 12,
+      "chapter_ref": "ch12-stream-processing",
+      "aliases": [
+        "exactly-once",
+        "exactly once",
+        "at-least-once",
+        "at least once",
+        "at-most-once",
+        "at most once"
+      ],
+      "hook_fa": "یک بار پرداخت، حتی وقتی شبکه دو بار تأیید می‌خواهد.",
+      "hook_en": "Charged once, even when the network wants a second confirmation.",
+      "one_liner_fa": "اثر یک پیام دقیقاً یک بار اعمال می‌شود — آن هم با تکرار و retry، نه با جادو.",
+      "one_liner_en": "A message's effect applies exactly once — achieved despite retries, not by preventing them.",
+      "everyday_fa": "دستگاه کارت‌خوان وسط تراکنش قطع می‌شود. تو نمی‌دانی پول کم شد یا نه، پس دوباره می‌زنی. بانک یک شمارهٔ پیگیری دارد: دو درخواست با همان شماره، فقط یک بار اعمال می‌شوند. «یک بار» این‌طور ساخته می‌شود، نه با مطمئن‌شدن از این‌که شبکه قطع نمی‌شود.",
+      "everyday_en": "A card terminal drops mid-transaction. You cannot tell whether the charge went through, so you tap again. The bank holds an idempotency key: two requests with that key apply once. That is how “exactly once” is built — not by ensuring the network never drops.",
+      "technical_fa": "سه سطح وجود دارد: at-most-once (شاید گم شود، هرگز تکرار نمی‌شود)، at-least-once (هرگز گم نمی‌شود، شاید تکرار شود)، و exactly-once که فقط با همکاری مصرف‌کننده و یک «مُهر» قابل اعتماد ساخته می‌شود. در عمل: نوشتن اتمیک با شناسه، یا تراکنشی که پیام و به‌روزرسانی offset را با هم ثبت می‌کند، یا committed state در موتور جریانی. بدون اثرِ تکرارپذیر در مرز نهایی (جایی که پول یا ایمیل واقعاً حرکت می‌کند)، دقیقاً یک بار به دست نمی‌آید.",
+      "technical_en": "There are three useful levels: at-most-once (may be lost, never duplicated), at-least-once (never lost, may be duplicated), and exactly-once, which can only be built with a consumer-side marker the sink trusts. In practice that means atomic writes keyed by an id, a transaction that records the message and the offset together, or committed state inside the stream engine. Without an idempotent or transactional effect at the final boundary — where money or mail actually moves — you do not get exactly once.",
+      "pitfall_fa": "شمردن دقیقاً یک بار به‌عنوان ویژگی «شبکه». پیام‌رسانی که دقیقاً یک بار تحویل نمی‌دهد؛ در نهایت هر سیستمی از retry استفاده می‌کند. ادعای دقیقاً یک بار فقط با اثرِ ایدمپوتنت در نقطهٔ پایانی معنی دارد.",
+      "pitfall_en": "Treating exactly-once as a network property. No transport delivers exactly once; every system retries. The claim only means something with an idempotent effect at the final sink.",
+      "related": [
+        "event-time",
+        "watermark"
+      ]
+    },
+    {
+      "id": "unbundling",
+      "term": "unbundling",
+      "term_fa": "تفکیک پایگاه داده",
+      "chapter": 13,
+      "chapter_ref": "ch13-streaming-philosophy",
+      "aliases": [
+        "unbundling",
+        "unbundle",
+        "unbundled",
+        "unbundles"
+      ],
+      "hook_fa": "پایگاه داده یک جعبهٔ همه‌کاره بود؛ اجزایش را جدا می‌کنیم.",
+      "hook_en": "The database was one all-in-one box; now its parts come apart.",
+      "one_liner_fa": "جداکردن سرویس‌هایی که سنتاً در یک پایگاه داده بودند (ذخیره، ایندکس، کش، جست‌وجو) و ساختن هر یک با ابزار تخصصی خودش.",
+      "one_liner_en": "Separating the services historically bundled inside one database — storage, index, cache, search — each built with a specialised tool.",
+      "everyday_fa": "یک چاقوی سوئیسی که همه‌چیز دارد: قیچی، ناخن‌گیر، پیچ‌گوشتی. برای سفر عالی است. ولی اگر آشپز حرفه‌ای باشی، یک چاقوی تیز، یک قیچی خوب و یک پیچ‌گوشتی برقی جدا می‌گیری — هر کدام کار خودش را بهتر می‌کند، به شرطی که یادت باشد همه‌شان را کجا گذاشتی.",
+      "everyday_en": "A Swiss army knife with scissors, nail file and screwdriver. Excellent for travel. But a professional cook buys a sharp knife, good scissors and a power driver separately — each does its job better, provided you remember where you put them all.",
+      "technical_fa": "در سیستم‌های امروزی، ذخیره‌سازی، ایندکس جست‌وجو، کش، انبار تحلیلی و حتی ثبت رویداد می‌توانند جدا باشند و با CDC و جریان رویداد هم‌گام شوند. سودش تخصصی‌شدن و مقیاس‌پذیری مستقل است؛ هزینه‌اش این است که سازگاری دیگر از خود پایگاه‌داده نمی‌آید و باید صریحاً طراحی شود: کدام مؤلفه منبع حقیقت است، چه چیزی مشتق است، و هر مؤلفه چقدر عقب است.",
+      "technical_en": "In modern systems storage, search indexes, caches, analytics stores and even the event log can be separate, kept in step by CDC and event streams. The gain is specialisation and independent scaling; the cost is that consistency no longer comes free from the database and must be designed: which component is the source of truth, what is derived, and how far behind each one is allowed to run.",
+      "pitfall_fa": "جدا کردن اجزا بدون تصمیم دربارهٔ منبع حقیقت. نتیجه‌اش دو نسخهٔ ناسازگار از یک واقعیت است و هیچ‌کس نمی‌داند کدام درست است.",
+      "pitfall_en": "Breaking the pieces apart without deciding the source of truth. The result is two disagreeing copies of one fact and nobody who knows which is right.",
+      "related": [
+        "derived-data",
+        "system-of-record"
+      ]
+    },
+    {
+      "id": "feedback-loop",
+      "term": "feedback loop",
+      "term_fa": "حلقهٔ بازخورد",
+      "chapter": 14,
+      "chapter_ref": "ch14-doing-right",
+      "aliases": [
+        "feedback loop",
+        "feedback loops",
+        "feedback-loop"
+      ],
+      "hook_fa": "سیستم آن چیزی را که قبلاً نشان داده، دوباره نشان می‌دهد.",
+      "hook_en": "The system starts recommending what it already recommended.",
+      "one_liner_fa": "وضعیتی که خروجی یک سیستم به ورودی آیندهٔ همان سیستم تبدیل می‌شود و سوگیری‌های کوچک را تقویت می‌کند.",
+      "one_liner_en": "A situation where a system's output feeds its own future input, amplifying small biases.",
+      "everyday_fa": "دو رستوران در یک خیابان. یکی از قضا شلوغ‌تر است، پس عابرها فکر می‌کنند بهتر است و همان را انتخاب می‌کنند؛ شلوغ می‌ماند و دیگری خالی می‌شود. کیفیت غذا هیچ نقشی نداشت — فقط صف، خودش را تقویت کرد.",
+      "everyday_en": "Two restaurants on one street. One happens to be busy first, so passers-by assume it is better and choose it; it stays busy and the other empties. Food quality played no part — the queue reinforced itself.",
+      "technical_fa": "در سیستم‌های پیشنهاددهنده و رتبه‌بندی، داده‌ای که برای آموزش استفاده می‌کنی دیگر نمونهٔ تصادفی نیست: نتیجهٔ نمایش‌های قبلی خودت است. اگر مدل یک آیتم را بیشتر نشان دهد، دادهٔ بیشتری از آن می‌گیرد و اعتمادش به آن آیتم مصنوعاً بالا می‌رود. راه‌حل‌ها: نگه‌داشتن گروه کنترل، ترافیک اکتشاف تصادفی، ثبت این‌که چه چیزی *نمایش داده شد* و چه چیزی *انتخاب شد*، و پرسیدن این‌سؤال که آیا برچسب‌ها نتیجهٔ رفتار قبلی سیستم‌اند یا واقعیت.",
+      "technical_en": "In recommender and ranking systems the training data is no longer a random sample: it is the outcome of your own previous displays. A model shown more of an item collects more data on it and grows artificially confident. Countermeasures: hold out a control group, keep a slice of random exploration, log what was *shown* separately from what was *chosen*, and ask whether labels reflect reality or the system's own past behaviour.",
+      "pitfall_fa": "اندازه‌گیری موفقیت با همان معیاری که سیستم آن را بهینه می‌کند. کلیک بیشتر می‌شود چون بیشتر نشان داده شد، نه چون بهتر بود.",
+      "pitfall_en": "Measuring success with the very metric the system optimises. Clicks rise because you showed more, not because it got better.",
+      "related": [
+        "consent"
+      ]
+    },
+    {
+      "id": "consent",
+      "term": "consent",
+      "term_fa": "رضایت",
+      "chapter": 14,
+      "chapter_ref": "ch14-doing-right",
+      "aliases": [
+        "consent",
+        "informed consent"
+      ],
+      "hook_fa": "دادهٔ آدم‌ها با اجازه‌شان حرکت می‌کند، نه با تصادف.",
+      "hook_en": "People's data moves with permission, not by accident.",
+      "one_liner_fa": "پایهٔ حقوقی استفاده از دادهٔ شخصی: هدف روشن، اجازهٔ آگاهانه و قابل پس‌گرفتن، و محدود ماندن به همان هدف.",
+      "one_liner_en": "The legal basis for using personal data: a clear purpose, informed and withdrawable permission, and use limited to that purpose.",
+      "everyday_fa": "عکس گروهی که می‌خواهی در استوری بگذاری. از همهٔ افراد عکس اجازه می‌گیری، می‌گویی کجا منتشر می‌کنی، و اگر یکی گفت نه، یا او را حذف می‌کنی یا عکس را منتشر نمی‌کنی. «قبلاً گذاشتم و کسی شکایت نکرد» اجازه نیست.",
+      "everyday_en": "A group photo you want to post. You ask everyone in it, you say where it will appear, and if one person says no you crop them out or drop the photo. “I posted before and nobody complained” is not permission.",
+      "technical_fa": "در عمل، رضایت باید ثبت‌شدنی باشد: چه کسی، برای چه هدفی، در چه زمانی، و با کدام نسخه از متن. باید بتوانی آن را پس بگیری و با آن، داده و مشتقاتش را پیدا کنی. همین‌جاست که «تفکیک» به کمک می‌آید: اگر معلوم باشد دادهٔ هر نفر در کدام شاردها و کدام نماهای مشتق نشسته، درخواست حذف قابل انجام است؛ اگر نه، فقط می‌توانی امیدوار باشی. هم‌سو شدن با رضایت، نیازمند نگاشت داده است، نه فقط یک صفحهٔ تنظیمات.",
+      "technical_en": "In practice consent must be recordable: who, for which purpose, when, and against which version of the text. It must be withdrawable, and withdrawal must let you find the data and its derivatives. This is where separation pays off: if you know which shards and derived views hold a person's data, deletion is possible; if not, you can only hope. Honouring consent is a data-lineage problem, not a settings-page problem.",
+      "pitfall_fa": "جمع‌آوری همه‌چیز «برای آینده» و امید به رضایت بعدی. دادهٔ جمع‌آوری‌شده بی‌هدف، معمولاً همان داده‌ای است که نمی‌توانی حذفش کنی.",
+      "pitfall_en": "Collecting everything “for later” and hoping consent follows. Data collected without a purpose is usually the data you cannot delete when asked.",
+      "related": [
+        "feedback-loop",
+        "derived-data"
+      ]
+    }
+  ]
+}
