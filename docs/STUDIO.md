@@ -72,6 +72,20 @@ The 49 chapter exercises each have their own reference topology, written in
 `assets/exercise_references.py` (nodes, edges, a bilingual note). The catalog builder attaches authored lessons from `assets/solutions/chN/exN.json`. Replica counts are illustrative teaching inputs, not a promise that each design meets every load. The legacy sizing helper produces a separate report; the builder does not consume it. The 35 classic problems keep
 the reference topology of the public SysDes project they were adapted from.
 
+`build()` lays a reference out one column per dependency depth, so the picture reads
+left to right. A column of several nodes is centred on its band instead of hanging
+from the top, and a chain longer than six columns continues on a second band whose
+crossing arrows travel below the first band as an orthogonal connector. Long
+component names wrap onto two lines at a word boundary; nothing is cut with an
+ellipsis unless a single unbroken line exceeds two full lines.
+
+The read-only tab prints the exercise's bilingual rationale above the canvas. Arrows
+do not print their transport (`HTTPS`, `RPC`) on every hop — the protocol stays in
+Settings and in the arrow's tooltip. A dashed arrow is labelled from its flow kind
+instead, in the reader's language and once per source node: `async` for background
+work, `control` for metadata and monitoring. An authored label always wins, so a
+lesson figure or a saved design keeps whatever the author wrote.
+
 ## Build and verify
 
 ```sh

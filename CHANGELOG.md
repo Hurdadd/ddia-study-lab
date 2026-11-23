@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Reference designs in the exercise studio now read as architectures instead of a
+  strip of cards. Each one is laid out in one column per dependency depth, a column
+  of several nodes is centred on its band instead of hanging from the top, and a
+  chain longer than six columns continues on a second band whose crossing arrows
+  travel below the first. Component names too wide for one line wrap onto two at a
+  word boundary, so a card no longer reads half a sentence and an ellipsis.
+- The canvas stopped labelling every hop with its transport. A dashed arrow now
+  carries its flow kind in the reader's language — `async`, `control` — once per
+  fan-out, and the protocol stays in Settings and in the arrow's tooltip. An authored
+  edge label still wins, so lesson figures and saved designs render as written.
+- The reference tab prints the exercise's rationale as a caption under the read-only
+  badge, so the diagram arrives with the reason it is shaped that way.
+- Topology, edge kinds, replica counts and the 100% self-coverage the checker asserts
+  are unchanged: this release changes layout, labels and captions only.
 - The glossary grew from 39 terms to 287, one for every technical term the Persian
   chapters actually use, and every entry got deeper. Each one now runs: a jargon-free
   everyday scene, an analogy, a generated diagram, the technical account, key
