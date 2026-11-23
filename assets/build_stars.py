@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
-"""Bake the GitHub star count into the site and the README badge.
+"""Bake the GitHub star count into the site, the README badge and the star chart.
 
 The study site is a static export with no backend, so nothing here runs on a
 visitor's request: the count is fetched once when the page is built, written to
 ``assets/stars.json``, drawn into ``assets/badges/stars.svg`` and stamped into
-every ``[data-star-count]`` slot. In the browser ``assets/stars.js`` re-reads the
-JSON from the same origin, which keeps the number fresh between deployments
-without a third-party request or an API token in the page.
+every ``[data-star-count]`` slot. The same read also collects each stargazer's
+``starred_at`` timestamp, which draws ``assets/star-history.svg`` for the README
+(see ``star_history.py``). In the browser ``assets/stars.js`` re-reads the JSON
+from the same origin, which keeps the number fresh between deployments without a
+third-party request or an API token in the page.
+
+The count and the chart share one source: when the stargazer list is available
+the number is that list's length, so the badge, the pill and the chart cannot
+disagree. ``stargazers_count`` only fills in when the list itself is unavailable.
 
 Usage:
-  python3 assets/build_stars.py             # fetch, then write JSON, badge, pages
-  python3 assets/build_stars.py --offline   # reuse the cached JSON, re-render only
+  python3 assets/build_stars.py             # fetch, then write JSON, badge, chart, pages
+  python3 assets/build_stars.py --offline   # reuse the cached JSON and redraw
   python3 assets/build_stars.py --check     # validate the cache, do not write
 """
 from __future__ import annotations
@@ -26,6 +32,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import star_history  # noqa: E402  (sibling module, resolved from this file)
+
 DATA = ROOT / 'assets' / 'stars.json'
 BADGE = ROOT / 'assets' / 'badges' / 'stars.svg'
 PAGES = (ROOT / 'index.html', ROOT / 'exercise-audit.html')
@@ -147,6 +156,25 @@ def write_badge(record: dict) -> None:
     BADGE.write_text(render_badge(record['stars'], record['repo']), encoding='utf-8')
 
 
+
+def refresh_history(repo: str, offline: bool) -> list[str]:
+    """Collect stargazer timestamps and redraw the README chart."""
+    if offline:
+        dates = star_history.read_history()
+    else:
+        try:
+            dates = star_history.fetch_stars(repo)
+        except Exception as error:  # network, auth or rate limit: keep what we have
+            print(f'stargazer list unavailable ({error.__class__.__name__}); '
+                  'keeping the cached chart', file=sys.stderr)
+            dates = star_history.read_history()
+        if dates:
+            star_history.write_history(dates, repo)
+    if dates:
+        star_history.write_chart(dates, repo)
+    return dates
+
+
 def patch_pages(stars: int) -> list[str]:
     slot = re.compile(r'(<span[^>]*\bdata-star-count\b[^>]*>)([^<]*)(</span>)')
     touched = []
@@ -185,6 +213,15 @@ def check() -> int:
             problems.append(f'count is {age.days} days old; refresh it')
     except (AttributeError, ValueError):
         problems.append('updated is not an ISO timestamp')
+    dates = star_history.read_history()
+    if dates and len(dates) != record.get('stars'):
+        problems.append(f'the chart has {len(dates)} stars but the badge has {record.get("stars")}')
+    if dates and not star_history.CHART.exists():
+        problems.append('assets/star-history.svg is missing; rerun build_stars.py')
+    elif dates:
+        chart = star_history.CHART.read_text(encoding='utf-8')
+        if f'>{record["stars"]}</text>' not in chart:
+            problems.append(f'the chart does not print {record["stars"]}')
     for page in PAGES:
         if page.exists() and 'data-star-count' not in page.read_text(encoding='utf-8'):
             problems.append(f'{page.name} lost its star slot')
@@ -212,6 +249,9 @@ def main() -> int:
     if args.print_only:
         print(record['stars'])
         return 0
+    dates = refresh_history(repo, args.offline)
+    if dates:
+        record['stars'] = len(dates)
     # A zero usually means the fetch was rate-limited or misrouted; never ship it.
     if record['stars'] <= 0 and DATA.exists():
         cached = read_cached()
@@ -222,7 +262,8 @@ def main() -> int:
     pages = patch_pages(record['stars'])
     print(f'{record["repo"]}: {record["stars"]} stars, {record["forks"]} forks '
           f'({record["source"]}, {record["updated"]})')
-    print('wrote assets/stars.json, assets/badges/stars.svg; slots ' + ', '.join(pages))
+    print('wrote assets/stars.json, assets/badges/stars.svg, assets/star-history.svg; '
+          'slots ' + ', '.join(pages))
     return 0
 
 

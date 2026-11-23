@@ -24,6 +24,15 @@ Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd
 
 </div>
 
+## Stars over time
+
+<a href="https://github.com/Hurdadd/ddia-study-lab?tab=stargazers"><img src="assets/star-history.svg" width="880" alt="Star history: 14 stars since 23 October 2026"></a>
+
+Every step is a real account's `starred_at` on GitHub, and the line under the axis
+sums what each month added. `assets/build_stars.py` draws the chart from the same
+read as the badge, so the number here, the badge and the site header cannot drift
+apart. Unstars remove their step: only current stargazers are visible to the API.
+
 ## Quick facts (for humans and AI agents)
 
 - **What it is:** a free, static study site for *Designing Data-Intensive Applications* (2nd ed.) plus a system-design practice studio. No backend, no account, no API key; everything runs in the browser.

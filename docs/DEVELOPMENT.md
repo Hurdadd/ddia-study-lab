@@ -61,10 +61,15 @@ The optional Archify generator is not required to serve committed diagrams.
 ## Star counter
 
 `assets/build_stars.py` is the only writer of the star number. It reads the live
-stargazer count (`gh api`, falling back to the public API), writes
+stargazer list (`gh api`, falling back to the public API), writes
 `assets/stars.json`, redraws `assets/badges/stars.svg` for the README badge row, and
 stamps the value into every `[data-star-count]` slot on the home page and the
-exercise audit.
+exercise audit. The same read feeds `assets/star_history.py`, which writes
+`assets/star-history.json` and draws `assets/star-history.svg`: one step per star,
+weekly ticks on a short history and month ticks once the span is longer, with each
+month's additions under the axis. Because the badge and the chart come from one
+list, they cannot disagree; `unstar` removes a step, which is the one thing the API
+cannot show.
 
     python3 assets/build_stars.py             # fetch, then refresh JSON, badge and pages
     python3 assets/build_stars.py --offline   # reuse the cached count, redraw only

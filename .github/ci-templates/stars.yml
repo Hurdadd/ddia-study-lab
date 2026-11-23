@@ -19,12 +19,12 @@ jobs:
         run: python3 assets/build_stars.py
       - name: Commit the refreshed counter
         run: |
-          if git diff --quiet -- assets/stars.json assets/badges/stars.svg index.html exercise-audit.html; then
+          if git diff --quiet -- assets/stars.json assets/badges/stars.svg assets/star-history.json assets/star-history.svg index.html exercise-audit.html; then
             echo "Star count unchanged"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/stars.json assets/badges/stars.svg index.html exercise-audit.html
+          git add assets/stars.json assets/badges/stars.svg assets/star-history.json assets/star-history.svg index.html exercise-audit.html
           git commit -m "chore(stars): refresh the star counter"
           git push
