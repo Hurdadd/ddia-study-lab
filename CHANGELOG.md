@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- The site and the README now show the repository's star count. `assets/build_stars.py`
+  reads the live stargazer count once per build, draws `assets/badges/stars.svg` for the
+  README badge row, and stamps the number into the header and hero star links;
+  `assets/stars.js` then refreshes it from a same-origin JSON file, so no visitor request
+  ever reaches GitHub and the baked number stays correct with JavaScript off. A live read
+  that returns zero is treated as a failed read rather than as an empty repository.
+- `/star` and `/stargazers` now redirect to the repository, and the capstone's GitHub link
+  points at `ddia-study-lab` instead of the pre-rename `own-the-stack` URL. GitHub still
+  answers that old name with a rename redirect, but the project no longer depends on it.
+- The README now carries a star-history chart. `assets/star_history.py` collects every
+  current stargazer's `starred_at`, writes `assets/star-history.json`, and draws
+  `assets/star-history.svg`: a step per star, weekly ticks for a short history and month
+  ticks once it spans a year, with each month's additions under the axis. It is redrawn
+  by the same command as the badge from the same read, so the number in the badge, the
+  number in the site header and the chart's last step are always the same value.
+- Documented the refresh (`docs/DEVELOPMENT.md`) and shipped the weekly refresh as the
+  inactive `.github/ci-templates/stars.yml` template, alongside the existing checks one.
 - Reference designs in the exercise studio now read as architectures instead of a
   strip of cards. Each one is laid out in one column per dependency depth, a column
   of several nodes is centred on its band instead of hanging from the top, and a

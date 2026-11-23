@@ -10,7 +10,7 @@ Interactive diagrams, **43 hands-on labs** inside the chapters, an **offline exe
 
 <sub>Leader failover (chapter 6): pick a start and an end node, and the diagram lights up the path between them.</sub>
 
-<a href="#build-understanding-before-infrastructure"><img src="assets/badges/status.svg" alt="Status: design prototype"></a> <a href="LICENSE"><img src="assets/badges/license.svg" alt="License: AGPL-3.0-only"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/languages.svg" alt="Documentation: Persian and English"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/website.svg" alt="Website: public"></a>
+<a href="#build-understanding-before-infrastructure"><img src="assets/badges/status.svg" alt="Status: design prototype"></a> <a href="https://github.com/Hurdadd/ddia-study-lab"><img src="assets/badges/stars.svg" alt="GitHub stars"></a> <a href="LICENSE"><img src="assets/badges/license.svg" alt="License: AGPL-3.0-only"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/languages.svg" alt="Documentation: Persian and English"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/website.svg" alt="Website: public"></a>
 
 14 chapters · interactive diagrams · 43 inline labs · 84 studio exercises · 15 ADRs · 1 capstone
 
@@ -20,9 +20,18 @@ Interactive diagrams, **43 hands-on labs** inside the chapters, an **offline exe
 
 Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd)**
 
-⭐ If this helps you learn, [star the repo](https://github.com/Hurdadd/ddia-study-lab) and share it with someone preparing for system-design interviews.
+⭐ If this helps you learn, [star the repo](https://github.com/Hurdadd/ddia-study-lab) — the counter in the badge and in the site header is refreshed from GitHub, so it stays honest — and share it with someone preparing for system-design interviews.
 
 </div>
+
+## Stars over time
+
+<a href="https://github.com/Hurdadd/ddia-study-lab?tab=stargazers"><img src="assets/star-history.svg" width="880" alt="Star history: 14 stars since 23 October 2026"></a>
+
+Every step is a real account's `starred_at` on GitHub, and the line under the axis
+sums what each month added. `assets/build_stars.py` draws the chart from the same
+read as the badge, so the number here, the badge and the site header cannot drift
+apart. Unstars remove their step: only current stargazers are visible to the API.
 
 ## Quick facts (for humans and AI agents)
 
