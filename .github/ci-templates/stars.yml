@@ -1,0 +1,30 @@
+# Inactive template, like checks.yml: move it to .github/workflows/stars.yml to
+# enable it. It refreshes assets/stars.json and the README badge weekly. Enabling
+# a push to main needs repository permissions that allow the Actions token to write.
+name: Star count
+on:
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read the live count
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 assets/build_stars.py
+      - name: Commit the refreshed counter
+        run: |
+          if git diff --quiet -- assets/stars.json assets/badges/stars.svg index.html exercise-audit.html; then
+            echo "Star count unchanged"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/stars.json assets/badges/stars.svg index.html exercise-audit.html
+          git commit -m "chore(stars): refresh the star counter"
+          git push

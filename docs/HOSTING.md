@@ -1,6 +1,8 @@
 # Hosting
 
 The production educational website is public at https://ddia-study-lab.vercel.app/.
+`/star` and `/stargazers` are short redirects to the GitHub repository, so a
+shared star link cannot land on a 404 when a repository name changes.
 The GitHub repository is public. The site is a static export, with no AI
 backend, production tenant data, or model credentials.
 

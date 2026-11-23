@@ -58,6 +58,25 @@ Frozen Archify HTML must be regenerated through its provenance workflow rather t
 hand-edited. The manifest selects nine export/specification hash pairs checked by SHA-256.
 The optional Archify generator is not required to serve committed diagrams.
 
+## Star counter
+
+`assets/build_stars.py` is the only writer of the star number. It reads the live
+stargazer count (`gh api`, falling back to the public API), writes
+`assets/stars.json`, redraws `assets/badges/stars.svg` for the README badge row, and
+stamps the value into every `[data-star-count]` slot on the home page and the
+exercise audit.
+
+    python3 assets/build_stars.py             # fetch, then refresh JSON, badge and pages
+    python3 assets/build_stars.py --offline   # reuse the cached count, redraw only
+    python3 assets/build_stars.py --check     # fail when the cache, badge or a slot drifted
+
+The site never calls GitHub: `assets/stars.js` re-reads the same-origin JSON, so a
+deployment shows the current count without a third-party request, and the baked
+number stays correct with JavaScript off. A live read that comes back as zero is
+treated as a failed read, not as an empty repository. A count older than 14 days is
+reported by `--check`. `.github/ci-templates/stars.yml` is the inactive weekly
+refresh, in the same template-only shape as the checks workflow.
+
 ## CI template
 
 `.github/ci-templates/checks.yml` contains the reproducible GitHub Actions job.
