@@ -3133,16 +3133,21 @@ def source_reference(reference):
     return {'nodes': nodes, 'edges': edges}
 
 def classify_flows(graph):
-    """Keep out-of-band work out of synchronous request estimates."""
+    """Keep out-of-band work out of synchronous request estimates.
+
+    The flow kind carries the meaning; the studio labels a dashed arrow from the
+    kind in the reader's language, so the catalog does not ship one bilingual
+    sentence per arrow that would collide with the cards.
+    """
     nodes = {n['id']: n for n in graph['nodes']}
     for edge in graph['edges']:
         source, target = nodes[edge['source']], nodes[edge['target']]
         if target['type'] in ('monitoring', 'config-service', 'service-discovery'):
-            edge.update(kind='control', label='Metadata / سنجه و تنظیمات')
+            edge.update(kind='control', label='')
         elif source['type'] in ('sql-db', 'nosql-db') and target['type'] in ('sql-db', 'nosql-db'):
-            edge.update(kind='background', label='Replication / تکثیر', protocol='Replication')
+            edge.update(kind='background', label='', protocol='Replication')
         elif (source['type'] in ('sql-db', 'nosql-db') and target['type'] == 'queue') or source['type'] in ('queue', 'pubsub'):
-            edge.update(kind='background', label='Async events / رویداد ناهمگام', protocol='Async')
+            edge.update(kind='background', label='', protocol='Async')
         else:
             edge.setdefault('kind', 'request')
     return graph

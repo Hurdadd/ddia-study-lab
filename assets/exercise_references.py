@@ -205,25 +205,56 @@ REFS = {
 }
 
 
+NODE_W, NODE_H = 170, 90
+COLUMN_PITCH, ROW_PITCH, BAND_GAP = 240, 140, 64
+SINGLE_ROW_LIMIT, COLUMNS_PER_BAND = 6, 4
+LEFT_MARGIN, TOP_MARGIN = 70, 80
+
+
 def build(ref_id):
-    """Return (reference graph, note_en, note_fa) laid out left-to-right by dependency depth."""
+    """Return (reference graph, note_en, note_fa) laid out in dependency order.
+
+    One column per dependency depth, so the picture reads left to right. A column
+    of several nodes is centred on its band instead of hanging from the top, and a
+    chain longer than six columns continues on a second band instead of turning
+    into one thin strip of cards. Only the edges that cross a band boundary travel
+    back to the left, and the canvas draws them below the band.
+    """
     specs, edge_text, note_en, note_fa = REFS[ref_id]
     edges = [tuple(int(v) - 1 for v in pair.split('>')) for pair in edge_text.split(',')]
     depth = [0] * len(specs)
     for _ in specs:
         for a, b in edges:
             depth[b] = max(depth[b], depth[a] + 1)
-    rows = {}
-    nodes = []
-    wrap = max(depth) >= 5  # long chains snake into bands of four columns so they stay readable
-    for i, spec in enumerate(specs):
+
+    layers = max(depth) + 1
+    bands = 1 if layers <= SINGLE_ROW_LIMIT else -(-layers // COLUMNS_PER_BAND)
+    columns = {}
+    for index, level in enumerate(depth):
+        band, column = (0, level) if bands == 1 else divmod(level, COLUMNS_PER_BAND)
+        columns.setdefault((band, column), []).append(index)
+    band_height = {band: (max(len(members) for (b, _), members in columns.items() if b == band) - 1) * ROW_PITCH + NODE_H
+                   for band in range(bands)}
+
+    placed, top = {}, TOP_MARGIN
+    for band in range(bands):
+        for (b, column), members in sorted(columns.items()):
+            if b != band:
+                continue
+            stack = (len(members) - 1) * ROW_PITCH + NODE_H
+            start = top + (band_height[band] - stack) / 2
+            for row, index in enumerate(members):
+                placed[index] = (LEFT_MARGIN + column * COLUMN_PITCH, round(start + row * ROW_PITCH))
+        top += band_height[band] + BAND_GAP
+
+    nodes, types = [], []
+    for index, spec in enumerate(specs):
         parts = spec.split('|')
-        row = rows.get(depth[i], 0)
-        rows[depth[i]] = row + 1
-        col, band = (depth[i] % 4, depth[i] // 4) if wrap else (depth[i], 0)
-        nodes.append({'id': f'n{i+1}', 'type': parts[0], 'label': parts[1] if len(parts) > 1 else '',
-                      'x': 70 + col * 230, 'y': 90 + band * 300 + row * 130, 'replicas': int(parts[2]) if len(parts) > 2 else (1 if parts[0] == 'client' else 2), 'config': {}})
+        types.append(parts[0])
+        nodes.append({'id': f'n{index+1}', 'type': parts[0], 'label': parts[1] if len(parts) > 1 else '',
+                      'x': placed[index][0], 'y': placed[index][1],
+                      'replicas': int(parts[2]) if len(parts) > 2 else (1 if parts[0] == 'client' else 2), 'config': {}})
     next(n for n in nodes if n['type'] != 'client')['config']['notes'] = note_en
-    graph_edges = [{'id': f'e{i+1}', 'source': f'n{a+1}', 'target': f'n{b+1}', 'protocol': 'HTTPS' if nodes[a]['type'] == 'client' else 'RPC'}
+    graph_edges = [{'id': f'e{i+1}', 'source': f'n{a+1}', 'target': f'n{b+1}', 'protocol': 'HTTPS' if types[a] == 'client' else 'RPC'}
                    for i, (a, b) in enumerate(edges)]
     return {'nodes': nodes, 'edges': graph_edges}, note_en, note_fa
