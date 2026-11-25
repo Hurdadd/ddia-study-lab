@@ -82,7 +82,11 @@ treated as a failed read, not as an empty repository. A count older than 14 days
 reported by `--check`.
 
 `.github/workflows/stars.yml` runs the command every thirty minutes and commits only
-when the number moved, so one commit per new star rather than one per run. That is
+when a byte changed, so one commit per new star rather than one per run. That is why
+the chart's x-axis ends at the newest star instead of at "now", and why both writers
+skip a rewrite when the list is unchanged: a fresh timestamp on every run would turn
+a schedule into commit noise. The current number lives in the badge, the site pill
+and the JSON, not in the curve's right edge. That is
 the freshest a README can be, and the measurement is in the workflow header:
 
 | Served by | Cache header | Worst-case lag in a README |
