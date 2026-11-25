@@ -79,8 +79,22 @@ The site never calls GitHub: `assets/stars.js` re-reads the same-origin JSON, so
 deployment shows the current count without a third-party request, and the baked
 number stays correct with JavaScript off. A live read that comes back as zero is
 treated as a failed read, not as an empty repository. A count older than 14 days is
-reported by `--check`. `.github/ci-templates/stars.yml` is the inactive weekly
-refresh, in the same template-only shape as the checks workflow.
+reported by `--check`.
+
+`.github/workflows/stars.yml` runs the command every thirty minutes and commits only
+when the number moved, so one commit per new star rather than one per run. That is
+the freshest a README can be, and the measurement is in the workflow header:
+
+| Served by | Cache header | Worst-case lag in a README |
+| --- | --- | --- |
+| `raw.githubusercontent.com` (repo-relative assets, what this project uses) | `max-age=300` | about five minutes after the commit |
+| `camo.githubusercontent.com` (shields.io, star-history.com and every other remote image) | `max-age=86400` | a day |
+
+So the vendored badge and chart, refreshed by a schedule, stay fresher than the
+badge services most repositories embed. The workflow needs the repository setting
+*Actions → Workflow permissions → Read and write*, because `GITHUB_TOKEN` cannot be
+granted more permission than the repository default; the job asks for `contents:
+write` and nothing else.
 
 ## CI template
 

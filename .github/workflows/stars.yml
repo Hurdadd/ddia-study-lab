@@ -1,0 +1,55 @@
+# Keeps the star count, the badge and the README chart current without a human.
+#
+# Why a schedule and not a badge service: a README image is cached by whoever
+# serves it. Repo-relative assets go through raw.githubusercontent.com, which
+# answers with `cache-control: max-age=300`, so a commit shows up within minutes.
+# img.shields.io (and star-history) are served through camo.githubusercontent.com,
+# which answers `max-age=86400` — a day of staleness. A commit every half hour is
+# therefore the freshest a README can be.
+#
+# The job writes nothing when the number has not moved, so the cost is one commit
+# per new star, not one per run.
+name: Star count
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: star-count
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Read the live count and redraw the chart
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 assets/build_stars.py
+      - name: Fail when the badge, the chart and the cache disagree
+        run: python3 assets/build_stars.py --check
+      - name: Commit only when the number moved
+        run: |
+          if git diff --quiet; then
+            echo "Star count unchanged"
+            # A quiet run still proves the token can write; a read-only repository
+            # default would fail here instead of on the first new star.
+            git push --dry-run origin main
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/stars.json assets/badges/stars.svg \
+                  assets/star-history.json assets/star-history.svg \
+                  index.html exercise-audit.html
+          git commit -m "chore(stars): refresh the star counter"
+          git pull --rebase --autostash
+          git push

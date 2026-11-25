@@ -26,7 +26,7 @@ Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd
 
 ## Stars over time
 
-<a href="https://github.com/Hurdadd/ddia-study-lab?tab=stargazers"><img src="assets/star-history.svg" width="880" alt="Star history: 14 stars since 23 October 2026"></a>
+<a href="https://github.com/Hurdadd/ddia-study-lab?tab=stargazers"><img src="assets/star-history.svg" width="880" alt="Star history chart"></a>
 
 ## Quick facts (for humans and AI agents)
 
