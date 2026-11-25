@@ -104,7 +104,9 @@ def render(stamps: list[str], repo: str, today: date | None = None) -> str:
     # Open just before the first star: a long stretch of zero says little, and the
     # header already names the date the curve starts.
     start = first - timedelta(days=2)
-    end = max(today, first) + timedelta(days=1)
+    # End at the newest star, not at "now": a quiet week then produces no diff, and
+    # the badge is the surface that carries the current number.
+    end = max(days[-1] if days else first, first) + timedelta(days=1)
     span = max((end - start).days, 1)
 
     def x(day: date) -> float:
@@ -220,6 +222,15 @@ def render(stamps: list[str], repo: str, today: date | None = None) -> str:
 
 
 def write_history(stamps: list[str], repo: str) -> None:
+    # Rewrite only when the list moved; a fresh `generated` stamp on every run would
+    # make the scheduled job commit noise instead of a change.
+    if HISTORY.exists():
+        try:
+            old = json.loads(HISTORY.read_text(encoding='utf-8'))
+            if old.get('stars') == stamps and old.get('repo') == repo:
+                return
+        except json.JSONDecodeError:
+            pass
     payload = {
         'repo': repo,
         'count': len(stamps),

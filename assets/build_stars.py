@@ -148,6 +148,15 @@ def collect(repo: str, offline: bool) -> dict:
 
 
 def write_data(record: dict) -> None:
+    # Same rule as the chart: keep the file byte-identical when nothing moved, so a
+    # scheduled run only commits a real change.
+    if DATA.exists():
+        try:
+            old = json.loads(DATA.read_text(encoding='utf-8'))
+            if all(old.get(key) == record.get(key) for key in ('repo', 'stars', 'forks')):
+                return
+        except json.JSONDecodeError:
+            pass
     DATA.write_text(json.dumps(record, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
 
 

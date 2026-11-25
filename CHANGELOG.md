@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The scheduled star refresh is now idempotent: `stars.json`, the chart JSON, the badge and
+  the SVG are left byte-identical when the list has not moved, and the chart ends at the
+  newest star rather than at "now". A half-hourly run that finds nothing new therefore
+  commits nothing, instead of one timestamp-only commit per run.
 - The star count now keeps itself current. `.github/workflows/stars.yml` runs
   `assets/build_stars.py` every thirty minutes and commits only when the number moved,
   so the badge, the chart and the site pill follow new stars without a human. The
