@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Chapter 12 is now generated from content blocks. `content/ch12/template.html` holds the
+  page skeleton with `{{fa:bNNN}}` / `{{en:bNNN}}` placeholders, `content.json` holds one
+  record per block, and `assets/build_chapter.py` renders the page. `npm run build:chapter`
+  rebuilds it; `npm run check:bilingual` fails when a block misses either language, so a
+  silent one-sided edit is no longer possible. The first render was byte-identical to the
+  hand-written page, which is how the migration was checked.
+- Persian and English now share one teaching voice. The prose was rewritten problem-first,
+  with a worked example and a question the reader can answer in their own words. Both
+  languages were updated together, and 32 paragraph pairs were re-synced.
+- Technical examples became bilingual components. The 25 scenarios (58 boxes including the
+  diagram narrations and the interview pack) were extracted out of the Persian prose,
+  translated, and are rendered once for both languages.
+- Examples can be stepped through: `assets/example-stepper.js` adds a "Step through"
+  control that reveals setup, steps and result one click at a time, in either language.
+- Vietnamese and Chinese drafts for section 1 live in `content/ch12/vi.json` and
+  `zh.json`, with a four-language review page at `content/ch12/review/section-1.html`.
+  They are marked machine drafts; issue #25 asks native speakers to review terminology.
+- `docs/TEACHING-RULES.md` records the six rules the chapter copy follows.
+
+
 - The scheduled star refresh is now idempotent: `stars.json`, the chart JSON, the badge and
   the SVG are left byte-identical when the list has not moved, and the chart ends at the
   newest star rather than at "now". A half-hourly run that finds nothing new therefore
