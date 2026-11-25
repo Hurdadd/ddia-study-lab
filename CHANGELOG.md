@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- The star count now keeps itself current. `.github/workflows/stars.yml` runs
+  `assets/build_stars.py` every thirty minutes and commits only when the number moved,
+  so the badge, the chart and the site pill follow new stars without a human. The
+  workflow header records the measurement behind that choice: repo-relative assets come
+  from `raw.githubusercontent.com` with `max-age=300`, while remote images (shields.io,
+  star-history.com) are served through camo with `max-age=86400`, so a scheduled commit
+  is fresher than the badge services it replaces.
+- The README chart alt text no longer carries a fixed count, so it cannot drift from the
+  image. Enabling the workflow required the repository default *Workflow permissions* to
+  become read-and-write; the job itself asks only for `contents: write`.
 - The site and the README now show the repository's star count. `assets/build_stars.py`
   reads the live stargazer count once per build, draws `assets/badges/stars.svg` for the
   README badge row, and stamps the number into the header and hero star links;
