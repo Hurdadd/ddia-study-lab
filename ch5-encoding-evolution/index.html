@@ -38,7 +38,7 @@
     <span class="en">A new version adds a field. Can it still read yesterday's records? Can the old version handle today's messages? You'll follow data from objects to bytes, then work through the compatibility rules that let versions coexist. Six interactive (Archify) and three concept diagrams walk through the changes. Finish with the interview pack.</span>
   </p>
   <div class="meta-row reveal">
-    <span><b><span class="fa">۹</span><span class="en">9</span></b> <span class="fa">نمودار (۶ تعاملی + ۳ مفهومی)</span><span class="en">diagrams (6 interactive + 3 concept)</span></span><span class="dot">·</span>
+    <span><b><span class="fa">۹</span><span class="en">9</span></b> <span class="fa">۹ نمودار + روایت گام‌به‌گام</span><span class="en">9 diagrams with step-by-step narration</span></span><span class="dot">·</span>
     <span><span class="fa">محور: compatibility · protobuf · Avro · dataflow modes</span><span class="en">Theme: compatibility · protobuf · Avro · dataflow modes</span></span><span class="dot">·</span>
     <span><span class="fa">زمان مطالعه: حدود ۶۵ دقیقه</span><span class="en">Reading time: ~65 min</span></span>
   </div>
@@ -161,7 +161,7 @@
   <h2 class="reveal"><span class="secnum"><span class="fa">۱</span><span class="en">1</span></span><span class="fa">encode و decode</span><span class="en">Encoding and decoding</span></h2>
 
   <div class="fa">
-<p>تصور کن encoding یعنی دادهٔ توی برنامه رو بکنی بایت که بشه ذخیره یا ارسالش کرد. decode هم همون بایت‌ها رو برمی‌گردونه به دادهٔ به‌دردبخور. یادت باشه این ربطی به رمزنگاری امنیتی نداره؛ قاطیشون نکن. نکتهٔ ماندگار: encode می‌بره، decode برمی‌گردونه.</p>
+<p>تصور کن encoding یعنی دادهٔ توی برنامه رو بکنی بایت که بشه ذخیره یا ارسالش کرد. decode هم همون بایت‌ها رو برمی‌گردونه به دادهٔ به‌دردبخور. یادت باشه این ربطی به رمزنگاری امنیتی نداره. نکتهٔ ماندگار: encode می‌بره، decode برمی‌گردونه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-1">
 <p class="example-title"><b>مثال فنی: شیء با بایت فرق دارد</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن برنامه‌ات یه شیء تو حافظه داره با <code dir="ltr">user_id=17</code> و <code dir="ltr">name=Sara</code>.</p>
@@ -206,14 +206,14 @@
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-2">
 <p class="example-title"><b>مثال فنی: چهار ترکیب در rolling upgrade</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن نصف سرورها هنوز نسخهٔ ۱‌ان، نصف دیگه رفتن روی نسخهٔ ۲.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اول نسخهٔ ۲ رکورد قدیمی رو می‌خونه و حالشو می‌بره؛ بعد نوبت نسخهٔ ۱ـه که یه رکورد دست‌نویس نسخهٔ ۲ دستش می‌رسه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> تهش اینه: backward یعنی جدید قدیمی رو بخونه، forward یعنی قدیمی جدید رو نگه داره. rolling upgrade هر دو رو هم‌زمان می‌خواد، قاطی نکن.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اول نسخهٔ ۲ رکورد قدیمی رو می‌خونه و بدون خطا decode می‌کنه؛ بعد نوبت نسخهٔ ۱ـه که یه رکورد دست‌نویس نسخهٔ ۲ دستش می‌رسه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> تهش اینه: backward یعنی جدید قدیمی رو بخونه، forward یعنی قدیمی جدید رو نگه داره. rolling upgrade هر دو رو هم‌زمان می‌خواد.</p>
 </div>
 </div><div class="en"><p>Adding a feature can add a field, introduce a record type or change an existing representation. You can't assume that every running process changes at the same instant:</p>
 <div class="callout" data-en-example="example-ch5-2">
 <p class="example-title"><b>Example: Four combinations during a rolling upgrade</b></p>
 <p><b>Setup:</b> Half the servers run version 1 and half run version 2.</p>
-<p><b>Walk through it:</b> Version 2 reads a record from version 1. Version 1 then receives a record produced by version 2. Include both same-version paths in the test matrix too.</p>
+<p><b>Walk through it:</b> Version 2 reads a record from version 1 and decodes it without error. Version 1 then receives a record produced by version 2. Include both same-version paths in the test matrix too.</p>
 <p><b>What this tells you:</b> Backward means the new reader handles old data. Forward means the old reader handles new data, retaining required information if it rewrites it. Mixed versions need both checks.</p>
 </div></div>
   <div class="fa">
@@ -476,7 +476,7 @@
 
   <h3 id="s3-4"><span class="fa">۳.۴ Protocol Buffers</span><span class="en">3.4 Protocol Buffers</span></h3>
   <div class="fa">
-<p>تو Protocol Buffers هر فیلد یه شماره داره و همین شماره بخشی از هویتشه رو سیم. اسم عوض کردن کجا، شمارهٔ یه فیلد حذف‌شده رو دوباره دادن کجا — قاطیشون نکن.</p>
+<p>تو Protocol Buffers هر فیلد یه شماره داره و همین شماره بخشی از هویتشه رو سیم. اسم عوض کردن با دوباره دادنِ شمارهٔ یه فیلد حذف‌شده یکی نیست.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch5-6">
 <p class="example-title"><b>مثال فنی: Tag هویت فیلد است</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن تو schema پیامت داری <code dir="ltr">string name = 1</code>، بعد اومدی <code dir="ltr">string email = 2</code> رو اضافه کردی.</p>
@@ -500,9 +500,9 @@ message Person {
   <div class="fa">
 <ul>    <li>ابزار codegen از این schema تو زبان‌های مختلف class می‌سازه؛ کدت هم همون کد تولیدشده رو صدا می‌زنه. زبون schema خیلی ساده‌تر از JSON Schema ـه: فقط فیلد و type، بدون قانون اعتبارسنجی عجیب.</li>
     <li>همون رکورد مثال فقط <b>۳۳ بایت</b> میشه. برخلاف MessagePack، <b>اسم فیلدها تو داده نیست</b>؛ به‌جاش <b>شمارهٔ تگ (tag)</b> میاد: همون ۱ و ۲ و ۳ که تو schema دیدی — یه اسم مستعار جمع‌وجور برای فیلد.</li>
-    <li>نوع فیلد و تگ تو <b>یه بایت</b> جا میشن؛ عددها <b>طول‌متغیر (varint)</b> ـن: ۱۳۷۱ تو دو بایت (بیت بالایی هر بایت یعنی «باز ادامه داره»). عددهای <span class="ltr">−64..63</span> تو یه بایت و <span class="ltr">−8192..8191</span> تو دو بایت جا میشن.</li>
+    <li>شمارهٔ فیلد و نوع سیمی (wire type) برای شماره‌های ۱ تا ۱۵ تو <b>یه بایت</b> جا می‌شن؛ شماره‌های بزرگ‌تر به دو بایت یا بیشتر نیاز دارن. عدد‌ها <b>طول‌متغیر (varint)</b> ـن: ۱۳۷۱ تو دو بایت (بیت بالایی هر بایت یعنی «باز ادامه داره»). عدد‌های <span class="ltr">−64..63</span> تو یه بایت و <span class="ltr">−8192..8191</span> تو دو بایت جا می‌شن — این بازه‌ها با <b>ZigZag</b> (مثل sint در protobuf) درستن؛ int معمولی منفی‌ها رو جور دیگه کد می‌کنه.</li>
     <li>لیست صریح نداره؛ <code>repeated</code> میگه فیلد چندمقداریه و تو بایت‌ها تکرار همون تگ یعنی آیتم‌ها.</li>
-  </ul></div><div class="en"><ul><li>A code generator turns the schema into classes for different languages. The schema describes fields and types; separate application validation handles more detailed rules.</li><li>The example record takes <b>33 bytes</b>. It carries <b>tag numbers</b> 1, 2 and 3 instead of field names. The schema maps those numbers back to meanings.</li><li>Small field tags and wire types fit in <b>one byte</b>. <b>Varints</b> use more bytes for larger values; 1337 takes two. A byte's top bit indicates whether another byte follows. The signed ranges <span class="ltr">−64..63</span> in one byte and <span class="ltr">−8192..8191</span> in two apply with <b>ZigZag</b> encoding, as used by protobuf's signed sint types; ordinary int types handle negative values differently.</li><li>A <code>repeated</code> field holds multiple values. The wire representation can repeat its tag for items; numeric values can also use packed encoding.</li></ul><p class="small">See the <a href="https://protobuf.dev/programming-guides/encoding/" target="_blank" rel="noopener">Protobuf wire-format guide</a> for varints and signed integers.</p></div>
+  </ul></div><div class="en"><ul><li>A code generator turns the schema into classes for different languages. The schema describes fields and types; separate application validation handles more detailed rules.</li><li>The example record takes <b>33 bytes</b>. It carries <b>tag numbers</b> 1, 2 and 3 instead of field names. The schema maps those numbers back to meanings.</li><li>Field numbers 1–15 and their wire type fit in <b>one byte</b>; larger field numbers need more bytes. <b>Varints</b> use more bytes for larger values; 1337 takes two. A byte's top bit indicates whether another byte follows. The signed ranges <span class="ltr">−64..63</span> in one byte and <span class="ltr">−8192..8191</span> in two apply with <b>ZigZag</b> encoding, as used by protobuf's signed sint types; ordinary int types handle negative values differently.</li><li>A <code>repeated</code> field holds multiple values. The wire representation can repeat its tag for items; numeric values can also use packed encoding.</li></ul><p class="small">See the <a href="https://protobuf.dev/programming-guides/encoding/" target="_blank" rel="noopener">Protobuf wire-format guide</a> for varints and signed integers.</p></div>
 
   <div class="callout">
     <div class="tag"><span class="fa">قواعد تکامل schema در protobuf</span><span class="en">Schema-evolution rules in protobuf</span></div>
@@ -553,7 +553,7 @@ message Person {
 <ul>    <li>فیلدها <b>با اسم</b> جفت میشن؛ ترتیبشون مهم نیست.</li>
     <li>فیلد تو writer هست ولی تو reader نه ← <b>می‌ره کنار</b>.</li>
     <li>فیلدی که reader می‌خواد ولی writer ننوشته ← با <b>مقدار پیش‌فرض reader</b> پر میشه.</li>
-    <li>برای سازگاری فقط فیلد <b>defaultدار</b> رو می‌تونی اضافه یا حذف کنی. اضافه کردن فیلد بدون default ← backward می‌ترکه؛ حذف فیلد بدون default ← forward.</li>
+    <li>افزودن فیلد به reader's schema برای خواندن رکورد‌های قدیمی <b>default سمت reader</b> می‌خواد؛ بدون اون backward می‌ترکه. حذف فیلد از writer هم فقط وقتی امنه که هر reader قدیمی که هنوز انتظارش رو داره، default داشته باشه؛ وگرنه forward می‌شکنه. هر جهت رو جدا چک کن.</li>
     <li>تو Avro، <span class="ltr">null</span> پیش‌فرض همه‌چیز نیست: برای nullable باید <code>union { null, ... }</code> بنویسی و فقط وقتی می‌تونی default رو null بذاری که null شاخهٔ اول union باشه.</li>
     <li><b>عوض کردن اسم فیلد</b> با <b>alias</b> تو reader's schema میشه → backward هست ولی <b>forward نیست</b>. اضافه کردن شاخه به union هم فقط backward ـه.</li>
   </ul></div><div class="en"><ul><li>Match record fields <b>by name</b>, rather than requiring the reader to declare the same field order.</li><li>If the writer has a field the reader doesn't want, resolution <b>ignores</b> it.</li><li>If the reader expects a field the writer didn't write, use the <b>reader's default</b>. Without a matching field or valid default, resolution fails.</li><li>Adding a reader field needs a default for reading older records. Removing a writer field needs a default in any old reader that still expects it. Check each direction.</li><li><span class="ltr">null</span> isn't an automatic default or an allowed value for every field. Declare nullability with a union such as <code>union { null, ... }</code>. Its default must match an allowed union branch. The examples here put null first and use a null default.</li><li>A reader-side <b>alias</b> can map an old writer name to a new reader name, helping backward compatibility. It doesn't teach an old reader the new name. Likewise, a new union branch accepted by a new reader may not be accepted by an old one.</li></ul>
@@ -650,7 +650,7 @@ message Person {
 <p class="example-title"><b>مثال فنی: قرارداد پیش از ورود داده</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن پیام ورودی فیلد <code dir="ltr">age</code> رو با متن <code dir="ltr">old</code> فرستاده، ولی قراردادت عدد می‌خواد.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن validation همون‌جا پیام رو رد یا قرنطینه می‌کنه و خطا رو ثبت می‌کنه؛ فقط کلاس ساختن از schema کافی نیست.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> schema اختلاف نوع رو زود لو می‌ده؛ ولی سن منفی و این حرف‌ها کنترل جدا می‌خواد — قاطیشون نکن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> schema اختلاف نوع رو زود لو می‌ده؛ ولی سن منفی و این حرف‌ها کنترل جدا می‌خواد.</p>
 </div>
 </div>
 
@@ -672,11 +672,12 @@ message Person {
     <tbody>
       <tr><td><b>schema</b></td><td>اختیاری (JSON Schema)</td><td>ندارد</td><td>اجباری (IDL با تگ)</td><td>اجباری (IDL/JSON بدون تگ)</td></tr>
       <tr><td><b>شناسهٔ فیلد در داده</b></td><td>نامِ کامل</td><td>نامِ کامل</td><td>شمارهٔ تگ</td><td>هیچ (فقط ترتیبِ schema)</td></tr>
-      <tr><td><b>حجمِ رکوردِ مثال</b></td><td>۸۱ بایت</td><td>۶۶ بایت</td><td>۳۳ بایت</td><td>۳۲ بایت</td></tr>
+      <tr><td><b>حجمِ رکوردِ سه‌فیلدیِ کتاب</b></td><td>۸۱ بایت</td><td>۶۶ بایت</td><td>۳۳ بایت</td><td>۳۲ بایت</td></tr>
       <tr><td><b>سازگاری</b></td><td>بستگی به قراردادِ شما دارد</td><td>مثل JSON</td><td>با تگ‌های ثابت: روشن و قابل‌اتکا</td><td>با defaultها و resolution: روشن و قابل‌اتکا</td></tr>
       <tr><td><b>انسان‌خوان</b></td><td>بله</td><td>نه</td><td>نه (ابزار می‌خواهد)</td><td>نه (ابزار می‌خواهد)</td></tr>
       <tr><td><b>بهترین کاربرد</b></td><td>تبادلِ بین سازمان‌ها، APIهای عمومی</td><td>وقتی فقط می‌خواهی JSON کوچک‌تر شود</td><td>RPC (gRPC)، لاگ‌ها، پیام‌ها</td><td>فایل‌های بزرگ، dump، pipelineهای داده</td></tr>
     </tbody></table>
+    <p class="small">اعدادِ ۸۱/۶۶/۳۳/۳۲ بایت به همان رکوردِ سه‌فیلدیِ کتاب (<code dir="ltr">userName, favoriteNumber, interests</code>) مربوط‌اند، نه به رکوردِ <code dir="ltr">user_id=17, active=true</code> که در مثالِ آغازِ بخش ۳ آمد.</p>
   </div><h3><span class="fa">نمودار مفهومی — یک رکورد، چهار کدگذاری</span><span class="en">Concept diagram — one record, four encodings</span></h3>
 <div class="diagram">
   <div class="cap">
@@ -689,18 +690,18 @@ message Person {
   <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
   <div class="fa">
 
-<p>چهار تا میله رو از بالا بخون: <span class="ltr">JSON</span> با ۸۱ بایت (اسم فیلدها تو خود داده سفر می‌کنن)، <span class="ltr">MessagePack</span> با ۶۶ بایت (همون مدل، باینری، ولی هنوز بی‌<span class="ltr">schema</span>)، پروتوباف با ۳۳ بایت (اسم‌ها با شمارهٔ tag عوض شدن) و <span class="ltr">Avro</span> با ۳۲ بایت (فقط مقدارها؛ ترتیب از <span class="ltr">schema</span> میاد). حرف آخرش اینه: <span class="ltr">schema</span> اسم‌ها رو حذف می‌کنه و ۸۱ بایت رو می‌کنه ۳۲ بایت.</p></div>
+<p>چهار تا میله رو برای رکورد سه‌فیلدیِ کتاب (<span class="ltr">userName</span>، <span class="ltr">favoriteNumber</span>، <span class="ltr">interests</span>) از بالا بخون: <span class="ltr">JSON</span> با ۸۱ بایت (اسم فیلدها تو خود داده سفر می‌کنن)، <span class="ltr">MessagePack</span> با ۶۶ بایت (همون مدل، باینری، ولی هنوز بی‌<span class="ltr">schema</span>)، پروتوباف با ۳۳ بایت (اسم‌ها با شمارهٔ tag عوض شدن) و <span class="ltr">Avro</span> با ۳۲ بایت (فقط مقدارها؛ ترتیب از <span class="ltr">schema</span> میاد). حرف آخرش اینه: <span class="ltr">schema</span> اسم‌ها رو حذف می‌کنه و ۸۱ بایت رو می‌کنه ۳۲ بایت.</p></div>
   <div class="en">
-<p>Compare the four bars for <b>this record</b>. <span class="ltr">JSON</span> uses 81 bytes with field names included. <span class="ltr">MessagePack</span> uses 66, retaining names in a binary map. Protobuf uses 33, replacing names with tag numbers. <span class="ltr">Avro</span> uses 32, with field order supplied by the schema.</p><p>The example shows how schema information can remove repeated metadata. It doesn't predict the size of every record or include every possible framing cost.</p></div>
+<p>Compare the four bars for the book's three-field record (<span class="ltr">userName</span>, <span class="ltr">favoriteNumber</span>, <span class="ltr">interests</span>). <span class="ltr">JSON</span> uses 81 bytes with field names included. <span class="ltr">MessagePack</span> uses 66, retaining names in a binary map. Protobuf uses 33, replacing names with tag numbers. <span class="ltr">Avro</span> uses 32, with field order supplied by the schema.</p><p>The example shows how schema information can remove repeated metadata. It doesn't predict the size of every record or include every possible framing cost.</p></div>
 </div>
 <div class="en"><div style="overflow-x:auto" tabindex="0" role="region" aria-label="Encoding format comparison"><table><thead><tr><th>Aspect</th><th>JSON / XML</th><th>MessagePack &amp; friends</th><th>Protocol Buffers</th><th>Avro</th></tr></thead><tbody>
 <tr><td><b>Schema</b></td><td>Optional, such as JSON Schema</td><td>None required</td><td>Required tagged IDL</td><td>Required tagless IDL/JSON</td></tr>
 <tr><td><b>Field ID in data</b></td><td>Full name</td><td>Full name in map form</td><td>Tag number</td><td>Schema field order</td></tr>
-<tr><td><b>Example-record size</b></td><td>81 bytes for JSON</td><td>66 bytes</td><td>33 bytes</td><td>32 bytes</td></tr>
+<tr><td><b>Book's three-field record size</b></td><td>81 bytes for JSON</td><td>66 bytes</td><td>33 bytes</td><td>32 bytes</td></tr>
 <tr><td><b>Compatibility</b></td><td>Reader conventions and validation</td><td>Similar concerns to JSON</td><td>Stable tags and wire rules</td><td>Schema resolution and defaults</td></tr>
 <tr><td><b>Human-readable</b></td><td>Yes</td><td>No</td><td>Tools needed</td><td>Tools needed</td></tr>
 <tr><td><b>Best use</b></td><td>Cross-org exchange, public APIs</td><td>Binary representation of JSON-like data</td><td>RPC (gRPC), logs, messages</td><td>Files, dumps, data pipelines</td></tr>
-</tbody></table></div></div>
+</tbody></table></div><p class="small">The 81/66/33/32-byte figures measure the book's three-field record (<code dir="ltr">userName, favoriteNumber, interests</code>), not the <code dir="ltr">user_id=17, active=true</code> record used in the section 3 example.</p></div>
 
   <h3 id="s3-7"><span class="fa">۳.۷ چرخهٔ حیاتِ یک فیلدِ اسکیما + نمودار ۶</span><span class="en">3.7 A schema field’s lifecycle + Diagram 6</span></h3>
   <div class="fa">
@@ -1192,8 +1193,8 @@ message Person {
   </details>
 
   <details><summary><span class="fa">۸. MessagePack چقدر فضا جبران می‌کند و چرا کتاب چندان تحویلش نمی‌گیرد؟</span><span class="en">8. How much space does MessagePack save — and why doesn’t the book rate it?</span></summary>
-    <div class="fa"><p>تو مثال همین فصل <span class="ltr">MessagePack</span> فقط از ۸۱ رسیده به ۶۶ بایت؛ همین عدد رو همه‌جا تعمیم نده. چون schema نداره، اسم فیلدها هنوز تو داده سفر می‌کنه — صرف باینری بودن معجزه نمی‌کنه.</p>
-</div><div class="en"><p>The chapter's record uses 66 MessagePack bytes instead of 81 JSON bytes, about an 18% reduction. In the ordinary map encoding, field names remain inside each record.</p><p>The schema-driven examples use 32–33 bytes because they can omit those names. Keep the comparison attached to this record and encoding; another dataset can have a different result.</p>
+    <div class="fa"><p>رکورد سه‌فیلدیِ کتاب (<span class="ltr">userName</span>، <span class="ltr">favoriteNumber</span>، <span class="ltr">interests</span>) با MessagePack ۶۶ بایت می‌شود، در برابر ۸۱ بایت JSON؛ این عدد را به همهٔ رکوردها تعمیم نده. چون schema ندارد، اسم فیلدها هنوز در داده سفر می‌کند — باینری بودن به‌تنهایی معجزه نمی‌کند.</p>
+</div><div class="en"><p>The book's three-field record (userName, favoriteNumber, interests) uses 66 MessagePack bytes instead of 81 JSON bytes, about an 18% reduction. In the ordinary map encoding, field names remain inside each record.</p><p>The schema-driven examples use 32–33 bytes because they can omit those names. Keep the comparison attached to this record and encoding; another dataset can have a different result.</p>
 </div>
   </details>
 
@@ -1223,7 +1224,7 @@ message Person {
   </details>
 
   <details><summary><span class="fa">۱۳. چرا در Avro برای nullable بودن باید union نوشت؟</span><span class="en">13. Why must Avro nullability use a union?</span></summary>
-    <div class="fa"><p>تو Avro هیچ فیلدی خودش null‌پذیر نیست؛ باید تو <span class="ltr">union</span> صریح بگی <span class="ltr">null</span> هم مجازه. نبودن فیلد، null بودن مقدار، و <span class="ltr">default</span> داشتن سه‌تای جدان — قاطیشون نکن.</p>
+    <div class="fa"><p>تو Avro هیچ فیلدی خودش null‌پذیر نیست؛ باید تو <span class="ltr">union</span> صریح بگی <span class="ltr">null</span> هم مجازه. نبودن فیلد، null بودن مقدار، و <span class="ltr">default</span> داشتن سه‌تای جدان.</p>
 </div><div class="en"><p>Declare every allowed type explicitly. For a nullable long, the example uses <code>union { null, long }</code>. A null-first union with a null default handles older writer schemas that lack the field.</p><p>Keep three concepts separate: a field absent from the writer's schema, a present field whose value is null, and a reader field with a default. Each answers a different question.</p>
 </div>
   </details>
@@ -1320,6 +1321,7 @@ message Person {
 <p class="exercise-verdict"><span class="fa">جهت writer→reader و فرمت binary و JSON و tag و default و alias همه باید صریح باشن. parse شدن با حفظ همهٔ مقدارها یکی نیست.</span><span class="en">Rule of thumb — name the writer→reader direction, the binary/JSON format, tags, defaults, and aliases. Parsing successfully is not the same as preserving every value.</span></p>
 <details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">حالا می‌ری سراغ Avro و Protobuf زیر فشار. افزودن فیلد و rename و تغییر cardinality رو چک کن. جهت writer→reader رو دقیق بگو، فرمت binary و JSON رو مشخص کن، و نقش tag و default و alias رو روشن کن. تغییر scalar-to-array رو با فیلد جدید و دورهٔ dual compatibility منتشر کن. آخرش compatibility test و rollback هم بذار.</span><span class="en">Rule of thumb, friend: always name the direction first. Compare Avro and Protobuf on field addition, renames, and cardinality changes. State the writer→reader direction, the binary versus JSON format, and the exact role of tags, defaults, and aliases. Ship a scalar-to-array change with a new field plus a dual-compatibility window, with compatibility tests and a rollback plan.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">روشن می‌کنی backward یعنی reader جدید با writer قدیم</span><span class="en">You spell out that backward means new reader with old writer</span></li><li><span class="fa">rename توی Avro رو دوطرفهٔ خودکار فرض نمی‌کنی</span><span class="en">You don&#x27;t treat an Avro rename as automatically two-way</span></li><li><span class="fa">packed بودن numeric و repeated رشته‌ای lossy رو می‌بینی</span><span class="en">You catch packed numerics and lossy repeated strings</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">consumerهای قدیمی ماه‌ها عقبن. کی tag یا فیلد قدیمی رو حذف می‌کنی؟</span><span class="en">Old consumers are months behind. When do you finally delete the old field or tag?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۲–۴ ساعت</span><span class="en">Extended hands-on laboratory · estimated 2–4 hours</span></summary><div class="fa"><p>برای پروفایل کاربر schemaهای Avro و Protobuf بنویس با نسخهٔ runtime مشخص. افزودن فیلد و rename و singular→repeated رو در هر دو جهت <span class="ltr">old writer→new reader</span> و <span class="ltr">new writer→old reader</span> آزمایش کن. توی Avro مقدار default سمت reader و جهت alias رو صریح بنویس؛ nullable بودن به‌تنهایی default نمی‌سازه. توی Protobuf tag رو ثابت نگه دار و فرق binary با JSON رو بسنج: حفظ unknown field در binary round-trip در برابر حذفش در JSON یا کپی field-by-field. برای cardinality نوع scalar و message و packed بودن رو مشخص کن و فقط به parse موفق بسنده نکن — باید همهٔ مقدارها چک بشن. مسیر امن رو با فیلد و tag تازه و دورهٔ dual-read و dual-write و آزمون rollback طراحی کن؛ معیار قبولی «حفظ معنا»ست.</p></div><div class="en"><p>Write Avro and Protobuf user-profile schemas with named runtime versions. Test field addition, rename, and singular→repeated in both <span class="ltr">old-writer→new-reader</span> and <span class="ltr">new-writer→old-reader</span> directions. In Avro, state the reader default and the alias direction explicitly — nullable alone gives you no default. In Protobuf, keep tags fixed and compare binary with JSON: unknown-field preservation in a binary round-trip versus dropping it in JSON or field-by-field copies. For cardinality, pin down the scalar/message type and packed encoding, and don't stop at successful parsing — verify every value. Design the safe path with a new field and new tag, a dual-read/dual-write window, and rollback tests. Semantic preservation is the acceptance bar.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
+<p class="small"><span class="fa">این آزمایشگاه همان تمرین مصاحبه است، ولی معیار پاسخش بلندتر است: نسخهٔ runtime صریح، default سمت reader، رفتار unknown field در binary در برابر JSON، cardinality و آزمون rollback را هم می‌خواهد.</span><span class="en">This lab is the same interview task with a longer rubric: it also requires an explicit runtime version, reader-side defaults, unknown-field behavior in binary versus JSON, cardinality, and rollback tests.</span></p>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch5-ex2"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-2"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://protobuf.dev/programming-guides/proto3/" target="_blank" rel="noopener">Protobuf · proto3 language guide</a> · <a href="https://avro.apache.org/docs/1.12.0/specification/" target="_blank" rel="noopener">Avro 1.12 · schema resolution</a></p>
 
 

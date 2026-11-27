@@ -3,7 +3,7 @@
   "slug": "inventory-holds",
   "interview_q_fa": "حالا یه فروشگاه اینترنتی داری تو شب حراج با هزاران خریدار هم‌زمان؛ رزرو (hold چنددقیقه‌ای) تو انبار key-value با شمارنده‌ست و دفتر موجودی تو پایگاه رابطه‌ای. چرا این دوتایی اتمیک نیست؟ با MySQL، استخر محدود و SKIP LOCKED درستش کن؛ قفل گپ، ترتیب قفل، پرکننده تکی، نگه‌داشتن connection و کات‌اور سایه‌ای رو هم توضیح بده.",
   "interview_q_en": "Honestly, you've got a web shop facing thousands of concurrent buyers on sale night; holds live in a key-value counter while your ledger lives in a relational database. Why isn't that pair atomic? Fix it with MySQL, a bounded pool and SKIP LOCKED; cover gap locks, lock ordering, the single refiller, connection holding and your shadow cutover.",
-  "answer_fa": "قضیه اینه که شمارنده و دفتر هیچ commit مشترکی ندارن: کم‌کردن دفتر و بعد پاک‌کردن رزرو، با یه crash وسط کار، undersell می‌ده؛ ترتیب برعکس هم oversell. درمانش اینه: به‌ازای هر واحد یک ردیف، ولی فقط یه استخر آمادهٔ محدود؛ برداشتن از استخر با SELECT ... FOR UPDATE SKIP LOCKED، پرکردن با یه مالوک واحد، و رزرو و claim توی یه تراکنش تک‌پایگاهی — یا هر دو می‌مونن یا هیچ‌کدوم. قفل گپ رو READ COMMITTED ول می‌کنه، کلید کامپوزیت تعداد قفل‌ها رو می‌آرونه به یکی، و کات‌اور با dual-write سایه‌ای و kill-switch جلو می‌ره — یه commit مشترک، کل درد رو می‌بره.",
+  "answer_fa": "قضیه اینه که شمارنده و دفتر هیچ commit مشترکی ندارن: کم‌کردن دفتر و بعد پاک‌کردن رزرو، با یه crash وسط کار، undersell می‌ده؛ ترتیب برعکس هم oversell. درمانش اینه: به‌ازای هر واحد یک ردیف، ولی فقط یه استخر آمادهٔ محدود؛ برداشتن از استخر با SELECT ... FOR UPDATE SKIP LOCKED، پرکردن با یه مالک واحد، و رزرو و claim توی یه تراکنش تک‌پایگاهی — یا هر دو می‌مونن یا هیچ‌کدوم. قفل گپ رو READ COMMITTED ول می‌کنه، کلید کامپوزیت تعداد قفل‌ها رو می‌آرونه به یکی، و کات‌اور با dual-write سایه‌ای و kill-switch جلو می‌ره — یه commit مشترک، کل درد رو می‌بره.",
   "answer_en": "Here's the thing: the counter and the ledger share no commit. Deduct-then-clear crashes into undersell, clear-then-deduct crashes into oversell. The fix: one row per unit, but only a bounded ready pool — pull from it with SELECT ... FOR UPDATE SKIP LOCKED, let a single owner refill it, and keep reserve and claim inside one single-database transaction, so it's all or nothing. READ COMMITTED drops the gap lock, a composite key cuts the locks down to one per row, and the cutover rides a shadow dual-write with a kill-switch. One shared commit, and the whole pain goes away.",
   "assumptions": [
     {
@@ -69,7 +69,7 @@
   ],
   "failures": [
     {
-      "fa": "پرکنندهٔ بدون مالک واحد: ده تراکنش هم‌زمان استخر خالی می‌بینن و هرکدام هزار ردیف درج می‌کنن — هجوم درج و استخر بادکرده. فقط یه مالوک پر کنه.",
+      "fa": "پرکنندهٔ بدون مالک واحد: ده تراکنش هم‌زمان استخر خالی می‌بینن و هرکدام هزار ردیف درج می‌کنن — هجوم درج و استخر بادکرده. فقط یه مالک پر کنه.",
       "en": "A refiller with no single owner: ten transactions see an empty pool at once and each inserts a thousand rows — an insert stampede and a bloated pool. Exactly one owner refills."
     },
     {

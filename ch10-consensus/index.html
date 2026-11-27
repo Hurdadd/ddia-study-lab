@@ -38,7 +38,7 @@
     <span class="en">Come along, friend — from the sharp “behave like one copy” rule (linearizability), through IDs and logical clocks, all the way to consensus, where nodes agree on one order despite failures — plus the bill for each promise: CAP, FLP, and the latency floor.</span>
   </p>
   <div class="meta-row reveal">
-    <span><b><span class="fa">۱۰</span><span class="en">10</span></b> <span class="fa">۱۰ نمودار + روایت گام‌به‌گام</span><span class="en">diagrams with step-by-step narration</span></span><span class="dot">·</span>
+    <span><b><span class="fa">۱۳</span><span class="en">13</span></b> <span class="fa">۱۳ نمودار + روایت گام‌به‌گام</span><span class="en">13 diagrams with step-by-step narration</span></span><span class="dot">·</span>
     <span><span class="fa">محور: linearizability · ساعت منطقی · consensus · Raft/Paxos · ZooKeeper</span><span class="en">Focus: linearizability · logical clocks · consensus · Raft/Paxos · ZooKeeper</span></span><span class="dot">·</span>
     <span><span class="fa">زمان مطالعه: حدود ۶۵ دقیقه</span><span class="en">Reading time: ~65 min</span></span><span class="dot">·</span><span><span class="fa">منبع: فصل ۱۰ کتاب DDIA ویرایش ۲</span><span class="en">Source: DDIA 2nd Edition, Chapter 10</span></span>
   </div>
@@ -108,15 +108,15 @@
 <li><a href="#example-ch10-1">پس از پاسخ موفق</a></li>
 <li><a href="#example-ch10-2">عملیات هم‌پوشان</a></li>
 <li><a href="#example-ch10-3">تراکنش serial با خواندن کهنه</a></li>
-<li><a href="#example-ch10-4">رقابت برای نام کاربری</a></li>
+<li><a href="#example-ch10-4">آخرین صندلی</a></li>
 <li><a href="#example-ch10-5">رهبرِ هنوز معتبر؟</a></li>
 <li><a href="#example-ch10-6">بهای قطع ارتباط</a></li>
 <li><a href="#example-ch10-7">شمارندهٔ یکتا روی یک نود</a></li>
 <li><a href="#example-ch10-8">یکتا لزوماً مرتب نیست</a></li>
 <li><a href="#example-ch10-9">Lamport روی ارسال پیام</a></li>
-<li><a href="#example-ch10-10">مولدِ مرتبِ سراسری</a></li>
+<li><a href="#example-ch10-10">حذفِ حساب، بعد گزارش</a></li>
 <li><a href="#example-ch10-11">یک تصمیم با چند اسم</a></li>
-<li><a href="#example-ch10-12">تصمیم مشترکِ معتبر</a></li>
+<li><a href="#example-ch10-12">وتو در commit اتمیک</a></li>
 <li><a href="#example-ch10-13">term بالاتر و رأی اکثریت</a></li>
 <li><a href="#example-ch10-14">همان لاگ، همان state</a></li>
 <li><a href="#example-ch10-15">وجود روی یک نود، commit نیست</a></li>
@@ -256,16 +256,16 @@
 <p class="example-title"><b>مثال فنی: عملیات هم‌پوشان</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن خوندن x وقتی شروع می‌شه که نوشتن <code dir="ltr">x=1</code> هنوز جواب نداده؛ مقدارِ قبلی هم ۰ـه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بسته به نقطه خطی‌شدن، خوندن می‌تونه ۰ یا ۱ برگردونه؛ ولی بعد از دیدنِ نوشتنِ تموم‌شده، خوندنِ بعدی — بدونِ نوشتنِ جدید — به ۰ برنمی‌گرده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> باید کلِ تاریخچه با یه ترتیبِ لحظه‌ایِ درست جور دربیاد؛ ساعتِ روی دستِ کلاینت‌ها ملاک نیست — یادت باشه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> باید کلِ تاریخچه با یه ترتیبِ لحظه‌ایِ درست جور دربیاد؛ ساعتِ روی دستِ کلاینت‌ها ملاک نیست.</p>
 </div>
 </div>
   <div class="en"><p>To get precise, picture operations as <b>timeline bars</b>: bar start = request sent, bar end = response received. The client never learns exactly when the work happened — only that it landed somewhere in between. If two bars overlap, those operations are <b>concurrent</b> in the system's eyes, and any order goes.</p></div>
 
   <div class="fa"><p>ولی «خوندنِ هم‌زمان هر جوابی بده» کافی نیست: وگرنه مقدار می‌تونست چند بار بینِ ۰ و ۱ بالا و پایین بپره!
-    قانونِ دوم اینه: تصور کن نقطه‌ای بینِ شروع و پایانِ نوشته هست که مقدار تو اون لحظه <b>atomically</b> از ۰ به ۱ می‌پره
+    قانونِ دوم اینه: نقطه‌ای بینِ شروع و پایانِ نوشته هست که مقدار تو اون لحظه <b>atomically</b> از ۰ به ۱ می‌پره
     (بهش می‌گن <span class="ltr">linearization point</span>). خطی که این نقطه‌ها رو به هم وصل می‌کنه
     باید همیشه <b>به جلو</b> بره، هیچ‌وقت به عقب. یعنی به‌محض اینکه خوندنی مقدارِ جدید رو دید، همه خوندن‌های بعدی هم باید همون یا جدیدتر رو ببینن.</p></div>
-  <div class="en"><p>But “concurrent reads may return anything” doesn't cut it — otherwise the value could ping-pong between 0 and 1 forever! Rule two: imagine a point between the write's start and end where the value flips <b>atomically</b> from 0 to 1 (that's the <span class="ltr">linearization point</span>). The line joining these points must always march <b>forward</b>, never back. Once a read spots the new value, every later read must see it or something newer.</p></div>
+  <div class="en"><p>But “concurrent reads may return anything” doesn't cut it — otherwise the value could ping-pong between 0 and 1 forever! Rule two: pick a point between the write's start and end where the value flips <b>atomically</b> from 0 to 1 (that's the <span class="ltr">linearization point</span>). The line joining these points must always march <b>forward</b>, never back. Once a read spots the new value, every later read must see it or something newer.</p></div>
 
   <div class="diagram">
     <div class="cap">
@@ -359,21 +359,22 @@
 
   <div class="fa"><p>ترکیبِ هر دو می‌شه <span class="ltr">strict serializability</span> (یا <span class="ltr">strong-1SR</span>).
     پایگاه‌داده‌های تک‌نودی معمولاً خطی‌پذیرن؛ ولی تو دنیای توزیع‌شده قضیه باحال می‌شه:
-    <span class="ltr">CockroachDB</span> هم سریال‌پذیری می‌ده هم کمی قولِ تازگی، ولی نه strict serializability —
-    چون هماهنگیِ بینِ تراکنشی گرون تموم می‌شه. در عوض <span class="ltr">Spanner</span> و
-    <span class="ltr">FoundationDB</span> strict serializability می‌دن. و باحال‌تر اینکه می‌تونی سطحِ ایزوله‌سازی و مدلِ سازگاری رو
-    تقریباً مستقل از هم انتخاب کنی.</p></div>
-  <div class="en"><p>Put them together and you've got <span class="ltr">strict serializability</span> (a.k.a. <span class="ltr">strong-1SR</span>). Single-node databases are usually linearizable; out in distributed land it gets spicy: <span class="ltr">CockroachDB</span> serves serializability plus a dash of freshness, but not strict serializability — cross-transaction coordination costs too much. <span class="ltr">Spanner</span> and <span class="ltr">FoundationDB</span>, on the other hand, do serve strict serializability. And here's a fun one: you can pick isolation level and consistency model almost independently.</p></div>
+    <span class="ltr">CockroachDB</span> هم سریال‌پذیری می‌ده و هم با HLC و انتظارِ بازهٔ عدمِ قطعیت، تازگی رو تقریباً حفظ می‌کنه؛
+    ولی قولِ strict serializability رو صریح نمی‌ده، چون هماهنگیِ بینِ تراکنشی گرون تموم می‌شه.
+    در عوض <span class="ltr">Spanner</span> و <span class="ltr">FoundationDB</span> همین قول رو با فرضِ ساعتِ دقیق
+    (یا هماهنگیِ بیشتر) می‌سازن. این تفاوت بیشتر انتخابِ مهندسی دربارهٔ فرض‌های ساعت و هماهنگیه تا برچسبِ مطلقِ محصول.
+    و باحال‌تر اینکه می‌تونی سطحِ ایزوله‌سازی و مدلِ سازگاری رو تقریباً مستقل از هم انتخاب کنی.</p></div>
+  <div class="en"><p>Put them together and you've got <span class="ltr">strict serializability</span> (a.k.a. <span class="ltr">strong-1SR</span>). Single-node databases are usually linearizable; out in distributed land it gets spicy: <span class="ltr">CockroachDB</span> serves serializability and preserves freshness closely using HLC plus its uncertainty-interval wait, but it doesn't promise strict serializability — cross-transaction coordination costs too much. <span class="ltr">Spanner</span> and <span class="ltr">FoundationDB</span> build that promise on precise clocks (or extra coordination). The gap is a design choice about clock and coordination assumptions, not an absolute product verdict. And here's a fun one: you can pick isolation level and consistency model almost independently.</p></div>
 
   <h3 id="s1-4"><span class="fa">۱.۴. کجا واقعاً لازمش داریم؟</span><span class="en">1.4. Where do we really need it?</span></h3>
 
   <div class="fa">
 <p>این قول وقتی مهمه که دیدنِ مقدارِ قدیمی یا تصمیمِ هم‌زمانِ ناجور، قانونِ برنامه رو بشکنه. نوعِ عملیات هم مهمه؛ خوندنِ تازه جای عملیاتِ شرطیِ اتمیک رو نمی‌گیره.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch10-4">
-<p class="example-title"><b>مثال فنی: رقابت برای نام کاربری</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن A و B هر دو می‌خوان <code dir="ltr">sara</code> رو ثبت کنن. یه اسم، دو تا مشتری.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا هر دو رو یه مرجعِ هماهنگ <code dir="ltr">compare-and-set(empty, owner)</code> می‌زنن یا با قیدِ درست درج می‌کنن؛ فقط یکیشون موفق می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اول «خالیه» بخونی بعد جداگونه رو دو تا replica بنویسی، یکتایی رو قول نمی‌ده — حساب کن.</p>
+<p class="example-title"><b>مثال فنی: آخرین صندلی</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> A و B هم‌زمان آخرین صندلیِ <code dir="ltr">12A</code> رو انتخاب می‌کنن؛ هر دو صفحهٔ «آزاد» رو دیدن و هنوز هیچ‌کس رزرو نکرده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا هر دو <code dir="ltr">compare-and-set(free, owner)</code> می‌زنن یا با قیدِ یکتایی درج می‌کنن؛ فقط یکی جوابِ موفق می‌گیره و اون یکی خطای «پر شده» می‌بینه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> «اول آزاد بودن رو بخون، بعد جداگونه رزرو کن» یکتایی رو قول نمی‌ده؛ تصمیمِ برنده باید از یک مرجعِ هماهنگ بیاد، نه از دو تا خوندنِ محلی.</p>
 </div>
 </div>
   <div class="en"><p>A match score? Nobody gets hurt. But some spots genuinely break without linearizability, friend:</p></div>
@@ -386,8 +387,6 @@
       <span class="ltr">etcd</span> دقیقاً واسه همین ساخته شدن.
       <span class="ltr">Oracle RAC</span> حتی واسه هر صفحه دیسک قفلِ خطی‌پذیر داره و واسه همین شبکه اختصاصی بینِ نودها می‌سازه.
     </li>
-    <li>
-      <b>قیدهای uniqueness:</b> نامِ کاربری یکتا، مسیرِ فایل یکتا، موجودیِ منفی‌نشدنیِ حساب، فروشِ بیش از موجودیِ انبار،
     <li>
       <b>قیدهای uniqueness:</b> اسمِ کاربری یکتا، مسیرِ فایل یکتا، موجودیِ منفی‌نشدنیِ حساب، فروشِ بیشتر از موجودیِ انبار،
       رزروِ هم‌زمانِ یه صندلی. اگه بخوای این قید موقعِ نوشته شدن اعمال شه (یکیشون خطا بگیره)،
@@ -408,8 +407,6 @@
       <span class="ltr">etcd</span> were built precisely for this.
       <span class="ltr">Oracle RAC</span> even keeps a linearizable lock per disk page — which is why it wires a dedicated interconnect between nodes.
     </li>
-    <li>
-      <b>Uniqueness constraints:</b> unique usernames, unique file paths, never-negative balances, no overselling inventory,
     <li>
       <b>Uniqueness constraints:</b> unique usernames, unique file paths, never-negative balances, no overselling inventory,
       no double-booked seats. To enforce the constraint at write time (one of two concurrent writers takes the error),
@@ -458,11 +455,11 @@
     <p>
       درسِ نمودار تو کارتِ آخره: <b>دو تا کانالِ ارتباطی بینِ یه جفت سیستم = مسابقه</b>؛
       مگر اینکه storage خطی‌پذیر باشه یا کانالِ اضافی «read-your-owns-writes» رو قول بده.
-      این دقیقاً همون وضعیتِ دو نفرِ بندِ قبله: اون‌جا هم کانالِ دوم، صدای نفرِ اول بود — تاریخ تکرار می‌شه.
+      این دقیقاً همون وضعیتِ دو تماشاگرِ بازیـه: اون‌جا هم کانالِ دوم، صدای نفرِ اول بود — فقط این‌بار نسخهٔ ویدیو، قربانیِ مسابقه‌ست.
     </p></div>
     <div class="en"><p>This is a <span class="ltr">sequence</span> diagram, friend, with five players left to right — <span class="ltr">Web App</span> (the user's browser), <span class="ltr">Web Server</span> (upload handler), <span class="ltr">File Storage</span> tagged “replicated, lagging”, the <span class="ltr">Message Queue</span> tagged “async channel”, and the <span class="ltr">Video Transcoder</span> background worker — across three phases: <span class="ltr">Store original</span>, <span class="ltr">Queue job</span>, and <span class="ltr">Race outcome</span>.</p>
     <p>Phase one: <span class="ltr">upload video</span> travels from app to server, then <span class="ltr">write video file</span> from server to storage, and <span class="ltr">write ack (replica lagging)</span> comes back — the write is acknowledged while internal replication is still on the road. Phase two: the video is too big for the queue, so only the “instruction” rides it — <span class="ltr">enqueue transcode job (file ref)</span>, then <span class="ltr">deliver job</span> (both dashed async lines).</p>
-    <p>Phase three blows the race open: the transcoder's <span class="ltr">fetch original video</span> hits storage and gets the pink <span class="ltr">stale version or missing</span> — steps 3–4 outran storage's slow replication. The result sits at the bottom: <span class="ltr">write transcoded copy of OLD video</span>, plus the warning card: original and transcoded copy stay inconsistent forever. And the lesson in the last card: <b>two channels between one pair of systems = a race</b>, unless storage is linearizable or the extra channel guarantees read-your-own-writes — the same story as the two match-watchers above, where the second channel was the first person's voice.</p></div>
+    <p>Phase three blows the race open: the transcoder's <span class="ltr">fetch original video</span> hits storage and gets the pink <span class="ltr">stale version or missing</span> — steps 3–4 outran storage's slow replication. The result sits at the bottom: <span class="ltr">write transcoded copy of OLD video</span>, plus the warning card: original and transcoded copy stay inconsistent forever. And the lesson in the last card: <b>two channels between one pair of systems = a race</b>, unless storage is linearizable or the extra channel guarantees read-your-own-writes — the same race as the two match-watchers, where the second channel was the first person's voice and the stale video copy pays the price.</p></div>
   </div>
 
   <h3 id="s1-5"><span class="fa">۱.۵. کدام روشِ replication خطی‌پذیر است؟</span><span class="en">1.5. Which replication method is linearizable?</span></h3>
@@ -578,7 +575,7 @@
 <p class="example-title"><b>مثال فنی: بهای قطع ارتباط</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن دو تا مرکز داده سیمشون قطع شده و هر دو می‌خوان یه اسمِ یکتا رو تغییر بدن.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا اگه هر دو جداگونه جوابِ موفق بدن، یکتایی می‌شکنه؛ مسیری که تصمیمِ واحد می‌خواد تو بخشی از شبکه باید صبر کنه یا خطا بده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> CAP همین انتخابِ موقعِ partition رو توصیف می‌کنه؛ تو حالتِ سالم هم هماهنگیِ راه‌دور خرجِ تأخیر داره — قبضش رو حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> CAP همین انتخابِ موقعِ partition رو توصیف می‌کنه؛ تو حالتِ سالم هم هماهنگیِ راه‌دور خرجِ تأخیر داره.</p>
 </div>
 </div>
   <div class="en"><p>Picture two regions with the link between them cut (each region healthy inside), friend. With multi-leader, each region works solo and writes sync up later. With single-leader, the leader sits in one region; the other can neither write nor take a linearizable read — <b>unavailable</b> for those users. And don't file this under “multi-region only”: any network fault at any scale forces the same call.</p></div>
@@ -588,10 +585,10 @@
     <div class="fa">«سه‌تایی، دوتاش رو بردار» <b>گول‌زنکه</b>: partition یه <b>خطاست</b>، نه یه انتخاب؛ نمی‌تونی انتخابش نکنی.
     تنها راهِ «بدونِ partition» اینه که شبکه نداشته باشی (یه نود) — که اون‌وقت دردسترس‌بودنِ بالا هم نداری.
     فرمولِ بهتر: <b>موقعِ partition یا سازگار باش یا در دسترس</b> (CP یا AP). وقتی شبکه سالمه، هر دو رو می‌تونی داشته باشی.
-    تعریفِ رسمیِ CAP هم خیلی محدوده: فقط linearizability و فقط partition — اون هم کمتر از ۸٪ حادثه‌های گوگل.
+    تعریفِ رسمیِ CAP هم خیلی محدوده: فقط linearizability و فقط partition — و partition هم به‌ندرت پیش می‌آد.
     تعمیمش یعنی <span class="ltr">PACELC</span>: موقعِ partition بینِ A و C، وگرنه (else) بینِ تأخیرِ کم (L) و C انتخاب کن.
     امروزه CAP بیشتر ارزشِ تاریخی داره و با نتیجه‌های دقیق‌تر جایگزین شده.</div>
-    <div class="en">“Pick two of three” is <b>a trap</b>: a partition is a <b>fault</b>, not a choice — you can't opt out of it. The only “partition-free” setup is having no network at all (one node) — which also waves goodbye to high availability. The better formula: <b>during a partition, be consistent or available</b> (CP or AP). With a healthy network you can have both. The formal CAP definition is also tiny: only linearizability and only partitions — under 8% of Google's incidents. Its generalization is <span class="ltr">PACELC</span>: during a partition pick A or C, else pick low latency (L) or C. These days CAP is mostly history, replaced by sharper results.</div>
+    <div class="en">“Pick two of three” is <b>a trap</b>: a partition is a <b>fault</b>, not a choice — you can't opt out of it. The only “partition-free” setup is having no network at all (one node) — which also waves goodbye to high availability. The better formula: <b>during a partition, be consistent or available</b> (CP or AP). With a healthy network you can have both. The formal CAP definition is also tiny: only linearizability and only partitions — and partitions are rare. Its generalization is <span class="ltr">PACELC</span>: during a partition pick A or C, else pick low latency (L) or C. These days CAP is mostly history, replaced by sharper results.</div>
   </div>
 
   <div class="fa"><p>نکته غافلگیرکننده آخر: خطی‌پذیری حتی تو یه کامپیوتر هم کمیابه!
@@ -728,8 +725,6 @@
     <div class="fa">
 
 <p>
-      سه شرکت‌کننده داریم: <span class="ltr">User A</span> و <span class="ltr">User B</span> و <span class="ltr">User C</span>
-<p>
       سه‌تا شرکت‌کننده داری: <span class="ltr">User A</span> و <span class="ltr">User B</span> و <span class="ltr">User C</span>
       و زیرِ هر سه نوشته «chat node, counter starts at 0» — هر کدوم یه نودِ ساعتِ Lamport با شمارنده صفر.
       نمودار دو تا فاز داره: «پست‌های هم‌زمان (A و C همدیگه رو ندیدن)» و «B شمارنده‌ها رو قاطی می‌کنه و جواب می‌ده».
@@ -774,13 +769,13 @@
   <div class="fa">
 <p>یه ترفند مصاحبه‌ای: مولدِ شناسه خطی‌پذیر باید ترتیبِ تموم و شروعِ درخواست‌ها رو تو زمانِ واقعی نگه داره. واسه نگه داشتنِ این قول موقعِ خرابی، فقط یه شمارنده محلی تو هر نود کافی نیست.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch10-10">
-<p class="example-title"><b>مثال فنی: مولدِ مرتبِ سراسری</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن درخواستِ اول شناسه ۱۰۷ گرفته و جوابش کامل شده؛ درخواستِ دوم بعداً شروع می‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا قولِ خطی‌پذیر به دومی شناسه بزرگ‌تر می‌ده؛ چند تا نودِ مستقل با بازه‌های آزاد این شرط رو خودکار نگه نمی‌دارن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> واسه این قول باید ترتیبِ تخصیص رو هماهنگ کنی؛ UUID فقط دعواش سرِ یکتاییه — ترتیب پیشکش.</p>
+<p class="example-title"><b>مثال فنی: حذفِ حساب، بعد گزارش</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> درخواستِ حذفِ حساب کامل شده و شناسهٔ ۱۰۷ رو گرفته؛ بعدش درخواستِ صدورِ گزارش از شاردِ دیگه شروع می‌شه.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا اگه شمارندهٔ شاردِ گزارش عقب‌تر باشه، گزارش شناسهٔ کوچیک‌تری می‌گیره و اسنپ‌شاتش می‌تونه داده‌های حذف‌شده رو هنوز ببینه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> قولِ خطی‌پذیر یعنی درخواستی که بعد از پایانِ حذف شروع شده شناسهٔ بزرگ‌تر می‌گیره؛ برای همین ترتیبِ تخصیص باید هماهنگ شه، نه اینکه هر شارد شمارندهٔ محلی داشته باشه.</p>
 </div>
 </div>
-  <div class="en"><p>So why isn't Lamport enough, friend? Because linearizability plays by a <b>real-time</b> rule: if A's work finished and B's started after, B must take home the bigger ID — even if those two nodes never spoke. The book's example: a user first flips their account private, then posts a photo from a laptop; but photos and settings live on different shards and the photo shard's counter lags. Net effect: the photo takes the smaller timestamp, and in MVCC a viewer whose timestamp lands between the two still sees the account as “public” next to the private photo! The simple fix: a <b>linearizable ID oracle</b>.</p></div>
+  <div class="en"><p>So why isn't Lamport enough, friend? Because linearizability plays by a <b>real-time</b> rule: if A's work finished and B's started after, B must take home the bigger ID — even if those two nodes never spoke. The book's example: a user first flips their account private, then posts a photo from a laptop; but photos and settings live on different shards and the photo shard's counter lags. Net effect: the photo takes the smaller timestamp, and in MVCC a viewer whose timestamp lands between the two still sees the account as “public” next to the private photo! The same shape shows up with deletion: a completed account deletion takes ID 107, then a later report request from a lagging shard gets a smaller stamp and its snapshot still sees deleted rows. The simple fix for both: a <b>linearizable ID oracle</b>.</p></div>
 
   <div class="fa"><p>ساده‌ترین پیاده‌سازی همون «تک‌نودِ مطمئن»ـه: شمارنده اتمی + پایدارسازی + replication تک‌رهبری.
     تو عمل بهش <span class="ltr">timestamp oracle</span> می‌گن (الگوی <span class="ltr">Percolator</span> تو TiKV).
@@ -843,10 +838,10 @@
   <div class="fa">
 <p>اگه تو مصاحبه پرسیدن consensus یعنی چی، این چهارتا رو ردیف کن: توافقِ سرِ نتیجه، معتبر بودنِ پیشنهاد، عوض نشدنِ تصمیمِ نهایی و رسیدن به تصمیم تو شرایطِ لازم. شرایطِ پیشرفتش به مدلِ خرابی و شبکه گره خورده.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch10-12">
-<p class="example-title"><b>مثال فنی: تصمیم مشترکِ معتبر</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن سه تا رأی‌دهنده پیشنهادهای A و B رو واسه رهبر دارن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا تصمیمِ نهایی باید از پیشنهادِ معتبر باشه، نودها نباید تصمیمِ ناجور بدن و با فرض‌های پیشرفت بالاخره باید تصمیم گرفته شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> خاصیت‌های agreement و validity و integrity و termination با هم قول رو می‌سازن؛ فقط پیامِ رأی داشتن کافی نیست — یادت باشه.</p>
+<p class="example-title"><b>مثال فنی: وتو در commit اتمیک</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> سه سرویس باید یک تراکنش رو یا همه commit کنن یا همه abort؛ هماهنگ‌کننده از هر سه آمادگی می‌گیره و سرویسِ سوم veto می‌ده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا تصمیم باید abort باشه و هر سه سرویس همون رو اجرا کنن؛ ولی اگه سرویسِ دوم ساکت بمونه، هماهنگ‌کننده نمی‌تونه بی‌تصمیم جلو بره و تراکنش گیر می‌کنه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> agreement و validity و integrity با وتو و تصمیمِ یکسان حفظ می‌شن؛ termination ولی به جوابِ همه گره خورده — برای همین 2PCِ ساده با consensusِ مقاوم در برابر خرابی فرق داره، حتی اگه قدرتِ حلِ مسئله هم‌ارز باشه.</p>
 </div>
 </div>
   <div class="en"><p>Consensus has many faces, friend: agreeing on <b>one value</b> (like atomic CAS), building an <b>append-only log</b> (a.k.a. <span class="ltr">total order broadcast</span>), the <b>fetch-and-add</b> op, and <b>atomic commitment</b> of a distributed transaction. And the deep bit: they're all <b>equivalent</b> — crack one and you've cracked them all.</p></div>
@@ -992,7 +987,7 @@
 <p>نکته‌ش اینجاست: بودنِ یه ورودی رو رهبر به‌معنیِ تأییدِ نهایی‌ش نیست. پروتکل معلوم می‌کنه کی ورودی موندگار و قابل‌اعماله و بعد از عوض شدنِ رهبر چی به سرش میاد.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch10-15">
 <p class="example-title"><b>مثال فنی: وجود روی یک نود، commit نیست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن رهبر entry رو رو خودش نوشته ولی قبل از تأییدِ quorum قطع می‌شه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن رهبر entry رو توی لاگِ خودش نوشته ولی قبل از تأییدِ quorum قطع می‌شه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا entry ممکنه تو لاگِ رهبرِ جدید نباشه و بعداً جایگزین شه؛ جوابِ موفق رو فقط باید طبقِ قانونِ commit پروتکل داد.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> هر entry محلی ماندگارِ نهایی نیست؛ شرطِ commit و شرطِ انتخابِ رهبر با هم از تاریخچه پذیرفته‌شده محافظت می‌کنن — زود قول نده.</p>
 </div>
@@ -1059,7 +1054,7 @@
 <p class="example-title"><b>مثال فنی: سه نود، تحمل یک خرابی</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن گروهِ سه‌عضوی واسه عملیاتِ اکثریتی به دو تا عضوِ در دسترس نیاز داره.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا خرابیِ یه عضو قابل‌تحمله؛ با خرابیِ دو عضو پیشرفت می‌خوابه تا اکثریت برگرده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اضافه کردنِ اعضا خرجِ replication و هماهنگی داره؛ اجماع معمولاً مالِ تصمیم‌های لازمه، نه هر حسابِ مستقل — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اضافه کردنِ اعضا خرجِ replication و هماهنگی داره؛ اجماع معمولاً مالِ تصمیم‌های لازمه، نه هر حسابِ مستقل.</p>
 </div>
 </div>
   <div class="en"><p>Consensus is really “single-leader done right”, friend: automatic failover, no lost committed data, no split brain — surviving all of Chapter 9's troubles. The street rule: any automatic-failover system not built on a proven consensus algorithm is probably <b>unsafe</b>. A proven algorithm won't bless the whole system — bugs live elsewhere too — but it's a solid start.</p></div>
@@ -1243,9 +1238,9 @@
 <p>داستان از این قراره: تضمین رو از رو عاقبتِ خطا انتخاب کن. جایی که مقدارِ قدیمی فقط نمایش رو عقب می‌ندازه با جایی که دو تا مالک یا دو تا رزروِ ناجور می‌سازه فرق داره.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch10-19">
 <p class="example-title"><b>مثال فنی: تضمین را برای هر مسیر انتخاب کن</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن ثبتِ اسمِ کاربری یکتاییِ فوری می‌خواد، ولی شمارنده بازدید می‌تونه چند ثانیه عقب باشه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا مسیرِ اول هماهنگی و قیدِ سفت می‌گیره؛ مسیرِ دوم جمعِ غیرهم‌زمان با کنترلِ تکرار داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> قولِ قوی رو بر اساسِ قانونِ همون عملیات انتخاب می‌کنی؛ یه برچسبِ consistency واسه همه تیکه‌های محصول کافی نیست — یه برچسب واسه همه کافی نیست.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> پرداخت باید دقیقاً یک‌بار ثبت شه و درخواستِ تکراری نباید دوباره پول کم کنه؛ در عوض شمارندهٔ بازدیدِ صفحهٔ محصول می‌تونه چند ثانیه عقب باشه.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا مسیرِ پرداخت به کلیدِ <span class="ltr">idempotency</span> خطی‌پذیر و درجِ یکتا تکیه می‌کنه؛ مسیرِ شمارنده جمعِ غیرهم‌زمان با کنترلِ تکرار داره.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> قولِ قوی رو بر اساسِ عاقبتِ خطا در همون عملیات انتخاب می‌کنی؛ یک برچسبِ consistency برای همهٔ بخش‌های محصول کافی نیست، چون هر بخش خطای متفاوتی رو تحمل می‌کنه.</p>
 </div>
 </div>
   <div class="en"><p>You've got all the pieces now, friend: the freshness promise (linearizability), the ordering tools (logical clocks), the decision engine (consensus), and its ready-made product (the coordination service). So here's the practical question: how far do you go for each need? The tree below walks you through it, step by step.</p></div>
@@ -1293,7 +1288,7 @@
     </p>
     <p>
       درسِ این درخت این نیست که «همیشه consensus بذار»؛ درسش اینه که <b>قبضِ هر قول رو با چشمِ باز بپردازی</b>:
-      بیشترِ مسیرهای واقعی به شل‌ترین قولِ کافی می‌رسن و فقط قیدهای سفتن که consensus می‌خوان — حساب کن.
+      بیشترِ مسیرهای واقعی به شل‌ترین قولِ کافی می‌رسن و فقط قیدهای سفتن که consensus می‌خوان.
     </p></div>
     <div class="en"><p>Meet the decision tree, friend: four lanes across the top — <span class="ltr">01 / Decision</span> (the questions), <span class="ltr">02 / Linearizable</span>, <span class="ltr">03 / Weak but sufficient</span> and <span class="ltr">04 / Eventual is fine</span> (the three outcome paths). The tree starts on the right (RTL, so that's first) with <span class="ltr">Requirement Review</span> — “what must readers see? / goal: weakest sufficient.” Your goal: pick the <b>weakest sufficient</b> guarantee, not the strongest.</p>
     <p>Question one: <span class="ltr">Need the latest value?</span> (“lock, lease, seat, balance”). Answer “no” and you move to question two: <span class="ltr">Causal sanity per user?</span> (“read-own-writes, monotonic”). A “yes” drops you into lane three: <span class="ltr">Weak guarantees</span> (“read-your-writes, monotonic / consistent prefix”) plus <span class="ltr">Logical clock IDs</span> (“Lamport / hybrid clocks / causal order”), ending at <span class="ltr">Weak guarantees suffice</span> (“timestamps for ordering / freshness only”). Need not even that, and the “no” path runs straight to lane four: <span class="ltr">Eventual consistency</span> (“multi-leader / leaderless / offline-friendly”).</p>
@@ -1352,7 +1347,7 @@
     <tr><td><span class="ltr">register</span></td><td>یه تیکه داده (کلید/سطر/سند) که می‌خونی و می‌نویسی</td><td>واحدِ خطی‌پذیری یه تیکه‌ست، نه تراکنش</td></tr>
     <tr><td><span class="ltr">linearization point</span></td><td>لحظه فرضی که اثرِ عملیات توش اتمی می‌شه</td><td>این نقطه‌ها همیشه باید رو به جلو برن</td></tr>
     <tr><td><span class="ltr">recency guarantee</span></td><td>خوندنِ بعدی دست‌کم به‌تازگیِ خوندنِ قبلی</td><td>همونی که تو «خوندنِ کهنه» می‌شکنه</td></tr>
-    <tr><td><span class="ltr">strict serializability</span></td><td>سریال‌پذیری + خطی‌پذیری (strong-1SR)</td><td>Spanner و FoundationDB آره؛ CockroachDB نه دقیقاً</td></tr>
+    <tr><td><span class="ltr">strict serializability</span></td><td>سریال‌پذیری + خطی‌پذیری (strong-1SR)</td><td>با فرضِ ساعتِ دقیق یا هماهنگیِ بیشتر: Spanner و FoundationDB؛ CockroachDB صریح قولش رو نمی‌ده</td></tr>
     <tr><td><span class="ltr">cross-channel race</span></td><td>دو تا مسیرِ ارتباطی با سرعتِ متفاوت</td><td>صف از storage جلو می‌زنه و ناسازگاریِ همیشگی می‌سازه</td></tr>
     <tr><td><span class="ltr">quorum (w + r &gt; n)</span></td><td>خوندن/نوشتن از دسته‌های هم‌پوشان</td><td>واسه خطی‌پذیری کافی نیست (نمودار ۳)</td></tr>
     <tr><td><span class="ltr">read repair</span></td><td>رسوندنِ عقب‌مونده‌ها قبل از جواب</td><td>هم‌زمانش کن تا خطی‌پذیر شه؛ Riak نمی‌کنه</td></tr>
@@ -1382,7 +1377,7 @@
     <tr><td><span class="ltr">register</span></td><td>One chunk of data (key/row/doc) you read and write</td><td>Linearizability's unit is one chunk, not a transaction</td></tr>
     <tr><td><span class="ltr">linearization point</span></td><td>The imaginary instant an op takes effect</td><td>These points must always march forward</td></tr>
     <tr><td><span class="ltr">recency guarantee</span></td><td>The next read is at least as fresh as the last</td><td>Exactly what snaps in a stale read</td></tr>
-    <tr><td><span class="ltr">strict serializability</span></td><td>Serializability + linearizability (strong-1SR)</td><td>Spanner and FoundationDB say yes; CockroachDB, not quite</td></tr>
+    <tr><td><span class="ltr">strict serializability</span></td><td>Serializability + linearizability (strong-1SR)</td><td>Given precise clocks or extra coordination: Spanner and FoundationDB; CockroachDB doesn't promise it outright</td></tr>
     <tr><td><span class="ltr">cross-channel race</span></td><td>Two channels running at different speeds</td><td>The queue laps storage and the split lasts forever</td></tr>
     <tr><td><span class="ltr">quorum (w + r &gt; n)</span></td><td>Reads/writes from overlapping sets</td><td>Not enough for linearizability (Diagram 3)</td></tr>
     <tr><td><span class="ltr">read repair</span></td><td>Catching laggards up before answering</td><td>Do it synchronously or no linearizability; Riak skips it</td></tr>
@@ -1412,13 +1407,13 @@
   <details><summary><span class="fa">۱. linearizability دقیقاً چه چیزی را تضمین می‌کند؟</span><span class="en">1. What exactly does linearizability guarantee?</span></summary>
     <div class="fa"><p>تعریفش اینه: هر عملیات انگار دقیقاً تو یه لحظه — بینِ شروع و پایانش — رو یه نسخه واحد انجام می‌شه. عملیاتی که بعد از پاسخِ نوشتن شروع شه، یا همون نوشتن رو می‌بینه یا تغییرِ بعدی رو — کهنه‌بینی ممنوع.</p>
 </div>
-    <div class="en"><p>Think of it like this, friend: every operation lands at one instant between its start and finish, on a single copy. Anything starting after a write's response sees that write or something newer — stale views banned.</p></div>
+    <div class="en"><p>Every operation lands at one instant between its start and finish, on a single copy. Anything starting after a write's response sees that write or something newer — stale views banned.</p></div>
   </details>
 
   <details><summary><span class="fa">۲. تفاوتِ linearizability و serializability چیست؟</span><span class="en">2. What is the difference between linearizability and serializability?</span></summary>
-    <div class="fa"><p>فرقشون ساده‌ست: خطی‌پذیری ساعتِ عملیات رو با زمانِ واقعی جفت می‌کنه؛ سریال‌پذیری فقط می‌گه نتیجه تراکنش‌ها انگار پشتِ سرِ هم اجرا شدن — ولی اون پشتِ سرِ هم بودن لزوماً همون ترتیبِ واقعی نیست.</p>
+    <div class="fa"><p>فرقشون ساده‌ست: خطی‌پذیری ساعتِ عملیات رو با زمانِ واقعی جفت می‌کنه. سریال‌پذیری فقط می‌گه نتیجه تراکنش‌ها انگار پشتِ سرِ هم اجرا شدن — ولی اون پشتِ سرِ هم بودن لزوماً همون ترتیبِ واقعی نیست.</p>
 </div>
-    <div class="en"><p>Here's the split: linearizability syncs operation order with real time; serializability only says transactions look sequential — but that sequence doesn't have to match real time.</p></div>
+    <div class="en"><p>Here's the split: linearizability syncs operation order with real time. Serializability only says transactions look sequential — but that sequence doesn't have to match real time.</p></div>
   </details>
 
   <details><summary><span class="fa">۳. چرا شرطِ <span class="ltr">w</span> + <span class="ltr">r</span> &gt; <span class="ltr">n</span> به‌تنهایی خطی‌پذیری را تضمین نمی‌کند؟</span><span class="en">3. Why isn't a quorum with w + r &gt; n linearizable?</span></summary>
@@ -1428,9 +1423,9 @@
   </details>
 
   <details><summary><span class="fa">۴. خطی‌پذیری چه قیمتی دارد؟</span><span class="en">4. What does linearizability cost?</span></summary>
-    <div class="fa"><p>قضیه‌ش اینه: خطی‌پذیری خرج داره — هماهنگی و نسخه معتبر می‌خواد، و هماهنگی هم تأخیر داره. موقعِ قطعی هم ممکنه بعضی درخواست‌ها نتونن طبقِ قول جوابِ موفق بگیرن — قبضش رو باید حساب کنی.</p>
+    <div class="fa"><p>قضیه‌ش اینه: خطی‌پذیری خرج داره — هماهنگی و نسخه معتبر می‌خواد، و هماهنگی هم تأخیر داره. موقعِ قطعی هم ممکنه بعضی درخواست‌ها نتونن طبقِ قول جوابِ موفق بگیرن.</p>
 </div>
-    <div class="en"><p>Because freshness has a bill attached: coordination plus a trusted copy, and coordination costs latency. During a cut, some requests just can't succeed under the guarantee — you've got to pay that bill.</p></div>
+    <div class="en"><p>Because freshness has a bill attached: coordination plus a trusted copy, and coordination costs latency. During a cut, some requests just can't succeed under the guarantee.</p></div>
   </details>
 
   <details><summary><span class="fa">۵. CAP را در یک جمله توضیح بده و ایرادش چیست؟</span><span class="en">5. Explain CAP in one sentence, and what's wrong with it?</span></summary>
@@ -1440,15 +1435,15 @@
   </details>
 
   <details><summary><span class="fa">۶. چرا نمی‌توانیم برای همه‌چیز از یک مولدِ شمارنده‌ی تک‌نودی استفاده کنیم؟</span><span class="en">6. Why can't we use one single-node counter for everything?</span></summary>
-    <div class="fa"><p>راستش، مولدِ مرکزی هم گلوگاهه هم نقطه وابستگی. واسه اینکه موقعِ خرابی جاش پر شه، وضعیتِ شمارنده باید سالم بمونه؛ ضمناً ترتیبِ صدورِ شناسه با ترتیبِ commit یکی نیست — قاطی‌شون نکن.</p>
+    <div class="fa"><p>راستش، مولدِ مرکزی هم گلوگاهه هم نقطه وابستگی. واسه اینکه موقعِ خرابی جاش پر شه، وضعیتِ شمارنده باید سالم بمونه؛ ضمناً ترتیبِ صدورِ شناسه با ترتیبِ commit یکی نیست.</p>
 </div>
-    <div class="en"><p>Honestly, a central generator is both a bottleneck and a single leg to stand on. Filling its shoes after a crash means keeping counter state intact — and issue order isn't commit order. Don't mix those up.</p></div>
+    <div class="en"><p>Honestly, a central generator is both a bottleneck and a single leg to stand on. Filling its shoes after a crash means keeping counter state intact — and issue order isn't commit order.</p></div>
   </details>
 
   <details><summary><span class="fa">۷. Lamport clock چگونه کار می‌کند و چه چیزی را تضمین نمی‌کند؟</span><span class="en">7. How does a Lamport clock work, and what doesn't it guarantee?</span></summary>
-    <div class="fa"><p>ایده‌ش ساده‌ست: هر نود شمارنده‌ش رو زیاد می‌کنه و موقعِ گرفتنِ پیام، خودش رو به شمارنده پیام می‌رسونه. علت عددِ کوچیک‌تر از معلول می‌گیره، ولی عددِ کوچیک‌تر دیدی دلیل نمی‌شه علتش باشه — این دام معروفه.</p>
+    <div class="fa"><p>ایده‌ش ساده‌ست: هر نود شمارنده‌ش رو زیاد می‌کنه و موقعِ گرفتنِ پیام، خودش رو به شمارنده پیام می‌رسونه. علت عددِ کوچیک‌تر از معلول می‌گیره، ولی عددِ کوچیک‌تر دیدی دلیل نمی‌شه علتش باشه.</p>
 </div>
-    <div class="en"><p>The idea's simple: each node bumps its counter and jumps to the message's counter on receive. Causes sort smaller than effects — but a smaller number doesn't prove causation. Classic trap.</p></div>
+    <div class="en"><p>The idea's simple: each node bumps its counter and jumps to the message's counter on receive. Causes sort smaller than effects — but a smaller number doesn't prove causation.</p></div>
   </details>
 
   <details><summary><span class="fa">۸. HLC چه چیزی را به Lamport اضافه می‌کند؟</span><span class="en">8. What does HLC add to Lamport?</span></summary>
@@ -1458,9 +1453,9 @@
   </details>
 
   <details><summary><span class="fa">۹. کی به vector clock نیاز داریم؟</span><span class="en">9. When do we need a vector clock?</span></summary>
-    <div class="fa"><p>وقتی لازمه بفهمی دو تا تغییر به هم وصلن یا مستقل و متعارضن، بردار به کارت میاد. یه عددِ مرتبِ ساده هم‌زمانیِ منطقی رو لو نمی‌ده — اینو قاب کن.</p>
+    <div class="fa"><p>وقتی لازمه بفهمی دو تا تغییر به هم وصلن یا مستقل و متعارضن، بردار به کارت میاد. یه عددِ مرتبِ ساده هم‌زمانیِ منطقی رو لو نمی‌ده.</p>
 </div>
-    <div class="en"><p>You'll want vectors when you must tell linked changes from independent, conflicting ones. A single sorted number can't expose logical concurrency — frame that one.</p></div>
+    <div class="en"><p>You'll want vectors when you must tell linked changes from independent, conflicting ones. A single sorted number can't expose logical concurrency.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۰. چهار خاصیتِ consensus کدام‌اند؟</span><span class="en">10. What are the four consensus properties?</span></summary>
@@ -1475,10 +1470,10 @@
     <div class="en"><p>Nope — FLP only caps the always-finish promise of deterministic consensus in fully async models with crash risk. Real systems lean on eventual synchrony or luck; a timeout alone proves nothing.</p></div>
   </details>
 
-  <details><summary><span class="fa">۱۲. اجماع، لاگِ مشترک و عملیاتِ اتمیک چه ارتباط و چه تفاوتی دارند؟</span><span class="en">12. What does “consensus has many equivalent faces” mean?</span></summary>
-    <div class="fa"><p>قضیه اینه که توافق رو مقدار، ترتیبِ معتبرِ لاگ و بعضی عملیاتِ شرطیِ قوی — با فرض‌های درست — به هم وصلن. ولی هر ابزارِ اتمیکی هم‌قدرت نیست و commit اتمیک همون مسئله اجماع نیست.</p>
+  <details><summary><span class="fa">۱۲. اجماع، لاگِ مشترک و عملیاتِ اتمیک چه ارتباط و چه تفاوتی دارند؟</span><span class="en">12. How do consensus, the shared log, and atomic operations relate — and how do they differ?</span></summary>
+    <div class="fa"><p>ارتباطشون اینه که با فرض‌های درست، توافق روی یک مقدار، ترتیبِ معتبرِ لاگِ مشترک و CAS خطی‌پذیر شکل‌های هم‌ارزِ یک مسئله‌ان: حلِ یکی، ساختنِ اون یکی رو هم ممکن می‌کنه. تفاوتشون در دامنه‌ست: لاگ یک ترتیبِ کامل می‌سازه، CAS فقط یک مقدارِ شرطی رو قطعی می‌کنه، و عملیات‌های اتمیکِ ضعیف‌تر مثل <span class="ltr">fetch-and-add</span> (با <span class="ltr">consensus number</span> ۲) این هم‌ارزی رو ندارن. <span class="ltr">commit</span> اتمیک هم با وجودِ هم‌ارزیِ قدرت، قواعدِ خودش رو داره: حقِ وتو داره و 2PCِ ساده با شکستِ هماهنگ‌کننده گیر می‌کنه.</p>
 </div>
-    <div class="en"><p>The thing is, value agreement, a valid log order, and some strong conditional ops all connect under the right assumptions. But not every atomic tool is equally strong — and atomic commit isn't the same problem as consensus.</p></div>
+    <div class="en"><p>The link is that, under the right assumptions, agreeing on one value, imposing a valid shared-log order, and a linearizable CAS are equivalent shapes of one problem: solve one and you can build the others. They differ in scope: a log fixes a total order, CAS fixes one conditional value, and weaker atomic primitives such as <span class="ltr">fetch-and-add</span> (<span class="ltr">consensus number</span> 2) don't carry that equivalence. <span class="ltr">Atomic commit</span> carries the same power but its own rules: it adds veto rights, and plain 2PC can stall when the coordinator fails.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۳. epoch یا term چه نقشی در جلوگیری از split brain دارد؟</span><span class="en">13. How do epochs/terms prevent split brain?</span></summary>
@@ -1494,9 +1489,9 @@
   </details>
 
   <details><summary><span class="fa">۱۵. state machine replication چیست و چرا مهم است؟</span><span class="en">15. What is state machine replication and why does it matter?</span></summary>
-    <div class="fa"><p>نسخه‌ها دستورهای لاگِ معتبر رو با همون ترتیب رو وضعیتِ یکسان اجرا می‌کنن. اجرای قطعی خروجی رو یکسان نگه می‌داره؛ ورودیِ غیرقطعی رو باید تو قرارداد کنترل کنی — قرارداد رو جدی بگیر.</p>
+    <div class="fa"><p>نسخه‌ها دستورهای لاگِ معتبر رو با همون ترتیب روی وضعیتِ یکسان اجرا می‌کنن. اجرای قطعی خروجی رو یکسان نگه می‌داره؛ ورودیِ غیرقطعی رو باید تو قرارداد کنترل کنی.</p>
 </div>
-    <div class="en"><p>Replicas run the valid log's commands in the same order on the same state. Deterministic execution keeps outputs identical — but you've got to fence non-deterministic inputs in the contract. Remember that.</p></div>
+    <div class="en"><p>Replicas run the valid log's commands in the same order on the same state. Deterministic execution keeps outputs identical — but you've got to fence non-deterministic inputs in the contract.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۶. چرا رهبرِ جدید نباید داده‌ی کهنه داشته باشد؟</span><span class="en">16. Why mustn't the new leader hold stale data?</span></summary>
@@ -1505,16 +1500,16 @@
     <div class="en"><p>A fresh leader must carry what it takes to preserve acknowledged entries. Electing a lagging copy without log rules can wipe out accepted data.</p></div>
   </details>
 
-  <details><summary><span class="fa">۱۷. در خواندنِ خطی‌پذیر چگونه مطمئن می‌شویم رهبر هنوز معتبر است؟</span><span class="en">17. Why vote even for a linearizable read?</span></summary>
+  <details><summary><span class="fa">۱۷. در خواندنِ خطی‌پذیر چگونه مطمئن می‌شویم رهبر هنوز معتبر است؟</span><span class="en">17. How do we know the leader is still valid for a linearizable read?</span></summary>
     <div class="fa"><p>قبل از خوندنِ قوی باید مطمئن شی رهبر هنوز مجوز داره و وضعیتِ لازم اعمال شده. تماس با اکثریت یا lease با فرض‌های معتبر از راه‌هاشه؛ ولی رأیِ جدا واسه هر خوندن قانونِ عمومی نیست.</p>
 </div>
     <div class="en"><p>Before a strong read, make sure the leader's mandate is still good and the needed state is applied. Asking the majority or holding a valid lease both work — but a separate vote per read isn't the general rule.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۸. چرا consensus را همه‌جا به کار نمی‌بریم؟</span><span class="en">18. Why not use consensus everywhere?</span></summary>
-    <div class="fa"><p>آخه اجماع پیام و ذخیره و هماهنگی می‌خواد و پیشرفتش به تعدادِ کافیِ اعضا گره خورده. بهتره خرجش کنی واسه تصمیم‌هایی که اختلافشون قابل‌قبول نیست — حساب کن.</p>
+    <div class="fa"><p>آخه اجماع پیام و ذخیره و هماهنگی می‌خواد و پیشرفتش به تعدادِ کافیِ اعضا گره خورده. بهتره خرجش کنی واسه تصمیم‌هایی که اختلافشون قابل‌قبول نیست.</p>
 </div>
-    <div class="en"><p>Since consensus eats messages, storage, and coordination, and progress hangs on having enough members around. Spend it on decisions where disagreement isn't an option. Do the math.</p></div>
+    <div class="en"><p>Since consensus eats messages, storage, and coordination, and progress hangs on having enough members around. Spend it on decisions where disagreement isn't an option.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۹. سرویسِ هماهنگی دقیقاً چه چیزی روی consensus می‌سازد؟</span><span class="en">19. What exactly does a coordination service build on consensus?</span></summary>
@@ -1524,32 +1519,32 @@
   </details>
 
   <details><summary><span class="fa">۲۰. اگر مجبور باشی یک جمله از این فصل را در مصاحبه بگویی، کدام است؟</span><span class="en">20. If you had one sentence from this chapter in an interview, which?</span></summary>
-    <div class="fa"><p>تضمین رو از رو عاقبتِ خطا انتخاب کن: تازگیِ خوندن و وابستگیِ رویداد و تصمیمِ مشترک سه‌تا نیازِ جدان. اسمِ ابزار هیچ‌وقت جای مشخص کردنِ قانونِ لازم رو نمی‌گیره — اینو قاب کن.</p>
+    <div class="fa"><p>تضمین رو از رو عاقبتِ خطا انتخاب کن: تازگیِ خوندن و وابستگیِ رویداد و تصمیمِ مشترک سه‌تا نیازِ جدان. اسمِ ابزار هیچ‌وقت جای مشخص کردنِ قانونِ لازم رو نمی‌گیره.</p>
 </div>
-    <div class="en"><p>Pick the guarantee from the failure's fallout: read freshness, event dependence, and joint decisions are three separate needs. A tool's name never replaces naming the rule you need — frame that one.</p></div>
+    <div class="en"><p>Pick the guarantee from the failure's fallout: read freshness, event dependence, and joint decisions are three separate needs. A tool's name never replaces naming the rule you need.</p></div>
   </details>
 
   <h3 id="s6-3"><span class="fa">۶.۳. اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">6.3. Common mistakes in interview answers</span></h3>
 
   <div class="fa"><ul>
-    <li>❌ «linearizability همون serializabilityـه.» → ✅ نه رفیق! یکیش قولِ تازگیِ یه تیکه داده‌ست، اون یکی ایزوله‌سازیِ تراکنشِ چندتیکه‌ای — قاطی‌شون نکن.</li>
+    <li>❌ «linearizability همون serializabilityـه.» → ✅ نه رفیق! یکیش قولِ تازگیِ یه تیکه داده‌ست، اون یکی ایزوله‌سازیِ تراکنشِ چندتیکه‌ای.</li>
     <li>❌ «quorum داریم (w + r &gt; n) پس قویاً سازگاریم.» → ✅ نه! حتی با quorum هم خوندنِ کهنه ممکنه — نمودار ۳ همین دام رو نشونت می‌ده.</li>
     <li>❌ «CAP یعنی از سه‌تا دوتا بردار.» → ✅ partition چیزی نیست که تو انتخابش کنی؛ فقط موقعِ partition باید بینِ C و A یکی رو بگیری.</li>
     <li>❌ «UUID می‌ذاریم، پس ترتیب هم داریم.» → ✅ ترتیبِ UUID نسخه ۴ تصادفیه؛ ترتیب می‌خوای برو سراغ ULID/UUIDv7 یا ساعتِ منطقی.</li>
-    <li>❌ «timestamp سرور کافیه؛ NTP هم داریم دیگه.» → ✅ skew و پرشِ ساعت ترتیب رو به هم می‌ریزه؛ ساعتِ دیواری خطی‌پذیر نیست — حساب کن.</li>
-    <li>❌ «الگوریتم consensus داریم، پس همه عملیات‌هامون خطی‌پذیرن.» → ✅ خوندنی که نپرسه «هنوز رهبرم؟» راحت کهنه می‌شه — یادت باشه.</li>
+    <li>❌ «timestamp سرور کافیه؛ NTP هم داریم دیگه.» → ✅ skew و پرشِ ساعت ترتیب رو به هم می‌ریزه؛ ساعتِ دیواری خطی‌پذیر نیست.</li>
+    <li>❌ «الگوریتم consensus داریم، پس همه عملیات‌هامون خطی‌پذیرن.» → ✅ خوندنی که نپرسه «هنوز رهبرم؟» راحت کهنه می‌شه.</li>
     <li>❌ «FLP ثابت کرد consensus ممکن نیست.» → ✅ FLP فقط می‌گه termination تو مدلِ ناهمگامِ قطعی قول داده نمی‌شه؛ با timeout و شانس قضیه حل می‌شه.</li>
-    <li>❌ «واسه سرعت، بذار replica عقب‌افتاده هم رهبر شه.» → ✅ یعنی قیدِ ایمنی رو ول کردی؛ نوشته commitشده ممکنه گم شه — این دام معروفه.</li>
+    <li>❌ «واسه سرعت، بذار replica عقب‌افتاده هم رهبر شه.» → ✅ یعنی قیدِ ایمنی رو ول کردی؛ نوشته commitشده ممکنه گم شه.</li>
   </ul></div>
   <div class="en"><ul>
-    <li>❌ “Linearizability is serializability.” → ✅ Nope, friend — one is a freshness promise for a single object, the other is isolation for multi-object transactions. Don't mix them up.</li>
+    <li>❌ “Linearizability is serializability.” → ✅ Nope, friend — one is a freshness promise for a single object, the other is isolation for multi-object transactions.</li>
     <li>❌ “We've got a quorum (w + r &gt; n), so we're strongly consistent.” → ✅ Not so fast — stale reads can still sneak through. Diagram 3 catches this red-handed.</li>
     <li>❌ “CAP means pick two of three.” → ✅ Partitions aren't on the menu — you don't pick them. You only pick C or A once a partition hits.</li>
     <li>❌ “We use UUIDs, so we've got order.” → ✅ UUID v4 order is random noise; if you want order, grab ULID/UUIDv7 or a logical clock.</li>
-    <li>❌ “Server timestamps do the job; we've got NTP.” → ✅ Skew and clock jumps scramble order — wall-clock time is never linearizable. Do the math.</li>
-    <li>❌ “We run consensus, so all our operations are linearizable.” → ✅ A read that never asks “am I still leader?” can quietly go stale. Remember that.</li>
+    <li>❌ “Server timestamps do the job; we've got NTP.” → ✅ Skew and clock jumps scramble order — wall-clock time is never linearizable.</li>
+    <li>❌ “We run consensus, so all our operations are linearizable.” → ✅ A read that never asks “am I still leader?” can quietly go stale.</li>
     <li>❌ “FLP proved consensus is impossible.” → ✅ It only says termination isn't guaranteed in deterministic async models — timeouts and a little luck fix that.</li>
-    <li>❌ “For speed, let a lagging replica lead.” → ✅ That's you dropping the safety belt — committed writes can vanish. Classic trap.</li>
+    <li>❌ “For speed, let a lagging replica lead.” → ✅ That's you dropping the safety belt — committed writes can vanish.</li>
   </ul></div>
 
   <h3 id="s6-4"><span class="fa">۶.۴. چک‌لیستِ ۵ دقیقه‌ای قبل از مصاحبه</span><span class="en">6.4. Five-minute checklist before the interview</span></h3>
@@ -1562,7 +1557,7 @@
     <li>CAP رو درست بگو: «موقعِ partition، سازگار یا در دسترس» + یه اشاره به PACELC.</li>
     <li>سه‌تا ساعت رو ردیف کن: Lamport، HLC، vector — هر کدوم چی قول می‌دن.</li>
     <li>چهارتا خاصیت consensus رو بشمر + بگو کدوم safetyـه کدوم liveness.</li>
-    <li>یه جمله درباره epoch/term، یه جمله درباره state machine replication — اینو قاب کن.</li>
+    <li>یه جمله درباره epoch/term، یه جمله درباره state machine replication.</li>
   </ol></div>
   <div class="en"><ol>
     <li>Say linearizability's definition cold + the “later reads never go older” rule.</li>
@@ -1572,7 +1567,7 @@
     <li>State CAP right: “during a partition, consistent or available” + a nod at PACELC.</li>
     <li>Line up the three clocks — Lamport, HLC, vector — and what each one promises.</li>
     <li>Count off consensus's four properties + which are safety and which is liveness.</li>
-    <li>One sentence on epoch/term, one on state machine replication — frame that one.</li>
+    <li>One sentence on epoch/term, one on state machine replication.</li>
   </ol></div>
 
 </section>

@@ -5013,7 +5013,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         <!-- Boundaries (behind everything) -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards" x="332" y="52" width="731" height="384" rx="12" class="c-region" stroke-width="1"/>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" data-composition-frame-label="Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards" x="332" y="52" width="731" height="384" rx="12" class="c-region" stroke-width="1"/>
 
         <!-- Connection paths (before components for correct z-order) -->
         <g data-graph-role="automatic-crossover" style="--step:0">
@@ -5028,17 +5028,17 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <path data-graph-role="automatic-crossover-underlay" d="M 595 133 L 800 133" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
           <path data-edge-from="n1" data-edge-to="n2" data-edge-label="shard 1: leader copy to follower" data-edge-key="2" data-edge-id="repl-1" data-composition-points="595,133;800,133" data-composition-crossover="halo" data-composition-independent="true" d="M 595 133 L 800 133" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
-        <g data-graph-role="automatic-crossover" style="--step:3">
-          <path data-graph-role="automatic-crossover-underlay" d="M 595 383 L 800 383" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="n4" data-edge-to="n3" data-edge-label="shard 4: leader copy to follower" data-edge-key="3" data-edge-id="repl-4" data-composition-points="595,383;800,383" data-composition-crossover="halo" data-composition-independent="true" d="M 595 383 L 800 383" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        </g>
         <g data-graph-role="automatic-crossover" style="--step:4">
-          <path data-graph-role="automatic-crossover-underlay" d="M 487.5 166 L 487.5 350" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="n1" data-edge-to="n4" data-edge-label="this node also follows shard 4" data-edge-key="4" data-edge-id="follow-4" data-composition-points="487.5,166;487.5,350" data-composition-crossover="halo" data-composition-independent="true" d="M 487.5 166 L 487.5 350" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+          <path data-graph-role="automatic-crossover-underlay" d="M 800 383 L 595 383" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="n3" data-edge-to="n4" data-edge-label="shard 3: leader copy to follower" data-edge-key="3" data-edge-id="repl-3" data-composition-points="800,383;595,383" data-composition-crossover="halo" data-composition-independent="true" d="M 800 383 L 595 383" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
         <g data-graph-role="automatic-crossover" style="--step:5">
+          <path data-graph-role="automatic-crossover-underlay" d="M 487.5 350 L 487.5 166" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
+          <path data-edge-from="n4" data-edge-to="n1" data-edge-label="shard 4: leader copy to follower" data-edge-key="4" data-edge-id="repl-4" data-composition-points="487.5,350;487.5,166" data-composition-crossover="halo" data-composition-independent="true" d="M 487.5 350 L 487.5 166" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        </g>
+        <g data-graph-role="automatic-crossover" style="--step:3">
           <path data-graph-role="automatic-crossover-underlay" d="M 907.5 166 L 907.5 350" fill="none" stroke="var(--mask)" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"/>
-          <path data-edge-from="n2" data-edge-to="n3" data-edge-label="this node also follows shard 3" data-edge-key="5" data-edge-id="follow-3" data-composition-points="907.5,166;907.5,350" data-composition-crossover="halo" data-composition-independent="true" d="M 907.5 166 L 907.5 350" class="a-dashed" stroke-width="1.5" marker-end="url(#arrowhead-dashed)"/>
+          <path data-edge-from="n2" data-edge-to="n3" data-edge-label="shard 2: leader copy to follower" data-edge-key="5" data-edge-id="repl-2" data-composition-points="907.5,166;907.5,350" data-composition-crossover="halo" data-composition-independent="true" d="M 907.5 166 L 907.5 350" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
         </g>
 
         <!-- Components -->
@@ -5054,8 +5054,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <text data-detail="context" x="132.5" y="272" class="t-muted" font-size="9" text-anchor="middle">reads and writes records</text>
         </g>
 
-        <g id="node-n1" data-node-id="n1" data-node-label="Node 1" tabindex="0" role="button" aria-label="Focus Node 1, leader of shard 1, Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards" aria-pressed="false" data-node-kind="database" data-node-sublabel="leader of shard 1" data-node-tag="follower of shard 4" data-node-context="Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards">
-          <title>Node 1 · leader of shard 1 · Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards · follower of shard 4</title>
+        <g id="node-n1" data-node-id="n1" data-node-label="Node 1" tabindex="0" role="button" aria-label="Focus Node 1, leader of shard 1, Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards" aria-pressed="false" data-node-kind="database" data-node-sublabel="leader of shard 1" data-node-tag="follower of shard 4" data-node-context="Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards">
+          <title>Node 1 · leader of shard 1 · Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards · follower of shard 4</title>
           <rect x="380" y="100" width="215" height="66" rx="6" class="c-mask"/>
           <rect x="380" y="100" width="215" height="66" rx="6" class="c-database" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(386 106) scale(0.6875)">
@@ -5067,8 +5067,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <text data-detail="fine" x="487.5" y="158" class="t-database" font-size="7" text-anchor="middle">follower of shard 4</text>
         </g>
 
-        <g id="node-n2" data-node-id="n2" data-node-label="Node 2" tabindex="0" role="button" aria-label="Focus Node 2, leader of shard 2, Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards" aria-pressed="false" data-node-kind="database" data-node-sublabel="leader of shard 2" data-node-tag="follower of shard 1" data-node-context="Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards">
-          <title>Node 2 · leader of shard 2 · Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards · follower of shard 1</title>
+        <g id="node-n2" data-node-id="n2" data-node-label="Node 2" tabindex="0" role="button" aria-label="Focus Node 2, leader of shard 2, Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards" aria-pressed="false" data-node-kind="database" data-node-sublabel="leader of shard 2" data-node-tag="follower of shard 1" data-node-context="Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards">
+          <title>Node 2 · leader of shard 2 · Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards · follower of shard 1</title>
           <rect x="800" y="100" width="215" height="66" rx="6" class="c-mask"/>
           <rect x="800" y="100" width="215" height="66" rx="6" class="c-database" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(806 106) scale(0.6875)">
@@ -5080,8 +5080,8 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         <text data-detail="fine" x="907.5" y="158" class="t-database" font-size="7" text-anchor="middle">follower of shard 1</text>
         </g>
 
-        <g id="node-n3" data-node-id="n3" data-node-label="Node 3" tabindex="0" role="button" aria-label="Focus Node 3, leader of shard 3, Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards" aria-pressed="false" data-node-kind="database" data-node-sublabel="leader of shard 3" data-node-tag="follower of shard 4" data-node-context="Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards">
-          <title>Node 3 · leader of shard 3 · Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards · follower of shard 4</title>
+        <g id="node-n3" data-node-id="n3" data-node-label="Node 3" tabindex="0" role="button" aria-label="Focus Node 3, leader of shard 3, Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards" aria-pressed="false" data-node-kind="database" data-node-sublabel="leader of shard 3" data-node-tag="follower of shard 2" data-node-context="Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards">
+          <title>Node 3 · leader of shard 3 · Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards · follower of shard 2</title>
           <rect x="800" y="350" width="215" height="66" rx="6" class="c-mask"/>
           <rect x="800" y="350" width="215" height="66" rx="6" class="c-database" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(806 356) scale(0.6875)">
@@ -5090,11 +5090,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           </g>
           <text data-node-label="" data-detail-anchor="" x="907.5" y="381" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Node 3</text>
         <text data-detail="context" x="907.5" y="397" class="t-muted" font-size="9" text-anchor="middle">leader of shard 3</text>
-        <text data-detail="fine" x="907.5" y="408" class="t-database" font-size="7" text-anchor="middle">follower of shard 4</text>
+        <text data-detail="fine" x="907.5" y="408" class="t-database" font-size="7" text-anchor="middle">follower of shard 2</text>
         </g>
 
-        <g id="node-n4" data-node-id="n4" data-node-label="Node 4" tabindex="0" role="button" aria-label="Focus Node 4, leader of shard 4, Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards" aria-pressed="false" data-node-kind="database" data-node-sublabel="leader of shard 4" data-node-tag="follower of shard 1" data-node-context="Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards">
-          <title>Node 4 · leader of shard 4 · Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards · follower of shard 1</title>
+        <g id="node-n4" data-node-id="n4" data-node-label="Node 4" tabindex="0" role="button" aria-label="Focus Node 4, leader of shard 4, Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards" aria-pressed="false" data-node-kind="database" data-node-sublabel="leader of shard 4" data-node-tag="follower of shard 3" data-node-context="Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards">
+          <title>Node 4 · leader of shard 4 · Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards · follower of shard 3</title>
           <rect x="380" y="350" width="215" height="66" rx="6" class="c-mask"/>
           <rect x="380" y="350" width="215" height="66" rx="6" class="c-database" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="database" class="semantic-sigil s-database" transform="translate(386 356) scale(0.6875)">
@@ -5103,7 +5103,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           </g>
           <text data-node-label="" data-detail-anchor="" x="487.5" y="381" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Node 4</text>
         <text data-detail="context" x="487.5" y="397" class="t-muted" font-size="9" text-anchor="middle">leader of shard 4</text>
-        <text data-detail="fine" x="487.5" y="408" class="t-database" font-size="7" text-anchor="middle">follower of shard 1</text>
+        <text data-detail="fine" x="487.5" y="408" class="t-database" font-size="7" text-anchor="middle">follower of shard 3</text>
         </g>
 
         <!-- Connection labels -->
@@ -5119,23 +5119,23 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <rect x="615.7" y="113" width="163.6" height="14" rx="3" class="c-mask"/>
           <text x="697.5" y="123" class="t-edge-default" font-size="8" text-anchor="middle">shard 1: leader copy to follower</text>
         </g>
-        <g data-detail="context" data-edge-from="n4" data-edge-to="n3" data-edge-label="shard 4: leader copy to follower" data-edge-key="3" data-edge-id="repl-4">
+        <g data-detail="context" data-edge-from="n3" data-edge-to="n4" data-edge-label="shard 3: leader copy to follower" data-edge-key="3" data-edge-id="repl-3">
           <rect x="615.7" y="363" width="163.6" height="14" rx="3" class="c-mask"/>
-          <text x="697.5" y="373" class="t-edge-default" font-size="8" text-anchor="middle">shard 4: leader copy to follower</text>
+          <text x="697.5" y="373" class="t-edge-default" font-size="8" text-anchor="middle">shard 3: leader copy to follower</text>
         </g>
-        <g data-detail="context" data-edge-from="n1" data-edge-to="n4" data-edge-label="this node also follows shard 4" data-edge-key="4" data-edge-id="follow-4">
-          <rect x="327.5" y="251" width="154" height="14" rx="3" class="c-mask"/>
-          <text x="404.5" y="261" class="t-edge-dashed" font-size="8" text-anchor="middle">this node also follows shard 4</text>
+        <g data-detail="context" data-edge-from="n4" data-edge-to="n1" data-edge-label="shard 4: leader copy to follower" data-edge-key="4" data-edge-id="repl-4">
+          <rect x="322.7" y="251" width="163.6" height="14" rx="3" class="c-mask"/>
+          <text x="404.5" y="261" class="t-edge-default" font-size="8" text-anchor="middle">shard 4: leader copy to follower</text>
         </g>
-        <g data-detail="context" data-edge-from="n2" data-edge-to="n3" data-edge-label="this node also follows shard 3" data-edge-key="5" data-edge-id="follow-3">
-          <rect x="747.5" y="251" width="154" height="14" rx="3" class="c-mask"/>
-          <text x="824.5" y="261" class="t-edge-dashed" font-size="8" text-anchor="middle">this node also follows shard 3</text>
+        <g data-detail="context" data-edge-from="n2" data-edge-to="n3" data-edge-label="shard 2: leader copy to follower" data-edge-key="5" data-edge-id="repl-2">
+          <rect x="742.7" y="251" width="163.6" height="14" rx="3" class="c-mask"/>
+          <text x="824.5" y="261" class="t-edge-default" font-size="8" text-anchor="middle">shard 2: leader copy to follower</text>
         </g>
 
         <!-- Boundary labels (foreground masks keep routes out of titles) -->
-        <g data-graph-role="structural-frame-label" data-composition-frame-id="0" data-composition-frame-kind="region" data-composition-frame-label="Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards">
+        <g data-graph-role="structural-frame-label" data-composition-frame-id="0" data-composition-frame-kind="region" data-composition-frame-label="Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards">
           <rect data-graph-role="structural-frame-label-mask" x="336" y="80" width="620.1999999999999" height="16" rx="3" class="c-mask"/>
-          <text data-boundary-label="" x="340" y="93" class="t-cloud" font-size="9" font-weight="600">Each record belongs to exactly one shard · each shard is replicated on several nodes · one node holds many shards</text>
+          <text data-boundary-label="" x="340" y="93" class="t-cloud" font-size="9" font-weight="600">Each record belongs to exactly one shard · each shard is replicated on another node · one node holds multiple shards</text>
         </g>
 
         <!-- Legend -->

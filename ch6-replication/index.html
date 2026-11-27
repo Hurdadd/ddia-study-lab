@@ -34,10 +34,10 @@
   <p class="crumb"><a href="../index.html"><span class="fa">نقشه راه</span><span class="en">Roadmap</span></a>/ <span class="fa">فصل ۶</span><span class="en">Chapter 6</span></p>
   <h1 class="reveal"><span class="fa">تکثیر (Replication)</span><span class="en">Replication</span></h1>
   <p class="lede reveal">
-    <span class="fa">فرض کن دیتات رو روی چند ماشین کپی کردی تا اگه یکیشون خوابید سرویس نخوابه و بار خواندن هم پخش بشه. حالا دردسر از جایی شروع می‌شه که نسخه‌ها عقب و جلو می‌افتن. تو این فصل سه مدل تک‌رهبر، چندرهبر و بدون‌رهبر رو می‌بینی و می‌فهمی lag و تعارض از کجا میاد. تهش این می‌مونه: نسخه بیشتر یعنی خیال راحت‌تر، ولی تازگی مجانی نیست.</span><span class="en">A write succeeds on one machine. Has every copy caught up? You'll compare <span class="ltr">single-leader</span>, <span class="ltr">multi-leader</span> and <span class="ltr">leaderless</span> replication, then follow <span class="ltr">failover</span>, <span class="ltr">split brain</span>, lag and concurrent updates. <span class="ltr">version vectors</span> help identify conflicts; <span class="ltr">CRDTs</span> provide merge rules for suitable data types. Nine diagrams, including six Archify stages and three concept sketches, lead into the interview pack.</span>
+    <span class="fa">دیتات رو روی چند ماشین کپی کردی تا اگه یکیشون خوابید سرویس نخوابه و بار خواندن هم پخش بشه. حالا دردسر از جایی شروع می‌شه که نسخه‌ها عقب و جلو می‌افتن. تو این فصل سه مدل تک‌رهبر، چندرهبر و بدون‌رهبر رو می‌بینی و می‌فهمی lag و تعارض از کجا میاد. نسخهٔ بیشتر دسترس‌پذیری می‌دهد، ولی تازگی مجانی نیست.</span><span class="en">A write succeeds on one machine. Has every copy caught up? You'll compare <span class="ltr">single-leader</span>, <span class="ltr">multi-leader</span> and <span class="ltr">leaderless</span> replication, then follow <span class="ltr">failover</span>, <span class="ltr">split brain</span>, lag and concurrent updates. <span class="ltr">version vectors</span> help identify conflicts; <span class="ltr">CRDTs</span> provide merge rules for suitable data types. Ten diagrams, including six Archify stages and four concept sketches, lead into the interview pack.</span>
   </p>
   <div class="meta-row reveal">
-    <span><b><span class="fa">۹</span><span class="en">9</span></b> <span class="fa">نمودار تعاملی</span><span class="en">interactive diagrams</span></span><span class="dot">·</span>
+    <span><b><span class="fa">۱۰</span><span class="en">10</span></b> <span class="fa">۱۰ نمودار + روایت گام‌به‌گام</span><span class="en">10 diagrams with step-by-step narration</span></span><span class="dot">·</span>
     <span><span class="fa">محور: رهبر · تأخیر تکثیر · حل تعارض · quorum</span><span class="en">Theme: leaders · replication lag · conflict resolution · quorums</span></span><span class="dot">·</span>
     <span><span class="fa">زمان مطالعه: حدود ۶۵ دقیقه</span><span class="en">Reading time: ~65 min</span></span>
   </div>
@@ -98,7 +98,7 @@
 <h2 class="reveal"><span class="secnum"><span class="fa">۰</span><span class="en">0</span></span> <span class="fa">نقشهٔ راه فصل</span><span class="en">Chapter roadmap</span></h2>
 <aside class="callout fa example-index" id="chapter-examples" aria-label="مثال‌های فنی فصل ۶">
 <div class="tag">مثال‌های فنی فصل ۶</div>
-<p>تصور کن هر مثال یه سناریوی کوچیکه: اول صحنه رو می‌چینیم، بعد قدم‌به‌قدم جلو می‌ریم، آخرش هم می‌گیم چی شد و چرا. یادت باشه عددها فقط برای فهم مطلبن، واقعی نیستن؛ اسم ابزار هم فقط وقتی میاد که رفتار همون ابزار مهم باشه. پس گیر نکن، برو سر اصل ماجرا.</p>
+<p>هر مثال یه سناریوی کوچیکه: اول صحنه رو می‌چینیم، بعد قدم‌به‌قدم جلو می‌ریم، آخرش هم می‌گیم چی شد و چرا. عددها فقط برای فهم مطلبن، واقعی نیستن؛ اسم ابزار هم فقط وقتی میاد که رفتار همون ابزار مهم باشه.</p>
 <details><summary>فهرستِ مثال‌ها؛ رفتن مستقیم به هر موضوع</summary><ul>
 <li><a href="#example-ch6-0">نسخهٔ سالم، نسخهٔ تازه؟</a></li>
 <li><a href="#example-ch6-1">سه کپی با backup فرق دارد</a></li>
@@ -129,13 +129,13 @@
 
 <div class="callout">
 <div class="tag"><span class="fa">ایدهٔ کلیدی فصل</span><span class="en">Chapter thesis</span></div>
-<div class="fa"><p>فرض کن یه کپی از دیتا همه‌جا داری که سرویس نخوابه و بار خواندن پخش بشه. ولی این سؤال رو جدی بگیر: اگه نسخه‌ها هم‌زمان به‌روز نشن چی؟ تو این فصل تک‌رهبر، چندرهبر و بدون‌رهبر رو کنار هم می‌ذاریم و می‌بینیم lag و تعارض چطور گریبونمون رو می‌گیره. تهش این می‌مونه: تکثیر نجاتت می‌ده، ولی تازگی رو مجانی نمی‌ده.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-0">
+<div class="fa"><p>یه کپی از دیتا همه‌جا داری که سرویس نخوابه و بار خواندن پخش بشه. ولی این سؤال رو جدی بگیر: اگه نسخه‌ها هم‌زمان به‌روز نشن چی؟ تو این فصل تک‌رهبر، چندرهبر و بدون‌رهبر رو کنار هم می‌ذاریم و می‌بینیم lag و تعارض چطور گریبونمون رو می‌گیره. تکثیر دسترس‌پذیری می‌دهد، ولی تازگی را مجانی نمی‌دهد.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-0">
 <p class="example-title"><b>مثال فنی: نسخهٔ سالم، نسخهٔ تازه؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن رهبر قیمت <code dir="ltr">P7=120</code> رو ثبت کرده، ولی follower بدبخت هنوز روی <code dir="ltr">100</code> مونده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نوشتن که موفق شده، تمومه. حالا اگه بری از follower عقب‌مونده بخونی، قاطی نکن اگه ۱۰۰ گرفتی؛ همونه که هنوز بهش نرسیده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> می‌بینی؟ replication هم جونت رو نجات می‌ده هم دردسر تازگی می‌سازه. پس از اول مشخص کن هر خواندن چقدر تازه‌بودن می‌خواد. اینو یادت نره.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> رهبر قیمت <code dir="ltr">P7=120</code> را ثبت کرده، ولی follower هنوز روی <code dir="ltr">100</code> مانده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نوشتن موفق شده است. حالا اگر از follower عقب‌مانده بخوانی، ۱۰۰ می‌گیری؛ همان مقداری که هنوز به آن نرسیده.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> تکثیر هم تاب‌آوری می‌دهد و هم مسئلهٔ تازگی می‌سازد. از اول مشخص کن هر خواندن چه میزان تازگی می‌خواهد.</p>
 </div>
-<p>این مثال‌ها رو مثل تمرین روزمره ببین، نه سند معماری یه شرکت واقعی. عددها فقط برای اینن که مطلب قشنگ جا بیفته. اصل قصه جای دیگه‌ست.</p></div>
+<p>مثال‌های این فصل تمرین روزمره‌اند، نه سند معماری یک شرکت واقعی؛ عددها برای جاافتادن مطلب‌اند.</p></div>
 <div class="en"><p>A leader records a new price, but a follower still has the old one. Both machines can be healthy while their answers differ. <b>Replication</b> keeps copies of the same data on networked machines; keeping those copies current is the difficult part.</p><p>Compare three families: <b>single-leader</b> routes writes through one leader, <b>multi-leader</b> lets several leaders accept them, and <b>leaderless</b> lets clients or coordinators write to several replicas. Each chooses a different place to handle ordering, acknowledgments and conflicts.</p><p>The examples are teaching scenarios drawn from everyday engineering work. Their numbers help explain the ideas and don't describe a particular company's architecture. The later Discord case study is separately labelled with its reported source.</p>
 <div class="callout" data-en-example="example-ch6-0">
 <p class="example-title"><b>Example: A healthy copy can still be behind</b></p>
@@ -149,7 +149,7 @@
 <div class="en"><p>Replication can support five goals. Which ones you get depends on the design and its failure assumptions:</p></div>
 
 <div class="fa"><ul>
-    <li><b>High availability:</b> فرض کن یه ماشین یا حتی یه zone و region کلاً خوابید؛ سیستم نباید بترکه، باید سرپا بمونه.</li>
+    <li><b>High availability:</b> یه ماشین یا حتی یه zone و region کلاً خوابید؛ سیستم نباید بترکه، باید سرپا بمونه.</li>
     <li><b>Durability:</b> اگه یه ماشین برای همیشه مرد، داده‌ات نباید باهاش دفن بشه. یه جای دیگه باید زنده باشه.</li>
     <li><b>Disconnected operation:</b> نت قطع شد؟ برنامه‌ات غر نزنه، کارش رو بکنه. قطع‌ووصلی نباید قفلت کنه.</li>
     <li><b>Latency:</b> داده رو ببر بچسبون به کاربر، همون بغل. این‌طوری کلیک می‌کنه زود جواب می‌گیره، معطل نمی‌مونه.</li>
@@ -167,7 +167,7 @@
 <div class="tag"><span class="fa">دامِ اصطلاح: تکثیر ≠ بکاپ</span><span class="en">Term trap: replication ≠ backup</span></div>
 <div class="fa">
 <p>
-      قاطی نکن: تکثیر یعنی نوشته‌های یه node زود برسه به بقیه؛ بکاپ یعنی یه عکس قدیمی داری که بتونی برگردی به <b>گذشته</b>. اگه اشتباهی delete بزنی، اون delete هم تکثیر می‌شه و می‌ره! پس برای برگردوندن داده بکاپ می‌خوای، نه replica. البته آرشیو لاگ تکثیر خودش می‌تونه بخشی از بکاپ باشه. خلاصه‌ش: تکثیر ≠ نجات از سوتی.
+      تکثیر یعنی نوشته‌های یه node زود برسه به بقیه؛ بکاپ یعنی یه عکس قدیمی داری که بتونی برگردی به <b>گذشته</b>. اگه اشتباهی delete بزنی، اون delete هم تکثیر می‌شه و می‌ره! پس برای برگردوندن داده بکاپ می‌خوای، نه replica. البته آرشیو لاگ تکثیر خودش می‌تونه بخشی از بکاپ باشه. تکثیر جای بکاپ را نمی‌گیرد.
     </p>
 </div>
 <div class="en"><p>Replication carries changes to other live copies. A <b>backup</b> retains an earlier state you can restore. If an accidental delete reaches every replica, all those live copies agree on the deletion.</p><p>To recover the earlier data, retain snapshots and the required history. An archived replication log can be part of that backup plan. Count recovery paths as well as copies.</p>
@@ -183,7 +183,7 @@
 <div class="tag"><span class="fa">نکتهٔ مصاحبه</span><span class="en">Interview tip</span></div>
 <div class="fa">
 <p>
-      این جمله رو قاب کن: <b>«تمام سختی تکثیر توی تغییره»</b> و <b>replication lag سقف نداره</b>. حالت خوشش چند دهم ثانیه‌ست، ولی زیر بار یا خرابی شبکه می‌ترکه تا چند دقیقه. پس هر وقت کسی گفت «در نهایت سازگار»، بپرس با چه lagی؟ اینو یادت نره.
+      <b>«تمام سختی تکثیر توی تغییره»</b> و <b>replication lag سقف نداره</b>. حالت خوشش چند دهم ثانیه است، ولی زیر بار یا خرابی شبکه تا چند دقیقه می‌رسد. پس هر وقت کسی گفت «در نهایت سازگار»، بپرس با چه lagی و با چه سنجه‌ای.
     </p>
 </div>
 <div class="en"><p><b>The hard part is change.</b> An asynchronous replica may normally trail by a fraction of a second, then fall seconds or minutes behind during load or network trouble. Eventual consistency by itself gives <b>no upper bound on that delay</b>. Decide what each read needs, then measure the lag.</p></div>
@@ -196,12 +196,12 @@
 <h2 class="reveal"><span class="secnum"><span class="fa">۱</span><span class="en">1</span></span> <span class="fa">تکثیر چرا و چیست؟</span><span class="en">Why and what is replication?</span></h2>
 
 <div class="fa">
-<p>فرض کن از یه داده چندتا کپی روی چندتا گره داری. چرا؟ یا می‌خوای خرابی رو تحمل کنی، یا داده رو بچسبونی به کاربر، یا بار خواندن رو پخش کنی. ولی صبر کن: به‌روز نگه‌داشتن همین کپی‌ها خودش یه دردسر گنده‌ست. تهش اینه: کپی گرفتن آسونه، هم‌قدم نگه‌شون داشتن سخته.</p>
+<p>از یه داده چندتا کپی روی چندتا گره داری. چرا؟ یا می‌خوای خرابی رو تحمل کنی، یا داده رو بچسبونی به کاربر، یا بار خواندن رو پخش کنی. ولی صبر کن: به‌روز نگه‌داشتن همین کپی‌ها خودش یه دردسر گنده‌ست. کپی گرفتن آسان است، هم‌قدم نگه‌داشتنشان سخت.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-1">
 <p class="example-title"><b>مثال فنی: سه کپی با backup فرق دارد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن جدولت روی سه replica خوابیده؛ یهو یه دستور اشتباه همه سفارش‌ها رو delete می‌کنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نگران نشو ولی ببین: اون delete می‌ره روی هر سه replica می‌شینه؛ فقط snapshot قدیمی و لاگ درست‌حسابیه که می‌ذاره برگردی به قبلش.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس replication برای اینه که سرویس نخوابه، نه اینکه تاریخچه نگه داره. بازیابی با backupه. قاطیشون نکن.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> جدول روی سه replica قرار دارد؛ یک دستور اشتباه همهٔ سفارش‌ها را delete می‌کند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> آن delete روی هر سه replica می‌نشیند؛ فقط snapshot قدیمی و لاگ درست‌حسابیه که اجازه می‌دهد به قبلش برگردی.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> replication برای بالا نگه‌داشتن سرویس است، نه نگه‌داشتن تاریخچه. بازیابی با backup انجام می‌شود.</p>
 </div>
 </div>
 <div class="en"><p>A node holding a copy is a <b>replica</b>. To keep the same replicated dataset, each replica must eventually receive and process its changes. Making a copy once is straightforward. Coordinating continuing writes, failures and recovery is where the trade-offs begin.</p></div>
@@ -236,7 +236,7 @@
 </tbody></table></div></div>
 
 <div class="fa"><p>
-    فعلاً فرض کن کل دیتاست روی هر ماشین جا می‌شه؛ این فرض رو فصل ۷ می‌شکنیم و می‌ریم سراغ <b>sharding</b>. فعلاً فقط بچسب به «تغییرات»: sync تکثیر کنیم یا async؟ اگه وسط failover نوشته‌ای گم شد چی؟ lag چه گندی می‌زنه؟ نوشته‌های هم‌زمان رو چطور قاطی کنیم که به هم نریزه؟ جواب همین‌هاست که این فصل رو می‌سازه.
+    فعلاً کل دیتاست روی هر ماشین جا می‌شه؛ این فرض رو فصل ۷ می‌شکنیم و می‌ریم سراغ <b>sharding</b>. فعلاً فقط بچسب به «تغییرات»: sync تکثیر کنیم یا async؟ اگه وسط failover نوشته‌ای گم شد چی؟ lag چه گندی می‌زنه؟ نوشته‌های هم‌زمان رو چطور قاطی کنیم که به هم نریزه؟ جواب همین‌هاست که این فصل رو می‌سازه.
   </p></div>
 <div class="en"><p>For now, assume every machine can hold the full dataset. Chapter 7 introduces <b>sharding</b> and removes that assumption.</p><p>Here, follow one change: when is it acknowledged, which copies have it, what happens during failover, and how do independent updates merge?</p></div>
 
@@ -247,10 +247,10 @@
 <h2 class="reveal"><span class="secnum"><span class="fa">۲</span><span class="en">2</span></span> <span class="fa">تکثیر تک‌رهبر</span><span class="en">Single-leader replication</span></h2>
 
 <div class="fa">
-<p>فرض کن فقط یه نفر حق نوشتن داره: leader. بقیه فقط دنبالش می‌کنن. یادت باشه خواندن از follower ممکنه یه کم کهنه باشه. طبیعیه، قاطی نکن.</p>
+<p>فقط یه نفر حق نوشتن داره: leader. بقیه فقط دنبالش می‌کنن. خواندن از follower ممکنه یه کم کهنه باشه. طبیعیه، نه خطا.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-2">
 <p class="example-title"><b>مثال فنی: رهبر ترتیب می‌دهد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن دو کلاینت هم‌زمان می‌خوان قیمت <code dir="ltr">P7</code> رو ۱۲۰ و ۱۳۰ کنن.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> دو کلاینت هم‌زمان می‌خواهند قیمت <code dir="ltr">P7</code> را ۱۲۰ و ۱۳۰ کنند.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> leader دعوا رو می‌خوابونه: اولی میشه موقعیت <code dir="ltr">51</code>، دومی <code dir="ltr">52</code>؛ followerها هم دقیقاً همین ترتیب رو اجرا می‌کنن.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> followerای که هنوز رو ۵۱ وایساده، ۱۲۰ رو نشون میده. پس ترتیب یکی باشه، تازه بودن تضمینی نیست. lag سر جاشه.</p>
 </div>
@@ -264,7 +264,7 @@
 </div></div>
 
 <div class="fa"><ol>
-    <li>فرض کن یه replica رو می‌کنی <b>leader</b> (primary / source of truth)؛ فقط همون حق نوشتن داره.</li>
+    <li>یه replica رو می‌کنی <b>leader</b> (primary / source of truth)؛ فقط همون حق نوشتن داره.</li>
     <li>بقیه میشن <b>follower</b> (read replica، secondary، hot standby). leader هر تغییری رو تو <b>replication log</b> یا change stream براشون می‌فرسته. فقط کپی می‌کنن، حرف اضافه نمی‌زنن.</li>
     <li>خوندن؟ از هر replica آزاده. بعضی دیتابیس‌ها follower رو فقط برای خوندن می‌خوان؛ بعضی‌ها نوشتن مستقیم رو هم اجازه میدن (همون داستان چندرهبر).</li>
   </ol></div>
@@ -275,10 +275,11 @@
 </ol></div>
 
 <div class="fa"><p>
-    نگران نشو، چیز عجیبی نیست. همین مدل تو PostgreSQL، MySQL، Oracle، SQL Server، MongoDB، DynamoDB و حتی Kafka و سیستم‌های consensus مثل Raft
-    (CockroachDB، TiDB، etcd) پایهٔ کاره. همه همین‌جوری می‌رن جلو.
+    تکثیر مبتنی بر leader در PostgreSQL، MySQL، Oracle و SQL Server و replica setهای MongoDB دیده می‌شود. Kafka و سیستم‌های مبتنی بر Raft مثل
+    CockroachDB، TiDB و etcd هم برای لاگِ تکثیرشده از leader استفاده می‌کنند، ولی تضمین ack و سازگاری‌شان با هم یکی نیست؛ پروتکل و تنظیمات واقعی هر سیستم را جدا بررسی کن.
+    DynamoDB طور دیگری کار می‌کند: یک coordinator درخواست را می‌پذیرد و به replicaها می‌نویسد، و این coordinator رهبر نیست.
   </p></div>
-<div class="en"><p>Leader-based replication appears in PostgreSQL, MySQL, Oracle, SQL Server, MongoDB and DynamoDB. Kafka and Raft-based systems such as CockroachDB, TiDB and etcd also use leaders for replicated logs. Their acknowledgment and consistency guarantees differ, so identify the actual protocol and settings.</p></div>
+<div class="en"><p>Leader-based replication appears in PostgreSQL, MySQL, Oracle and SQL Server, and in MongoDB replica sets. Kafka and Raft-based systems such as CockroachDB, TiDB and etcd also use leaders for replicated logs, but their acknowledgment and consistency guarantees differ; identify the actual protocol and settings. DynamoDB is a different case: a coordinator accepts each request and writes to replicas, and that coordinator is not a leader.</p></div>
 
 <h3><span class="fa">هم‌زمان در برابر ناهمزمان</span><span class="en">Synchronous vs asynchronous</span></h3>
 
@@ -330,8 +331,8 @@
 <div class="fa">
 
 
-<p>تصور کن سه خط، سه قول مختلف به کلاینت میدن. خط بالا (<span class="ltr">Synchronous</span>): کلاینت می‌نویسه، leader لاگ رو می‌فرسته و <b>وایمیسته تا تأیید بیاد</b>؛ بعد تازه میگه «موفق». پس داده رو دو node امنه، ولی یه follower کند می‌تونه کل نوشتن رو بخوابونه. یه نفر کند، همه می‌ترکن.</p>
-<p>خط وسط (<span class="ltr">Semisync</span>): leader فقط منتظر <b>یه</b> تأییده، بقیه asyncان؛ همیشه دو کپی تازه داری و اگه اون یکیه افتاد، یه follower دیگه جاش میاد. خط پایین (<span class="ltr">Asynchronous</span>): فلش چین‌چین یعنی «بفرست و بی‌خیال شو» — leader اصلاً صبر نمی‌کنه، «موفق» فوری برمی‌گرده، ولی اگه leader بمیره، نوشته‌های تأییدشده‌ای که هنوز نرسیدن <b>می‌پرن</b>. خلاصه: سرعت داری، ریسک هم داری.</p>
+<p>سه خط، سه قول مختلف به کلاینت میدن. خط بالا (<span class="ltr">Synchronous</span>): کلاینت می‌نویسه، leader لاگ رو می‌فرسته و <b>وایمیسته تا تأیید بیاد</b>؛ بعد تازه میگه «موفق». پس داده رو دو node امنه، ولی یه follower کند می‌تونه کل نوشتن رو بخوابونه.</p>
+<p>خط وسط (<span class="ltr">Semisync</span>): leader فقط منتظر <b>یه</b> تأییده، بقیه asyncان؛ همیشه دو کپی تازه داری و اگه اون یکیه افتاد، یه follower دیگه جاش میاد. خط پایین (<span class="ltr">Asynchronous</span>): فلش چین‌چین یعنی «بفرست و بی‌خیال شو» — leader اصلاً صبر نمی‌کنه، «موفق» فوری برمی‌گرده، ولی اگه leader بمیره، نوشته‌های تأییدشده‌ای که هنوز نرسیدن <b>می‌پرن</b>.</p>
 </div>
 <div class="en">
 <p>The three lanes compare when the client hears “success”. In <span class="ltr">Synchronous</span>, the leader ships the change and waits for the required acknowledgment. A slow required follower delays that response. State what the acknowledgment means: received, persisted or applied.</p><p>In <span class="ltr">Semisync</span>, this diagram waits for one follower while the rest receive asynchronously. That doesn't necessarily make the change immediately visible to queries on that follower. In <span class="ltr">Asynchronous</span>, the leader responds without waiting. If it fails before the change reaches a surviving replica, failover can lose that acknowledged write.</p><p class="small">For a concrete implementation, see <a href="https://dev.mysql.com/doc/refman/8.4/en/replication-semisync.html" target="_blank" rel="noopener">MySQL's semisynchronous acknowledgment and fallback rules</a>.</p></div>
@@ -340,12 +341,12 @@
 <div class="callout">
 <div class="tag"><span class="fa">چرا «همه‌چیز هم‌زمان» غیرعملی است؟</span><span class="en">Why is “everything synchronous” impractical?</span></div>
 <div class="fa">
-<p>یادت باشه: تو حالت sync جواب «موفق» وایمیسته تا تأییدای لازم برسه. تو حالت async، leader زودتر جواب میده و بقیهٔ کپی‌ها بعداً می‌رسن. عجله در برابر اطمینان.</p>
+<p>تو حالت sync جواب «موفق» وایمیسته تا تأییدای لازم برسه. تو حالت async، leader زودتر جواب میده و بقیهٔ کپی‌ها بعداً می‌رسن. انتخاب بین این دو، معاوضهٔ تأخیر در برابر اطمینان است.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-3">
 <p class="example-title"><b>مثال فنی: زمان تأیید در دو روش</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن leader تغییر شمارهٔ ۵۲ رو رو دیسک خودش ثبت کرده؛ follower هنوز نگرفتش.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> leader تغییر شمارهٔ ۵۲ را روی دیسک خودش ثبت کرده؛ follower هنوز آن را نگرفته.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تو حالت async ممکنه همین‌جا «موفق» برگرده؛ تو سیاست sync باید تأیید replica لازم هم برسه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اگه leader قبل از رسوندن بمیره، نوشتهٔ async تو failover می‌پره؛ sync هم قیمتش انتظاره و وابستگی. مفت نیست.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اگر leader پیش از رساندن بمیرد، نوشتهٔ async در failover می‌پرد؛ sync هم بهایش انتظار و وابستگی است.</p>
 </div>
 </div>
 <div class="en"><p>Waiting for every follower makes every one of them part of the write-availability path. Adding replicas then adds more opportunities for one slow or unavailable node to delay success.</p><p>Other policies wait for one follower or a quorum, such as 3 of 5 replicas. These are different contracts, rather than interchangeable meanings of “sync”. Chapter 10 examines quorum-based coordination.</p></div>
@@ -372,7 +373,7 @@
 
 
 <p>
-      فرض کن شکل دو خط موازی داره که از چپ به راست تو چهار مرحله می‌رن جلو: خط بالا مسیر <b>نوشتن</b>ه، خط پایین مسیر <b>خوندن</b>.
+      شکل دو خط موازی داره که از چپ به راست تو چهار مرحله می‌رن جلو: خط بالا مسیر <b>نوشتن</b>ه، خط پایین مسیر <b>خوندن</b>.
       مرحلهٔ اول، <span class="ltr">Clients</span>، دو گره می‌بینی: <span class="ltr">«Write Client»</span>
       (زیرنویس: <span class="ltr">«sends every write»</span>) و پایین‌تر <span class="ltr">«Read Client»</span>
       (زیرنویس: <span class="ltr">«scales out reads»</span>). برچسب بالایی رک میگه
@@ -382,7 +383,7 @@
       فلش پررنگ <span class="ltr">«all writes through the leader»</span> از Write Client میره به مرحلهٔ دوم، به گرهٔ
       <span class="ltr">«Leader / Primary»</span> (زیرنویس: <span class="ltr">«accepts all writes»</span>، برچسب <span class="ltr">«serializes writes»</span>).
       تو همون مرحله، پایین <span class="ltr">«Read-Your-Writes»</span> نشسته: قانونش ساده‌ست، اگه کاربر همین الان چیزی نوشته،
-      خوندن همون داده باید از leader باشه (برچسب <span class="ltr">«stale-read remedy»</span>). یادت باشه، وگرنه کاربر فکر می‌کنه نوشته‌ش پریده.
+      خوندن همون داده باید از leader باشه (برچسب <span class="ltr">«stale-read remedy»</span>). وگرنه کاربر فکر می‌کنه نوشته‌ش پریده.
     </p>
 <p>
       مرحلهٔ سوم، <span class="ltr">Replication</span>، قلب داستانه: <span class="ltr">«Replication Log»</span>
@@ -391,7 +392,7 @@
       <span class="ltr">«Sync Follower»</span> (زیرنویس <span class="ltr">«leader waits for ack»</span>، برچسب <span class="ltr">«semisynchronous»</span>).
       ولی خط پایین فلش چین‌چین <span class="ltr">«ship log, fire and forget»</span> میره به
       <span class="ltr">«Async Follower»</span>: هیچکی منتظرش نمی‌مونه و برچسبش داد می‌زنه:
-      <span class="ltr">«unbounded lag»</span>. یعنی lag حد نداره، قاطی نکن.
+      <span class="ltr">«unbounded lag»</span>. یعنی lag حد نداره.
     </p>
 <p>
       مسیر خوندن هم قصهٔ خودشو داره: <span class="ltr">«Read Client»</span> با فلش
@@ -401,8 +402,8 @@
       <span class="ltr">«stale value until it catches up»</span> می‌رسه به Async Follower. تا نرسیده، کهنه می‌بینی.
     </p>
 <p>
-      درس شکل؟ نوشتن یه مسیر مشخص و مرکزی داره (leader ← log ← follower)، ولی خوندن پخشه.
-      «یه کم کهنه بودن» رو باید قبول کنی، بخشی از قرارداده. راه مبارزه باهاشو تو بخش ۳ می‌بینی. نگران نشو.
+      درس شکل: نوشتن یه مسیر مشخص و مرکزی داره (leader ← log ← follower)، ولی خوندن پخشه.
+      «کمی کهنه بودن» بخشی از قرارداد است و راه‌های مقابله با آن در بخش ۳ می‌آید.
     </p>
 </div>
 <div class="en">
@@ -415,9 +416,9 @@
 <p>می‌خوای follower جدید اضافه کنی؟ اول یه عکس تمیز و سازگار از داده بگیر، بعد تغییرات بعدش رو اعمال کن. فقط کپی فایل‌های در حال تغییر؟ نه، اون‌جوری می‌ترکه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-4">
 <p class="example-title"><b>مثال فنی: Snapshot با نقطهٔ لاگ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن موقع ساخت follower تازه، snapshot تو موقعیت <code dir="ltr">500</code> گرفته میشه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> هنگام ساخت follower تازه، snapshot در موقعیت <code dir="ltr">500</code> گرفته می‌شود.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> snapshot کپی میشه و follower تغییرهای <code dir="ltr">501</code> به بعد رو می‌گیره؛ لاگ لازم تا آخر انتقال نگه داشته میشه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> کپی فایل بدون مرز سازگار؟ بعضی تغییرهای وسط کپی جا می‌مونن یا دوبار اعمال میشن. تهش قاطی میشه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> کپی فایل بدون مرز سازگار، بعضی تغییرهای وسط کپی را جا می‌اندازد یا دوبار اعمال می‌کند.</p>
 </div>
 </div>
 <div class="en"><p>A new follower needs a consistent starting point. Copying live database files without a coordinated snapshot can mix different moments while writes continue. Use a snapshot linked to an exact log position:</p>
@@ -431,7 +432,7 @@
 <div class="fa"><ol>
     <li>یه <b>snapshot سازگار</b> از دیتابیس leader تو یه لحظهٔ مشخص بگیر (ترجیحاً بدون قفل کل دیتابیس؛ مثل <span class="ltr">Percona XtraBackup</span> برای MySQL).</li>
     <li>snapshot را به node جدید کپی کن.</li>
-    <li>follower وصل میشه به leader و همهٔ تغییرات <b>بعد snapshot</b> رو می‌گیره — snapshot باید به «موقعیت دقیق» لاگ گره خورده باشه (تو PostgreSQL: <span class="ltr">log sequence number</span>؛ تو MySQL: <span class="ltr">binlog coordinates</span> یا <span class="ltr">GTID</span>). یادت باشه، وگرنه جا می‌مونی.</li>
+    <li>follower وصل میشه به leader و همهٔ تغییرات <b>بعد snapshot</b> رو می‌گیره — snapshot باید به «موقعیت دقیق» لاگ گره خورده باشه (تو PostgreSQL: <span class="ltr">log sequence number</span>؛ تو MySQL: <span class="ltr">binlog coordinates</span> یا <span class="ltr">GTID</span>). وگرنه جا می‌مونی.</li>
     <li>وقتی follower عقب‌افتادگی رو جبران کرد (<span class="ltr">caught up</span>)، مثل قبل جریان تغییرها رو ادامه میده. تمومه.</li>
   </ol></div>
 <div class="en"><ol>
@@ -442,7 +443,7 @@
 </ol></div>
 
 <div class="fa"><p>
-    یادت باشه آرشیو لاگ تکثیر + اسنپ‌شات دوره‌ای تو object storage (مثل WAL-G برای PostgreSQL/MySQL یا Litestream برای SQLite)
+    آرشیو لاگ تکثیر + اسنپ‌شات دوره‌ای تو object storage (مثل WAL-G برای PostgreSQL/MySQL یا Litestream برای SQLite)
     هم بکاپه، هم قدم ۱ و ۲ رو راحت می‌کنه. دو تا کار با یه تیر.
   </p></div>
 <div class="en"><p>Periodic snapshots plus archived replication logs can support both backup recovery and follower initialization. The chapter's examples are WAL-G for PostgreSQL/MySQL and Litestream for SQLite. Keep the history required to recover from the chosen snapshot.</p></div>
@@ -451,7 +452,7 @@
 <div class="tag"><span class="fa">نکتهٔ مدرن: پایگاه‌های داده متکی به object storage</span><span class="en">Modern note: object-storage-backed databases</span></div>
 <div class="fa">
 <p>
-      تصور کن object storage ارزونه، durability خیلی بالایی داره و با <b>conditional write</b> (همون compare-and-set) حتی می‌تونه انتخاب leader و تراکنش رو هم دست بگیره. قیمتش؟ تأخیر خوندن/نوشتن خیلی بیشتر از دیسک محلی + پول هر API call. بعضی‌ها storage لایه‌ای می‌سازن، بعضی WAL رو می‌ذارن کنار (مثل Safekeeperهای Neon)، بعضی هم می‌رن سراغ <b>zero-disk architecture</b>: همه‌چی تو object storage، دیسک و حافظه فقط cache. ارزون ولی کند.
+      Object storage ارزان است، durability خیلی بالایی داره و با <b>conditional write</b> (همون compare-and-set) حتی می‌تونه انتخاب leader و تراکنش رو هم دست بگیره. قیمتش؟ تأخیر خوندن/نوشتن خیلی بیشتر از دیسک محلی + پول هر API call. بعضی‌ها storage لایه‌ای می‌سازن، بعضی WAL رو می‌ذارن کنار (مثل Safekeeperهای Neon)، بعضی هم می‌رن سراغ <b>zero-disk architecture</b>: همه‌چی تو object storage، دیسک و حافظه فقط cache. کم‌هزینه‌تر است، ولی تأخیر بیشتری دارد.
     </p>
 </div>
 <div class="en"><p>Object storage offers low storage cost and high durability, with higher access latency than local disk and a charge for requests. A <b>conditional write</b>, such as compare-and-set, can support coordination protocols when the system is designed around its guarantees.</p><p>Some architectures use tiered storage or separate durable logs from compute. Neon is an example of separation: its <b>Safekeepers replicate WAL</b>; they don't remove the need for WAL. In a <b>zero-disk architecture</b>, persistent state lives outside the compute node while its memory and local disk act as caches. Follow where the durable copy actually lives.</p><p class="small">Source for the Neon example: <a href="https://neon.com/blog/our-approach-to-high-availability" target="_blank" rel="noopener">Neon's storage and Safekeeper architecture</a>.</p></div>
@@ -460,12 +461,12 @@
 <h3 id="s2-2"><span class="fa">۲.۲ خرابیِ nodeها و failover + نمودار ۲</span><span class="en">2.2 Node failure and failover + diagram 2</span></h3>
 
 <div class="fa">
-<p>فرض کن follower خراب شد: معمولاً فقط عقب‌افتادگی‌ها رو دوباره می‌گیری، تمومه. ولی اگه leader بمیره، باید یه leader تازه انتخاب کنی و نوشتن رو بفرستی سمتش؛ به همین جابه‌جایی میگن failover. این‌جاست که داستان قاطی میشه.</p>
+<p>اگر follower خراب شود، معمولاً فقط عقب‌افتادگی‌ها رو دوباره می‌گیری، تمومه. ولی اگه leader بمیره، باید یه leader تازه انتخاب کنی و نوشتن رو بفرستی سمتش؛ به همین جابه‌جایی میگن failover. همین‌جا پیچیدگی‌ها شروع می‌شوند.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-5">
 <p class="example-title"><b>مثال فنی: ترفیعِ کپی عقب‌مانده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن leader تا موقعیت <code dir="ltr">105</code> رو به کلاینت ok داده، ولی کاندیدای جدید فقط تا <code dir="ltr">103</code> داره.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> leader تا موقعیت <code dir="ltr">105</code> را به کلاینت ok داده، ولی کاندیدای جدید فقط تا <code dir="ltr">103</code> رسیده است.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اگه همین عقب‌مونده رو بدون تضمین لازم بکنی leader، نوشته‌های ۱۰۴ و ۱۰۵ از دید سرویس غیب میشن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> انتخاب leader و سیاست ack باید با هدف نپریدن داده جور باشه؛ هر replica زنده‌ای کاندیدای امن نیست. عجله نکن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> انتخاب leader و سیاست ack باید با هدف نپریدن داده هم‌خوان باشد؛ هر replica زنده‌ای کاندیدای امن نیست.</p>
 </div>
 </div>
 <div class="en"><p>A node can stop because of a fault or planned maintenance. A returning follower usually catches up. A failed leader requires another node to take over, clients to find it and the rest of the replicas to follow it. That's <b>failover</b>.</p>
@@ -477,8 +478,8 @@
 </div></div>
 
 <div class="fa"><ul>
-    <li><b>خرابی follower (catch-up recovery):</b> follower لاگ تغییرهایی که گرفته رو رو دیسکش داره؛ بعد ری‌استارت می‌دونه آخرین تراکنش پردازش‌شده کدوم بوده و از leader همون‌جا به بعد رو می‌گیره. ولی اگه مدت طولانی offline بوده باشه، هم به leader فشار میاد هم به خودش. leader باید انتخاب کنه: «لاگ رو نگه دارم تا follower برگرده (ریسک پر شدن دیسک)» یا «لاگ تأییدنشده رو پاک کنم (follower مجبوره از بکاپ برگرده)». هر دو درد داره.</li>
-    <li><b>خرابی leader (failover):</b> باید یه follower جدید بشه leader، کلاینت‌ها وصل شن بهش و بقیه هم دنبالش کنن — دستی یا خودکار. این فرایند پر از تله‌ست و نمودار ۲ دقیقاً همینو روایت می‌کنه. قاطی نکن، قدم‌به‌قدم برو.</li>
+    <li><b>خرابی follower (catch-up recovery):</b> follower لاگ تغییرهایی که گرفته روی دیسکش داره؛ بعد ری‌استارت می‌دونه آخرین تراکنش پردازش‌شده کدوم بوده و از leader همون‌جا به بعد رو می‌گیره. ولی اگه مدت طولانی offline بوده باشه، هم به leader فشار میاد هم به خودش. leader باید انتخاب کنه: «لاگ رو نگه دارم تا follower برگرده (ریسک پر شدن دیسک)» یا «لاگ تأییدنشده رو پاک کنم (follower مجبوره از بکاپ برگرده)». هر دو درد داره.</li>
+    <li><b>خرابی leader (failover):</b> باید یه follower جدید بشه leader، کلاینت‌ها وصل شن بهش و بقیه هم دنبالش کنن — دستی یا خودکار. این فرایند پر از تله است و نمودار ۲ دقیقاً همین را روایت می‌کند؛ هر گام باید با قاعدهٔ مشخص انجام شود.</li>
   </ul></div>
 <div class="en"><ul>
 <li><b>Follower failure:</b> resume from its last durable progress point and fetch missing changes. A long absence adds catch-up work. Retaining logs indefinitely can fill storage; removing required history means rebuilding from a snapshot or backup.</li>
@@ -499,7 +500,7 @@
 
 
 <p>
-      فرض کن چهار نفر از چپ به راست نشستن: <span class="ltr">«Client»</span>، <span class="ltr">«Leader (old)»</span>
+      چهار نفر از چپ به راست نشسته‌اند: <span class="ltr">«Client»</span>، <span class="ltr">«Leader (old)»</span>
       با زیرنویس <span class="ltr">«crashes mid-write»</span>، <span class="ltr">«Follower 1»</span>
       (زیرنویس: <span class="ltr">«most up-to-date»</span> — تازه‌ترین نسخه دستشه) و
       <span class="ltr">«Follower 2»</span> (زیرنویس: <span class="ltr">«falling behind»</span>).
@@ -515,18 +516,18 @@
       بی‌جواب می‌مونه و یادداشت زیرش میگه <span class="ltr">«failure detected only by timeout»</span> — یعنی هیچ راه مطمئنی
       برای فهمیدن «مرگ» نیست؛ فقط timeout. بعد Follower 2 به Follower 1 پیام میده:
       <span class="ltr">«elect the most up-to-date follower»</span> با یادداشت <span class="ltr">«consensus problem — Chapter 10»</span>،
-      و Follower 1 به Client اعلام می‌کنه: <span class="ltr">«I am the new leader — send writes here»</span>. از این‌جا به بعد قاطی نکن.
+      و Follower 1 به Client اعلام می‌کنه: <span class="ltr">«I am the new leader — send writes here»</span>. از این‌جا به بعد هر نوشتن باید مجوز دورهٔ تازه را داشته باشد.
     </p>
 <p>
       پردهٔ سوم، <span class="ltr">«Old leader rejoins»</span>: leader قدیمی برمی‌گرده (<span class="ltr">«old leader rejoins the cluster»</span>)
       و شاید هنوز فکر کنه leaderه. جواب Follower 1 قاطعه:
-      <span class="ltr">«step down — fencing rejects your writes»</span> و یادداشت تلخ زیر همون فلش:
-      <span class="ltr">«unreplicated writes are discarded»</span> — نوشته‌هایی که کلاینت «موفق» شنیده بود ولی تکثیر نشده بودن، می‌پرن. دردناکه ولی واقعیته.
+      <span class="ltr">«step down — fencing rejects your writes»</span> و یادداشت زیر همان فلش:
+      <span class="ltr">«unreplicated writes are discarded»</span> — نوشته‌هایی که کلاینت «موفق» شنیده بود ولی تکثیر نشده بودن، می‌پرن.
     </p>
 <p>
-      درس شکل؟ failover سه قدم داره (تشخیص با timeout، انتخاب تازه‌ترین replica، بازپیکربندی) و سه خطر بزرگ: <b>پریدن نوشته‌ها</b>
+      درس شکل: failover سه قدم داره (تشخیص با timeout، انتخاب تازه‌ترین replica، بازپیکربندی) و سه خطر بزرگ: <b>پریدن نوشته‌ها</b>
       تو تکثیر async، <b>split brain</b> (دو node هم‌زمان فکر کنن leaderان — راه‌حلش <b>fencing</b>ه)،
-      و timeout اشتباه (کوتاه ← failover الکی زیر بار؛ بلند ← بازیابی لاک‌پشتی). timeout رو درست بچین، وگرنه می‌ترکه.
+      و timeout اشتباه (کوتاه ← failover الکی زیر بار؛ بلند ← بازیابی لاک‌پشتی). انتخاب timeout باید بین این دو حد باشد.
     </p>
 </div>
 <div class="en">
@@ -537,7 +538,7 @@
 <div class="tag"><span class="fa">ماجرای واقعی: یک failover خطرناک</span><span class="en">True story: a dangerous failover</span></div>
 <div class="fa">
 <p>
-      یه حادثهٔ معروف رو تصور کن: follower قدیمی یه MySQL شد leader؛ شمارندهٔ autoincrement شناسه‌ها عقب‌تر بود و شناسهٔ تکراری تولید کرد. چون همون شناسه‌ها تو یه ذخیره‌ساز دیگه هم استفاده شده بودن، دادهٔ خصوصی رفت جلوی کاربر اشتباهی. درس؟ تغییر leader فقط «یه دیتابیس» نیست؛ هر سیستمی که با داده هماهنگه باهاش می‌ترکه.
+      یک حادثهٔ معروف: follower قدیمی یه MySQL شد leader؛ شمارندهٔ autoincrement شناسه‌ها عقب‌تر بود و شناسهٔ تکراری تولید کرد. چون همون شناسه‌ها تو یه ذخیره‌ساز دیگه هم استفاده شده بودن، دادهٔ خصوصی رفت جلوی کاربر اشتباهی. درس این است: تغییر leader فقط «یه دیتابیس» نیست؛ هر سیستمی که با داده هماهنگه باهاش می‌ترکه.
     </p>
 </div>
 <div class="en"><p>The book describes an incident where a stale MySQL follower was promoted and reused auto-increment IDs. Another store used those same IDs, so records became associated with the wrong users.</p><p>A leader change can affect systems outside the database too. Include external identifiers and downstream state in the recovery plan.</p></div>
@@ -546,12 +547,12 @@
 <h3 id="s2-3"><span class="fa">۲.۳ ماشینِ وضعیتِ failover + نمودار ۶</span><span class="en">2.3 The failover state machine + diagram 6</span></h3>
 
 <div class="fa">
-<p>تصور کن هر گره موقع failover چند حالت داره: follower، کاندید، leader یا خارج از خدمت. تغییر حالت باید با قاعدهٔ مشترک باشه، نه فقط حدس محلی یه گره. هرکی ساز خودشو بزنه، می‌ترکه.</p>
+<p>هر گره موقع failover چند حالت داره: follower، کاندید، leader یا خارج از خدمت. تغییر حالت باید با قاعدهٔ مشترک باشه، نه فقط حدس محلی یه گره. اگر هر گره ساز خودش را بزند، سیستم می‌شکند.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-6">
 <p class="example-title"><b>مثال فنی: رهبر قدیمی برمی‌گردد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن A تو epoch ۷ رهبر بوده و بعد قطع شبکه، B تو epoch ۸ انتخاب شده.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> A در epoch ۷ رهبر بود و پس از قطع شبکه، B برای epoch ۸ انتخاب شد.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> مقصد نوشتن epoch قدیمی رو رد می‌کنه؛ A بعد برگشت نمی‌تونه با مجوز ۷ نوشتن معتبر انجام بده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> فقط timeout دیدن، A رو متوقف نمی‌کنه؛ fencing جلوی اثر leader منقضی رو می‌گیره. قفل، نه حدس.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> فقط timeout دیدن، A را متوقف نمی‌کند؛ fencing جلوی اثر leader منقضی را می‌گیرد. قفل، نه حدس.</p>
 </div>
 </div>
 <div class="en"><p>The timeline shows the cluster's sequence of actions. A <b>state machine</b> instead follows one node: follower, candidate, leader or recovering. Each transition needs a trigger and a rule that the rest of the system can enforce. A local guess isn't enough to establish authority.</p>
@@ -602,7 +603,7 @@
       <span class="ltr">«majority of votes»</span> به <span class="ltr">«Leader»</span> (قدم <span class="ltr">03</span>،
       زیرنویس <span class="ltr">«accepts writes»</span>، برچسب <span class="ltr">«single writer»</span>)، یا
       <span class="ltr">«another node wins»</span> که Candidate رو برمی‌گردونه به <span class="ltr">«Follower»</span> —
-      باختن تو انتخابات ارزون‌ترین گذار کل شکله: هیچی خراب نشده، فقط دوباره شدی follower. نگران نشو.
+      باختن در انتخابات ارزان‌ترین گذار کل شکل است: هیچ‌چیز خراب نشده و node دوباره follower می‌شود.
     </p>
 <p>
       حالا بریم سراغ خطرها. از <span class="ltr">«Leader»</span> یه فلش چین‌چین میاد پایین —
@@ -626,7 +627,7 @@
 <p>
       درس اول شکل، <b>fencing</b>ه. چون نمی‌تونی «مرگ» رو از «کندی» تشخیص بدی، به «فهمیدن» تکیه نکن؛ به «بی‌اثر کردن» تکیه کن. راه عملیش اینه: هر leader تازه یه شمارهٔ دورهٔ بالاتر می‌گیره (<b>epoch</b> یا <b>term</b>)،
       و لایهٔ ذخیره‌سازی هر نوشته‌ای که با شمارهٔ قدیمی بیاد رو رد می‌کنه — به این قفل یه‌طرفه می‌گن <b>fencing token</b>.
-      پیاده‌سازی رایج: شمارهٔ epoch تو خود لاگ، یا یه سرویس قفل متمرکز که تا session قطع شد، قفل leader قدیمی رو باطل می‌کنه. بدون fencing، «leader کهنه‌ای که برمی‌گرده» همیشه رو میزه. یادت باشه.
+      پیاده‌سازی رایج: شمارهٔ epoch تو خود لاگ، یا یه سرویس قفل متمرکز که تا session قطع شد، قفل leader قدیمی رو باطل می‌کنه. بدون fencing، «leader کهنه‌ای که برمی‌گرده» همیشه رو میزه.
     </p>
 <p>
       درس دوم: خطر واقعی <b>split brain</b>ه، نه «پریدن یه نوشته». اگه دو node هم‌زمان فکر کنن leaderان،
@@ -675,12 +676,12 @@
 </div></div>
 
 <div class="fa">
-<p>فرض کن لاگ تکثیر می‌تونه سه‌جور حرف بزنه: دستور، تغییر فیزیکی صفحه، یا تغییر منطقی ردیف. هرکدوم یه‌جور به موتور داخلی و نسخهٔ نرم‌افزار گیره. انتخاب اشتباه دردسره.</p>
+<p>لاگ تکثیر می‌تونه سه‌جور حرف بزنه: دستور، تغییر فیزیکی صفحه، یا تغییر منطقی ردیف. هرکدوم یه‌جور به موتور داخلی و نسخهٔ نرم‌افزار گیره. انتخاب اشتباه دردسره.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-7">
 <p class="example-title"><b>مثال فنی: سه شکل ثبت یک تغییر</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن دستور <code dir="ltr">UPDATE ... SET updated_at=NOW()</code> رو leader اجرا می‌کنه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> leader دستور <code dir="ltr">UPDATE ... SET updated_at=NOW()</code> را اجرا می‌کند.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تکثیر statement ممکنه تو مقصد زمان متفاوت بسازه؛ row-log مقدار نهایی ردیف رو می‌بره؛ لاگ فیزیکی به ساختار داخلی موتور گیره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> قالب لاگ رو درست انتخاب کن: رو قطعیت، حجم، سازگاری نسخه و مصرف بیرونی اثر می‌ذاره. آخرش معلوم میشه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> قالب لاگ را درست انتخاب کن؛ روی قطعیت، حجم، سازگاری نسخه و مصرف بیرونی اثر می‌گذارد.</p>
 </div>
 </div>
 <div class="en"><p>If a newer follower can consume the leader's log, upgrading followers first and then switching leaders can reduce upgrade downtime. A physical log constrains that compatibility; it doesn't make every version transition impossible.</p><p>For example, PostgreSQL generally doesn't ship WAL across <b>major</b> versions, while its guidance distinguishes <b>minor</b> updates. Check the engine's supported transition before choosing the upgrade path.</p><p class="small">Source: <a href="https://www.postgresql.org/docs/current/warm-standby.html#WARM-STANDBY-PLANNING" target="_blank" rel="noopener">PostgreSQL's standby version-compatibility guidance</a>.</p></div>
@@ -698,8 +699,8 @@
 <div class="fa">
 
 
-<p>سه ستون، سه جواب به یه سؤالن: «تغییر رو با چه دونه‌بندی بفرستیم؟» ستون اول (<span class="ltr">Statement-based</span>): خود دستور SQL میره و follower دوباره اجراش می‌کنه — ساده‌ست، ولی تابع غیرقطعی مثل <code>NOW()</code> دو نسخهٔ متفاوت می‌سازه. قاطی نکن، همینه.</p>
-<p>ستون وسط (<span class="ltr">WAL shipping</span>): بایت‌های فیزیکی لاگ موتور فرستاده میشه — سریع و دقیقه ولی تکثیر رو به همون موتور و همون نسخه قفل می‌کنه و ارتقای بدون downtime رو غیرممکن می‌کنه. ستون سوم (<span class="ltr">Logical</span>): رکوردهای سطح سطر، جدا از موتور — با نسخه‌های مختلف می‌سازه و همون لاگ خوراک <b>change data capture</b> برای سیستم‌های بیرونی میشه. درس: اگه انتخاب با توئه logical رو بخر. تهش می‌فهمی چرا.</p>
+<p>سه ستون، سه جواب به یه سؤالن: «تغییر رو با چه دونه‌بندی بفرستیم؟» ستون اول (<span class="ltr">Statement-based</span>): خود دستور SQL میره و follower دوباره اجراش می‌کنه — ساده‌ست، ولی تابع غیرقطعی مثل <code>NOW()</code> دو نسخهٔ متفاوت می‌سازه.</p>
+<p>ستون وسط (<span class="ltr">WAL shipping</span>): بایت‌های فیزیکی لاگ موتور فرستاده میشه — سریع و دقیقه ولی تکثیر رو به همون موتور و همون نسخه قفل می‌کنه و ارتقای بدون downtime رو غیرممکن می‌کنه. ستون سوم (<span class="ltr">Logical</span>): رکوردهای سطح سطر، جدا از موتور — با نسخه‌های مختلف می‌سازه و همون لاگ خوراک <b>change data capture</b> برای سیستم‌های بیرونی میشه. درس: گرانولاریتی را بر اساس خواننده‌ها و مسیرهای بازیابی انتخاب کن.</p>
 </div>
 <div class="en">
 <p>Compare the columns by asking what travels. With <span class="ltr">Statement-based</span>, the follower re-executes a statement. A function such as <code>NOW()</code> can produce different values unless the replication mechanism handles that nondeterminism.</p><p>With <span class="ltr">WAL shipping</span>, physical changes depend on the engine's storage format and supported versions. With <span class="ltr">Logical</span>, row changes are more independent of physical layout and can feed <b>change data capture</b>. That can make compatible upgrades easier, while schema and value rules still need checking. Choose the granularity around the readers and recovery paths it must support.</p></div>
@@ -720,12 +721,12 @@
 <h2 class="reveal"><span class="secnum"><span class="fa">۳</span><span class="en">3</span></span> <span class="fa">مشکلاتِ replication lag</span><span class="en">Replication lag problems</span></h2>
 
 <div class="fa">
-<p>تصور کن نوشتی ثبت شده ولی هنوز به بعضی replicaها نرسیده — اسمش همینه: replication lag. یادت باشه همه خواندن‌ها یکی نیستن؛ فرض کن بعضی‌ها می‌تونن کمی stale باشن، بعضی‌ها نه. نکته ماندگار: اول تصمیم بگیر کدوم خواندن تضمین می‌خواد.</p>
+<p>نوشتنی ثبت شده ولی هنوز به بعضی replicaها نرسیده — اسمش همینه: replication lag. همه خواندن‌ها یکی نیستن؛ بعضی‌ها می‌تونن کمی stale باشن، بعضی‌ها نه. اول تصمیم بگیر کدوم خواندن تضمین می‌خواد.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-8">
 <p class="example-title"><b>مثال فنی: ویرایش دیده نمی‌شود</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن کاربر اسمش رو کرده «سارا» و جواب موفق هم گرفته.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا تصور کن خواندن بعدی می‌افته روی followerای که هنوز تغییر رو نگرفته؛ پس اسم قبلی رو برمی‌گردونه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه اینجا read-your-writes می‌خوای. نکته ماندگار: دیدن مقدار قدیمی همیشه یعنی نوشتن پریده؟ نه، فقط lag داری.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> کاربر نامش را «سارا» کرده و پاسخ موفق گرفته است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> خواندن بعدی روی followerای می‌افتد که هنوز تغییر را نگرفته؛ پس نام قبلی را برمی‌گرداند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> این مسیر به read-your-writes نیاز دارد. دیدن مقدار قدیمی لزوماً یعنی نوشتن پریده نیست؛ فقط lag داری.</p>
 </div>
 </div>
 <div class="en"><p>Asynchronous followers are a common way to scale reads without making every follower part of the write-acknowledgment path. They can return <b>stale</b> values while catching up.</p><p><b>Eventual consistency</b> says replicas converge once updates stop and the required communication and processing complete. It doesn't tell a reader how long to wait. Synchronous replication and read scaling aren't mutually exclusive; the acknowledgment and read rules determine the guarantees.</p>
@@ -740,7 +741,7 @@
 <div class="tag"><span class="fa">«eventually» یعنی چقدر؟</span><span class="en">“Eventually” means how long?</span></div>
 <div class="fa">
 <p>
-      یادت باشه «eventually» عمداً لقِه: <b>حد بالایی ندارد</b>. فرض کن حالت عادی فقط چند دهم ثانیه lag داری، ولی نزدیک سقف ظرفیت یا وقتی شبکه خراب می‌شه، می‌رسه به چند ثانیه یا چند دقیقه. نکته ماندگار: این فقط درد NoSQL نیست؛ follower ناهمزمانِ رابطه‌ای هم همینه.
+      «eventually» عمداً مبهم است: <b>حد بالایی ندارد</b>. حالت عادی فقط چند دهم ثانیه lag داری، ولی نزدیک سقف ظرفیت یا وقتی شبکه خراب می‌شه، می‌رسه به چند ثانیه یا چند دقیقه. این فقط درد NoSQL نیست؛ follower ناهمزمانِ رابطه‌ای هم همینه.
     </p>
 </div>
 <div class="en"><p>There is <b>no fixed upper bound</b> in an eventual-consistency promise. A follower may usually trail by a fraction of a second, then fall seconds or minutes behind near capacity or during a network problem. This applies to asynchronous relational replicas as well as NoSQL systems. Measure the lag instead of assuming “eventually” means a few seconds.</p></div>
@@ -748,12 +749,12 @@
 
 <h3 id="s3-1"><span class="fa">۳.۱ سه ناهنجاریِ معروف</span><span class="en">3.1 Three famous anomalies</span></h3>
 <div class="fa">
-<p>فرض کن سه درد جدا داری، سه قرص جدا هم می‌خوان: دیدن نوشته خودت، عقب نرفتن خواندن‌های پشت سر هم، و دیدن تغییرهای وابسته با ترتیب درست. یادت باشه هرکدوم جلوی یه مدل به‌هم‌ریختگی رو می‌گیره.</p>
+<p>سه درد جدا داری، سه قرص جدا هم می‌خوان: دیدن نوشته خودت، عقب نرفتن خواندن‌های پشت سر هم، و دیدن تغییرهای وابسته با ترتیب درست. هرکدوم جلوی یه مدل به‌هم‌ریختگی رو می‌گیره.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-9">
 <p class="example-title"><b>مثال فنی: سه شکلِ عقب‌ماندگی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن A تغییر اسم رو ثبت کرده؛ B تا موقعیت ۹۰ جلو رفته و C تا ۱۰۰.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن بعد نوشتن از B می‌خونی — قدیمیه. بعد از C بپری روی B، انگار زمان عقب رفته. روی shardهای جدا هم ممکنه جواب رو قبل از سوال ببینی.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه read-your-writes، monotonic reads و consistent prefix هرکدوم مال یه درد جدان. نکته ماندگار: هر سه رو با هم قاطی نکن.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> A تغییر نام را ثبت کرده؛ B تا موقعیت ۹۰ و C تا ۱۰۰ جلو رفته‌اند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> خواندن از B بعد از نوشتن، مقدار قدیمی می‌دهد؛ خواندن از C و سپس B مثل عقب‌رفتن زمان است. روی shardهای جدا هم ممکن است پاسخ پیش از سؤال دیده شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> read-your-writes، monotonic reads و consistent prefix هر کدام یک درد جدا را درمان می‌کنند. هر سه را با هم یکی نکن.</p>
 </div>
 </div>
 
@@ -793,7 +794,7 @@
 <h3 id="s3-2"><span class="fa">۳.۲ نمودار ۳ + روایت مدرس</span><span class="en">3.2 Diagram 3 + teacher narration</span></h3>
 
 <div class="fa"><p>
-    تصور کن سر یه دوراهی وایسادی: کدوم ناهنجاری برای کاربرت واقعاً مهمه؟ فقط همون تضمین رو بخر. نکته ماندگار: تضمین اضافه یعنی هزینه اضافه.
+    سر یه دوراهی وایسادی: کدوم ناهنجاری برای کاربرت واقعاً مهمه؟ فقط همون تضمین رو بخر. هر تضمین اضافه هزینهٔ اضافه دارد.
   </p></div>
 <div class="en"><p>Name the user-visible problem before choosing a remedy. The next diagram connects three different anomalies to three different guarantees. They don't make the same promise.</p></div>
 
@@ -817,14 +818,14 @@
     </p>
 <p>
       تصمیم اول رو ببین: <span class="ltr">«Own Update Disappears?»</span> (زیرنویس: <span class="ltr">«write, then read»</span>).
-      فرض کن جواب «آره»‌ست — فلش عمودی <span class="ltr">«yes»</span> می‌بردت به lane دوم، گره
+      اگر جواب «آره» باشد، فلش عمودی <span class="ltr">«yes»</span> می‌بردت به lane دوم، گره
       <span class="ltr">«Read-Your-Writes»</span> با زیرنویس <span class="ltr">«own data from leader»</span> و برچسب
       <span class="ltr">«or track last write time»</span>. اگه «نه»، فلش افقی <span class="ltr">«no»</span> می‌ره سراغ تصمیم بعدی.
     </p>
 <p>
       تصمیم دوم: <span class="ltr">«Time Moves Backward?»</span> (زیرنویس: <span class="ltr">«two reads, two replicas»</span>).
       اگه جوابت «آره»‌ست، یعنی <span class="ltr">«Monotonic Reads»</span> رو تو lane سوم لازم داری — با زیرنویس
-      <span class="ltr">«same replica per user»</span> و برچسب <span class="ltr">«hash of the user ID»</span>. نکته ماندگار: بعد دیدن داده تازه، حق نداری قدیمی ببینی.
+      <span class="ltr">«same replica per user»</span> و برچسب <span class="ltr">«hash of the user ID»</span>. بعد از دیدن دادهٔ تازه، خواندن بعدی نباید عقب‌تر برود.
     </p>
 <p>
       سومین تصمیم: <span class="ltr">«Reply Before Question?»</span> (زیرنویس: <span class="ltr">«causal order broken»</span>).
@@ -834,8 +835,8 @@
       <span class="ltr">«Live With the Lag»</span> — ارزون‌ترین راه، با همون eventual consistency.
     </p>
 <p>
-      یادت باشه این تضمین‌ها خوب/بد مطلق نیستن؛ هرکدوم قیمت دارن. فرض کن فقط همونی رو می‌خری که کاربرت لازم داره.
-      نکته ماندگار: اگه هیچ‌کدوم جواب نداد، از پیچیدگی اپلیکیشن فرار کن — برو سراغ دیتابیسی با تضمین قوی‌تر (مثل linearizable + ACID).
+      این تضمین‌ها خوب/بد مطلق نیستن؛ هرکدوم قیمت دارن. فقط همونی رو می‌خری که کاربرت لازم داره.
+      اگه هیچ‌کدوم جواب نداد، از پیچیدگی اپلیکیشن فرار کن — برو سراغ دیتابیسی با تضمین قوی‌تر (مثل linearizable + ACID).
     </p>
 </div>
 <div class="en">
@@ -845,18 +846,18 @@
 <div class="grid2">
 <div class="cardmini">
 <h4><span class="fa">راه‌های عملیِ read-your-writes</span><span class="en">Practical read-your-writes paths</span></h4>
-<div class="fa"><p>تصور کن می‌خوای نوشته خودت رو ببینی — خواندن مرتبط رو بفرست روی leader یا replicaای که تغییر رو گرفته. یادت باشه فقط «یه کم صبر کن» تضمین نیست.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-10">
+<div class="fa"><p>می‌خوای نوشته خودت رو ببینی — خواندن مرتبط رو بفرست روی leader یا replicaای که تغییر رو گرفته. ولی «کمی صبر کن» تضمین نیست.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-10">
 <p class="example-title"><b>مثال فنی: حداقل موقعیت لازم</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن جواب ویرایش پروفایل، موقعیت نوشتن <code dir="ltr">LSN=105</code> رو برمی‌گردونه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن خواندن بعدی فقط می‌ره روی replicaای که به ۱۰۵ رسیده، یا صبر می‌کنه برسه، یا برمی‌گرده روی leader.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نکته ماندگار: انتخاب replica با سنجه پیشرفت خیلی تمیزتر از «دو ثانیه صبر کن» جواب می‌ده.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> کاربر یک نظر ثبت می‌کند و پاسخ، موقعیت نوشتن <code dir="ltr">LSN=105</code> را برمی‌گرداند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> خواندن بعدی یا روی replicaای می‌رود که به ۱۰۵ رسیده، یا صبر می‌کند برسد، یا به leader برمی‌گردد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> انتخاب replica با سنجهٔ پیشرفت دقیق‌تر از «دو ثانیه صبر کن» جواب می‌دهد؛ نشانگر، خواندن را به نوشتن تأییدشده گره می‌زند.</p>
 </div></div>
 
 <div class="fa">
 <ul>
-        <li>فرض کن هرچی کاربر ممکنه عوض کرده باشه رو از leader (یا follower هم‌زمان) می‌خونی — مثلاً پروفایل خود کاربر همیشه از leader.</li>
-        <li>تصور کن یه مدت کوتاه (مثلاً یک دقیقه) بعد آخرین نوشتن، همه‌چی رو از leader می‌خونی؛ یا followerهایی که خیلی عقب‌ان رو کلاً از مسیر خواندن خط می‌زنی.</li>
-        <li>یادت باشه کلاینت زمان آخرین نوشتنش رو نگه می‌داره و سیستم قول می‌ده هر replica جواب‌دهنده حداقل تا همون لحظه تازه باشه (timestamp منطقی یا ساعت سیستم — که خودش قصه فصل ۹‌ئه).</li>
+        <li>هرچی کاربر ممکنه عوض کرده باشه رو از leader (یا follower هم‌زمان) می‌خونی — مثلاً پروفایل خود کاربر همیشه از leader.</li>
+        <li>یه مدت کوتاه (مثلاً یک دقیقه) بعد آخرین نوشتن، همه‌چی رو از leader می‌خونی؛ یا followerهایی که خیلی عقب‌ان رو کلاً از مسیر خواندن خط می‌زنی.</li>
+        <li>کلاینت زمان آخرین نوشتنش رو نگه می‌داره و سیستم قول می‌ده هر replica جواب‌دهنده حداقل تا همون لحظه تازه باشه (timestamp منطقی یا ساعت سیستم — که خودش قصه فصل ۹‌ئه).</li>
       </ul>
 </div>
 <div class="en"><ul>
@@ -866,25 +867,25 @@
 </ul>
 <div class="callout" data-en-example="example-ch6-10">
 <p class="example-title"><b>Example: A minimum progress token</b></p>
-<p><b>Setup:</b> The profile-update response carries <code dir="ltr">LSN=105</code>.</p>
+<p><b>Setup:</b> A user posts a comment and the response carries <code dir="ltr">LSN=105</code>.</p>
 <p><b>Walk through it:</b> The next read uses a replica that has reached 105, waits for it to catch up, or routes to the leader.</p>
 <p><b>What this tells you:</b> Checking progress is more precise than assuming a two-second pause is enough. The token ties the read to the accepted write.</p>
 </div></div>
 </div>
 <div class="cardmini">
 <h4><span class="fa">چند پیچیدگیِ دیگر</span><span class="en">A few more complications</span></h4>
-<div class="fa"><p>فرض کن کاربر دستگاه عوض می‌کنه یا درخواستت shard و مسیر عوض می‌کنه — همین تضمین خواندن رو به‌هم می‌ریزه. یادت باشه اطلاعات لازم برای حفظ ترتیب باید دقیقاً تو همون محدوده لازم جابه‌جا بشه.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-11">
+<div class="fa"><p>کاربر دستگاه عوض می‌کنه یا درخواستت shard و مسیر عوض می‌کنه — همین تضمین خواندن رو به‌هم می‌ریزه. اطلاعات لازم برای حفظ ترتیب باید دقیقاً تو همون محدوده لازم جابه‌جا بشه.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-11">
 <p class="example-title"><b>مثال فنی: دو دستگاه و دو مسیر</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن کاربر با موبایل اسم رو عوض کرده ولی لپ‌تاپ هیچ token موقعیت نوشتن نداره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن session موبایل رو چسبوندی به leader — برای لپ‌تاپ کافی نیست؛ اطلاعات پیشرفت باید تو دامنه لازم بین دستگاه‌ها هم منتقل بشه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نکته ماندگار: تضمین یه session با تضمین همه دستگاه‌های یه اکانت فرق داره؛ دامنه قولت رو روشن کن.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> کاربر سفارشی را در اپ موبایل ثبت می‌کند و پاسخ موفق می‌گیرد؛ بعد وضعیت همان سفارش را در مرورگر لپ‌تاپ می‌خواند که هیچ نشانگری از پیشرفت نوشتن ندارد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> چسباندن session موبایل به leader فقط همان دستگاه را پوشش می‌دهد؛ مرورگر لپ‌تاپ اگر به replica عقب‌مانده برسد، سفارش را نمی‌بیند. برای پوشش کل حساب، نشانگر پیشرفت (LSN یا version) باید بین دستگاه‌ها منتقل شود یا خواندن اول به leader برود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> تضمین یک session با تضمین همهٔ دستگاه‌های یک حساب فرق دارد؛ دامنهٔ قول را روشن کن و فراداده را همان‌قدر که قول داده‌ای جابه‌جا کن.</p>
 </div></div>
 
 <div class="fa">
 <ul>
-        <li><b>چند دستگاهی:</b> تصور کن کاربر هم با دسکتاپ هم موبایل وصله — اونوقت metadata «آخرین نوشته» باید <b>مرکزی</b> باشه و رسوندن همه دستگاه‌ها به regionِ leader سخت‌تر می‌شه.</li>
-        <li><b>monotonic reads:</b> ساده‌ترین راه رو یادت باشه: هر کاربر رو بچسبون به یه replica مشخص (hash شناسه کاربر)؛ اگه اون replica افتاد، مسیر رو عوض کن.</li>
-        <li><b>consistent prefix:</b> فرض کن دیتابیس shardشده داری — چون هر shard مستقله، ترتیب جهانی نداری؛ یا نوشته‌های علّی رو یه‌جا بنویس یا وابستگی علّی رو صریح نگه دار.</li>
+        <li><b>چند دستگاهی:</b> کاربر هم با دسکتاپ هم موبایل وصله — اونوقت metadata «آخرین نوشته» باید <b>مرکزی</b> باشه و رسوندن همه دستگاه‌ها به regionِ leader سخت‌تر می‌شه.</li>
+        <li><b>monotonic reads:</b> ساده‌ترین راه این است که هر کاربر را به یک replica مشخص بچسبانی (hash شناسه کاربر)؛ اگه اون replica افتاد، مسیر رو عوض کن.</li>
+        <li><b>consistent prefix:</b> در یک دیتابیس shardشده، هر shard مستقل است و ترتیب جهانی نداری؛ یا نوشته‌های علّی رو یه‌جا بنویس یا وابستگی علّی رو صریح نگه دار.</li>
       </ul>
 </div>
 <div class="en"><ul>
@@ -894,9 +895,9 @@
 </ul>
 <div class="callout" data-en-example="example-ch6-11">
 <p class="example-title"><b>Example: Two devices, different context</b></p>
-<p><b>Setup:</b> A user changes their name on a phone. Their laptop doesn't have the write-progress token.</p>
-<p><b>Walk through it:</b> Routing the phone session to the leader doesn't establish the same guarantee on the laptop. Share progress metadata across devices if that is the promised scope.</p>
-<p><b>What this tells you:</b> A session guarantee and an account-wide guarantee are different contracts. Specify which readers must observe the change.</p>
+<p><b>Setup:</b> A user places an order in the mobile app and receives success, then checks that order's status in a laptop browser that has no write-progress token.</p>
+<p><b>Walk through it:</b> Routing the phone session to the leader covers only that device; if the browser reaches a lagging follower, it may not see the order. Covering the whole account requires sharing the progress token (LSN or version) across devices or routing the first read to the leader.</p>
+<p><b>What this tells you:</b> A session guarantee and an account-wide guarantee are different contracts. State the scope of the promise and carry the metadata as far as the promise reaches.</p>
 </div></div>
 </div>
 </div>
@@ -905,8 +906,8 @@
 <div class="tag"><span class="fa">راهِ ساده‌تر: تضمینِ قوی‌تر بخر</span><span class="en">The simpler path: buy a stronger guarantee</span></div>
 <div class="fa">
 <p>
-      فرض کن lag چنددقیقه‌ای برای برنامه‌ات «مهم نیست» — عالی، راحتی. اگه مهمه، دو راه داری: یا تو کد اپلیکیشن تضمین رو پیاده کن (پیچیده و پرخطا)
-      یا دیتابیسی بردار که خودش <b>linearizability</b> و تراکنش ACID بده (مسیر NewSQL). نکته ماندگار: وانمود کن تکثیر ناهمزمان «هم‌زمانه»؟ داری برای آینده درد می‌خری.
+      اگر lag چنددقیقه‌ای برای برنامه‌ات مهم نیست، همان را قرارداد کن. اگه مهمه، دو راه داری: یا تو کد اپلیکیشن تضمین رو پیاده کن (پیچیده و پرخطا)
+      یا دیتابیسی بردار که خودش <b>linearizability</b> و تراکنش ACID بده (مسیر NewSQL). تکثیر ناهمزمان را «هم‌زمان» فرض نکن؛ این فرض درد آینده است.
     </p>
 </div>
 <div class="en"><p>If stale results are acceptable for a particular read, state that contract. If they're harmful, implement the required routing and progress checks or use a database offering the needed guarantee.</p><p><b>Linearizability</b> concerns how operations appear in real-time order. ACID transactions provide a different set of guarantees. A NewSQL system may offer both through particular protocols and settings. Don't infer either from the presence of replicas alone.</p></div>
@@ -937,12 +938,12 @@
 <h2 class="reveal"><span class="secnum"><span class="fa">۴</span><span class="en">4</span></span> <span class="fa">تکثیر چندرهبر و تعارض نوشته‌ها</span><span class="en">Multi-leader replication and write conflicts</span></h2>
 
 <div class="fa">
-<p>تصور کن چندتا رهبر هم‌زمان قلم دست گرفتن! تو multi-leader هر گره می‌تونه بنویسه. برای کار آفلاین یا چند region عالیه، ولی یادت باشه: دو تغییر هم‌زمان قاطی می‌شن و conflict می‌ترکه.</p>
+<p>در multi-leader چند leader می‌توانند هم‌زمان بنویسند. برای کار آفلاین یا چند region عالیه، ولی دو تغییر هم‌زمان قاطی می‌شن و conflict می‌ترکه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-12">
 <p class="example-title"><b>مثال فنی: دو رهبر، یک کلید</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن مرکز A برای <code dir="ltr">P7</code> مقدار ۱۲۰ رو محلی ثبت می‌کنه، هم‌زمان مرکز B مقدار ۱۳۰ رو.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> مرکز A برای <code dir="ltr">P7</code> مقدار ۱۲۰ را محلی ثبت می‌کند و هم‌زمان مرکز B مقدار ۱۳۰ را.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> شبکه که وصل می‌شه، هر دو نسخه می‌رسن سر میز؛ حالا باید conflict رو پیدا و حل کنی.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نوشتن محلی سریع می‌شه ولی بهاش conflict resolutionـه؛ یادت باشه ترتیب رسیدن هیچی از مقدار درست نمی‌گه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> نوشتن محلی سریع می‌شود، ولی بهایش conflict resolution است. ترتیب رسیدن هیچ چیزی دربارهٔ مقدار درست نمی‌گوید.</p>
 </div>
 </div>
 <div class="en"><p>A single leader requires writes to reach that leader. <b>Multi-leader replication</b>, also called active/active, lets several nodes accept writes and exchange changes.</p><p>Asynchronous exchange allows local progress during a network outage, but it also allows conflicts. Coordinating writes synchronously across leaders changes that latency and availability trade-off. Start with the asynchronous case here.</p>
@@ -956,8 +957,8 @@
 <h3 id="s4-1"><span class="fa">۴.۱ کجا معنا دارد؟ توپولوژی‌ها</span><span class="en">4.1 Where does it make sense? Topologies</span></h3>
 
 <div class="fa"><ul>
-    <li><b>توزیعِ جغرافیایی:</b> فرض کن تو هر region یه leader داری؛ محلی می‌نویسی، بین regionها ناهمزمان sync می‌کنی. کاربر تأخیر رو حس نمی‌کنه، هر region رو پای خودشه و قطعی لینک کمتر اذیت می‌کنه. ولی نکته‌ش اینه: consistency شل می‌شه — قید یکتایی username یا منفی نشدن موجودی می‌ترکه، چون هر leader جدا تأیید می‌کنه و جمعش قاطی می‌شه.</li>
-    <li><b>سرویس‌های offline-first و local-first:</b> تصور کن هر گوشی یا هر tab مرورگر خودش یه leaderـه؛ بدون اینترنت هم می‌نویسه، بعداً sync می‌کنه. کتابخونه‌ای که این قاطی‌بازی رو جمع می‌کنه همون <b>sync engine</b>ـه (مثل PouchDB/CouchDB، Automerge، Yjs).</li>
+    <li><b>توزیعِ جغرافیایی:</b> تو هر region یه leader داری؛ محلی می‌نویسی، بین regionها ناهمزمان sync می‌کنی. کاربر تأخیر رو حس نمی‌کنه، هر region رو پای خودشه و قطعی لینک کمتر اذیت می‌کنه. ولی نکته‌ش اینه: consistency شل می‌شه — قید یکتایی username یا منفی نشدن موجودی می‌ترکه، چون هر leader جدا تأیید می‌کنه و جمعش قاطی می‌شه.</li>
+    <li><b>سرویس‌های offline-first و local-first:</b> هر گوشی یا هر tab مرورگر خودش یه leaderـه؛ بدون اینترنت هم می‌نویسه، بعداً sync می‌کنه. کتابخونه‌ای که این قاطی‌بازی رو جمع می‌کنه همون <b>sync engine</b>ـه (مثل PouchDB/CouchDB، Automerge، Yjs).</li>
     <li><b>توپولوژیِ تکثیر:</b> یعنی نوشته از چه مسیری بین leaderها می‌چرخه: <span class="ltr">circular</span> (حلقه‌ای)، <span class="ltr">star</span> (ریشه‌ای) یا <span class="ltr">all-to-all</span> (کامل). تو حلقه‌ای و star یه node خراب کل جریان رو می‌خوابونه؛ تو all-to-all راه جایگزین داری ولی پیام‌ها از راه‌های مختلف با <b>ترتیبِ متفاوت</b> می‌رسن و قاطی می‌شه.</li>
   </ul></div>
 <div class="en"><ul>
@@ -975,26 +976,26 @@
 <div class="callout warn">
 <div class="tag"><span class="fa">خطرِ ترتیب در all-to-all</span><span class="en">Ordering danger in all-to-all</span></div>
 <div class="fa">
-<p>یادت باشه توپولوژی فقط نقشه راهه: مشخص می‌کنه تغییر از کجا به کجا بره. چندتا مسیر داشتن یعنی تغییرهای وابسته لزوماً به ترتیب درست نمی‌رسن.</p>
+<p>توپولوژی فقط نقشه راهه: مشخص می‌کنه تغییر از کجا به کجا بره. چندتا مسیر داشتن یعنی تغییرهای وابسته لزوماً به ترتیب درست نمی‌رسن.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-13">
 <p class="example-title"><b>مثال فنی: توپولوژی و مسیرهای تکراری</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن رهبرهای A و B و C دارن به هم تغییر می‌فرستن.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> رهبرهای A و B و C به هم تغییر می‌فرستند.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تو توپولوژی کامل یه تغییر ممکنه از دو راه برسه؛ شناسه رویداد جلوی اعمال دوباره‌ش رو می‌گیره. تو حلقه یه قطعی کل انتقال رو می‌خوابونه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> توپولوژی فقط شکل نیست؛ نکته‌ش اینه که روی دسترس‌پذیری، ترتیب و تشخیص پیام تکراری اثر می‌ذاره.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> توپولوژی فقط شکل نیست؛ روی دسترس‌پذیری، ترتیب و تشخیص پیام تکراری اثر می‌گذارد.</p>
 </div>
 </div>
-<div class="en"><p>Suppose leader 1 inserts a row, then leader 3 updates it. Leader 2 can receive the update before the insert if they travel different routes. Receiving the effect before its cause isn't resolved by picking the larger wall-clock timestamp.</p><p><b>Causal metadata</b>, such as a <b>version vector</b>, helps identify dependencies. Applying changes in the required order still needs protocol support; the metadata tells the system what it must respect.</p></div>
+<div class="en"><p>If leader 1 inserts a row and leader 3 updates it, Leader 2 can receive the update before the insert if they travel different routes. Receiving the effect before its cause isn't resolved by picking the larger wall-clock timestamp.</p><p><b>Causal metadata</b>, such as a <b>version vector</b>, helps identify dependencies. Applying changes in the required order still needs protocol support; the metadata tells the system what it must respect.</p></div>
 </div>
 
 <h3 id="s4-2"><span class="fa">۴.۲ حلِ تعارض + نمودار ۴</span><span class="en">4.2 Conflict resolution + diagram 4</span></h3>
 
 <div class="fa">
-<p>فرض کن دو نفر هم‌زمان یه چیز رو عوض کردن؛ حالا باید تصمیم بگیری. یا یکیش رو نگه می‌داری، یا هر دو رو، یا با یه قاعده قاطیشون می‌کنی. یادت باشه حذف بی‌سروصدا همیشه جواب نیست.</p>
+<p>دو نفر هم‌زمان یه چیز رو عوض کردن؛ حالا باید تصمیم بگیری. یا یکیش رو نگه می‌داری، یا هر دو رو، یا با یه قاعده قاطیشون می‌کنی. حذف بی‌سروصدا همیشه جواب نیست.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-14">
 <p class="example-title"><b>مثال فنی: ادغام سبد خرید</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سبد خالیه؛ دستگاه A «کتاب» می‌ندازه توش، هم‌زمان دستگاه B «قلم».</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> سبد خالی است؛ دستگاه A «کتاب» و دستگاه B هم‌زمان «قلم» اضافه می‌کند.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اگه فقط یه نسخه رو نگه داری یه قلم می‌پره؛ union مجموعه هر دو رو نگه می‌داره، ولی حذف هم‌زمان یه semantics تمیز می‌خواد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> راه‌حل به نوع داده و معنی عملیات وصله؛ نکته‌ش اینه که یه LWW برای همه‌جا جواب نمی‌ده.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> راه‌حل به نوع داده و معنای عملیات وابسته است؛ یک LWW برای همه‌جا جواب نمی‌دهد.</p>
 </div>
 </div>
 <div class="en"><p>Two leaders can independently change one wiki title from A to B and from A to C. Neither update saw the other. That's a <b>concurrent-write conflict</b>, whether the leaders are in separate regions or on offline devices. Decide what the application should retain before choosing how to merge it.</p>
@@ -1019,7 +1020,7 @@
 
 
 <p>
-      تصور کن نمودار دو خط موازیه تو چهار مرحله. مرحله اول، <span class="ltr">«Concurrent Writes»</span>:
+      نمودار دو خط موازی در چهار مرحله دارد. مرحله اول، <span class="ltr">«Concurrent Writes»</span>:
       بالا گره <span class="ltr">«Leader 1: A to B»</span> (زیرنویس: <span class="ltr">«did not see the other»</span>)،
       پایین <span class="ltr">«Leader 2: A to C»</span> (زیرنویس: <span class="ltr">«written while offline»</span>).
       برچسب بالا داد می‌زنه: «یک رکورد، دو leader». نکته‌ش اینه نوشته‌ها concurrentن چون هیچ‌کدوم از اون یکی خبر نداشته.
@@ -1031,7 +1032,7 @@
       <span class="ltr">«arrival order differs per replica»</span> از Leader 2 به گره
       <span class="ltr">«Version Vector»</span> می‌ره (زیرنویس: <span class="ltr">«counter per replica»</span>، برچسب
       <span class="ltr">«dotted in Riak 2.0»</span>). و فلش عمودی وسط با برچسب
-      <span class="ltr">«compare version vectors»</span> این دو گره رو به هم می‌زنه: یادت باشه فراداده علّی رو مقایسه می‌کنن
+      <span class="ltr">«compare version vectors»</span> این دو گره رو به هم می‌زنه: فراداده علّی رو مقایسه می‌کنن
       تا بفهمن هر مقدار <b>بازنویسی</b>ـه یا <b>تعارض</b>.
     </p>
 <p>
@@ -1094,7 +1095,7 @@
 <div class="tag"><span class="fa">مثالِ معروف: سبد خریدِ آمازون</span><span class="en">Famous example: Amazon's shopping cart</span></div>
 <div class="fa">
 <p>
-      فرض کن سبدهای هم‌زمان رو با «اجتماع مجموعه‌ها» قاطی می‌کردن: اگه کاربر تو یه دستگاه کتاب رو حذف کرده بود ولی تو نسخه دیگه هنوز بود،
+      اگر سبدهای هم‌زمان را با «اجتماع مجموعه‌ها» ادغام می‌کردند و کاربر در یک دستگاه کتاب را حذف کرده بود ولی نسخهٔ دیگر هنوز آن را داشت،
       کتاب حذف‌شده <b>دوباره سر از سبد درمی‌آورد</b>. نکته‌ش اینه: ادغام درست باید <b>حذف‌ها رو هم ردیابی کنه</b>، نه فقط اضافه شدن‌ها رو.
     </p>
 </div>
@@ -1102,10 +1103,10 @@
 </div>
 
 <div class="fa"><ul>
-    <li><b>CRDT (conflict-free replicated datatype):</b> فرض کن به هر کاراکتر/آیتم یه شناسه ثابت می‌ده و جای درج/حذف رو با شناسه مشخص می‌کنه؛ دو درج هم‌زمان تو یه جا با ترتیب قطعی شناسه‌ها مرتب می‌شن و همه replicaها بدون «تبدیل» به هم می‌رسن.</li>
+    <li><b>CRDT (conflict-free replicated datatype):</b> به هر کاراکتر/آیتم یه شناسه ثابت می‌ده و جای درج/حذف رو با شناسه مشخص می‌کنه؛ دو درج هم‌زمان تو یه جا با ترتیب قطعی شناسه‌ها مرتب می‌شن و همه replicaها بدون «تبدیل» به هم می‌رسن.</li>
     <li><b>OT (operational transformation):</b> ایندکس عملیات‌ها رو با توجه به عملیات هم‌زمان اعمال‌شده <b>تبدیل</b> می‌کنه؛ مثال کلاسیکش: «ice» که یکی «n» رو تو ایندکس ۰ و اون یکی «!» رو تو ایندکس ۳ می‌ذاره؛ بدون تبدیل «nic!e» غلط درمیاد و با تبدیل ایندکس «nice!» درست به دست میاد.</li>
     <li>هر دو برای متن، لیست، شمارنده و map قواعدِ ادغامِ مخصوص دارند؛ ترکیبِ مزایای هر دو هم ممکن است. OT در ویرایشگرهای بلادرنگ (مثل Google Docs) و CRDT در پایگاه‌های داده توزیع‌شده و sync engineهای متن‌باز (Automerge، Yjs) رایج‌ترند.</li>
-    <li><b>نوعِ تعارض می‌تواند ظریف باشد:</b> تصور کن سیستم رزرو اتاق جلسه؛ تعارض رو «فیلد» نیست؛ دو رزرو هم‌زمان برای یه اتاق تو یه بازه، حتی اگه هر دو قبل ثبت «اتاق خالی» دیده باشن، قید یکتایی رو می‌شکنن.</li>
+    <li><b>نوعِ تعارض می‌تواند ظریف باشد:</b> در سیستم رزرو اتاق جلسه، تعارض فقط بر سر یک «فیلد» نیست؛ دو رزرو هم‌زمان برای یه اتاق تو یه بازه، حتی اگه هر دو قبل ثبت «اتاق خالی» دیده باشن، قید یکتایی رو می‌شکنن.</li>
   </ul></div>
 <div class="en"><ul>
 <li>A <b>CRDT</b>, or conflict-free replicated datatype, defines operations or merge rules that converge under stated assumptions. A text CRDT can give characters stable IDs and order concurrent insertions deterministically, rather than addressing only their changing numeric positions.</li>
@@ -1117,10 +1118,10 @@
 <h3 id="s4-3"><span class="fa">۴.۳ تشخیصِ هم‌زمانی: happens-before و version vector</span><span class="en">4.3 Detecting concurrency: happens-before and version vectors</span></h3>
 
 <div class="fa">
-<p>فرض کن یه تغییر رو بر اساس نسخه‌ای که دیدی ساختی؛ این با یه تغییر مستقل فرق داره. version vector کمک می‌کنه بفهمی وابسته‌ست یا concurrent؛ یادت باشه concurrent بودن هیچ ربطی به ساعت دیواری نداره.</p>
+<p>یه تغییر رو بر اساس نسخه‌ای که دیدی ساختی؛ این با یه تغییر مستقل فرق داره. version vector کمک می‌کنه بفهمی وابسته‌ست یا concurrent؛ concurrent بودن هیچ ربطی به ساعت دیواری نداره.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-15">
 <p class="example-title"><b>مثال فنی: تشخیصِ concurrent با نسخه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دو نسخه بردارهای <code dir="ltr">{A:2,B:1}</code> و <code dir="ltr">{A:1,B:2}</code> دارن.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> دو نسخه بردارهای <code dir="ltr">{A:2,B:1}</code> و <code dir="ltr">{A:1,B:2}</code> دارند.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> هیچ‌کدوم تو همه مؤلفه‌ها اون یکی رو پوشش نمی‌ده؛ پس دو تغییر concurrentـن. نسخه <code dir="ltr">{A:2,B:2}</code> می‌تونه بعد از ادغام هر دو ساخته بشه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> این مقایسه وابستگی علّی رو می‌گه، نه اینکه ساعت دیواری کدوم ماشین جلوتره.</p>
 </div>
@@ -1134,7 +1135,7 @@
 </div></div>
 
 <div class="fa"><p>
-    راه‌حل عملی <b>version vector</b>ـه: فرض کن به‌جای یه شماره نسخه، به‌ازای هر کلید و هر replica یه شمارنده داری.
+    راه‌حل عملی <b>version vector</b>ـه: به‌جای یه شماره نسخه، به‌ازای هر کلید و هر replica یه شمارنده داری.
     هر replica موقع نوشتن شمارنده خودش رو جلو می‌بره و شمارنده‌هایی که تا اون لحظه دیده نگه می‌داره؛ خواندن، همون بردار رو
     با مقدار برمی‌گردونه و نوشتن بعدی باید پسش بفرسته. حالا سرور تصمیم می‌گیره: اگه بردار نوشتن جدید «زیر»
     بردار موجود باشه یعنی overwrite مجازه؛ اگه نه، دو مقدار concurrentـن و باید <b>sibling</b> نگه داشته بشن
@@ -1166,15 +1167,15 @@
 <h2 class="reveal"><span class="secnum"><span class="fa">۵</span><span class="en">5</span></span> <span class="fa">تکثیر بدون‌رهبر</span><span class="en">Leaderless replication</span></h2>
 
 <div class="fa">
-<p>فرض کن رهبری در کار نیست؛ coordinator برای خواندن و نوشتن با چند replica حرف می‌زند. یادت باشه تعداد ackها و مدل repair معلوم می‌کنه با replica غایب یا کهنه چی کار کنی.</p>
+<p>رهبری در کار نیست؛ coordinator برای خواندن و نوشتن با چند replica حرف می‌زند. تعداد ackها و مدل repair معلوم می‌کنه با replica غایب یا کهنه چی کار کنی.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-16">
 <p class="example-title"><b>مثال فنی: نوشتن بدون رهبر واحد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن کلید K روی A و B و C خوابیده و کلاینت از دو replica ack می‌خواهد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> کلید K روی A و B و C قرار دارد و کلاینت از دو replica ack می‌خواهد.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اگه C قطع باشه، A و B همون‌طور می‌نویسن و برمی‌گردن؛ خواندن بعدی باید versionها رو طبق پروتکل مقایسه کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نکته ماندگار: فقط دو تا جواب گرفتن یعنی quorum پر شده، نه اینکه تعارض حل شده یا تازه‌ترین version دستته.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> گرفتن دو پاسخ یعنی quorum پر شده است، نه اینکه تعارض حل شده یا تازه‌ترین version در دست توست.</p>
 </div>
 </div>
-<div class="en"><p>In <b>leaderless replication</b>, clients or a <b>coordinator</b> send writes to several replicas without one leader imposing a common log order. The chapter follows the Dynamo family, named after Amazon's 2007 paper, with examples such as Riak, Cassandra and ScyllaDB.</p><p>The original Dynamo design and the later DynamoDB service aren't the same system. DynamoDB is included among the leader-based examples earlier. A coordinator handles the request; that role alone doesn't make it a leader.</p>
+<div class="en"><p>In <b>leaderless replication</b>, clients or a <b>coordinator</b> send writes to several replicas without one leader imposing a common log order. The chapter follows the Dynamo family, named after Amazon's 2007 paper, with examples such as Riak, Cassandra and ScyllaDB.</p><p>The original Dynamo design and the later DynamoDB service aren't the same system. DynamoDB writes through a coordinator, and that role alone doesn't make it a leader.</p>
 <div class="callout" data-en-example="example-ch6-16">
 <p class="example-title"><b>Example: A write without one leader</b></p>
 <p><b>Setup:</b> Key K is replicated on A, B and C. The client requires two write acknowledgments.</p>
@@ -1185,12 +1186,12 @@
 <h3 id="s5-1"><span class="fa">۵.۱ quorum و بازیابیِ نوشته‌های ازدست‌رفته + نمودار ۵</span><span class="en">5.1 Quorums and recovering lost writes + diagram 5</span></h3>
 
 <div class="fa">
-<p>فرض کن quorum یعنی برای هر عملیات به k تا ack نیاز داری. هم‌پوشانی set خواندن و نوشتن خوبه، ولی یادت باشه version درست رو تشخیص بده و write نصفه‌کاره رو جمع کن.</p>
+<p>در quorum، برای هر عملیات به تعداد مشخصی ack نیاز داری. هم‌پوشانی set خواندن و نوشتن خوبه، ولی version درست رو تشخیص بده و write نصفه‌کاره رو جمع کن.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-17">
 <p class="example-title"><b>مثال فنی: هم‌پوشانی مجموعه‌ها</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن <code dir="ltr">n=3,w=2,r=2</code> داری و نوشتن روی <code dir="ltr">{A,B}</code> نشسته.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> هر read دوتایی از همین سه replica حتماً به A یا B می‌خوره — قاطی نمی‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نکته ماندگار: <code dir="ltr">w+r&gt;n</code> فقط overlap می‌دهد؛ linearizability هنوز versioning و پروتکل read/write می‌خواهد.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> <code dir="ltr">n=3,w=2,r=2</code> داری و نوشتن روی <code dir="ltr">{A,B}</code> نشسته است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> هر خواندن دوتایی از همین سه replica حتماً به A یا B می‌خورد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> <code dir="ltr">w+r&gt;n</code> فقط overlap می‌دهد؛ linearizability به versioning و پروتکل درست read/write هم نیاز دارد.</p>
 </div>
 </div>
 <div class="en"><p>With three replicas, a write can be sent to all while the policy waits for two acknowledgments. If the third is unavailable, the write can still succeed under that policy.</p><p>When the missing replica returns, its copy is behind. Read several replicas and compare their <b>versions or timestamps</b> according to the protocol. Two replies don't by themselves decide which version is causally newer or resolve a concurrent update.</p>
@@ -1236,7 +1237,7 @@
     </p>
 <p>
       درسِ شکل: در نبودِ leader، «همه‌چیز درست شود» کارِ یک نفر نیست؛ ترکیبی از <b>quorum در لحظه</b> (w و r) و
-      <b>مکانیزم‌های ترمیمِ تنبل</b> (read repair، hinted handoff، anti-entropy) سیستم رو بالاخره همگرا می‌کنه — دیر یا زود.
+      <b>مکانیزم‌های ترمیمِ تنبل</b> (read repair، hinted handoff، anti-entropy) سیستم رو بالاخره همگرا می‌کنه.
     </p>
 </div>
 <div class="en">
@@ -1256,9 +1257,9 @@
 <div class="fa">
 
 
-<p>تصور کن خط وسط رو گرفتی و داری چپ‌به‌راست جلو می‌ری. نقطهٔ ۱ (<span class="ltr">2017 baseline</span>) همون شروع آرومه: ۱۲ گره که میلیاردها پیام رو با کلید <span class="ltr">channel + time bucket</span> نگه می‌دارن، سه کپی با خواندن/نوشتن <span class="ltr">quorum</span>. نگهداریش هم کم‌دردسره — فعلاً همه‌چی سر جاشه.</p>
-<p>حالا نوبت فشار خوردنه: نقطهٔ ۲ (<span class="ltr">strain</span>، اوایل ۲۰۲۲) می‌ترکه تا ۱۷۷ گره و تریلیون‌ها پیام. قضیه اینه که پارتیشن‌های داغ دومینووار می‌افتن (<span class="ltr">hot partition cascade</span>)، <span class="ltr">compaction</span> عقب می‌مونه، <span class="ltr">GC</span> مکث می‌ده و هر خواندن مجبوره <span class="ltr">memtable</span> و کلی <span class="ltr">SST</span> رو بگرده. یادت باشه، همین‌جاست که پیجر شروع می‌کنه به غر زدن.</p>
-<p>نقطهٔ ۳ (<span class="ltr">decide + shield</span>) نقشهٔ فراره: ذخیره‌ساز تازه با سرویس‌های دادهٔ <span class="ltr">Rust</span>. ایده‌ش ساده‌ست — <span class="ltr">coalescing</span> یعنی برای هر سطر داغ فقط یه بار بری سراغ دیتابیس، بعد هم مسیریابی با شناسهٔ کانال و بدون منطق کسب‌وکاری. نقطهٔ ۴ (<span class="ltr">migration run</span>) هم مسابقهٔ جابه‌جاییه: برآورد <span class="ltr">Spark</span> حدود سه ماه بود، ولی جابه‌جاکنندهٔ <span class="ltr">Rust</span> با نرخ گزارش‌شدهٔ تا ۳٫۲ میلیون پیام در ثانیه حدود ۹ روزه تمومش کرد؛ دنبالهٔ بازه‌های <span class="ltr">tombstone</span> هم آخرش جمع شد. نقطهٔ ۵ (<span class="ltr">verify + cutover</span>) کمربند ایمنیه: خواندن سایه‌ای از هر دو ذخیره‌ساز و مقایسهٔ نتیجه‌ها، بعد برش ترافیک در مهٔ ۲۰۲۲ که طبق گزارش سرپا موند. تهش نقطهٔ ۶ (<span class="ltr">steady state</span>): فقط ۷۲ گره که پیک اواخر ۲۰۲۲ رو قورت داد؛ <span class="ltr">p99</span> واکشی از ۴۰ تا ۱۲۵ میلی‌ثانیه اومد روی ۱۵ میلی‌ثانیه. همهٔ عددها همون‌طور که گزارش شدن نقل می‌شن — نه بیشتر، نه کمتر.</p>
+<p>خط وسط رو گرفتی و داری چپ‌به‌راست جلو می‌ری. نقطهٔ ۱ (<span class="ltr">2017 baseline</span>) همون شروع آرومه: ۱۲ گره که میلیاردها پیام رو با کلید <span class="ltr">channel + time bucket</span> نگه می‌دارن، سه کپی با خواندن/نوشتن <span class="ltr">quorum</span>. نگهداریش هم کم‌دردسره — فعلاً همه‌چی سر جاشه.</p>
+<p>حالا نوبت فشار خوردنه: نقطهٔ ۲ (<span class="ltr">strain</span>، اوایل ۲۰۲۲) می‌ترکه تا ۱۷۷ گره و تریلیون‌ها پیام. قضیه اینه که پارتیشن‌های داغ دومینووار می‌افتن (<span class="ltr">hot partition cascade</span>)، <span class="ltr">compaction</span> عقب می‌مونه، <span class="ltr">GC</span> مکث می‌ده و هر خواندن مجبوره <span class="ltr">memtable</span> و کلی <span class="ltr">SST</span> رو بگرده. همین‌جاست که پیجر شروع می‌کنه به غر زدن.</p>
+<p>نقطهٔ ۳ (<span class="ltr">decide + shield</span>) نقشهٔ فراره: ذخیره‌ساز تازه با سرویس‌های دادهٔ <span class="ltr">Rust</span>. ایده‌ش ساده‌ست — <span class="ltr">coalescing</span> یعنی برای هر سطر داغ فقط یه بار بری سراغ دیتابیس، بعد هم مسیریابی با شناسهٔ کانال و بدون منطق کسب‌وکاری. نقطهٔ ۴ (<span class="ltr">migration run</span>) هم مسابقهٔ جابه‌جاییه: برآورد <span class="ltr">Spark</span> حدود سه ماه بود، ولی جابه‌جاکنندهٔ <span class="ltr">Rust</span> با نرخ گزارش‌شدهٔ تا ۳٫۲ میلیون پیام در ثانیه حدود ۹ روزه تمومش کرد؛ دنبالهٔ بازه‌های <span class="ltr">tombstone</span> هم آخرش جمع شد. نقطهٔ ۵ (<span class="ltr">verify + cutover</span>) کمربند ایمنیه: خواندن سایه‌ای از هر دو ذخیره‌ساز و مقایسهٔ نتیجه‌ها، بعد برش ترافیک در مهٔ ۲۰۲۲ که طبق گزارش سرپا موند. در پایان، نقطهٔ ۶ (<span class="ltr">steady state</span>): فقط ۷۲ گره که پیک اواخر ۲۰۲۲ رو قورت داد؛ <span class="ltr">p99</span> واکشی از ۴۰ تا ۱۲۵ میلی‌ثانیه اومد روی ۱۵ میلی‌ثانیه.</p>
 <p class="small">منبع: <a href="https://discord.com/blog/how-discord-stores-trillions-of-messages">How Discord Stores Trillions of Messages</a> (منتشرشده در ۶ مارس ۲۰۲۳؛ سال صفحه تأیید شد). همهٔ عددها — شمار گره‌ها، نرخ‌ها و تأخیرها — طبق گزارش منبع‌اند.</p>
 </div>
 <div class="en">
@@ -1268,17 +1269,17 @@
 <div class="grid2">
 <div class="cardmini">
 <h4><span class="fa">ریاضیِ quorum</span><span class="en">Quorum math</span></h4>
-<div class="fa"><p>فرض کن read set و write set از اعضای ثابت میان و جمع‌شون از n بیشتره؛ پس حتماً یه عضو مشترک دارن. یادت باشه این فقط یه تکه از تضمینه.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-18">
+<div class="fa"><p>read set و write set از اعضای ثابت میان و جمع‌شون از n بیشتره؛ پس حتماً یه عضو مشترک دارن. این فقط یه تکه از تضمینه.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-18">
 <p class="example-title"><b>مثال فنی: یک پاسخ کافی نیست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن A و B مقدار <code dir="ltr">v2</code> دارن و C هنوز روی <code dir="ltr">v1</code> گیر کرده.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> A و B مقدار <code dir="ltr">v2</code> دارند و C هنوز روی <code dir="ltr">v1</code> مانده است.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اگه فقط از C بخونی کهنه می‌گیری؛ اگه از A و C بخونی هر دو version رو می‌بینی و باید تازه‌تر رو سوا کنی.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نکته ماندگار: r بزرگ‌تر یعنی هزینه بیشتر و شانس بیشتر برای دیدن تازه؛ ولی timestamp خراب یا write concurrent با ریاضی quorum جمع نمی‌شه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> r بزرگ‌تر هزینه و شانس دیدن دادهٔ تازه را بیشتر می‌کند؛ ولی timestamp خراب یا نوشتن concurrent با ریاضی quorum حل نمی‌شود.</p>
 </div></div>
 
 <div class="fa">
 <ul>
-        <li>فرض کن <code>n</code> کپی از هر مقدار داری، نوشتن با <code>w</code> ack موفقه و خواندن از <code>r</code> node؛ شرطش <code>w + r > n</code> — یادت باشه overlap، نه جادو.</li>
-        <li>معمولاً n فرد می‌ذارن (۳ یا ۵) و <code>w = r = ⌈(n+1)/2⌉</code>؛ ولی یادت باشه quorum یعنی overlap، نه حتماً majority.</li>
+        <li><code>n</code> کپی از هر مقدار داری، نوشتن با <code>w</code> ack موفقه و خواندن از <code>r</code> node؛ شرطش <code>w + r > n</code> — این همپوشانی مجموعه‌هاست.</li>
+        <li>معمولاً n فرد می‌ذارن (۳ یا ۵) و <code>w = r = ⌈(n+1)/2⌉</code>؛ ولی quorum یعنی overlap، نه حتماً majority.</li>
         <li>اگه خواندن سنگینه: <code>w = n, r = 1</code> بذار — خواندن می‌ترکه، ولی با یه خرابی نوشتن قفل می‌شه.</li>
         <li>اگه جواب‌ها از w یا r کمتر باشن عملیات error می‌ده؛ نوع خرابی مهم نیست، فقط ack موفق می‌شمره.</li>
       </ul>
@@ -1298,18 +1299,18 @@
 </div>
 <div class="cardmini">
 <h4><span class="fa">سه مکانیزمِ ترمیم</span><span class="en">Three repair mechanisms</span></h4>
-<div class="fa"><p>تصور کن repair سه‌جا می‌تونه رخ بده: سر خواندن، تو background، یا با رسوندن changeهایی که برای node غایب نگه داشتی.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-19">
+<div class="fa"><p>repair سه‌جا می‌تونه رخ بده: سر خواندن، تو background، یا با رسوندن changeهایی که برای node غایب نگه داشتی.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-19">
 <p class="example-title"><b>مثال فنی: ترمیمِ replica جا‌مانده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن C سر نوشتن قطع بوده و A موقتاً hintش رو نگه داشته.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> C هنگام نوشتن قطع بوده و A موقتاً hint آن را نگه داشته است.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> hinted handoff بعداً change رو می‌رسونه؛ read repair اختلاف سر خواندن رو صاف می‌کنه؛ anti-entropy دوره‌ای کلیدهای کم‌خوانده رو هم چک می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نکته ماندگار: هر سازوکار یه سوراخ رو می‌پوشونه؛ فقط read repair ممکنه داده کم‌خوانده رو مدت‌ها کهنه ول کنه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هر سازوکار یک سوراخ را می‌پوشاند؛ اگر فقط read repair داشته باشی، دادهٔ کم‌خوانده ممکن است مدت زیادی کهنه بماند.</p>
 </div></div>
 
 <div class="fa">
 <ul>
-        <li><b>Read repair:</b> فرض کن سر read موازی می‌فهمی یه جواب کهنه‌ست، همون‌جا مقدار تازه رو هل می‌دی عقب — برای کلید داغ عالیه.</li>
+        <li><b>Read repair:</b> سر read موازی می‌فهمی یه جواب کهنه‌ست، همون‌جا مقدار تازه رو هل می‌دی عقب — برای کلید داغ عالیه.</li>
         <li><b>Hinted handoff:</b> اگه node در دسترس نبود، یه node دیگه hintهاش رو نگه می‌داره و بعداً می‌رسونه دستش.</li>
-        <li><b>Anti-entropy:</b> یه فرایند background که فرق replicaها رو پیدا و کپی می‌کنه؛ یادت باشه برخلاف replication log <b>order نداره</b> و ممکنه دیر بجنبه.</li>
+        <li><b>Anti-entropy:</b> یه فرایند background که فرق replicaها رو پیدا و کپی می‌کنه؛ برخلاف replication log <b>order نداره</b> و ممکنه دیر بجنبه.</li>
       </ul>
 </div>
 <div class="en"><ul>
@@ -1328,12 +1329,12 @@
 
 <h3 id="s5-2"><span class="fa">۵.۲ محدودیت‌های quorum و مقایسهٔ عملکرد</span><span class="en">5.2 Quorum limits and performance comparison</span></h3>
 <div class="fa">
-<p>فرض کن فرمول overlap به‌تنهایی linearizability نمی‌ده؛ write هم‌زمان، clock، جواب نصفه و عوض شدن memberها قاطیش می‌کنن.</p>
+<p>فرمول overlap به‌تنهایی linearizability نمی‌ده؛ write هم‌زمان، clock، جواب نصفه و عوض شدن memberها خراب می‌کنند.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch6-20">
 <p class="example-title"><b>مثال فنی: Sloppy quorum و دامِ انتظار</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن replicaهای اصلی K همون A و B و Cان؛ حالا A و B پریدن.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> replicaهای اصلی K همان A و B و C هستند؛ حالا A و B از دسترس خارج شده‌اند.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نوشتن موقتاً می‌ره روی D و E؛ خواندن از B و C ممکنه اصلاً به set واقعی نوشتن نخوره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نکته ماندگار: شرط عددی quorum روی member جایگزین همون تضمین set ثابت رو نمی‌ده.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> شرط عددی quorum روی member جایگزین، همان تضمین مجموعهٔ ثابت را نمی‌دهد.</p>
 </div>
 </div>
 
@@ -1344,12 +1345,12 @@
 <ul>
       <li>اگه nodeای که مقدار تازه رو داره بیفته و از replica کهنه rebuild بشه، ممکنه کپی تازه از w کمتر بشه — quorum روی کاغذ درسته ولی رو زمین نه.</li>
       <li>سر rebalancing (فصل ۷) هر node یه تصور از «n کپی کجاست» داره و overlap می‌ترکه.</li>
-      <li>تصور کن read با write در حال پرواز قاطی بشه: read اول تازه می‌بینه، دومی کهنه — race تمام‌عیار.</li>
-      <li>یادت باشه writeای که رو بعضی replicaها نشست و رو بعضی نه rollback نمی‌شه؛ read بعدی ممکنه همون «write ناموفق» رو ببینه.</li>
+      <li>اگر read با write در حال پرواز هم‌زمان شود، read اول تازه می‌بینه، دومی کهنه — race تمام‌عیار.</li>
+      <li>نوشتنی که روی بعضی replicaها نشست و روی بعضی نه rollback نمی‌شود؛ خواندن بعدی ممکن است همان «نوشتن ناموفق» را ببیند.</li>
       <li>اگه order با wall-clock تعیین بشه (مثل Cassandra)، clock جلوتر می‌تونه write سالم رو بی‌صدا بندازه دور.</li>
     </ul>
 <p>
-      پس یادت باشه دیتابیس Dynamo-style برای سناریوی «تحمل eventual consistency» ساخته شده؛ w و r فقط احتمال stale read رو <b>تنظیم</b> می‌کنن، حذفش نمی‌کنن.
+      پس دیتابیس Dynamo-style برای سناریوی «تحمل eventual consistency» ساخته شده؛ w و r فقط احتمال stale read رو <b>تنظیم</b> می‌کنن، حذفش نمی‌کنن.
     </p>
 </div>
 <div class="en"><ul>
@@ -1362,10 +1363,10 @@
 </div>
 
 <div class="fa"><ul>
-    <li><b>پایشِ کهنگی:</b> تو تک‌رهبر lag رو با فاصله position follower تا leader می‌سنجی؛ تو بدون‌رهبر order نیست و سنجش سخت می‌شه (مثلاً تعداد hintها). یادت باشه «eventually» باید برای عملیات <b>قابل‌سنجش</b> بشه.</li>
-    <li><b>خواندن از leader در برابر بدون‌رهبر:</b> فرض کن خواندن از leader تازه‌ست ولی ظرفیتش سقفه، سر failover سکته می‌کنه و به کندی leader حساسه. بدون‌رهبر با «درخواست‌های موازی و استفاده از سریع‌ترین پاسخ‌ها» (<b>request hedging</b>) تأخیر دُم رو کم می‌کنه و جلو <b>gray failure</b> (node زنده ولی کند) سفت وایمیسته، چون اصلاً فرقی بین «حالت عادی» و «حالت خرابی» نمی‌ذاره.</li>
-    <li><b>بهای بدون‌رهبر:</b> یادت باشه پیدا کردن node مرده و replay hintها دقیقاً سر فشار بار اضافه می‌سازه؛ quorum بزرگ‌تر یعنی احتمال بیشتر گیر کردن پشت یه node کند (تو عمل به‌ندرت بیشتر از ۴ از ۷ یا ۵ از ۹)؛ و قطعی بزرگ ممکنه اصلاً quorum نسازه — راه فرار بعضی‌ها <b>sloppy quorum</b> (یا level <span class="ltr">ANY</span>)ـه: رو هر node در دسترس بنویس، به بهای اینکه read بعدی شاید اون مقدار رو نبینه.</li>
-    <li><b>چند region:</b> تصور کن تو Cassandra/ScyllaDB نوشتن می‌ره دست coordinator محلی و اون به یه replica تو هر region دیگه می‌فرسته؛ می‌تونی «quorum سراسری» یا «quorum محلی» (سریع‌تر ولی کهنه‌تر) برداری. Riak ارتباط کلاینت رو محلی نگه می‌داره و تکثیر بین‌regionی رو background و شبیه چندرهبر انجام میده.</li>
+    <li><b>پایشِ کهنگی:</b> تو تک‌رهبر lag رو با فاصله position follower تا leader می‌سنجی؛ تو بدون‌رهبر order نیست و سنجش سخت می‌شه (مثلاً تعداد hintها). «eventually» باید برای عملیات <b>قابل‌سنجش</b> بشه.</li>
+    <li><b>خواندن از leader در برابر بدون‌رهبر:</b> خواندن از leader تازه‌ست ولی ظرفیتش سقفه، سر failover سکته می‌کنه و به کندی leader حساسه. بدون‌رهبر با «درخواست‌های موازی و استفاده از سریع‌ترین پاسخ‌ها» (<b>request hedging</b>) تأخیر دُم رو کم می‌کنه و جلو <b>gray failure</b> (node زنده ولی کند) سفت وایمیسته، چون اصلاً فرقی بین «حالت عادی» و «حالت خرابی» نمی‌ذاره.</li>
+    <li><b>بهای بدون‌رهبر:</b> پیدا کردن node مرده و replay hintها دقیقاً سر فشار بار اضافه می‌سازه؛ quorum بزرگ‌تر یعنی احتمال بیشتر گیر کردن پشت یه node کند (تو عمل به‌ندرت بیشتر از ۴ از ۷ یا ۵ از ۹)؛ و قطعی بزرگ ممکنه اصلاً quorum نسازه — راه فرار بعضی‌ها <b>sloppy quorum</b> (یا level <span class="ltr">ANY</span>)ـه: رو هر node در دسترس بنویس، به بهای اینکه read بعدی شاید اون مقدار رو نبینه.</li>
+    <li><b>چند region:</b> تو Cassandra/ScyllaDB نوشتن می‌ره دست coordinator محلی و اون به یه replica تو هر region دیگه می‌فرسته؛ می‌تونی «quorum سراسری» یا «quorum محلی» (سریع‌تر ولی کهنه‌تر) برداری. Riak ارتباط کلاینت رو محلی نگه می‌داره و تکثیر بین‌regionی رو background و شبیه چندرهبر انجام میده.</li>
     <li><b>چندرهبر در برابر بدون‌رهبر:</b> چندرهبر جلو قطعی شبکه سفت‌تره (کلاینت فقط با یه leader محلی حرف می‌زنه) ولی readش می‌تونه حسابی کهنه باشه؛ quorum حد وسطه: تحمل خرابی خوب + شانس بالای read تازه.</li>
   </ul></div>
 <div class="en"><ul>
@@ -1395,7 +1396,7 @@
 <div class="fa">
 
 
-<p>فرض کن گره وسط (<span class="ltr">Replication</span>) با شش یال به مفاهیم وصله و لیبل هر یال حرف اصلیشه: تک‌رهبر با «یه نویسنده»، چندرهبر با «چند نویسنده»، بدون‌رهبر با <code>w + r &gt; n</code>، lag با «سقف نداره»، failover با «تشخیص فقط با timeout» و تعارض با «ادغام کن، ننداز دور».</p>
+<p>گره وسط (<span class="ltr">Replication</span>) با شش یال به مفاهیم وصل است و لیبل هر یال حرف اصلیشه: تک‌رهبر با «یه نویسنده»، چندرهبر با «چند نویسنده»، بدون‌رهبر با <code>w + r &gt; n</code>، lag با «سقف نداره»، failover با «تشخیص فقط با timeout» و تعارض با «ادغام کن، ننداز دور».</p>
 <p>این نقشه رو مثل چک‌لیست بخون: اگه برای هر یال بتونی یه پاراگراف با مثال و بهاش بگی فصل رو بلدی؛ اگه یه یال ساکتت کرد همون بخش رو دوباره بخون — بعد برو سراغ بسته مصاحبه.</p>
 </div>
 <div class="en">
@@ -1494,142 +1495,142 @@
 <h3 id="s6-2"><span class="fa">۶.۲ سوالات پرتکرار مصاحبه (برای دیدن جواب کلیک کن)</span><span class="en">6.2 Frequent interview questions (click for answers)</span></h3>
 
 <details><summary><span class="fa">۱. تکثیر چه هدف‌هایی دارد و چرا با بکاپ فرق می‌کند؟</span><span class="en">1. What goals does replication serve, and how does it differ from backup?</span></summary>
-<div class="fa"><p>فرض کن replication برای اینه سرویس نخوابه، داده نزدیک کاربر باشه و خواندن تقسیم بشه؛ backup برای اینه برگردی به گذشته. یادت باشه delete اشتباهی هم می‌ترکه روی همهٔ <span class="ltr">replica</span>ها — قاطیشون نکن.</p>
+<div class="fa"><p>تکثیر سرویس را در برابر خرابی ماشین یا زون بالا نگه می‌دارد، یک نسخهٔ پایدارتر می‌سازد، به کاربر دورتر تأخیر کمتری می‌دهد، کار آفلاین را ممکن می‌کند و خواندن را بین چند نسخه پخش می‌کند. بکاپ یک وضعیت قدیمیِ قابل‌بازیابی است، در حالی که تکثیر زنده همان نوشتن‌ها را روی همهٔ نسخه‌ها می‌برد. اگر delete اشتباهی اجرا شود، روی replicaها هم تکرار می‌شود؛ برای برگشتن به گذشته به snapshot و تاریخچهٔ قابل‌بازیابی نیاز داری.</p>
 </div>
-<div class="en"><p>Replication can improve availability, durability, disconnected operation, geographical latency and read capacity. Those benefits depend on which failures and network conditions the design covers.</p><p>A backup preserves an earlier recoverable state. Live replication also carries an accidental deletion, so extra current copies alone won't restore the deleted records. Retain snapshots and the history needed for recovery.</p>
+<div class="en"><p>Replication improves availability when a machine or zone fails, adds another durable copy, lowers latency for nearby users, supports disconnected operation and spreads reads across copies. A backup preserves an earlier recoverable state, while live replication carries every accepted change, including an accidental deletion, to the copies. Recovering deleted records therefore needs retained snapshots and history, not more current replicas.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۲. سه خانوادهٔ الگوریتمِ تکثیر را در یک جمله مقایسه کن.</span><span class="en">2. Compare the three replication algorithm families in one sentence each.</span></summary>
-<div class="fa"><p>تصور کن تک‌رهبر یعنی یه صف نوشتن؛ چندرهبر یعنی چند صف مستقل که قاطی می‌کنن و تعارض می‌سازن؛ بدون‌رهبر یعنی از چند replica ack بگیر و با version و repair جمعش کن.</p>
+<div class="fa"><p>تک‌رهبر یک نقطهٔ ترتیب‌دهی برای نوشتن دارد و هنگام ازدست‌رفتن آن به failover نیاز است. چندرهبر نوشتن محلی را در چند ناحیه یا دستگاه آفلاین ممکن می‌کند، ولی تعارض‌ها و قیدهای سراسری را باید حل کند. بدون‌رهبر درخواست را به چند replica می‌فرستد و تازگی و تعارض را با quorum، version و ترمیم مدیریت می‌کند.</p>
 </div>
-<div class="en"><p><b>Single-leader:</b> one write-ordering point, with failover when that authority is lost. <b>Multi-leader:</b> independent local writes, with conflict resolution and coordination for global rules. <b>Leaderless:</b> requests reach several replicas, with quorum, version and repair protocols rather than a single-leader promotion.</p><p>Ask where the write is ordered, when success is returned and how a stale or conflicting version is handled.</p>
+<div class="en"><p>Single-leader replication gives writes one ordering point and requires failover when that authority is lost. Multi-leader replication allows local writes in several regions or offline devices, at the cost of resolving conflicts and coordinating global rules. Leaderless replication sends requests to several replicas and relies on quorum, version and repair protocols instead of a single-leader promotion.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۳. تکثیرِ هم‌زمان و ناهمزمان چه تفاوتِ رفتاری دارند؟ semisynchronous چیست؟</span><span class="en">3. How do synchronous and asynchronous replication behave differently? What is semisynchronous?</span></summary>
-<div class="fa"><p>فرض کن sync یعنی جواب وایمیسته تا ack نسخه‌های تعیین‌شده بیاد؛ async یعنی بفرست و بعداً کاملش کن. semisync معمولاً فقط یه follower رو تو مسیر انتظار می‌ذاره؛ معنای دقیقش به محصول بستگی داره — نکته ماندگار: async ارزونه ولی ممکنه ack گرفته بپره.</p>
+<div class="fa"><p>در تکثیر هم‌زمان، موفقیت نوشتن منتظر تأیید replicaهای تعیین‌شده می‌ماند؛ در ناهم‌زمان، leader بدون انتظار برای دریافت نسخه‌ها جواب می‌دهد. semisync در این فصل فقط منتظر یک follower می‌ماند و بقیه ناهم‌زمان دریافت می‌کنند، ولی معنای دقیق آن به محصول و تنظیماتش بستگی دارد. در هر حالت باید روشن کنی ack به‌معنای دریافت، ذخیرهٔ پایدار یا قابل‌دیدن‌شدن در query است؛ نوشتهٔ ناهم‌زمانِ تأییدشده می‌تواند با failover از دست برود.</p>
 </div>
-<div class="en"><p>Synchronous success waits for the required replica acknowledgments. Asynchronous success doesn't wait for follower receipt, so failover can lose an acknowledged write absent from the survivors.</p><p>The chapter's semisynchronous model waits for one follower while others replicate asynchronously. A majority policy is another possible contract. State who must acknowledge and whether that means receipt, stable storage or application to query-visible data. Implementation fallback rules matter too.</p>
+<div class="en"><p>Synchronous success waits for the required replica acknowledgments; asynchronous success doesn't wait for follower receipt, so failover can lose an acknowledged write. This chapter's semisynchronous model waits for one follower while others receive asynchronously, and a product's exact fallback rules may differ. In every mode, state whether acknowledgment means receipt, stable storage or query-visible application.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۴. چرا همهٔ followerها را نمی‌توان هم‌زمان کرد؟</span><span class="en">4. Why can't all followers be synchronous?</span></summary>
-<div class="fa"><p>تصور کن بخوای همه رو sync کنی: نوشتن باید منتظر همه بمونه، پس یه node کند یا مرده همه رو می‌خوابونه — قیمتش دسترس‌پذیریه.</p>
+<div class="fa"><p>اگر هر follower باید تأیید کند، یک node کند یا ازدست‌رفته موفقیت نوشتن را معطل می‌کند و با اضافه‌شدن replicaها وابستگی‌های مسیر نوشتن بیشتر می‌شود. انتظار برای یک follower یا یک majority (مثلاً ۳ از ۵) مجموعهٔ خرابی متفاوتی را با دوام و دسترس‌پذیری معاوضه می‌کند. پس «هم‌زمان» باید همراه با مجموعهٔ ack و تعریف ذخیرهٔ پایدار مشخص شود.</p>
 </div>
-<div class="en"><p>Requiring every follower's acknowledgment makes a single unavailable or slow follower delay write success. More replicas then add more dependencies to that path.</p><p>Waiting for one follower or a majority, such as 3 of 5, trades a different failure set against durability and availability. “Sync” needs an acknowledgment set and a persistence definition.</p>
+<div class="en"><p>Requiring every follower's acknowledgment puts each one on the write-success path, so a single slow or unavailable node blocks writes and more replicas add more dependencies. Waiting for one follower or a majority, such as 3 of 5, trades a different failure set against durability and availability. “Synchronous” therefore needs a stated acknowledgment set and a definition of durable storage.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۵. راه‌اندازیِ follower جدید چه مراحلی دارد و چرا کپیِ ساده کافی نیست؟</span><span class="en">5. What are the steps of setting up a new follower, and why isn't a plain copy enough?</span></summary>
-<div class="fa"><p>فرض کن اول یه snapshot سازگار با position مشخص لاگ می‌گیری، منتقلش می‌کنی، بعد changeهای بعدی رو اعمال می‌کنی. یادت باشه کپی ساده فایل در حال تغییر یه عکس واحد از یه لحظه نمی‌ده — قاطی می‌کنه.</p>
+<div class="fa"><p>برای افزودن follower، یک snapshot سازگار بگیر و مرز دقیق لاگ آن را ثبت کن، snapshot را منتقل کن و همهٔ تغییرهای بعد از آن مرز را اعمال کن. PostgreSQL این مرز را با LSN و MySQL با مختصات binlog یا GTID نشان می‌دهد، و لاگ لازم باید تا پایان catch-up نگه داشته شود. کپی ساده از فایل‌های در حال تغییر می‌تواند وضعیت‌های مختلف را مخلوط کند، تغییرها را جا بیندازد یا دوباره اعمال کند.</p>
 </div>
-<div class="en"><p>Take a consistent snapshot, record its exact log boundary, copy it to the new follower and apply all later changes. PostgreSQL's LSN or MySQL's GTID/log coordinates identify that boundary. Keep the required log available until catch-up finishes.</p><p>A plain copy of changing files can mix states, miss changes or replay them incorrectly. The snapshot and its history must fit together.</p>
+<div class="en"><p>Take a consistent snapshot, record its exact log boundary, copy it to the new follower and apply every later change. PostgreSQL's LSN or MySQL's GTID/log coordinates identify that boundary, and the required log must stay available until catch-up finishes. A plain copy of changing files can mix states, miss changes or apply them twice.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۶. failover چه مراحلی دارد و چه چیزهایی ممکن است خراب شود؟</span><span class="en">6. What are failover's steps, and what can go wrong?</span></summary>
-<div class="fa"><p>فرض کن سه گام داری: تشخیص مشکوک بودن leader، انتخاب جایگزین، عوض کردن مسیر نوشتن. یادت باشه lag، داده عقب‌افتاده و برگشتن leader قدیمی هر کدوم می‌تونن بترکونن.</p>
+<div class="fa"><p>failover سه گام دارد: تشخیص مشکوک‌بودن leader، انتخاب جایگزین واجد شرایط، و بازپیکربندی کلاینت‌ها و replicaها. timeout فقط شک را نشان می‌دهد و مرگ را ثابت نمی‌کند، پس پروتکل انتخاب باید تاریخچهٔ تأییدشده را حفظ کند. خطرها شامل ازدست‌رفتن نوشته‌های تکثیرنشده، split brain، برگشتن leader قدیمی و کندی بازیابی به‌دلیل انتخاب timeout است؛ شناسه‌ها و سیستم‌های بیرونی وابسته هم باید بررسی شوند.</p>
 </div>
-<div class="en"><p>Detect a suspected failure, select an eligible successor and reconfigure clients and replicas. Timeouts can't prove a remote leader is dead; the selection protocol must protect the accepted history.</p><p>Explain unreplicated write loss, split brain and stale authority, and the recovery delay caused by timeout choices. Check downstream IDs and external systems too. Promoting any live follower isn't automatically safe.</p>
+<div class="en"><p>Failover detects a suspected failure, selects an eligible successor and reconfigures clients and replicas. Timeouts establish suspicion rather than death, so the selection protocol must protect the accepted history. The risks include losing unreplicated writes, split brain, a stale leader returning and slow recovery from timeout choices; downstream identifiers and external systems need checking too.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۷. split brain چیست و fencing چطور کمک می‌کند؟</span><span class="en">7. What is split brain, and how does fencing help?</span></summary>
-<div class="fa"><p>تصور کن <span class="ltr">split</span> <span class="ltr">brain</span> یعنی دو node هم‌زمان خودشون رو leader می‌دونن و مستقل می‌نویسن. <span class="ltr">fencing</span> مجوز قدیمی (epoch/token) رو سر مقصد رد می‌کنه؛ فقط اعلام leader تازه کافی نیست.</p>
+<div class="fa"><p>split brain یعنی دو node هم‌زمان خودشان را leader می‌دانند و تاریخچه‌های ناسازگار می‌سازند. fencing مجوز قدیمی را در همان منبعی که نوشتن را می‌پذیرد بی‌اثر می‌کند، مثلاً با ردکردن epoch قدیمی. فقط اعلام leader تازه کافی نیست؛ یک فرایند متوقف‌شده می‌تواند بعد از timeout ادامه دهد و مقصد باید قاعدهٔ مجوز را اجرا کند.</p>
 </div>
-<div class="en"><p>Split brain means nodes act as competing leaders, potentially producing incompatible histories. Fencing makes outdated authority ineffective at the resource accepting writes, for example by rejecting an old epoch token.</p><p>A timeout or expired lock doesn't by itself stop a paused process from resuming. The destination must enforce the authority rule. An automated shutdown scheme also needs care to avoid disabling both sides.</p>
+<div class="en"><p>Split brain means competing leaders produce incompatible histories. Fencing makes outdated authority ineffective at the resource accepting writes, for example by rejecting an old epoch token. Announcing a new leader isn't enough: a paused process can resume after a timeout, so the destination must enforce the authority rule.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۸. سه روشِ پیاده‌سازیِ لاگِ تکثیر و ضعفِ هرکدام؟</span><span class="en">8. Three ways to implement the replication log, and each one's weakness?</span></summary>
-<div class="fa"><p>فرض کن statement-based خود دستور رو می‌فرسته و با <code>NOW()</code> و رفتار غیرقطعی می‌ترکه؛ <span class="ltr">WAL</span> فیزیکی به موتور قفله؛ logical لاگ سطح row رو می‌فرسته — نکته ماندگار: اگه انتخاب با توئه logical رو بخر.</p>
+<div class="fa"><p>statement-based خود دستور را می‌فرستد و follower آن را دوباره اجرا می‌کند، بنابراین توابع غیرقطعی و زمینهٔ اجرا نتیجه را عوض می‌کنند. WAL shipping رکوردهای فیزیکی موتور را می‌فرستد و به قالب ذخیره‌سازی و نسخه‌های پشتیبانی‌شده وابسته است. logical replication تغییرهای سطح سطر را مستقل‌تر از چیدمان فیزیکی می‌فرستد و می‌تواند خوراک CDC باشد، ولی قواعد schema و مقدارها را هنوز باید بررسی کرد.</p>
 </div>
-<div class="en"><p><b>Statement-based:</b> followers execute the statements, so nondeterminism and execution context matter. <b>WAL shipping:</b> physical records depend on the storage format and supported software versions. <b>Logical replication:</b> row-level changes are more independent of layout and can feed CDC.</p><p>That independence can help compatible staged upgrades. Physical replication can still support some version transitions, such as supported minor updates; don't generalize the major-version restriction to every update.</p>
+<div class="en"><p>Statement-based replication sends statements for followers to re-execute, so nondeterminism and execution context can change the result. WAL shipping sends the storage engine's physical records and depends on its format and supported versions. Logical replication sends row-level changes more independently of physical layout and can feed CDC, though schema and value rules still need checking.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۹. eventual consistency دقیقاً چه می‌گوید و چه نمی‌گوید؟</span><span class="en">9. What does eventual consistency say exactly — and not say?</span></summary>
-<div class="fa"><p>یادت باشه eventual consistency فقط می‌گه اگه نوشتن وایسه و تحویل و repair برقرار باشه replicaها سرانجام همگرا می‌شن. به‌تنهایی نه deadline می‌ده نه تازگی هر read رو تضمین می‌کنه.</p>
+<div class="fa"><p>eventual consistency فقط می‌گوید اگر نوشتن متوقف شود و تحویل و پردازش ادامه یابد، replicaها سرانجام همگرا می‌شوند. این قول هیچ سقف زمانی برای تأخیر نمی‌دهد و در میانهٔ واگرایی، خواندن می‌تواند کهنه باشد یا داده‌های وابسته را بی‌ترتیب نشان دهد. این وضعیت هم در follower ناهم‌زمانِ یک دیتابیس رابطه‌ای رخ می‌دهد و هم در سیستم‌های NoSQL؛ باید مشخص کنی خواندن به تضمین قوی‌تری نیاز دارد یا نه.</p>
 </div>
-<div class="en"><p>Eventual consistency promises convergence once writes stop and updates can be delivered and processed. It doesn't specify a maximum delay. While replicas differ, reads may be stale or expose dependent data in an unexpected order.</p><p>That can occur with asynchronous followers of a relational database as well as with NoSQL systems. Decide whether the read needs a stronger guarantee.</p>
+<div class="en"><p>Eventual consistency promises convergence once writes stop and updates can be delivered and processed. It sets no maximum delay, and while replicas differ a read may be stale or expose dependent data out of order. This happens with asynchronous followers of relational databases as well as NoSQL systems, so decide whether a read needs a stronger guarantee.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۱۰. read-your-writes را با سه روشِ عملی پیاده کن.</span><span class="en">10. Implement read-your-writes three practical ways.</span></summary>
-<div class="fa"><p>تصور کن سه راه داری: read مرتبط رو بفرست سراغ leader یا replica تأییدشده؛ بعد نوشتن موقتاً همه رو بچسبون به leader؛ یا position تغییر (LSN/version) رو همراه داشته باش و فقط replica رسیده رو قبول کن. یادت باشه sleep ثابت تضمین نیست.</p>
+<div class="fa"><p>خواندن مرتبط با نوشتن را به leader یا به followerی بفرست که تأییدشده آن نوشتن را دارد. می‌توانی بعد از نوشتن، مدتی کوتاه همهٔ خواندن‌ها را به leader ببری، ولی یک پنجرهٔ زمانی یا sleep ثابت با lag بی‌سقف تضمین نیست. راه دقیق‌تر این است که نشانگر پیشرفت نوشتن (LSN یا version) را همراه داشته باشی و فقط replica رسیده به آن را بپذیری؛ اگر قول شامل چند دستگاه است، این فراداده را بین آن‌ها هم به اشتراک بگذار.</p>
 </div>
-<div class="en"><p>Read from a replica known to include the user's write. The leader is one routing option; another is a follower checked against the last write's progress token. Wait or route elsewhere until that progress is reached.</p><p>A one-minute leader-routing window can reduce the risk, but a fixed wait doesn't prove freshness under unbounded lag. If the promise covers multiple devices, share the required progress metadata across them.</p>
+<div class="en"><p>Read from a replica known to include the user's write, with the leader as one routing option. A short leader-routing window can reduce stale reads, but a fixed wait doesn't prove freshness under unbounded lag. A progress token such as an LSN or version ties the read to the accepted write, and account-wide promises must share that metadata across devices.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۱۱. monotonic reads چیست و ساده‌ترین راه‌حلش؟</span><span class="en">11. What are monotonic reads, and the simplest fix?</span></summary>
-<div class="fa"><p>فرض کن monotonic reads یعنی وقتی version تازه رو دیدی دیگه قدیمی نبینی. ساده‌ترین راه sticky کردنه: هر کاربر به یه replica بچسبه؛ ولی یادت باشه سر failover و جابه‌جایی هم نباید زمان برگرده عقب.</p>
+<div class="fa"><p>monotonic reads مانع می‌شود یک session به نسخه‌ای عقب‌تر از چیزی که قبلاً دیده برگردد، ولی تضمین نمی‌کند هر خواندن آخرین نوشتن جهانی را ببیند. چسباندن کاربر به یک replica با hash شناسه کمک می‌کند، اما اگر آن replica بیفتد یا مسیر عوض شود، جایگزین باید حداقل پیشرفت مشاهده‌شده را داشته باشد. پس routing به‌تنهایی کافی نیست و به قاعدهٔ بازیابی نیاز دارد.</p>
 </div>
-<div class="en"><p>Monotonic reads prevent a session from moving behind a version it has already observed. They don't promise that every read sees the latest global update.</p><p>Sticky routing to one replica can help. If that replica fails or routing changes, make the replacement meet the session's minimum observed progress. Routing alone needs a recovery rule.</p>
+<div class="en"><p>Monotonic reads keep a session from moving behind a version it has already observed, though they don't promise every read sees the latest global update. Sticky routing by user ID helps, but a replacement replica after failure or rerouting must meet the session's minimum observed progress. Routing alone therefore needs a recovery rule.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۱۲. consistent prefix reads چیست و چرا در پایگاه‌های داده shardشده مشکل‌ساز است؟</span><span class="en">12. What are consistent prefix reads, and why are they painful in sharded databases?</span></summary>
-<div class="fa"><p>فرض کن consistent prefix یعنی علت و معلول با همون ترتیب دیده بشن. اگه علت و معلول رو shard جدا با سرعت متفاوت replicate کنن، جواب زودتر از سوال می‌ترکه بیرون.</p>
+<div class="fa"><p>consistent-prefix reads ترتیب نوشتن‌های مرتبط را حفظ می‌کند: خواننده نباید پاسخ را پیش از پرسشی که به آن وابسته است ببیند. لاگ‌های مستقل shardها این رابطه را به‌طور خودکار در سراسر shardها حفظ نمی‌کنند. نوشتن‌های مرتبط را در یک مسیر مرتب نگه دار یا وابستگی علّی آن‌ها را ردیابی کن؛ ترتیب محلی هر shard تضمین ترتیب علّی جهانی نیست.</p>
 </div>
-<div class="en"><p>Consistent-prefix reads preserve the relevant write order: a reader shouldn't see a reply without the question it depends on. Independent shard logs don't automatically preserve that relationship across shards.</p><p>Keep related writes on one ordered path where suitable, or track their causal dependencies. A local order on each shard isn't a global causal-order guarantee.</p>
+<div class="en"><p>Consistent-prefix reads preserve the relevant write order: a reader shouldn't see a reply without the question it depends on. Independent shard logs don't automatically preserve that relationship across shards. Keep related writes on one ordered path or track their causal dependencies; a local order per shard isn't a global causal guarantee.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۱۳. multi-leader چه زمانی واقعاً ارزشش را دارد؟</span><span class="en">13. When is multi-leader truly worth it?</span></summary>
-<div class="fa"><p>فرض کن multi-leader وقتی می‌ارزه که نوشتن محلی چند region یا ویرایش آفلاین لازم داری؛ ولی یادت باشه هزینه‌اش conflict resolution و انتشار changeـه — تو یه region معمولاً نمی‌صرفه.</p>
+<div class="fa"><p>multi-leader وقتی ارزش دارد که نوشتن محلی در چند region یا ویرایش آفلاین واقعاً لازم است و می‌خواهی هر ناحیه هنگام قطعی لینک به‌کار ادامه دهد. هزینه‌اش حل تعارض و هماهنگی قیدهای سراسری مثل یکتایی نام کاربری یا موجودی نامنفی است. در یک region، این هزینه را با مسیر نوشتن ساده‌تر مقایسه کن؛ افزودن نقطهٔ نوشتن به‌تنهایی مالکیت و قواعد ادغام را حذف نمی‌کند.</p>
 </div>
-<div class="en"><p>Multi-leader can fit local writes across regions and offline-first devices. Each location can keep working while a remote link is down, then exchange changes later.</p><p>The costs are conflict resolution and coordination for global rules such as unique names or non-negative balances. Within one region, compare those costs against a simpler write path before adopting it. More writing locations don't remove the need to define ownership and merge semantics.</p>
+<div class="en"><p>Multi-leader is worth it when local writes across regions or offline editing are genuine requirements and each location must keep working through a link outage. The costs are conflict resolution and coordination for global rules such as unique usernames or non-negative balances. Within one region, compare those costs with a simpler write path; more writers don't remove the need to define ownership and merge semantics.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۱۴. توپولوژی‌های تکثیرِ چندرهبر و مشکلِ هرکدام؟</span><span class="en">14. Multi-leader replication topologies and each one's problem?</span></summary>
-<div class="fa"><p>تصور کن ring و star از واسطه رد می‌شن و با خرابی واسطه می‌خوابن؛ all-to-all مسیر بیشتر داره ولی order رسیدن قاطی می‌شه. یادت باشه duplicate detection و version vector گردنته.</p>
+<div class="fa"><p>در توپولوژی حلقه یا star، تغییر از طریق nodeهای دیگر عبور می‌کند و خرابی یک واسطه مسیر را قطع می‌کند. all-to-all مسیرهای جایگزین می‌دهد، ولی ترتیب رسیدن تغییرها متفاوت می‌شود و ممکن است به‌روزرسانی پیش از درج برسد. شناسهٔ رویداد یا node از حلقه و اعمال دوباره جلوگیری می‌کند و فرادادهٔ علّی مثل version vector به پروتکل کمک می‌کند وابستگی‌ها را رعایت کند.</p>
 </div>
-<div class="en"><p>A circular or star topology relays changes through other nodes, so a failed relay can interrupt a route. Include node or event identities to avoid loops and duplicate application.</p><p>All-to-all routes provide alternatives, but delivery order can differ. An update can arrive before its insert. Causal metadata such as version vectors identifies dependencies; the receiving protocol must also respect them. A timestamp alone doesn't establish causal history.</p>
+<div class="en"><p>In circular or star topologies, changes relay through other nodes, so a failed relay can interrupt a route. All-to-all provides alternatives, but delivery order can differ and an update can arrive before its insert. Event or node identities prevent loops and duplicate application, while causal metadata such as version vectors tells the protocol which dependencies to respect.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۱۵. LWW چرا گمراه‌کننده است و چه خطری با ساعت دارد؟</span><span class="en">15. Why is LWW misleading, and what clock danger does it carry?</span></summary>
-<div class="fa"><p>یادت باشه برای دو write مستقل «آخرین» معنی نداره؛ انتخاب با ساعت می‌تونه write واقعاً تازه‌تر رو بندازه دور چون clockها یکی نیستن — برنده عملاً تصادفیه.</p>
+<div class="fa"><p>LWW بزرگ‌ترین timestamp را با یک قاعدهٔ tie-break انتخاب می‌کند، پس یک برندهٔ قطعی دارد، نه اثبات آخرین نوشتنِ واقعی یا موردنظر. با clock skew ممکن است تغییر واقعاً جدیدتر ببازد و انتخاب عملاً تصادفی شود. LWW را فقط وقتی به‌کار ببر که اپلیکیشن همین قاعده و حذف گزینه‌های دیگر را می‌پذیرد.</p>
 </div>
-<div class="en"><p>LWW chooses the greatest timestamp, usually with a tie-break rule. That is a deterministic winner, rather than proof of the last real-world or intended update. Clock skew can make a genuinely later change lose.</p><p>Logical clocks reduce dependence on physical clock skew but don't preserve both concurrent intentions. Use LWW when the application accepts that winner rule and discarded alternatives. Unique-key inserts can avoid same-key update conflicts; they aren't the only possible use of a last-writer-wins register.</p>
+<div class="en"><p>LWW picks the greatest timestamp with a tie-break rule, giving a deterministic winner rather than proof of the last real-world or intended update. Clock skew can make a genuinely later change lose, so the winner can be effectively arbitrary. Use LWW only when the application accepts that rule and the discarded alternatives.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۱۶. siblings چیست و ادغامِ دستی چه تله‌هایی دارد؟</span><span class="en">16. What are siblings, and what traps does manual merging hold?</span></summary>
-<div class="fa"><p>فرض کن <span class="ltr">siblings</span> یعنی versionهای متعارضی که نگهشون داشتی برای تصمیم بعدی. یادت باشه merge باید delete رو هم بفهمه؛ union ساده سبد، کتاب حذف‌شده رو برمی‌گردونه تو سبد.</p>
+<div class="fa"><p>siblings نسخه‌های هم‌زمانی هستند که تا حل‌شدن توسط اپلیکیشن نگه داشته می‌شوند، بنابراین یک خواندن ممکن است چند مقدار برگرداند. حل آن‌ها به قواعد دامنه نیاز دارد: union ساده می‌تواند آیتم حذف‌شده را برگرداند و دو حل مستقل می‌توانند دوباره تعارض بسازند. نگه‌داشتن اطلاعات مفید است، ولی باید مشخص کنی هر مقدار چه معنایی دارد.</p>
 </div>
-<div class="en"><p>Siblings are concurrent versions retained until the application resolves them. A read may return several values rather than one.</p><p>The resolution needs domain rules. Set union can restore a removed cart item, and two independent resolutions can conflict again, such as B/C versus C/B. Manual merging also puts work on the user. Keeping information is useful; deciding what it means is still necessary.</p>
+<div class="en"><p>Siblings are concurrent versions retained until the application resolves them, so a read may return several values. Resolution needs domain rules: set union can restore a removed item, and two independent resolutions can conflict again. Keeping the information is useful, but deciding what it means is still necessary.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۱۷. CRDT و OT چطور دو ویرایشِ هم‌زمانِ «ice» به «nice» و «ice!» را ادغام می‌کنند؟</span><span class="en">17. How do CRDT and OT merge two concurrent edits of “ice” into “nice” and “ice!”?</span></summary>
-<div class="fa"><p>تصور کن <span class="ltr">OT</span> ایندکس عملیات رو نسبت به عملیات هم‌زمان transform می‌کنه؛ <span class="ltr">CRDT</span> با ID ثابت و قواعد همگرایی کار می‌کنه. یادت باشه هر دو باید به datatype بخورن.</p>
+<div class="fa"><p>با «ice»، یک ویرایش «n» را در ایندکس ۰ درج می‌کند و دیگری «!» را در ایندکس ۳؛ OT جایگاه دوم را پس از درج اول به ۴ تبدیل می‌کند تا «nice!» بسازد، نه «nic!e». CRDT متن می‌تواند به کاراکترها شناسهٔ ثابت بدهد و ترتیب قطعی درج‌های هم‌زمان را تعیین کند. این دو الگوریتم به یک نتیجهٔ همگرا می‌رسند، ولی هیچ‌کدام دستور عمومی union یا الحاق دلخواه رشته‌ها نیست.</p>
 </div>
-<div class="en"><p>Starting with “ice”, one edit inserts “n” at index 0 and another inserts “!” at the original index 3. OT transforms the second position to 4 after accounting for the first insert, producing “nice!” instead of “nic!e”.</p><p>A text CRDT can refer to stable character IDs and define a deterministic order for concurrent insertions. The algorithms take different routes to convergence. Neither is a generic instruction to concatenate or union arbitrary strings.</p>
+<div class="en"><p>Starting with “ice”, one edit inserts “n” at index 0 and another inserts “!” at the original index 3; OT shifts the second position to 4, producing “nice!” rather than “nic!e”. A text CRDT can give characters stable IDs and a deterministic order for concurrent insertions. Both converge through different routes, and neither is a generic instruction to union or concatenate arbitrary strings.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۱۸. quorum چیست و شرطِ <code>w + r > n</code> چه می‌دهد؟</span><span class="en">18. What is a quorum, and what does <code>w + r &gt; n</code> buy?</span></summary>
-<div class="fa"><p>فرض کن <span class="ltr">n</span> تعداد کپیه، <span class="ltr">w</span> تعداد ack نوشتن و <span class="ltr">r</span> اندازه خواندنه. شرط <span class="ltr">w</span> + <span class="ltr">r</span> &gt; <span class="ltr">n</span> فقط overlap می‌ده؛ تازه با فرض member ثابت و version درست read به write می‌رسه.</p>
+<div class="fa"><p>با n نسخهٔ ثابت، w تأیید نوشتن و r پاسخ خواندن، شرط w + r > n مجموعه‌ها را مجبور به هم‌پوشانی می‌کند. در این حالت برای نوشتن کامل، حداقل یک replica از مجموعهٔ ack در خواندن دیده می‌شود و majority با تحمل ⌊n/2⌋ خرابی یکی از انتخاب‌های رایج است. با w + r ≤ n خواندن می‌تواند همهٔ دارنده‌های نوشتن را از دست بدهد، و هم‌پوشانی به‌تنهایی linearizability نمی‌سازد؛ به version، membership و پروتکل درست هم نیاز داری.</p>
 </div>
-<div class="en"><p>With n fixed replicas, w write acknowledgments and r read responses, w + r &gt; n forces the two sets to overlap. For a completed write under those assumptions, at least one queried replica belongs to its acknowledgment set.</p><p>Majorities are a common choice and can tolerate up to ⌊n/2⌋ unavailable replicas with the corresponding settings. With w + r ≤ n, a read can miss every holder of that write. Overlap still needs correct version handling, membership and a read/write protocol; the inequality alone doesn't establish linearizability.</p>
+<div class="en"><p>With n fixed replicas, w write acknowledgments and r read responses, w + r > n forces the sets to overlap. Under those assumptions a completed write is seen by at least one queried replica, and majorities with ⌊n/2⌋ tolerance are a common choice. With w + r ≤ n a read can miss every holder of the write, and overlap alone doesn't establish linearizability: version handling, membership and the read/write protocol matter too.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۱۹. read repair، hinted handoff و anti-entropy هرکدام چه می‌کنند؟</span><span class="en">19. What do read repair, hinted handoff and anti-entropy each do?</span></summary>
-<div class="fa"><p>تصور کن read repair نسخه کهنه‌ای که سر read لو رفته رو برمی‌گردونه؛ hinted handoff change غایب رو بعداً می‌رسونه؛ anti-entropy تو background diff می‌گیره و کپی می‌کنه — بی‌هیچ order.</p>
+<div class="fa"><p>read repair نسخه‌های کهنه‌ای را که هنگام خواندن دیده می‌شوند تازه می‌کند. hinted handoff تغییرهای نگه‌داشته‌شده برای replica غایب را بعداً تحویل می‌دهد. anti-entropy در پس‌زمینه تفاوت‌های replicaها را پیدا و همگام می‌کند و کلیدهای کم‌خوانده را هم پوشش می‌دهد؛ اگر فقط read repair داشته باشی، کلیدی که کسی نمی‌خواند می‌تواند مدت زیادی کهنه بماند.</p>
 </div>
-<div class="en"><p><b>Read repair</b> fixes stale copies encountered while reading. <b>Hinted handoff</b> later delivers changes retained for an unavailable replica. <b>Anti-entropy</b> compares and synchronizes replicas in the background, including rarely read keys.</p><p>These mechanisms cover different gaps. A key nobody reads may stay stale if read repair is the only mechanism. Background reconciliation also needs monitoring; it isn't one ordered source log.</p>
+<div class="en"><p>Read repair fixes stale copies encountered during a read. Hinted handoff later delivers changes retained for an unavailable replica. Anti-entropy compares and synchronizes replicas in the background, including rarely read keys, so read repair alone can leave an unread key stale for a long time.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۲۰. version vector چیست و چه تفاوتی با vector clock دارد؟</span><span class="en">20. What is a version vector, and how does it differ from a vector clock?</span></summary>
-<div class="fa"><p>فرض کن version vector به‌ازای هر replica یه counter برای هر کلید نگه می‌داره تا overwrite وابسته از تعارض مستقل سوا بشه. یادت باشه vector clock مفهوم عام‌تر برای eventهاست و اسم‌ها تو منابع قاطی می‌شن؛ نکته ماندگار: اگه vector رو سر write بعدی پس نفرستی همه‌چیز تعارض حساب می‌شه.</p>
+<div class="fa"><p>version vector برای هر کلید شمارندهٔ هر replica را نگه می‌دارد و فرادادهٔ علّی را با مقدار برمی‌گرداند تا نوشتن بعدی نشان دهد کدام نسخه‌ها را دیده است. اگر یک بردار مؤلفه‌به‌مؤلفه بردار دیگر را بپوشاند، تاریخچهٔ دست‌کم آن را دارد؛ اگر هیچ‌کدام دیگری را نپوشاند، دو نسخه concurrent هستند. Riak از dotted version vector استفاده می‌کند و vector clock مفهوم مرتبطی برای ترتیب رویدادهاست؛ برای مقایسهٔ درست باید بدانی شمارنده‌ها چه چیزی را می‌شمارند.</p>
 </div>
-<div class="en"><p>A version vector tracks per-replica counters for a key's history. A read returns that context; a later write returns it so the server can identify observed versions.</p><p>If one vector covers another component by component, it represents at least that history; if neither covers the other, they are concurrent. A new version that dominates an old one can supersede it. Riak's dotted version vectors carry causal context. Vector clocks use related metadata for event ordering; explain what the counters mean rather than relying only on the name.</p>
+<div class="en"><p>A version vector tracks per-replica counters for a key's history and returns its causal context with the value so a later write can show which versions it observed. If one vector covers another component by component, it represents at least that history; if neither covers the other, the versions are concurrent. Riak uses dotted version vectors, and vector clocks are a related event-ordering concept; explain what the counters mean before comparing them.</p>
 </div>
 </details>
 
@@ -1640,20 +1641,20 @@
 <h2 class="reveal"><span class="secnum"><span class="fa">۶.۳</span><span class="en">6.3</span></span> <span class="fa">اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">Common interview mistakes</span></h2>
 
 <div class="fa"><ul>
-    <li>فرض کن تکثیر فقط کپیه — یادت باشه تمام سختی تو <b>change</b> و هم‌زمانیه، نه کپی.</li>
-    <li>قاطی کردن replication با backup — یادت باشه delete اشتباهی هم می‌ترکه روی همه.</li>
-    <li>تصور کن eventual یعنی «چند ثانیه بعد درسته» — یادت باشه eventually سقف نداره.</li>
-    <li>یادت باشه read scaling فقط با async می‌صرفه؛ وگرنه یه خرابی همه رو می‌خوابونه.</li>
-    <li>اگه تو failover فقط بگی «follower تازه leader می‌شه» باختی — سه خطر رو بگو: write گمشده، split brain و timeout.</li>
-    <li>اگه بگی «LWW یعنی آخرین می‌بره» ولی نگی برای concurrent «آخرین» تعریف نشده و برنده تصادفیه، مصاحبه می‌ترکه.</li>
-    <li>فرض نکن order تو all-to-all یا leaderless حفظ می‌شه — order پیام شبکه قابل اعتماد نیست، قاطی می‌کنه.</li>
-    <li>یادت باشه concurrent یعنی «هیچ‌کدوم از اون یکی خبر نداشته»، نه «یه لحظه فیزیکی».</li>
-    <li>نگو quorum یعنی majority — quorum یعنی overlap مجموعه read و write با w + r > n؛ majority فقط یه انتخاب رایجه.</li>
-    <li>یادت باشه حتی با quorum هم stale read ممکنه: rebuild از replica کهنه، rebalancing، یا write ناموفق rollback‌نشده.</li>
-    <li>نگو «CRDT همه‌چی رو حل می‌کنه» — قید ساختاری مثل «حداکثر ۵ آیتم» ذاتاً با write هم‌زمان نمی‌سازه.</li>
-    <li>union ساده بدون ردیابی delete — همون تله سبد خرید که آیتم حذف‌شده برمی‌گرده.</li>
-    <li>قاطی کردن version vector با vector clock، یا یادت بره vector رو سر write بعدی پس بفرستی.</li>
-    <li>برای هر سناریو multi-leader تجویز نکن — تو یه region معمولاً نمی‌صرفه و قید سراسری مثل uniqueness رو هم نمی‌تونی قول بدی.</li>
+    <li>گفتن اینکه تکثیر فقط یک کپی است و جا انداختن تغییرهای پیوسته و هم‌زمانی.</li>
+    <li>یکی دانستن replicaهای زنده با بکاپ؛ delete اشتباهی هم روی همهٔ کپی‌ها تکرار می‌شود.</li>
+    <li>فرض اینکه eventual consistency یک مهلت چندثانیه‌ای می‌دهد.</li>
+    <li>ادعای اینکه read scaling فقط با async به‌صرفه است؛ سیاست ack و تازگی را مشخص کن.</li>
+    <li>توضیح failover بدون نوشته‌های گم‌شده، split brain، fencing و رفتار timeout.</li>
+    <li>خواندن برندهٔ LWW به‌عنوان آخرین نوشتن واقعی؛ قاعدهٔ timestamp و اطلاعات حذف‌شده را بگو.</li>
+    <li>فرض حفظ ترتیب یا جلوگیری از تکرار در مسیرهای جایگزین تکثیر.</li>
+    <li>تعریف هم‌زمانی به‌عنوان یک لحظهٔ ساعت مشترک، به‌جای نبود ترتیب علّی.</li>
+    <li>یکی دانستن هر quorum با majority؛ همپوشانی مجموعهٔ ثابت read/write با w + r > n را توضیح بده.</li>
+    <li>فرض اینکه همپوشانی به‌تنهایی rebalancing، نوشتن ناقص و خواندن‌های هم‌زمان با نوشتن را حل می‌کند.</li>
+    <li>انتظار اینکه CRDT هر قید کسب‌وکاری مثل «حداکثر ۵ آیتم» را بدون پروتکل مناسب اجرا کند.</li>
+    <li>ادغام سبدها با union مجموعه‌ها و دور ریختن اطلاعات حذف.</li>
+    <li>برگرداندن جهت dominance بردار، یا نفرستادن context علّی همراه نوشتن بعدی.</li>
+    <li>انتخاب multi-leader بدون حساب کردن conflict resolution و قیدهای سراسری.</li>
   </ul></div>
 <div class="en"><ul>
 <li>Describing replication as a one-time copy and missing continuing changes and concurrency.</li>
@@ -1675,8 +1676,8 @@
 <h3 id="s6-4"><span class="fa">۶.۴ چک‌لیست مرور ۵ دقیقه‌ای قبل از مصاحبه</span><span class="en">6.4 Five-minute checklist before the interview</span></h3>
 
 <div class="fa"><ol>
-    <li>فرض کن ۳۰ ثانیه وقت داری: سه خانواده تکثیر رو با یه مزیت و یه بها بگو.</li>
-    <li>فرق sync / semisync / async رو بگو و یادت باشه «ack شده» تو async یعنی چی — نکته ماندگار: ممکنه بپره.</li>
+    <li>در ۳۰ ثانیه، سه خانوادهٔ تکثیر را با یک مزیت و یک بها مقایسه کن.</li>
+    <li>فرق sync / semisync / async را بگو و مشخص کن ack در هر حالت چه چیزی را تضمین می‌کند.</li>
     <li>قصه failover رو تو سه گام و سه خطر تعریف کن — split brain و fencing رو حتماً بگو، وگرنه قاطی می‌کنی.</li>
     <li>سه ناهنجاری lag رو با تضمین روبه‌روش و یه راه عملی برای هر کدوم ردیف کن.</li>
     <li>چهار راه حل تعارض رو بلد باش: avoidance / LWW / manual / automatic — به‌علاوه تله سبد خرید.</li>

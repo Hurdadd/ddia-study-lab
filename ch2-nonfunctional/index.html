@@ -38,7 +38,7 @@
     <span class="en">How long does a user wait? How much traffic can the service handle? What happens when a component breaks? In this chapter, you'll turn those questions into requirements you can test. Give each number a meaning before you memorize it.</span>
   </p>
   <div class="meta-row reveal">
-    <span><b><span class="fa">۹</span><span class="en">9</span></b> <span class="fa">نمودار تعاملی</span><span class="en">interactive diagrams</span></span><span class="dot">·</span>
+    <span><b><span class="fa">۱۰</span><span class="en">10</span></b> <span class="fa">۱۰ نمودار + روایت گام‌به‌گام</span><span class="en">10 diagrams with step-by-step narration</span></span><span class="dot">·</span>
     <span><span class="fa">محور: performance · reliability · scalability · maintainability</span><span class="en">Theme: performance · reliability · scalability · maintainability</span></span><span class="dot">·</span>
     <span><span class="fa">زمان مطالعه: حدود ۵۵ دقیقه</span><span class="en">Reading time: ~55 min</span></span>
   </div>
@@ -203,8 +203,8 @@
 <p>برای شناخت بار فقط شمردن کاربرها کافی نیست رفیق. باید تعداد درخواست و حجم داده و نسبت خوندن به نوشتن و اینکه ترافیک کجا جمع می‌شه رو هم بدونی.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch2-2">
 <p class="example-title"><b>مثال فنی: محاسبهٔ بار polling</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن یه میلیون کاربر فعال هر <code dir="ltr">5 s</code> صفحه رو تازه می‌کنن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا حساب کن: نرخ درخواست <code dir="ltr">1,000,000 / 5 = 200,000 req/s</code> ـه؛ با دنبال کردن ۲۰۰ نفر، هر درخواست ممکنه دادهٔ چند نویسنده رو قاطی کنه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ده میلیون کاربر فعال هر <code dir="ltr">5 s</code> صفحه رو تازه می‌کنن.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا حساب کن: نرخ درخواست <code dir="ltr">10,000,000 / 5 = 2,000,000 req/s</code> ـه؛ با دنبال کردن ۲۰۰ نفر، هر درخواست ممکنه دادهٔ چند نویسنده رو قاطی کنه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس تعداد کاربر به‌تنهایی ظرفیت لازم رو نمی‌گه. فاصلهٔ polling و هزینهٔ هر درخواست هم تعیین‌کننده‌ان — فقط سرشماری نکن.</p>
 </div>
 </div>
@@ -219,8 +219,8 @@
 </ul>
 <div class="callout" data-en-example="example-ch2-2">
 <p class="example-title"><b>Example: Calculating polling load</b></p>
-<p><b>Setup:</b> A million active users refresh every <code dir="ltr">5 s</code>.</p>
-<p><b>Walk through it:</b> That's <code dir="ltr">1,000,000 / 5 = 200,000 req/s</code>. With 200 followees per user, each request can also need to merge several authors' posts.</p>
+<p><b>Setup:</b> Ten million active users refresh every <code dir="ltr">5 s</code>.</p>
+<p><b>Walk through it:</b> That's <code dir="ltr">10,000,000 / 5 = 2,000,000 req/s</code>. With 200 followees per user, each request can also need to merge several authors' posts.</p>
 <p><b>What this tells you:</b> User count alone doesn't tell you the required capacity. Include the refresh interval and the work per request.</p>
 </div></div>
 
@@ -279,12 +279,12 @@
   <div class="fa"><ul>
     <li><b>۲ میلیون کوئری تایم‌لاین در ثانیه</b> (۱۰ میلیون ÷ ۵ ثانیه) — حساب کتابش با تو</li>
     <li>هر کوئری باید پست‌های ۲۰۰ نفر رو جمع کنه ← <b>۴۰۰ میلیون lookup در ثانیه</b> — اون هم تو حالت میانگین! نفست بند اومد؟</li>
-    <li>کاربرهایی که ده‌ها هزار نفر رو دنبال می‌کنن، عملاً این کوئری رو ناممکن می‌کنن — تمام.</li>
+    <li>کاربرهایی که ده‌ها هزار نفر رو دنبال می‌کنن، این کوئری رو در عمل بسیار پرهزینه و غیراقتصادی می‌کنن.</li>
   </ul></div>
   <div class="en"><ul>
 <li><b>2 million timeline queries a second</b>: 10M ÷ 5s.</li>
 <li>Each query collects posts from 200 followees: about <b>400M lookups/second</b> under this average-case estimate.</li>
-<li>Users following tens of thousands make the read-time query much more expensive.</li>
+<li>Users following tens of thousands of accounts make the read-time query impractical or much more expensive.</li>
 </ul><p>The refresh interval and work per query matter just as much as the user count.</p></div>
 
   <h3 id="s1-1"><span class="fa">راه‌حل بهتر: Materialization و Fan-out on Write</span><span class="en">Better fix: materialization and fan-out on write</span></h3>
@@ -505,7 +505,7 @@
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch2-6">
 <p class="example-title"><b>مثال فنی: میانگین، کندترین‌ها را پنهان می‌کند</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن از ۱۰۰۰ تا درخواست، ۹۹۰ تاش <code dir="ltr">10 ms</code> و ۱۰ تاش <code dir="ltr">1000 ms</code> طول می‌کشن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا میانگین <code dir="ltr">19.9 ms</code> ـه؛ با روش nearest-rank، ـی <code dir="ltr">p99=10 ms</code> و <code dir="ltr">p99.9=1000 ms</code> می‌شه.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا میانگین <code dir="ltr">19.9 ms</code> ـه؛ با روش nearest-rank، <code dir="ltr">p95=10 ms</code>، <code dir="ltr">p99=10 ms</code> و <code dir="ltr">p99.9=1000 ms</code> می‌شه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس هدف صدک باید مشخص باشه. میانگین خوب می‌تونه با تجربهٔ بد یه گروه از کاربرها همراه باشه — میانگین دروغگوی خوش‌روئه!</p>
 </div>
 </div>
@@ -513,21 +513,21 @@
 <div class="callout" data-en-example="example-ch2-6">
 <p class="example-title"><b>Example: An average can hide the slowest requests</b></p>
 <p><b>Setup:</b> Out of 1,000 requests, 990 finish in <code dir="ltr">10 ms</code> and 10 take <code dir="ltr">1000 ms</code>.</p>
-<p><b>Walk through it:</b> The mean is <code dir="ltr">19.9 ms</code>. With the nearest-rank method, <code dir="ltr">p99=10 ms</code> and <code dir="ltr">p99.9=1000 ms</code>.</p>
+<p><b>Walk through it:</b> The mean is <code dir="ltr">19.9 ms</code>. With the nearest-rank method, <code dir="ltr">p95=10 ms</code>, <code dir="ltr">p99=10 ms</code> and <code dir="ltr">p99.9=1000 ms</code>.</p>
 <p><b>What this tells you:</b> Choose the percentile explicitly. A good-looking mean can coexist with a poor experience for a smaller group of users.</p>
 </div></div>
   <div class="fa"><ul>
     <li><b>میانگین (mean):</b> برای حدس سقف throughput خوبه، ولی «معمولی بودن» حس کاربر رو نشون نمی‌ده.</li>
     <li><b>میانه / p50:</b> نصف درخواست‌ها تندتر و نصف کندتر — بهترین معیار برای «کاربر معمولی چقدر معطله».</li>
-    <li><b>p95، p99، p999:</b> برای دیدن بدبخت‌ها (outlier). مثلاً p95 = ۱.۵ ثانیه یعنی ۵ تا از هر ۱۰۰ درخواست، ۱.۵ ثانیه یا بیشتر معطلن.</li>
-    <li><b>Tail latency:</b> همون درصدهای بالا. آمازون تکلیف سرویس‌های داخلی‌ش رو <b>p99.9</b> گذاشته چون کندترین کاربرها،
-      پولدارترین مشتری‌ان (سابقهٔ خرید زیاد). بهینه کردن p99.99 گرون و کم‌بازده از آب دراومد — تهش نرو.</li>
+    <li><b>p95، p99، p999:</b> برای دیدن کندترین بخش توزیع (outlier). مثلاً p95 = ۱۰ میلی‌ثانیه یعنی ۵ تا از هر ۱۰۰ درخواست، ۱۰ میلی‌ثانیه یا بیشتر معطلن.</li>
+    <li><b>Tail latency:</b> همون درصدهای بالا. مثال کتاب از <b>p99.9</b> آمازون می‌گه چون مشتریانی با سابقهٔ خرید طولانی
+      ممکنه پاسخ‌های کندتری داشته باشن؛ بهینه کردن p99.99 هم گرون و کم‌بازده گزارش شده. این رو مثال کتاب بخون، نه سیاست ثابت امروز یه شرکت.</li>
   </ul></div>
   <div class="en"><ul>
 <li><b>Mean:</b> useful for estimating throughput capacity, but it doesn't show the typical user's wait.</li>
 <li><b>Median / p50:</b> half the requests finish sooner and half later.</li>
-<li><b>p95, p99, p999:</b> show the slower end of the distribution. In the example, p95 = 1.5s means roughly 5 in 100 requests wait 1.5s or longer.</li>
-<li><b>Tail latency:</b> the high percentiles. The book's Amazon example uses <b>p99.9</b> because customers with long purchase histories could have slower requests. It reports less benefit for the cost of improving p99.99. Read that as the book's example, rather than a statement of a company's policy today.</li>
+<li><b>p95, p99, p999:</b> show the slower end of the distribution. For example, p95 = 10 ms means roughly 5 in 100 requests wait 10 ms or longer.</li>
+<li><b>Tail latency:</b> the high percentiles. The book's Amazon example uses <b>p99.9</b> because customers with long purchase histories could have slower requests. The book reports that improving p99.99 costs much more for less benefit. Read that as the book's example, rather than a statement of a company's policy today.</li>
 </ul></div>
 
   <div class="diagram">
@@ -568,9 +568,9 @@
 <p>SLO همون هدف قابل‌سنجش خودمونه برای کیفیت سرویس. SLA قول قراردادی به مشتریه و ممکنه نقضش جریمه داشته باشه — فرقشون رو بگیر.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch2-7">
 <p class="example-title"><b>مثال فنی: بودجهٔ خطا</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن SLO ـی فرضی اینه: موفقیت <code dir="ltr">99.9%</code> از یه میلیون درخواست توی ماه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن یه SLO آموزشی اینه: موفقیت <code dir="ltr">99.9%</code> از یه میلیون درخواست توی ماه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا حداکثر ۱۰۰۰ تا درخواست ناموفق توی بودجه می‌گنجه؛ SLA ممکنه برای نقض هدف قراردادی جبران مالی تعیین کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس SLO هدف مهندسیه؛ پیامد قراردادی فقط وقتی مطرحه که SLA چنین تعهدی داشته باشه — SLO قوله، SLA سند محضریه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس SLO هدف مهندسیه؛ پیامد قراردادی فقط وقتی مطرحه که SLA چنین تعهدی داشته باشه — SLO هدف داخلی است، SLA تعهد به مشتری.</p>
 </div>
 </div>
 
@@ -586,7 +586,7 @@
 <p class="example-title"><b>Example: An error budget</b></p>
 <p><b>Setup:</b> Use a teaching SLO of <code dir="ltr">99.9%</code> success across one million requests in a month.</p>
 <p><b>Walk through it:</b> That leaves room for at most 1,000 unsuccessful requests. An SLA may separately define compensation for missing its contractual target.</p>
-<p><b>What this tells you:</b> The SLO is the engineering target. A contractual consequence applies only if the SLA includes it. Keep the target and agreement distinct.</p>
+<p><b>What this tells you:</b> The SLO is the engineering target, and a contractual consequence applies only if the SLA includes it. In short, the SLO is the internal target and the SLA is the customer commitment.</p>
 </div></div>
 
   <div class="diagram">
@@ -771,7 +771,7 @@
       <h4><span class="fa">سخت‌افزار</span><span class="en">Hardware</span></h4>
 <div class="fa"><p>خرابیِ قطعه را باید در طراحی محتمل بدانیم و راهِ ادامهٔ خدمت و بازیابی داشته باشیم.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch2-10">
 <p class="example-title"><b>مثال فنی: از دست رفتن دیسک</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن replica ـی A داده رو روی دیسک محلی داره و دیسکش می‌ترکه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن replica A داده رو روی دیسک محلی داره و دیسکش می‌ترکه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا B با کپی سالم سرویس رو ادامه می‌ده؛ A از snapshot و لاگ بعدی بازسازی می‌شه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس افزونگی باید توی دامنهٔ خرابی مناسب باشه؛ دو تا فرایند روی همون دیسک از خرابیش مستقل نیستن — تخم‌مرغ‌ها رو یه سبد نچین.</p>
 </div></div>
@@ -943,7 +943,7 @@
 <p>دو تا سؤال اصلی اینه: با همین منابع، زیاد شدن بار چه بلایی سر کیفیت میاره؟ و برای ثابت نگه‌داشتن کیفیت، چقدر باید خرج منابع کنی؟</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch2-13">
 <p class="example-title"><b>مثال فنی: دو سؤال آزمایش ظرفیت</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن توی <code dir="ltr">500 req/s</code>، ـی <code dir="ltr">p99=100 ms</code> ـه؛ توی <code dir="ltr">1000 req/s</code> می‌رسه به <code dir="ltr">900 ms</code>.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن توی <code dir="ltr">500 req/s</code>، <code dir="ltr">p99=100 ms</code> ـه؛ توی <code dir="ltr">1000 req/s</code> می‌رسه به <code dir="ltr">900 ms</code>.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا اول روی سخت‌افزار ثابت علت صف رو پیدا می‌کنیم؛ بعد می‌سنجیم برای حفظ <code dir="ltr">100 ms</code> چه منابع یا تغییر طراحی لازمه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس دو برابر کردن بار الزاماً فقط دو برابر کردن CPU نمی‌خواد؛ گلوگاه ممکنه قفل یا دیسک باشه — اول قاتل رو پیدا کن، بعد اسلحه بخر.</p>
 </div>
@@ -1287,7 +1287,7 @@
   </details>
 
   <details><summary><span class="fa">۵. مسئلهٔ سلبریتی‌ها چطور حل می‌شود؟</span><span class="en">5. How is the celebrity problem solved?</span></summary>
-    <div class="fa"><p>ترکیبی بزن: پست کاربر معمولی رو تو فهرست‌ها پخش کن، پست خیلی‌پرطرفدار رو موقع خوندن اضافه کن — هرکی به اندازهٔ خودش.</p>
+    <div class="fa"><p>ترکیبی بزن: پست کاربر معمولی رو موقع انتشار تو فهرست‌ها پخش کن و پست سلبریتی رو موقع خوندن اضافه کن. این کار نوشتن‌های میلیونی برای یه پست پرطرفدار رو حذف می‌کنه، ولی خوندن گرون‌تر می‌شه. برای کاربرهایی که خیلی زیاد دنبال می‌کنن هم نمونه‌گیری از نوشتن‌ها گزینهٔ بررسی‌شده‌ست.</p>
 </div>
     <div class="en"><p>Use a hybrid. Fan out ordinary authors' posts when they publish; merge a celebrity's posts into the prepared list when someone reads. That avoids millions of writes for a single celebrity post, at the cost of extra read-time work. For users following unusually many accounts, the case also considers sampling writes.</p>
 </div>
@@ -1307,10 +1307,10 @@
 </div>
   </details>
 
-  <details><summary><span class="fa">۸. مثالِ کتاب دربارهٔ <span class="ltr">p99.9</span> و <span class="ltr">p99.99</span> چه بده‌بستانی را نشان می‌دهد؟</span><span class="en">8. Why is Amazon strict on p99.9 but not p99.99?</span></summary>
-    <div class="fa"><p>داستان کتاب اینه: خوب کردن تأخیر کاربرهای کند می‌تونه خیلی بیارزه، ولی رسیدن به صدک‌های خیلی دور ممکنه خیلی گرون تموم بشه. این مثال رو سیاست ثابت امروز یه شرکت حساب نکن — مال اون روزه.</p>
+  <details><summary><span class="fa">۸. مثالِ کتاب دربارهٔ <span class="ltr">p99.9</span> و <span class="ltr">p99.99</span> چه بده‌بستانی را نشان می‌دهد؟</span><span class="en">8. What trade-off does the book’s Amazon p99.9 example show?</span></summary>
+    <div class="fa"><p>مثال کتاب کندی پاسخ رو به مشتریانی با سابقهٔ خرید طولانی وصل می‌کنه و می‌گه بهتر کردن این دم می‌تونه بیارزه. ولی رفتن از p99.9 به p99.99، یعنی یه درخواست از هر ۱۰٬۰۰۰، می‌تونه خیلی گرون‌تر و کم‌دستاوردتر باشه. کاربرهای متأثر رو با هدف محصول مقایسه کن. این رو زمینهٔ تاریخی کتاب بخون، نه سیاست ثابت امروز یه شرکت.</p>
 </div>
-    <div class="en"><p>The book's example connects slower responses with valuable customers who have longer purchase histories. Improving that tail can matter. But pushing from p99.9 to p99.99, one request in 10,000, can cost much more for less benefit. Compare the affected users with the product target. Treat the example as historical context, rather than a company's fixed policy today.</p>
+    <div class="en"><p>The book's example connects slower responses with customers who have long purchase histories, and says improving that tail can matter. But pushing from p99.9 to p99.99, one request in 10,000, can cost much more for less benefit. Compare the affected users with the product target. Treat the example as historical context, rather than a company's fixed policy today.</p>
 </div>
   </details>
 
@@ -1342,7 +1342,7 @@
   </details>
 
   <details><summary><span class="fa">۱۳. SPOF چیست؟ مثال بزن.</span><span class="en">13. What is a SPOF? Give an example.</span></summary>
-    <div class="fa"><p>تک‌ستون خیمه: تیکه‌ایه که خراب شدنش خدمت لازم رو می‌خوابونه، چون راه جایگزین درست‌حسابی نداریم.</p>
+    <div class="fa"><p>تک‌ستون خیمه: تیکه‌ایه که خراب شدنش خدمت لازم رو می‌خوابونه، چون راه جایگزین درست‌حسابی نداریم. یه پایگاه بدون رپلیکا یا یه load balancer تنها می‌تونه همین نقش رو بازی کنه. کل مسیر درخواست رو بگرد؛ رپلیکای بیشتر برای سرویس‌ها، یه ورودی مشترک رو محافظت نمی‌کنه.</p>
 </div>
     <div class="en"><p>A single point of failure is a component whose loss stops the required service because there's no working alternative. A database with no replica or a lone load balancer can play that role. Inspect the whole request path; extra service replicas don't protect a shared entry point.</p>
 </div>
@@ -1377,7 +1377,7 @@
   </details>
 
   <details><summary><span class="fa">۱۸. shared-memory، shared-disk و shared-nothing را مقایسه کن.</span><span class="en">18. Compare shared-memory, shared-disk and shared-nothing.</span></summary>
-    <div class="fa"><p>تو <span class="ltr">shared-memory</span> پردازنده‌ها حافظهٔ مشترک دارن؛ تو <span class="ltr">shared-disk</span> چند تا گره به انبار مشترک وصلن؛ تو <span class="ltr">shared-nothing</span> هر گره مال خودش رو داره و از راه شبکه هماهنگ می‌شه — سه تا خونه، سه تا قانون.</p>
+    <div class="fa"><p>تو <span class="ltr">shared-memory</span> پردازنده‌ها حافظهٔ مشترک دارن و معمولاً یه ماشین رو scale-up می‌کنن. تو <span class="ltr">shared-disk</span> چند تا گره به انبار مشترکی مثل NAS/SAN وصلن. تو <span class="ltr">shared-nothing</span> هر گره CPU و حافظه و دیسک خودش رو داره و از راه شبکه هماهنگ می‌شه، معمولاً با sharding. هر مدل، جای رقابت و هماهنگی رو جای متفاوتی می‌ذاره.</p>
 </div>
     <div class="en"><p>Shared-memory means processors use common memory, typically scaling up one machine. Shared-disk means separate nodes use common storage, such as NAS/SAN. Shared-nothing means each node owns its CPU, memory and disk and coordinates over the network, usually with sharding. Each model puts contention and coordination in different places.</p>
 </div>
@@ -1393,7 +1393,7 @@
   <details><summary><span class="fa">۲۰. سه اصل maintainability و مثال irreversibility؟</span><span class="en">20. The three maintainability principles, plus an irreversibility example?</span></summary>
     <div class="fa"><p>سه اصل اینان: عملیات آسون، فهم ساده، تغییر ممکن. تصمیم بی‌برگشت خرج آینده رو زیاد می‌کنه؛ نگه‌داشتن راه برگشت می‌ارزه — همیشه در خروج رو باز بذار.</p>
 </div>
-    <div class="en"><p>Operability makes the system easier to run. Simplicity makes it easier to understand. Evolvability makes it easier to change. Irreversible decisions, such as a database migration with no way back, make future work riskier. Keep a recovery or rollback path while validating the change.</p>
+    <div class="en"><p>Operability makes the system easier to run, simplicity makes it easier to understand, and evolvability makes it easier to change. Irreversible decisions, such as a database migration with no way back, make future work riskier. Keep a recovery or rollback path while validating the change.</p>
 </div>
   </details>
 

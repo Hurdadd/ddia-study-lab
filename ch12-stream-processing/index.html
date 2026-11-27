@@ -38,7 +38,7 @@
     <div class="en">Here's the thing: batch wants a <span class='ltr'>bounded</span> input with a known end — but real user data never finishes. It just keeps arriving, piece by piece, <span class='ltr'>unbounded</span>. You can fake it with a daily batch, or you can do the honest thing: process <span class='ltr'>each event continuously</span> — that's stream processing. Three questions carry the whole chapter: how events get <span class='ltr'>transported</span> (messaging and logs), how they relate to <span class='ltr'>databases</span> (sync, CDC, the state/stream duality), and how they get <span class='ltr'>processed</span> (windows, joins, time, exactly-once).</div>
   </div>
 <div class="meta-row reveal">
-<span><b><span class="fa">۱۳</span><span class="en">13</span></b> <span class="fa">نمودار تعاملی</span><span class="en">interactive diagrams</span></span><span class="dot">·</span>
+<span><b><span class="fa">۱۳</span><span class="en">13</span></b> <span class="fa">۱۳ نمودار + روایت گام‌به‌گام</span><span class="en">13 diagrams with step-by-step narration</span></span><span class="dot">·</span>
 <span><span class="fa">محور: پیام‌رسانی · CDC · پنجره‌ها · joinها · exactly-once</span><span class="en">Theme: messaging · CDC · windows · joins · exactly-once</span></span><span class="dot">·</span>
     <span><span class="fa">زمان مطالعه: حدود ۷۵ دقیقه</span><span class="en">Reading time: ~75 min</span></span><span class="dot">·</span><span><span class="fa">منبع: فصل ۱۲ کتاب DDIA ویرایش ۲</span><span class="en">Source: DDIA 2nd Edition, Chapter 12</span></span>
 </div>
@@ -105,10 +105,10 @@
 <h2 class="reveal"><span class="secnum"><span class="fa">۰</span><span class="en">0</span></span> <span class="fa">نقشهٔ راه فصل</span><span class="en">Chapter roadmap</span></h2>
 <aside class="callout fa example-index" id="chapter-examples" aria-label="مثال‌های فنی فصل ۱۲">
 <div class="tag">مثال‌های فنی فصل ۱۲</div>
-<p>هر مثال سه‌تیکه‌ست: وضعیت اول، ترتیب عملیات، نتیجه. عددها فقط برای فهم‌ان؛ اسم ابزار هم فقط وقتی میاد که رفتار همون ابزار وسط بحثه — حساب کن.</p>
+<p>هر مثال سه‌تیکه‌ست: وضعیت اول، ترتیب عملیات، نتیجه. عددها فقط برای فهم‌ان؛ اسم ابزار هم فقط وقتی میاد که رفتار همون ابزار وسط بحثه.</p>
 <details><summary>فهرستِ مثال‌ها؛ رفتن مستقیم به هر موضوع</summary><ul>
 <li><a href="#example-ch12-0">از پیام تا اثرِ پایدار</a></li>
-<li><a href="#example-ch12-1">چهار نقش، یک سفارش</a></li>
+<li><a href="#example-ch12-1">چهار نقش، یک کلیک</a></li>
 <li><a href="#example-ch12-2">مستقیم یا بروکر؟</a></li>
 <li><a href="#example-ch12-3">دو گروه، چند worker</a></li>
 <li><a href="#example-ch12-4">حساب backlog</a></li>
@@ -145,7 +145,7 @@
 <p class="example-title"><b>مثال فنی: از پیام تا اثرِ پایدار</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> رویداد <code dir="ltr">e7</code> می‌گه سفارش ۴۲ به مبلغ ۲۰۰ ثبت شده.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> مصرف‌کننده‌اش رو می‌خونه، جمعِ فروش رو عوض می‌کنه و موقعیتِ پیشرفت رو ذخیره می‌کنه؛ اگه crash بینِ همین دو تا بیفته، تکرار می‌سازه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> طراحیِ استریم باید دو چیز رو با هم روشن کنه: پیام کجا نگه داشته می‌شه، و اثر با پیشرفت چطور اتمی می‌شه. — یادت باشه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> طراحیِ استریم باید دو چیز رو با هم روشن کنه: پیام کجا نگه داشته می‌شه، و اثر با پیشرفت چطور اتمی می‌شه.</p>
 </div>
 <p>مثال‌های این فصل سناریوهای آموزشیِ برگرفته از کارهای روزمره‌اند. عددهای انتخاب‌شده برای توضیح‌اند؛ معماریِ داخلیِ یک شرکت مشخص را توصیف نمی‌کنند.</p></div>
 <div class="en">
@@ -189,10 +189,10 @@
 <div class="fa">
 <p>رویداد یعنی «این اتفاق افتاد». تولیدکننده می‌فرسته‌اش، تاپیک دستهٔ منطقیِ پیام‌هاست و مصرف‌کننده برای کارِ خودش می‌خونش.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch12-1">
-<p class="example-title"><b>مثال فنی: چهار نقش، یک سفارش</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویسِ سفارش رویداد <code dir="ltr">{id:e7, order_id:42, amount:200}</code> رو می‌سازه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پیام تو topic سفارش‌ها ثبت می‌شه؛ مصرف‌کنندهٔ گزارش می‌خونش و جمع رو عوض می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نقش‌ها روشنن: تولیدکننده منشأِ پیام، topic جریانِ دسته‌بندی‌شده، مصرف‌کننده مجریِ پردازش. رویداد یه رخدادِ شناخته‌شده با هویت و زمانه. — چهار نقش، همین.</p>
+<p class="example-title"><b>مثال فنی: چهار نقش، یک کلیک</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویسِ تحلیل رویداد <code dir="ltr">{id:c9, session_id:s3, event:click, url:/checkout}</code> را می‌سازد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پیام در topic کلیک‌ها ثبت می‌شود؛ مصرف‌کنندهٔ گزارش آن را می‌خواند و شمارشِ کلیکِ همان صفحه را عوض می‌کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> نقش‌ها روشنن: تولیدکننده منشأِ پیام، topic جریانِ دسته‌بندی‌شده، مصرف‌کننده مجریِ پردازش. رویداد یه رخدادِ شناخته‌شده با هویت و زمانه.</p>
 </div>
 </div>
 <div class="en"><p>When the input is a file (a sequence of bytes), the first step is usually parsing it into records. In the streaming world a record is called an <span class='ltr'>event</span> — same thing, different hat: a small, self-contained, immutable entity describing something that happened at a point in time. A user click, a purchase, a sensor temperature, one line of the web-server log. An event usually carries a <span class='ltr'>timestamp</span> too (wall-clock time; how that differs from a monotonic clock was covered in Chapter 9).</p></div>
@@ -223,7 +223,7 @@
 <p class="example-title"><b>مثال فنی: مستقیم یا بروکر؟</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> سرویسِ گزارش ۱۰ دقیقه خاموشه، ولی سفارش‌ها دارن میان.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> ارسالِ مستقیم بدون ذخیرهٔ پایدار می‌تونه پیام‌ها رو گم کنه؛ brokerِ پایدار طبق سیاست retention نگهشون می‌داره تا گزارش برگرده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> broker وابستگیِ زمانی رو کم می‌کنه؛ ظرفیتِ دیسک، دوام و مدتِ نگهداری هنوز باید کافی باشن. — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> broker وابستگیِ زمانی رو کم می‌کنه؛ ظرفیتِ دیسک، دوام و مدتِ نگهداری هنوز باید کافی باشن.</p>
 </div>
 </div>
 <div class="en"><p>The simplest messenger is a direct channel — a Unix pipe, a TCP connection between producer and consumer. But those wire exactly one sender to one receiver, while a real messenger has to connect many producers to one topic, and one topic to many consumers.</p></div>
@@ -323,7 +323,7 @@
 <p class="example-title"><b>مثال فنی: دو گروه، چند worker</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> topic سفارش‌ها ۴ پارتیشن داره؛ گروهِ ارسال دو worker داره و گروهِ تحلیل هم دو worker.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تو هر گروه پارتیشن‌ها تقسیم می‌شن؛ هر گروه مستقل، همهٔ جریان رو دنبال می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> load balancing تقسیمِ کارِ یه گروهه؛ fan-out رسوندنِ جریان به گروه‌های مستقل. — این دوتا رو قاطی نکن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> load balancing تقسیمِ کارِ یه گروهه؛ fan-out رسوندنِ جریان به گروه‌های مستقل.</p>
 </div>
 </div>
 <div class="en"><p>When several consumers read one topic, there are two patterns (Fig. 12-1) — and the difference between them is the whole ballgame:</p></div>
@@ -361,7 +361,7 @@
 <p class="example-title"><b>مثال فنی: حساب backlog</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> تولید <code dir="ltr">1000 msg/s</code> داریم و مصرف <code dir="ltr">700 msg/s</code>.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> backlog هر ثانیه ۳۰۰ پیام و در ۱۰ دقیقه ۱۸۰ هزار پیام بزرگ می‌شه؛ بزرگ‌کردنِ بافر فقط زمان می‌خره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یا نرخِ تولید رو کم می‌کنی، یا ظرفیتِ مصرف رو زیاد، یا طبقِ نیازِ بخشی رو حذف می‌کنی؛ صفِ نامحدود راه‌حلِ پایدارِ اختلافِ نرخ نیست. — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> یا نرخِ تولید رو کم می‌کنی، یا ظرفیتِ مصرف رو زیاد، یا طبقِ نیازِ بخشی رو حذف می‌کنی؛ صفِ نامحدود راه‌حلِ پایدارِ اختلافِ نرخ نیست.</p>
 </div>
 </div>
 <div class="en"><p>If the producer sends faster than the consumer processes, you've got three options: <span class='ltr'><b>dropping</b></span> messages, <span class='ltr'><b>buffering</b></span> them in a queue, or <span class='ltr'><b>backpressure / flow control</b></span> — stall the producer until there's room. Unix pipes and TCP take the third path with a small fixed buffer: when it's full, the sender blocks until the receiver takes something. And if you do buffer, you have to work out what happens as the queue grows: it won't fit in memory? It spills to disk? What does disk do to performance? And when the disk fills, then what?</p></div>
@@ -405,7 +405,7 @@
 <p class="example-title"><b>مثال فنی: Retry ترتیب تکمیل را عوض می‌کند</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> پیامِ اول <code dir="ltr">set status=paid</code> تو worker A گیر کرده؛ پیامِ دوم <code dir="ltr">set status=shipped</code> تو B زودتر تموم می‌شه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تحویلِ دوبارهٔ پیامِ اول می‌تونه بعداً وضعیت رو برگردونه به paid، اگه نسخه یا ترتیبِ هر سفارش کنترل نشه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> ترتیبِ تحویل با ترتیبِ پایانِ پردازش یکی نیست؛ برای همون موجودیت، کلیدگذاری، سریالی‌کردن یا کنترلِ نسخه لازمه. — این دام معروفه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> ترتیبِ تحویل با ترتیبِ پایانِ پردازش یکی نیست؛ برای همون موجودیت، کلیدگذاری، سریالی‌کردن یا کنترلِ نسخه لازمه.</p>
 </div>
 </div>
 <div class="en"><p>A consumer can crash at any moment: the broker delivered the message but it was never processed, or only half-processed. The fix is <span class='ltr'><b>acknowledgment</b></span>: the client must explicitly confirm that a message is done so the broker drops it from the queue. If the connection closes without an ack, or times out, the broker assumes the message was never processed and <span class='ltr'>redelivers</span> it to another consumer. (And here's the subtlety: the message may be fully processed with only the ack lost on the network — handling that needs an atomic-commit protocol, unless the operation is idempotent or exactly-once isn't required.)</p></div>
@@ -466,7 +466,7 @@
 <p class="example-title"><b>مثال فنی: پیامِ سمی</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> پیامِ e7 نسخهٔ schema نامعتبر داره و هر بار decoder رو می‌شکنه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> بعد از چند تلاشِ محدود، پیام با علتِ خطا و هویتِ اصلیش می‌ره تو DLQ؛ بعد از اصلاح هم یه بازپردازشِ کنترل‌شده انجام می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> retryِ بی‌پایان همون خطا رو تکرار می‌کنه و ممکنه پارتیشن رو معطل کنه؛ DLQ هم بدونِ رسیدگی، محلِ گم‌شدنِ خاموشِ داده می‌شه. — این دام معروفه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> retryِ بی‌پایان همون خطا رو تکرار می‌کنه و ممکنه پارتیشن رو معطل کنه؛ DLQ هم بدونِ رسیدگی، محلِ گم‌شدنِ خاموشِ داده می‌شه.</p>
 </div>
 </div>
 <div class="en"><p>Redelivery doesn't just reorder; it can waste resources or wedge the flow forever. Here's the classic scenario: a producer that serializes badly — say it drops a required key from a JSON object. The keyless message crashes the consumer, which restarts; no ack arrives, the broker resends, the next consumer dies too — and the loop runs forever. With a hard ordering guarantee no progress is possible at all; with relaxed ordering you progress but burn resources on messages that never get acked.</p></div>
@@ -510,7 +510,7 @@
 <p class="example-title"><b>مثال فنی: Offset جایگاهِ یک پارتیشن است</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> پیام <code dir="ltr">e7</code> تو پارتیشن ۲ با offset=۱۰۱ ثبت شده.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> گروه A تا offset ۱۰۰ و گروه B تا ۹۰ پیش رفته؛ پیشرفتشون مستقل از همه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> offset شناسهٔ سراسریِ کلِ topic نیست؛ برای موقعیت، نامِ topic و partition هم لازمه. — یادت باشه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> offset شناسهٔ سراسریِ کلِ topic نیست؛ برای موقعیت، نامِ topic و partition هم لازمه.</p>
 </div>
 </div>
 <div class="en"><p>Sending a packet over the network, or a request to a service, is a transient act that leaves no permanent trace — and the lightweight AMQP/JMS brokers inherited that transient mindset: even when they write a message to disk, they delete it soon after delivery. Databases and filesystems are the opposite: whatever is written is, as a rule, recorded forever until someone explicitly deletes it. That mindset difference wrecks “derived data”: in batch you can repeat the processing as often as you like without harming the input, but in traditional messaging, receiving a message with an ack is destructive (the message leaves the broker) — so you can’t rerun the same consumer and expect the same result. And a fresh consumer only gets messages <b>after</b> it registered; everything earlier is gone — unlike files and databases, where a late-arriving client still reads the past.</p></div>
@@ -560,9 +560,9 @@
 <p>تو صفِ کاریِ معمول، محورِ کار «تحویل و تأییدِ هر پیام»ه؛ تو لاگ، محور «نگهداریِ تاریخچه و موقعیتِ خواندنِ هر گروه». جزئیاتِ دقیق به محصول و تنظیمات بستگی داره.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch12-8">
 <p class="example-title"><b>مثال فنی: مصرف پیام، حذف فوری نیست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> گروهِ گزارش پیامِ ۱۰۱ رو خونده، ولی گروهِ حسابرسی هنوز روی ۸۰ئه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تو brokerِ لاگ‌محور، مصرفِ گروهِ اول پیام رو از لاگ برای گروهِ دوم حذف نمی‌کنه؛ retention سیاستِ مستقلِ خودش رو داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> گروه‌ها می‌تونن با سرعتِ جدا پیش برن، تا وقتی دادهٔ لازم از retention خارج نشده باشه. — حساب کن.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> تاپیکِ خوانش‌های دما ۶ پارتیشن دارد؛ گروهِ هشدار تا offset ۴۲۰۰ در پارتیشن ۳ پیش رفته، ولی گروهِ آرشیو روی همان پارتیشن هنوز ۳۹۰۰ است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> در brokerِ لاگ‌محور، مصرفِ گروهِ هشدار پیام را از لاگ برای گروهِ آرشیو حذف نمی‌کند؛ retention سیاستِ مستقلِ خودش را دارد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> گروه‌ها می‌توانند با سرعتِ جدا پیش بروند، تا وقتی دادهٔ لازم از retention خارج نشده باشد.</p>
 </div>
 </div>
 <div class="en"><p>So, the rule of thumb: if messages are expensive and you want to parallelize them one by one while order hardly matters, a lightweight JMS/AMQP broker is the better fit; if throughput is high, each message processes fast and order matters, the log-based approach shines — though the boundary between the two architectures is blurring (Kafka now supports lightweight JMS/AMQP-style consumer groups too). And since order survives only within a shard, every event that must stay ordered has to go to the same shard — e.g. by partitioning on the user ID key.</p></div>
@@ -601,7 +601,7 @@
 <p class="example-title"><b>مثال فنی: Replay بعد از اصلاح فرمول</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> خطای محاسبه از offset ۱۰۰۰ تا ۲۰۰۰ رخ داده و لاگ هنوز موجوده.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پردازشگرِ اصلاح‌شده از ۱۰۰۰ تو خروجیِ تازه بازپخش می‌کنه؛ اثرِ قبلی باید جایگزین بشه یا با هویتِ پیام از شمارشِ دوباره مصون بمونه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> عقب‌بردنِ offset به‌تنهایی جدولِ قدیمی رو پاک یا اصلاح نمی‌کنه؛ مقصد هم بخشی از برنامهٔ replayه. — یادت باشه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> عقب‌بردنِ offset به‌تنهایی جدولِ قدیمی رو پاک یا اصلاح نمی‌کنه؛ مقصد هم بخشی از برنامهٔ replayه.</p>
 </div>
 </div>
 <div class="en"><p>In the three-way classification (drop / buffer / backpressure), the log-based approach is <span class='ltr'><b>buffering with a large fixed buffer</b></span> (bounded by disk space). If a consumer lags so far that its offset points at a deleted segment, those messages are lost — i.e. the broker effectively drops messages older than the buffer. You can watch a consumer's lag behind the log tip and alert when it grows; since the buffer is big, a human operator gets time to fix the slow consumer and catch up before anything is dropped.</p></div>
@@ -641,7 +641,7 @@
 <p class="example-title"><b>مثال فنی: State چطور جریان می‌شه؟</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> جدولِ کالا برای <code dir="ltr">P7</code> قیمتِ ۱۰۰ داره و بعد به ۱۲۰ تغییر می‌کنه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> CDC تغییرِ commitشده رو به رویداد تبدیل می‌کنه و مصرف‌کننده ازش نمایِ جست‌وجو می‌سازه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پایگاه داده می‌تونه منشأِ stream باشه؛ مرزِ snapshot و تغییرهای بعدش برای ساختنِ نمای کامل لازمه. — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پایگاه داده می‌تونه منشأِ stream باشه؛ مرزِ snapshot و تغییرهای بعدش برای ساختنِ نمای کامل لازمه.</p>
 </div>
 </div>
 <div class="en"><p>Brokers and databases were always seen as two separate categories, but log-based brokers brought database ideas into messaging — and the reverse works too: streaming ideas can be brought into databases. You can even make the event stream the <span class='ltr'><b>system of record</b></span>: instead of a data model mutated by updates and deletes, model every state change as an immutable event in an append-only log and derive readable materialized views from it — the <span class='ltr'>event sourcing</span> of Chapter 3. A log-based broker (one that never deletes old events) is well-built for this. But you needn't go as far as event sourcing; even with a mutable model an event stream helps the database — because <b>every database write is itself an event</b> that can be captured, stored and processed. The replication log (Chapter 6) is the leader's write-event stream, and the state-machine replication principle (Chapter 10) is the same: if each event is a write and each replica processes the same events in the same order, all reach the same final state.</p></div>
@@ -652,9 +652,9 @@
 <p>نوشتنِ جداگانه تو دو سیستم می‌تونه ناقص بمونه یا با ترتیبِ متفاوت اجرا بشه. retryِ ساده لزوماً اختلافِ پایگاه داده و نمای دوم رو برطرف نمی‌کنه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch12-11">
 <p class="example-title"><b>مثال فنی: Dual-write وسطِ کار می‌ترکه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> برنامه قیمتِ P7 رو تو مرجع ۱۲۰ می‌کنه و پیش از نوشتنِ ایندکس crash می‌کنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> مرجع ۱۲۰ و ایندکس ۱۰۰ می‌مونن؛ و تو دو ویرایشِ هم‌زمان، حتی ترتیبِ اعمالِ دو مقصد می‌تونه فرق کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> retryِ ساده همیشه ترتیب رو درست نمی‌کنه؛ یه لاگِ معتبرِ تغییر یا outbox مسیرِ بازپخش‌پذیر می‌ده. — این دام معروفه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> برنامه نامِ نمایشیِ کاربر <code dir="ltr">U9</code> را در مرجع به «آوا» تغییر می‌دهد و پیش از نوشتنِ ایندکس crash می‌کند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> مرجع «آوا» و ایندکس نامِ قبلی را نگه می‌دارد؛ و در دو ویرایشِ هم‌زمان، حتی ترتیبِ اعمالِ دو مقصد می‌تواند فرق کند.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> retryِ ساده همیشه ترتیب را درست نمی‌کند؛ یک لاگِ معتبرِ تغییر یا outbox مسیرِ بازپخش‌پذیر می‌دهد.</p>
 </div>
 </div>
 <div class="en"><p>No single system covers every need: an OLTP database for user requests, a cache for speed, a text index for search, a warehouse for analytics — each keeps its own copy in its own optimized shape, so they must stay <b>in sync</b>. With the warehouse, periodic ETL (full copy + bulk load, i.e. batch) usually does this. An occasionally used alternative is <span class='ltr'><b>dual write</b></span>: application code explicitly writes to each system — first the database, then the search index, then the cache invalidation. But dual writes have two serious problems, the first shown in Diagram 3.</p></div>
@@ -705,11 +705,11 @@
     مشکلِ دومِ نوشتنِ دوگانه تحملِ خرابیه، نه هم‌زمانی: یکی از writeها موفق و اون یکی ناموفق می‌شه
     و دو سیستم ناسازگار می‌مونن. اینکه «هر دو موفق بشن یا هر دو شکست بخورن» همون مسئلهٔ کامیتِ اتمیه
     که حلش گرونه (2PC فصل ۸). اگه فقط یه پایگاه دادهٔ تک‌رهبری داشتی، رهبر ترتیبِ writeها رو تعیین می‌کرد و
-    replication ماشینِ وضعیت کار می‌کرد؛ ولی تو شکلِ بالا رهبرِ واحدی نیست — پایگاه داده رهبرِ خودش رو داره و
+    replication ماشینِ وضعیت کار می‌کرد؛ ولی تو این طراحی رهبرِ واحدی نیست — پایگاه داده رهبرِ خودش رو داره و
     ایندکس رهبرِ خودش رو (وضعیتی شبیه replication چندرهبریِ فصل ۶).
     ای‌کاش واقعاً فقط یه رهبر بود — مثلاً پایگاه داده — و ایندکس دنباله‌رویِ پایگاه داده می‌شد. آیا در عمل می‌شه؟
   </p></div>
-<div class="en"><p>The second dual-write problem is fault tolerance, not concurrency: one write succeeds and the other fails, leaving the two systems inconsistent. Getting “both succeed or both fail” is the atomic-commit problem, and it's expensive to solve (Chapter 8's 2PC). With a single-leader database the leader would order the writes and state-machine replication would work; but in the figure above there is no single leader — the database has its own leader and the index its own (a situation like Chapter 6's multi-leader replication). How nice it would be if there really were one leader — the database, say — with the index following it. Is that practical?</p></div>
+<div class="en"><p>The second dual-write problem is fault tolerance, not concurrency: one write succeeds and the other fails, leaving the two systems inconsistent. Getting “both succeed or both fail” is the atomic-commit problem, and it's expensive to solve (Chapter 8's 2PC). With a single-leader database the leader would order the writes and state-machine replication would work; but in this design there is no single leader — the database has its own leader and the index its own (a situation like Chapter 6's multi-leader replication). How nice it would be if there really were one leader — the database, say — with the index following it. Is that practical?</p></div>
 
 <h3 id="s4-2"><span class="fa">۴.۲. CDC: یک رهبر، چند دنباله‌رو + نمودار ۴</span><span class="en">4.2. CDC: one leader, many followers + Diagram 4</span></h3>
 
@@ -719,7 +719,7 @@
 <p class="example-title"><b>مثال فنی: CDC با مرز سازگار</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> snapshotِ جدول تا موقعیتِ لاگ ۵۰۰ گرفته شده.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> snapshot میاد تو جست‌وجو و بعد تغییرهای پس از ۵۰۰ به‌ترتیبِ مناسب اعمال می‌شن؛ lag و gap کنترل می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اگه مرز اشتباه باشه، تغییرِ حینِ snapshot جا می‌افته یا نادرست تکرار می‌شه؛ صرفِ خوندنِ دوره‌ایِ کلِ جدول، CDC دقیق نیست. — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اگه مرز اشتباه باشه، تغییرِ حینِ snapshot جا می‌افته یا نادرست تکرار می‌شه؛ صرفِ خوندنِ دوره‌ایِ کلِ جدول، CDC دقیق نیست.</p>
 </div>
 </div>
 <div class="en"><p>The trouble with most databases' replication logs was that they were treated as an internal implementation detail, not public API — for decades there was no documented way to tap the change log. But recently <span class='ltr'><b>change data capture (CDC)</b></span> has been taken seriously: observing every change written to the database and pulling it out in a form replicable to other systems — and even nicer when those changes are available as a stream right away. Just capture the changes and continuously apply them to the search index; if the change log is applied in the same order, the index data matches the database. The index and every other derived system are just consumers of the change stream — and Diagram 3's race is solved: although requests A and B reach the database concurrently, the database itself orders their execution and writes them to the replication log in that order; the index picks up and applies the same order. If another system (say, the warehouse) is needed later, just add another consumer to the same stream.</p></div>
@@ -787,7 +787,7 @@
 <p class="example-title"><b>مثال فنی: Outbox کنار سفارش</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> تو همون تراکنش، سفارش ۴۲ و ردیفِ outbox با <code dir="ltr">event_id=e7</code> نوشته می‌شن.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> relay پیام رو منتشر می‌کنه و ممکنه بعد از crash دوباره بفرستش؛ مصرف‌کننده e7 رو تکراری تشخیص می‌ده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> outbox شکافِ «ثبتِ سفارش» و «ثبتِ قصدِ انتشار» رو می‌بنده؛ ولی تحویلِ فیزیکیِ دقیقاً یک‌باره رو خودکار تضمین نمی‌کنه. — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> outbox شکافِ «ثبتِ سفارش» و «ثبتِ قصدِ انتشار» رو می‌بنده؛ ولی تحویلِ فیزیکیِ دقیقاً یک‌باره رو خودکار تضمین نمی‌کنه.</p>
 </div>
 </div>
 
@@ -840,7 +840,7 @@
 <p class="example-title"><b>مثال فنی: ساخت state از رخدادها</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> جریانِ کلید K به‌ترتیب <code dir="ltr">K=1,K=3,K=DELETE</code> هست.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اعمالِ این تغییرات state نهاییِ «K وجود نداره» رو می‌سازه؛ compaction می‌تونه برای بازسازیِ state آخرین تغییرِ لازمِ هر کلید رو نگه داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> stream تاریخچهٔ تغییره و state حاصلِ اعمالِ اون؛ حذف‌ها و retention باید تو bootstrap درست تفسیر بشن. — یادت باشه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> stream تاریخچهٔ تغییره و state حاصلِ اعمالِ اون؛ حذف‌ها و retention باید تو bootstrap درست تفسیر بشن.</p>
 </div>
 </div>
 <div class="en"><p>In Chapter 11 we saw batch profit from input immutability; the same immutability principle powers event sourcing and CDC. We usually think of the database as holding <b>current state</b> (optimized for reading), but any state that changes is the product of events that mutated it over time: the list of free seats is the product of processed reservations; an account balance the product of credits and debits. No matter how much is done and redone, the fact remains that those events happened. The key idea: <b>mutable state and the append-only log of immutable events are not in conflict; they are two sides of one coin.</b> The log of all changes is the evolution of state over time — mathematically inclined: application state is the integral of the event stream over time, and the change stream is the time-derivative of state (Fig. 12-7). As Gray and Reuter put it (1992): “Fundamentally, there is no need to keep a database; the log has all the information. The only reason for storing a database (i.e. the current end of the log) is retrieval efficiency.” And log compaction is the bridge between the two pictures: only each record's latest version remains.</p></div>
@@ -920,9 +920,9 @@
 <p>پردازش جریانی روی داده‌ای کار می‌کنه که دائماً میاد و پایانِ کلی نداره. به‌جای صبر کردن برای تکمیلِ همهٔ داده، نتیجه‌ها مرحله‌به‌مرحله عوض می‌شن.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch12-15">
 <p class="example-title"><b>مثال فنی: یک رخداد، سه پردازش</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> یه سفارشِ تازه به مبلغ ۲۰۰ رسیده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> یه پردازشگر الگوی تقلب رو بررسی می‌کنه، یکی دیگه جمعِ دقیقه رو عوض می‌کنه و سومی نمای وضعیتِ سفارش رو می‌سازه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> همه‌شون streaming‌ان، ولی state، شرطِ تکمیل و تحملِ تأخیرشون یکی نیست. — این دام معروفه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> یک ثبت‌نامِ تازه با <code dir="ltr">user_id=u9</code> رسیده.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> یک پردازشگر الگوی تقلب را بررسی می‌کند، یکی شمارشِ ثبت‌نامِ دقیقه را عوض می‌کند و سومی نمای وضعیتِ کاربر را می‌سازد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> همه‌شون streaming‌ان، ولی state، شرطِ تکمیل و تحملِ تأخیرشون یکی نیست.</p>
 </div>
 </div>
 <div class="en"><p>So far we've seen where streams come from (user events, sensors, database writes) and how they get carried. What's left is what you can <b>do</b> with a stream. Three broad ways: 1) write the events into a database/cache/index for others to query (the streaming equivalent of batch uses — especially when the stream consumer is that database's sole writer); 2) deliver events to humans (alert emails, pushes, realtime dashboards); 3) process one or more input streams into one or more output streams — possibly as a multi-stage pipeline. The rest of the chapter lives in that third way: the snippet turning a stream into a derived stream (<span class='ltr'>operator / job</span>), kin to Unix processes and Chapter-11 MapReduce jobs — same dataflow pattern (read the input read-only, write the output append-only somewhere else) and the same sharding and parallelization. Simple operations like transform and filter work the same way.</p></div>
@@ -947,7 +947,7 @@
 <p class="example-title"><b>مثال فنی: CEP با جمع‌زدن فرق داره</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> برای یه حساب، سه ورودِ ناموفق و بعد یه ورودِ موفق تو دو دقیقه رخ داده.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> CEP ترتیب و فاصلهٔ رخدادها رو برای یه الگو می‌سنجه؛ تحلیلِ معمولی می‌تونه فقط تعدادِ ورودِ ناموفقِ دقیقه رو جمع کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یه مجموعِ ساده ترتیبِ «سه شکست سپس موفقیت» رو نگه نمی‌داره؛ نوعِ سؤال، stateِ لازم رو تعیین می‌کنه. — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> یه مجموعِ ساده ترتیبِ «سه شکست سپس موفقیت» رو نگه نمی‌داره؛ نوعِ سؤال، stateِ لازم رو تعیین می‌کنه.</p>
 </div>
 </div>
 
@@ -1008,7 +1008,7 @@
 <p class="example-title"><b>مثال فنی: سه join با سه state</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> کلیک و نمایشِ تبلیغ هر دو جریان‌ان؛ مشخصاتِ کاربر یه جدوله.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> stream-stream کلیک رو تو بازهٔ زمانی به نمایش وصل می‌کنه؛ stream-table مشخصاتِ کاربر رو هنگامِ رخداد می‌خونه؛ table-table دو نمای به‌روز رو هماهنگ می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> هر join زمانِ نگهداری و معنای نسخهٔ طرفِ مقابل رو می‌خواد؛ join دو streamِ نامحدود بدون محدودیتِ state، stateِ نامحدود می‌سازه. — این دام معروفه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> هر join زمانِ نگهداری و معنای نسخهٔ طرفِ مقابل رو می‌خواد؛ join دو streamِ نامحدود بدون محدودیتِ state، stateِ نامحدود می‌سازه.</p>
 </div>
 </div>
 <div class="en"><p>Since stream processing generalizes the data pipeline to incremental processing of unbounded datasets, batch's join need shows up here too — but joining on a stream is harder, because a fresh event may arrive at any moment. Three kinds to tell apart:</p></div>
@@ -1109,12 +1109,12 @@
 <h3 id="s5-3"><span class="fa">۵.۳. چهار نوع پنجره + نمودار ۷</span><span class="en">5.3. Four window types + Diagram 7</span></h3>
 
 <div class="fa">
-<p>پنجره مشخص می‌کنه محاسبه روی کدوم بازهٔ زمانی یا چند تا داده انجام بشه. پنجرهٔ ثابت، لغزان، متحرک و نشست مرزهای متفاوتی دارن و یه رویداد ممکنه تو چند نتیجه نقش داشته باشه.</p>
+<p>پنجره مشخص می‌کنه محاسبه روی کدوم بازهٔ زمانی یا چند تا داده انجام بشه. پنجرهٔ ثابت، پنجرهٔ پرشی، پنجرهٔ لغزان و نشست مرزهای متفاوتی دارن و یه رویداد ممکنه تو چند نتیجه نقش داشته باشه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch12-18">
 <p class="example-title"><b>مثال فنی: چهار پنجره با یک جریان</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> برای یه کلید، رخدادها تو <code dir="ltr">10:01,10:04,10:12</code> رسیدن و زمانِ خودِ رخداد ملاکه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> tumbling پنج‌دقیقه‌ای دو رخدادِ اول رو تو <code dir="ltr">[10:00,10:05)</code> می‌ذاره؛ hopping با اندازهٔ ۱۰ و گام ۵ اون‌ها رو تو دو پنجرهٔ هم‌پوشان می‌شمره؛ sliding ده‌دقیقه‌ای تو ۱۰:۱۲ فقط ۱۰:۰۴ و ۱۰:۱۲ رو داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> session با قانونِ «فاصلهٔ بیش از پنج دقیقه، نشستِ تازه» دو رخدادِ اول رو یه نشست و رخدادِ سوم رو نشستِ بعد می‌گیره؛ تعریفِ مرزِ هر پنجره باید مشخص باشه. — حساب کن.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> برای یه کلید، رخدادها تو <code dir="ltr">10:01, 10:03, 10:40</code> رسیدن و زمانِ خودِ رخداد ملاکه.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> tumbling یک‌دقیقه‌ای هر رخداد را جدا می‌گذارد: <code dir="ltr">[10:01,10:02)</code>، <code dir="ltr">[10:03,10:04)</code> و <code dir="ltr">[10:40,10:41)</code>؛ hopping پنج‌دقیقه‌ای با گام یک‌دقیقه دو رخدادِ اول را در <code dir="ltr">[10:00,10:05)</code> و پنجره‌های هم‌پوشانِ همسایه می‌شمارد؛ sliding پنج‌دقیقه‌ای در <code dir="ltr">10:04</code> فقط <code dir="ltr">10:01</code> و <code dir="ltr">10:03</code> را دارد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> session با قانونِ «بیش از ۳۰ دقیقه بی‌کاری، نشستِ تازه» دو رخدادِ اول را یک نشست و رخدادِ <code dir="ltr">10:40</code> را نشستِ بعد می‌گیرد؛ مرزِ هر پنجره باید صریح تعریف شود.</p>
 </div>
 </div>
 <div class="en"><p>Once the event timestamp is known, the next step is defining a window over a time range for aggregation (counts, averages). Four common kinds:</p></div>
@@ -1142,26 +1142,26 @@
       که یه دقیقه یه دقیقه جلو می‌رن — هموارسازی با هم‌پوشانی (اول پنجره‌های tumbling یک‌دقیقه‌ای، بعد تجمیعِ چند همسایه).
     </p>
 <p>
-      بخشِ سوم <span class="ltr">Sliding</span>: دو رویداد با فاصلهٔ ۴.۵ دقیقه تو یه پنجرهٔ لغزانن
-      درحالی‌که هیچ پنجرهٔ ثابتِ ۵دقیقه‌ای اون‌ها رو یه‌جا نمی‌گذاشت (یادداشتِ «پنجره رویدادها رو دنبال می‌کنه») —
+      بخشِ سوم <span class="ltr">Sliding</span>: دو رویداد با فاصلهٔ ۴.۵ دقیقه تو یه پنجرهٔ لغزانِ پنج‌دقیقه‌ای‌ان
+      درحالی‌که هیچ پنجرهٔ ثابتِ یک‌دقیقه‌ای اون‌ها رو یه‌جا نمی‌گذاشت (یادداشتِ «پنجره رویدادها رو دنبال می‌کنه») —
       پیاده‌سازی: بافرِ مرتبِ رویدادها و اخراجِ کهنه‌ها با انقضا.
       باندِ چهارم <span class="ltr">Session</span>: خوشه‌های رویدادِ یه کاربر با مستطیل‌های پهنای‌متغیر،
       و شکافِ «۳۰ دقیقه بی‌فعالیتی ← پایانِ session» که پنجره رو می‌بنده — بدونِ مدتِ ثابت.
-      درس: tumbling/hopping/session مرزِ ثابت دارن و ارزون‌ان؛ sliding state شناور می‌خواد و با پنجرهٔ بزرگ یا throughput بالا،
-      state موقتِ زیادی روی ماشین‌ها می‌خواد (حافظه یا دیسک).
+      درس: tumbling و hopping مرزِ ثابت دارن و ارزون‌ان؛ مرزِ session را شکافِ بی‌کاری تعیین می‌کند؛ sliding state شناور می‌خواهد و با پنجرهٔ بزرگ یا throughput بالا،
+      حافظه یا دیسکِ زیادی روی ماشین‌ها مصرف می‌کند.
     </p>
 </div>
 <div class="en">
-<p>Four stacked bands sharing a 0–10 minute scale, with the legend “dot = event, rectangle = window”. Band 1, <span class='ltr'>Tumbling</span> (fixed size, no overlap): back-to-back rectangles <span class='ltr'>[0,1)</span>, <span class='ltr'>[1,2)</span> through <span class='ltr'>[9,10)</span> — the note says each event lands in exactly one window (implementation: rounding the timestamp down to the minute). Band 2, <span class='ltr'>Hopping</span> (fixed size, fixed hop): overlapping 5-minute rectangles <span class='ltr'>[0,5)</span>, <span class='ltr'>[1,6)</span> through <span class='ltr'>[5,10)</span> advancing one minute at a time — smoothing via overlap (first one-minute tumbling windows, then aggregating several neighbors).</p><p>Band 3, <span class='ltr'>Sliding</span>: two events 4.5 minutes apart share a sliding window although no fixed 5-minute window would hold them together (“the window follows the events”) — implementation: a sorted event buffer with expiry evicting the stale. Band 4, <span class='ltr'>Session</span>: one user's event clusters in variable-width rectangles, with the “30 minutes idle → session ends” gap closing the window — no fixed duration. Lesson: tumbling/hopping/session have fixed boundaries and are cheap; sliding needs floating state, and with big windows or high throughput it needs lots of temporary machine state (memory or disk).</p>
+<p>Four stacked bands sharing a 0–10 minute scale, with the legend “dot = event, rectangle = window”. Band 1, <span class='ltr'>Tumbling</span> (fixed size, no overlap): back-to-back rectangles <span class='ltr'>[0,1)</span>, <span class='ltr'>[1,2)</span> through <span class='ltr'>[9,10)</span> — the note says each event lands in exactly one window (implementation: rounding the timestamp down to the minute). Band 2, <span class='ltr'>Hopping</span> (fixed size, fixed hop): overlapping 5-minute rectangles <span class='ltr'>[0,5)</span>, <span class='ltr'>[1,6)</span> through <span class='ltr'>[5,10)</span> advancing one minute at a time — smoothing via overlap (first one-minute tumbling windows, then aggregating several neighbors).</p><p>Band 3, <span class='ltr'>Sliding</span>: two events 4.5 minutes apart share a sliding window although no fixed one-minute tumbling window would hold them together (“the window follows the events”) — implementation: a sorted event buffer with expiry evicting the stale. Band 4, <span class='ltr'>Session</span>: one user's event clusters in variable-width rectangles, with the “30 minutes idle → session ends” gap closing the window — no fixed duration. Lesson: tumbling and hopping have fixed boundaries and are cheap; a session boundary is set by the idle gap; sliding needs floating state, and with big windows or high throughput it needs lots of temporary machine state (memory or disk).</p>
 </div>
 
 <div class="fa"><ul>
-    <li><b>غلتان</b> (<span class="ltr">tumbling</span>): طولِ ثابت، هر رویداد دقیقاً تو یه پنجره (مثلاً همهٔ رویدادهای دقیقهٔ ۱۰:۰۳ تو یه پنجره).</li>
-    <li><b>پرشی</b> (<span class="ltr">hopping</span>): طولِ ثابت ولی پنجره‌های متوالی هم‌پوشانی دارن (مثلاً پنجرهٔ ۵دقیقه‌ای با hop یک‌دقیقه‌ای: ۱۰:۰۳ تا ۱۰:۰۷، بعد ۱۰:۰۴ تا ۱۰:۰۸).</li>
-    <li><b>لغزان</b> (<span class="ltr">sliding</span>): همهٔ رویدادهایی که تو فاصلهٔ معینی از هم‌ان (مثلاً دو رویداد با فاصلهٔ ۴.۵ دقیقه تو پنجرهٔ ۵دقیقه‌ای‌ان، هرچند هیچ مرزِ ثابتی اون‌ها رو یه‌جا نمی‌کنه).</li>
+    <li><b>پنجرهٔ ثابت</b> (<span class="ltr">tumbling</span>): طولِ ثابت، هر رویداد دقیقاً تو یه پنجره (مثلاً پنجرهٔ یک‌دقیقه‌ای <code dir="ltr">[10:03,10:04)</code> همهٔ رویدادهای همان دقیقه را می‌گیرد).</li>
+    <li><b>پنجرهٔ پرشی</b> (<span class="ltr">hopping</span>): طولِ ثابت ولی پنجره‌های متوالی هم‌پوشانی دارن (مثلاً پنجرهٔ پنج‌دقیقه‌ای با گام یک‌دقیقه: <code dir="ltr">[10:00,10:05)</code>، بعد <code dir="ltr">[10:01,10:06)</code>).</li>
+    <li><b>پنجرهٔ لغزان</b> (<span class="ltr">sliding</span>): همهٔ رویدادهایی که تو فاصلهٔ معینی از هم‌ان (مثلاً دو رویداد با فاصلهٔ ۴.۵ دقیقه تو پنجرهٔ پنج‌دقیقه‌ای‌ان، هرچند هیچ مرزِ ثابتی اون‌ها رو یه‌جا نمی‌کنه).</li>
     <li><b>نشست</b> (<span class="ltr">session</span>): بدونِ مدتِ ثابت — همهٔ رویدادهای نزدیکِ همِ یه کاربر، و پایان وقتی که کاربر مدتی (مثلاً ۳۰ دقیقه) غیرفعال بوده؛ رایج تو تحلیلِ وب‌سایت.</li>
   </ul></div>
-<div class="en"><ul><li><span class='ltr'><b>Tumbling</b></span>: fixed length, each event in exactly one window (e.g. all 10:03-minute events in one window).</li><li><span class='ltr'><b>Hopping</b></span>: fixed length but consecutive windows overlap (e.g. a 5-minute window with a one-minute hop: 10:03–10:07, then 10:04–10:08).</li><li><span class='ltr'><b>Sliding</b></span>: all events within a given distance of each other (e.g. two events 4.5 minutes apart share a 5-minute window, though no fixed boundary would hold them together).</li><li><span class='ltr'><b>Session</b></span>: no fixed duration — all nearby events of one user, ending when the user has been idle a while (e.g. 30 minutes); common in website analytics.</li></ul></div>
+<div class="en"><ul><li><span class='ltr'><b>Tumbling</b></span>: fixed length, each event in exactly one window (e.g. a one-minute window <code dir='ltr'>[10:03,10:04)</code> holds every event in that minute).</li><li><span class='ltr'><b>Hopping</b></span>: fixed length but consecutive windows overlap (e.g. 5-minute windows with a one-minute hop: <code dir='ltr'>[10:00,10:05)</code>, then <code dir='ltr'>[10:01,10:06)</code>).</li><li><span class='ltr'><b>Sliding</b></span>: all events within a given distance of each other (e.g. two events 4.5 minutes apart share a 5-minute window, though no fixed boundary would hold them together).</li><li><span class='ltr'><b>Session</b></span>: no fixed duration — all nearby events of one user, ending when the user has been idle a while (e.g. 30 minutes); common in website analytics.</li></ul></div>
 
 <div class="fa"><p>
     عملیاتِ پنجره معمولاً state موقت نگه می‌داره: گاهی با اندازهٔ ثابت (شمارنده فقط یه عدده، هرقدر هم پنجره بزرگ بشه)،
@@ -1177,7 +1177,7 @@
 <p class="example-title"><b>مثال فنی: رخداد دیر رسیده</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> خرید تو <code dir="ltr">10:02</code> رخ داده، ولی به‌خاطرِ قطعِ دستگاه تو <code dir="ltr">10:12</code> به پردازشگر رسیده.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> گزارشِ event-time اون رو تو بازهٔ <code dir="ltr">10:00–10:05</code> می‌ذاره؛ گزارشِ processing-time هم تو بازهٔ دریافت.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> برای گزارشِ رخدادِ واقعی به lateness و اصلاحِ نتیجه نیاز داری؛ دو ساعت، دو سؤالِ متفاوت رو جواب می‌دن. — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> برای گزارشِ رخدادِ واقعی به lateness و اصلاحِ نتیجه نیاز داری؛ دو ساعت، دو سؤالِ متفاوت رو جواب می‌دن.</p>
 </div>
 </div>
 <div class="en"><p>Stream processors deal with time a lot (e.g. “the average of the last five minutes”), and what “the last five minutes” means is surprisingly subtle. In batch, tasks chew through history fast, and when they need time separation they look at each event's embedded timestamp — looking at the executing machine's clock is meaningless, since run time has nothing to do with occurrence time (a minutes-long batch may read a year of history; the timeline that matters is that year, not those minutes). And that use of the event timestamp makes processing <b>deterministic</b>: rerunning on the same input gives the same result.</p></div>
@@ -1243,7 +1243,7 @@
 <p class="example-title"><b>مثال فنی: Watermark حکمِ قطعیِ نرسیدن نیست</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> پنجره تا <code dir="ltr">10:05</code>ه و سیاست، اصلاح تا دو دقیقه بعد از پایانِ پنجره رو می‌پذیره.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> watermark از ۱۰:۰۵ رد می‌شه و خروجیِ اولیه منتشر می‌شه؛ تا مرزِ مجاز، پیامِ دیررس می‌تونه نتیجه رو اصلاح کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> watermark برآوردِ پیشرفتِ event-timeه؛ سیاستِ دادهٔ دیرتر و پاک‌سازیِ state باید جدا تعریف بشه. — این دام معروفه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> watermark برآوردِ پیشرفتِ event-timeه؛ سیاستِ دادهٔ دیرتر و پاک‌سازیِ state باید جدا تعریف بشه.</p>
 </div>
 </div>
 <div class="en"><p>Here's the subtle part of defining windows with event time: you're never sure whether all of a window's events arrived or more are on the way. Say you count events in one-minute windows; minute-37's events are counted and now most inputs are minutes 38 and 39 — when do you declare minute 37's window done and emit its counter? You can time out (no fresh event for that window for a while, so declare it ready), but some events may be buffered on another machine (network partition). You have to cope with those late <span class='ltr'>stragglers</span> arriving after the announcement; two broad ways: ignore them (normally a small fraction — metric the dropped count and alert if it grows) or publish a correction (the window's updated value including the laggards, possibly retracting the previous output). Sometimes a special message says “from now on no message with timestamp before t will come” and the consumer triggers the window with it — but with producers on different machines each producer's threshold must be tracked separately, and adding/removing producers gets harder.</p></div>
@@ -1301,7 +1301,7 @@
 <p class="example-title"><b>مثال فنی: شکافِ اثر و offset</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> جمعِ فعلی ۱۰۰۰ئه و پیامِ ۱۰۱ مبلغِ ۲۰۰ داره.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> worker جمع رو ۱۲۰۰ می‌کنه، ولی قبل از ذخیرهٔ پیشرفت crash می‌کنه؛ replayِ بی‌حفاظ دوباره می‌زنه و می‌رسه به ۱۴۰۰.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> «دقیقاً یک اثر» به اتمی‌بودنِ state و پیشرفت، یا dedupِ معتبر نیاز داره؛ فقط ack کردنِ پیام کافی نیست. — این دام معروفه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> «دقیقاً یک اثر» به اتمی‌بودنِ state و پیشرفت، یا dedupِ معتبر نیاز داره؛ فقط ack کردنِ پیام کافی نیست.</p>
 </div>
 </div>
 <div class="en"><p>In Chapter 11 we saw batch tolerate failure simply: the broken task restarts from scratch on another machine and its partial output is discarded; since input is immutable and each task's output goes to a separate file that appears only on successful completion. The result looks as if no failure happened — as if each input record was processed exactly once, although restarts mean some records were processed several times with only one visible effect. This is called <span class='ltr'>exactly-once</span> semantics (<span class='ltr'>effectively-once</span> is the more precise description). Streams have the same problem but no simpler: waiting for a task's “end” to reveal output is impossible, since the stream is infinite and never ends.</p></div>
@@ -1312,9 +1312,9 @@
 <p>Microbatch ورودی رو به دسته‌های کوچک تقسیم می‌کنه. Checkpoint یه نقطهٔ بازیابیِ وضعیت و پیشرفته؛ بعد از خرابی، پردازش از نقطهٔ سازگار ادامه پیدا می‌کنه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch12-22">
 <p class="example-title"><b>مثال فنی: Checkpoint سازگار</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تو checkpoint شمارهٔ ۷، جمعِ ۱۲۰۰ و موقعیتِ ورودی تا پیامِ ۱۰۱ با هم ثبت شدن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> بعد از crash، state و ورودی از همون مرز بازیابی می‌شن؛ خروجیِ بیرونی هم باید با قراردادِ checkpoint سازگار باشه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> بازیابیِ state تا ۱۰۱ همراهِ offsetِ ۱۰۰ همون مرز نیست و می‌تونه دوباره‌شماری بسازه. — حساب کن.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> در checkpoint شمارهٔ ۷، موجودیِ انبارِ ۸۵۰ واحد و موقعیتِ ورودی تا پیامِ ۳۰۲ با هم ثبت شده‌اند.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> بعد از crash، state و ورودی از همان مرز بازیابی می‌شوند؛ خروجیِ بیرونی هم باید با قراردادِ checkpoint سازگار باشد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اگر state تا پیامِ ۳۰۲ بازیابی شود ولی offset روی ۳۰۱ بماند، مرز یکی نیست و دوباره‌شماری می‌سازد.</p>
 </div>
 </div>
 <div class="en"><p>One way is cutting the stream into small blocks and treating each block like a miniature batch: <span class='ltr'>microbatching</span> (in Spark Streaming; batch size usually about a second — an efficiency tradeoff: smaller batches mean more scheduling and coordination overhead, bigger batches mean more latency before results show). Microbatching also builds a tumbling window the size of the batch (in processing time, not event timestamps); jobs wanting bigger windows must explicitly carry state from one microbatch to the next. The different approach in Flink: periodically producing a rolling <span class='ltr'>checkpoint</span> of state and writing it to durable storage; if an operator crashes it restarts from the freshest checkpoint and discards output between the last checkpoint and the crash. Checkpoints are triggered by barriers in the message stream — like microbatch boundaries but without imposing a particular window size. Within a stream processor's boundaries, both approaches give batch's exactly-once.</p></div>
@@ -1333,9 +1333,9 @@
 <p>برای اثرِ یک‌باره، ثبتِ خروجی و پیشرفت باید هماهنگ باشه یا نوشتنِ تکراری اثرِ اضافه نذاره. تضمینِ داخلِ بروکر خودبه‌خود به هر سیستمِ بیرونی منتقل نمی‌شه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch12-23">
 <p class="example-title"><b>مثال فنی: یک تراکنش برای اثر و شناسه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تو مقصدِ SQL، <code dir="ltr">event_id=e7</code> uniqueه و جمعِ فروش باید ۲۰۰ زیاد بشه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> داخل یه تراکنش، شناسه ثبت و جمع زیاد می‌شه؛ اگه شناسه از قبل باشه، افزایشِ دوباره انجام نمی‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> commitِ offset جدا می‌تونه عقب بمونه و پیام تکرار بشه، ولی این مقصد اثر رو دوباره اعمال نمی‌کنه؛ حفظِ شناسه به افقِ replay وابسته‌ست. — یادت باشه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> در مقصدِ SQL، <code dir="ltr">event_id=e11</code> یکتاست و موجودیِ کوپن باید یک واحد کم شود.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> داخل یک تراکنش، شناسه ثبت و موجودی کم می‌شود؛ اگر شناسه از قبل باشد، کاهشِ دوباره انجام نمی‌شود.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> commitِ offset جدا می‌تونه عقب بمونه و پیام تکرار بشه، ولی این مقصد اثر رو دوباره اعمال نمی‌کنه؛ حفظِ شناسه به افقِ replay وابسته‌ست.</p>
 </div>
 </div>
 <div class="en"><p>For exactly-once appearance under failure, you must ensure all outputs and side effects of processing one event persist if and only if processing succeeded: messages to downstream operators or external systems (even emails and pushes), database writes, operator state changes, and input-message acknowledgment (including advancing the offset in a log-based broker) — all must happen atomically: all or none. Sound familiar? It is Chapter 8's “exactly-once message processing” with distributed transactions and 2PC. But in a narrower environment such an atomic commit can be implemented efficiently (Google's Dataflow, VoltDB, Kafka): unlike XA, which transacts across heterogeneous technologies, these keep the transaction internal — managing both state changes and messaging inside the framework — and the protocol overhead is amortized by processing several input messages in one transaction.</p></div>
@@ -1396,7 +1396,7 @@
 <p class="example-title"><b>مثال فنی: مرز تضمین را تا مقصد دنبال کن</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> پردازشگر از Kafka می‌خونه و روی topic دیگه‌ای می‌نویسه، یا به API پیامک زنگ می‌زنه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تراکنشِ Kafka می‌تونه outputِ Kafka و offset رو تو دامنهٔ خودش هماهنگ کنه؛ API پیامک بیرون از اون به کلیدِ تکرارپذیری و قراردادِ خودش نیاز داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> exactly-once رو برای مسیرِ مشخص می‌گیم؛ تضمینِ داخلِ broker رو بی‌دلیل به هر اثرِ بیرونی تعمیم نمی‌دیم. — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> exactly-once رو برای مسیرِ مشخص می‌گیم؛ تضمینِ داخلِ broker رو بی‌دلیل به هر اثرِ بیرونی تعمیم نمی‌دیم.</p>
 </div>
 </div>
 <div class="en"><p>Now we see all the chapter's choices in one tree: first which broker, then which delivery meaning. Note the tree's main path (<span class='ltr'>start → q1 → q3 → out_log → q4 → out_idem</span>) is today's common recommendation: if you want replay and throughput is high, a log-based broker; and since external effects are usually outside the framework, you effectively reach “practically exactly once” with idempotent writes.</p></div>
@@ -1468,7 +1468,7 @@
 <section id="s7">
 <h2 class="reveal"><span class="secnum"><span class="fa">۷</span><span class="en">7</span></span> <span class="fa">بستهٔ مصاحبه</span><span class="en">Interview pack</span></h2>
 
-<h3 id="s7-1"><span class="fa">۷.۱. همه‌چیز در یک نگاه</span><span class="en">7.1. 7.1 Everything at a glance</span></h3>
+<h3 id="s7-1"><span class="fa">۷.۱. همه‌چیز در یک نگاه</span><span class="en">7.1. Everything at a glance</span></h3>
 
 <div class="fa"><table>
     <tr><th>مفهوم</th><th>تعریفِ یک‌خطی</th><th>نکته‌ی مصاحبه</th></tr>
@@ -1508,17 +1508,17 @@
     <tr><td><span class="ltr">event time vs processing time</span></td><td>timestamp رویداد (قطعی) در برابرِ ساعتِ پردازشگر (شکننده با lag)</td><td>شکل ۱۲-۸: restart جهشِ مصنوعی می‌سازه</td></tr>
     <tr><td><span class="ltr">watermark</span></td><td>«بعد از این، پیامی قبل از t نمیاد»؛ trigger پنجره</td><td>به‌ازای هر تولیدکننده جدا پیگیری می‌شه</td></tr>
     <tr><td><span class="ltr">stragglers</span></td><td>دیررسِ بعد از بستنِ پنجره: بی‌خیال (با متریک) یا اصلاحیه (با retraction)</td><td>ساعتِ دستگاه قابلِ اعتماد نیست؛ سه timestamp</td></tr>
-    <tr><td><span class="ltr">tumbling / hopping / sliding / session</span></td><td>بدونِ هم‌پوشانی / با هم‌پوشانی / دنبال‌کنندهٔ رویداد / بر اساسِ سکون</td><td>اسلایدینگ و join state بافر می‌خوانن</td></tr>
+    <tr><td><span class="ltr">tumbling / hopping / sliding / session</span></td><td>پنجرهٔ ثابت (بدونِ هم‌پوشانی) / پنجرهٔ پرشی (با هم‌پوشانی) / پنجرهٔ لغزان (دنبال‌کنندهٔ رویداد) / نشست (بر اساسِ سکون)</td><td>پنجرهٔ لغزان و joinها state بافر می‌خوانند</td></tr>
     <tr><td><span class="ltr">exactly-once (effectively-once)</span></td><td>اثرِ مرئی انگار یک‌بار، هرچند پردازش چند بار</td><td>تو استریم: microbatch/checkpoint + کامیتِ اتمی/idempotence</td></tr>
     <tr><td><span class="ltr">microbatch vs checkpoint</span></td><td>بلوکِ ~۱ثانیه‌ای در برابرِ snapshot غلتان با barrier</td><td>هر دو درونِ فریم‌ورک exactly-once؛ بیرون نه (اثرِ دوم)</td></tr>
     <tr><td><span class="ltr">idempotent sink</span></td><td>offset کافکا همراهِ write؛ تکرار بی‌اثر</td><td>فرض: بازپخشِ هم‌ترتیب + قطعی‌بودن + fencing</td></tr>
   </table></div>
-<div class="en"><table><thead><tr><th>Concept</th><th>One-line definition</th><th>Interview note</th></tr></thead><tbody><tr><td><span class='ltr'>event</span></td><td>Small self-contained immutable record of something that happened at a point in time + timestamp</td><td>The record's equivalent in batch; a log line is an event too</td></tr><tr><td><span class='ltr'>topic / stream</span></td><td>A group of same-kind events</td><td>The filename's equivalent in a filesystem</td></tr><tr><td><span class='ltr'>producer / consumer</span></td><td>One-time producer, possibly several consumers</td><td>Also called publisher/sender and subscriber/recipient</td></tr><tr><td><span class='ltr'>polling vs notification</span></td><td>Periodic polling gets expensive at low latency (empty-handed requests)</td><td>Database triggers are limited; you need a specialized messenger</td></tr><tr><td><span class='ltr'>drop / buffer / backpressure</span></td><td>Three ways to outproduce consumption</td><td>Unix pipes and TCP take the third with a small fixed buffer</td></tr><tr><td><span class='ltr'>direct messaging</span></td><td>No middleman: UDP multicast, ZeroMQ, StatsD, webhooks</td><td>Assumes always-online; offline consumers lose out</td></tr><tr><td><span class='ltr'>message broker</span></td><td>Centralized message-delivery server; durability lives here</td><td>Its consumer is asynchronous (you only get the buffering ack)</td></tr><tr><td><span class='ltr'>broker vs database</span></td><td>Brokers delete, databases keep; brokers notify, databases snapshot</td><td>Traditional brokers aren't for long-term storage</td></tr><tr><td><span class='ltr'>load balancing</span></td><td>Each message goes to one of the consumers</td><td>For expensive work; you scale it by adding consumers</td></tr><tr><td><span class='ltr'>fan-out</span></td><td>Each message reaches all the consumers</td><td>Like several batch jobs on one file</td></tr><tr><td><span class='ltr'>consumer groups</span></td><td>Load balancing inside groups + fan-out across groups</td><td>Kafka's combined pattern</td></tr><tr><td><span class='ltr'>acknowledgment</span></td><td>Explicit “processing done” so the message leaves the queue</td><td>No ack means redelivery to another consumer</td></tr><tr><td><span class='ltr'>reordering trap</span></td><td>Load balancing + redelivery = broken order (m4 before m3)</td><td>Even JMS/AMQP ordering guarantees don't stop it; fix: separate queues</td></tr><tr><td><span class='ltr'>poison message + DLQ</span></td><td>An always-fatal message builds an infinite retry loop; the DLQ frees it</td><td>You monitor the DLQ; every message in it is an error</td></tr><tr><td><span class='ltr'>log-based broker</span></td><td>Append to a log + sequential read + tail -f</td><td>Consumption is read-only, so replay is possible</td></tr><tr><td><span class='ltr'>partition + offset</span></td><td>Log shard + each message's ascending number in the partition</td><td>Total order inside a partition, none across them</td></tr><tr><td><span class='ltr'>consumer offset</span></td><td>Periodic progress recording instead of per-message ack</td><td>Resume from older = duplicates; like the LSN in replication</td></tr><tr><td><span class='ltr'>max consumers = #partitions</span></td><td>Each shard has exactly one owner</td><td>Parallelize with more shards, not more consumers</td></tr><tr><td><span class='ltr'>head-of-line blocking</span></td><td>A slow message holds up the rest of its shard</td><td>Like the Chapter-2 performance story</td></tr><tr><td><span class='ltr'>ring buffer on disk</span></td><td>Old segments are deleted; a big lag means loss</td><td>~22h minimum buffer; watch the lag</td></tr><tr><td><span class='ltr'>dual-write race</span></td><td>Two independent leaders → two orders → permanent silent divergence</td><td>Fig. 12-4; without a version vector you don't even notice</td></tr><tr><td><span class='ltr'>CDC</span></td><td>Extracting the database change log as an ordered stream</td><td>Debezium, Kafka Connect; asynchronous, so it has lag</td></tr><tr><td><span class='ltr'>initial snapshot</span></td><td>Consistent copy at a known offset + applying changes from there</td><td>Netflix DBLog for gradual snapshots</td></tr><tr><td><span class='ltr'>log compaction</span></td><td>Only each key's latest value remains (+ tombstone for deletes)</td><td>Rebuilding a fresh system from offset zero; Kafka has it</td></tr><tr><td><span class='ltr'>outbox pattern</span></td><td>Dual write in one transaction of one system (domain + outbox)</td><td>CDC reads a stable schema; the internal schema stays free</td></tr><tr><td><span class='ltr'>CDC vs event sourcing</span></td><td>Low-level log of a mutable model vs high-level immutable events</td><td>CDC is added gradually; sourcing is a redesign</td></tr><tr><td><span class='ltr'>state = ∫events, stream = d(state)/dt</span></td><td>State is the event integral, stream the state derivative (Fig. 12-7)</td><td>The log is the record, state is derived; compaction bridges them</td></tr><tr><td><span class='ltr'>CEP</span></td><td>Event patterns like regex; long-lived queries, transient data</td><td>The database's inverse; Esper/Apama, SQL on streams</td></tr><tr><td><span class='ltr'>stream analytics</span></td><td>Aggregation and metrics over windows; probabilistic = just optimization</td><td>Bloom/HyperLogLog; Storm/Flink/Beam</td></tr><tr><td><span class='ltr'>IVM</span></td><td>Compiling SQL into incremental operators; only changed data</td><td>Periodic REFRESH is inefficient and stale; Materialize/RisingWave</td></tr><tr><td><span class='ltr'>stream–stream join</span></td><td>Two event streams in a bounded window (search+click with session id)</td><td>The click may arrive first; expiry = “unclicked”</td></tr><tr><td><span class='ltr'>stream–table join</span></td><td>Enrichment with a local copy + CDC (infinite window on the table side)</td><td>Local hash join; the fresh version replaces the old</td></tr><tr><td><span class='ltr'>table–table join</span></td><td>Maintaining a materialized view; (u·v)′ = u′v + uv′</td><td>Timeline = posts ⋈ follows</td></tr><tr><td><span class='ltr'>event time vs processing time</span></td><td>Event timestamp (deterministic) vs processor clock (fragile under lag)</td><td>Fig. 12-8: restarts build artificial spikes</td></tr><tr><td><span class='ltr'>watermark</span></td><td>“After this, no message before t will come”; it triggers the window</td><td>Tracked separately per producer</td></tr><tr><td><span class='ltr'>stragglers</span></td><td>Post-close laggards: ignore them (with a metric) or correct them (with a retraction)</td><td>Device clocks are untrustworthy; use three timestamps</td></tr><tr><td><span class='ltr'>tumbling / hopping / sliding / session</span></td><td>No overlap / with overlap / event-following / idle-based</td><td>Sliding windows and joins need buffers</td></tr><tr><td><span class='ltr'>exactly-once (effectively-once)</span></td><td>Visible effect as if once, though it was processed several times</td><td>In streams: microbatch/checkpoint inside + atomic commit/idempotence outside</td></tr><tr><td><span class='ltr'>microbatch vs checkpoint</span></td><td>~1s blocks vs rolling barrier snapshots</td><td>Both are exactly-once inside the framework; outside, effects duplicate</td></tr><tr><td><span class='ltr'>idempotent sink</span></td><td>Kafka offset stored alongside the write; repeats are harmless</td><td>Assumes same-order replay + determinism + fencing</td></tr></tbody></table></div>
+<div class="en"><table><thead><tr><th>Concept</th><th>One-line definition</th><th>Interview note</th></tr></thead><tbody><tr><td><span class='ltr'>event</span></td><td>Small self-contained immutable record of something that happened at a point in time + timestamp</td><td>The record's equivalent in batch; a log line is an event too</td></tr><tr><td><span class='ltr'>topic / stream</span></td><td>A group of same-kind events</td><td>The filename's equivalent in a filesystem</td></tr><tr><td><span class='ltr'>producer / consumer</span></td><td>One-time producer, possibly several consumers</td><td>Also called publisher/sender and subscriber/recipient</td></tr><tr><td><span class='ltr'>polling vs notification</span></td><td>Periodic polling gets expensive at low latency (empty-handed requests)</td><td>Database triggers are limited; you need a specialized messenger</td></tr><tr><td><span class='ltr'>drop / buffer / backpressure</span></td><td>Three ways to outproduce consumption</td><td>Unix pipes and TCP take the third with a small fixed buffer</td></tr><tr><td><span class='ltr'>direct messaging</span></td><td>No middleman: UDP multicast, ZeroMQ, StatsD, webhooks</td><td>Assumes always-online; offline consumers lose out</td></tr><tr><td><span class='ltr'>message broker</span></td><td>Centralized message-delivery server; durability lives here</td><td>Its consumer is asynchronous (you only get the buffering ack)</td></tr><tr><td><span class='ltr'>broker vs database</span></td><td>Brokers delete, databases keep; brokers notify, databases snapshot</td><td>Traditional brokers aren't for long-term storage</td></tr><tr><td><span class='ltr'>load balancing</span></td><td>Each message goes to one of the consumers</td><td>For expensive work; you scale it by adding consumers</td></tr><tr><td><span class='ltr'>fan-out</span></td><td>Each message reaches all the consumers</td><td>Like several batch jobs on one file</td></tr><tr><td><span class='ltr'>consumer groups</span></td><td>Load balancing inside groups + fan-out across groups</td><td>Kafka's combined pattern</td></tr><tr><td><span class='ltr'>acknowledgment</span></td><td>Explicit “processing done” so the message leaves the queue</td><td>No ack means redelivery to another consumer</td></tr><tr><td><span class='ltr'>reordering trap</span></td><td>Load balancing + redelivery = broken order (m4 before m3)</td><td>Even JMS/AMQP ordering guarantees don't stop it; fix: separate queues</td></tr><tr><td><span class='ltr'>poison message + DLQ</span></td><td>An always-fatal message builds an infinite retry loop; the DLQ frees it</td><td>You monitor the DLQ; every message in it is an error</td></tr><tr><td><span class='ltr'>log-based broker</span></td><td>Append to a log + sequential read + tail -f</td><td>Consumption is read-only, so replay is possible</td></tr><tr><td><span class='ltr'>partition + offset</span></td><td>Log shard + each message's ascending number in the partition</td><td>Total order inside a partition, none across them</td></tr><tr><td><span class='ltr'>consumer offset</span></td><td>Periodic progress recording instead of per-message ack</td><td>Resume from older = duplicates; like the LSN in replication</td></tr><tr><td><span class='ltr'>max consumers = #partitions</span></td><td>Each shard has exactly one owner</td><td>Parallelize with more shards, not more consumers</td></tr><tr><td><span class='ltr'>head-of-line blocking</span></td><td>A slow message holds up the rest of its shard</td><td>Like the Chapter-2 performance story</td></tr><tr><td><span class='ltr'>ring buffer on disk</span></td><td>Old segments are deleted; a big lag means loss</td><td>~22h minimum buffer; watch the lag</td></tr><tr><td><span class='ltr'>dual-write race</span></td><td>Two independent leaders → two orders → permanent silent divergence</td><td>Fig. 12-4; without a version vector you don't even notice</td></tr><tr><td><span class='ltr'>CDC</span></td><td>Extracting the database change log as an ordered stream</td><td>Debezium, Kafka Connect; asynchronous, so it has lag</td></tr><tr><td><span class='ltr'>initial snapshot</span></td><td>Consistent copy at a known offset + applying changes from there</td><td>Netflix DBLog for gradual snapshots</td></tr><tr><td><span class='ltr'>log compaction</span></td><td>Only each key's latest value remains (+ tombstone for deletes)</td><td>Rebuilding a fresh system from offset zero; Kafka has it</td></tr><tr><td><span class='ltr'>outbox pattern</span></td><td>Dual write in one transaction of one system (domain + outbox)</td><td>CDC reads a stable schema; the internal schema stays free</td></tr><tr><td><span class='ltr'>CDC vs event sourcing</span></td><td>Low-level log of a mutable model vs high-level immutable events</td><td>CDC is added gradually; sourcing is a redesign</td></tr><tr><td><span class='ltr'>state = ∫events, stream = d(state)/dt</span></td><td>State is the event integral, stream the state derivative (Fig. 12-7)</td><td>The log is the record, state is derived; compaction bridges them</td></tr><tr><td><span class='ltr'>CEP</span></td><td>Event patterns like regex; long-lived queries, transient data</td><td>The database's inverse; Esper/Apama, SQL on streams</td></tr><tr><td><span class='ltr'>stream analytics</span></td><td>Aggregation and metrics over windows; probabilistic = just optimization</td><td>Bloom/HyperLogLog; Storm/Flink/Beam</td></tr><tr><td><span class='ltr'>IVM</span></td><td>Compiling SQL into incremental operators; only changed data</td><td>Periodic REFRESH is inefficient and stale; Materialize/RisingWave</td></tr><tr><td><span class='ltr'>stream–stream join</span></td><td>Two event streams in a bounded window (search+click with session id)</td><td>The click may arrive first; expiry = “unclicked”</td></tr><tr><td><span class='ltr'>stream–table join</span></td><td>Enrichment with a local copy + CDC (infinite window on the table side)</td><td>Local hash join; the fresh version replaces the old</td></tr><tr><td><span class='ltr'>table–table join</span></td><td>Maintaining a materialized view; (u·v)′ = u′v + uv′</td><td>Timeline = posts ⋈ follows</td></tr><tr><td><span class='ltr'>event time vs processing time</span></td><td>Event timestamp (deterministic) vs processor clock (fragile under lag)</td><td>Fig. 12-8: restarts build artificial spikes</td></tr><tr><td><span class='ltr'>watermark</span></td><td>“After this, no message before t will come”; it triggers the window</td><td>Tracked separately per producer</td></tr><tr><td><span class='ltr'>stragglers</span></td><td>Post-close laggards: ignore them (with a metric) or correct them (with a retraction)</td><td>Device clocks are untrustworthy; use three timestamps</td></tr><tr><td><span class='ltr'>tumbling / hopping / sliding / session</span></td><td>Tumbling (no overlap) / hopping (overlap) / sliding (event-following) / session (idle-based)</td><td>Sliding windows and joins need buffers</td></tr><tr><td><span class='ltr'>exactly-once (effectively-once)</span></td><td>Visible effect as if once, though it was processed several times</td><td>In streams: microbatch/checkpoint inside + atomic commit/idempotence outside</td></tr><tr><td><span class='ltr'>microbatch vs checkpoint</span></td><td>~1s blocks vs rolling barrier snapshots</td><td>Both are exactly-once inside the framework; outside, effects duplicate</td></tr><tr><td><span class='ltr'>idempotent sink</span></td><td>Kafka offset stored alongside the write; repeats are harmless</td><td>Assumes same-order replay + determinism + fencing</td></tr></tbody></table></div>
 
-<h3 id="s7-2"><span class="fa">۷.۲. سوالات پرتکرار مصاحبه</span><span class="en">7.2. 7.2 Frequent interview questions</span></h3>
+<h3 id="s7-2"><span class="fa">۷.۲. سوالات پرتکرار مصاحبه</span><span class="en">7.2. Frequent interview questions</span></h3>
 
 <details><summary><span class="fa">۱. رویداد، تاپیک، تولیدکننده و مصرف‌کننده را در یک خط تعریف کن.</span><span class="en">1. Define event, topic, producer and consumer in one line each.</span></summary>
-<div class="fa"><p>رویداد یعنی «این اتفاق افتاد»؛ تولیدکننده می‌نویسش، تاپیک دستهٔ منطقیِ همون رویدادهاست و مصرف‌کننده برای کارِ خودش می‌خونش. قالب و معنای رویداد باید بینِ همه یکی باشه. — همین چهار نقش، تمامِ مدلِ رویداده.</p>
+<div class="fa"><p>رویداد یعنی «این اتفاق افتاد»؛ تولیدکننده می‌نویسش، تاپیک دستهٔ منطقیِ همون رویدادهاست و مصرف‌کننده برای کارِ خودش می‌خونش. قالب و معنای رویداد باید بینِ همه یکی باشه.</p>
 </div>
 <div class="en">
 <p><b>Event:</b> a small self-contained immutable record of something that happened, plus a timestamp. <b>Topic:</b> a group of same-kind events — the filename equivalent. The <b>producer</b> writes it once; there may be several <b>consumers</b>, each doing its own thing. Four roles, one model.</p>
@@ -1526,7 +1526,7 @@
 </details>
 
 <details><summary><span class="fa">۲. چرا polling پایگاه داده برای استریم جواب نمی‌دهد؟</span><span class="en">2. Why doesn't database polling work for streams?</span></summary>
-<div class="fa"><p><span class="ltr">Polling</span> بارِ تکراری می‌سازه و هر تغییری که بینِ دو خوندن اتفاق بیفته از قلم می‌افته؛ حذف و ترتیب هم سخت‌تر دیده می‌شن. یه منبعِ تغییرِ پایدار، قراردادِ روشن‌تری می‌ده. — سنجش رو باید از خودِ لاگ گرفت، نه از وضعیتِ لحظه‌ای.</p>
+<div class="fa"><p><span class="ltr">Polling</span> بارِ تکراری می‌سازه و هر تغییری که بینِ دو خوندن اتفاق بیفته از قلم می‌افته؛ حذف و ترتیب هم سخت‌تر دیده می‌شن. یه منبعِ تغییرِ پایدار، قراردادِ روشن‌تری می‌ده.</p>
 </div>
 <div class="en">
 <p>Because as you move toward low latency, most polls come back empty-handed and the overhead climbs; the consumer should just be notified instead. Database triggers are limited and marginal too — hence the specialized messenger. Polling reads a snapshot; a change stream tells you what actually happened.</p>
@@ -1534,7 +1534,7 @@
 </details>
 
 <details><summary><span class="fa">۳. وقتی تولید سریع‌تر از مصرف است، سه راه چیست؟ مثال بزن.</span><span class="en">3. When production outruns consumption, what are the three options? Give an example.</span></summary>
-<div class="fa"><p>سه راه: پیام رو بندازی، بافر کنی، یا فشارِ برگشتی بذاری و تولید رو کم کنی. ارزشِ داده، ظرفیت و پیامدِ انتظار تعیین می‌کنن کدوم پذیرفتنیه. — انتخاب با جوابه.</p>
+<div class="fa"><p>سه راه: پیام رو بندازی، بافر کنی، یا فشارِ برگشتی بذاری و تولید رو کم کنی. ارزشِ داده، ظرفیت و پیامدِ انتظار تعیین می‌کنن کدوم پذیرفتنیه.</p>
 </div>
 <div class="en">
 <p>Drop it, buffer it, or push back (stalling the producer). Unix pipes and TCP take the third with a small fixed buffer; when it's full, the sender stays blocked until the receiver reads. The right one depends on what the message is worth.</p>
@@ -1542,7 +1542,7 @@
 </details>
 
 <details><summary><span class="fa">۴. پیام‌رسانیِ مستقیم چه فرضی دارد و کی می‌شکند؟</span><span class="en">4. What does direct messaging assume, and when does it break?</span></summary>
-<div class="fa"><p>ارتباطِ مستقیم بیشتر به حضور و توانِ هم‌زمانِ طرف‌ها وابسته‌ست. قطع شدنِ گیرنده و کند شدنِ مصرف‌کننده، بافر و تحویلِ صریح می‌خوانه. — فرض کن طرفین همیشه آنلاین‌ان.</p>
+<div class="fa"><p>فرضِ اصلی‌اش این است که هر دو طرف همیشه آنلاین‌اند. قطع شدنِ گیرنده و کند شدنِ مصرف‌کننده، بافر و تحویلِ صریح می‌خوانه.</p>
 </div>
 <div class="en">
 <p>It assumes both sides are permanently online. An offline consumer loses the outage-time messages; and if the producer itself crashes, its retry buffer dies with it. So the fault tolerance is thin, and your app code has to accept that loss is possible (UDP multicast, ZeroMQ, StatsD, webhooks). The broker is the safety net you're paying for.</p>
@@ -1550,7 +1550,7 @@
 </details>
 
 <details><summary><span class="fa">۵. بروکر چه مشکلی را حل می‌کند و مصرف‌کننده‌اش چرا ناهمگام است؟</span><span class="en">5. What problem does a broker solve, and why is its consumer asynchronous?</span></summary>
-<div class="fa"><p>بروکر تولید و مصرف رو از نظرِ زمان و مکان جدا می‌کنه و طبقِ قرارداد پیام رو نگه می‌داره. مصرف‌کننده با سرعتِ خودش می‌خونه؛ ماندگاریِ واقعی به نوع و تنظیماتِ بروکر بستگی داره. — ناهمگام بودنِ مصرف‌کننده، بهای همین جداسازیه.</p>
+<div class="fa"><p>بروکر تولید و مصرف رو از نظرِ زمان و مکان جدا می‌کنه و طبقِ قرارداد پیام رو نگه می‌داره. مصرف‌کننده با سرعتِ خودش می‌خونه؛ ماندگاریِ واقعی به نوع و تنظیماتِ بروکر بستگی داره.</p>
 </div>
 <div class="en">
 <p>By centralizing the data in the broker, client churn and crashes are easy to absorb, and durability moves into the broker (in-memory or on-disk, your call). The producer only waits for the buffering ack; delivery to the consumer happens at some unknown point in the future — hence asynchronous. That's the trade: you get the decoupling, and you inherit the broker's guarantees.</p>
@@ -1558,7 +1558,7 @@
 </details>
 
 <details><summary><span class="fa">۶. متعادل‌سازیِ بار و fan-out چه فرقی دارند؟ ترکیبشان چیست؟</span><span class="en">6. How do load balancing and fan-out differ? What combines them?</span></summary>
-<div class="fa"><p>تقسیمِ بار هر پیام رو بینِ اعضای یه گروه پخش می‌کنه؛ <span class="ltr">fan-out</span> همون خبر رو به گروه‌های مستقل می‌رسونه. می‌شه تو هر گروه چند مصرف‌کننده داشت. — دوتا رو قاطی نکن.</p>
+<div class="fa"><p>تقسیمِ بار هر پیام را بینِ اعضای یک گروه پخش می‌کند؛ <span class="ltr">fan-out</span> همان خبر را به گروه‌های مستقل می‌رساند. ترکیبشان گروه مصرف‌کنندهٔ کافکاست: تقسیمِ بار درونِ گروه، fan-out بینِ گروه‌ها. می‌شود در هر گروه چند مصرف‌کننده داشت.</p>
 </div>
 <div class="en">
 <p>In the first one each message reaches a single consumer (that splits expensive work, and you scale by adding consumers); in the second each message reaches everyone (an independent broadcast, like several batch jobs reading one file). Combine them and you get the Kafka consumer group: load balancing inside the group, fan-out across groups.</p>
@@ -1566,7 +1566,7 @@
 </details>
 
 <details><summary><span class="fa">۷. ack چیست و تحویلِ مجدد چطور ترتیب را به‌هم می‌زند؟</span><span class="en">7. What is an ack, and how does redelivery break ordering?</span></summary>
-<div class="fa"><p><span class="ltr">Ack</span> یعنی «رسیدگی شد، طبقِ قرارداد». اگه بعد از اثرگذاری گم بشه، پیام دوباره می‌رسه؛ و ممکنه پیام‌های بعدی زودتر اجرا شده باشن و ترتیبِ اثرها قاطی بشه. — این دام معروفه.</p>
+<div class="fa"><p><span class="ltr">Ack</span> یعنی «رسیدگی شد، طبقِ قرارداد». اگه بعد از اثرگذاری گم بشه، پیام دوباره می‌رسه؛ و ممکنه پیام‌های بعدی زودتر اجرا شده باشن و ترتیبِ اثرها قاطی بشه.</p>
 </div>
 <div class="en">
 <p>The consumer has to explicitly say “done” so the message can leave the queue; no ack (closed connection or timeout) means redelivery to somebody else. Because the first consumer processed and acked the next message meanwhile, the redelivered one lands later — like m4 before m3. Even the JMS/AMQP ordering guarantees can't save you from “load balancing + redelivery”.</p>
@@ -1574,7 +1574,7 @@
 </details>
 
 <details><summary><span class="fa">۸. پیامِ سمی چیست و DLQ چه می‌کند؟</span><span class="en">8. What is a poison message, and what does a DLQ do?</span></summary>
-<div class="fa"><p>پیامِ سمی اون ورودی‌ایه که پردازشِ تکراری‌اش می‌شکنه. <span class="ltr">DLQ</span> جدا کردنش می‌کنه تا بقیه راهشون رو باز کنن؛ ولی اصلاح، ترتیب و بازگرداندن رو باید خودت برنامه‌ریزی کنی. — DLQِ بی‌رسیدگی، انبارِ کثافتِ داده‌ست.</p>
+<div class="fa"><p>پیامِ سمی اون ورودی‌ایه که پردازشِ تکراری‌اش می‌شکنه. <span class="ltr">DLQ</span> جدا کردنش می‌کنه تا بقیه راهشون رو باز کنن؛ ولی اصلاح، ترتیب و بازگرداندن رو باید خودت برنامه‌ریزی کنی.</p>
 </div>
 <div class="en">
 <p>A message that kills every consumer (say, JSON missing a required key) and, since no ack comes, retries forever — burning resources or wedging everything (with hard ordering). The DLQ moves it to a separate queue so the flow stays free; DLQs are monitored, and the operator decides: drop it, fix it by hand, or fix the code. A DLQ nobody watches is just a graveyard.</p>
@@ -1582,7 +1582,7 @@
 </details>
 
 <details><summary><span class="fa">۹. بروکرِ لاگ‌محور چطور کار می‌کند و مصرفش چرا تکرارپذیر است؟</span><span class="en">9. How does a log-based broker work, and why is its consumption repeatable?</span></summary>
-<div class="fa"><p>پیام‌ها تو لاگِ پارتیشن نگه داشته می‌شن و گروهِ مصرف‌کننده موقعیتِ خوندنش رو ثبت می‌کنه. تا وقتی تاریخچه هست، می‌شه دوباره بخونی؛ ولی بازپخشِ اثرهای بیرونی باید کنترل بشه. — خوندن، لاگ رو پاک نمی‌کنه.</p>
+<div class="fa"><p>پیام‌ها تو لاگِ پارتیشن نگه داشته می‌شن و گروهِ مصرف‌کننده موقعیتِ خوندنش رو ثبت می‌کنه. تا وقتی تاریخچه هست، می‌شه دوباره بخونی؛ ولی بازپخشِ اثرهای بیرونی باید کنترل بشه.</p>
 </div>
 <div class="en">
 <p>The producer appends, the consumer reads sequentially and waits at the log tail for a notification (like tail -f). Reading doesn't change the log — only the offset advances, and that's the consumer's own business — so you can raise a copy of the consumer at yesterday's offset and replay the past.</p>
@@ -1590,7 +1590,7 @@
 </details>
 
 <details><summary><span class="fa">۱۰. offset چیست و چرا تکرارِ پیام پیش می‌آید؟</span><span class="en">10. What is an offset, and why do messages repeat?</span></summary>
-<div class="fa"><p><span class="ltr">Offset</span> جای پیام تو یه پارتیشنه. اگه اثر اعمال بشه ولی موقعیت ذخیره نشه، بعد از بازیابی همون پیام دوباره خونده می‌شه. — تکرار، بهای همین فاصله‌ست.</p>
+<div class="fa"><p><span class="ltr">Offset</span> جای پیام تو یه پارتیشنه. اگه اثر اعمال بشه ولی موقعیت ذخیره نشه، بعد از بازیابی همون پیام دوباره خونده می‌شه.</p>
 </div>
 <div class="en">
 <p>Each message's ascending number inside its partition (total order within a partition, none across them). The broker only records the offset periodically — no per-message ack — so after a crash you resume from the last recorded one, not the last seen, and the messages in between repeat. Same deal as the LSN in replication.</p>
@@ -1598,7 +1598,7 @@
 </details>
 
 <details><summary><span class="fa">۱۱. چرا تعدادِ مصرف‌کننده‌ها سقف دارد؟</span><span class="en">11. Why is the consumer count capped?</span></summary>
-<div class="fa"><p>تو مدلِ معمولِ گروهِ مصرف‌کنندهٔ لاگ، هر پارتیشن هم‌زمان به یه عضو واگذار می‌شه؛ تعدادِ اعضای فعالِ اون تاپیک به تعدادِ پارتیشن‌ها محدوده. ولی این سقفِ همهٔ مدل‌های پردازش نیست. — حساب کن.</p>
+<div class="fa"><p>تو مدلِ معمولِ گروهِ مصرف‌کنندهٔ لاگ، هر پارتیشن هم‌زمان به یه عضو واگذار می‌شه؛ تعدادِ اعضای فعالِ اون تاپیک به تعدادِ پارتیشن‌ها محدوده. ولی این سقفِ همهٔ مدل‌های پردازش نیست.</p>
 </div>
 <div class="en">
 <p>Because a whole shard goes to one node, and a topic's cooperating nodes are at most its shard count. If one message is slow, the rest of its shard waits behind it (head-of-line blocking). For expensive per-message work where order doesn't matter, a traditional broker is the better deal.</p>
@@ -1606,7 +1606,7 @@
 </details>
 
 <details><summary><span class="fa">۱۲. مسابقهٔ dual-write را با شکل توضیح بده.</span><span class="en">12. Explain the dual-write race with the figure.</span></summary>
-<div class="fa"><p>نوشتن تو مرجع و مقصدِ دوم جداست؛ یکی می‌تونه شکست بخوره یا دو تغییر به ترتیبِ متفاوت برسن. باید یه مسیرِ مشترکِ معتبرِ تغییر داشته باشی یا تصمیمی که هماهنگه. — رهبرِ واحد، راهِ کم‌دردسر.</p>
+<div class="fa"><p>دو مشتری هم‌زمان می‌خواهند X را A و B کنند و هر دو اول در پایگاه داده می‌نویسند و بعد در ایندکس. پایگاه داده A و بعد B را می‌بیند (مقدار نهایی B) ولی ایندکس B و بعد A را می‌بیند (مقدار نهایی A)؛ هیچ خطایی هم گزارش نمی‌شود و این واگرایی ماندگار است. علت، دو رهبرِ مستقل و نبودِ یک ترتیبِ واحد است؛ بدونِ بردارِ نسخه حتی متوجهش نمی‌شوی. راه‌حل یک رهبر (پایگاه داده) به‌همراه CDC است تا ایندکس همان ترتیبِ لاگ را اعمال کند.</p>
 </div>
 <div class="en">
 <p>Two clients concurrently want X as A and B; both write the database first, then the index. The database sees A then B (final: B) but the index sees B then A (final: A) — a permanent, silent divergence with no error at all. The cause is two independent leaders and no single order; without a version vector you don't even notice. The fix is one leader (the database) plus CDC.</p>
@@ -1614,7 +1614,7 @@
 </details>
 
 <details><summary><span class="fa">۱۳. CDC چیست و چه چیزهایی لازم دارد؟</span><span class="en">13. What is CDC, and what does it need?</span></summary>
-<div class="fa"><p><span class="ltr">CDC</span> تغییرها رو از مرجع به جریان تبدیل می‌کنه. تصویرِ شروع، نقطهٔ لاگ، حذف‌ها، ترتیبِ لازم، قراردادِ ساختار و تکرار باید مدیریت بشن تا نمای مقصد قابل‌بازیابی بمونه. — مرز رو درست انتخاب کن.</p>
+<div class="fa"><p><span class="ltr">CDC</span> تغییرها رو از مرجع به جریان تبدیل می‌کنه. تصویرِ شروع، نقطهٔ لاگ، حذف‌ها، ترتیبِ لازم، قراردادِ ساختار و تکرار باید مدیریت بشن تا نمای مقصد قابل‌بازیابی بمونه.</p>
 </div>
 <div class="en">
 <p>Extracting the database change log as an ordered stream (Debezium, Kafka Connect) that derived systems apply in the same order — the database leads, the rest follow. It's asynchronous, so it has lag. For a fresh system: a consistent snapshot at a known offset and then applying from there (or a compacted log from offset zero). Stabilize the schema with the outbox (single-transaction dual write).</p>
@@ -1622,7 +1622,7 @@
 </details>
 
 <details><summary><span class="fa">۱۴. log compaction چطور جای snapshot را می‌گیرد؟</span><span class="en">14. How does log compaction replace the snapshot?</span></summary>
-<div class="fa"><p>تو لاگِ فشرده‌شده، نسخهٔ لازمِ هر کلید می‌تونه برای بازسازیِ وضعیتِ فعلی بمونه — به شرطِ قراردادِ درست برای حذف و نگهداری. ولی این کار همهٔ تاریخچه یا هر نوعِ <span class="ltr">snapshot</span> رو جایگزین نمی‌کنه. — حواست به tombstone باشه.</p>
+<div class="fa"><p>تو لاگِ فشرده‌شده، نسخهٔ لازمِ هر کلید می‌تونه برای بازسازیِ وضعیتِ فعلی بمونه — به شرطِ قراردادِ درست برای حذف و نگهداری. ولی این کار همهٔ تاریخچه یا هر نوعِ <span class="ltr">snapshot</span> رو جایگزین نمی‌کنه.</p>
 </div>
 <div class="en">
 <p>Only each key's latest value remains (deletes via tombstone), and the footprint depends only on the current content. A fresh consumer scans the whole log from offset zero and takes a full copy — no fresh snapshot needed from the source. (For event sourcing, where events are intents rather than replacements, it doesn't work.)</p>
@@ -1630,7 +1630,7 @@
 </details>
 
 <details><summary><span class="fa">۱۵. دوگانِ state و stream یعنی چه؟</span><span class="en">15. What does the state/stream duality mean?</span></summary>
-<div class="fa"><p>جریانِ تغییرها وضعیت رو با اعمالِ مرحله‌ای می‌سازه؛ وضعیتِ فعلی همهٔ گذشته رو نگه نمی‌داره. برای بازسازی یا تاریخچهٔ کافی می‌خوای یا تصویرِ شروعِ معتبر. — لاگ مبناست، state مشتق‌شده.</p>
+<div class="fa"><p>جریانِ تغییرها وضعیت رو با اعمالِ مرحله‌ای می‌سازه؛ وضعیتِ فعلی همهٔ گذشته رو نگه نمی‌داره. برای بازسازی یا تاریخچهٔ کافی می‌خوای یا تصویرِ شروعِ معتبر.</p>
 </div>
 <div class="en">
 <p>Mutable state and the immutable log are two sides of one coin: state = the event integral over time, the stream = the time-derivative of state. Treat the log as the record and state as derived — then replay, auditing and building several views from one log all come for free. (Gray and Reuter: the log has all the information.)</p>
@@ -1638,7 +1638,7 @@
 </details>
 
 <details><summary><span class="fa">۱۶. CEP و تحلیلِ استریم چه فرقی دارند؟</span><span class="en">16. How do CEP and stream analytics differ?</span></summary>
-<div class="fa"><p><span class="ltr">CEP</span> به الگوی رویدادهای مرتبط واکنش می‌ده؛ تحلیلِ جریانی معمولاً آمار و تجمیع می‌سازه. فرق تو خروجی و نیازِ ترتیب و زمانه. — CEP دنبالِ الگو می‌گرده، نه دنبالِ میانگین.</p>
+<div class="fa"><p><span class="ltr">CEP</span> به الگوی رویدادهای مرتبط واکنش می‌ده؛ تحلیلِ جریانی معمولاً آمار و تجمیع می‌سازه. فرق تو خروجی و نیازِ ترتیب و زمانه.</p>
 </div>
 <div class="en">
 <p>CEP hunts specific multi-event patterns (like regex; long-lived queries, transient data — the database's inverse). Analytics hunts aggregation and metrics over windows (rates, rolling averages); its probabilistic algorithms are only an optimization, not the nature of streams. One asks “did this happen?”, the other asks “how much?”.</p>
@@ -1646,7 +1646,7 @@
 </details>
 
 <details><summary><span class="fa">۱۷. سه join استریمی را مقایسه کن.</span><span class="en">17. Compare the three stream joins.</span></summary>
-<div class="fa"><p>جریان–جریان رویدادهای دو جریان رو با محدودهٔ زمان ترکیب می‌کنه؛ جریان–جدول رویداد رو با وضعیت کامل می‌کنه؛ جدول–جدول تغییرهای دو وضعیت رو تو نمای مشترک منعکس می‌کنه. — هر سه، state از یه ورودی می‌سازن.</p>
+<div class="fa"><p>جریان–جریان رویدادهای دو جریان را با محدودهٔ زمان ترکیب می‌کند؛ جریان–جدول رویداد را با وضعیت کامل می‌کند؛ جدول–جدول تغییرهای دو وضعیت را در نمای مشترک منعکس می‌کند. در هر سه، یک طرف state را نگه می‌دارد و طرفِ دیگر با آن lookup می‌شود.</p>
 </div>
 <div class="en">
 <p>Stream–stream: two event streams inside a bounded window (search+click; expiry = unclicked). Stream–table: enrichment with a local copy plus CDC (an infinite window on the table side; fresh replaces old). Table–table: maintaining a materialized view from two changelogs with (u·v)′ = u′v + uv′. All three are “state from one input + lookup with the other” — and undefined cross-stream order makes a join nondeterministic.</p>
@@ -1654,7 +1654,7 @@
 </details>
 
 <details><summary><span class="fa">۱۸. event time و processing time چرا قاطی می‌شوند؟ راه چیست؟</span><span class="en">18. Why do event time and processing time get mixed? What's the fix?</span></summary>
-<div class="fa"><p>زمانِ وقوع با زمانِ رسیدن فرق داره. پنجرهٔ مبتنی بر زمانِ رویداد و سیاستِ پیامِ دیررس، نسبت‌دادنِ داده رو روشن می‌کنن؛ ولی <span class="ltr">watermark</span> تضمینِ نبودِ دیررس نیست. — قاطی نکن.</p>
+<div class="fa"><p>زمانِ وقوع با زمانِ رسیدن فرق داره. پنجرهٔ مبتنی بر زمانِ رویداد و سیاستِ پیامِ دیررس، نسبت‌دادنِ داده رو روشن می‌کنن؛ ولی <span class="ltr">watermark</span> تضمینِ نبودِ دیررس نیست.</p>
 </div>
 <div class="en">
 <p>Many frameworks window by the machine clock; under lag (restarts, backlogs) a flat rate turns into an artificial spike (Fig. 12-8). The fix: window by the event timestamp (deterministic and replayable) plus watermarks for closing, and for laggards either ignore them (with a metric) or correct (with a retraction). Device clocks are untrustworthy — use three timestamps.</p>
@@ -1662,22 +1662,22 @@
 </details>
 
 <details><summary><span class="fa">۱۹. چهار نوع پنجره را با مثال بگو.</span><span class="en">19. Describe the four window types with an example each.</span></summary>
-<div class="fa"><p>پنجرهٔ ثابت مرزِ جدا داره؛ پنجرهٔ لغزان تو فاصله‌های منظم روی بازه‌های هم‌پوشان خروجی می‌ده؛ پنجرهٔ متحرک فاصلهٔ زمانیِ رویدادها رو دنبال می‌کنه؛ نشست هم با سکوتِ میانِ فعالیت‌ها جدا می‌شه. — مرزها رو دقیق تعریف کن.</p>
+<div class="fa"><p>پنجرهٔ ثابتِ یک‌دقیقه‌ای رخدادِ <code dir="ltr">10:03</code> را در <code dir="ltr">[10:03,10:04)</code> می‌گذارد و هم‌پوشانی ندارد. پنجرهٔ پرشیِ پنج‌دقیقه‌ای با گام یک‌دقیقه، رخدادهای نزدیکِ <code dir="ltr">10:03</code> را در چند پنجرهٔ هم‌پوشان می‌شمارد. پنجرهٔ لغزانِ پنج‌دقیقه‌ای دو رخداد با فاصلهٔ ۴.۵ دقیقه را کنار هم می‌آورد و برای این کار بافرِ مرتب می‌خواهد. نشست، خوشهٔ فعالیتِ یک کاربر است تا ۳۰ دقیقه بی‌کاری؛ پهنایش متغیر است و در تحلیلِ وب رایج است.</p>
 </div>
 <div class="en">
-<p>Tumbling: the 10:03 minute is one window, no overlap. Hopping: 5-minute windows with a one-minute hop (that's the smoothing). Sliding: two events 4.5 minutes apart share a window (the window follows the events; needs a sorted buffer). Session: a user's activity cluster until 30 minutes idle (variable width, common in web analytics). Say the boundaries out loud — that's the part interviews test.</p>
+<p>Tumbling: a one-minute window puts every 10:03 event in <code dir='ltr'>[10:03,10:04)</code> with no overlap. Hopping: five-minute windows with a one-minute hop, so an event near 10:03 lands in several overlapping windows. Sliding: a five-minute window holds two events 4.5 minutes apart, which needs a sorted buffer because the window follows the events. Session: one user's activity cluster until 30 minutes idle — variable width and common in web analytics.</p>
 </div>
 </details>
 
 <details><summary><span class="fa">۲۰. در استریم به exactly-once چطور می‌رسی؟</span><span class="en">20. How do you reach exactly-once in streams?</span></summary>
-<div class="fa"><p>وضعیت، محلِ خوندن و خروجی باید تو محدودهٔ تضمین هماهنگ بازیابی بشن، یا نوشتنِ تکراری اثرِ اضافه نذاره. مقصدِ بیرونی هم باید تو همین قرارداد باشه. — مرزِ تضمین رو تا مقصد دنبال کن.</p>
+<div class="fa"><p>وضعیت، محلِ خوندن و خروجی باید تو محدودهٔ تضمین هماهنگ بازیابی بشن، یا نوشتنِ تکراری اثرِ اضافه نذاره. مقصدِ بیرونی هم باید تو همین قرارداد باشه.</p>
 </div>
 <div class="en">
 <p>Like batch (retry + discarding the partial) but with no “end”: inside the framework with microbatch (~1 second) or rolling checkpoints (barriers); for external effects either an internal atomic commit (state + messages + offset together) or idempotent writes (the Kafka offset alongside the value; assumes same-order replay, determinism and fencing). The precise name for it is effectively-once.</p>
 </div>
 </details>
 
-<h3 id="s7-3"><span class="fa">۷.۳. اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">7.3. 7.3 Common interview mistakes</span></h3>
+<h3 id="s7-3"><span class="fa">۷.۳. اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">7.3. Common interview mistakes</span></h3>
 
 <div class="fa"><ul>
     <li>«کافکا ترتیبِ سراسری تضمین می‌کند» — نه؛ فقط <b>درونِ هر پارتیشن</b>. رویدادهای دو پارتیشن می‌تونن هر ترتیبی برسن؛ اگه ترتیبِ موجودیتی لازمه، کلیدِ پارتیشن‌بندیش کن.</li>
@@ -1693,7 +1693,7 @@
   </ul></div>
 <div class="en"><ul><li>“Kafka guarantees global order” — no; only inside each partition. Two partitions' events can arrive in any order, so partition-key it if you need per-entity order.</li><li>“Ack means exactly once” — no; ack means at-least-once (redelivery + lost acks = duplicates). Exactly-once also needs atomic commit or idempotence.</li><li>“Add consumers to go faster” — only up to the partition count; beyond that your nodes just sit there. Raise the partition count first.</li><li>“Delete from the log like a queue” — log consumption is read-only, and a manual delete breaks everyone else's replay. Retention is managed with retention/compaction, not manual deletes.</li><li>“Dual writes are fixed with try/catch” — no; the ordering race (Fig. 12-4) happens with zero errors, and try/catch can't see it. You need a single leader + CDC.</li><li>“CDC is the same as event sourcing” — no; CDC extracts the low-level log of a mutable model (the real write order), sourcing writes high-level immutable events (user intent). Compaction doesn't work for the latter.</li><li>“Close windows by the server clock” — under lag you manufacture bad data (Fig. 12-8). Window by event time + watermark; the processor clock only when lag is guaranteed negligible.</li><li>“Always ignore laggards” — it depends: fine for a rate metric, but billing needs corrections (retracting the old one). Pick the policy explicitly and metric it.</li><li>“Microbatch means end-to-end exactly-once” — only inside the framework; external effects (database, email) duplicate on retry unless they're atomic or idempotent.</li><li>“A stream join is like a batch join” — no; the input never ends so you need windows and state, the cross-stream order is undefined (nondeterminism), and expiry is itself an output (“unclicked”).</li></ul></div>
 
-<h3 id="s7-4"><span class="fa">۷.۴. چک‌لیستِ ۵ دقیقه‌ای قبل از مصاحبه</span><span class="en">7.4. 7.4 Five-minute checklist</span></h3>
+<h3 id="s7-4"><span class="fa">۷.۴. چک‌لیستِ ۵ دقیقه‌ای قبل از مصاحبه</span><span class="en">7.4. Five-minute checklist</span></h3>
 
 <div class="fa"><ul>
     <li>سه‌تاییِ drop/buffer/backpressure و مثالِ لوله/TCP رو بگو.</li>
@@ -1705,7 +1705,7 @@
     <li>دوگان: state = انتگرالِ رویداد، stream = مشتقِ وضعیت.</li>
     <li>سه join (پنجرهٔ محدود / نامتناهی / دوطرفه) + قاعدهٔ (u·v)′ رو بگو.</li>
     <li>event time در برابرِ processing time + شکلِ جهشِ مصنوعی + watermark و دو سیاستِ دیررس.</li>
-    <li>چهار پنجره (غلتان/پرشی/لغزان/نشست) رو با یه مثال بگو.</li>
+    <li>چهار پنجره (پنجرهٔ ثابت/پرشی/لغزان/نشست) رو با یه مثال بگو.</li>
     <li>exactly-once = microbatch/checkpoint درون + کامیتِ اتمی/idempotence بیرون (effectively-once).</li>
   </ul></div>
 <div class="en"><ul><li>Recite the drop/buffer/backpressure trio with the pipe/TCP example.</li><li>Load balancing (one) vs fan-out (all) + the consumer-group combination.</li><li>Draw the m4-before-m3 mechanism (load balancing + redelivery) from memory.</li><li>Partition/offset: order inside vs across + the parallelism ceiling + post-resume duplicates.</li><li>The A/B dual-write race and the CDC fix (single leader, single order).</li><li>Compaction (latest per key + tombstone) and outbox (single-transaction dual write).</li><li>The duality: state = event integral, stream = state derivative.</li><li>The three joins (bounded / infinite / two-sided windows) + the (u·v)′ rule.</li><li>Event time vs processing time + the artificial-spike figure + watermarks and the two laggard policies.</li><li>The four windows (tumbling/hopping/sliding/session), one example each.</li><li>Exactly-once = microbatch/checkpoint inside + atomic commit/idempotence outside (effectively-once).</li></ul></div>

@@ -4,7 +4,7 @@
 
 ### Learn *Designing Data-Intensive Applications* by playing with it.
 
-Interactive diagrams, **43 hands-on labs** inside the chapters, an **offline exercise studio with 84 system-design exercises**, step-by-step narration and an interview pack for every chapter of DDIA (2nd ed.) — in **Persian and English**. Then use what you learned in a capstone: design an AI platform.
+**160 interactive diagrams**, **43 hands-on labs** inside the chapters, an **offline exercise studio with 84 system-design exercises (49 chapter exercises + 35 classic problems)**, step-by-step narration and an interview pack for every chapter of DDIA (2nd ed.) — in **Persian and English**. Then use what you learned in a capstone: design an AI platform.
 
 <img src="assets/demo.gif" alt="Tracing a route through the leader-failover diagram: PATH, pick Client, pick Follower 2, and the shortest path lights up" width="80%">
 
@@ -12,7 +12,7 @@ Interactive diagrams, **43 hands-on labs** inside the chapters, an **offline exe
 
 <a href="#build-understanding-before-infrastructure"><img src="assets/badges/status.svg" alt="Status: design prototype"></a> <a href="https://github.com/Hurdadd/ddia-study-lab"><img src="assets/badges/stars.svg" alt="GitHub stars"></a> <a href="LICENSE"><img src="assets/badges/license.svg" alt="License: AGPL-3.0-only"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/languages.svg" alt="Documentation: Persian and English"></a> <a href="https://ddia-study-lab.vercel.app/"><img src="assets/badges/website.svg" alt="Website: public"></a>
 
-14 chapters · interactive diagrams · 43 inline labs · 84 studio exercises · 15 ADRs · 1 capstone
+14 chapters · 160 interactive diagrams · 43 inline labs · 84 studio exercises (49 chapter + 35 classic) · 15 ADRs · 1 capstone
 
 [**Explore the live site ↗**](https://ddia-study-lab.vercel.app/) &nbsp;·&nbsp; [**Enter the capstone**](https://ddia-study-lab.vercel.app/final-project/index.html#overview) &nbsp;·&nbsp; [**Start at Chapter 1**](https://ddia-study-lab.vercel.app/ch1-tradeoffs/index.html)
 
@@ -24,19 +24,22 @@ Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd
 
 </div>
 
-## Stars over time
+## Star count snapshot (current stargazers)
 
-<a href="https://github.com/Hurdadd/ddia-study-lab?tab=stargazers"><img src="assets/star-history.svg" width="880" alt="Star history chart"></a>
+<a href="https://github.com/Hurdadd/ddia-study-lab?tab=stargazers"><img src="assets/star-history.svg" width="880" alt="Star count snapshot of current stargazers"></a>
+
+The chart is rebuilt from the accounts that currently star the repository, so it is a snapshot, not an append-only history: if someone removes a star, their point disappears from the curve. The badge, the site pill and [`assets/stars.json`](assets/stars.json) carry the current count.
 
 ## Quick facts (for humans and AI agents)
 
-- **What it is:** a free, static study site for *Designing Data-Intensive Applications* (2nd ed.) plus a system-design practice studio. No backend, no account, no API key; everything runs in the browser.
+- **What it is:** a free, static study site for *Designing Data-Intensive Applications* (2nd ed.) plus a system-design practice studio. No backend, no account, no API key; the chapters, calculators, labs and studio run in your browser.
 - **Languages:** Persian (RTL) and English, light and dark themes.
 - **Covers:** replication, sharding, transactions, consensus, storage engines, batch and stream processing, CDC, exactly-once, schema evolution, ethics.
-- **Interactive parts:** 113 diagrams, 43 inline labs (3 per chapter, 4 in chapter 6), and an exercise studio with 84 exercises. Run an exercise to see packets flow, bottlenecks appear and a pass/fail verdict.
-- **Glossary:** 287 technical terms get a dotted underline in the chapters; hover previews a one-line definition and clicking opens the entry — a jargon-free everyday scene, an analogy, a generated diagram, the technical account with key numbers, longer sections and the usual trap. The index lives at [`glossary/index.html`](glossary/index.html) and every chapter has its own page of entries.
+- **Interactive parts:** 160 diagrams, 43 inline labs (3 per chapter, 4 in chapter 6), and an exercise studio with 84 exercises (49 chapter exercises + 35 classic problems). Run an exercise to see packets flow, bottlenecks appear and a pass/fail verdict.
+- **Glossary:** 287 technical terms get a dotted underline in the chapters; 226 of them also have a generated diagram. Hover previews a one-line definition and clicking opens the entry — a jargon-free everyday scene, an analogy, the technical account with key numbers, longer sections and the usual trap. The index lives at [`glossary/index.html`](glossary/index.html) and every chapter has its own page of entries.
 - **Entry points:** [`index.html`](index.html), `ch1-tradeoffs/` to `ch14-doing-right/`, [`glossary/index.html`](glossary/index.html), [`studio/index.html`](studio/index.html), [`final-project/index.html`](final-project/index.html).
 - **Machine-readable summary:** [`llms.txt`](llms.txt). Studio internals: [`docs/STUDIO.md`](docs/STUDIO.md).
+- **Privacy:** no account and no tracking cookies. The public deployment includes Vercel Web Analytics to count cookieless pageviews (page URL, referrer, approximate country, device/browser); it sets no cookies and does not track you across sites. Exercise answers and saved work stay in your browser; the study content makes no model or platform API calls.
 - **Run it:** `python3 -m http.server 8766 --bind 127.0.0.1`, then open `http://127.0.0.1:8766/`.
 - **License:** AGPL-3.0-only. Independent project, not affiliated with the book's authors or O'Reilly.
 
@@ -46,7 +49,7 @@ Created, written and maintained by **[hurdad ashouri](https://github.com/Hurdadd
 
 Most distributed-systems notes stop at definitions. Most AI-platform repos start at infrastructure. This lab connects the two ends:
 
-1. **Learn the foundations** — 14 chapters of *Designing Data-Intensive Applications (2nd Edition)*, each distilled to its trade-offs with interactive diagrams and a teacher-style walkthrough.
+1. **Learn the foundations** — 14 chapters of *Designing Data-Intensive Applications (2nd Edition)*, each with interactive diagrams, three or four inline labs, a teacher-style walkthrough, an interview pack and worked solutions; about 45–105 minutes per chapter at 150 wpm.
 2. **Practice defending decisions** — a capstone workshop that turns those chapters into one coherent AI-platform design: requirements → estimates → ADRs → animated request flow → recovery drills → portfolio evidence.
 3. **Stay honest about scope** — everything proposed is labeled *proposed*; everything measured is labeled *measured*. No fake benchmarks, no implied production system.
 
@@ -56,12 +59,12 @@ Most distributed-systems notes stop at definitions. Most AI-platform repos start
 
 | | |
 | :--- | :--- |
-| 📚 **14 bilingual chapters** | Persian + English, each with an at-a-glance table, frequent interview questions, common mistakes and a 5-minute checklist |
-| 📊 **113 interactive diagrams** | Dataflows, lifecycles, UML and decision trees — every one followed by a step-by-step narration, as if a teacher stood at the board |
-| 🔬 **43 inline labs** | Three short experiments in each chapter: pick a decision, step through events, replay the whole flow and see what survives a crash, retry or lag |
-| 🔤 **287-term glossary** | Jargon words in a chapter are dotted; hover for a one-line definition, click for the full entry — a jargon-free everyday scene, an analogy, a generated diagram, the technical account with key numbers, then the usual trap |
-| 🛠️ **Exercise studio** | Draw a design, press **Run** and watch packets flow, then get a verdict, a score, a reference and a step-by-step solution, all offline |
-| 🧪 **49 reviewed exercises** | Leveled, prioritized, with interview briefs — plus a [2026 assessment & Senior/Staff path](https://ddia-study-lab.vercel.app/exercise-audit.html) |
+| 📚 **14 bilingual chapters** | Persian + English, each with an at-a-glance table, frequent interview questions, common mistakes and a 5-minute checklist; about 45–105 minutes at 150 wpm |
+| 📊 **160 interactive diagrams** | Dataflows, lifecycles, UML and decision trees — every one followed by a step-by-step narration, as if a teacher stood at the board |
+| 🔬 **43 inline labs** | Three short experiments in most chapters, four in chapter 6: pick a decision, step through events, replay the whole flow and see what survives a crash, retry or lag |
+| 🔤 **287 terms, 226 figures** | Jargon words in a chapter are dotted; hover for a one-line definition, click for the full entry — a jargon-free everyday scene, an analogy, a generated diagram where one exists, the technical account with key numbers, then the usual trap |
+| 🛠️ **Exercise studio** | Draw a design, press **Run** and watch packets flow, then get a verdict, a score, a reference and a step-by-step solution, all in your browser |
+| 🧪 **49 reviewed chapter exercises** | Leveled, prioritized, with interview briefs — the other 35 are classic system-design problems, for 84 in the studio; plus a [2026 assessment & Senior/Staff path](https://ddia-study-lab.vercel.app/exercise-audit.html) |
 | 🏗️ **Capstone: Own the Stack** | One AI platform, five capabilities, fifteen ADRs with rationale, alternatives, validation and revisit triggers |
 | 🧮 **Editable estimates** | Workload & cost arithmetic with 12 explicit assumptions and limits — change the numbers, see what breaks |
 | 🛟 **Recovery with reasons** | Failure-specific RPO/RTO targets with derivation budgets and planned drills, not slogans |
@@ -73,7 +76,7 @@ Every chapter has hands-on labs right after the section that explains the idea. 
 
 ![A chapter lab: a write, a held replication message and a stale read](docs/media/chapter-lab.gif)
 
-The **exercise studio** is a separate practice area for the 84 exercises (49 from the chapters, 35 classic problems such as a URL shortener or a chat system). Build a design on a canvas, press **Run**, and see packets flow along every edge, overloaded nodes drop requests, and a verdict card name the bottleneck. Then score it, compare with the exercise's reference design and open the step-by-step solution. There is no AI and no network call; saved work stays in your browser.
+The **exercise studio** is a separate practice area for the 84 exercises (49 from the chapters, 35 classic problems such as a URL shortener or a chat system). Build a design on a canvas, press **Run**, and see packets flow along every edge, overloaded nodes drop requests, and a verdict card name the bottleneck. Then score it, compare with the exercise's reference design and open the step-by-step solution. The studio makes no AI or network call when it runs; saved work stays in your browser.
 
 ![Studio run: packets flow along the edges and a verdict card appears](docs/media/studio-run.gif)
 
@@ -88,19 +91,19 @@ The **exercise studio** is a separate practice area for the 84 exercises (49 fro
 | # | Chapter | Core question | Diagrams |
 | :--- | :--- | :--- | :---: |
 | 01 | [Trade-offs in data systems](ch1-tradeoffs/index.html) | Why do checkout, search and reporting need different tools? | 8 |
-| 02 | [Nonfunctional requirements](ch2-nonfunctional/index.html) | How do latency, failure tolerance and growth get measured? | 6 |
-| 03 | [Data models & query languages](ch3-data-models/index.html) | Tables, documents, graphs or event logs — which fits? | 8 |
-| 04 | [Storage & retrieval](ch4-storage-retrieval/index.html) | How is one order found fast and millions aggregated? | 6 |
-| 05 | [Encoding & evolution](ch5-encoding-evolution/index.html) | How do old and new app versions keep talking? | 6 |
-| 06 | [Replication](ch6-replication/index.html) | How do copies converge — and where do conflicts come from? | 6 |
-| 07 | [Sharding](ch7-sharding/index.html) | How is data split across servers without hot spots? | 6 |
-| 08 | [Transactions](ch8-transactions/index.html) | Who gets the last seat — and how is that decided fairly? | 8 |
-| 09 | [The trouble with distributed systems](ch9-distributed-trouble/index.html) | The response never arrived — did it happen or not? | 9 |
-| 10 | [Consistency & consensus](ch10-consensus/index.html) | After the leader fails, how do nodes agree on the next one? | 10 |
-| 11 | [Batch processing](ch11-batch-processing/index.html) | From raw files to a complete nightly report — reliably? | 12 |
-| 12 | [Stream processing](ch12-stream-processing/index.html) | Duplicates, late events, live counts — how to stay correct? | 10 |
-| 13 | [A philosophy of streaming systems](ch13-streaming-philosophy/index.html) | How do derived views stay rebuildable and trustworthy? | 11 |
-| 14 | [Doing the right thing](ch14-doing-right/index.html) | Bias, surveillance, consent — what is the data *for*? | 10 |
+| 02 | [Nonfunctional requirements](ch2-nonfunctional/index.html) | How do latency, failure tolerance and growth get measured? | 10 |
+| 03 | [Data models & query languages](ch3-data-models/index.html) | Tables, documents, graphs or event logs — which fits? | 11 |
+| 04 | [Storage & retrieval](ch4-storage-retrieval/index.html) | How is one order found fast and millions aggregated? | 10 |
+| 05 | [Encoding & evolution](ch5-encoding-evolution/index.html) | How do old and new app versions keep talking? | 9 |
+| 06 | [Replication](ch6-replication/index.html) | How do copies converge — and where do conflicts come from? | 10 |
+| 07 | [Sharding](ch7-sharding/index.html) | How is data split across servers without hot spots? | 10 |
+| 08 | [Transactions](ch8-transactions/index.html) | Who gets the last seat — and how is that decided fairly? | 12 |
+| 09 | [The trouble with distributed systems](ch9-distributed-trouble/index.html) | The response never arrived — did it happen or not? | 12 |
+| 10 | [Consistency & consensus](ch10-consensus/index.html) | After the leader fails, how do nodes agree on the next one? | 13 |
+| 11 | [Batch processing](ch11-batch-processing/index.html) | From raw files to a complete nightly report — reliably? | 15 |
+| 12 | [Stream processing](ch12-stream-processing/index.html) | Duplicates, late events, live counts — how to stay correct? | 13 |
+| 13 | [A philosophy of streaming systems](ch13-streaming-philosophy/index.html) | How do derived views stay rebuildable and trustworthy? | 14 |
+| 14 | [Doing the right thing](ch14-doing-right/index.html) | Bias, surveillance, consent — what is the data *for*? | 13 |
 
 Prefer the guided path? [Open the roadmap on the live site ↗](https://ddia-study-lab.vercel.app/#chapters) · [Exercise audit & study path ↗](https://ddia-study-lab.vercel.app/exercise-audit.html)
 
@@ -161,7 +164,7 @@ cd ddia-study-lab
 python3 -m http.server 8766 --bind 127.0.0.1
 ```
 
-Open **[localhost:8766](http://127.0.0.1:8766/)**. Fonts load from Google Fonts with local fallbacks. Calculators and animations send no model/platform requests. Motion is user-controlled, with pause, stepping, keyboard support and reduced-motion behavior.
+Open **[localhost:8766](http://127.0.0.1:8766/)**. Fonts load from Google Fonts with local fallbacks. Calculators and animations make no model or platform API calls. The public deployment also includes Vercel Web Analytics: cookieless pageviews only (page URL, referrer, approximate country, device/browser), no cookies, no cross-site tracking, and no exercise answers or saved work. Motion is user-controlled, with pause, stepping, keyboard support and reduced-motion behavior.
 
 <details>
 <summary><strong>Development & verification</strong></summary>
@@ -172,10 +175,17 @@ Committed HTML works as-is. After editing the capstone sources:
 python3 assets/build_final_project.py
 python3 assets/check_publication.py
 python3 assets/check_final_project.py
+python3 assets/check_teaching_examples.py
+python3 assets/check_solutions.py
+python3 assets/check_exercise_audit.py
+python3 assets/check_glossary.py
+python3 assets/check_links.py
 python3 assets/structcheck.py index.html final-project/index.html
 python3 assets/build_site.py
 python3 assets/check_publication.py --export
 ```
+
+The content gates fail on a lost core example, a duplicated example body, a missing worked solution, a broken internal link or fragment, and glossary drift.
 
 The allowlisted `public/` export excludes credentials, local history, review captures, generator state and tool caches. Frozen diagram exports and nine export/specification hash pairs are checked by SHA-256; Archify is optional for regeneration.
 
@@ -210,7 +220,7 @@ docs/            development, recovery, deployment and third-party notices
 
 | ✅ Implemented & usable | 🔧 Proposed, not built |
 | :--- | :--- |
-| 14 bilingual chapters, 113 diagrams, 43 labs, 49 exercises, 84-exercise studio | Platform APIs, workers, database, CDC pipelines |
+| 14 bilingual chapters, 160 diagrams, 43 labs, 49 reviewed chapter exercises, 84-exercise studio (49 + 35 classic) | Platform APIs, workers, database, CDC pipelines |
 | 15 ADRs, estimates, recovery budgets, drill guide | Model serving, real evaluations, DR automation |
 | Animated request flow & synthetic developer POV | Measured SLOs, benchmarks, production deployment |
 

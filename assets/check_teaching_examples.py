@@ -33,6 +33,8 @@ class Examples(HTMLParser):
         self.technical = []
         self.active_example = None
         self.duplicate_ids = set()
+        self.body_buf = []
+        self.bodies = []
         self.feed(source)
 
     def handle_starttag(self, tag, attrs):
@@ -45,6 +47,7 @@ class Examples(HTMLParser):
         if 'technical-example' in classes:
             assert self.active_example is None, 'nested technical examples'
             self.active_example = {'depth': len(self.stack), 'parts': [], 'version': attrs.get('data-example-version')}
+            self.body_buf = []
             self.technical.append(self.active_example)
         if attrs.get('data-example-part') and self.active_example is not None:
             self.active_example['parts'].append(attrs['data-example-part'])
@@ -69,6 +72,8 @@ class Examples(HTMLParser):
             self.stack.append((tag, attrs))
 
     def handle_data(self, data):
+        if self.active_example is not None:
+            self.body_buf.append(data)
         if self.in_summary and not any('en' in a.get('class', '').split() for _, a in self.stack):
             self.summary += data
 
@@ -81,6 +86,9 @@ class Examples(HTMLParser):
             if self.stack[i][0] == tag:
                 del self.stack[i:]
                 if self.active_example is not None and len(self.stack) <= self.active_example['depth']:
+                    body = ' '.join(''.join(self.body_buf).split())
+                    if body:
+                        self.bodies.append(body)
                     self.active_example = None
                 break
 
@@ -100,6 +108,7 @@ def check(path):
         assert counts == EXPECTED[int(ch[1])], f'topic coverage changed: {counts}'
     assert len(page.technical) == page.core + page.review + page.guides, 'an old or unstructured example remains'
     assert all(e['version'] == 'technical-v2' and e['parts'] == ['setup', 'steps', 'result'] for e in page.technical), 'an example lacks its initial state, operations or explained result'
+    assert len(page.bodies) == len(set(page.bodies)), 'two teaching examples repeat the same body verbatim'
     assert 'chapter-examples' in page.ids and len(page.links) == page.core, 'chapter example index is incomplete'
     if path.parent.name == 'ch8-transactions':
         required = {'example-transaction', 'example-acid', 'example-mvcc', 'example-lost-update',

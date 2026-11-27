@@ -38,9 +38,9 @@
     <span class="en">Write a value, then ask for it later. What happens between those two calls? You'll follow the bytes through logs, indexes, B-trees, LSM and columnar storage. Nine diagrams and worked examples show where each design spends its read, write and storage budget.</span>
   </p>
   <div class="meta-row reveal">
-    <span><b><span class="fa">۹</span><span class="en">9</span></b> <span class="fa">نمودار (۶ تعاملی + ۳ مفهومی)</span><span class="en">diagrams (6 interactive + 3 concept)</span></span><span class="dot">·</span>
+    <span><b><span class="fa">۱۰</span><span class="en">10</span></b> <span class="fa">۱۰ نمودار + روایت گام‌به‌گام</span><span class="en">10 diagrams with step-by-step narration</span></span><span class="dot">·</span>
     <span><span class="fa">محور: log-structured · B-tree · columnar · indexes</span><span class="en">Theme: log-structured · B-tree · columnar · indexes</span></span><span class="dot">·</span>
-    <span><span class="fa">زمان مطالعه: حدود ۷۰ دقیقه</span><span class="en">Reading time: ~70 min</span></span>
+    <span><span class="fa">زمان مطالعه: حدود ۷۵ دقیقه</span><span class="en">Reading time: ~75 min</span></span>
   </div>
 </section>
 
@@ -368,7 +368,7 @@ $ db_get 42</pre>
       <h4>Bloom filter</h4>
 <div class="fa"><p>پاسخِ «نیست» تو Bloom filter قطعیه و پاسخِ «شاید هست» بررسیِ واقعی می‌خواد. این فیلتر مقدارِ رکورد رو نگه نمی‌داره.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch4-5">
 <p class="example-title"><b>مثال فنی: شاید هست، قطعاً نیست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن برای یه SSTable، ـی Bloom filter می‌گه بیت لازم برای کلید <code dir="ltr">P99</code> صفره. یعنی نیست.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن برای یه SSTable، Bloom filter می‌گه بیت لازم برای کلید <code dir="ltr">P99</code> صفره. یعنی نیست.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا فایل برای <code dir="ltr">P99</code> خونده نمی‌شه؛ ولی اگه همهٔ بیت‌ها یک باشن، فایل هنوز باید بررسی بشه. شاید هست، شاید نه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس پاسخ مثبت می‌تونه کاذب باشه. فیلتر سالم برای مجموعهٔ ساخته‌شده پاسخ منفی کاذب نمی‌ده و جای بررسی داده رو نمی‌گیره — «نه» قطعیه، «شاید» مشکوکه.</p>
 </div></div>
@@ -721,19 +721,19 @@ $ db_get 42</pre>
       <tr><td><b>range query</b></td><td>ساده و سریع با ساختار مرتب درخت</td><td>ممکنه ولی باید همهٔ سگمنت‌ها رو موازی بخونی و ادغام کنی؛ Bloom filter کمکی نمی‌کنه و نسبت به نقطه‌ای گرون‌تره</td></tr>
       <tr><td><b>الگوی نوشتن</b></td><td>نوشتن‌های کوچیک و پراکنده (random writes) به صفحاتِ هرجای دیسک</td><td>نوشتن‌های بزرگ و ترتیبی (sequential writes) — کل سگمنت تو یه نوبت</td></tr>
       <tr><td><b>بازده نوشتن</b></td><td>کمتر؛ به‌خصوص رو HDD</td><td>بیشتر؛ تفاوت رو HDD بزرگ و رو SSD کمتر ولی محسوس</td></tr>
-      <tr><td><b>write amplification</b></td><td>هر داده حداقل ۲ بار: WAL + صفحه؛ گاهی کل صفحه برای چند تا بایت</td><td>WAL + flush + هر بار compaction؛ معمولاً کمتر (صفحهٔ ثابت نداره و بلوک‌ها فشرده می‌شن)</td></tr>
+      <tr><td><b>write amplification</b></td><td>هر داده حداقل ۲ بار: WAL + صفحه؛ گاهی کل صفحه برای چند تا بایت</td><td>WAL + flush + هر بار compaction؛ مقدارش به استراتژیِ compaction بستگی داره: size-tiered فایل‌های مشابه رو ادغام می‌کنه و فضای موقت بیشتری می‌خواد، ولی leveled داده رو در سطح‌ها چندین بار بازنویسی می‌کنه و می‌تونه به write amplification یک B-tree نزدیک یا از آن بیشتر بشه. بلوک‌های فشرده بایت کمتری می‌نویسن</td></tr>
       <tr><td><b>latency نوشتن</b></td><td>نسبتاً یکنواخت</td><td>ممکنه با پر شدن memtable یا عقب افتادن compaction جهش کنه؛ موتورهایی مثل RocksDB backpressure می‌ذارن</td></tr>
       <tr><td><b>فضای دیسک</b></td><td>fragmentation بعد از حذف انبوه (نیاز به vacuum مثل PostgreSQL)</td><td>فشرده‌سازی بهتر؛ ولی نسخه‌های قدیمی تا compaction فضا می‌گیرن و size-tiered موقت فضای زیادی می‌خواد</td></tr>
       <tr><td><b>حذف قطعی داده</b></td><td>مستقیم‌تر</td><td>tombstone باید تو همهٔ سطح‌ها propagate بشه؛ ممکنه طول بکشه</td></tr>
       <tr><td><b>snapshot</b></td><td>سخت‌تر (صفحات بازنویسی می‌شن)</td><td>آسان: فایل‌های تغییرناپذیرِ همون لحظه = snapshot، بدون کپی</td></tr>
-      <tr><td><b>عمر SSD</b></td><td>write amplification بیشتر ← سایش بیشتر</td><td>معمولاً کمتر می‌نویسه ← عمر بیشتر</td></tr>
+      <tr><td><b>عمر SSD</b></td><td>write amplification بیشتر ← سایش بیشتر</td><td>اگر write amplification اندازه‌گیری‌شده کمتر باشه، سایش هم کمتر می‌شه</td></tr>
     </tbody></table>
   </div><div class="en"><table><thead><tr><th>Aspect</th><th>B-tree (update in place)</th><th>LSM (log-structured)</th></tr></thead><tbody>
 <tr><td><b>Point reads</b></td><td>One page per level; short, predictable path</td><td>May check several segments; Bloom filters reduce I/O</td></tr>
 <tr><td><b>Range queries</b></td><td>Follow sorted leaves</td><td>Read relevant sorted runs and merge; point-key Bloom filters don't resolve a range</td></tr>
 <tr><td><b>Write pattern</b></td><td>Small, scattered page writes</td><td>Large, sequential segment writes</td></tr>
 <tr><td><b>Write throughput</b></td><td>Often lower, especially on HDD</td><td>Often higher; the gap depends on workload and media, including SSD</td></tr>
-<tr><td><b>Write amplification</b></td><td>WAL and page writes; a few changed bytes may require a full page</td><td>WAL, flush and compaction; compressed blocks can reduce bytes, while repeated merges add writes</td></tr>
+<tr><td><b>Write amplification</b></td><td>WAL and page writes; a few changed bytes may require a full page</td><td>WAL, flush and compaction; the amount depends on the compaction strategy: size-tiered merges similar runs and needs more temporary space, while leveled rewrites data across levels and can approach or exceed B-tree write amplification. Compressed blocks reduce bytes per write.</td></tr>
 <tr><td><b>Write latency</b></td><td>Often more uniform</td><td>Can spike when memory fills or compaction falls behind; RocksDB can apply backpressure</td></tr>
 <tr><td><b>Disk space</b></td><td>Free space can fragment after deletes; cleanup such as PostgreSQL vacuum is needed</td><td>Compression helps; old versions and size-tiered merge inputs need space</td></tr>
 <tr><td><b>Definitive deletion</b></td><td>More direct in the basic page model</td><td>Tombstones must cover the relevant old versions before removal</td></tr>
@@ -867,9 +867,9 @@ $ db_get 42</pre>
 
   <h3><span class="fa">انبارداده‌های ابری و تفکیک لایه‌ها</span><span class="en">Cloud warehouses and layer separation</span></h3>
   <div class="fa">
-<ul>    <li>نسل تازه (BigQuery، Redshift، Snowflake) از زیرساخت ابری بهره می‌برن: داده تو <b>object storage</b> و محاسبهٔ <b>serverless</b> — یعنی ذخیره‌سازی و محاسبه <b>مستقل از هم</b> مقیاس می‌گیرن و با بقیهٔ سرویس‌های ابری ( ingest لاگ، Dataflow، Kinesis) یکپارچه‌ان.</li>
+<ul>    <li>نسل تازه (BigQuery، Redshift، Snowflake) ذخیره‌سازی و محاسبه رو از هم جدا می‌کنه، ولی نه با یه الگوی واحد: <b>Snowflake</b> داده رو روی <b>object storage</b> نگه می‌داره و کوئری رو با <b>virtual warehouse</b>های قابل‌تنظیم اجرا می‌کنه، نه صرفاً محاسبهٔ serverless؛ <b>Redshift</b> معمولاً یه کلاستر provisioned هست و فقط مدل <b>RA3</b> (و نسخهٔ Serverless) ذخیره‌سازی رو جدا می‌کنه؛ <b>BigQuery</b> هم serverless هست و ذخیره‌سازی و محاسبهٔ مدیریت‌شده رو جدا نگه می‌داره. این جداسازی باعث می‌شه ظرفیت هر لایه مستقل مقیاس بگیره و با سرویس‌های ابری مثل ingest لاگ، Dataflow و Kinesis یکپارچه بشه.</li>
     <li>تو دنیای متن‌باز هم یه سیستم یکپارچهٔ قدیمی (مثل Hive) به مؤلفه‌های جدا شکسته شده:</li>
-  </ul></div><div class="en"><ul><li>The cloud warehouse examples, BigQuery, Redshift and Snowflake, separate <b>storage and compute</b> so capacity can scale independently. This architecture uses object storage and serverless compute, with integrations such as log ingestion, Dataflow and Kinesis.</li><li>Open-source analytics also separates roles that used to sit inside a more monolithic system such as Hive. Track four components:</li></ul></div>
+  </ul></div><div class="en"><ul><li>The cloud warehouses BigQuery, Redshift and Snowflake separate <b>storage and compute</b>, but not in one identical way: <b>Snowflake</b> keeps data in <b>object storage</b> and runs queries on configurable <b>virtual warehouses</b> rather than pure serverless compute; <b>Redshift</b> is normally a provisioned cluster, with the <b>RA3</b> model (and Redshift Serverless) separating storage; <b>BigQuery</b> is serverless with managed storage and compute kept apart. That separation lets each layer scale independently and connect to cloud services such as log ingestion, Dataflow and Kinesis.</li><li>Open-source analytics also separates roles that used to sit inside a more monolithic system such as Hive. Track four components:</li></ul></div>
   <div class="fa">
     <table><thead><tr><th>مؤلفه</th><th>وظیفه</th><th>نمونه‌ها</th></tr></thead>
     <tbody>
@@ -974,9 +974,9 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 <ul>    <li><b>ذخیره‌سازی ستونی (columnar):</b> به‌جای یه ردیف، <b>همهٔ مقادیر هر ستون</b> کنار هم ذخیره می‌شن؛ پس کوئری فقط ستون‌های استفاده‌شده رو می‌خونه و تجزیه می‌کنه.</li>
     <li>بازسازی ردیف: چون همهٔ ستون‌ها ردیف‌ها رو <b>به یه ترتیب</b> نگه می‌دارن، مؤلفهٔ k امِ هر ستون = ردیفِ k ام.</li>
     <li>در عمل کلِ ستونِ تریلیون‌ردیفی یه‌جا نیست: جدول به <b>بلوک‌هایی از هزاران/میلیون‌ها ردیف</b> شکسته می‌شه و چون کوئری‌ها معمولاً بازهٔ تاریخی دارن، هر بلوک معمولاً یه بازهٔ زمانیه. کوئری فقط بلوک‌های هم‌پوشانِ بازه و فقط ستون‌های لازم رو می‌خونه.</li>
-    <li>این چیدمان تقریباً تو همهٔ پایگاه‌های داده تحلیلیِ امروز هست: از Snowflake گرفته تا DuckDB و Pinot و Druid؛ فرمت‌های Parquet و ORC و Lance و Nimble و قالب‌های درون‌حافظه‌ای مثل Arrow و Pandas/NumPy؛ و بعضی پایگاه‌های داده سری زمانی (InfluxDB IOx، TimescaleDB). Parquet حتی مدل سندی رو هم پشتیبانی می‌کنه (تکنیک shredding از Dremel).</li>
+    <li>این چیدمان در بیشتر موتورهای تحلیلیِ ستون‌محور امروز دیده می‌شه: از Snowflake گرفته تا DuckDB و Pinot و Druid؛ فرمت‌های Parquet و ORC و Lance و Nimble و قالب‌های درون‌حافظه‌ای مثل Arrow و Pandas/NumPy؛ و بعضی پایگاه‌های داده سری زمانی (InfluxDB IOx، TimescaleDB). Parquet حتی مدل سندی رو هم پشتیبانی می‌کنه (تکنیک shredding از Dremel).</li>
     <li>ستون‌ها رو می‌شه <b>فشرده</b> کرد؛ چون ستون‌ها معمولاً تکرارِ زیادی دارن (میلیاردها تراکنش، ۱۰۰ هزار محصولِ متمایز). روش شاخص: <b>bitmap encoding</b> — برای هر مقدارِ متمایز یه bitmap با یه بیت به‌ازای هر ردیف. bitmapهای تنک رو <b>run-length encoding</b> می‌کنن و روش‌هایی مثل roaring bitmaps بین دو نمایش، فشرده‌تر رو برمی‌گزینن.</li>
-  </ul></div><div class="en"><ul><li><b>Columnar storage</b> groups values by column. A query can read and parse the columns it uses instead of every field in each row.</li><li>Columns share the <b>same row order</b>: element k in each column belongs to row k. That alignment lets the engine reconstruct rows.</li><li>A trillion-row column isn't stored as one indivisible unit. Tables are split into blocks covering thousands or millions of rows. A time-range query can skip non-overlapping blocks and read only the needed columns.</li><li>The chapter's examples include Snowflake, DuckDB, Pinot and Druid; Parquet, ORC, Lance and Nimble; memory layouts such as Arrow and Pandas/NumPy; and time-series systems such as InfluxDB IOx and TimescaleDB. Parquet also represents nested documents using Dremel-style shredding.</li><li>Similar values often <b>compress</b> well. Think of billions of sales with only 100k products. <b>Bitmap encoding</b> uses a bitmap per distinct value, with a bit per row. <b>Run-length encoding</b> compresses runs, while roaring bitmaps choose suitable representations for their data density.</li></ul>
+  </ul></div><div class="en"><ul><li><b>Columnar storage</b> groups values by column. A query can read and parse the columns it uses instead of every field in each row.</li><li>Columns share the <b>same row order</b>: element k in each column belongs to row k. That alignment lets the engine reconstruct rows.</li><li>A trillion-row column isn't stored as one indivisible unit. Tables are split into blocks covering thousands or millions of rows. A time-range query can skip non-overlapping blocks and read only the needed columns.</li><li>Most columnar analytical engines use this layout, including Snowflake, DuckDB, Pinot and Druid; Parquet, ORC, Lance and Nimble; memory layouts such as Arrow and Pandas/NumPy; and time-series systems such as InfluxDB IOx and TimescaleDB. Parquet also represents nested documents using Dremel-style shredding.</li><li>Similar values often <b>compress</b> well. Think of billions of sales with only 100k products. <b>Bitmap encoding</b> uses a bitmap per distinct value, with a bit per row. <b>Run-length encoding</b> compresses runs, while roaring bitmaps choose suitable representations for their data density.</li></ul>
 <div class="callout" data-en-example="example-ch4-18">
 <p class="example-title"><b>Example: Compressing repeated column values</b></p>
 <p><b>Setup:</b> A block's <code dir="ltr">country</code> column contains a thousand copies of <code dir="ltr">IR</code>.</p>
@@ -1117,7 +1117,7 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch4-23">
 <p class="example-title"><b>مثال فنی: سه سؤال، سه ایندکس</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن باید سفارش مشتری رو بیابی، سند دارای واژه رو پیدا کنی و محصول مشابه تصویر رو پیشنهاد بدی. سه تا کار، سه تا ساز.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا B-tree برای کلید مرتب، ـی inverted index برای واژه و ANN برای بردار مسیرهای متفاوت دارن. هر کدوم یه کاره.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا B-tree برای کلید مرتب، inverted index برای واژه و ANN برای بردار مسیرهای متفاوت دارن. هر کدوم یه کاره.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس «ایندکس داریم» کافی نیست. نوع پرسش تعیین می‌کنه چه رابطه‌ای بین ورودی و محل داده لازمه — اول سؤال، بعد ابزار.</p>
 </div>
 </div><div class="en"><p>B-trees and LSM support sorted ranges over <b>one key order</b>, such as names starting with L. A question involving several independent ranges needs a closer look at what that order can and can't narrow down.</p>
@@ -1203,7 +1203,7 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch4-26">
 <p class="example-title"><b>مثال فنی: جست‌وجوی تقریبی بردار</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن query برداری نزدیک به محصول <code dir="ltr">P7</code>ـه، ولی فقط چند تا خوشه یا بخشی از گراف بررسی می‌شه. نه همه جا!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا IVF خوشه‌های منتخب رو می‌کاوه؛ HNSW مسیر همسایه‌ها رو رو گراف طی می‌کنه. گسترش جست‌وجو معمولاً کار بیشتری می‌خواد.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا IVF خوشه‌های منتخب رو می‌کاوه؛ HNSW مسیر همسایه‌ها رو روی گراف طی می‌کنه. گسترش جست‌وجو معمولاً کار بیشتری می‌خواد.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس ممکنه نزدیک‌ترین همسایهٔ واقعی جا بمونه. recall باید با جست‌وجوی دقیق رو نمونهٔ مرجع سنجیده بشه — تقریب یعنی گاهی اشتباه، یادت باشه.</p>
 </div>
 </div><div class="en"><p>Keep the two meanings of “vector” separate. <b>Vectorized processing</b> in section 7 means operating on batches of values. A <b>vector embedding</b> is a numerical point representing content in a multidimensional space. Batching calculations and searching for similar content solve different problems.</p></div>
@@ -1348,7 +1348,7 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
   </details>
 
   <details><summary><span class="fa">۳. چرا hash index به‌تنهایی کافی نیست؟</span><span class="en">3. Why isn’t a hash index enough on its own?</span></summary>
-    <div class="fa"><p>تو مدلِ سادهٔ فصل، ایندکسِ هشِ درونِ حافظه جست‌وجوی کلید رو سریع می‌کنه، ولی خوندنِ بازه و ظرفیتِ حافظه و بازیابی و جمع‌آوریِ نسخه‌های قدیمی مسائلِ جداگانه‌ان.</p>
+    <div class="fa"><p>تو مدلِ سادهٔ فصل، ایندکسِ هشِ درونِ حافظه جست‌وجوی کلید رو سریع می‌کنه، ولی خوندنِ بازه و ظرفیتِ حافظه و بازیابی و جمع‌آوریِ نسخه‌های قدیمی مسائلِ جداگانه‌ان. انتقالِ هش به دیسک هم هزینهٔ دسترسیِ تصادفی و تغییرِ اندازه رو اضافه می‌کنه.</p>
 </div><div class="en"><p>The simple hash map speeds up point lookups, but four issues remain: old log records consume space, restarts rebuild the map by scanning the log, the map must fit in memory, and it provides no sorted range access. Moving the hash to disk brings random-access and resizing costs.</p>
 </div>
   </details>
@@ -1367,19 +1367,18 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 
   <details><summary><span class="fa">۶. جست‌وجوی نقطه‌ای در LSM چطور انجام می‌شود؟</span><span class="en">6. How does LSM point lookup work?</span></summary>
     <div class="fa"><p>خوندن وضعیتِ تازه رو تو حافظه و فایل‌های مرتبط جست‌وجو می‌کنه. فیلترها و ایندکس‌ها فایل و بلوکِ لازم رو محدود می‌کنن؛ نسخه‌ها و علامتِ حذف تعیین می‌کنن چه نتیجه‌ای معتبره.</p>
-</div><div class="en"><p>Check memory first, then relevant segments in newest-to-oldest order for this model. A Bloom filter can rule out a segment; otherwise its sparse index identifies the data block. Return the newest visible version, respecting tombstones. A missing key or an old unchanged key can require checking several segments, which is why filters matter.</p>
+</div><div class="en"><p>Check the memtable first, then the relevant segments in newest-to-oldest order. A Bloom filter can rule out a segment; otherwise its sparse index identifies the data block. Return the newest visible version, respecting tombstones. A missing key or an old unchanged key can require checking several segments, which is why filters matter.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۷. Bloom filter چطور کار می‌کند و false positive یعنی چه؟</span><span class="en">7. How does a Bloom filter work — what is a false positive?</span></summary>
     <div class="fa"><p>برای کلید، چند تا موقعیتِ بیت علامت می‌خوره. اگه بیتِ لازم صفر باشه، کلید نیست؛ اگه همه یک باشن، شاید هست، چون کلیدهای دیگه هم همون بیت‌ها رو علامت زدن.</p>
-</div><div class="en"><p>Several hashes set positions in a bit array. One required 0 bit proves the key isn't in the set represented by a correctly built filter. All 1s mean “maybe”: another key may have set the same bits.</p><p>The chapter's approximation is 10 bits per key for about 1% false positives. In an LSM lookup, that false positive causes an extra check rather than an incorrect returned record. The filter doesn't store the value.</p>
-</div>
+</div><div class="en"><p>Several hashes set positions in a bit array. One required 0 bit proves the key isn't in the set represented by a correctly built filter. All 1s mean “maybe”: another key may have set the same bits; the chapter's approximation is 10 bits per key for about 1% false positives. In an LSM lookup, that false positive causes an extra check rather than an incorrect returned record, and the filter doesn't store the value.</p></div>
   </details>
 
   <details><summary><span class="fa">۸. دو استراتژی compaction را مقایسه کن.</span><span class="en">8. Compare the two compaction strategies.</span></summary>
     <div class="fa"><p>ادغامِ اندازه‌محور فایل‌های مشابه رو جمع می‌کنه و معمولاً فضای موقت و فایل‌های بیشتری داره. ادغامِ سطحی بازه‌ها رو منظم‌تر نگه می‌داره، ولی می‌تونه داده رو بیشتر بازنویسی کنه.</p>
-</div><div class="en"><p>Size-tiered compaction merges similarly sized files, often favoring write throughput while keeping more runs and requiring temporary space. Leveled compaction organizes files into levels L0, L1, … with size limits and more controlled ranges. That can improve read and space costs but add rewriting.</p><p>Compare size-tiered for write-heavy traffic and leveled for read-heavy traffic as starting points. Workload and settings decide the actual result.</p>
+</div><div class="en"><p>Size-tiered compaction merges similarly sized files, often favoring write throughput while keeping more runs and requiring temporary space. Leveled compaction organizes files into levels L0, L1, … with size limits and more controlled ranges. That can improve read and space costs but add rewriting.</p><p>Compare size-tiered for write-heavy traffic and leveled for read-heavy traffic as starting points; workload and settings decide the actual result.</p>
 </div>
   </details>
 
@@ -1391,7 +1390,7 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 
   <details><summary><span class="fa">۱۰. ساختار B-tree را در چند جمله توضیح بده.</span><span class="en">10. Explain the B-tree structure in a few sentences.</span></summary>
     <div class="fa"><p><span class="ltr">B-tree</span> درختی از صفحه‌های دارای کلید و اشاره‌گره. هر سطح بازه رو محدود می‌کنه؛ برگ‌ها کلیدهای مرتب رو نگه می‌دارن و محلِ رکورد به طراحیِ موتور بستگی داره.</p>
-</div><div class="en"><p>A B-tree consists of fixed-size pages, commonly illustrated here as 8–16 KB, linked by page references. The root and internal boundary keys narrow the range until you reach a leaf. A branching factor in the hundreds keeps large examples around 3–4 levels deep, with O(log n) depth. The engine decides whether leaves contain records or references to them.</p>
+</div><div class="en"><p>A B-tree consists of fixed-size pages — commonly 8–16 KB — linked by page references. The root and internal boundary keys narrow the range until you reach a leaf. A branching factor in the hundreds keeps large examples around 3–4 levels deep, with O(log n) depth. The engine decides whether leaves contain records or references to them.</p>
 </div>
   </details>
 
@@ -1403,20 +1402,17 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 
   <details><summary><span class="fa">۱۲. مهم‌ترین تفاوت‌های B-tree و LSM چیست؟</span><span class="en">12. What are the key B-tree vs LSM differences?</span></summary>
     <div class="fa"><p><span class="ltr">B-tree</span> معمولاً با مسیرِ صفحه‌ایِ مرتب می‌خونه؛ <span class="ltr">LSM</span> تغییرها رو تو حافظه و فایل‌ها جمع و بعد ادغام می‌کنه. هزینهٔ نوشتن و خوندن و فضا و تأخیرِ پس‌زمینه به بار و پیاده‌سازی وابسته‌ست.</p>
-</div><div class="en"><p>B-trees follow a short page path for point reads and sorted leaves for ranges. LSM gathers changes in memory and immutable files, then merges them. Reads may check several runs; range reads merge their ordered results.</p><p>Compare writes, space and latency too. LSM compression can save space, but old versions and compaction need room. B-tree pages can fragment. Snapshots and final deletion follow different paths. Measure the real workload instead of declaring a universal winner.</p>
-</div>
+</div><div class="en"><p>B-trees follow a short page path for point reads and sorted leaves for ranges. LSM gathers changes in memory and immutable files, then merges them; reads may check several runs, and range reads merge their ordered results. Compare writes, space and latency too: LSM compression can save space, but old versions and compaction need room, while B-tree pages can fragment. Snapshots and final deletion follow different paths, so measure the real workload instead of declaring a universal winner.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۳. write amplification چیست و چرا مهم است؟</span><span class="en">13. What is write amplification, and why does it matter?</span></summary>
     <div class="fa"><p>افزایشِ نوشتن یعنی مقدارِ واقعیِ نوشته‌شده بر رسانه، از دادهٔ تازهٔ برنامه بیشتر باشه. لاگ و صفحه‌ها و ایندکس و ادغام تو این هزینه نقش دارن.</p>
-</div><div class="en"><p>Write amplification is the ratio of bytes actually written to the medium to the application's input data bytes. State what you count, including logs, indexes and compaction.</p><p>In the simple B-tree illustration, a change is written at least 2× through WAL and page writes, sometimes rewriting a whole page for a few bytes. LSM writes through WAL, flush and repeated compaction. Those physical bytes affect bandwidth and SSD wear. Run benchmarks long enough to include background work.</p>
-</div>
+</div><div class="en"><p>Write amplification is the ratio of bytes actually written to the medium to the application's input data bytes. State what you count, including logs, indexes and compaction. In a simple B-tree, a change is written at least 2× through WAL and page writes, sometimes rewriting a whole page for a few bytes, while an LSM writes through WAL, flush and repeated compaction. Those physical bytes affect bandwidth and SSD wear, so run benchmarks long enough to include background work.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۴. چرا SSD هم برای نوشتن ترتیبی سریع‌تر است؟</span><span class="en">14. Why are sequential writes faster even on SSDs?</span></summary>
     <div class="fa"><p>فلش واحدهای خوندن و نوشتن و پاک‌کردنِ متفاوت داره و کنترل‌کننده داده رو جابه‌جا می‌کنه. نوشتنِ ترتیبی می‌تونه کارِ مدیریتِ رسانه رو کمتر کنه، ولی اثرش به دستگاه و بار وابسته‌ست.</p>
-</div><div class="en"><p>Flash can erase a larger block, such as the chapter's 512KB example, only after its live pages are preserved elsewhere. That relocation is garbage collection. Sequential writes can reduce the device's management work; scattered rewrites can increase copying and wear. The result depends on the device, available space and workload. SSD doesn't mean writes have no cost.</p>
-</div>
+</div><div class="en"><p>Flash can erase a larger block, often around 512 KB, only after its live pages are preserved elsewhere. That relocation is garbage collection. Sequential writes can reduce the device's management work; scattered rewrites can increase copying and wear. The result depends on the device, available space and workload, so SSD doesn't mean writes have no cost.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۵. clustered index، heap file و covering index چه تفاوتی دارند؟</span><span class="en">15. How do clustered, heap and covering indexes differ?</span></summary>
@@ -1427,8 +1423,7 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 
   <details><summary><span class="fa">۱۶. چرا ذخیره‌سازی ستونی برای تحلیل بهتر است؟</span><span class="en">16. Why is columnar storage better for analytics?</span></summary>
     <div class="fa"><p>تحلیل اغلب تعدادِ زیادی ردیف ولی چند تا ستون رو می‌خواد. چیدمانِ ستونی خوندنِ بخشِ لازم و فشرده‌سازیِ مقدارهای مشابه رو راحت می‌کنه.</p>
-</div><div class="en"><p>An analytical query may need only 3–5 of a table's 100+ columns. Columnar storage can read just those columns. Similar values compress well with methods such as bitmap and RLE encoding; sorting complete rows builds longer runs. Filter bitmaps can combine with AND/OR, and operators can process batches. Retrieving one complete row has a different access pattern.</p>
-</div>
+</div><div class="en"><p>An analytical query may need only 3–5 of a table's 100+ columns, and columnar storage can read just those columns. Similar values compress well with methods such as bitmap and RLE encoding; sorting complete rows builds longer runs. Filter bitmaps can combine with AND/OR, and operators can process batches. Retrieving one complete row has a different access pattern.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۷. column-oriented با wide-column چه فرقی دارد؟</span><span class="en">17. How does column-oriented differ from wide-column?</span></summary>
@@ -1438,21 +1433,18 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
   </details>
 
   <details><summary><span class="fa">۱۸. تفاوت query compilation و vectorized processing؟</span><span class="en">18. Query compilation vs vectorized processing?</span></summary>
-    <div class="fa"><p>کامپایلِ پرس‌وجو بخشی از منطق رو به کدِ اجرایی تبدیل می‌کنه. پردازشِ برداری عملیات رو رو دسته‌ای از مقدارها انجام می‌ده؛ این دو تا روش می‌تونن کنارِ هم استفاده بشن.</p>
-</div><div class="en"><p>Compilation turns query logic into executable code, using tools such as LLVM, similar to JIT. Vectorized execution gives operators batches of values. An equality test can produce a bitmap, then bitwise AND combines filters.</p><p>The two choices can work together. Both can benefit from sequential memory access, tight loops, SIMD and operations on compressed data.</p>
-</div>
+    <div class="fa"><p>کامپایلِ پرس‌وجو بخشی از منطق رو به کدِ اجرایی تبدیل می‌کنه. پردازشِ برداری عملیات رو روی دسته‌ای از مقدارها انجام می‌ده؛ این دو تا روش می‌تونن کنارِ هم استفاده بشن.</p>
+</div><div class="en"><p>Compilation turns query logic into executable code, using tools such as LLVM, similar to JIT. Vectorized execution gives operators batches of values. An equality test can produce a bitmap, then bitwise AND combines filters. The two choices can work together, and both benefit from sequential memory access, tight loops, SIMD and operations on compressed data.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۹. inverted index چیست و چطور «سیب قرمز» را جواب می‌دهد؟</span><span class="en">19. What is an inverted index — how does it answer “red apples”?</span></summary>
     <div class="fa"><p>ایندکسِ معکوس هر واژه رو به سندهای دارای اون وصل می‌کنه. برای وجودِ هر دو تا واژه، فهرست‌ها مشترک‌گیری می‌شن؛ برای عبارتِ دقیق، موقعیتِ واژه‌ها هم لازمه.</p>
-</div><div class="en"><p>An inverted index maps a term to document IDs, its postings list. Intersect the lists for “red” and “apples” to find documents with both. With bitmap postings, bit n refers to document n in each bitmap, so bitwise AND computes that intersection. An exact phrase also needs the words' positions. Lucene, used by Elasticsearch/Solr, and PostgreSQL's GIN use postings-based structures.</p>
-</div>
+</div><div class="en"><p>An inverted index maps a term to document IDs, its postings list. Intersect the lists for “red” and “apples” to find documents with both; with bitmap postings, bit n refers to document n in each bitmap, so bitwise AND computes that intersection. An exact phrase also needs the words' positions. Lucene, used by Elasticsearch/Solr, and PostgreSQL's GIN use postings-based structures.</p></div>
   </details>
 
   <details><summary><span class="fa">۲۰. IVF و HNSW چه تفاوتی با هم دارند و «تقریبی» یعنی چه؟</span><span class="en">20. How do IVF and HNSW differ — what does “approximate” mean?</span></summary>
     <div class="fa"><p><span class="ltr">IVF</span> جست‌وجو رو به چند تا خوشه محدود می‌کنه؛ <span class="ltr">HNSW</span> رو گرافِ همسایگی مسیرِ جست‌وجو می‌سازه. تقریبی بودن یعنی ممکنه نزدیک‌ترین نتیجهٔ واقعی پیدا نشه؛ سرعت و دقت تنظیم می‌شن.</p>
-</div><div class="en"><p>Flat search compares every vector and finds exact neighbors under the chosen measure. IVF probes selected clusters; HNSW follows a layered proximity graph from sparse upper layers toward the denser base.</p><p>IVF and HNSW are approximate: either may miss the true nearest result. Increasing probes or graph search effort usually improves recall while increasing work. Measure recall against an exact reference alongside latency.</p>
-</div>
+</div><div class="en"><p>Flat search compares every vector and finds exact neighbors under the chosen measure. IVF probes selected clusters; HNSW follows a layered proximity graph from sparse upper layers toward the denser base. IVF and HNSW are approximate: either may miss the true nearest result, and increasing probes or graph search effort usually improves recall while increasing work. Measure recall against an exact reference alongside latency.</p></div>
   </details>
 
   <h3 id="s9-3"><span class="fa">۹.۳ اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">9.3 Common interview mistakes</span></h3>
@@ -1526,7 +1518,7 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
   <article class="exercise-block" id="exercise-4">
 <h3><span class="fa">تمرین ۴ — یک میلیارد بردار و قبض منفجرشدهٔ HNSW</span><span class="en">Exercise 4 — a billion vectors and the exploding HNSW bill</span></h3>
 <div class="exercise-labels"><span class="exercise-label level-senior"><span class="fa">L2 · Senior</span><span class="en">L2 · Senior</span></span><span class="exercise-label priority-role"><span class="fa">مطالعهٔ موردی صنعت</span><span class="en">Industry case study</span></span><span class="exercise-label"><span class="fa">۳۰ دقیقه بحث</span><span class="en">30 min discussion</span></span></div>
-<details class="interview-brief" open><summary><span class="fa">صورت تمرین (حل‌نشده — اول خودت طرح بزن)</span><span class="en">Unsolved brief — sketch your own design first</span></summary><p><span class="fa">تصور کن سال ۲۰۲۵ه و سرویس جست‌وجوی برداری تو یه میلیارد بردار ۷۶۸بعدی رو سرو می‌کنه. ایندکس HNSW حافظه‌محور قبض ماشین‌ها رو ترکنده و هر بیلد تازه ساعت‌ها طول می‌کشه. مأموریت تو: ایندکس رو از نو طراحی کن — چند تا پارتیشن و با چی ساخته می‌شن، بردارها چطور فشرده می‌شن، مسیر بیلد آفلاین از مسیر سرو آنلاین چطور جدا می‌مونه، و هر کوئری دقیقاً چه مراحلی رو طی می‌کنه. حل قدم‌به‌قدم تو صفحهٔ حل‌هاست، ولی اول خودت یه طرح بزن بعد برو سراغش.</span><span class="en">Picture this: it is 2025 and your vector search serves a billion 768-dim vectors. The memory-resident HNSW index is blowing up the machine bill, and every fresh build takes hours. Your mission: redesign the index — how many partitions and built how, how vectors get compressed, how the offline build path stays decoupled from the online serve path, and exactly which stages each query passes through. The step-by-step solution is on the solutions page, but sketch your own design first, then go read it.</span></p><h4><span class="fa">قرارداد طراحی: چی باید مشخص کنی</span><span class="en">Design contract: what you must pin down</span></h4><ul><li><span class="fa">پارتیشن‌بندی: چند تا پارتیشن، با چه الگوریتمی، و جای هر بردار کجا ثبت می‌شه</span><span class="en">Partitioning: how many partitions, built by which algorithm, and where each vector's assignment is recorded</span></li><li><span class="fa">فشرده‌سازی: با چه codecای، چند برابر کوچک‌سازی، و recall@k رو نسبت به چه ground truthای می‌سنجی</span><span class="en">Compression: which codec, how much shrinkage, and which ground truth your recall@k is measured against</span></li><li><span class="fa">بیلد در برابر سرو: بیلد آفلاین چی تولید می‌کنه، سرو آنلاین موقع استارت چی رو می‌بره تو حافظه، و نسخهٔ تازه چطور منتشر می‌شه</span><span class="en">Build versus serve: what the offline build produces, what online serving loads into memory at startup, and how a fresh version is published</span></li><li><span class="fa">مسیر کوئری: probe، اسکن تقریبی، fetch بردارهای full-precision، re-rank دقیق — هر مرحله چی می‌خونه و چی برمی‌گردونه</span><span class="en">Query path: probe, approximate scan, full-precision fetch, exact re-rank — what each stage reads and returns</span></li><li><span class="fa">قرارداد عملیاتی: سقف زمان بیلد، p95 تأخیر کوئری، و هزینه به‌ازای کوئری نسبت به وضع موجود</span><span class="en">Operational contract: build time budget, query p95 latency, and cost per query versus the status quo</span></li></ul></details>
+<details class="interview-brief" open><summary><span class="fa">صورت تمرین (حل‌نشده — اول خودت طرح بزن)</span><span class="en">Unsolved brief — sketch your own design first</span></summary><p><span class="fa">تصور کن سال ۲۰۲۶ه و سرویس جست‌وجوی برداری تو یه میلیارد بردار ۷۶۸بعدی رو سرو می‌کنه. ایندکس HNSW حافظه‌محور قبض ماشین‌ها رو ترکنده و هر بیلد تازه ساعت‌ها طول می‌کشه. مأموریت تو: ایندکس رو از نو طراحی کن — چند تا پارتیشن و با چی ساخته می‌شن، بردارها چطور فشرده می‌شن، مسیر بیلد آفلاین از مسیر سرو آنلاین چطور جدا می‌مونه، و هر کوئری دقیقاً چه مراحلی رو طی می‌کنه. حل قدم‌به‌قدم تو صفحهٔ حل‌هاست، ولی اول خودت یه طرح بزن بعد برو سراغش.</span><span class="en">Picture this: it is 2026 and your vector search serves a billion 768-dim vectors. The memory-resident HNSW index is blowing up the machine bill, and every fresh build takes hours. Your mission: redesign the index — how many partitions and built how, how vectors get compressed, how the offline build path stays decoupled from the online serve path, and exactly which stages each query passes through. The step-by-step solution is on the solutions page, but sketch your own design first, then go read it.</span></p><h4><span class="fa">قرارداد طراحی: چی باید مشخص کنی</span><span class="en">Design contract: what you must pin down</span></h4><ul><li><span class="fa">پارتیشن‌بندی: چند تا پارتیشن، با چه الگوریتمی، و جای هر بردار کجا ثبت می‌شه</span><span class="en">Partitioning: how many partitions, built by which algorithm, and where each vector's assignment is recorded</span></li><li><span class="fa">فشرده‌سازی: با چه codecای، چند برابر کوچک‌سازی، و recall@k رو نسبت به چه ground truthای می‌سنجی</span><span class="en">Compression: which codec, how much shrinkage, and which ground truth your recall@k is measured against</span></li><li><span class="fa">بیلد در برابر سرو: بیلد آفلاین چی تولید می‌کنه، سرو آنلاین موقع استارت چی رو می‌بره تو حافظه، و نسخهٔ تازه چطور منتشر می‌شه</span><span class="en">Build versus serve: what the offline build produces, what online serving loads into memory at startup, and how a fresh version is published</span></li><li><span class="fa">مسیر کوئری: probe، اسکن تقریبی، fetch بردارهای full-precision، re-rank دقیق — هر مرحله چی می‌خونه و چی برمی‌گردونه</span><span class="en">Query path: probe, approximate scan, full-precision fetch, exact re-rank — what each stage reads and returns</span></li><li><span class="fa">قرارداد عملیاتی: سقف زمان بیلد، p95 تأخیر کوئری، و هزینه به‌ازای کوئری نسبت به وضع موجود</span><span class="en">Operational contract: build time budget, query p95 latency, and cost per query versus the status quo</span></li></ul></details>
 <p class="exercise-evidence"><a href="diagrams/databricks-vector-search.html"><span class="fa">نمودار کیس صنعتی</span><span class="en">Industry case diagram</span></a> · <a href="https://www.databricks.com/blog/decoupled-design-billion-scale-vector-search" target="_blank" rel="noopener">Databricks · decoupled design for billion-scale vector search</a></p>
 
 

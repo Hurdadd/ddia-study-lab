@@ -7,8 +7,9 @@
 # which answers `max-age=86400` — a day of staleness. A commit every half hour is
 # therefore the freshest a README can be.
 #
-# The job writes nothing when the number has not moved, so the cost is one commit
-# per new star, not one per run.
+# The workflow fetches every half hour but commits only when the count or the
+# stargazer list actually changed: one commit per change, not one per run. A quiet
+# run still does a `git push --dry-run` to prove the token can write.
 name: Star count
 
 on:

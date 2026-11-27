@@ -277,6 +277,7 @@ def build_one(data_path):
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Vazirmatn:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/ddia.css">
 <link rel="stylesheet" href="../assets/exercise-audit.css">
+<link rel="stylesheet" href="../assets/glossary.css">
 </head>
 <body>
 
@@ -286,6 +287,7 @@ def build_one(data_path):
     <a href="../index.html"><span class="fa">نقشه راه</span><span class="en">Roadmap</span></a>
     <a href="index.html"><span class="fa">فصل {ch}</span><span class="en">Chapter {ch}</span></a>
     <a href="solutions.html" aria-current="page"><span class="fa">حل تمرین‌ها</span><span class="en">Solutions</span></a>
+    <a href="../glossary/index.html"><span class="fa">واژه‌نامه</span><span class="en">Glossary</span></a>
   </nav>
   <button class="langbtn" data-lang-toggle><span class="fa">EN</span><span class="en">فارسی</span></button>
   <button class="iconbtn" data-theme-toggle aria-label="theme">
@@ -335,6 +337,8 @@ def build_one(data_path):
 </footer>
 
 <script src="../assets/site.js"></script>
+<script src="../assets/glossary-data.js"></script>
+<script src="../assets/glossary.js" defer></script>
 </body>
 </html>
 """

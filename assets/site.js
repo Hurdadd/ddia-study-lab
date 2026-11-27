@@ -26,7 +26,14 @@
   function init(){
     var savedLang = null, savedTheme = null;
     try{ savedLang = localStorage.getItem(LANG_KEY); savedTheme = localStorage.getItem(THEME_KEY); }catch(e){}
-    applyLang(savedLang === "fa" || (savedLang !== "en" && root.getAttribute("data-default-lang") === "fa") ? "fa" : "en");
+    var browserFa = false;
+    try{
+      var langs = navigator.languages || [navigator.language || ""];
+      browserFa = langs.some(function(l){ return /^fa(-|$)/i.test(l); });
+    }catch(e){}
+    var lang = savedLang === "fa" ? "fa" : savedLang === "en" ? "en" :
+      (root.getAttribute("data-default-lang") === "fa" || browserFa ? "fa" : "en");
+    applyLang(lang);
     applyTheme(savedTheme === "dark" ? "dark" : "light");
     document.querySelectorAll("[data-lang-toggle]").forEach(function(btn){
       btn.addEventListener("click", function(){
@@ -80,7 +87,34 @@
     });
   }
 
-  document.addEventListener("DOMContentLoaded", function(){ init(); reveal(); spy(); });
+  /* Mobile: keep the table of contents from pushing the chapter below the fold. */
+  function mobileToc(){
+    var toc = document.querySelector(".toc");
+    if(!toc || !window.matchMedia) return;
+    if(!toc.id) toc.id = "chapter-toc";
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "toc-toggle";
+    btn.setAttribute("aria-controls", toc.id);
+    btn.setAttribute("aria-expanded", "false");
+    btn.innerHTML = '<span class="fa">فهرست مطالب این فصل</span><span class="en">Chapter contents</span><span class="toc-chevron" aria-hidden="true">▾</span>';
+    toc.parentNode.insertBefore(btn, toc);
+    var mq = window.matchMedia("(max-width: 980px)");
+    function sync(){
+      var collapsed = mq.matches && btn.getAttribute("aria-expanded") !== "true";
+      toc.classList.toggle("is-collapsed", collapsed);
+    }
+    btn.addEventListener("click", function(){
+      var open = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", open ? "false" : "true");
+      sync();
+    });
+    if(mq.addEventListener) mq.addEventListener("change", sync);
+    else if(mq.addListener) mq.addListener(sync);
+    sync();
+  }
+
+  document.addEventListener("DOMContentLoaded", function(){ init(); reveal(); spy(); mobileToc(); });
 })();
 
 /* Original study-site authorship; book and third-party rights remain separate. */

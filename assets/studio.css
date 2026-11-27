@@ -82,3 +82,35 @@ html[data-theme=dark] .graph-node .node-body{fill:var(--ground-3)}
 .canvas-hint{display:block;bottom:38px;left:16px;right:16px;padding:6px 10px!important;border-radius:8px;background:var(--studio-panel);white-space:normal;line-height:1.6;font-size:11px;max-width:650px;margin-inline:auto!important}
 @media(max-width:700px){.canvas-hint{bottom:55px;font-size:10px}.canvas-toolbar{gap:1px}.canvas-toolbar [data-tool],.canvas-toolbar #undo,.canvas-toolbar #redo{min-width:28px;width:28px}}
 .graph-edge.secondary-flow .edge-path{stroke-dasharray:5 5;opacity:.65}.graph-node .node-top{fill:var(--component-color);opacity:.12}.graph-node .node-body{stroke:var(--component-color)}.graph-node.selected .node-body{stroke:var(--studio-accent);stroke-width:3}
+
+/* Evaluation panel: fit the criteria table inside the 320px inspector.
+   The panel is a query container, so stacking follows the panel width, not the viewport. */
+#panel-evaluation{container-name:evaluation;container-type:inline-size}
+.evaluation-table-wrap{width:100%;overflow:visible}
+.studio-page .evaluation-table{width:100%;table-layout:fixed;border-collapse:collapse}
+.studio-page .evaluation-table th,.studio-page .evaluation-table td{padding:8px 6px;text-align:start;vertical-align:top;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+.studio-page .evaluation-table th:nth-child(1){width:30%}
+.studio-page .evaluation-table th:nth-child(2){width:18%}
+.studio-page .evaluation-table th:nth-child(3){width:24%}
+.studio-page .evaluation-table th:nth-child(4){width:28%}
+.studio-page .evaluation-table td:nth-child(2){white-space:nowrap;font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate}.evaluation-score>strong{direction:ltr;unicode-bidi:isolate}
+.studio-page .evaluation-table .evaluation-match-cell{font-weight:700;color:var(--studio-text)}
+.studio-page .evaluation-table .evaluation-missing-cell{color:var(--studio-muted)}
+.studio-page .check-list p{white-space:normal;overflow-wrap:anywhere}
+.evaluation-match{display:block;font-weight:700;color:var(--studio-text)}
+.check-match{color:var(--studio-accent)!important;font-weight:700;margin:0 0 4px!important}.metric-value{white-space:nowrap;unicode-bidi:isolate}
+@container evaluation (max-width:620px){
+ .studio-page .evaluation-table,.studio-page .evaluation-table tbody{display:block;width:100%}
+ .studio-page .evaluation-table thead{display:none}
+ .studio-page .evaluation-table tr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:10px 0;border-bottom:1px solid var(--studio-line)}
+ .studio-page .evaluation-table tbody tr:first-child{padding-top:0}
+ .studio-page .evaluation-table tbody tr:last-child{border-bottom:0}
+ .studio-page .evaluation-table td{display:block;padding:2px 0;border:0}
+ .studio-page .evaluation-table td:nth-child(1){grid-column:1;font-weight:700;font-size:12px;color:var(--studio-text)}
+ .studio-page .evaluation-table td:nth-child(2){grid-column:2;text-align:end;color:var(--studio-muted)}
+ .studio-page .evaluation-table td:nth-child(3),.studio-page .evaluation-table td:nth-child(4){grid-column:1/-1}
+ .studio-page .evaluation-table td:nth-child(3){margin-top:3px}
+ .studio-page .evaluation-table td:nth-child(4){margin-top:1px;color:var(--studio-muted)}
+ .studio-page .evaluation-table .evaluation-match{font-size:11px;line-height:1.6}
+ .studio-page .evaluation-table .evaluation-missing-cell{font-size:11px;line-height:1.7}
+}

@@ -38,7 +38,7 @@
     <div class="en">Twelve chapters of tools — storage, replication, partitioning, transactions, consensus, batch and stream. This chapter assembles them into a <span class='ltr'>working philosophy</span>: no single tool covers every need, so you stitch specialized systems together with <span class='ltr'>derived data</span> — fresh input enters through one <span class='ltr'>system of record</span>, and every other view is built from it with <span class='ltr'>deterministic, idempotent</span> processing. Then you stay <span class='ltr'>correct</span> without distributed transactions: end-to-end IDs, asynchronous constraints, and the occasional calculated apology — and you measure timeliness on its own.</div>
   </div>
 <div class="meta-row reveal">
-<span><b><span class="fa">۱۴</span><span class="en">14</span></b> <span class="fa">نمودار تعاملی</span><span class="en">interactive diagrams</span></span><span class="dot">·</span>
+<span><b><span class="fa">۱۴</span><span class="en">14</span></b> <span class="fa">۱۴ نمودار + روایت گام‌به‌گام</span><span class="en">14 diagrams with step-by-step narration</span></span><span class="dot">·</span>
 <span><span class="fa">محور: دادهٔ مشتق · سرتاسری · timeliness در برابر integrity · پرهیز از هماهنگی</span><span class="en">Theme: derived data · end-to-end · timeliness vs integrity · coordination avoidance</span></span><span class="dot">·</span>
     <span><span class="fa">زمان مطالعه: حدود ۱۰۵ دقیقه</span><span class="en">Reading time: ~105 min</span></span><span class="dot">·</span><span><span class="fa">منبع: فصل ۱۳ کتاب DDIA ویرایش ۲</span><span class="en">Source: DDIA 2nd Edition, Chapter 13</span></span>
 </div>
@@ -71,10 +71,10 @@
   <a class="lvl2" href="#s4-5"><span class="fa">۴.۵. کلاینتِ stateful و خواندن‌ها هم رویدادند</span><span class="en">4.5. Stateful clients; reads are events too</span></a>
   <a href="#s5"><span class="fa">۵. هدف‌گرفتنِ درستی</span><span class="en">5. Aiming for correctness</span></a>
   <a class="lvl2" href="#s5-1"><span class="fa">۵.۱. سرکوبِ تکراری، سرتاسری + نمودار ۷</span><span class="en">5.1. End-to-end duplicate suppression + Diagram 7</span></a>
-  <a class="lvl2" href="#s5-2"><span class="fa">۵.۲. قیدها: اجماع یا عذرخواهی + نمودار ۸</span><span class="en">5.2. Constraints: consensus or apology + Diagram 8</span></a>
+  <a class="lvl2" href="#s5-2"><span class="fa">۵.۲. قیدها: اجماع یا پذیرش و جبران + نمودار ۸</span><span class="en">5.2. Constraints: consensus or accept-and-compensate + Diagram 8</span></a>
   <a class="lvl2" href="#s5-3"><span class="fa">۵.۳. پرداختِ چندshardی بدونِ commit اتمیک + نمودار ۹</span><span class="en">5.3. Multishard payment without atomic commit + Diagram 9</span></a>
   <a class="lvl2" href="#s5-4"><span class="fa">۵.۴. timeliness در برابر integrity + نمودار ۱۰</span><span class="en">5.4. Timeliness vs integrity + Diagram 10</span></a>
-  <a class="lvl2" href="#s5-5"><span class="fa">۵.۵. نقطهٔ بهینه: هماهنگیِ کمتر، عذرِ بیشتر + نمودار ۱۱</span><span class="en">5.5. The sweet spot: less coordination, more apology + Diagram 11</span></a>
+  <a class="lvl2" href="#s5-5"><span class="fa">۵.۵. نقطهٔ بهینه: هماهنگیِ کمتر، جبرانِ بیشتر + نمودار ۱۱</span><span class="en">5.5. The sweet spot: less coordination, more compensation + Diagram 11</span></a>
   <a class="lvl2" href="#s5-6"><span class="fa">۵.۶. اعتماد کن، ولی راستی‌آزمایی کن</span><span class="en">5.6. Trust, but verify</span></a>
   <a href="#s6"><span class="fa">۶. بستهٔ مصاحبه</span><span class="en">6. Interview pack</span></a>
   <a class="lvl2" href="#s6-1"><span class="fa">۶.۱. همه‌چیز در یک نگاه</span><span class="en">6.1. Everything at a glance</span></a>
@@ -104,7 +104,7 @@
 <h2 class="reveal"><span class="secnum"><span class="fa">۰</span><span class="en">0</span></span> <span class="fa">نقشهٔ راه فصل</span><span class="en">Chapter roadmap</span></h2>
 <aside class="callout fa example-index" id="chapter-examples" aria-label="مثال‌های فنی فصل ۱۳">
 <div class="tag">مثال‌های فنی فصل ۱۳</div>
-<p>هر مثال سه‌تیکه‌ست: وضعیت اولیه، ترتیبِ عملیات، نتیجه. عددها و داده‌ها فرضِ آموزشی‌ان — نگرانشون نباشه. نامِ ابزارها هم فقط وقتی اومده که رفتارِ همون ابزار خودش موضوعِ بحثه.</p>
+<p>هر مثال سه‌تیکه‌ست: وضعیت اولیه، ترتیبِ عملیات، نتیجه. عددها و داده‌ها فرضِ آموزشی‌انشون نباشه. نامِ ابزارها هم فقط وقتی اومده که رفتارِ همون ابزار خودش موضوعِ بحثه.</p>
 <details><summary>فهرستِ مثال‌ها؛ رفتن مستقیم به هر موضوع</summary><ul>
 <li><a href="#example-ch13-0">همون یک تغییر، چند نمای عقب‌مانده</a></li>
 <li><a href="#example-ch13-1">یک مرجع، سه خروجی</a></li>
@@ -146,7 +146,7 @@
 <p class="example-title"><b>مثال فنی: همون یک تغییر، چند نمای عقب‌مانده</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> قیمتِ کالای <code dir="ltr">P7</code> توی مرجع با نسخهٔ ۱۲ به ۱۲۰ تغییر کرده.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> ایندکسِ جست‌وجو تا نسخهٔ ۱۱ و کش تا ۱۰ پیش رفته؛ هر مصرف‌کننده با لاگِ معتبر به ۱۲ می‌رسه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> lag رو می‌شه با نسخه و موقعیتِ پیشرفت سنجید؛ ولی اگه جریان کامل و قابلِ بازپخش نباشه، «بالاخره درست می‌شه» تضمینِ مفیدی نیست — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> lag رو می‌شه با نسخه و موقعیتِ پیشرفت سنجید؛ ولی اگه جریان کامل و قابلِ بازپخش نباشه، «بالاخره درست می‌شه» تضمینِ مفیدی نیست.</p>
 </div>
 <p>مثال‌های این فصل سناریوهای آموزشی‌ان، برگرفته از کارهای روزمره. عددها برای توضیح انتخاب شدن؛ معماریِ داخلیِ هیچ شرکتِ خاصی رو توصیف نمی‌کنن.</p></div>
 <div class="en">
@@ -184,7 +184,7 @@
     <tr>
       <td>قیدِ یکتایی در سیستمِ توزیع‌شده</td>
       <td>یا اجماع، یا شل‌کردنِ آگاهانه</td>
-      <td>رهبرِ واحد برای هر shard، یا compensating transaction و عذرخواهی</td>
+      <td>رهبرِ واحد برای هر shard، یا compensating transaction و جبران</td>
     </tr>
     <tr>
       <td>تراکنشِ چندshardی، بدونِ 2PC</td>
@@ -337,7 +337,7 @@
 <p class="example-title"><b>مثال فنی: همین‌الان یا بعداً؟</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> نگاه کن: تغییرِ قیمت توی مرجع commit شده، ولی جست‌وجو هنوز نسخهٔ قدیمی رو نشون می‌ده.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> توی dataflow، مصرف‌کننده بعداً تغییر رو می‌رسونه؛ توی atomic commit، منابعِ participant به یه تصمیمِ مشترکِ commit/abort متعهد می‌شن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> روشِ اول lag رو می‌پذیره و بازپخش می‌خواد؛ روشِ دوم هماهنگی و مسیرِ انتظارِ خرابیِ خودش رو داره — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> روشِ اول lag رو می‌پذیره و بازپخش می‌خواد؛ روشِ دوم هماهنگی و مسیرِ انتظارِ خرابیِ خودش رو داره.</p>
 </div>
 </div>
 <div class="en"><p>The classic way to keep systems in sync is the distributed transaction (2PC, Chapter 8). At an abstract level both chase one goal with two means: transactions guarantee atomic application via <b>atomic commit</b>; the log-based system reaches correctness via <b>deterministic retry and idempotence</b>. The biggest difference is that a transactional system usually guarantees “after writing, you immediately read the fresh value” (<span class='ltr'>read-your-writes</span>), while an asynchronous derived system offers no such promise.</p></div>
@@ -361,7 +361,7 @@
 <p class="example-title"><b>مثال فنی: علت، ولی روی دو پارتیشن</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> رویدادِ ایجادِ سفارش ۴۲ روی پارتیشنِ A و لغوِ همون روی B قرار گرفته.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> مصرف‌کننده ممکنه لغو رو پیش از ایجاد ببینه؛ هم‌پارتیشن کردنِ رخدادهای همون سفارش یا نگهداریِ وابستگی این مسئله رو کنترل می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> رخدادهای مستقل الزاماً ترتیبِ جهانی نمی‌خوان؛ رخدادهای وابسته بدونِ قراردادِ ترتیب، stateِ نامعتبر می‌سازن — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> رخدادهای مستقل الزاماً ترتیبِ جهانی نمی‌خوان؛ رخدادهای وابسته بدونِ قراردادِ ترتیب، stateِ نامعتبر می‌سازن.</p>
 </div>
 </div>
 <div class="en"><p>While the system is small, a fully ordered event log is feasible (single-leader databases build exactly that log). But as the scale grows, the limits show up:</p></div>
@@ -1318,7 +1318,7 @@ COMMIT;</pre>
 </div>
 </div>
 
-<h3 id="s5-2"><span class="fa">۵.۲. قیدها: اجماع یا عذرخواهی</span><span class="en">5.2. Constraints: consensus or apology</span></h3>
+<h3 id="s5-2"><span class="fa">۵.۲. قیدها: اجماع یا پذیرش و جبران</span><span class="en">5.2. Constraints: consensus or accept-and-compensate</span></h3>
 
 <div class="fa">
 <p>برای بعضی قیدها باید پیش از پذیرش هماهنگ بشیم؛ برای بعضی دیگه می‌شه خطای محدود رو پذیرفت و جبران کرد. این یه تصمیمِ روشنِ محصوله، نه حذفِ بی‌خبرِ تضمین.</p>
@@ -1521,7 +1521,7 @@ COMMIT;</pre>
 <p class="example-title"><b>مثال فنی: lag قابلِ اندازه‌گیری</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> مرجع تا offset ۱۲۰ و گزارش تا ۱۱۰ پیش رفته.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> ۱۰ رخداد عقب‌مانده و زمانِ قدیمی‌ترین رخدادِ اعمال‌نشده ثبت می‌شه؛ و بعد از catch up نتیجه تازه می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> timeliness دربارهٔ زمانِ دیده شدنِ دادهٔ درسته؛ باید با معیارِ مناسب بار سنجیده بشه، نه‌فقط روشن بودنِ worker — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> timeliness دربارهٔ زمانِ دیده شدنِ دادهٔ درسته؛ باید با معیارِ مناسب بار سنجیده بشه، نه‌فقط روشن بودنِ worker.</p>
 </div></div>
 
 <div class="fa">
@@ -1636,7 +1636,7 @@ COMMIT;</pre>
 </div>
 </div>
 
-<h3 id="s5-5"><span class="fa">۵.۵. نقطهٔ بهینه: هماهنگیِ کمتر، عذرِ بیشتر</span><span class="en">5.5. The sweet spot: less coordination, more apology</span></h3>
+<h3 id="s5-5"><span class="fa">۵.۵. نقطهٔ بهینه: هماهنگیِ کمتر، جبرانِ بیشتر</span><span class="en">5.5. The sweet spot: less coordination, more compensation</span></h3>
 
 <div class="fa">
 <p>هماهنگی رو جایی مصرف کن که نقضِ قید هزینهٔ غیرقابل‌قبول داشته باشه. اگه جبران مجازه، باید روش، سقفِ خطا و تجربهٔ کاربر از قبل طراحی بشه.</p>
@@ -1658,7 +1658,7 @@ COMMIT;</pre>
 <div class="en"><ul><li>If a customer orders beyond warehouse stock, you can oversell, apologize for the delay and discount — the same thing you'd do if a forklift drove into the warehouse goods and stock fell short of imagination. So the apology workflow must be part of the business process for such incidents anyway, and a hard constraint on stock count may be unnecessary.</li><li>Many airlines overbook assuming some passengers miss the flight, and many hotels overbook rooms assuming some guests cancel. Here the “one person per seat” constraint is deliberately violated for business reasons, with a compensation process (refunds, upgrades, a free room at the neighboring hotel) laid on for over-demand. Even without overbooking, apology-and-compensation processes were needed for events like weather- or strike-cancelled flights — recovering from such issues is just an ordinary part of business.</li><li>If someone withdraws beyond their account balance, the bank can charge an overdraft fee and ask the debt repaid; and by capping total daily withdrawals the bank's risk stays bounded.</li><li>In systems integrating data across organizations, inconsistency inevitably arises and a correction mechanism is needed; inter-bank payment settlement (Chapter 11) is an example.</li></ul></div>
 
 <div class="fa"><p>
-    توی خیلی زمینه‌های کسب‌وکاری پس قابلِ قبوله که قید رو <b>موقتاً نقض کنی و بعد با عذرخواهی درستش کنی</b>.
+    توی خیلی زمینه‌های کسب‌وکاری پس قابلِ قبوله که قید رو <b>موقتاً نقض کنی و بعد با عذرخواهی درستش کنی</b> — «عذرخواهی» این‌جا یعنی پذیرشِ نقضِ قید و جبرانِ آن، نه گفتنِ «متأسفم» به کاربر.
     این جنس اصلاحِ اشتباه <span class="ltr">compensating transaction</span> نامیده می‌شه. هزینهٔ عذرخواهی
     (پول یا اعتبار) فرق می‌کنه ولی اغلب کمه: ایمیلِ فرستاده‌شده رو نمی‌شه پس گرفت، ولی می‌شه ایمیلِ اصلاحیِ بعدی فرستاد؛ اگه
     کارت رو دوبار شارژ کردی، می‌شه یکیش رو refund کرد و هزینه‌فقط کارمزدِ پردازش و شاید شکایتِ مشتری است. (پولی که از
@@ -1670,7 +1670,7 @@ COMMIT;</pre>
     بده-بستانِ نامتطابق ناپدید بشه) ولی <b>timeliness در enforce قید</b> نمی‌خوان: اگه بیشتر از موجودی فروختی،
     می‌شه بعداً درستش کرد — شبیه همون رویکردهای حلِ تعارضِ «برخورد با نوشتنِ متعارض» (فصل ۶).
   </p></div>
-<div class="en"><p>In many business contexts it's thus acceptable to temporarily violate a constraint and fix it later with an apology. This kind of mistake-fixing is called a <span class='ltr'>compensating transaction</span>. The apology's cost (money or reputation) varies but is often small: a sent email can't be unsent, but a corrective follow-up email can be sent; if you double-charged a card, one charge can be refunded at only the processing fee plus perhaps a customer complaint. (Cash out of an ATM can't directly be taken back — though in principle a collector can be sent for a negative balance.) Whether the apology cost is acceptable is a business decision. If acceptable, the traditional “check every constraint before even writing data” model is needlessly restrictive; it may be perfectly reasonable to write optimistically and check the constraint later. Validation can still sit before actions whose recovery is expensive — but that doesn't mean validating before even writing data. These apps want integrity (you don't want a reservation lost or money vanished with mismatched debit-credit) but no timeliness in constraint enforcement: oversold stock can be fixed later — like Chapter 6's “handling conflicting writes” conflict-resolution approaches.</p></div>
+<div class="en"><p>In many business contexts it's thus acceptable to temporarily violate a constraint and fix it later with an apology — where “apology” means accepting the violation and compensating for it, not saying “sorry” to the user. This kind of mistake-fixing is called a <span class='ltr'>compensating transaction</span>. The apology's cost (money or reputation) varies but is often small: a sent email can't be unsent, but a corrective follow-up email can be sent; if you double-charged a card, one charge can be refunded at only the processing fee plus perhaps a customer complaint. (Cash out of an ATM can't directly be taken back — though in principle a collector can be sent for a negative balance.) Whether the apology cost is acceptable is a business decision. If acceptable, the traditional “check every constraint before even writing data” model is needlessly restrictive; it may be perfectly reasonable to write optimistically and check the constraint later. Validation can still sit before actions whose recovery is expensive — but that doesn't mean validating before even writing data. These apps want integrity (you don't want a reservation lost or money vanished with mismatched debit-credit) but no timeliness in constraint enforcement: oversold stock can be fixed later — like Chapter 6's “handling conflicting writes” conflict-resolution approaches.</p></div>
 
 <div class="fa"><p>
     حالا دو مشاهدهٔ جالب کنار هم می‌نشینن: (۱) سیستم‌های dataflow می‌تونن تضمینِ integrity روی دادهٔ مشتق رو <b>بدونِ</b>
@@ -1867,7 +1867,7 @@ COMMIT;</pre>
 <section id="s6">
 <h2 class="reveal"><span class="secnum"><span class="fa">۶</span><span class="en">6</span></span> <span class="fa">بستهٔ مصاحبه</span><span class="en">Interview pack</span></h2>
 
-<h3 id="s6-1"><span class="fa">۶.۱. همه‌چیز در یک نگاه</span><span class="en">6.1. 6.1 Everything at a glance</span></h3>
+<h3 id="s6-1"><span class="fa">۶.۱. همه‌چیز در یک نگاه</span><span class="en">6.1. Everything at a glance</span></h3>
 
 <div class="fa"><table>
     <tr><th>مفهوم</th><th>در یک جمله</th><th>نکتهٔ مصاحبه‌ای</th></tr>
@@ -1939,7 +1939,7 @@ COMMIT;</pre>
   </table></div>
 <div class="en"><table><thead><tr><th>Concept</th><th>In one sentence</th><th>Interview note</th></tr></thead><tbody><tr><td>Record vs derived data</td><td>Fresh input enters only through the record; everything else stays derived, with an ordered log + a deterministic function + idempotent writes</td><td>Direct dual writes to two stores diverge, because nobody owns the order (Diagram 2)</td></tr><tr><td>Total order = consensus</td><td><span class='ltr'>Total order broadcast</span> equals consensus, and it hangs on one ordering node</td><td>Four scale ceilings: one leader's power, geographic regions, microservices, offline client state</td></tr><tr><td>Causality without total order</td><td>Order unlinked events however you like; send one object's updates to a single shard; record the dependency with a reference or an ID</td><td>The unfriend-then-message example: the notification is really a message/friend-list join (Diagram 3)</td></tr><tr><td>Reprocessing and gradual migration</td><td>Old and new views side by side from the same data; a gradual traffic shift; every step reversible</td><td>The dual-rail analogy; the stream gives you low latency, the batch reprocesses history (Diagram 4)</td></tr><tr><td>Unbundle: federated vs unbundled</td><td>Federated unifies your reads (Trino); unbundled syncs your writes with the event log</td><td>The hard problem is keeping writes in sync, not reads; a debate about breadth, not depth</td></tr><tr><td>Dataflow instead of RPC</td><td>Subscribe to the change flow and read from a local replica — the fastest network request is none</td><td>You've got a time-dependent streaming join now; reprocessing wants the historical rates (Diagram 5)</td></tr><tr><td>Write path / read path</td><td>The derivative is where eager and lazy computation meet; caches, indexes and views only move that boundary</td><td>No index means cheap writes and expensive scans; precomputing everything is impossible (Diagram 6)</td></tr><tr><td>The end-to-end argument</td><td>TCP and database transactions suppress duplicates only inside their own scope; the fix is an ID that travels from client to database</td><td>Example 13-1 ($22) vs 13-2 (UNIQUE(request_id) + INSERT-first) — Diagram 7</td></tr><tr><td>Uniqueness = consensus</td><td>Rejecting a conflict on the spot wants synchronous coordination; scale it by sharding on the constrained value; async multi-leader is out</td><td>In the log-based world: conflicts go to the same shard, and a single thread processes them in order → success/reject (Diagram 8)</td></tr><tr><td>Multishard payment without 2PC</td><td>One atomic append of the request + eventual propagation of the events with the same ID + per-shard dedup</td><td>Atomicity comes from that one initial event, not from a commit (Diagram 9)</td></tr><tr><td>Timeliness vs integrity</td><td>Breaking the first one is temporary (wait and retry); breaking the second is permanent (check and repair) — and the second matters more</td><td>Dataflow doesn't promise the first, but it gives you the second with 4 mechanisms: a single message, a deterministic function, an ID, immutability (Diagram 10)</td></tr><tr><td>The sweet spot and coordination-avoiding</td><td>Coordination cuts the apologies for inconsistency but raises the apologies for outages; no absolute zero exists</td><td>Loose constraints + compensating transactions; synchronous coordination only as much as you need (Diagram 11)</td></tr><tr><td>Trust, but verify</td><td>Failure arrives sooner or later; continuous end-to-end auditing + provenance by design (event sourcing, hashes, Merkle)</td><td>HDFS/S3 don't blindly trust their disks; blockchains are the heavyweight version of the same idea</td></tr></tbody></table></div>
 
-<h3 id="s6-2"><span class="fa">۶.۲. سوالات پرتکرار مصاحبه</span><span class="en">6.2. 6.2 Frequent interview questions</span></h3>
+<h3 id="s6-2"><span class="fa">۶.۲. سوالات پرتکرار مصاحبه</span><span class="en">6.2. Frequent interview questions</span></h3>
 
 <details><summary><span class="fa">۱. چرا نوشتنِ مستقیمِ هم‌زمان در پایگاه داده و ایندکسِ جستجو ایدهٔ بدی است؟</span><span class="en">1. Why is simultaneously writing directly to the database and the search index a bad idea?</span></summary>
 <div class="fa"><p>تعریفش اینه: دو نوشتنِ مستقل می‌تونن نیمه‌کاره بمونن یا ترتیبِ متفاوت بسازن. مسیرِ واحدِ معتبرِ تغییر و مصرفِ قابل‌بازیابی کمک می‌کنه ایندکس از مرجع ساخته بشه؛ تأخیرِ مقصد همچنان باید دیده بشه — این دام معروفه.</p>
@@ -1958,7 +1958,7 @@ COMMIT;</pre>
 </details>
 
 <details><summary><span class="fa">۳. چرا ترتیبِ کامل در مقیاس نمی‌گنجد؟ چهار محدودیت را بگو.</span><span class="en">3. Why doesn't total order scale? Name the four limits.</span></summary>
-<div class="fa"><p>چهار محدودیت رو نگه دار: ظرفیتِ مسیرِ مرتب‌کننده، تأخیرِ هماهنگیِ جغرافیایی، مرجع‌های مستقلِ سرویس‌ها و تغییرِ آفلاینِ کلاینت. ترتیبِ مشترکِ همهٔ اتفاق‌ها ممکنه خیلی گران یا نامتناسب بشه — حساب کن.</p>
+<div class="fa"><p>چهار محدودیت رو نگه دار: ظرفیتِ مسیرِ مرتب‌کننده، تأخیرِ هماهنگیِ جغرافیایی، مرجع‌های مستقلِ سرویس‌ها و تغییرِ آفلاینِ کلاینت. ترتیبِ مشترکِ همهٔ اتفاق‌ها ممکنه خیلی گران یا نامتناسب بشه.</p>
 </div>
 <div class="en">
 <p>Total order = total order broadcast = consensus, tied to an ordering node: (1) one leader's power doesn't cover the whole flow → sharding and cross-shard order ambiguity; (2) geographic regions have separate leaders (synchronous cross-continent coordination is slow); (3) microservices share no state; (4) offline client-side state changes the seen order.</p>
@@ -2054,7 +2054,7 @@ COMMIT;</pre>
 </details>
 
 <details><summary><span class="fa">۱۵. timeliness و integrity چه فرقی دارند و کدام مهم‌تر است؟</span><span class="en">15. How do timeliness and integrity differ, and which matters more?</span></summary>
-<div class="fa"><p>تازگی زمانِ رسیدنِ نتیجه‌ست؛ یکپارچگی حفظِ قواعدِ معتبر و جلوگیری از گم‌شدن یا تکراره. اهمیتِ هرکدوم به کاربرد وابسته‌ست؛ جبرانِ نتیجهٔ غلط معمولاً سخت‌تره — حساب کن.</p>
+<div class="fa"><p>تازگی زمانِ رسیدنِ نتیجه‌ست؛ یکپارچگی حفظِ قواعدِ معتبر و جلوگیری از گم‌شدن یا تکراره. اهمیتِ هرکدوم به کاربرد وابسته‌ست؛ جبرانِ نتیجهٔ غلط معمولاً سخت‌تره.</p>
 </div>
 <div class="en">
 <p>Timeliness means “the user sees up-to-date state” — its violation is temporary, fixed by waiting/retrying (like a 24h-missing card transaction). Integrity means “no loss, no contradiction” — its violation is permanent, wanting explicit check/repair (like balance ≠ transaction sums). Integrity matters more. Dataflow systems don't guarantee the former but give the latter with four mechanisms: an atomic single message, a deterministic derivation function, an end-to-end ID, immutability + reprocessing (Diagram 10).</p>

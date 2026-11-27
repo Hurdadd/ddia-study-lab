@@ -6,6 +6,8 @@
 3. The index lists every term exactly once and every link resolves.
 4. Every figure has a caption and its own marker definition.
 5. Every chapter page that marks terms loads the glossary stylesheet and scripts.
+6. Every internal link with a #fragment on every glossary page lands on a real
+   element, and each generated "also in" link goes to the chapter's own page.
 
 Run: python3 assets/check_glossary.py
 """
@@ -116,7 +118,87 @@ for path, body in check_paths:
         if not target.exists():
             problems.append('broken link on %s: %s' % (path.relative_to(ROOT), href))
 
-# 6. the pages that mark terms must load the glossary, in the right relative form
+# 6. every internal fragment link lands on a file that defines the id, and the
+#    generated "also in" links point at the chapter folders (not the glossary page)
+def fragment_target(path, href):
+    """(file, fragment) for an internal href carrying a #fragment, else None."""
+    if href.startswith(('http://', 'https://', '//', 'mailto:', 'javascript:',
+                        'data:', 'tel:')) or '#' not in href:
+        return None
+    target, frag = href.split('#', 1)
+    target = target.split('?', 1)[0]
+    if not target:
+        return path, frag
+    if target.startswith('/'):
+        return (ROOT / target.lstrip('/')).resolve(), frag
+    return (path.parent / target).resolve(), frag
+
+
+frag_links = 0
+for path in sorted(INDEX.parent.rglob('*.html')):
+    body = path.read_text(encoding='utf-8')
+    for href in re.findall(r'href="([^"]+)"', body):
+        got = fragment_target(path, href)
+        if not got:
+            continue
+        frag_links += 1
+        target, frag = got
+        if not frag:
+            problems.append('%s: link %s has an empty fragment'
+                            % (path.relative_to(ROOT), href))
+        elif not target.is_file():
+            try:
+                shown = target.relative_to(ROOT)
+            except ValueError:
+                shown = target
+            problems.append('%s: link %s has no target file %s'
+                            % (path.relative_to(ROOT), href, shown))
+        elif 'id="%s"' % frag not in target.read_text(encoding='utf-8'):
+            problems.append('%s: link %s points at #%s, which the target does not define'
+                            % (path.relative_to(ROOT), href, frag))
+
+# the "also in" badge must link to each extra chapter's own page, with a live anchor
+chapter_dirs = {}
+for p in sorted(ROOT.glob('ch*')):
+    m = re.match(r'ch(\d+)-', p.name)
+    if m and p.is_dir():
+        chapter_dirs[int(m.group(1))] = p.name
+
+also_links = 0
+for t in terms:
+    extras = [c for c in (t.get('chapters') or []) if c != t['chapter']]
+    body = pages.get(t['chapter'], '')
+    at = body.find('<article class="gl-card" id="%s"' % t['id'])
+    if at < 0:
+        continue
+    end = body.find('</article>', at)
+    card_html = body[at:end if end > at else len(body)]
+    mark = card_html.find('<span class="gl-alsoseen">')
+    span = card_html[mark:card_html.find('</div>', mark)] if mark >= 0 else ''
+    links = re.findall(r'href="([^"]+)"', span)
+    if len(links) != len(extras):
+        problems.append('#%s has %d also-in link(s) for %d extra chapter(s)'
+                        % (t['id'], len(links), len(extras)))
+        continue
+    for chapter, href in zip(extras, links):
+        folder = chapter_dirs.get(chapter)
+        if not folder:
+            problems.append('#%s is also in chapter %d, which has no ch* folder'
+                            % (t['id'], chapter))
+            continue
+        want = '../../%s/index.html' % folder
+        if not href.startswith(want):
+            problems.append('#%s also-in link %s does not point at %s'
+                            % (t['id'], href, want))
+            continue
+        also_links += 1
+        frag = href[len(want):]
+        page = (ROOT / folder / 'index.html').read_text(encoding='utf-8')
+        if frag and not (frag.startswith('#') and 'id="%s"' % frag[1:] in page):
+            problems.append('#%s also-in link %s names no section on %s'
+                            % (t['id'], href, folder))
+
+# 7. the pages that mark terms must load the glossary, in the right relative form
 wired = 0
 for path in sorted(ROOT.glob('ch*/index.html')):
     s = path.read_text(encoding='utf-8')
@@ -128,7 +210,7 @@ root = (ROOT / 'index.html').read_text(encoding='utf-8')
 if 'assets/glossary.js' not in root:
     problems.append('index.html does not load the glossary assets')
 
-# 7. the homepage advertises a count; it must be the real one
+# 8. the homepage advertises a count; it must be the real one
 m = None if PREVIEW else re.search(r'<section class="gloss-band".*?</section>', root, re.S)
 if not m and not PREVIEW:
     problems.append('index.html lost the glossary band')
@@ -143,7 +225,7 @@ elif m:
         if fa_n != want:
             problems.append('homepage says %d terms in Persian, glossary has %d' % (fa_n, want))
 
-# 8. the data file must not claim terms that have no page
+# 9. the data file must not claim terms that have no page
 declared = set(re.findall(r'"([a-z0-9-]+)":\{"term"', data))
 for tid in sorted(declared - set(ids)):
     problems.append('hover data declares an unknown term: %s' % tid)
@@ -154,5 +236,6 @@ if problems:
     sys.exit(1)
 
 print('PASS: %d terms across %d chapter pages, %d figures; %d chapter pages wired; '
+      '%d fragment links and %d also-in links resolve; '
       'index, pages, hover data and JSON in step'
-      % (len(terms), len(pages), total_fig, wired))
+      % (len(terms), len(pages), total_fig, wired, frag_links, also_links))

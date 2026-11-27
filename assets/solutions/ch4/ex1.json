@@ -105,8 +105,8 @@
   ],
   "steps": [
     {
-      "en": "Every write lands twice, and you must not mix the two up. The durability write is the <span class=\"ltr\">WAL append + fsync</span>; the memtable update is the visibility write. Ack the client only after the fsync, never after the RAM update alone. — An ack means \"this write survived\", not \"this write is sitting in memory\".",
-      "fa": "هر نوشتن دو جا می‌نشیند و نباید قاطی‌شان کنی. نوشتنِ durability همون <span class=\"ltr\">WAL append + fsync</span> هست؛ به‌روزرسانی حافظه هم نوشتنِ visibility. به کلاینت رو فقط بعد از fsync جواب بده، هرگز فقط بعد از به‌روزرسانی RAM. — ack یعنی «این نوشتن دوام آورد»، نه «این نوشتن توی حافظه نشست».",
+      "en": "Don't mix the two up. The durability write is the <span class=\"ltr\">WAL append + fsync</span>; the memtable update is the visibility write. Ack the client only after the fsync, never after the RAM update alone. — An ack means \"this write survived\", not \"this write is sitting in memory\".",
+      "fa": "این دو نوشتن را نباید قاطی کنی. نوشتنِ durability همون <span class=\"ltr\">WAL append + fsync</span> هست؛ به‌روزرسانی حافظه هم نوشتنِ visibility. به کلاینت رو فقط بعد از fsync جواب بده، هرگز فقط بعد از به‌روزرسانی RAM. — ack یعنی «این نوشتن دوام آورد»، نه «این نوشتن توی حافظه نشست».",
       "t_en": "Every write lands twice",
       "t_fa": "هر نوشتن دو جا می‌نشیند"
     },
@@ -263,8 +263,8 @@
         ]
       },
       "selfcheck": {
-        "a_en": "The WAL fsync, because durability lives in the log, not in RAM. A memtable-only write disappears with the process.",
-        "a_fa": "fsync لاگ — چون durability توی لاگ زندگی می‌کنه، نه توی RAM. نوشتنِ فقط-حافظه با پراسس می‌ره.",
+        "a_en": "No. A memtable update is only a visibility write; without the WAL fsync the write is not durable, and a memtable-only write disappears with the process. If the crash happened before the fsync completed, no ack should have been sent and recovery is not guaranteed to replay the record.",
+        "a_fa": "نه. به‌روزرسانیِ حافظه فقط نوشتنِ visibility است؛ بدونِ fsync شدن WAL، نوشتن بادوام نیست و نوشتنِ فقط-حافظه با پراسس می‌رود. اگر کرش پیش از کامل شدنِ fsync رخ داده، هیچ ackای نباید رفته باشد و recovery هم تضمینی برای بازپخش آن رکورد ندارد.",
         "q_en": "A put updated the memtable but the process crashed before the WAL fsync. Is the write durable?",
         "q_fa": "یک put حافظه را به‌روز کرد ولی پراسس پیش از fsync لاگ کرش کرد. آیا نوشتن بادوام است؟"
       }

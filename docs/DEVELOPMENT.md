@@ -65,11 +65,13 @@ stargazer list (`gh api`, falling back to the public API), writes
 `assets/stars.json`, redraws `assets/badges/stars.svg` for the README badge row, and
 stamps the value into every `[data-star-count]` slot on the home page and the
 exercise audit. The same read feeds `assets/star_history.py`, which writes
-`assets/star-history.json` and draws `assets/star-history.svg`: one step per star,
+`assets/star-history.json` and draws `assets/star-history.svg`: a snapshot of the
+accounts that currently star the repository, one step per current stargazer,
 weekly ticks on a short history and month ticks once the span is longer, with each
-month's additions under the axis. Because the badge and the chart come from one
-list, they cannot disagree; `unstar` removes a step, which is the one thing the API
-cannot show.
+month's current additions under the axis. The README labels it a star count
+snapshot, not an append-only history. Because the badge and the chart come from one
+list, they cannot disagree; `unstar` removes a step, which the API cannot show, so
+drops are not represented.
 
     python3 assets/build_stars.py             # fetch, then refresh JSON, badge and pages
     python3 assets/build_stars.py --offline   # reuse the cached count, redraw only
@@ -82,12 +84,12 @@ treated as a failed read, not as an empty repository. A count older than 14 days
 reported by `--check`.
 
 `.github/workflows/stars.yml` runs the command every thirty minutes and commits only
-when a byte changed, so one commit per new star rather than one per run. That is why
-the chart's x-axis ends at the newest star instead of at "now", and why both writers
-skip a rewrite when the list is unchanged: a fresh timestamp on every run would turn
-a schedule into commit noise. The current number lives in the badge, the site pill
-and the JSON, not in the curve's right edge. That is
-the freshest a README can be, and the measurement is in the workflow header:
+when a byte changed, so one commit per new star or changed stargazer list rather
+than one per run. That is why the chart's x-axis ends at the newest star instead of
+at "now", and why both writers skip a rewrite when the list is unchanged: a fresh
+timestamp on every run would turn a schedule into commit noise. The current number
+lives in the badge, the site pill and the JSON, not in the curve's right edge. That
+is the freshest a README can be, and the measurement is in the workflow header:
 
 | Served by | Cache header | Worst-case lag in a README |
 | --- | --- | --- |

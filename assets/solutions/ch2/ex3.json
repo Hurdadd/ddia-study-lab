@@ -6,7 +6,7 @@
     }
   ],
   "answer_en": "The goal: lose one host or one whole AZ and nobody notices. The shape of it: a stateless order API behind a load balancer across 3 AZs, a database with a synchronous standby plus an asynchronous replica, a durable replicated queue for the three consumers, and session state kept outside the app. Then name every failure domain (host, AZ, control plane, state, network), keep N+1 capacity in the surviving AZs, and keep HA (survive) apart from backup (restore, RPO/RTO) and DR (region). Rolling upgrades use expand–migrate–contract so the old and new binaries can live side by side. Two machines is not two of everything — count your failure domains, not your boxes.",
-  "answer_fa": "قضیه اینه که باید یه ماشین یا یه AZ رو از دست بدی و کسی نفهمه. طرح: API سفارش stateless پشت load balancer روی ۳ AZ؛ پایگاه با standby هم‌گام به‌علاوهٔ رپلیکای ناهمگام؛ صف بادوامِ تکثیرشده برای سه مصرف‌کننده؛ و state نشست بیرون از برنامه. بعدش همهٔ failure domainها رو نام ببر (ماشین، AZ، control plane، state، شبکه)، توی AZهای باقی‌مونده ظرفیت N+1 نگه دار، و HA (زنده ماندن) رو از backup (بازیابی، RPO/RTO) و DR (ریجن) جدا نگه دار. برای ارتقای غلتان هم expand–migrate–contract، تا باینری قدیم و جدید هم‌زیستی کنن. دو تا ماشین یعنی دو تا از همه‌چیز نیست — حساب کن.",
+  "answer_fa": "قضیه اینه که باید یه ماشین یا یه AZ رو از دست بدی و کسی نفهمه. طرح: API سفارش stateless پشت load balancer روی ۳ AZ؛ پایگاه با standby هم‌گام به‌علاوهٔ رپلیکای ناهمگام؛ صف بادوامِ تکثیرشده برای سه مصرف‌کننده؛ و state نشست بیرون از برنامه. بعدش همهٔ failure domainها رو نام ببر (ماشین، AZ، control plane، state، شبکه)، توی AZهای باقی‌مونده ظرفیت N+1 نگه دار، و HA (زنده ماندن) رو از backup (بازیابی، RPO/RTO) و DR (ریجن) جدا نگه دار. برای ارتقای غلتان هم expand–migrate–contract، تا باینری قدیم و جدید هم‌زیستی کنن. دو تا ماشین یعنی دو تا از همه‌چیز نیست — دامنه‌های خرابی رو بشمار، نه جعبه‌ها رو.",
   "assumptions": [
     {
       "fa": "قضیه اینه که سه AZ توی یه region چیدمان ماست. توی این طرح محافظه‌کارانه، هر AZ کل peak رو تحمل می‌کنه — این از حداقل N+1 بیشتره و هزینهٔ اضافه داره.",
@@ -40,7 +40,7 @@
   "followups": [
     {
       "a_en": "Expand–migrate–contract with both binaries live. (1) Expand: add the new column as nullable (or a new event field the old code ignores) — the new binary writes both and reads the old. (2) Migrate: backfill, dual-read and compare. (3) Contract: switch the reads to the new one, drop the old writes, then drop the old column — and only after no old binary is left. Rollback before contract just routes the traffic back; after contract it needs the reverse migration. Never rename in place in one release.",
-      "a_fa": "به ترتیب expand–migrate–contract، با هر دو باینری زنده. (۱) Expand: ستون جدید nullable (یا یه فیلد تازه روی رویداد که کد قدیم نادیده می‌گیره)؛ باینری جدید هر دو رو می‌نویسه و قدیمی رو می‌خونه. (۲) Migrate: backfill و dual-read با مقایسه. (۳) Contract: خواندن‌ها می‌ره سمت جدید، نوشتن قدیم حذف می‌شه، بعد خودِ ستون قدیم — ولی فقط وقتی هیچ باینری قدیمی ن مونده باشه. rollback قبل از contract یعنی برگردوندن ترافیک.",
+      "a_fa": "به ترتیب expand–migrate–contract، با هر دو باینری زنده. (۱) Expand: ستون جدید nullable (یا یه فیلد تازه روی رویداد که کد قدیم نادیده می‌گیره)؛ باینری جدید هر دو رو می‌نویسه و قدیمی رو می‌خونه. (۲) Migrate: backfill و dual-read با مقایسه. (۳) Contract: خواندن‌ها می‌ره سمت جدید، نوشتن قدیم حذف می‌شه، بعد خودِ ستون قدیم — ولی فقط وقتی هیچ باینری قدیمی باقی نمونده باشه. rollback قبل از contract یعنی برگردوندن ترافیک.",
       "level": "senior",
       "q_en": "Old and new binaries are live side by side in a rolling upgrade — how do you ship the schema change?",
       "q_fa": "حالا موقع rolling upgrade نسخهٔ قدیم و جدید کنار هم بالا هستن — تغییر schema رو چطور منتشر می‌کنی؟"
@@ -205,7 +205,7 @@
       "selfcheck": {
         "q_fa": "بعد از ارتقای <span class=\"ltr\">standby</span>، نوشتنِ قدیمی با <span class=\"ltr\">epoch</span> ۷ چی می‌شه و چرا؟ و <span class=\"ltr\">contract</span> کی مجازه؟",
         "q_en": "After the standby promotes, what happens to an old epoch-7 write and why? And when is contract allowed?",
-        "a_fa": "رد می‌شه چون فنس شده و فقط <span class=\"ltr\">epoch</span> ۸ می‌نویسه؛ و <span class=\"ltr\">contract</span> فقط وقتی مجازه که هیچ باینری قدیمی ن مونده باشه.",
+        "a_fa": "رد می‌شه چون فنس شده و فقط <span class=\"ltr\">epoch</span> ۸ می‌نویسه؛ و <span class=\"ltr\">contract</span> فقط وقتی مجازه که هیچ باینری قدیمی باقی نمونده باشه.",
         "a_en": "Rejected — it's fenced and only epoch 8 writes; and contract is allowed only once no old binary is left."
       }
     },

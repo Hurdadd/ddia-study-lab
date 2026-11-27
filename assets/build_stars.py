@@ -5,8 +5,10 @@ The study site is a static export with no backend, so nothing here runs on a
 visitor's request: the count is fetched once when the page is built, written to
 ``assets/stars.json``, drawn into ``assets/badges/stars.svg`` and stamped into
 every ``[data-star-count]`` slot. The same read also collects each stargazer's
-``starred_at`` timestamp, which draws ``assets/star-history.svg`` for the README
-(see ``star_history.py``). In the browser ``assets/stars.js`` re-reads the JSON
+``starred_at`` timestamp, which draws a current-stargazer snapshot at
+``assets/star-history.svg`` for the README (see ``star_history.py``). The chart is a
+snapshot, not an append-only history: an unstar disappears from it. In the browser
+``assets/stars.js`` re-reads the JSON
 from the same origin, which keeps the number fresh between deployments without a
 third-party request or an API token in the page.
 

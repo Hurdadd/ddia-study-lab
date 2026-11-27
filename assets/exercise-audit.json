@@ -959,7 +959,7 @@
       "minutes": 30,
       "lab": "۳–۶ ساعت",
       "reason": "اتمیکیِ state و event از commit دیتابیس میاد، نه از جدول. ولی اگه این دو تا رو قاطی کنی، یه پنجرهٔ خرابی بینشون می‌مونه. مسیر commit و مرزِ تحویل رو مشخص کن.",
-      "prompt": "فرض کن یه بازارِ بلیت داری و قانونِ جدید اینه: هیچ جدولِ outboxی اضافه نمی‌کنی. هر خرید باید هم state رو بچرخونه هم یه event منتشر کنه — اتمیک. مسیرِ commit رو از write_to_outbox و pg_logical_emit_message تا Kafka بکش؛ بعد بگو اگه تراکنش rollback بشه چی می‌مونه، و اگه کانکتور وسطِ راه بمیره چی.",
+      "prompt": "فرض کن یه بازارِ بلیت داری و قانونِ جدید اینه: هیچ جدولِ outboxی اضافه نمی‌کنی. هر خرید باید هم state رو بچرخونه هم یه event منتشر کنه — اتمیک. مسیرِ commit رو از UPDATE روی business row و pg_logical_emit_message تا Kafka بکش؛ بعد بگو اگه تراکنش rollback بشه چی می‌مونه، و اگه کانکتور وسطِ راه بمیره چی.",
       "signals": [
         "dual write رو با یه crash بین دو نوشتن می‌شکنی",
         "اتمیکی رو از یه تراکنش واحد با pg_logical_emit_message می‌گیری",
@@ -973,7 +973,7 @@
         "kafka"
       ],
       "reason_en": "The atomicity of state and event comes from the database commit, not from a table. But if you split the two writes, a failure window opens between them. Draw the commit path and the delivery boundary.",
-      "prompt_en": "Picture this: a ticket marketplace where the new rule is no extra outbox table. Every purchase must flip state AND publish an event, atomically. Draw the commit path — from write_to_outbox and pg_logical_emit_message to Kafka — then say what survives a rollback, and what happens when the connector dies mid-stream.",
+      "prompt_en": "Picture this: a ticket marketplace where the new rule is no extra outbox table. Every purchase must flip state AND publish an event, atomically. Draw the commit path — from the business-row UPDATE and pg_logical_emit_message to Kafka — then say what survives a rollback, and what happens when the connector dies mid-stream.",
       "signals_en": [
         "You break the dual write with a crash between the two writes",
         "You take atomicity from one transaction using pg_logical_emit_message",

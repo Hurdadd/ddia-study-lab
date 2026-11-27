@@ -196,23 +196,23 @@
       const byId = new Map(g.nodes.map(x => [x.id, x.type]));
       return `${n.type} [${g.edges.filter(e => e.target === n.id).map(e => byId.get(e.source)).sort()}] [${g.edges.filter(e => e.source === n.id).map(e => byId.get(e.target)).sort()}]`;
     });
-    const category = (name, required, actual, max) => {
+    const category = (name, required, actual, max, kind) => {
       const need = counts(required), have = counts(actual), missing = [];
       let matched = 0;
       for (const [key, count] of need) {
         matched += Math.min(count, have.get(key) || 0);
         if ((have.get(key) || 0) < count) missing.push(`${key} × ${count - (have.get(key) || 0)}`);
       }
-      return { name, max, score: required.length ? Math.round(max * matched / required.length) : (graph.nodes.length ? max : 0), feedback: missing };
+      return { name, kind, max, matched, total: required.length, score: required.length ? Math.round(max * matched / required.length) : (graph.nodes.length ? max : 0), feedback: missing };
     };
     const categories = [
-      category(L('Component coverage', 'پوشش اجزا'), nodeTypes(expected), nodeTypes(graph), 35),
-      category(L('Directed connections', 'اتصال‌های جهت‌دار'), links(expected), links(graph), 35),
-      category(L('Component roles and neighbours', 'نقش و همسایه‌های اجزا'), roles(expected), roles(graph), 30),
+      category(L('Component coverage', 'پوشش اجزا'), nodeTypes(expected), nodeTypes(graph), 35, 'components'),
+      category(L('Directed connections', 'اتصال‌های جهت‌دار'), links(expected), links(graph), 35, 'connections'),
+      category(L('Component roles and neighbours', 'نقش و همسایه‌های اجزا'), roles(expected), roles(graph), 30, 'roles'),
     ];
-    if (!validation.valid) categories.forEach(c => { c.score = 0; c.feedback = validation.errors; });
-    const checks = categories.map(c => ({ category: c.name, label: c.name, passed: c.score === c.max,
-      detail: c.feedback.length ? L('Missing from this reference alternative: ', 'کمبود نسبت به این گزینهٔ مرجع: ') + c.feedback.join('; ') : L('All structural items in this alternative are represented.', 'همهٔ موارد ساختاری این گزینه نمایش داده شده‌اند.') }));
+    if (!validation.valid) categories.forEach(c => { c.score = 0; c.matched = 0; c.feedback = validation.errors; });
+    const checks = categories.map(c => ({ category: c.name, label: c.name, kind: c.kind, matched: c.matched, total: c.total, passed: c.score === c.max,
+      detail: c.feedback.length ? L('Missing from your design: ', 'کمبود در طرح تو: ') + c.feedback.join('; ') : L('All structural items of this reference alternative are represented in your design.', 'همهٔ موارد ساختاری این گزینهٔ مرجع در طرح تو پوشش داده شده‌اند.') }));
     return { mode: 'exercise-coverage', total: categories.reduce((sum, c) => sum + c.score, 0), categories, checks,
       feedback: checks.filter(c => !c.passed).map(c => c.detail), workload: simulate(input, opts),
       manualReview: fa ? problem.signalsFa || [] : problem.signalsEn || [],

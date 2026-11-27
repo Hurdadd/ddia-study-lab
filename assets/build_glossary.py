@@ -277,6 +277,16 @@ def block(cls, title_fa, title_en, body_fa, body_en):
 BY_ID = {}
 
 
+def also_in_href(chapter, term):
+    """Link to the chapter's own page, at the section that mentions the term (or its top).
+
+    The "also in" badge is shown on the term's glossary card, which lives under
+    glossary/ch<N>/, so a chapter page two levels up is ../../<chapter-folder>/.
+    """
+    folder = CHAPTER_DIRS[chapter]
+    return '../../%s/index.html%s' % (folder, first_section(term, folder))
+
+
 def card(t, idx):
     """One full entry, rendered on its chapter's page."""
     out = []
@@ -296,8 +306,10 @@ def card(t, idx):
                % (q(href), chapter_label(chapter), bi('دیدن در متن', 'see in context')))
     extra = [c for c in (t.get('chapters') or []) if c != chapter]
     if extra:
-        links = ' '.join('<a href="../ch%d/index.html#%s">%s</a>'
-                         % (c, q(t['id']), bi('فصل %s' % to_fa(c), 'ch %d' % c))
+        name = (t.get('aliases') or [t['term']])[0]
+        links = ' '.join('<a href="%s">%s</a>'
+                         % (q(also_in_href(c, name)),
+                            bi('فصل %s' % to_fa(c), 'ch %d' % c))
                          for c in extra)
         out.append('        <span class="gl-alsoseen">%s %s</span>\n'
                    % (bi('همچنین', 'also in'), links))
@@ -599,6 +611,8 @@ def build_data(terms, chapters):
 TITLES = {}
 CHAPTER_SET = set()
 TERMS = []
+# chapter number -> chapter folder; filled from scene_dirs() in main()
+CHAPTER_DIRS = {}
 
 
 def main():
@@ -618,7 +632,8 @@ def main():
             t['related'] = [r for r in (t.get('related') or []) if r in ids]
         print('preview build: %d terms' % len(ids))
 
-    global TERMS, TITLES, CHAPTER_SET, BY_ID
+    global TERMS, TITLES, CHAPTER_SET, BY_ID, CHAPTER_DIRS
+    CHAPTER_DIRS = chapters
     terms = validate(doc, chapters)
     TERMS = terms
     BY_ID = {t['id']: t for t in terms}

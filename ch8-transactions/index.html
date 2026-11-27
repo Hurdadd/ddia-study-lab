@@ -35,12 +35,12 @@
   <h1 class="reveal"><span class="fa">تراکنش‌ها (Transactions)</span><span class="en">Transactions</span></h1>
   <p class="lede reveal">
     <span class="fa">ببین رفیق، تراکنش کار چندمرحله‌ای رو قابل‌کنترل‌تر می‌کنه، ولی همهٔ سطح‌های جداسازی یه جور تضمین نمی‌دن. تو این فصل می‌بینی تغییرهای هم‌زمان چطور قانون برنامه رو می‌شکنن و هر راه‌حل چه قیمتی داره. مثال کاربردی هم بغل هر موضوع هست — بزن بریم.</span>
-    <span class="en">Real systems fail all the time, friend: the database dies mid-write, the network blinks, two clients stomp one row, races breed gremlins. A <b>transaction</b> bundles reads and writes into one unit — <b>all</b> or <b>nothing</b>. Two halves ahead: <b>concurrency control</b> (<span class="ltr">read committed</span> to <span class="ltr">snapshot isolation</span> to <span class="ltr">serializability</span>) and <b>distributed atomic commit</b> (<span class="ltr">two-phase commit</span>). Eleven diagrams, each walked through, plus an interview pack.</span>
+    <span class="en">Real systems fail all the time, friend: the database dies mid-write, the network blinks, two clients stomp one row, races breed gremlins. A <b>transaction</b> bundles reads and writes into one unit — <b>all</b> or <b>nothing</b>. Two halves ahead: <b>concurrency control</b> (<span class="ltr">read committed</span> to <span class="ltr">snapshot isolation</span> to <span class="ltr">serializability</span>) and <b>distributed atomic commit</b> (<span class="ltr">two-phase commit</span>). Twelve diagrams, each walked through, plus an interview pack.</span>
   </p>
   <div class="meta-row reveal">
-    <span><b><span class="fa">۱۱</span><span class="en">11</span></b> <span class="fa">دیاگرام با روایت گام‌به‌گام</span><span class="en">diagrams with step-by-step narration</span></span><span class="dot">·</span>
+    <span><b><span class="fa">۱۲</span><span class="en">12</span></b> <span class="fa">۱۲ نمودار + روایت گام‌به‌گام</span><span class="en">12 diagrams with step-by-step narration</span></span><span class="dot">·</span>
     <span><span class="fa">محور: ACID · سطوح isolation · MVCC · write skew · serializability · 2PC</span><span class="en">Theme: ACID · isolation levels · MVCC · write skew · serializability · 2PC</span></span><span class="dot">·</span>
-    <span><span class="fa">زمان مطالعه: حدود ۷۰ دقیقه</span><span class="en">Reading time: ~70 min</span></span>
+    <span><span class="fa">زمان مطالعه: حدود ۷۵ دقیقه</span><span class="en">Reading time: ~75 min</span></span>
   </div>
 </section>
 
@@ -214,9 +214,9 @@
   <div class="fa"><p>
     تراکنش قانون طبیعت نیست؛ برای ساده کردن مدل برنامه‌نویسی ساخته شد. هر برنامه‌ای تراکنش نمی‌خواد و گاهی شل کردن
     ضمانت‌ها (برای سرعت یا دسترس‌پذیری بیشتر) به نفعه. ولی نبود تراکنش یعنی مسئولیت همهٔ اون سناریوهای خرابی با خودته —
-    و تست سختش. (نمونهٔ معروف: رسوایی Horizon تو ادارهٔ پست بریتانیا که ریشهٔ فنیش احتمالاً نبود تراکنش‌های ACID
-    تو سیستم حسابداری بود — گرون تموم شد.)
-  </p></div><div class="en"><p>Transactions aren’t physics, friend; humans invented them to make coding livable. Not every app wants them, and loosening guarantees for speed or uptime is sometimes the smart trade. But transaction-free means every horror scenario is personally yours — plus the brutal testing bill. (Britain’s Horizon Post Office scandal? Probably missing ACID in the ledger. Ouch.)</p></div>
+    و تست سختش. یه نمونهٔ دقیق: دفتری که بدهکار و بستانکار هر انتقال رو در دو commit جدا می‌نویسه؛ crash بین این دو،
+    یک طرف رو ثبت می‌کنه و طرف دیگه رو گم می‌کنه — همون چیزی که یه تراکنش چندردیفی جلوش رو می‌گیره.
+  </p></div><div class="en"><p>Transactions aren’t physics, friend; humans invented them to make coding livable. Not every app wants them, and loosening guarantees for speed or uptime is sometimes the smart trade. But transaction-free means every horror scenario is personally yours — plus the brutal testing bill. A precise case: a ledger that commits each side of a transfer separately; a crash between the two commits records one side and loses the other — exactly what a multi-row atomic transaction prevents.</p></div>
 
   <h3 id="s1-2"><span class="fa">۱.۲ چهار حرف ACID دقیقاً یعنی چه</span><span class="en">1.2 What the four ACID letters really mean</span></h3>
   <div class="fa"><p>ACID چهار تا موضوع رو جدا می‌کنه: همه‌یاهیچ بودن، نگه داشتن قواعد داده، کنترل اثر تراکنش‌های هم‌زمان و موندن بعد تأیید. اسم ACID به‌تنهایی جزئیات این قول‌ها رو مشخص نمی‌کنه — اسمش دهن‌پرکنه، معناش رو باید باز کنی.</p>
@@ -238,7 +238,7 @@
       <tr>
         <td><b>C — Consistency</b></td>
         <td><b>invariantهای خود برنامه</b> همیشه درست باشن؛ مثلاً تو حسابداری جمع بدهکار و بستانکار همیشه تراز باشه</td>
-        <td>سازگاری replica، snapshot سازگار، consistent hashing یا linearizability — اینا معناهای دیگهٔ همون کلمه‌ان، قاطی نکن</td>
+        <td>سازگاری replica، snapshot سازگار، consistent hashing یا linearizability — اینا معناهای دیگهٔ همون کلمه‌ان</td>
       </tr>
       <tr>
         <td><b>I — Isolation</b></td>
@@ -316,7 +316,7 @@
 <p class="example-title"><b>مثال فنی: انتقال بین دو ظرفیت</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سانس A ظرفیت ۱ داره و سانس B ظرفیت ۰؛ رزرو باید از B بره به A.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا ببین: ظرفیت A یکی کم و B یکی زیاد می‌شه و رکورد رزرو هم عوض می‌شه. اگه وسط راه خطا بیاد، همه باید برگردن سر جاشون.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس این قانون به چند ردیف وصله. سه تا نوشتن جدا ممکنه ظرفیت رو گم یا اضافه کنه — ظرفیت هوا نمی‌شه، یادت باشه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس این قانون به چند ردیف وصله. سه تا نوشتن جدا ممکنه ظرفیت رو گم یا اضافه کنه — ظرفیت هوا نمی‌شه.</p>
 </div></div>
 
       <div class="fa"><ul>
@@ -333,7 +333,7 @@
       <h4><span class="fa">retry کردنِ تراکنشِ abortشده — پنج دام</span><span class="en">Retrying an aborted transaction — five traps</span></h4>
 <div class="fa"><p>بازتلاش باید خطای گذرا را با ورودیِ معتبر و از ابتدای تراکنش تکرار کند. خطای دائمی، فشارِ اضافه و اثرِ بیرونیِ تکراری با retry حل نمی‌شوند.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch8-5">
 <p class="example-title"><b>مثال فنی: Retry کل تصمیم با همان هویت</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن تراکنش ثبت درخواست <code dir="ltr">r7</code> به خاطر تعارض abort می‌شه. غصه نخور.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن تراکنش ثبت درخواست <code dir="ltr">r7</code> به خاطر تعارض abort می‌شه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا از اول با دادهٔ تازه می‌خونی و کل تراکنش رو با همون شناسه تکرار می‌کنی. backoff و سقف تلاش هم داری و اثر بیرونی تکراری رو مهار می‌کنی.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس فقط SQL آخر رو تکرار نکن — تصمیم قبلی ممکنه با دادهٔ تازه غلط باشه. timeout موقع commit هم یعنی «نمی‌دونم»، نه abort قطعی.</p>
 </div></div>
@@ -444,8 +444,8 @@
 <p class="example-title"><b>مثال فنی: گزارش ثابت با MVCC</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن قبل از انتقال حساب A برابر ۱۰۰ و B برابر ۰ ـه؛ یه تراکنش ۲۰ واحد جابه‌جا می‌کنه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا گزارش روی snapshot قبل از انتقال A=100 و B=0 رو می‌بینه؛ گزارش روی snapshot بعد A=80 و B=20 رو می‌بینه. هر گزارش یه دنیای سازگار.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس snapshot درست نصفه‌قبل و نصفه‌بعد رو قاطی نمی‌کنه. MVCC نسخه‌های لازم برای خوانندهٔ قدیمی رو نگه می‌داره — جادوش همینه.</p>
-</div></div><div class="en"><p>Read committed has a famous crack: <b>read skew</b>. Picture $1000 across two $500 accounts, $100 mid-flight between them. Peek at both balances mid-move and you might catch one pre-deposit ($500) and one post-withdrawal ($400) — poof, $100 vanished into air! That’s read skew, a <span class="ltr">nonrepeatable read</span>, officially “meh, acceptable” at this level.</p></div>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> پس snapshot درست نصفه‌قبل و نصفه‌بعد رو قاطی نمی‌کنه. MVCC نسخه‌های لازم برای خوانندهٔ قدیمی رو نگه می‌داره.</p>
+</div></div><div class="en"><p>Read committed has a famous crack: <b>read skew</b>. Picture two accounts, A=100 and B=0, with 20 units mid-flight from A to B. Peek at both balances mid-move and you might catch the receiver before its deposit (B=0) and the sender after its withdrawal (A=80) — poof, 20 units vanished into air! That’s read skew, a <span class="ltr">nonrepeatable read</span>, officially “meh, acceptable” at this level.</p></div>
   <div class="fa"><p>
     برای بکاپ و کوئری‌های تحلیلی طولانی ولی tolerable نیست: بکاپ چندساعته نباید قاطی نسخه‌های قدیمی و جدید باشه — آش شله‌قلمکار ممنوع.
     راه‌حل رایج <b>snapshot isolation</b> ـه: هر تراکنش از یه snapshot سازگار دیتابیس می‌خونه — یعنی هرچی لحظهٔ
@@ -466,8 +466,8 @@
     <div class="tag"><span class="fa">روایت مدرس از دیاگرام ۱</span><span class="en">Teacher narration of Diagram 1</span></div>
     <div class="fa">
 
-<p>شکل دو تا ردیف چهارمرحله‌ای داره (<span class="ltr">Write the Change</span> و <span class="ltr">Keep Versions</span> و <span class="ltr">Read a Snapshot</span> و <span class="ltr">Clean Up</span>)؛ ردیف بالا MVCC (مثل PostgreSQL) و ردیف پایین copy-on-write ـه. «به‌روزرسانی» واقعاً <span class="ltr">Delete + Insert</span> ـه: نسخهٔ قدیمی فقط مهر <span class="ltr">deleted_by = 13</span> می‌خوره و نسخهٔ جدید با <span class="ltr">inserted_by = 13</span> درج می‌شه، و همهٔ نسخه‌ها تو <span class="ltr">Version Chain</span> (زنجیره تو heap) زندگی می‌کنن.</p><p>خواننده با <span class="ltr">walk the version list</span> تو زنجیره قدم می‌زنه تا نسخهٔ مرئی رو تو <span class="ltr">Txid Filter</span> پیدا کنه: تراکنش ۱۲ همون ۵۰۰ دلار رو می‌بینه (<span class="ltr">tx 12 sees $500</span>) هرچند ۱۳ کرده‌ش ۴۰۰؛ بقیه با <span class="ltr">keep only visible rows</span> می‌رن به <span class="ltr">Garbage Collection</span>. تو ردیف پایین، <span class="ltr">Copy Changed Pages</span> با <span class="ltr">copy path to the root</span> می‌رسه به <span class="ltr">New Tree Root</span> و <span class="ltr">Snapshot = Root</span> یعنی هر ریشه خودش یه snapshot ـه و فیلتر txid لازم نیست؛ ته‌مونده با <span class="ltr">drop orphaned pages</span> می‌ره به <span class="ltr">Compaction</span>.</p><p>درس شکل: نوشتن هیچ‌وقت بازنویسی نمی‌کنه — یا نسخهٔ تازه می‌سازه یا صفحهٔ تازه — و «قدیمی بودن» فقط یه فیلتر دیده. بنویس، پاک نکن.</p></div>
-    <div class="en"><p>Two four-station rows up there (<span class="ltr">Write the Change</span>, <span class="ltr">Keep Versions</span>, <span class="ltr">Read a Snapshot</span>, <span class="ltr">Clean Up</span>); upstairs is MVCC (PostgreSQL style), downstairs copy-on-write. An “update” is secretly <span class="ltr">Delete + Insert</span>: grandpa gets stamped <span class="ltr">deleted_by = 13</span>, junior arrives with <span class="ltr">inserted_by = 13</span>, the whole family lives in the <span class="ltr">Version Chain</span> (a heap boarding house).</p><p>The reader <span class="ltr">strolls the version list</span> hunting its visible twin in the <span class="ltr">Txid Filter</span>: tx 12 still sees its $500 (<span class="ltr">tx 12 sees $500</span>) though 13 rewrote it to $400; the rejects ride <span class="ltr">keep only visible rows</span> to <span class="ltr">Garbage Collection</span>. Downstairs, <span class="ltr">Copy Changed Pages</span> climbs <span class="ltr">copy path to the root</span> to a <span class="ltr">New Tree Root</span>, and <span class="ltr">Snapshot = Root</span> means each root IS a snapshot — txid filter need not apply; leftovers slide via <span class="ltr">drop orphaned pages</span> to <span class="ltr">Compaction</span>.</p><p>Moral of the figure: writes never scribble over — they birth a fresh version or a fresh page — and “old” is just a pair of glasses. Write, don’t erase.</p></div>
+<p>شکل دو تا ردیف چهارمرحله‌ای داره (<span class="ltr">Write the Change</span> و <span class="ltr">Keep Versions</span> و <span class="ltr">Read a Snapshot</span> و <span class="ltr">Clean Up</span>)؛ ردیف بالا MVCC (مثل PostgreSQL) و ردیف پایین copy-on-write ـه. «به‌روزرسانی» واقعاً <span class="ltr">Delete + Insert</span> ـه: نسخهٔ قدیمی فقط مهر <span class="ltr">deleted_by = 13</span> می‌خوره و نسخهٔ جدید با <span class="ltr">inserted_by = 13</span> درج می‌شه، و همهٔ نسخه‌ها تو <span class="ltr">Version Chain</span> (زنجیره تو heap) زندگی می‌کنن.</p><p>خواننده با <span class="ltr">walk the version list</span> تو زنجیره قدم می‌زنه تا نسخهٔ مرئی رو تو <span class="ltr">Txid Filter</span> پیدا کنه: تراکنش ۱۲ حساب A رو هنوز ۱۰۰ واحد می‌بینه، هرچند ۱۳ اون رو به ۸۰ رسونده؛ بقیه با <span class="ltr">keep only visible rows</span> می‌رن به <span class="ltr">Garbage Collection</span>. تو ردیف پایین، <span class="ltr">Copy Changed Pages</span> با <span class="ltr">copy path to the root</span> می‌رسه به <span class="ltr">New Tree Root</span> و <span class="ltr">Snapshot = Root</span> یعنی هر ریشه خودش یه snapshot ـه و فیلتر txid لازم نیست؛ ته‌مونده با <span class="ltr">drop orphaned pages</span> می‌ره به <span class="ltr">Compaction</span>.</p><p>درس شکل: نوشتن هیچ‌وقت بازنویسی نمی‌کنه — یا نسخهٔ تازه می‌سازه یا صفحهٔ تازه — و «قدیمی بودن» فقط یه فیلتر دیده. بنویس، پاک نکن.</p></div>
+    <div class="en"><p>Two four-station rows up there (<span class="ltr">Write the Change</span>, <span class="ltr">Keep Versions</span>, <span class="ltr">Read a Snapshot</span>, <span class="ltr">Clean Up</span>); upstairs is MVCC (PostgreSQL style), downstairs copy-on-write. An “update” is secretly <span class="ltr">Delete + Insert</span>: grandpa gets stamped <span class="ltr">deleted_by = 13</span>, junior arrives with <span class="ltr">inserted_by = 13</span>, the whole family lives in the <span class="ltr">Version Chain</span> (a heap boarding house).</p><p>The reader <span class="ltr">strolls the version list</span> hunting its visible twin in the <span class="ltr">Txid Filter</span>: tx 12 still sees A=100, though 13 rewrote it to 80; the rejects ride <span class="ltr">keep only visible rows</span> to <span class="ltr">Garbage Collection</span>. Downstairs, <span class="ltr">Copy Changed Pages</span> climbs <span class="ltr">copy path to the root</span> to a <span class="ltr">New Tree Root</span>, and <span class="ltr">Snapshot = Root</span> means each root IS a snapshot — txid filter need not apply; leftovers slide via <span class="ltr">drop orphaned pages</span> to <span class="ltr">Compaction</span>.</p><p>Moral of the figure: writes never scribble over — they birth a fresh version or a fresh page — and “old” is just a pair of glasses. Write, don’t erase.</p></div>
   </div>
   <div class="callout">
     <div class="tag"><span class="fa">قواعدِ visibility (خلاصهٔ چهار قاعده)</span><span class="en">Visibility rules (four rules in short)</span></div>
@@ -634,7 +634,7 @@ RETURNING qty;</code></pre><p>در Read Committed، دو تغییرِ رقیب �
     <div class="en"><p>Four columns on stage (<span class="ltr">Tx: Aaliyah</span>, <span class="ltr">Tx: Bryce</span>, a snapshot-isolated <span class="ltr">Database</span>, the <span class="ltr">Invariant</span> judge) and three acts: <span class="ltr">Both read the premise</span>, <span class="ltr">Both act on the premise</span>, <span class="ltr">Both commit — the invariant breaks</span>. Act one: both chant <span class="ltr">SELECT doctors on call</span>, both see “2 doctors” — each from its private snapshot.</p><p>Act two: each scribbles only its own row (<span class="ltr">UPDATE Aaliyah/Bryce set on_call = false</span>); no dirty write, no lock in sight. Act three: both <span class="ltr">COMMIT</span> (<span class="ltr">locks only Aaliyah's row</span>, <span class="ltr">no conflict detected here</span>) and the dashed <span class="ltr">0 doctors on call</span> arrow stabs the Invariant. Moral: write skew nests in decision logic, not in a row’s value — object locks shrug, lost-update radar misses; only serializability catches it. Golden rule of this act.</p></div>
   </div>
   <h3 id="s3-3"><span class="fa">۳.۳ phantom و materializing conflicts + دیاگرام ۳</span><span class="en">3.3 phantoms and materializing conflicts + Diagram 3</span></h3>
-  <div class="fa"><p>خطای رکوردهای تازه وقتی پیش میاد که تصمیم رو «نبودن رکورد مطابق شرط» بنا کنی. قفل کردن یه ردیف موجود الزاماً جلوی درج ردیف تازه رو نمی‌گیره — هوا رو که نمی‌شه قفل کرد (یادته؟).</p>
+  <div class="fa"><p>خطای رکوردهای تازه وقتی پیش میاد که تصمیم رو «نبودن رکورد مطابق شرط» بنا کنی. قفل کردن یه ردیف موجود الزاماً جلوی درج ردیف تازه رو نمی‌گیره — هوا رو که نمی‌شه قفل کرد.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-phantom">
 <p class="example-title"><b>مثال فنی: رزروِ بازه‌ای که هنوز ردیف ندارد</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن برای اتاق ۷ و بازهٔ <code dir="ltr">[10:00,11:00)</code> هیچ رزروی نیست. سالن خالیه.</p>
@@ -662,8 +662,8 @@ FOR UPDATE;</code></pre><p>اگر نتیجه خالی باشد، این دستو
   <div class="fa"><p>
     نکتهٔ ظریف: تو مثال پزشکان، ردیفی که عوض می‌شه همون ردیفیه که SELECT برگردونده — پس
     <code>SELECT ... FOR UPDATE</code> می‌تونه قفل بگیره. ولی تو بقیهٔ مثال‌ها، چک «نبود ردیف» رو بررسی می‌کنه و نوشتن
-    <i>یه ردیف تازه</i> می‌سازه که اون شرط رو می‌شکنه؛ وقتی SELECT هیچ ردیفی برنمی‌گردونه، FOR UPDATE چیزی نداره که قفل کنه! هوا رو که نمی‌شه قفل کرد — یادته؟
-  </p></div><div class="en"><p>Sneaky bit: the doctors’ changed row came back in the SELECT — so <code>SELECT ... FOR UPDATE</code> had something to grab. But the other tales check an <i>absence</i>, and the write <i>invents</i> the rule-breaking row; SELECT returns thin air, FOR UPDATE grips thin air! Can’t lock the sky — remember?</p></div>
+    <i>یه ردیف تازه</i> می‌سازه که اون شرط رو می‌شکنه؛ وقتی SELECT هیچ ردیفی برنمی‌گردونه، FOR UPDATE چیزی نداره که قفل کنه! هوا رو که نمی‌شه قفل کرد.
+  </p></div><div class="en"><p>Sneaky bit: the doctors’ changed row came back in the SELECT — so <code>SELECT ... FOR UPDATE</code> had something to grab. But the other tales check an <i>absence</i>, and the write <i>invents</i> the rule-breaking row; SELECT returns thin air, FOR UPDATE grips thin air! Can’t lock the sky.</p></div>
 
   <div class="diagram">
     <div class="cap">
@@ -804,7 +804,7 @@ FOR UPDATE;</code></pre><p>اگر نتیجه خالی باشد، این دستو
     stored procedureها سابقهٔ بدی دارن: زبون اختصاصی هر vendor (PL/SQL و T-SQL و PL/pgSQL) زشت و قدیمی شده،
     مدیریتشون (دیباگ و version control و تست و مانیتورینگ) سخته، و یه procedure بد می‌تونه کل دیتابیس مشترک رو بخوابونه.
     ولی نسخه‌های مدرن از زبون‌های عمومی استفاده می‌کنن: VoltDB با Java/Groovy، Datomic با Java/Clojure، Redis با Lua، MongoDB با JavaScript — هرکی با زبون خودش.
-    ضمناً VoltDB برای replication به‌جای کپی نوشتن‌ها، <i>همون procedure</i> رو رو همهٔ replicaها اجرا می‌کنه (state machine replication)
+    ضمناً VoltDB برای replication به‌جای کپی نوشتن‌ها، <i>همون procedure</i> رو روی همهٔ replicaها اجرا می‌کنه (state machine replication)
     پس procedure باید deterministic باشه — وگرنه replicaها هر کدوم یه سازی می‌زنن.
   </p></div><div class="en"><p>Stored procedures: notorious past. Vendor-locked tongues (PL/SQL, T-SQL, PL/pgSQL) aged like milk, and babysitting them (debug, version, test, watch) hurts — one rogue procedure floors the shared DB. Modern ones speak human languages: VoltDB Java/Groovy, Datomic Java/Clojure, Redis Lua, MongoDB JavaScript. VoltDB even replicates by replaying <i>the same procedure</i> everywhere (state machine replication) — so procedures must be deterministic, or replicas freestyle.</p></div>
   <div class="fa"><p>
@@ -871,7 +871,7 @@ FOR UPDATE;</code></pre><p>اگر نتیجه خالی باشد، این دستو
       <tr><td>مسدود شدن</td><td>تو صف یه thread</td><td>خواننده و نویسنده هم رو قفل می‌کنن</td><td>هیچ‌کس هیچ‌کس رو قفل نمی‌کنه — آزادی</td></tr>
       <tr><td>phantom</td><td>نداره (سریالیه دیگه)</td><td>با predicate یا index-range lock — کلاسیک</td><td>با ردیابی تضاد خوندن/نوشتن — مدرن</td></tr>
       <tr><td>بزرگ‌ترین ضعف</td><td>سقف یه هسته؛ تراکنش کند کل سیستم رو می‌بنده</td><td>latency بی‌قرار، deadlock، قفل شدن نوشتن‌ها</td><td>abort زیر contention زیاد؛ خرج دفترداری</td></tr>
-      <tr><td>نمونه‌ها</td><td>VoltDB، Datomic، Redis</td><td>MySQL/InnoDB و SQL Server (سطح serializable) — قدیمی‌ها</td><td>PostgreSQL و Hekaton و HyPer و CockroachDB و FoundationDB — جدیدها</td></tr>
+      <tr><td>نمونه‌ها</td><td>VoltDB، Datomic، Redis</td><td>MySQL/InnoDB و SQL Server (سطح serializable) — قدیمی‌ها</td><td>PostgreSQL، CockroachDB، Hekaton و HyPer — جدیدها</td></tr>
     </tbody>
   </table></div><div class="en"><table>
     <thead><tr><th>Criterion</th><th>Serial execution</th><th>2PL</th><th>SSI</th></tr></thead>
@@ -880,9 +880,10 @@ FOR UPDATE;</code></pre><p>اگر نتیجه خالی باشد، این دستو
       <tr><td>Blocking</td><td>Queueing behind one thread</td><td>Readers, writers: mutual lockdown</td><td>Zero lockdown. Freedom.</td></tr>
       <tr><td>Phantoms</td><td>None — it’s serial, duh</td><td>Predicate or index-range locks — old school</td><td>Read/write beef tracking — new school</td></tr>
       <tr><td>Biggest weakness</td><td>One-core roof; one slowpoke stalls the parade</td><td>Jittery latency, deadlocks, frozen writes</td><td>Aborts when crowded; paperwork overhead</td></tr>
-      <tr><td>Examples</td><td>VoltDB, Datomic, Redis</td><td>MySQL/InnoDB, SQL Server (serializable tier) — the elders</td><td>PostgreSQL, Hekaton, HyPer, CockroachDB, FoundationDB — the new kids</td></tr>
+      <tr><td>Examples</td><td>VoltDB, Datomic, Redis</td><td>MySQL/InnoDB, SQL Server (serializable tier) — the elders</td><td>PostgreSQL, CockroachDB, Hekaton, HyPer — the new kids</td></tr>
     </tbody>
   </table></div>
+  <div class="fa"><p class="small"><b>یک هشدار:</b> FoundationDB هم در commit خوش‌بینانه بررسی می‌کند، ولی سریال‌پذیری را با read/write conflict range ثابت می‌کند، نه با SSI — هر دو در commit قضاوت می‌کنند، اما الگوریتم یکی نیست.</p></div><div class="en"><p class="small"><b>One caveat:</b> FoundationDB also validates optimistically at commit, but it enforces serializability with read/write conflict ranges, not SSI — both judge at commit, but the algorithm is not the same.</p></div>
 </section>
 
 <!-- ============ SECTION 5 ============ -->
@@ -897,7 +898,7 @@ FOR UPDATE;</code></pre><p>اگر نتیجه خالی باشد، این دستو
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا coordinator از هر دو prepare می‌خواد. بعد از رأی مثبت همه، تصمیم commit رو پایدار می‌کنه و می‌فرسته. رأی منفی قبل از تصمیم نهایی یعنی abort.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس هیچ participant نمی‌تونه با timeout سر خود تصمیم بگیره. شرطش اینه که منابع واقعاً از پروتکل پشتیبانی کنن — روی کاغذ نه، توی عمل.</p>
 </div>
-<p>و آخرش همون فروشگاه مسئله رو به‌جای حل با پروتکل توزیع‌شده، کوچیک کرد: رزرو و دفتر رو برد توی یه پایگاه — claim شد یه تراکنش تک‌پایگاهی: یا هر دو، یا هیچ‌کدوم. جملهٔ مصاحبه‌ش اینه: قبل از اینکه بری سراغ 2PC، بپرس می‌شه مرز تراکنش رو جوری کشید که همه‌چیز توی یه پایگاه جا بشه؟ اگه آره، کل درد atomic-commit توزیع‌شده از ریشه حل می‌شه.</p></div><div class="en"><p>Single box? The engine handles atomicity solo: first ink the data durable (usually the WAL), then append the commit record. Crash mid-way? Read the log on wake-up: commit record there = committed, missing = rolled back. The whole decision is one disk write finishing. Easy life.</p></div>
+<p>و آخرش همون فروشگاه مسئله رو به‌جای حل با پروتکل توزیع‌شده، کوچیک کرد: رزرو و دفتر رو برد توی یه پایگاه — یعنی یه تراکنش تک‌پایگاهی: یا هر دو، یا هیچ‌کدوم. جملهٔ مصاحبه‌ش اینه: قبل از اینکه بری سراغ 2PC، بپرس می‌شه مرز تراکنش رو جوری کشید که همه‌چیز توی یه پایگاه جا بشه؟ اگه آره، کل درد atomic-commit توزیع‌شده از ریشه حل می‌شه.</p></div><div class="en"><p>Single box? The engine handles atomicity solo: first ink the data durable (usually the WAL), then append the commit record. Crash mid-way? Read the log on wake-up: commit record there = committed, missing = rolled back. The whole decision is one disk write finishing. Easy life.</p></div>
 <div class="en"><p>That same shop shrank the problem instead of solving it with a distributed protocol: reservations and the ledger moved into one database, turning the claim into a single local transaction — all or nothing. The interview line: before reaching for 2PC, ask whether the transaction boundary can be redrawn around one database.</p></div>
   <div class="fa"><p>
     ولی تو تراکنش پخش‌شده (چند تا shard، یا ایندکس سراسری رو node دیگه) نمی‌شه به هر node گفت «خودت commit کن»:
@@ -926,7 +927,7 @@ FOR UPDATE;</code></pre><p>اگر نتیجه خالی باشد، این دستو
   <div class="fa"><p>شرکت‌کنندهٔ آماده قول داده تصمیم نهایی رو اجرا کنه و ممکنه منابع رو نگه داره. اگه هماهنگ‌کننده تو این فاصله غیب بشه، وضعیت نامشخص می‌تونه کارهای دیگه رو هم معطل کنه — یه نفر خوابش ببره، همه وایمیستن.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-in-doubt">
 <p class="example-title"><b>مثال فنی: Prepared و بی‌خبر از تصمیم</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن participant ـی A آماده شده و قول داده نتیجهٔ coordinator رو اجرا کنه؛ حالا ارتباط با coordinator قطع می‌شه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن participant A آماده شده و قول داده نتیجهٔ coordinator رو اجرا کنه؛ حالا ارتباط با coordinator قطع می‌شه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا A قفل‌ها و وضعیت پایدار رو نگه می‌داره تا تصمیم معتبر از یه جا بازیابی بشه. صبر می‌کنه.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس timeout نمی‌گه coordinator ـیر commit کرده یا abort. آزاد کردن سرخود قول یعنی شکستن atomic commit — صبر تلخه ولی لازمه.</p>
 </div></div><div class="en"><p>2PC is a <b>blocking</b> protocol, full stop: after voting yes, a participant just… waits. Timeout? Useless — Database 1 going rogue-abort while Database 2 committed means divorce; rogue-commit, same story. And while doubting, those <b>locks stay gripped</b>: coordinator napping twenty minutes = nobody touches that data for twenty minutes. Coordinator’s log fully vaporized? Locks forever — restarts can’t help, because 2PC law says in-doubt locks outlive reboots. Only exit left: a sysadmin’s trembling hand.</p></div>
@@ -947,10 +948,11 @@ FOR UPDATE;</code></pre><p>اگر نتیجه خالی باشد، این دستو
   </div>
   <div class="fa"><p>
     در عوض، <b>تراکنش‌های پخش‌شدهٔ داخلی</b> (همهٔ participantها یه دیتابیس واحد با نرم‌افزار یکسان: CockroachDB و TiDB و
-    Spanner و FoundationDB و YugabyteDB یا Kafka) حالشون خیلی بهتره: هنوز 2PC استفاده می‌کنن ولی coordinator رو
+    Spanner و YugabyteDB یا Kafka) حالشون خیلی بهتره: هنوز 2PC استفاده می‌کنن ولی coordinator رو
     با consensus تکثیر می‌کنن (failover خودکار)، می‌ذارن coordinator مستقیم با shardها حرف بزنه، خود shardها رو هم
     تکثیر می‌کنن، و commit اتمیک رو با کنترل هم‌زمانی پخش‌شده (تشخیص deadlock و خوندن سازگار) جفت می‌کنن — خانوادهٔ خوشبخت.
-  </p></div><div class="en"><p>The happy family instead: <b>internal distributed transactions</b> (everybody runs the same database — CockroachDB, TiDB, Spanner, FoundationDB, YugabyteDB, even Kafka) still waltz 2PC, but the coordinator rides consensus (auto-failover), chats with shards directly, shards come replicated, and atomic commit slow-dances with distributed concurrency control (deadlock radar, consistent reads). Same blood, fewer feuds.</p></div>
+    FoundationDB هم تراکنش توزیع‌شدهٔ داخلی دارد، ولی commitش خوش‌بینانه و بر پایهٔ read/write conflict range است، نه 2PC.
+  </p></div><div class="en"><p>The happy family instead: <b>internal distributed transactions</b> (everybody runs the same database — CockroachDB, TiDB, Spanner, YugabyteDB, even Kafka) still waltz 2PC, but the coordinator rides consensus (auto-failover), chats with shards directly, shards come replicated, and atomic commit slow-dances with distributed concurrency control (deadlock radar, consistent reads). FoundationDB also runs internal distributed transactions, but its commit is optimistic and built on read/write conflict ranges, not 2PC. Same blood, fewer feuds.</p></div>
 
   <h3 id="s5-3"><span class="fa">۵.۳ exactly-once و idempotency</span><span class="en">5.3 exactly-once and idempotency</span></h3>
   <div class="fa"><p>اثر یه‌باره یعنی تکرار درخواست نتیجهٔ کسب‌وکاری رو دوبار نسازه. برای این کار شناسهٔ ثابت درخواست و ثبت اتمیک نتیجه و جلوگیری از تکرار لازمه — سه تا ستون.</p>
@@ -1089,7 +1091,8 @@ COMMIT;
       <tr><td><span class="ltr">Two-Phase Locking</span></td><td>قفلِ shared/exclusive با فازِ رشد و کاهش</td><td>2PL ≠ 2PC؛ deadlock و latency ناپایدار</td></tr>
       <tr><td><span class="ltr">Predicate Lock</span></td><td>قفل روی همهٔ اشیای منطبق با شرط — حتی آینده</td><td>دقیق اما کُند</td></tr>
       <tr><td><span class="ltr">Index-Range Lock</span></td><td>تقریبِ ارزانِ predicate lock روی بازهٔ ایندکس</td><td>next-key locking؛ بدونِ ایندکس → قفلِ کلِ جدول</td></tr>
-      <tr><td><span class="ltr">SSI</span></td><td>خوش‌بینانه: بررسیِ تضاد در لحظهٔ commit</td><td>PostgreSQL، CockroachDB، FoundationDB</td></tr>
+      <tr><td><span class="ltr">SSI</span></td><td>خوش‌بینانه: بررسیِ تضاد در لحظهٔ commit</td><td>PostgreSQL، CockroachDB</td></tr>
+      <tr><td><span class="ltr">Optimistic CC</span></td><td>خواندن/نوشتن خوش‌بینانه با read/write conflict range</td><td>FoundationDB؛ در commit بررسی می‌کند، ولی SSI نیست</td></tr>
       <tr><td><span class="ltr">Atomic Commit</span></td><td>یا همهٔ nodeها commit یا همه abort</td><td>مسالهٔ اصلیِ تراکنشِ توزیع‌شده</td></tr>
       <tr><td><span class="ltr">2PC</span></td><td>prepare → vote → commit point → commit</td><td>blocking؛ دو نقطهٔ بازگشت‌ناپذیر</td></tr>
       <tr><td><span class="ltr">In-Doubt</span></td><td>وضعیتِ participant پس از رایِ yes و بدونِ خبرِ coordinator</td><td>قفل‌ها تا تعیینِ تکلیف نگه داشته می‌شوند</td></tr>
@@ -1123,7 +1126,8 @@ COMMIT;
       <tr><td><span class="ltr">Two-Phase Locking</span></td><td>Shared/exclusive locks with growth and shrinkage</td><td>2PL ≠ 2PC; deadlocks and unstable latency</td></tr>
       <tr><td><span class="ltr">Predicate Lock</span></td><td>Locking every object matching a condition — even future ones</td><td>Precise but slow</td></tr>
       <tr><td><span class="ltr">Index-Range Lock</span></td><td>Cheap approximation of predicate locks on index ranges</td><td>Next-key locking; no index → whole-table lock</td></tr>
-      <tr><td><span class="ltr">SSI</span></td><td>Optimistic: conflict checks at commit time</td><td>PostgreSQL, CockroachDB, FoundationDB</td></tr>
+      <tr><td><span class="ltr">SSI</span></td><td>Optimistic: conflict checks at commit time</td><td>PostgreSQL, CockroachDB</td></tr>
+      <tr><td><span class="ltr">Optimistic CC</span></td><td>Optimistic reads/writes validated against read/write conflict ranges</td><td>FoundationDB; it checks at commit but is not SSI</td></tr>
       <tr><td><span class="ltr">Atomic Commit</span></td><td>Either all nodes commit or all abort</td><td>The core distributed-transaction problem</td></tr>
       <tr><td><span class="ltr">2PC</span></td><td>prepare → vote → commit point → commit</td><td>Blocking; two points of no return</td></tr>
       <tr><td><span class="ltr">In-Doubt</span></td><td>Participant state after voting yes with no coordinator news</td><td>Locks held till decided</td></tr>
@@ -1141,7 +1145,7 @@ COMMIT;
   </details>
 
   <details><summary><span class="fa">۲. چرا حرفِ C در ACID با بقیه فرق دارد؟</span><span class="en">2. Why is the C in ACID unlike the rest?</span></summary>
-    <div class="fa"><p>C یعنی قواعد درست برنامه سر پا بمونن. موتور بعضی قواعد اعلام‌شده رو اجرا می‌کنه، ولی منطق لازم و سطح جداسازی رو طراح باید انتخاب کنه؛ این معنا با سازگاری replica یکی نیست — اسم مشترک، معنای جدا.</p></div><div class="en"><p>Because the database can’t babysit your rules alone: YOUR invariants (debits hugging credits, say) must hold. Some you ink as constraints (foreign key, unique, check); the rest (hello, “one doctor on call, always”) is code’s homework. Plus the word moonlights in five database meanings — don’t mix the cocktails.</p></div>
+    <div class="fa"><p>C یعنی قواعد درست برنامه سر پا بمونن. دیتابیس می‌تونه هر دو ردیف رو اتمیک و با isolation قوی بنویسه و باز هم نتیجه غلط باشه: اگه برنامه از حساب A صد واحد کم کنه و به حساب B دویست واحد اضافه کنه، هیچ نوشتنی نصفه نمونده ولی قانون بقای مبلغ شکسته. برای همین قیدها و منطق دامنه رو خودت تعریف می‌کنی؛ ACID فرمول کسب‌وکار رو اختراع نمی‌کنه.</p></div><div class="en"><p>Because the database can’t babysit your rules alone: YOUR invariants (debits matching credits, say) must hold. It can write both rows atomically with strong isolation and still produce a wrong result — debit account A 100, credit account B 200, and no write is half-done while the conservation rule breaks. So you define the constraints and domain logic; ACID does not invent your business formula.</p></div>
   </details>
 
   <details><summary><span class="fa">۳. dirty read و dirty write چیستند و چرا جلویشان را می‌گیرند؟</span><span class="en">3. What are dirty reads and dirty writes, and why stop them?</span></summary>
@@ -1149,7 +1153,7 @@ COMMIT;
   </details>
 
   <details><summary><span class="fa">۴. snapshot isolation چه ضمانتی می‌دهد و چگونه با MVCC پیاده می‌شود؟</span><span class="en">4. What does snapshot isolation guarantee, and how does MVCC implement it?</span></summary>
-    <div class="fa"><p>جداسازی تصویری، خوندن رو وصل می‌کنه به عکس سازگار تراکنش. MVCC چند تا نسخه نگه می‌داره و قواعد رؤیت تعیین می‌کنن کدوم نسخه دیده بشه؛ جزئیات نسخه‌ها مال همون موتوره — داکش رو بخون.</p></div><div class="en"><p>Every transaction time-travels to its own start; rivals’ scribbles stay invisible. Under the hood: each write births a stamped version (update = delete+insert, remember?), versions chain up, reads filter by a two-line bouncer’s list. House rule, chant it: readers never block writers.</p></div>
+    <div class="fa"><p>جداسازی تصویری، خوندن رو وصل می‌کنه به عکس سازگار تراکنش. MVCC چند تا نسخه نگه می‌داره و قواعد رؤیت تعیین می‌کنن کدوم نسخه دیده بشه؛ جزئیات نسخه‌ها مال همون موتوره — داکش رو بخون.</p></div><div class="en"><p>Every transaction time-travels to its own start; rivals’ scribbles stay invisible. Under the hood, each write births a stamped version (an update is a delete plus an insert), versions chain up, and reads filter by a two-line visibility list. House rule: readers never block writers.</p></div>
   </details>
 
   <details><summary><span class="fa">۵. چرا «repeatable read» در دیتابیس‌های مختلف معانی متفاوتی دارد؟</span><span class="en">5. Why does “repeatable read” mean different things in different databases?</span></summary>
@@ -1161,15 +1165,15 @@ COMMIT;
   </details>
 
   <details><summary><span class="fa">۷. write skew چیست و چرا از lost update سخت‌تر است؟</span><span class="en">7. What is write skew, and why is it harder than lost update?</span></summary>
-    <div class="fa"><p>Write skew شرط مشترک رو با عوض کردن ردیف‌های جدا می‌شکنه؛ پس تشخیص بازنویسی همون ردیف کافی نیست. قفل همهٔ دادهٔ مؤثر تو تصمیم یا جداسازی سریال‌پذیر می‌تونه کمک کنه — قانون رو قفل کن، نه ردیف رو.</p></div><div class="en"><p>Decide on condition A, write object B — and your own write murders premise A. Different objects each side, so neither dirty write nor lost update fits. Bargain cures bounce off; leash EVERY row the decision leaned on, or go serializable. No shortcuts on this one.</p></div>
+    <div class="fa"><p>Write skew شرط مشترک رو با عوض کردن ردیف‌های جدا می‌شکنه؛ پس تشخیص بازنویسی همون ردیف کافی نیست. قفل همهٔ دادهٔ مؤثر تو تصمیم یا جداسازی سریال‌پذیر می‌تونه کمک کنه — قانون رو قفل کن، نه ردیف رو.</p></div><div class="en"><p>Decide on condition A, write object B — and your own write murders premise A. Different objects each side, so neither dirty write nor lost update fits. Bargain cures bounce off; leash EVERY row the decision leaned on, or go serializable.</p></div>
   </details>
 
-  <details><summary><span class="fa">۸. phantom چیست و چرا SELECT FOR UPDATE در مثالِ رزرو اتاق کار نمی‌کند؟</span><span class="en">8. What is a phantom, and why does SELECT FOR UPDATE fail in the room-booking example?</span></summary>
-    <div class="fa"><p>Phantom مال عوض شدن مجموعهٔ مطابق شرطه. قفل ردیف‌های برگشتی الزاماً جلوی درج ردیف تازه رو نمی‌گیره؛ تو جست‌وجوی خالی ممکنه ردیفی برای قفل نباشه — هوا رو که نمی‌شه قفل کرد.</p></div><div class="en"><p>A phantom = your write reshaping MY search results. Room-booking classic: check says “no clash”, write invents the clashing row; SELECT returns air, FOR UPDATE grips air. Snapshot isolation ghosts-busts pure reads only — writers stay haunted. Cures: serializability, or conjure lockable rows (materialize conflicts).</p></div>
+  <details><summary><span class="fa">۸. phantom چیست و چرا SELECT FOR UPDATE در رزرو اتاق کار نمی‌کند؟</span><span class="en">8. What is a phantom, and why does SELECT FOR UPDATE fail when booking a room?</span></summary>
+    <div class="fa"><p>Phantom یعنی نوشتنی مجموعهٔ ردیف‌های مطابق شرط را عوض می‌کند. در رزرو اتاق، دو تراکنش هم‌پوشان هر دو «تعارضی نیست» می‌بینند و هر دو درج می‌کنند؛ SELECT ردیفی برنمی‌گرداند، پس FOR UPDATE چیزی برای قفل کردن ندارد. جداسازی snapshot فقط خواندن‌های تنها را حفظ می‌کند؛ درمان، serializability یا ساختن ردیف قابل‌قفل است.</p></div><div class="en"><p>A phantom is a write that changes the set of rows your search would return. Take two overlapping room bookings: each transaction checks for a clash, sees none, then inserts, so SELECT returns no existing row and FOR UPDATE locks nothing. Snapshot isolation protects read-only queries only, and writers stay exposed. Cures: serializability, or materialize lockable rows.</p></div>
   </details>
 
   <details><summary><span class="fa">۹. materializing conflicts یعنی چه و چرا آخرین راه‌حل است؟</span><span class="en">9. What does materializing conflicts mean, and why is it the last resort?</span></summary>
-    <div class="fa"><p>Materializing conflicts یعنی یه رکورد مشترک قابل‌قفل بسازیم تا تصمیم‌های متعارض روش هماهنگ بشن. پیدا کردن دامنهٔ درست این رکورد سخته و کنترل هم‌زمانی رو میاره تو مدل داده — راه آخره، نه اول.</p></div><div class="en"><p>Conjuring rows purely as padlocks: pre-stuff a “room × 15-minute slot” grid, lock your cell first. Clever? Sure. Clean? Never — designing it right is a minefield, and concurrency plumbing leaks into your data model. Serializable available? Take it and run.</p></div>
+    <div class="fa"><p>Materializing conflicts یعنی یه رکورد مشترک قابل‌قفل بسازیم تا تصمیم‌های متعارض روش هماهنگ بشن. پیدا کردن دامنهٔ درست این رکورد سخته و کنترل هم‌زمانی رو میاره تو مدل داده — راه آخره، نه اول.</p></div><div class="en"><p>Conjuring rows purely as padlocks: pre-stuff a “room × 15-minute slot” grid and lock your cell first. It works, but choosing the right granularity is a minefield and concurrency plumbing leaks into your data model. Use it only as a last resort when serializability is unavailable.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۰. سه روشِ پیاده‌سازیِ serializability را مقایسه کن.</span><span class="en">10. Compare the three serializability implementations.</span></summary>
@@ -1177,11 +1181,11 @@ COMMIT;
   </details>
 
   <details><summary><span class="fa">۱۱. «دو فازِ» قفلِ دوفازی یعنی چه و 2PL با 2PC چه فرقی دارد؟</span><span class="en">11. What do the “two phases” of two-phase locking mean, and how does 2PL differ from 2PC?</span></summary>
-    <div class="fa"><p>تو 2PL اول قفل‌ها گرفته می‌شن و بعد شروع آزادسازی، قفل تازه گرفته نمی‌شه؛ تو نوع سخت‌گیرانه قفل‌های مهم تا آخر نگه داشته می‌شن. 2PC دربارهٔ تصمیم تأیید چند تا شرکت‌کننده‌ست — قفل با رأی فرق داره.</p></div><div class="en"><p>Phase one (growth): grab locks mid-sprint. Phase two (shrinkage): drop them all at the finish — touch nothing new after the first drop. And 2PC? Different sport entirely: 2PL guards isolation, 2PC seals distributed vows. Lock-cousin vs commit-cousin — family reunion, different jobs.</p></div>
+    <div class="fa"><p>تو 2PL اول قفل‌ها گرفته می‌شن و بعد شروع آزادسازی، قفل تازه گرفته نمی‌شه؛ تو نوع سخت‌گیرانه قفل‌های مهم تا آخر نگه داشته می‌شن. 2PC دربارهٔ تصمیم تأیید چند تا شرکت‌کننده‌ست — قفل با رأی فرق داره.</p></div><div class="en"><p>Phase one (growth): grab locks mid-sprint. Phase two (shrinkage): drop them all at the finish, and touch nothing new after the first drop. 2PC is a different sport: 2PL guards isolation, while 2PC seals distributed commit.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۲. predicate lock و index-range lock چه می‌کنند؟</span><span class="en">12. What do predicate locks and index-range locks do?</span></summary>
-    <div class="fa"><p>قفل شرط، دامنهٔ رکوردهای مطابق یه شرط رو پوشش می‌ده، حتی درج آینده رو. قفل بازهٔ ایندکس تقریب اجراییشه و ممکنه دامنهٔ بیشتری از لازم رو محدود کنه — تور بزرگ‌تر، ماهی بیشتر.</p></div><div class="en"><p>Predicate lock: a mind-meld over EVERYTHING matching the search — unborn rows included. Phantom-proof, matcher-slow. Index-range (next-key): the street version — a shared lock on the covering slice; sometimes grabs extra, costs pennies. No fitting index? Whole-table padlock. Ouch.</p></div>
+    <div class="fa"><p>قفل شرط، دامنهٔ رکوردهای مطابق یه شرط رو پوشش می‌ده، حتی درج آینده رو. قفل بازهٔ ایندکس تقریب اجراییشه و ممکنه دامنهٔ بیشتری از لازم رو محدود کنه — تور بزرگ‌تر، ماهی بیشتر.</p></div><div class="en"><p>Predicate lock: a lock over everything matching a search condition, unborn rows included — precise but slow. Index-range (next-key) locking is the cheap street version: a shared lock on the covering index slice, sometimes grabbing extra. With no fitting index, both degrade to a whole-table lock.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۳. SSI چگونه تضادها را تشخیص می‌دهد و چرا فوراً abort نمی‌کند؟</span><span class="en">13. How does SSI detect conflicts, and why not abort immediately?</span></summary>
@@ -1189,7 +1193,7 @@ COMMIT;
   </details>
 
   <details><summary><span class="fa">۱۴. چرا stored procedure برای اجرای سریالی لازم است؟</span><span class="en">14. Why are stored procedures required for serial execution?</span></summary>
-    <div class="fa"><p>تحویل کل کار تو یه فراخوانی، معطلی رفت‌وبرگشت شبکه رو از مسیر اجرای سریالی کم می‌کنه. Stored procedure یکیشه؛ اصل کوتاه و غیرتعاملی بودن کاره — حرف بزن و برو، نه حرف بزن و وایسا.</p></div><div class="en"><p>Chatty interactive mode: every statement commutes app↔database, burning daylight on the road; one-at-a-time turns throughput to dust. Stored procedures ship the whole errand upfront for nap-free in-RAM sprints. Modern flavors speak Java, Lua, JavaScript — and state-machine replication demands clockwork-deterministic scripts. No dice, no clocks.</p></div>
+    <div class="fa"><p>تحویل کل کار تو یه فراخوانی، معطلی رفت‌وبرگشت شبکه رو از مسیر اجرای سریالی کم می‌کنه. Stored procedure یکیشه؛ اصل کوتاه و غیرتعاملی بودن کاره — حرف بزن و برو، نه حرف بزن و وایسا.</p></div><div class="en"><p>Chatty interactive mode sends every statement back and forth, burning daylight on the network and turning one-at-a-time execution into a crawl. Stored procedures ship the whole errand upfront for fast in-memory execution. Modern flavors speak Java, Lua and JavaScript, and state-machine replication requires clockwork-deterministic scripts.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۵. مسالهٔ atomic commit چیست و چرا «هر node خودش commit کند» جواب نمی‌دهد؟</span><span class="en">15. What is the atomic-commit problem, and why is “each node commits itself” not enough?</span></summary>
@@ -1201,11 +1205,11 @@ COMMIT;
   </details>
 
   <details><summary><span class="fa">۱۷. وضعیتِ in-doubt چیست و چرا timeout کمکی نمی‌کند؟</span><span class="en">17. What is the in-doubt state, and why doesn’t a timeout help?</span></summary>
-    <div class="fa"><p>شرکت‌کننده رأی مثبت داده ولی تصمیم رو نمی‌دونه. Timeout ثابت نمی‌کنه بقیه لغو کردن؛ تصمیم مستقل می‌تونه با نتیجهٔ طرف دیگه اختلاف بسازه — صبر کن، حدس نزن.</p></div><div class="en"><p>Voted YES and the coordinator ghosts you? Welcome to purgatory: committed or not, nobody tells you — you just wait, locks gripped. Freelance-abort on timeout and you might split from a sibling that committed; freelance-commit, mirror risk. Meanwhile your locks freeze a slice of the app solid. Log vaporized too? Only a sysadmin’s trembling hand can rule. Coffee for two, please.</p></div>
+    <div class="fa"><p>شرکت‌کننده رأی مثبت داده ولی تصمیم رو نمی‌دونه. Timeout ثابت نمی‌کنه بقیه لغو کردن؛ تصمیم مستقل می‌تونه با نتیجهٔ طرف دیگه اختلاف بسازه — صبر کن، حدس نزن.</p></div><div class="en"><p>Voted YES and the coordinator disappears? You are in doubt: committed or not, nobody tells you, and your locks stay gripped. A timeout proves nothing — a freelance abort can split you from a sibling that committed, and a freelance commit carries the mirror risk, while your locks freeze a slice of the application. If the coordinator’s log is gone too, only a manual ruling can resolve it.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۸. چرا 2PC را blocking می‌نامند و 3PC چرا جواب نداد؟</span><span class="en">18. Why is 2PC called blocking, and why didn’t 3PC fix it?</span></summary>
-    <div class="fa"><p>2PC ممکنه منابع رو تا روشن شدن تصمیم نگه داره. 3PC برای جلو رفتن به فرض‌های زمانی و شبکه‌ای قوی‌تر نیاز داره؛ قطعی و مکث واقعی می‌تونن اون فرض‌ها رو بشکنن — رو کاغذ قشنگه، تو واقعیت نه.</p></div><div class="en"><p>Blocking = the parade halts for one marcher’s resurrection. 3PC auditioned as the nonblocking understudy but demands punctual networks and nodes — real life (random delays, coffee-break pauses) voids the contract. The grown-up fix? Clone the coordinator via consensus: it faints, the understudy already holds the script. Automatic understudies for the win.</p></div>
+    <div class="fa"><p>2PC ممکنه منابع رو تا روشن شدن تصمیم نگه داره. 3PC برای جلو رفتن به فرض‌های زمانی و شبکه‌ای قوی‌تر نیاز داره؛ قطعی و مکث واقعی می‌تونن اون فرض‌ها رو بشکنن — رو کاغذ قشنگه، تو واقعیت نه.</p></div><div class="en"><p>Blocking means the whole parade halts waiting for one marcher’s fate. 3PC auditioned as the nonblocking understudy but demands punctual networks and crash-free nodes; real delays and pauses void that contract. The practical fix is to replicate the coordinator with consensus so an understudy already holds the decision.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۹. XA چیست و بزرگ‌ترین مشکلاتش کدامند؟</span><span class="en">19. What is XA, and what are its biggest problems?</span></summary>
@@ -1213,15 +1217,15 @@ COMMIT;
   </details>
 
   <details><summary><span class="fa">۲۰. تراکنشِ توزیع‌شدهٔ داخلیِ دیتابیس‌های NewSQL چه فرقی با XA دارد؟</span><span class="en">20. How do NewSQL internal distributed transactions differ from XA?</span></summary>
-    <div class="fa"><p>تو یه محصول، هماهنگ‌کننده و شاردها می‌تونن با پروتکل واحد و تکثیر و بازیابی و کنترل هم‌زمانی یکپارچه طراحی بشن. تو XA منابع مستقل باید رو قرارداد مشترک کار کنن؛ تضمین دقیق هنوز محصول‌محوره — خونواده یا غریبه؟</p></div><div class="en"><p>One big happy family: identical software everywhere, no lowest-common haggling. Coordinator rides consensus (auto-understudy included), chats with shards direct, shards come cloned, atomic commit slow-dances with distributed concurrency control (deadlock radar, cross-shard consistent reads). Multi-shard snapshots, even SSI — starring CockroachDB, TiDB, Spanner, FoundationDB, YugabyteDB. Same blood, fewer feuds.</p></div>
+    <div class="fa"><p>تو یه محصول، هماهنگ‌کننده و شاردها می‌تونن با پروتکل واحد و تکثیر و بازیابی و کنترل هم‌زمانی یکپارچه طراحی بشن. تو XA منابع مستقل باید رو قرارداد مشترک کار کنن؛ تضمین دقیق هنوز محصول‌محوره — خونواده یا غریبه؟</p></div><div class="en"><p>One big happy family: identical software everywhere, no lowest-common haggling. Coordinator rides consensus (auto-understudy included), chats with shards direct, shards come cloned, atomic commit slow-dances with distributed concurrency control (deadlock radar, cross-shard consistent reads). Multi-shard snapshots and serializable transactions — starring CockroachDB, TiDB, Spanner, FoundationDB, YugabyteDB. Same blood, fewer feuds.</p></div>
   </details>
 
   <details><summary><span class="fa">۲۱. چگونه بدونِ 2PC به exactly-once می‌رسیم؟</span><span class="en">21. How do we reach exactly-once without 2PC?</span></summary>
-    <div class="fa"><p>شناسهٔ پیام و اثرش رو با قید یکتا تو یه تراکنش ثبت می‌کنیم و بعد commit تأیید صف می‌فرستیم. تکرار اثر تازه نمی‌سازه؛ شناسه تا آخر دورهٔ ممکن بازتلاش یا بازپخش باید حفظ بشه — زود پاکش نکن.</p></div><div class="en"><p>The idempotency recipe: every message wears a unique id; one transaction inks the id AND does the chores; commit lands, THEN ack flies. Repeat delivery? Spots its name in the guest book, acks, leaves. Idempotent = encores cause zero extra dessert; the unique constraint even body-blocks twin simultaneous retries. Kafka Streams’ exactly-once? This recipe, lightly seasoned.</p></div>
+    <div class="fa"><p>شناسهٔ پیام و اثرش رو با قید یکتا تو یه تراکنش ثبت می‌کنیم و بعد commit تأیید صف می‌فرستیم. تکرار اثر تازه نمی‌سازه؛ شناسه تا آخر دورهٔ ممکن بازتلاش یا بازپخش باید حفظ بشه — زود پاکش نکن.</p></div><div class="en"><p>The idempotency recipe: every message carries a unique id; one transaction records the id AND applies the effect; after commit, the consumer ACKs. Repeat delivery finds its name in the guest book, ACKs, and leaves. Idempotent means encores cause zero extra effect, and a unique constraint body-blocks twin simultaneous retries.</p></div>
   </details>
 
   <details><summary><span class="fa">۲۲. «ACID» یعنی برای دادهٔ مالی همه‌چیز درست است؟</span><span class="en">22. Does “ACID” mean everything is fine for financial data?</span></summary>
-    <div class="fa"><p>نه! باید قواعد کسب‌وکار و سطح جداسازی و دوام و بازتلاش و اثرهای بیرونی روشن باشن. ACID اسم یه مجموعه موضوعه و طراحی درست کل برنامه رو به‌تنهایی ثابت نمی‌کنه — اسم، ضمانت نیست.</p></div><div class="en"><p>Nope! Even card-carrying “ACID” relationals usually cruise on weak isolation — lost updates and write skew still prowl. Know your exact level, name your lurking anomalies, pack a countermeasure (locks? constraints? serializability?). And in money-land, auditors and human eyes outrank any acronym. ACID is a feature, not a fairy godmother.</p></div>
+    <div class="fa"><p>نه! باید قواعد کسب‌وکار و سطح جداسازی و دوام و بازتلاش و اثرهای بیرونی روشن باشن. ACID اسم یه مجموعه موضوعه و طراحی درست کل برنامه رو به‌تنهایی ثابت نمی‌کنه — اسم، ضمانت نیست.</p></div><div class="en"><p>Nope! Even card-carrying “ACID” relational databases usually run weak isolation, so lost updates and write skew still prowl. Know your exact level, name the anomalies that remain, and pick a countermeasure (locks, constraints or serializability). ACID is a feature, not a fairy godmother.</p></div>
   </details>
 </section>
 
@@ -1230,21 +1234,21 @@ COMMIT;
   <h2 class="reveal"><span class="secnum">6.3</span> <span class="fa">اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">Common interview mistakes</span></h2>
   <div class="fa"><ul>
     <li>یکی دونستن <b>2PL و 2PC</b> — یکیش isolation ـه، اون یکی atomic commit. دو تا دنیای جدا.</li>
-    <li>تعریف atomicity ـی ACID مثل «اتمیِ چندریته‌ای» — اون مال isolation ـه؛ atomicity یعنی همه‌یاهیچ با abort. اسم رو قاطی نکن.</li>
+    <li>تعریف atomicity ـی ACID مثل «اتمیِ چندریته‌ای» — اون مال isolation ـه؛ atomicity یعنی همه‌یاهیچ با abort.</li>
     <li>گفتن «consistency یعنی سازگاری replicaها» تو تعریف ACID — تو ACID یعنی invariantهای خود برنامه. پنج تا معنا، یه کلمه.</li>
     <li>اینکه «هر دیتابیس ACID جلوی همهٔ raceها رو می‌گیره»؛ تو عمل isolation معمولاً ضعیفه — برچسب رو باور نکن.</li>
     <li>نسخه‌پیچی «از ACID استفاده کن» برای درد مالی، بدون پرسیدن سطح isolation — نسخه بدون تشخیص.</li>
-    <li>یادت بره lost update با نوشتن بعد commit هم پیش میاد و dirty write نیست — قاتل نامرئی.</li>
+    <li>یادت نره lost update با نوشتن بعد commit هم پیش میاد و dirty write نیست — قاتل نامرئی.</li>
     <li>گفتن «SELECT FOR UPDATE همیشه write skew رو حل می‌کنه» — تو phantom ردیفی برای قفل کردن نیست. هوا رو که نمی‌شه قفل کرد.</li>
     <li>گفتن «snapshot isolation جلوی همهٔ ناهنجاری‌ها رو می‌گیره»؛ write skew کاملاً ممکنه و lost update بستگی به پیاده‌سازی داره — معجزه نیست.</li>
     <li>یکی دونستن «repeatable read» بین دیتابیس‌های مختلف (PostgreSQL ≠ MySQL ≠ Db2) — اسم مشترک، سه تا معنا.</li>
     <li>یکی دونستن «atomic increment» با atomicity ـی ACID؛ اون تو زبون چندریته‌ای اتمیه — دو تا زبون جدا.</li>
-    <li>یادت بره C تو ACID: اگه invariant رو به شکل constraint اعلام نکنی، دیتابیس جلوی دادهٔ بد رو نمی‌گیره — نگفتی، نشنیده.</li>
+    <li>یادت نره C تو ACID: اگه invariant رو به شکل constraint اعلام نکنی، دیتابیس جلوی دادهٔ بد رو نمی‌گیره — نگفتی، نشنیده.</li>
     <li>گفتن «2PC تضمین می‌کنه همیشه commit می‌شه»؛ 2PC فقط atomicity می‌ده و ممکنه کلاً abort کنه یا گیر بیفته — قول commit نداده.</li>
     <li>ندیدن درد in-doubt: participant بعد رأی yes قفل‌هاش رو تا تعیین تکلیف نگه می‌داره و timeout هم کمکی نمی‌کنه — برزخ واقعی.</li>
     <li>گفتن «برای exactly-once حتماً تراکنش پخش‌شده لازمه»؛ idempotency با تراکنش تو خود دیتابیس کافیه — توپ رو جمع کن.</li>
     <li>پیشنهاد XA برای هر سناریوی چندسیستمی، بدون اشاره به تک‌نقطه‌خرابی بودن coordinator و خرج‌های عملیاتی — نسخهٔ سنگین بدون عوارض‌سنجی.</li>
-    <li>یادت بره retry تراکنش abortشده بدون deduplication می‌تونه اثر دوباره بسازه و retry زیر overload وضع رو بدتر می‌کنه — بنزین رو آتیش.</li>
+    <li>یادت نره retry تراکنش abortشده بدون deduplication می‌تونه اثر دوباره بسازه و retry زیر overload وضع رو بدتر می‌کنه — بنزین رو آتیش.</li>
     <li>گفتن «SSI یعنی قفل‌های سبک‌تر»؛ SSI اصلاً قفل مسدودکننده نداره و خوش‌بينه‌ست — قفل نیست، داوریه.</li>
     <li>اینکه «اجرای سریالی یعنی دیتابیس کند»؛ با stored procedure و داده تو حافظه می‌تونه خیلی تند باشه — تا وقتی تراکنش‌ها کوچیکن. تک‌نفره ولی فرمول یک.</li>
   </ul></div><div class="en"><ul>
@@ -1354,7 +1358,7 @@ COMMIT;
 <h3><span class="fa">تمرین ۵ — outbox بدون جدول: state و event با یک COMMIT</span><span class="en">Exercise 5 — table-less outbox: state and event in one COMMIT</span></h3>
 <div class="exercise-labels"><span class="exercise-label level-senior"><span class="fa">L2 · Senior</span><span class="en">L2 · Senior</span></span><span class="exercise-label priority-core"><span class="fa">اولویت اصلی</span><span class="en">Core priority</span></span><span class="exercise-label"><span class="fa">30 دقیقه بحث</span><span class="en">30 min discussion</span></span></div>
 <p class="exercise-verdict"><span class="fa">اتمیکیِ state و event از commit دیتابیس میاد، نه از جدول. ولی اگه این دو تا رو قاطی کنی، یه پنجرهٔ خرابی بینشون می‌مونه. مسیر commit و مرزِ تحویل رو مشخص کن.</span><span class="en">The atomicity of state and event comes from the database commit, not from a table. But if you split the two writes, a failure window opens between them. Draw the commit path and the delivery boundary.</span></p>
-<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">فرض کن یه بازارِ بلیت داری و قانونِ جدید اینه: هیچ جدولِ outboxی اضافه نمی‌کنی. هر خرید باید هم state رو بچرخونه هم یه event منتشر کنه — اتمیک. مسیرِ commit رو از write_to_outbox و pg_logical_emit_message تا Kafka بکش؛ بعد بگو اگه تراکنش rollback بشه چی می‌مونه، و اگه کانکتور وسطِ راه بمیره چی.</span><span class="en">Picture this: a ticket marketplace where the new rule is no extra outbox table. Every purchase must flip state AND publish an event, atomically. Draw the commit path — from write_to_outbox and pg_logical_emit_message to Kafka — then say what survives a rollback, and what happens when the connector dies mid-stream.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">dual write رو با یه crash بین دو نوشتن می‌شکنی</span><span class="en">You break the dual write with a crash between the two writes</span></li><li><span class="fa">اتمیکی رو از یه تراکنش واحد با pg_logical_emit_message می‌گیری</span><span class="en">You take atomicity from one transaction using pg_logical_emit_message</span></li><li><span class="fa">at-least-once بودن تحویل و dedup مصرف‌کننده رو صادقانه می‌گی</span><span class="en">You state honestly that delivery is at-least-once and dedup lives in the consumer</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">کانکتور بعد از اینکه پیام رو منتشر کرد ولی قبل از ack از دست رفت چی می‌شه؟</span><span class="en">The connector dies after publishing but before acknowledging. What happens?</span></p></details>
+<details class="interview-brief" open><summary><span class="fa">نسخهٔ بازبینی‌شده برای مصاحبه</span><span class="en">Reviewed interview brief</span></summary><p><span class="fa">فرض کن یه بازارِ بلیت داری و قانونِ جدید اینه: هیچ جدولِ outboxی اضافه نمی‌کنی. هر خرید باید هم state رو بچرخونه هم یه event منتشر کنه — اتمیک. مسیرِ commit رو از UPDATE روی business row و pg_logical_emit_message تا Kafka بکش؛ بعد بگو اگه تراکنش rollback بشه چی می‌مونه، و اگه کانکتور وسطِ راه بمیره چی.</span><span class="en">Picture this: a ticket marketplace where the new rule is no extra outbox table. Every purchase must flip state AND publish an event, atomically. Draw the commit path — from the business-row UPDATE and pg_logical_emit_message to Kafka — then say what survives a rollback, and what happens when the connector dies mid-stream.</span></p><h4><span class="fa">معیار پاسخ خوب</span><span class="en">What a good answer demonstrates</span></h4><ul><li><span class="fa">dual write رو با یه crash بین دو نوشتن می‌شکنی</span><span class="en">You break the dual write with a crash between the two writes</span></li><li><span class="fa">اتمیکی رو از یه تراکنش واحد با pg_logical_emit_message می‌گیری</span><span class="en">You take atomicity from one transaction using pg_logical_emit_message</span></li><li><span class="fa">at-least-once بودن تحویل و dedup مصرف‌کننده رو صادقانه می‌گی</span><span class="en">You state honestly that delivery is at-least-once and dedup lives in the consumer</span></li></ul><p><b><span class="fa">پیگیری مصاحبه:</span><span class="en">Interview follow-up:</span></b> <span class="fa">کانکتور بعد از اینکه پیام رو منتشر کرد ولی قبل از ack از دست رفت چی می‌شه؟</span><span class="en">The connector dies after publishing but before acknowledging. What happens?</span></p></details>
 <details class="lab-brief"><summary><span class="fa">آزمایشگاه تکمیلی · زمان تقریبی ۳–۶ ساعت</span><span class="en">Extended hands-on laboratory · estimated 3–6 hours</span></summary><div class="fa"><p>روی یه PostgreSQL واقعی با <code>wal_level=logical</code> یه publication بساز و یه slot منطقی بساز. داخل یه تراکنش واقعی، <code>pg_logical_emit_message('orders|evt-1', payload)</code> را صدا بزن و جریان را با <code>pg_logical_slot_get_changes</code> بخوان. بعد Debezium را روی Kafka Connect بالا بیاور، کانکتور را وسط کار متوقف کن و بازپخش را ببین. سه چیز را اندازه بگیر: نرخ تکراری مصرف‌کننده، فضای WAL روی دیسک و lag کانکتور. یک heartbeat بساز و قبل و بعد از آن، اندازهٔ WAL را مقایسه کن. آخرش رویداد تکراری را به یه مصرف‌کنندهٔ idempotent بده و اثر رو بشمار.</p></div><div class="en"><p>On a real PostgreSQL with <code>wal_level=logical</code>, create a publication and a logical slot. Inside a real transaction call <code>pg_logical_emit_message('orders|evt-1', payload)</code> and read the stream with <code>pg_logical_slot_get_changes</code>. Then bring up Debezium on Kafka Connect, stop the connector mid-flight and watch the replay. Measure three things: the consumer's duplicate rate, the WAL footprint on disk and connector lag. Build a heartbeat table and compare WAL size before and after it. Finally, feed a duplicate event to an idempotent consumer and count the applied effects.</p></div><p class="small"><span class="fa">برای یادگیریِ عمیق است؛ انجام کاملش در زمان بحثِ مصاحبه انتظار نمی‌رود.</span><span class="en">The full laboratory is optional depth work and is not expected within the discussion time.</span></p></details>
 <p class="exercise-evidence"><a href="../exercise-audit.html#ch8-ex5"><span class="fa">ارزیابی، سطح و شواهد این تمرین</span><span class="en">Assessment, level and evidence</span></a> · <a href="solutions.html#sol-5"><span class="fa">حل آموزشی این تمرین</span><span class="en">Worked solution</span></a> · <a href="https://chairnerd.seatgeek.com/transactional-outbox-pattern" target="_blank" rel="noopener">SeatGeek · transactional outbox pattern</a> · <a href="https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html" target="_blank" rel="noopener">Debezium · outbox event router</a> · <a href="https://debezium.io/documentation/reference/stable/connectors/postgresql.html" target="_blank" rel="noopener">Debezium · PostgreSQL snapshot and streaming</a> · <a href="https://kafka.apache.org/41/design/design/" target="_blank" rel="noopener">Kafka 4.1 · design and delivery semantics</a></p>
 

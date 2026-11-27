@@ -38,7 +38,7 @@
     <span class="en">Should a resume live in tables or one document? What changes when you need to follow relationships or replay history? You'll compare those choices with worked examples, diagram walkthroughs and interview questions. Start with what the application needs to ask.</span>
   </p>
   <div class="meta-row reveal">
-    <span><b><span class="fa">۱۱</span><span class="en">11</span></b> <span class="fa">نمودار تعاملی</span><span class="en">interactive diagrams</span></span><span class="dot">·</span>
+    <span><b><span class="fa">۱۱</span><span class="en">11</span></b> <span class="fa">۱۱ نمودار + روایت گام‌به‌گام</span><span class="en">11 diagrams with step-by-step narration</span></span><span class="dot">·</span>
     <span><span class="fa">محور: relational · document · graph · events</span><span class="en">Theme: relational · document · graph · events</span></span><span class="dot">·</span>
     <span><span class="fa">زمان مطالعه: حدود ۵۰ دقیقه</span><span class="en">Reading time: ~50 min</span></span>
   </div>
@@ -529,7 +529,7 @@
       برو نیمهٔ پایین شکل. این‌جا جعبهٔ <span class="ltr">«Profile Page (JSON)»</span> فقط یه فلش پررنگ داره: <span class="ltr">«single read»</span> که مستقیم می‌رسه به <span class="ltr">«Profile Document»</span>؛ سندی که زیرنویسش <span class="ltr">«positions + education inside»</span> ـه و برچسبش <span class="ltr">«one read»</span>. تنها فلش چین‌چین این نیمه <span class="ltr">«by region_id»</span> ـه که می‌ره به <span class="ltr">regions collection</span>.
     </p>
     <p>
-      درس شکل تو همین تضاده: بالا چند تا کوئری و join برای بازسازی یه درخت، پایین یه خوندن — ولی بهای پایین، تکرار داده و درد به‌روز کردن کپی‌هاست. هیچ ناهاری مفت نیست.
+      درس شکل تو همین تضاده: بالا چند تا کوئری و join برای بازسازی یه درخت، پایین یه خوندن — ولی بهای پایین، تکرار داده و درد به‌روز کردن کپی‌هاست.
     </p>
     </div>
     <div class="en">
@@ -538,9 +538,9 @@
 
   <h3 id="s1-6"><span class="fa">نمودار کلاس/ER — یک رزومه، سه شکل</span><span class="en">Class/ER diagram — one resume, three shapes</span></h3>
   <div class="fa"><p>
-    تا اینجا هر مدل رو جدا دیدیم. حالا هر سه رو با زبون نمودار کلاس/ER بغل هم بذار تا فرق <b>شکل داده</b> یه‌جا معلوم بشه: تو مدل رابطه‌ای با «موجودیت + کلید خارجی + کاردینالیتی» طرفی، تو مدل سندی با «یه درخت تودرتو»، و تو مدل گرافی با «گره + یال خاصیت‌دار». همون اطلاعات، سه شکل — و هر شکل یه دسته کوئری رو ارزون می‌کنه. انتخاب با توئه.
+    تا اینجا هر مدل رو جدا دیدیم. حالا هر سه رو با زبون نمودار کلاس/ER بغل هم بذار تا فرق <b>شکل داده</b> یه‌جا معلوم بشه: تو مدل رابطه‌ای با «موجودیت + کلید خارجی + کاردینالیتی» طرفی، تو مدل سندی با «یه درخت تودرتو»، و تو مدل گرافی با «گره + یال خاصیت‌دار». تو گراف، همون رزومه یعنی شخص و شرکت و شهر به‌عنوان گره و اشتغال به‌عنوان یالی با ویژگی <span class="ltr">since</span>. همون اطلاعات، سه شکل — و هر شکل یه دسته کوئری رو ارزون می‌کنه. انتخاب با توئه.
   </p></div>
-  <div class="en"><p>Put the three models side by side and compare the <b>shape of the data</b>. Relational storage uses entities, foreign keys and cardinalities. A document uses a nested tree. A graph uses nodes and relationships that can hold properties. The facts can be the same while different questions become easier to express and answer.</p></div>
+  <div class="en"><p>Put the three models side by side and compare the <b>shape of the data</b>. Relational storage uses entities, foreign keys and cardinalities. A document uses a nested tree. A graph uses nodes and relationships that can hold properties; for this resume, person, company and city become nodes, and employment becomes an edge carrying <span class="ltr">since</span>. The facts can be the same while different questions become easier to express and answer.</p></div>
   <div class="diagram">
     <div class="cap">
       <b><span class="fa">نمودار کلاس/ER — یک رزومه، سه شکل: Relational · Document · Graph</span><span class="en">Class/ER diagram — one resume, three shapes: Relational · Document · Graph</span></b>
@@ -584,7 +584,7 @@
       حالا زیر هر پنل سه خط توضیح کوتاه رو بخون. پنل A: «هر ردیف یه چیزه؛ ارجاع‌ها باید معتبر بمونن» و «نشون دادن رزومه یعنی JOIN موقع خوندن». پنل B: «همهٔ فیلدهای یه کاربر بغل همن — بدون join» ولی «denormalization یعنی تکرار داده چند جا». پنل C: «رابطه‌ها دادهٔ خودشون رو دارن» و «خرج کوئری به گشتن بستگی داره، نه به schema». و خط پایین کل شکل نتیجه می‌گیره: همون اطلاعات، سه شکل — مدل تعیین می‌کنه کدوم دسترسی ارزونه و کدوم تراکنش یا تکرار داده می‌خواد.
     </p>
     <p>
-      درس شکل: «ناهماهنگی شیء-رابطه‌ای» دقیقاً همین شکاف بین جعبه‌های پنل A و شیء تو کد برنامه‌ست. مدل سندی با جا دادن کل درخت تو یه سند حلش می‌کنه — ولی بهاش رو موقع به‌روز کردن داده‌های تکراری می‌دی. مدل گرافی هم وقتی می‌بره که سؤال تو اساساً دربارهٔ «کی به چی وصله» باشه — سؤال رو بشنو، مدل رو انتخاب کن.
+      درس شکل: «ناهماهنگی شیء-رابطه‌ای» دقیقاً همین شکاف بین جعبه‌های پنل A و شیء تو کد برنامه‌ست. مدل سندی با جا دادن کل درخت تو یه سند حلش می‌کنه — ولی بهاش رو موقع به‌روز کردن داده‌های تکراری می‌دی. مدل گرافی هم وقتی می‌بره که سؤال تو اساساً دربارهٔ «کی به چی وصله» باشه؛ انتخاب رو با همون سؤال تنظیم کن.
     </p>
     </div>
     <div class="en">
@@ -679,7 +679,7 @@
       سمت راست همون الگو تکرار شده: <span class="ltr">«Saint-Lo»</span> با <code>WITHIN</code> به <span class="ltr">«France»</span>، و فرانسه با <code>WITHIN</code> به <span class="ltr">«Europe»</span>. زیرشون <span class="ltr">«Alain»</span> رو می‌بینی که هم <code>BORN_IN</code> به سن-لو داره و هم <code>LIVES_IN</code> به لندن. و یه فلش افقی با برچسب <code>MARRIED_TO</code> این دو نفر رو به هم وصل می‌کنه — عاشقانه تو گراف.
     </p>
     <p>
-      حالا سؤال کتاب رو رو همین شکل اجرا کنیم: «کیا تو آمریکا به دنیا اومدن و حالا تو اروپا زندگی می‌کنن». یه گره person رو بردار، با <code>BORN_IN</code> برو به زادگاهش، بعد با زنجیرهٔ <code>WITHIN*0..</code> (صفر یا چند تا پرش «تو») برو بالا تا جعبهٔ United States؛ همون person باید با <code>LIVES_IN</code> برسه به جایی که با <code>WITHIN*0..</code> می‌رسه به Europe. Lucy دقیقاً همین الگو رو پر می‌کنه — متهم پیدا شد.
+      حالا سؤال کتاب رو روی همین شکل اجرا کنیم: «کیا تو آمریکا به دنیا اومدن و حالا تو اروپا زندگی می‌کنن». یه گره person رو بردار، با <code>BORN_IN</code> برو به زادگاهش، بعد با زنجیرهٔ <code>WITHIN*0..</code> (صفر یا چند تا پرش «تو») برو بالا تا جعبهٔ United States؛ همون person باید با <code>LIVES_IN</code> برسه به جایی که با <code>WITHIN*0..</code> می‌رسه به Europe. Lucy دقیقاً همین الگو رو پر می‌کنه — متهم پیدا شد.
     </p>
     <p>
       و نکتهٔ طلایی مصاحبه: همین الگوی چهارخطی رو تو SQL باید با <code>WITH RECURSIVE</code> و حدود ۳۱ خط بنویسی — چون تعداد joinها تو گراف از پیش معلوم نیست. ۴ خط در برابر ۳۱ خط — اینو بگو، مصاحبه‌گر لبخند می‌زنه.
@@ -744,14 +744,14 @@ RETURN person.name</pre>
     <li><b>Cypher:</b> تطبیق الگو با فلش‌ها؛ از Neo4j اومد و حالا استاندارد بازه (openCypher). اسمش از یارو تو فیلم ماتریکسه، نه رمزنگاری — اشتباه نگیر!</li>
     <li><b>SPARQL:</b> مال triple storeهای RDF؛ الگوش تقریباً همون Cypher ـه (<span class="ltr">?person :bornIn / :within* / :name "United States"</span>) و چون RDF بین صفت و یال فرق نمی‌ذاره، همون سینتکس برای صفت‌ها هم جواب می‌ده.</li>
     <li><b>Datalog:</b> قدیمی‌تر و ریشه‌دار تو پژوهش‌های دههٔ ۸۰؛ به‌جای SELECT <b>قاعده</b> تعریف می‌کنی و جدول مجازی می‌سازی (مثل view)، و قاعده‌ها می‌تونن بازگشتی باشن → پیمایش گراف. پدربزرگ خردمند.</li>
-    <li><b>GraphQL:</b> با بقیه فرق داره — مال OLTP و رابط کاربریه؛ کلاینت شکل دقیق JSON جواب رو تعیین می‌کنه. عمداً محدوده: نه کوئری بازگشتی، نه شرط دلبخواهی (چون از منبع نامطمئن میاد و می‌تونه DoS درست کنه). رو هر دیتابیسی پیاده می‌شه.</li>
+    <li><b>GraphQL:</b> با بقیه فرق داره — مال OLTP و رابط کاربریه؛ کلاینت شکل دقیق JSON جواب رو با یه اسکیمای اعلام‌شده انتخاب می‌کنه. بازگشت و شرط دلبخواهی دیتابیس رو نداره چون زبانش بر اساس فیلدها و resolverهای همون API طراحی شده، نه به این خاطر که ورودی نامطمئنه. این محدودیت کوئری ارزان رو تضمین نمی‌کنه؛ کوئری‌های گران و DoS هنوز ممکنن، پس رفتار resolver و سقف درخواست رو باید مدیریت کنی. رو هر دیتابیسی پیاده می‌شه.</li>
     <li><b>GQL:</b> استاندارد ISO سال ۲۰۲۴ رو دوش Cypher — امید به یه‌دست شدن بیشتر. ببینیم چی می‌شه.</li>
   </ul></div>
   <div class="en"><ul>
 <li><b>Cypher:</b> describe graph patterns using arrows. It originated with Neo4j and led to openCypher. The name refers to the Matrix character, rather than cryptography.</li>
 <li><b>SPARQL:</b> query RDF triples. A path can look like <span class="ltr">?person :bornIn / :within* / :name "United States"</span>. Attributes and relationships use the same triple-based representation.</li>
 <li><b>Datalog:</b> rooted in work from the 1980s, it defines results through logical <b>rules</b>. The rules build virtual relations, similar to views, and can recurse to express graph walks.</li>
-<li><b>GraphQL:</b> an API query language, often used for OLTP-backed UIs. The client selects the JSON response fields through a declared schema. Queries follow the API's fields and resolvers; they don't provide arbitrary database recursion or conditions. Those limits alone don't prevent expensive requests, and the backing database can use any model.</li>
+<li><b>GraphQL:</b> an API query language, often used for OLTP-backed UIs. The client selects JSON response fields through a declared schema. Queries follow the API's fields and resolvers, so the language doesn't expose arbitrary database recursion or conditions; that's a design property, not a safety guarantee. Those limits don't prevent expensive requests or DoS, and the backing database can use any model.</li>
 <li><b>GQL:</b> the 2024 ISO graph query language standard builds on ideas from Cypher. Its aim is a common language for graph queries.</li>
 </ul>
 <div class="callout" data-en-example="example-ch3-12">
@@ -790,12 +790,12 @@ RETURN person.name</pre>
 
   <div class="fa"><ul>
     <li><b>Event Sourcing:</b> هر تغییر وضعیت اول به شکل رویداد می‌ره تو لاگ؛ رویدادها تغییرناپذیرن و فقط اضافه می‌شن. رویدادها رو به زمان گذشته اسم بذار (<span class="ltr">seats were booked</span>) چون گزارش چیزی‌ان که افتاده — گذشته‌ست، نه آرزو.</li>
-    <li><b>CQRS:</b> جدا کردن کار فرمان از کار کوئری — نماهای فقط‌خوندنی (projection / read model / materialized view) از رو لاگ ساخته و به‌روز می‌شن.</li>
+    <li><b>CQRS:</b> جدا کردن کار فرمان از کار کوئری — نماهای فقط‌خوندنی (projection / read model / materialized view) می‌تونن مستقیم با همون مسیر نوشتن به‌روز بشن و لازم نیست از لاگ ساخته بشن؛ تو این فصل چون نوشتن از لاگ می‌گذره، نماها از همون لاگ مشتق می‌شن.</li>
     <li><b>Command → اعتبارسنجی → fact:</b> درخواست کاربر اول باید معتبر بشه (مثلاً صندلی خالی باشه)؛ بعد رویدادش می‌شینه تو لاگ. پس لاگ فقط رویداد معتبر داره و مصرف‌کنندهٔ نما حق رد کردن رویداد رو نداره — لاگ دروغ نمی‌گه.</li>
   </ul></div>
   <div class="en"><ul>
 <li><b>Event sourcing:</b> record each accepted state change as an immutable event in the append-only log. Use past-tense names, such as <span class="ltr">seats were booked</span>, because an event describes something that happened.</li>
-<li><b>CQRS:</b> separate the command and query models. In this design, consumers build and update read views from the log: projections, read models or materialized views. CQRS doesn't require event sourcing in every implementation.</li>
+<li><b>CQRS:</b> separate the command and query models. Read models such as projections or materialized views can be updated directly by the write side; they don't have to be built from a log. In this chapter's design, because writes go through the event log, the views are derived from it instead. CQRS doesn't require event sourcing.</li>
 <li><b>Command → validation → fact:</b> check the request first, including whether a seat is available. An accepted request produces an event. View consumers apply that recorded fact; they don't decide afterward whether the original command should have been accepted.</li>
 </ul>
 <div class="callout" data-en-example="example-ch3-13">
@@ -859,14 +859,14 @@ RETURN person.name</pre>
         <li>نماها قابل بازتولیدن: پاک کن و همون رویدادها رو با همون ترتیب و کد دوباره پخش کن — مثل روز اول.</li>
         <li>هر تعداد نمای بهینه که دلت خواست، حتی فقط تو حافظه؛ نمای جدید از رو لاگ قدیمی هم ساخته می‌شه — لاگ گنجه.</li>
         <li>کارهای بی‌برگشت کمتر می‌شه؛ لاگ همزمان حسابرسی (audit) هم هست — دو تا پرنده با یه سنگ.</li>
-        <li>نوشتن ترتیبی throughput بالا می‌ده و جهش رویداد رو جذب می‌کنه — صف خودش جمعش می‌کنه.</li>
+        <li>نوشتن ترتیبی throughput بالا می‌ده و جهش رویداد رو به backlog تبدیل می‌کنه؛ ولی صف ظرفیت مصرف‌کننده رو نمی‌سازه. ظرفیت مصرف‌کننده‌ها رو جدا چک کن، چون backlog هم زمان می‌بره تا پردازش بشه.</li>
       </ul></div>
       <div class="en"><ul>
 <li>Events express domain meaning: “booking canceled” tells you more about intent than “row 4001's active column set to false”.</li>
 <li>Rebuild a view by replaying the same events in the required order with the same deterministic processing logic.</li>
 <li>Build several views for different queries, including memory-only views. A new projection can use old events if the history contains the information it needs.</li>
 <li>The retained history provides an audit trail and leaves more options for future processing.</li>
-<li>Sequential appends can support high write rates, while a queue lets projections catch up after a burst. Check consumer capacity too; a backlog still takes time to process.</li>
+<li>Sequential appends can support high write rates, while a queue converts a burst into backlog so projections can catch up. A queue doesn't add consumer capacity, so check it separately; the backlog still takes time to process.</li>
 </ul>
 <div class="callout" data-en-example="example-ch3-14">
 <p class="example-title"><b>Example: Rebuilding a new report</b></p>
@@ -877,7 +877,7 @@ RETURN person.name</pre>
     </div>
     <div class="cardmini">
       <h4><span class="fa">هشدارها</span><span class="en">Cautions</span></h4>
-<div class="fa"><p>رویداد قدیمی با عوض شدن کد غیب نمی‌شه. باید نسخهٔ رویداد و بازپخش و اثرهای جانبی رو با چشم باز مدیریت کنی — حوـه باشه.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-15">
+<div class="fa"><p>رویداد قدیمی با عوض شدن کد غیب نمی‌شه. باید نسخهٔ رویداد و بازپخش و اثرهای جانبی رو با چشم باز مدیریت کنی؛ این بخشی از طراحی نگه‌داری تاریخچه‌ست، نه یک اتفاق نادر.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch3-15">
 <p class="example-title"><b>مثال فنی: Replay نباید پیامک تاریخی بفرستد</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن projector گزارش، رویداد <code dir="ltr">OrderPlaced</code> سال گذشته رو دوباره می‌خونه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا مسیر بازسازی فقط جدول گزارش رو می‌نویسه؛ ارسال پیامک مسیر اثر جانبی جدا با شناسهٔ یکتا و سیاست جلوگیری از تکرار داره.</p>
@@ -887,10 +887,10 @@ RETURN person.name</pre>
       <div class="fa"><ul>
         <li>پردازش باید قطعی (deterministic) باشه: نرخ ارز رو بذار تو خود رویداد، نه اینکه از بیرون بگیری — بیرون عوض می‌شه، رویداد نه.</li>
         <li>تغییرناپذیری با «حق حذف» قانون حریم خصوصی دعوا داره: راه‌حل‌هایی مثل crypto-shredding — کلید رو بنداز دور، داده بمیره.</li>
-        <li>بازپخش نباید اثر جانبی رو تکرار کنه (مثلاً دوباره ایمیل تأیید نره — مشتری شاکی می‌شه).</li>
+        <li>بازپخش نباید اثر جانبی رو تکرار کنه (مثلاً دوباره ایمیل تأیید نره).</li>
         <li>قانون فنی: همهٔ نماها باید رویدادها رو دقیقاً با همون ترتیب لاگ ببینن — ترتیب مقدسه.</li>
       </ul></div>
-      <div class="en"><p>Old events remain after the code changes. Plan how their versions, processing rules and external effects will work during a replay:</p><ul>
+      <div class="en"><p>Old events remain after the code changes. Plan how their versions, processing rules and external effects will work during a replay; that planning is part of retaining history, not an edge case:</p><ul>
 <li><b>Deterministic processing:</b> record an exchange rate in the event if rebuilding the result depends on that rate. Fetching today's rate won't reproduce yesterday's calculation.</li>
 <li><b>Deletion requirements:</b> immutable history can conflict with a need to erase personal data. Crypto-shredding, which destroys the relevant encryption key, is one approach to consider; deletion still needs an explicit design.</li>
 <li><b>Side effects:</b> rebuilding a report mustn't resend the original confirmation email or message. Separate replayed calculations from external actions.</li>
@@ -919,7 +919,7 @@ RETURN person.name</pre>
 
 
     <p>
-      این ماشین وضعیت زندگی یه صندلی رزرو رو تو مدل event sourcing نشون می‌ده — بیوگرافی یه صندلی.
+      این ماشین وضعیت زندگی یه صندلی رزرو رو تو مدل event sourcing نشون می‌ده.
       از لین بالا شروع کن، <span class="ltr">«Booking states»</span>: جعبهٔ شروع
       <span class="ltr">«Open»</span> («registration starts») با فلش «capacity set» به
       <span class="ltr">«Available»</span> می‌ره. بعد فلش پررنگ <code>SEAT_BOOKED</code> به
@@ -1086,7 +1086,7 @@ RETURN person.name</pre>
     <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
     <div class="fa">
 
-<p>گرهٔ مرکزی (<span class="ltr">Data models and query languages</span>) رو بخون و شش تا یال رو دنبال کن: <span class="ltr">normalize</span> به رابطه‌ای با جدول و JOIN، <span class="ltr">embed</span> به سندی با یه درخت JSON، <span class="ltr">traverse</span> به گراف با گره و یال، <span class="ltr">derive</span> به لاگ رویداد به‌عنوان حقیقت فقط‌افزودنی، <span class="ltr">optimize</span> به اعلانی بودن (بگو چی می‌خوای، چطورش رو قایم کن)، و <span class="ltr">decide</span> به قاعدهٔ انتخاب: اول شکل رابطه‌ها، بعد الگوی دسترسی — شش تا فعل، کل فصل تو جیبته.</p></div>
+<p>گرهٔ مرکزی (<span class="ltr">Data models and query languages</span>) رو بخون و شش تا یال رو دنبال کن: <span class="ltr">normalize</span> به رابطه‌ای با جدول و JOIN، <span class="ltr">embed</span> به سندی با یه درخت JSON، <span class="ltr">traverse</span> به گراف با گره و یال، <span class="ltr">derive</span> به لاگ رویداد به‌عنوان حقیقت فقط‌افزودنی، <span class="ltr">optimize</span> به اعلانی بودن (بگو چی می‌خوای، چطورش رو قایم کن)، و <span class="ltr">decide</span> به قاعدهٔ انتخاب: اول شکل رابطه‌ها، بعد الگوی دسترسی. از همین شش اتصال برای توضیح انسجام فصل استفاده کن.</p></div>
     <div class="en">
 <p>Start at <span class="ltr">Data models and query languages</span> and follow six verbs. <span class="ltr">normalize</span> leads to relational tables and JOINs. <span class="ltr">embed</span> groups a tree inside JSON. <span class="ltr">traverse</span> follows nodes and edges. <span class="ltr">derive</span> builds views from an append-only event history. <span class="ltr">optimize</span> leaves execution planning to a declarative query engine. <span class="ltr">decide</span> brings you back to relationship shape and access patterns. Use those six connections to explain how the chapter's ideas fit together.</p></div>
   </div>
@@ -1110,9 +1110,9 @@ RETURN person.name</pre>
       <tr><td><span class="ltr">Property Graph</span></td><td>رأس با ویژگی و یال‌های برچسب‌دار</td><td>معادل دو جدول vertices/edges</td></tr>
       <tr><td><span class="ltr">Triple Store / RDF</span></td><td>سه‌تایی subject, predicate, object</td><td>Turtle، SPARQL</td></tr>
       <tr><td><span class="ltr">Cypher / SPARQL / Datalog</span></td><td>الگوی گراف / سه‌تایی / قاعدهٔ بازگشتی</td><td>۴ خط در برابر ۳۱ خط SQL</td></tr>
-      <tr><td><span class="ltr">GraphQL</span></td><td>کلاینت شکل پاسخ JSON را تعیین می‌کند</td><td>محدودِ آگاهانه، بدون بازگشت</td></tr>
+      <tr><td><span class="ltr">GraphQL</span></td><td>کلاینت شکل پاسخ JSON را تعیین می‌کند</td><td>پرسش بر اساس اسکیمای API، بدون بازگشت دیتابیس</td></tr>
       <tr><td><span class="ltr">Event Sourcing</span></td><td>لاگ رویدادِ تغییرناپذیر = منبع حقیقت</td><td>رویداد به زمان گذشته</td></tr>
-      <tr><td><span class="ltr">CQRS / Projection</span></td><td>نماهای خواندنیِ مشتق‌شده از لاگ</td><td>قابل بازتولید</td></tr>
+      <tr><td><span class="ltr">CQRS / Projection</span></td><td>نماهای خواندنی جدا؛ در این طراحی از لاگ</td><td>قابل بازتولید</td></tr>
       <tr><td><span class="ltr">DataFrame</span></td><td>جدولِ دستکاری‌شده با دستورها، پلِ به ماتریس</td><td>ML، آرایهٔ تنک</td></tr>
     </tbody>
   </table></div>
@@ -1132,7 +1132,7 @@ RETURN person.name</pre>
       <tr><td><span class="ltr">Cypher / SPARQL / Datalog</span></td><td>Graph pattern / triple / recursive rule</td><td>Example: 4 lines vs 31 lines of SQL</td></tr>
       <tr><td><span class="ltr">GraphQL</span></td><td>Client dictates the JSON response shape</td><td>Queries follow API schema and resolvers</td></tr>
       <tr><td><span class="ltr">Event Sourcing</span></td><td>Immutable event log = source of truth</td><td>Past-tense events</td></tr>
-      <tr><td><span class="ltr">CQRS / Projection</span></td><td>Separate read and write models; log-derived views here</td><td>Same result on replay</td></tr>
+      <tr><td><span class="ltr">CQRS / Projection</span></td><td>Separate read/write models; log-derived views in this design</td><td>Same result on replay</td></tr>
       <tr><td><span class="ltr">DataFrame</span></td><td>Table operations; bridge to matrices</td><td>ML, sparse arrays</td></tr>
     </tbody>
   </table></div>
@@ -1140,118 +1140,118 @@ RETURN person.name</pre>
   <h3 id="s6-2"><span class="fa">۶.۲ سوالات پرتکرار مصاحبه (برای دیدن جواب کلیک کن)</span><span class="en">6.2 Frequent interview questions (click for answers)</span></h3>
 
   <details><summary><span class="fa">۱. چرا مدل داده این‌قدر مهم است؟</span><span class="en">1. Why does the data model matter so much?</span></summary>
-    <div class="fa"><p>مدل داده تعیین می‌کنه چی رو موجودیت و رابطه بدونی و چه سؤال‌هایی رو راحت‌تر بپرسی. این انتخاب رو کد و فکرت دربارهٔ مسئله اثر داره — مدل، عینکته.</p>
+    <div class="fa"><p>مدل داده تعیین می‌کنه چی رو موجودیت و رابطه بدونی و چه سؤال‌هایی رو راحت‌تر بپرسی. همین انتخاب روی کد و روی طرز فکرت دربارهٔ مسئله اثر می‌ذاره، و لایه‌های مختلف برنامه هم می‌تونن برای همون اطلاعات مدل‌های متفاوتی داشته باشن.</p>
 </div>
     <div class="en"><p>A data model determines what you treat as an entity, how entities connect and which questions are easy to ask. That affects both the code and how you think about the problem. The layers in an application can use different models for the same information.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۲. declarative یعنی چه و چه فایده‌ای دارد؟</span><span class="en">2. What does declarative mean, and why is it useful?</span></summary>
-    <div class="fa"><p>تو زبون اعلانی نتیجه رو می‌گی و روش اجرا رو می‌سپری به موتور. این آزادی به بهینه‌ساز اجازه می‌ده طرح اجرا رو با حال داده و منابع عوض کنه — بسپر بهش، بلده.</p>
+    <div class="fa"><p>تو زبون اعلانی نتیجه رو می‌گی و روش اجرا رو می‌سپری به موتور. این آزادی به بهینه‌ساز اجازه می‌ده با عوض شدن داده و منابع، ایندکس یا روش join و اجرای موازی رو انتخاب کنه، در حالی که معنای کوئری ثابت می‌مونه.</p>
 </div>
     <div class="en"><p>A declarative query describes the result and lets the engine plan the steps. The optimizer can choose indexes, join algorithms or parallel execution as the data and resources change, while the query keeps its meaning.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۳. ORM چه کمکی می‌کند و مسئلهٔ N+1 چیست؟</span><span class="en">3. How do ORMs help, and what is the N+1 problem?</span></summary>
-    <div class="fa"><p><span class="ltr">ORM</span> ترجمهٔ شیء و جدول رو آسون می‌کنه، ولی خرج کوئری رو حذف نمی‌کنه. تو <span class="ltr">N</span>+1، یه کوئری اول و بعد یه کوئری جدا برای هر نتیجه اجرا می‌شه — ۱+N تا رفت‌وبرگشت!</p>
+    <div class="fa"><p><span class="ltr">ORM</span> ترجمهٔ شیء و جدول رو آسون می‌کنه، ولی خرج کوئری‌های تولیدشده رو حذف نمی‌کنه. تو <span class="ltr">N</span>+1، یه کوئری اول اجرا می‌شه و بعد برای هر نتیجه یه کوئری جدا — یعنی ۱+N تا رفت‌وبرگشت. <span class="ltr">JOIN</span> یا eager loading می‌تونه رکوردهای مرتبط رو یک‌جا بیاره؛ تعداد کوئری و دادهٔ برگشتی رو چک کن، نه فقط کوتاهی کد.</p>
 </div>
-    <div class="en"><p>An ORM reduces object-to-table translation code. It doesn't remove the cost of the generated queries. N+1 means one initial query followed by one more for each of N results. A JOIN or eager loading can fetch related records together. Check the query count and returned data, rather than judging by the length of the application code.</p>
+    <div class="en"><p>An ORM reduces object-to-table translation code, but it doesn't remove the cost of the generated queries. N+1 means one initial query followed by one more for each of N results. A JOIN or eager loading can fetch related records together. Check the query count and returned data, rather than judging by the length of the application code.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۴. تفاوت shredding و embedding؟</span><span class="en">4. Shredding vs embedding?</span></summary>
-    <div class="fa"><p><span class="ltr">Shredding</span> یعنی دادهٔ تودرتو رو بشکنی به رکوردهای مرتبط؛ <span class="ltr">embedding</span> یعنی تیکه‌های مرتبط رو نگه داری تو یه سند. خوندن یه مجموعه و عوض کردن رابطهٔ بین مجموعه‌ها دو تا نیاز جدا‌ان.</p>
+    <div class="fa"><p><span class="ltr">Shredding</span> یعنی دادهٔ تودرتو رو بشکنی به رکوردهای مرتبط؛ <span class="ltr">embedding</span> یعنی تیکه‌های مرتبط رو نگه داری تو یه سند. درخت کوچیکی که با هم خونده می‌شه برای embedding مناسبه، ولی هویت‌های مشترک و ارجاع به آیتم‌های جدا باید جداگانه طراحی بشن. خوندن کل رزومه و عوض کردن شرکتی که بین هزاران رزومه مشترکه، دو نیاز متفاوتن.</p>
 </div>
     <div class="en"><p>Shredding splits a nested structure into related records. Embedding keeps its parts inside one document. A small tree read together suits embedding; shared entities and references to individual items need more thought. Retrieving a whole resume and updating a company shared by many resumes are different requirements.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۵. کی نرمال‌سازی و کی نرمال‌زدایی؟</span><span class="en">5. When to normalize, when to denormalize?</span></summary>
-    <div class="fa"><p>نرمال‌سازی تکرار رو کم و عوض کردن اطلاعات مشترک رو آسون می‌کنه؛ نرمال‌زدایی بعضی خوندن‌ها رو ساده‌تر می‌کنه، ولی هماهنگ نگه‌داشتن نسخه‌های تکراری خرج داره — هیچی مفت نیست.</p>
+    <div class="fa"><p>نرمال‌سازی تکرار رو کم می‌کنه و عوض کردن اطلاعات مشترک رو در یک جا آسون می‌کنه. نرمال‌زدایی بعضی خوندن‌ها رو ساده‌تر می‌کنه، ولی کپی‌ها یه مسیر همگام‌سازی می‌خوان. برای بار واقعی، نوشتن و خواندن و سازگاری رو کنار هم بسنج؛ OLTP معمولاً نرمال‌شده و تحلیل معمولاً نماهای دنرمال‌شده می‌خواد.</p>
 </div>
     <div class="en"><p>Normalization reduces duplication and makes shared information easier to update in one place. Denormalization copies information to simplify selected reads, then needs a process to maintain those copies. Compare writes, reads and consistency for the actual workload. OLTP often benefits from normalized records; analytics often uses prepared denormalized views.</p>
 </div>
   </details>
 
-  <details><summary><span class="fa">۶. در مثالِ تایم‌لاینِ فصل، چرا شناسهٔ پست ذخیره می‌شود؟</span><span class="en">6. Why does X’s timeline store only IDs?</span></summary>
-    <div class="fa"><p>تو سناریوی تایم‌لاین فصل، شناسهٔ پست می‌ره تو فهرست و محتوای قابل‌تغییر جدا خونده می‌شه. این کار حجم کپی و خرج اصلاح داده رو کم می‌کنه — فقط شناسه رو کپی کن، نه کل پست رو.</p>
+  <details><summary><span class="fa">۶. چرا فهرست تایم‌لاین فقط شناسهٔ پست را ذخیره می‌کند؟</span><span class="en">6. Why does X’s timeline store only IDs?</span></summary>
+    <div class="fa"><p>فهرست تایم‌لاین فقط شناسهٔ پست رو نگه می‌داره و متن و لایک و آواتار قابل‌تغییر موقع خوندن جدا خونده می‌شن. این کار همون hydration شناسه‌هاست؛ یه join در کد برنامه که حجم کپی و خرج اصلاح داده رو کم می‌کنه. خوندن‌های مستقل می‌تونن موازی اجرا بشن، ولی حذف و کش هنوز طراحی می‌خوان.</p>
 </div>
-    <div class="en"><p>In the timeline example, lists hold post IDs while mutable text, likes and avatars are fetched separately at read time. That's ID hydration, a join in application code. It reduces copied data and the work of updating that data across timelines. Independent lookups can run in parallel, but deletion and caching still need handling.</p>
+    <div class="en"><p>A prepared timeline list holds post IDs, while mutable text, likes and avatars are fetched separately at read time. That's ID hydration, a join in application code. It reduces copied data and the work of updating that data across timelines. Independent lookups can run in parallel, but deletion and caching still need handling.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۷. star schema چیست و fact/dimension یعنی چه؟</span><span class="en">7. What is a star schema? What are facts and dimensions?</span></summary>
-    <div class="fa"><p>تو طرح ستاره‌ای، جدول واقعیت رویداد و مقدارهای قابل‌حساب رو نگه می‌داره؛ جدول‌های بُعد اطلاعات توصیفی اونا رو دارن — وسط، دورش ستاره.</p>
+    <div class="fa"><p>در طرح ستاره‌ای، جدول واقعیت رویدادها و مقدارهای قابل‌حساب رو نگه می‌داره و جدول‌های بُعد اون‌ها رو توصیف می‌کنن — محصول، فروشگاه یا تاریخ. Snowflake بعدها رو به جدول‌های ریزتر می‌شکنه و OBT فیلدهای توصیفی رو تو یه جدول دنرمال‌شده جمع می‌کنه. این چیدمان تعیین می‌کنه چقدر داده تکرار بشه و هر کوئری چه joinهایی بخواد.</p>
 </div>
-    <div class="en"><p>A star schema puts a fact table in the center, with events and measurable values. Dimension tables describe those events: the product, store or date. Snowflake splits dimensions into further tables. OBT folds their descriptive fields into one denormalized table. The layout changes how much data is repeated and which joins a query needs.</p>
+    <div class="en"><p>A star schema puts a fact table in the center, with events and measurable values. Dimension tables describe those events: the product, store or date. Snowflake splits dimensions into further tables, while OBT folds their descriptive fields into one denormalized table. The layout changes how much data is repeated and which joins a query needs.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۸. schema-on-read در برابر schema-on-write؟</span><span class="en">8. Schema-on-read vs schema-on-write?</span></summary>
-    <div class="fa"><p>تو <span class="ltr">schema-on-write</span> ساختار قبل ثبت چک می‌شه؛ تو <span class="ltr">schema-on-read</span> خواننده موقع استفاده تفسیرش می‌کنه. روش دوم هم قرارداد داده می‌خواد — بی‌قانون نیست، دیرقانونه.</p>
+    <div class="fa"><p>تو <span class="ltr">schema-on-write</span> ساختار قبل از ثبت چک می‌شه؛ تو <span class="ltr">schema-on-read</span> خواننده موقع استفاده تفسیرش می‌کنه و هنوز به یه قرارداد داده نیاز داره. مقایسه با تایپ‌چکینگ ایستا و پویا تفاوت رو روشن می‌کنه. موقع عوض شدن قالب، برای سندهای قدیمی یا مهاجرت ردیف‌های موجود برنامه داشته باش.</p>
 </div>
     <div class="en"><p>Schema-on-write checks the expected structure before storing data. Schema-on-read leaves more interpretation to the reader, which still needs a data contract. The static-versus-dynamic typing comparison helps explain the difference. When a format changes, plan for old documents or a migration of existing rows.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۹. کی سراغ مدل گراف برویم؟</span><span class="en">9. When should we reach for the graph model?</span></summary>
-    <div class="fa"><p>وقتی رابطه‌های جورواجور و چندقدمه موضوع اصلی سؤالن، گراف نمایش طبیعی‌تری می‌شه. صرف وجود یه رابطه دلیل رفتن سراغ گراف نیست — توپ رو با تانک نزن.</p>
+    <div class="fa"><p>وقتی رابطه‌های جورواجور و مسیرهای چندقدمه موضوع اصلی سؤالن، گراف نمایش طبیعی‌تری می‌ده. گره‌ها می‌تونن انواع مختلف موجودیت باشن، ولی صرف وجود یه رابطه دلیل استفاده از دیتابیس گرافی نیست. ببین برنامه واقعاً چقدر پیمایش لازم داره و هزینهٔ نگه‌داری رو هم حساب کن.</p>
 </div>
     <div class="en"><p>A graph is useful when varied relationships and multi-step paths are central to the questions. Its nodes can represent different kinds of entity. Having one relationship doesn't automatically justify a graph database; consider how much traversal the application actually needs.</p>
 </div>
   </details>
   <details><summary><span class="fa">۱۰. property graph از چه ساخته شده؟</span><span class="en">10. What is a property graph made of?</span></summary>
-    <div class="fa"><p><span class="ltr">Property</span> <span class="ltr">graph</span> گره‌های شناسه‌دار و برچسب‌دار و ویژگی‌دار و یال‌های مقصددار و نوع‌دار و ویژگی‌دار داره. جهت یال و مشخصات مدل تو معنای رابطه اثر دارن — جزئیات مهمن.</p>
+    <div class="fa"><p><span class="ltr">Property</span> <span class="ltr">graph</span> گره‌های شناسه‌دار و برچسب‌دار و ویژگی‌دار و یال‌های مقصددار و نوع‌دار و ویژگی‌دار داره. این مدل رو می‌شه با جدول‌های vertices و edges و ایندکس روی دو سر یال پیاده کرد. جهت یال و مشخصاتش بخشی از معنای رابطه‌ست، نه جزئیات تزئینی.</p>
 </div>
     <div class="en"><p>A property-graph vertex has an ID, label, properties and incoming or outgoing edges. An edge has an ID, tail, head, label and properties of its own. You can represent this with vertices and edges tables and indexes on both endpoints. The relationship's direction and properties are part of its meaning.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۱۱. چرا همان گراف را در SQL نگه نداریم؟</span><span class="en">11. Why not keep the same graph in SQL?</span></summary>
-    <div class="fa"><p>گراف رو می‌شه تو جدول هم نگه داشت. مسئله راحتی گفتن و اجرای پیمایش چندقدمه و متغیره؛ <span class="ltr">SQL</span> بازگشتی هم یه راهشه — می‌شه، ولی دست‌وپا شکسته.</p>
+    <div class="fa"><p>گراف رو می‌شه تو جدول‌های vertices و edges نگه داشت و با join مسیرها رو دنبال کرد. <span class="ltr">SQL</span> بازگشتی هم پیمایش با عمق متغیر رو ممکن می‌کنه، ولی بیان الگو و مسیر سخت‌تر می‌شه. یه الگوی چهارخطی Cypher می‌تونه معادل حدود ۳۱ خط SQL بازگشتی بشه؛ این فرق بیان است و هزینهٔ اجرا رو باید روی دادهٔ واقعی سنجید.</p>
 </div>
-    <div class="en"><p>Yes. Tables can store vertices and edges, and joins can follow the links. Variable-depth paths may use recursive SQL. In this chapter's example, a four-line Cypher pattern corresponds to about 31 lines of WITH RECURSIVE SQL. That illustrates a difference in expression; measure execution cost on real data.</p>
+    <div class="en"><p>You can keep a graph in vertices and edges tables, and joins can follow the links. Variable-depth paths may use recursive SQL. A four-line Cypher pattern can correspond to about 31 lines of WITH RECURSIVE SQL; that illustrates a difference in expression, not execution cost.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۱۲. SPARQL و Datalog چه فرقی با Cypher دارند؟</span><span class="en">12. How do SPARQL and Datalog differ from Cypher?</span></summary>
-    <div class="fa"><p><span class="ltr">Cypher</span> الگوی گراف ویژگی‌دار رو می‌گه؛ <span class="ltr">SPARQL</span> الگوی سه‌تایی‌های <span class="ltr">RDF</span> رو؛ <span class="ltr">Datalog</span> نتیجه رو با قاعده‌های منطقی، از جمله بازگشتی، تعریف می‌کنه — هرکی یه لهجه.</p>
+    <div class="fa"><p><span class="ltr">Cypher</span> الگوی گراف ویژگی‌دار رو توصیف می‌کنه، <span class="ltr">SPARQL</span> الگوی سه‌تایی‌های <span class="ltr">RDF</span> رو و <span class="ltr">Datalog</span> نتیجه رو با قاعده‌های منطقی، از جمله قاعده‌های بازگشتی، تعریف می‌کنه. تو <span class="ltr">RDF</span> صفت و رابطه هر دو سه‌تایی‌ان، پس یه شکل نمایش دارن. هر سه زبون اعلانی‌ان: نتیجه رو می‌گی و اجرا رو موتور انتخاب می‌کنه.</p>
 </div>
     <div class="en"><p>Cypher describes property-graph patterns. SPARQL matches RDF triples, using the same representation for attributes and relationships. Datalog defines derived relations through logical rules, including recursive rules. All three let you describe a result while the engine handles execution.</p>
 </div>
   </details>
 
-  <details><summary><span class="fa">۱۳. GraphQL دقیقاً چه می‌کند و چرا محدود است؟</span><span class="en">13. What exactly does GraphQL do, and why is it limited?</span></summary>
-    <div class="fa"><p><span class="ltr">GraphQL</span> قرارداد <span class="ltr">API</span> ـه که کلاینت باهاش فیلدهای لازم جواب رو انتخاب می‌کنه. اسمش یعنی موتور دیتابیس گراف؟ نه! قابلیت پرسش به اسکیمای <span class="ltr">API</span> و <span class="ltr">resolver</span>ها محدوده — اسم گولت نزنه.</p>
+  <details><summary><span class="fa">۱۳. GraphQL دقیقاً چه می‌کند و محدودیتش چه چیزی را تضمین نمی‌کند؟</span><span class="en">13. What exactly does GraphQL do, and what don't its limits guarantee?</span></summary>
+    <div class="fa"><p><span class="ltr">GraphQL</span> یه زبون کوئری <span class="ltr">API</span> ـه که کلاینت با یه اسکیمای اعلام‌شده فیلدهای جواب <span class="ltr">JSON</span> رو انتخاب می‌کنه. بازگشت و شرط دلبخواهی دیتابیس رو نداره چون زبان روی فیلدها و <span class="ltr">resolver</span>های همون <span class="ltr">API</span> ساخته شده؛ این یه ویژگی طراحی زبانه، نه تضمین امنیت. کوئری‌های گران و <span class="ltr">DoS</span> هنوز ممکنن، پس رفتار <span class="ltr">resolver</span> و سقف درخواست رو مدیریت کن و پشتش هر دیتابیسی می‌تونه باشه.</p>
 </div>
-    <div class="en"><p>GraphQL is an API query language: the client selects the fields it needs in a JSON response. Queries follow the API schema and its resolvers, rather than exposing arbitrary database conditions or recursion. The backend can use any database model. Those restrictions don't guarantee cheap queries or prevent DoS; resolver behavior and request limits still matter.</p>
+    <div class="en"><p>GraphQL is an API query language: the client selects the fields it needs in a JSON response. Queries follow the API schema and its resolvers, so the language doesn't expose arbitrary database recursion or conditions; that's a design property, not a safety guarantee. The backend can use any database model. Those restrictions don't prevent expensive requests or DoS; resolver behavior and request limits still matter.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۱۴. event sourcing یعنی چه و چرا رویدادها را به زمان گذشته نام‌گذاری می‌کنیم؟</span><span class="en">14. What is event sourcing, and why past-tense event names?</span></summary>
-    <div class="fa"><p>تو <span class="ltr">Event</span> <span class="ltr">Sourcing</span> تغییر قبول‌شده به شکل رویداد ذخیره می‌شه و وضعیت از روش ساخته می‌شه. اسم گذشته نشون می‌ده اتفاق افتاده، نه اینکه درخواستش فرستاده شده — گذشته، نه آرزو.</p>
+    <div class="fa"><p>تو <span class="ltr">Event</span> <span class="ltr">Sourcing</span> تغییر قبول‌شده به شکل رویداد تغییرناپذیر ذخیره می‌شه و وضعیت از همون تاریخچه ساخته می‌شه. اسم زمان گذشته نشون می‌ده اتفاق افتاده، نه اینکه فقط درخواستش فرستاده شده. لغو رزرو هم یه رویداد تازه اضافه می‌کنه و اصلاح، بخشی از تاریخچه می‌شه.</p>
 </div>
     <div class="en"><p>Event sourcing stores accepted changes as immutable events and derives state from that history. Past-tense names describe what happened. Canceling a booking appends another event instead of removing the original booking. A correction also becomes a new part of the history.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۱۵. CQRS چه چیزی را جدا می‌کند؟</span><span class="en">15. What does CQRS separate?</span></summary>
-    <div class="fa"><p><span class="ltr">CQRS</span> مدل ثبت تغییر و مدل خوندن رو جدا می‌کنه. مدل خوندن می‌تونه برای کوئری آماده بشه؛ استفاده از لاگ رویداد شرط واجب همهٔ پیاده‌سازی‌های <span class="ltr">CQRS</span> نیست — پسرعموئن، نه دوقلو.</p>
+    <div class="fa"><p><span class="ltr">CQRS</span> مدل ثبت تغییر و مدل خوندن رو جدا می‌کنه. مدل خوندن می‌تونه مستقیم با مسیر نوشتن به‌روز بشه یا از رویدادها ساخته بشه؛ استفاده از لاگ رویداد شرط واجب <span class="ltr">CQRS</span> نیست. تو یه طراحی <span class="ltr">event-sourced</span>، نماها از لاگ ساخته و با بازپخش قابل بازسازی می‌شن — این یه پیاده‌سازی <span class="ltr">CQRS</span> ـه، نه تعریفش.</p>
 </div>
-    <div class="en"><p>CQRS separates the model that accepts changes from the model that answers queries. In this chapter's design, the write path appends events and projections build materialized read views. Those views can be rebuilt by replaying the retained events with appropriate logic. CQRS can also be implemented without event sourcing.</p>
+    <div class="en"><p>CQRS separates the model that accepts changes from the model that answers queries. A read model can be updated directly by the write side or built from events; CQRS doesn't require event sourcing. In an event-sourced design, projections build materialized views that can be rebuilt by replaying the retained events. That is one CQRS implementation, not its definition.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۱۶. بزرگ‌ترین چالش‌های event sourcing؟</span><span class="en">16. The biggest event-sourcing challenges?</span></summary>
-    <div class="fa"><p>بازتولید نتیجه به نسخهٔ رویداد و منطق پردازش وصله. ورودی بیرونی و حذف داده و اثرهای جانبی تکراری هم باید جدا مدیریت بشن — هرکدوم یه درد.</p>
+    <div class="fa"><p>بازتولید نتیجه به نسخهٔ رویداد و منطق پردازش وصله، پس پردازش باید قطعی (deterministic) باشه. حذف داده و حق فراموشی با تاریخچهٔ تغییرناپذیر تعارض داره و اثرهای جانبی مثل ایمیل و پیامک نباید موقع بازپخش تکرار بشن. ترتیب رویدادهایی که به هم وابسته‌ان هم باید حفظ بشه.</p>
 </div>
-    <div class="en"><p>Rebuilding a view depends on the event versions and processing logic. Keep processing deterministic, including the historical exchange rate if the calculation needs it. Plan how deletion requirements interact with immutable history; crypto-shredding is one approach. Separate external actions from replay so rebuilding a report doesn't resend old emails or messages. Preserve the order that dependent events require.</p>
+    <div class="en"><p>Rebuilding a view depends on the event versions and processing logic. Keep processing deterministic, including the historical exchange rate if the calculation needs it. Plan how deletion requirements interact with immutable history, and separate external actions from replay so rebuilding a report doesn't resend old emails or messages. Preserve the order that dependent events require.</p>
 </div>
   </details>
 
   <details><summary><span class="fa">۱۷. DataFrame چه جایگاهی دارد؟</span><span class="en">17. Where do DataFrames fit?</span></summary>
-    <div class="fa"><p><span class="ltr">DataFrame</span> نمایش جدولی برای تبدیل و تحلیله و با مدل‌های عددی یادگیری ماشین هم قاطی می‌شه. عملیات مشابه تو اجرای محلی و پخش‌شده خرج و رفتار یکسانی ندارن — مواظب باش.</p>
+    <div class="fa"><p><span class="ltr">DataFrame</span> یه نمایش جدولی برای فیلتر و join و گروه‌بندی و تبدیل داده در تحلیل است. می‌تونه به نمایش‌های عددی یادگیری ماشین، مثل ماتریس تنک و دسته‌های one-hot، وصل بشه. عملیات شبیه‌به‌هم تو اجرای محلی و پخش‌شده خرج و رفتار یکسانی ندارن، پس قبل از انتخاب اجرا، بار واقعی رو بسنج.</p>
 </div>
     <div class="en"><p>A DataFrame provides a table-like form for filtering, joining, grouping and transforming data during analysis. It can feed numerical ML representations, including sparse matrices and one-hot encoded categories. Arrays represent values across numerical axes. Similar-looking operations can have different costs in local and distributed execution.</p>
 </div>
@@ -1260,15 +1260,15 @@ RETURN person.name</pre>
   <h3 id="s6-3"><span class="fa">۶.۳ اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">6.3 Common interview mistakes</span></h3>
   <div class="fa"><ul>
     <li>گفتن «SQL قدیمی شده» یا «NoSQL بهتره» بدون حرف زدن از شکل رابطه‌ها و الگوی دسترسی — شعار نده.</li>
-    <li>یادت بره که دنرمال‌سازی = دادهٔ مشتق‌شده و کپی‌ها به‌روزرسانی می‌خوان — بی‌لوله قبول نیست.</li>
+    <li>یادت نره که دنرمال‌سازی = دادهٔ مشتق‌شده و کپی‌ها به‌روزرسانی می‌خوان؛ بدون یه مسیر همگام‌سازی، جواب قبول نیست.</li>
     <li>ادعای «join ذاتاً کنده» — مثال تایم‌لاین خلافش رو نشون می‌ده. Hydration رو یادته؟</li>
     <li>نفهمیدن فرق schema-on-read و schema-on-write تو تکامل اسکیما — دو تا دنیای جدا.</li>
-    <li>GraphQL رو با گراف یکی دونستن، یا محدودیت‌های عمدیش رو ندونستن — اسم گولت نزنه.</li>
+    <li>GraphQL رو با گراف یکی دونستن، یا فکر کردن محدودیت‌های زبانش هر resolver رو ارزان می‌کنه.</li>
     <li>event sourcing رو تعریف کردن بدون determinism و بازتولیدپذیری نماها — نصف جواب.</li>
   </ul></div>
   <div class="en"><ul>
 <li>Choosing SQL or NoSQL by slogan without discussing relationship shape and access patterns.</li>
-<li>Copying current data without explaining how derived copies stay up to date.</li>
+<li>Copying current data without explaining how derived copies stay up to date; remember that denormalization means derived data and copies need an update path.</li>
 <li>Claiming that joins are inherently slow. Use timeline ID hydration to discuss a concrete read-time join.</li>
 <li>Confusing schema-on-read with schema-on-write, especially when existing data must evolve.</li>
 <li>Treating GraphQL as a graph database, or assuming its query restrictions make every resolver inexpensive.</li>

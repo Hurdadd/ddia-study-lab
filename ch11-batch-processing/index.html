@@ -38,7 +38,7 @@
     <span class="en">From the simple Unix pipeline to the “distributed operating system” (filesystem, scheduler, isolated tasks), from MapReduce and shuffle to dataflow engines — and all-or-nothing publication of output to the outside world.</span>
   </p>
   <div class="meta-row reveal">
-    <span><b><span class="fa">۱۱</span><span class="en">11</span></b> <span class="fa">۱۲ نمودار + روایت گام‌به‌گام</span><span class="en">diagrams with step-by-step narration</span></span><span class="dot">·</span>
+    <span><b><span class="fa">۱۵</span><span class="en">15</span></b> <span class="fa">۱۵ نمودار + روایت گام‌به‌گام</span><span class="en">15 diagrams with step-by-step narration</span></span><span class="dot">·</span>
     <span><span class="fa">محور: batch · ابزارهای Unix · MapReduce · shuffle · dataflow · workflowها</span><span class="en">Focus: batch · Unix tools · MapReduce · shuffle · dataflow · workflows</span></span><span class="dot">·</span>
     <span><span class="fa">زمان مطالعه: حدود ۹۵ دقیقه</span><span class="en">Reading time: ~95 min</span></span><span class="dot">·</span><span><span class="fa">منبع: فصل ۱۱ کتاب DDIA ویرایش ۲</span><span class="en">Source: DDIA 2nd Edition, Chapter 11</span></span>
   </div>
@@ -148,9 +148,9 @@
     <div class="tag"><span class="fa">ایدهٔ کلیدی فصل</span><span class="en">Chapter thesis</span></div>
     <div class="fa"><p>داستان این فصل: پردازش دسته‌ای روی یه ورودیِ محدود، یه نتیجهٔ قابل‌انتشار می‌سازه. از زنجیرهٔ ابزارهای ساده شروع می‌کنیم و می‌رسیم به تقسیمِ کار، انتقالِ داده و نجاتِ وظیفهٔ شکست‌خورده روی چند ماشین.</p><div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-0">
 <p class="example-title"><b>مثال فنی: بازمحاسبهٔ گزارش از ورودی ثابت</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل فروش ۱۴ مهر بسته شده و نسخهٔ ورودی معلومه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فایل فروش ۱۴ مهر بسته شده و نسخهٔ ورودی معلومه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا job مجموع فروش هر شعبه رو تو خروجی نسخهٔ <code dir="ltr">v2</code> می‌نویسه؛ اگه فرمول غلط بود، با کد اصلاح‌شده از همون ورودی دوباره اجراش می‌کنیم.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> ورودی immutable و خروجی نسخه‌داره، پس خطای محاسبه قابل‌بازسازیه؛ بازنویسی مستقیمِ دادهٔ مرجع همچین آزادی‌ای نمی‌ده — همین.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> ورودی immutable و خروجی نسخه‌داره، پس خطای محاسبه قابل‌بازسازیه؛ بازنویسی مستقیمِ دادهٔ مرجع همچین آزادی‌ای نمی‌ده</p>
 </div>
 <p>مثال‌های این فصل قصه‌های آموزشی‌ان که از کار روزمره اومدن. عددها فقط برای فهم بهتر انتخاب شدن و معماری هیچ شرکت واقعی رو توصیف نمی‌کنن.</p></div>
     <div class="en">A <b>batch job</b> takes <b>read-only, immutable</b> input and produces <b>derived</b> output — output rebuilt <b>from scratch</b> every run, so you can delete it, fix the logic and rerun. That one simple contract changes everything: retries are safe, you can roll back (<span class="ltr">time travel</span>), and you can even recover from your own bugs (<span class="ltr">human fault tolerance</span>). And the price is just as clear: nobody sees output until the whole job ends, and even a tiny input change means reprocessing everything.</div>
@@ -206,9 +206,9 @@
 <p>قضیه اینه که: پردازش آنلاین برای جواب دادن به درخواستِ همون لحظه کار می‌کنه؛ پردازش دسته‌ای روی یه مجموعهٔ ته‌دار اجرا می‌شه و خروجی رو بعداً آماده می‌کنه. معیار موفقیتِ این دو تا الزاماً یکی نیست.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-1">
 <p class="example-title"><b>مثال فنی: پاسخ کاربر یا پایان job</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن API وضعیت سفارش باید تو چندصد میلی‌ثانیه جواب بده؛ گزارش کل سال ممکنه نیم ساعت طول بکشه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> API وضعیت سفارش باید تو چندصد میلی‌ثانیه جواب بده؛ گزارش کل سال ممکنه نیم ساعت طول بکشه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا API درخواست محدود رو همون لحظه انجام می‌ده؛ job دسته‌ای ورودیِ کران‌دار رو کامل می‌خونه و خروجی رو منتشر می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> معیار آنلاین بیشتر latency هر درخواسته و معیار batch بیشتر زمان پایان و هزینهٔ کل پردازش — همین.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> معیار آنلاین بیشتر latency هر درخواسته و معیار batch بیشتر زمان پایان و هزینهٔ کل پردازش</p>
 </div>
 </div>
   <div class="en"><p>Most things you've built so far were “ask, get an answer”: the browser wants a page, a remote service calls an API, and the database, cache and search answer. Those are <b>online</b> systems, and their core metric is <span class="ltr">response time</span>. But sometimes you're holding a computation that fits no interactive request: training a model, transforming a huge data volume, or analyzing a large dataset. Those are <b>batch</b> jobs, and the systems running them are <b>offline</b> systems.</p></div>
@@ -257,15 +257,15 @@
   <h3 id="s1-2"><span class="fa">۱.۲. از MapReduce تا امروز</span><span class="en">1.2. From MapReduce to today</span></h3>
 
   <div class="fa">
-<p>ایده‌ش ساده‌ست: MapReduce پردازش بزرگ رو می‌شکنه به کارهای کوچیک و نتیجه‌ها رو جمع می‌کنه. موتورهای جدیدتر می‌تونن زنجیره‌های پیچیده‌تری از تبدیل‌ها رو با سربار کمتر اجرا کنن.</p>
+<p>ایده‌ش ساده‌ست: MapReduce پردازش بزرگ رو می‌شکنه به کارهای کوچیک و نتیجه‌ها رو جمع می‌کنه. موتورهای جدیدتر می‌تونن زنجیره‌های پیچیده‌تری از تبدیل‌ها رو با سربار کمتر اجرا کنن. ولی MapReduce امروز تا حدِ زیادی منسوخ شده — حتی گوگل هم دیگه ازش استفاده نمی‌کنه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-2">
 <p class="example-title"><b>مثال فنی: از چند job تا یک DAG</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن اول داده پاک‌سازی می‌شه، بعد join می‌خوره و آخرش دو تا گزارش ساخته می‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا MapReduce می‌تونه این مرحله‌ها رو چند تا job جدا کنه؛ موتور dataflow اون‌ها رو به گراف عملگرها تبدیل می‌کنه و بعضی مرحله‌ها رو ادغام می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> مدل اجرا هزینهٔ فایل میانی و زمان‌بندی رو عوض می‌کنه؛ هدف هنوز ساختنِ خروجیِ درست از ورودیِ معلومه — خلاص.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> پاک‌سازیِ شبانه ۲ ترابایت خروجی می‌ده و دو گزارشِ مستقل باید از همون خروجیِ پاک‌شده ساخته بشن.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا اگه هر گزارش یه jobِ MapReduce جدا باشه، پاک‌سازی دو بار اجرا می‌شه و ۲ ترابایت دو بار نوشته و خونده می‌شه؛ اگه هر سه مرحله تو یه DAG بیان، پاک‌سازی یک‌بار اجرا می‌شه و خروجیِ میانی برای هر دو شاخه کش می‌شه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> مدلِ اجرا هزینهٔ فایلِ میانی و زمان‌بندی رو عوض می‌کنه؛ DAG خروجیِ مشترک رو یک‌بار می‌سازه، ولی اگه اون خروجی خیلی بزرگ باشه باز هم باید جایی نوشته بشه.</p>
 </div>
 </div>
-  <div class="en"><p>Modern batch processing is deeply shaped by <span class="ltr">MapReduce</span> — the algorithm Google published in 2004, later implemented in Hadoop, CouchDB and MongoDB. MapReduce is a fairly low-level programming model; less capable than the parallel execution engines of analytical databases. Fresh out of the gate, it was a leap in processable scale on commodity hardware — but today it's largely obsolete, and even Google doesn't use it anymore.</p></div>
+  <div class="en"><p>Modern batch processing is deeply shaped by <span class="ltr">MapReduce</span> — the algorithm Google published in 2004, later implemented in Hadoop, CouchDB and MongoDB. MapReduce is a fairly low-level programming model; less capable than the parallel execution engines of analytical databases. Fresh out of the gate, it was a leap in processable scale on commodity hardware — but today it is largely obsolete, and even Google no longer uses it.</p></div>
 
   <div class="fa"><p>پردازشِ دسته‌ایِ امروز معمولاً با <span class="ltr">Spark</span> یا <span class="ltr">Flink</span> یا موتورهای کوئریِ data warehouse انجام می‌شه. این‌ها مثلِ MapReduce به <span class="ltr">sharding</span> (فصل ۷) و اجرای موازی تکیه دارن، ولی استراتژی‌های کشینگ و اجرای خیلی پیچیده‌تری دارن. با بالغ شدنِ این سیستم‌ها، دغدغه‌های عملیاتی تا حدِ زیادی حل شد و تمرکز رفت به <b>قابلیتِ استفاده</b>: مدل‌های پردازشِ جدید مثل <span class="ltr">dataflow API</span>ها، زبون‌های کوئری و <span class="ltr">DataFrame API</span>ها حالا همه‌جا پشتیبانی می‌شن. ابزارهای orchestration هم بالغ شدن: schedulerهای Hadoop-محور مثل <span class="ltr">Oozie</span> و <span class="ltr">Azkaban</span> جاشون رو به راه‌حل‌های عمومی‌تر مثل <span class="ltr">Airflow</span> و <span class="ltr">Dagster</span> و <span class="ltr">Prefect</span> دادن که طیفِ وسیعی از frameworkها و warehouseهای ابری رو پشتیبانی می‌کنن.</p></div>
   <div class="en"><p>Today's batch processing usually runs on <span class="ltr">Spark</span> or <span class="ltr">Flink</span> or data-warehouse query engines. Like MapReduce they rely on <span class="ltr">sharding</span> (Chapter 7) and parallel execution, but with far more sophisticated caching and execution strategies. As these systems matured, operational concerns were largely solved and focus moved to <b>usability</b>: new processing models like <span class="ltr">dataflow APIs</span>, query languages and <span class="ltr">DataFrame APIs</span> are now supported everywhere. Orchestration tooling matured too: Hadoop-centric schedulers like <span class="ltr">Oozie</span> and <span class="ltr">Azkaban</span> gave way to general solutions like <span class="ltr">Airflow</span>, <span class="ltr">Dagster</span> and <span class="ltr">Prefect</span> supporting a wide range of frameworks and cloud warehouses.</p></div>
@@ -308,9 +308,9 @@
 <p>بذار ساده بگم: ابزارهای Unix رو می‌شه به یه زنجیره تبدیل کرد — هر ابزار یه خروجیِ مشخص می‌ده و ابزار بعدی همون رو می‌خونه. قراردادِ سادهٔ ورودی و خروجی، ترکیب‌پذیری رو ممکن می‌کنه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-3">
 <p class="example-title"><b>مثال فنی: Pipe فایلِ ثابت</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل لاگ مسیرهای <code dir="ltr">/a,/b,/a</code> رو داره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا استخراج مسیر و مرتب‌سازی و <code dir="ltr">uniq -c</code> خروجی <code dir="ltr">/a:2,/b:1</code> رو می‌دن؛ هر ابزار خروجیِ ابزار قبلی رو ورودی می‌گیره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> وصل کردنِ ابزارهای ساده یه جریان پردازش می‌سازه؛ ترتیب ورودی برای بعضی ابزارها، از جمله uniq، جزئی از قرارداده — همین و بس.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فایل لاگ خطوطی مثل <code dir="ltr">10.0.0.7 500</code>، <code dir="ltr">10.0.0.9 200</code> و <code dir="ltr">10.0.0.7 500</code> داره.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا <code dir="ltr">grep ' 500 ' | cut -d' ' -f1 | sort | uniq -c</code> فقط خطاهای ۵۰۰ رو رد می‌کنه، IP رو جدا می‌کنه و شمارش رو می‌ده: <code dir="ltr">10.0.0.7:2</code>؛ هر ابزار خروجیِ ابزار قبلی رو ورودی می‌گیره.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> وصل کردنِ ابزارهای ساده یه جریان پردازش می‌سازه؛ ترتیب ورودی برای بعضی ابزارها، از جمله uniq، جزئی از قرارداده.</p>
 </div>
 </div>
   <div class="en"><p>The best intuition for batch processing is what already works on one machine: a chain of Unix tools joined by pipes. Later we generalize the same example to distributed.</p></div>
@@ -321,9 +321,9 @@
 <p>لاگ دسترسی، ردِ درخواست‌های وب رو نگه می‌داره. برای گزارش اول باید فیلدِ موردنظر رو جدا کنیم و بعد به شکل مناسبِ شمارش یا گروه‌بندی درش بیاریم.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-4">
 <p class="example-title"><b>مثال فنی: چرا sort قبل از uniq؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن مسیرهای ورودی <code dir="ltr">/a,/b,/a</code> هستن.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> مسیرهای ورودی <code dir="ltr">/a,/b,/a</code> هستن.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا <code dir="ltr">uniq -c</code> فقط تکرارهای مجاور رو می‌شماره و بدون sort سه تا گروه می‌بینه؛ sort دو تا <code dir="ltr">/a</code> رو کنار هم می‌آره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> مرتب‌سازی تو این pipeline برای درستیِ شمارش لازمه، نه فقط برای قشنگی خروجی — اینو قاب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> مرتب‌سازی تو این pipeline برای درستیِ شمارش لازمه، نه فقط برای قشنگی خروجی</p>
 </div>
 </div>
   <div class="en"><p>Suppose a web server appending one line to a log file per request. A standard NGINX access line looks like this:</p></div>
@@ -392,8 +392,7 @@
 <p>
       حالا این نمودار رو با هم بخونیم: یه <span class="ltr">dataflow</span> با پنج تا ستونه که بالاشون نام‌گذاری شده:
       <span class="ltr">Source</span>، <span class="ltr">Extract</span>، <span class="ltr">External Sort</span>،
-      <span class="ltr">Count</span> و <span class="ltr">Rank &amp; Report</span>. از سمتِ راستِ نمودار (در RTL یعنی ابتدا)
-      شروع کن: جعبه‌ی <span class="ltr">access.log</span> با زیرنویسِ <span class="ltr">NGINX log lines</span> — همون فایلِ لاگی که تو متن دیدی.
+      <span class="ltr">Count</span> و <span class="ltr">Rank &amp; Report</span>. از جعبه‌ی <span class="ltr">access.log</span> با زیرنویسِ <span class="ltr">NGINX log lines</span> شروع کن — همون فایلِ لاگی که تو متن دیدی.
     </p>
     <p>
       فلشِ اول «<span class="ltr">log lines</span>» اسمشه و زیرش نوشته «<span class="ltr">e.g. GET /css/typography.css 200</span>»: یه خطِ نمونه از لاگ. این فلش به جعبه‌ی <span class="ltr">awk {print $7}</span> با زیرنویسِ <span class="ltr">extract URL field</span> می‌رسه — دقیقاً همون گامِ «استخراجِ فیلدِ هفتم».
@@ -410,7 +409,7 @@
       و کارتِ سوم «<span class="ltr">Example Output — Top 5 Requested URLs</span>» همون پنج خطِ خروجی‌ست (<span class="ltr">4189 /favicon.ico</span> تا <span class="ltr">915 /css/typography.css</span>) — همون چیزی که تو متن دیدی.
     </p>
     <p>
-      درسِ این نمودار: هر فلش یه «جریانِ رکورد»ـه نه یه «درخواست/پاسخ»؛ و مرتب‌سازی همون کاری رو می‌کنه که بعداً تو مقیاسِ توزیع‌شده بهش می‌گیم <span class="ltr">shuffle</span>: کنارِ هم آوردنِ رکوردهای هم‌کلید — همین یه جمله رو نگه دار.
+      درسِ این نمودار: هر فلش یه «جریانِ رکورد»ـه نه یه «درخواست/پاسخ»؛ و مرتب‌سازی همون کاری رو می‌کنه که بعداً تو مقیاسِ توزیع‌شده بهش می‌گیم <span class="ltr">shuffle</span>: کنارِ هم آوردنِ رکوردهای هم‌کلید.
     </p></div>
     <div class="en"><p>This <span class="ltr">dataflow</span> has five labelled columns: <span class="ltr">Source</span>, <span class="ltr">Extract</span>, <span class="ltr">External Sort</span>, <span class="ltr">Count</span> and <span class="ltr">Rank &amp; Report</span>. Start at the <span class="ltr">access.log</span> box (“NGINX log lines”) — the same log file you just met in the text. The first arrow, “<span class="ltr">log lines</span>” (“<span class="ltr">e.g. GET /css/typography.css 200</span>”), reaches <span class="ltr">awk {print $7}</span> (“extract URL field”) — exactly the seventh-field extraction step.</p>
     <p>The “<span class="ltr">URL stream</span>” arrow runs to <span class="ltr">sort</span> (“group duplicate URLs”), and the next arrow's note matters: “<span class="ltr">sorted URLs</span>” (“<span class="ltr">spills to disk, merges sorted segments</span>”) — the same disk-spilling sort discussed in the next section. Then <span class="ltr">uniq -c</span> (“count per URL”), the “<span class="ltr">counted pairs</span>” arrow to <span class="ltr">sort -r -n</span> (“rank by request count”), and finally “<span class="ltr">ranked pairs</span>” (“<span class="ltr">top 5 kept, rest discarded</span>”) down to <span class="ltr">head -n 5</span> (“top-5 report”) — the data path is exactly the six-command line.</p>
@@ -423,9 +422,9 @@
 <p>قضیهٔ شمارش با جدول هش اینه: معمولاً به حافظهٔ متناسب با تعداد کلیدهای متفاوت نیاز داره. مرتب‌سازیِ بیرونی می‌تونه از دیسک کمک بگیره و وقتی داده تو حافظه جا نمی‌شه هم ادامه بده.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-5">
 <p class="example-title"><b>مثال فنی: تجمیع بیرون از RAM</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ورودی یه میلیارد کلید متفاوت داره و جدول hashِ شمارنده‌ها تو RAM جا نمی‌شه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> ورودی یه میلیارد کلید متفاوت داره و جدول hashِ شمارنده‌ها تو RAM جا نمی‌شه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا external sort تکه‌هایی که تو حافظه جا می‌شن رو مرتب می‌کنه و رو دیسک می‌نویسه، بعد ادغامشون می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> مرتب‌سازی می‌تونه با دیسک و حافظهٔ محدود ادامه بده؛ hash aggregation هم ممکنه spill داشته باشه، پس برتریِ مطلق مطرح نیست — روشنه، نه؟</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> مرتب‌سازی می‌تونه با دیسک و حافظهٔ محدود ادامه بده؛ hash aggregation هم ممکنه spill داشته باشه، پس برتریِ مطلق مطرح نیست</p>
 </div>
 </div>
   <div class="en"><p>The same job could be done with a simple program instead of the Unix chain. E.g. in Python:</p></div>
@@ -467,7 +466,7 @@
       <b>مرتب‌سازی (pipeline):</b> اگه working set از حافظه بزرگ‌تر بشه، رویکردِ مرتب‌سازی برنده‌ست چون دیسک رو کارآمد استفاده می‌کنه — دقیقاً همون اصلِ «ذخیره‌سازیِ log-structured» (فصل ۴): تکه‌های داده تو حافظه مرتب می‌شن و به‌صورتِ <span class="ltr">segment file</span> رو دیسک نوشته می‌شن، بعد چند تا segmentِ مرتبِ کوچیک تو یه فایلِ مرتبِ بزرگ‌تر ادغام می‌شن. <span class="ltr">mergesort</span> الگوی دسترسیِ <b>ترتیبی</b> داره که رو دیسک (و SSD) خیلی بهتر از دسترسیِ تصادفی عمل می‌کنه.
     </li>
     <li>
-      و نکتهٔ عملی: دستورِ <code>sort</code> تو <span class="ltr">GNU Coreutils</span> خودش datasetهای بزرگ‌تر از حافظه رو با spill به دیسک مدیریت می‌کنه و مرتب‌سازی رو رو چند هستهٔ CPU موازی می‌کنه. یعنی همون خطِ فرمانِ ساده بدونِ تموم شدنِ حافظه به datasetهای بزرگ مقیاس می‌خوره؛ گلوگاه احتمالاً نرخِ خوندنِ فایلِ ورودی از دیسکه.
+      و نکتهٔ عملی: دستورِ <code>sort</code> تو <span class="ltr">GNU Coreutils</span> خودش datasetهای بزرگ‌تر از حافظه رو با spill به دیسک مدیریت می‌کنه و مرتب‌سازی رو روی چند هستهٔ CPU موازی می‌کنه. یعنی همون خطِ فرمانِ ساده بدونِ تموم شدنِ حافظه به datasetهای بزرگ مقیاس می‌خوره؛ گلوگاه احتمالاً نرخِ خوندنِ فایلِ ورودی از دیسکه.
     </li>
   </ul></div>
   <div class="en"><ul>
@@ -488,9 +487,9 @@
 <p>داستان از این قراره: وقتی زمان اجرا و ظرفیت دیسک یا توانِ یه ماشین کافی نیست، می‌شه داده و کار رو تقسیم کرد. توزیع، هزینهٔ شبکه و هماهنگی رو هم اضافه می‌کنه و همیشه قدم اول نیست.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-6">
 <p class="example-title"><b>مثال فنی: ورودی بزرگ‌تر از یک ماشین</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن <code dir="ltr">10 TB</code> لاگ داریم و یه ماشین روزانه فقط <code dir="ltr">1 TB</code> رو تو زمان مجاز پردازش می‌کنه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> ۱۰ ترابایت لاگ داریم و یه ماشین روزانه فقط ۱ ترابایت رو تو زمان مجاز پردازش می‌کنه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا فایل‌ها به taskهای مستقل تقسیم می‌شن؛ چند تا worker بخش‌ها رو می‌خونن و خروجی تجمیعی تو مرحلهٔ بعد ادغام می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> توزیع ظرفیت رو زیاد می‌کنه، ولی شبکه و skew و هماهنگیِ taskها بخشی از زمان پایان می‌شن — جادو نیست.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> توزیع ظرفیت رو زیاد می‌کنه، ولی شبکه و skew و هماهنگیِ taskها بخشی از زمان پایان می‌شن</p>
 </div>
 </div>
   <div class="en"><p>Unix tools' limit is running on <b>one machine</b>. Datasets that fit neither in memory nor on local disk are the problem — and that is where distributed batch frameworks enter. The same Unix example had three cooperating parts: storage devices reachable through the OS filesystem interface; a scheduler deciding when each process runs and how much CPU it gets; and a set of Unix programs whose <span class="ltr">stdin</span> and <span class="ltr">stdout</span> are piped together. <b>The same three parts exist in distributed frameworks</b> — the key analogy of the next section.</p></div>
@@ -508,9 +507,9 @@
 <p>نوبتی هم باشه نوبت قیاسه: چارچوبِ دسته‌ای مثل یه سیستم‌عامل، محل داده و سهم منابع و اجرای کارها رو مدیریت می‌کنه؛ با این فرق که این مسئولیت‌ها بین چند تا ماشین پخش شدن.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-7">
 <p class="example-title"><b>مثال فنی: سه مسئولیتِ چارچوب</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن job به خوندن فایل و اجرای ۱۰۰ تا task و انتقال دادهٔ بین مرحله‌ها نیاز داره.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> job به خوندن فایل و اجرای ۱۰۰ تا task و انتقال دادهٔ بین مرحله‌ها نیاز داره.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا لایهٔ ذخیره فایل رو نگه می‌داره؛ scheduler منابع می‌ده؛ موتور اجرا task و retry و shuffle رو مدیریت می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> قیاس با سیستم‌عامل یعنی برنامه همهٔ جزئیات ماشین‌ها رو خودش اداره نکنه؛ مرز هر لایه هنوز باید روشن باشه — حکش کن تو ذهنت.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> قیاس با سیستم‌عامل یعنی برنامه همهٔ جزئیات ماشین‌ها رو خودش اداره نکنه؛ مرز هر لایه هنوز باید روشن باشه</p>
 </div>
 </div>
   <div class="en"><p>Like we saw at the end of the last section, you can view a distributed batch framework as a <b>distributed operating system</b>: it's got a filesystem, a job scheduler, and programs passing data through the filesystem or other channels. Three main layers:</p></div>
@@ -563,9 +562,9 @@
 <p>ایده‌ش ساده‌ست: فایل‌سیستم توزیع‌شده فایل بزرگ رو به بخش‌هایی رو چند تا ماشین تقسیم می‌کنه و معمولاً نسخه‌های اضافی نگه می‌داره. برنامه باید بتونه فایل رو بخونه، بدون این‌که محلِ تک‌تک بخش‌ها رو مدیریت کنه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-8">
 <p class="example-title"><b>مثال فنی: بلاک بزرگِ فایل توزیع‌شده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل <code dir="ltr">1 GB</code> با بلاک فرضی <code dir="ltr">128 MB</code> به هشت بخش تقسیم شده.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فایل <code dir="ltr">1 GB</code> با بلاکِ <code dir="ltr">128 MB</code> به هشت بخش تقسیم شده.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا metadata محل کپی هر بلاک رو می‌ده و worker از یه کپی سالم می‌خونه؛ اندازهٔ بلاک رو تعداد metadata و موازی‌سازی اثر داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> بلاکِ درشت برای اسکن ترتیبی و کاهش سربار مناسبه؛ با page کوچیکِ موتور پایگاه داده هدف یکسانی نداره — همین.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> بلاکِ درشت برای اسکن ترتیبی و کاهش سربار مناسبه؛ با page کوچیکِ موتور پایگاه داده هدف یکسانی نداره</p>
 </div>
 </div>
   <div class="en"><p>Your own OS filesystem has layers: at the bottom the <b>block device</b> driver talks to the disk directly, enabling raw block reads/writes; above it the <b>page cache</b> keeps recently-touched blocks in memory; then the <b>filesystem</b> layer (like ext4 or XFS) breaks big files into blocks and tracks metadata like inodes and directories; and finally the OS exposes filesystems to programs through one shared API called <b>VFS</b>.</p></div>
@@ -607,9 +606,9 @@
 <p>داستان اینه: مخزن شیء، داده رو معمولاً به‌شکل اشیای نام‌دار با API ذخیره می‌کنه. رفتارش الزاماً مثل فایل‌سیستم محلی نیست؛ مثلاً تغییر یه بخش از فایل ممکنه به شکل دیگه‌ای انجام بشه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-9">
 <p class="example-title"><b>مثال فنی: Object یک فایل POSIX کامل نیست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن خروجی job با کلید <code dir="ltr">reports/run-42/part-1</code> تو object store نوشته می‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا برای انتشارِ نسخهٔ کامل، manifest یا اشاره‌گر نسخهٔ معتبر عوض می‌شه؛ نباید rename اتمیکِ دایرکتوری رو بدون پشتیبانی فرض کرد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> API و تضمین عملیات object store باید جدا بررسی بشه؛ شبیه بودن اسم «فایل» رفتار یکسان نمی‌سازه — این دام معروفه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> دو task هم‌زمان می‌خوان یه خط به کلید <code dir="ltr">reports/run-42/summary.json</code> اضافه کنن.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> هر کدوم کل شیء رو می‌خونه، خطِ خودش رو اضافه می‌کنه و دوباره می‌نویسه؛ چون append و قفلِ فایل وجود نداره، نوشتنِ آخری برنده می‌شه و خطِ اون یکی گم می‌شه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> object store فایلِ POSIX نیست؛ هر task باید شیءِ مستقلِ خودش رو بنویسه و ادغام تو یه مرحلهٔ جدا انجام بشه.</p>
 </div>
 </div>
   <div class="en"><p>Object storage services like <span class="ltr">Amazon S3</span>, <span class="ltr">Google Cloud Storage</span>, <span class="ltr">Azure Blob Storage</span> and <span class="ltr">OpenStack Swift</span> became the popular DFS replacement for batch jobs. The boundary between the two is blurring: FUSE drivers let you see an object store as a filesystem, and some DFS implementations like JuiceFS and Ceph offer both APIs (object and filesystem). But their APIs, performance and consistency guarantees differ a lot — adopt carefully and verify they really behave as you expect.</p></div>
@@ -678,9 +677,9 @@
 <p>قضیهٔ هماهنگ‌کنندهٔ کار اینه: مشخص می‌کنه هر وظیفه کجا و کی اجرا بشه، نتیجه‌ش کجاست و بعد از شکست چی لازمه. این با خودِ منطقِ جمع‌زدنِ فروش فرق داره.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-10">
 <p class="example-title"><b>مثال فنی: Task دوباره زمان‌بندی می‌شود</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن از ۱۰۰ تا task، workerِ اجرای task ۳۷ خاموش می‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا scheduler task ۳۷ رو رو یه worker دیگه اجرا می‌کنه و خروجیِ attempt موفق رو می‌پذیره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> کلِ job لازم نیست از صفر تکرار بشه، اگه ورودی و وابستگی‌های لازم برای همون task در دسترس باشن — غصه نخور.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> از ۱۰۰ تا task، workerِ اجرای task ۳۷ خاموش می‌شه.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا scheduler task ۳۷ رو روی یه worker دیگه اجرا می‌کنه و خروجیِ attempt موفق رو می‌پذیره.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> کلِ job لازم نیست از صفر تکرار بشه، اگه ورودی و وابستگی‌های لازم برای همون task در دسترس باشن</p>
 </div>
 </div>
   <div class="en"><p>The same OS analogy holds in orchestration: running a Unix job means someone must actually launch the <code>awk</code>, <code>sort</code> and <code>uniq</code> processes, carry data from one's output to the next one's input, allocate memory and guarantee fair execution. On one machine that is the kernel's job; in a distributed setting it is the <b>job orchestrator</b>'s. A job-run request carries metadata: task count, each task's memory/CPU/disk, the job id, access credentials, parameters (like input and output), needed hardware (like GPUs) and the runnable code's location.</p></div>
@@ -727,9 +726,9 @@
 <p>زمان‌بند بینِ کارها منابع تقسیم می‌کنه. انصاف و زمانِ پایانِ یه کار و استفادهٔ کامل از خوشه ممکنه هم‌زمان به بهترین مقدار نرسن.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-11">
 <p class="example-title"><b>مثال فنی: دو job روی ۱۶۰ هسته</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دو تا job که هرکدوم ۱۰۰ تا task تک‌هسته‌ایِ هم‌زمان تو مرحلهٔ جاری می‌خوان.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> دو تا job داریم که هرکدوم ۱۰۰ تا task تک‌هسته‌ایِ هم‌زمان تو مرحلهٔ جاری می‌خوان.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا با تقسیم ۸۰/۸۰ هر دو مرحله منتظر دو موج‌ان؛ تخصیصِ متفاوت می‌تونه یه job رو زودتر تموم کنه و منابعش رو آزاد کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> انصاف لحظه‌ای و کمینه کردن زمان پایان همیشه یکی نیستن؛ اندازهٔ مرحله و امکان preemption تو تصمیم اثر دارن — همینه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> انصاف لحظه‌ای و کمینه کردن زمان پایان همیشه یکی نیستن؛ اندازهٔ مرحله و امکان preemption تو تصمیم اثر دارن</p>
 </div>
 </div>
   <div class="en"><p>The scheduler's job is genuinely hard: it must distribute the cluster's limited resources “optimally” among competing jobs, and these decisions inherently balance <b>fairness</b> against <b>efficiency</b>. See the book's puzzle: a 5-node cluster with 160 CPU cores total, and two job requests each wanting 100 cores. What to do?</p></div>
@@ -785,9 +784,9 @@
 <p>بذار ساده بگم: گردش‌کار، وابستگیِ کارها رو مشخص می‌کنه. DAG نموداری بدون چرخه‌ست که نشون می‌ده کدوم مرحله باید پیش از مرحلهٔ دیگه تموم بشه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-12">
 <p class="example-title"><b>مثال فنی: وابستگی در DAG</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن پاک‌سازی <code dir="ltr">A</code> ورودیِ مشترک گزارش‌های <code dir="ltr">B</code> و <code dir="ltr">C</code>ـه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> پاک‌سازی <code dir="ltr">A</code> ورودیِ مشترک گزارش‌های <code dir="ltr">B</code> و <code dir="ltr">C</code>ـه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بعد از موفقیت A، دو شاخهٔ B و C می‌تونن موازی اجرا بشن؛ اگه A شکست بخوره، خروجی نهاییِ وابسته منتشر نمی‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> DAG ترتیب وابستگی رو می‌گه، نه یه فهرستِ لزوماً سریالی از دستورها — حفظ کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> DAG ترتیب وابستگی رو می‌گه، نه یه فهرستِ لزوماً سریالی از دستورها</p>
 </div>
 </div>
   <div class="en"><p>In the Unix example, each command's output reached the next one — and friend, distributed processing follows the same pattern: one job's output becomes one or more other jobs' input. That's called a <b>workflow</b>, or a <span class="ltr">DAG</span> (directed acyclic graph) of jobs.</p></div>
@@ -803,7 +802,7 @@
 
   <div class="fa"><ul>
     <li>اگه خروجیِ یه job ورودیِ چند تا job دیگه‌ست که تیم‌های مختلفی نگه‌داری‌شون می‌کنن، بهتره job اول خروجی‌ش رو جایی بنویسه که همه بتونن بخونن؛ jobهای مصرف‌کننده هر بار که داده به‌روز شد (یا با برنامهٔ خودشون) اجرا بشن.</li>
-    <li>گاهی می‌خوای داده رو بینِ ابزارهای پردازش جابه‌جا کنی: مثلاً یه jobِ Spark رو HDFS خروجی بده، یه اسکریپتِ پایتون یه کوئریِ <span class="ltr">Trino</span> رو رو همون فایل‌ها تریگر کنه و نتیجه به S3 بره.</li>
+    <li>گاهی می‌خوای داده رو بینِ ابزارهای پردازش جابه‌جا کنی: مثلاً یه jobِ Spark رو HDFS خروجی بده، یه اسکریپتِ پایتون یه کوئریِ <span class="ltr">Trino</span> رو روی همون فایل‌ها تریگر کنه و نتیجه به S3 بره.</li>
     <li>گاهی خودِ pipeline چند تا مرحله می‌خواد: اگه مرحله‌ای داده رو با یه کلید shard کنه و مرحلهٔ بعدی به shard با کلیدِ دیگه‌ای نیاز داشته باشه، مرحلهٔ اول خروجی رو به همون شکلی آماده می‌کنه که مرحلهٔ دوم می‌خواد.</li>
   </ul></div>
   <div class="en"><ul>
@@ -821,9 +820,9 @@
 <p>اگه ورودی تغییرناپذیر باشه و خروجیِ تلاشِ ناقص جدا بمونه، می‌شه وظیفهٔ شکست‌خورده رو دوباره اجرا کرد. مدیریتِ خروجیِ میانی تعیین می‌کنه چه مقدار کار تکرار بشه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-13">
 <p class="example-title"><b>مثال فنی: خروجی attempt ناموفق را منتشر نکن</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن task قسمتی از فایل رو نوشته و پیش از پایان crash کرده.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> task قسمتی از فایل رو نوشته و پیش از پایان crash کرده.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا خروجی تو مسیر موقتِ attempt می‌مونه؛ سازوکار commit فقط خروجی موفق رو تو نسخهٔ job وارد می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> retry نباید فایل ناقص و فایل کامل رو با هم به‌عنوان خروجی معتبر نشون بده؛ I/O مستقیم به مقصد بیرونی سخت‌تره — قول می‌دم به کارت میاد.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> retry نباید فایل ناقص و فایل کامل رو با هم به‌عنوان خروجی معتبر نشون بده؛ I/O مستقیم به مقصد بیرونی سخت‌تره</p>
 </div>
 </div>
   <div class="en"><p>Batch jobs run long; a long job with many parallel tasks will almost surely meet at least one <b>task failure</b> on its way — hardware faults (especially on commodity hardware) or network cuts. But a more common cause exists: the scheduler deliberately <b>preempts</b> (kills) the task. This pays off with priority levels: cheap low-priority tasks run whenever spare capacity exists, at the risk of being killed the moment a higher-priority job arrives. These cheap VMs are called <span class="ltr">spot instances</span> on EC2, <span class="ltr">spot VMs</span> on Azure and <span class="ltr">preemptible instances</span> on Google Cloud. Since batch jobs are rarely urgent, using this cheap capacity is economical (and raises cluster use); but it means <b>preemption happens far more than hardware failure</b>.</p></div>
@@ -864,7 +863,7 @@
       فازِ ۱: فلشِ «<span class="ltr">submit job — N tasks + request metadata</span>» از client به resource manager می‌ره و یادداشتش همون متادیتای متنه: «<span class="ltr">job id, CPU / RAM / disk, GPU need, credentials, params, code location</span>». بعد دو تا فلشِ تخصیص: «<span class="ltr">allocate tasks — data locality preferred</span>» به Executor A و «<span class="ltr">allocate remaining tasks</span>» به Executor B.
     </p>
     <p>
-      فازِ ۲ سه تا استراتژیِ دادهٔ میانی رو رو همون نمودار کنارِ هم می‌ذاره (سه تا فلش به Distributed FS): «<span class="ltr">MapReduce: intermediate written to DFS</span>» با یادداشتِ «<span class="ltr">task waits for the write: fault-tolerant, heavy I/O</span>»؛ «<span class="ltr">Spark: intermediate in memory, spill to disk</span>» با یادداشتِ «<span class="ltr">only the final result reaches DFS; loss recovered from lineage</span>»؛ و «<span class="ltr">Flink: periodic checkpoint snapshot</span>» با یادداشتِ «<span class="ltr">task state snapshotted to durable storage</span>».
+      فازِ ۲ سه تا استراتژیِ دادهٔ میانی رو روی همون نمودار کنارِ هم می‌ذاره (سه تا فلش به Distributed FS): «<span class="ltr">MapReduce: intermediate written to DFS</span>» با یادداشتِ «<span class="ltr">task waits for the write: fault-tolerant, heavy I/O</span>»؛ «<span class="ltr">Spark: intermediate in memory, spill to disk</span>» با یادداشتِ «<span class="ltr">only the final result reaches DFS; loss recovered from lineage</span>»؛ و «<span class="ltr">Flink: periodic checkpoint snapshot</span>» با یادداشتِ «<span class="ltr">task state snapshotted to durable storage</span>».
     </p>
     <p>
       فازِ ۳ ماجرا رو جذاب می‌کنه: فلشِ خط‌چینِ «<span class="ltr">heartbeats stop — crash, network cut, or preemption</span>» از Executor A به resource manager می‌ره — یادداشت می‌گه «<span class="ltr">preemption: spot capacity reclaimed or a higher-priority job arrives</span>». resource manager فوراً «<span class="ltr">task declared incomplete — partial output deleted</span>» رو به DFS می‌فرسته (فلشِ برجسته) و بعد «<span class="ltr">reschedule the task — retry at task level</span>» رو به Executor B، با یادداشتِ کلیدیِ «<span class="ltr">immutable input, no side effects: re-running is safe</span>». Executor B با «<span class="ltr">recompute from immutable input; write output</span>» خروجی رو از نو می‌سازه، «<span class="ltr">replacement task complete</span>» رو خبر می‌ده، و بالاخره فلشِ برگشتیِ «<span class="ltr">publish job output — all-or-nothing</span>» از resource manager به client می‌ره.
@@ -942,9 +941,9 @@
 <p>قانون اولِ این بخش: مدل پردازش مشخص می‌کنه منطق برنامه چطور به وظیفه‌های اجرایی شکسته بشه. MapReduce الگوی محدودتری داره و dataflow زنجیرهٔ متنوع‌تری از تبدیل‌ها رو بیان می‌کنه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-14">
 <p class="example-title"><b>مثال فنی: یک محاسبه، چند مدل اجرا</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ورودی فروش باید فیلتر بشه، با کالا join بخوره و بر دسته تجمیع بشه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> ورودی فروش باید فیلتر بشه، با کالا join بخوره و بر دسته تجمیع بشه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا می‌شه اون رو به jobهای MapReduce یا DAG عملگرها یا SQL رو موتور توزیع‌شده بیان کرد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اختلاف تو کنترل و بهینه‌سازی اجراست؛ برای مقایسه باید همون semanticsِ join و null و نوع عدد حفظ بشن — نقطه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اختلاف تو کنترل و بهینه‌سازی اجراست؛ برای مقایسه باید همون semanticsِ join و null و نوع عدد حفظ بشن</p>
 </div>
 </div>
   <div class="en"><p>So far you've seen how jobs get scheduled and run; now comes how frameworks actually process data. Two common models: <span class="ltr">MapReduce</span> and <span class="ltr">dataflow</span> engines. Dataflow has in practice replaced MapReduce — but you still need to understand MapReduce, since it shaped many modern frameworks. Both models opened over time to multiple programming models: low-level programming APIs, relational query languages and <span class="ltr">DataFrame</span> APIs.</p></div>
@@ -955,9 +954,9 @@
 <p>تو MapReduce، نگاشت برای هر ورودی جفتِ کلید–مقدار می‌سازه، جابه‌جایی داده کلیدهای یکسان رو جمع می‌کنه و کاهش نتیجهٔ هر کلید رو حساب می‌کنه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-15">
 <p class="example-title"><b>مثال فنی: Map، shuffle، reduce</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن متن‌های <code dir="ltr">red blue</code> و <code dir="ltr">red</code> ورودی‌ان.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> متن‌های <code dir="ltr">red blue</code> و <code dir="ltr">red</code> ورودی‌ان.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا map جفت‌های <code dir="ltr">(red,1),(blue,1),(red,1)</code> رو می‌ده؛ shuffle redها رو کنار هم می‌فرسته؛ reduce جمع <code dir="ltr">red=2,blue=1</code> رو می‌سازه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> shuffle تصادفی نیست؛ گروه‌بندیِ کلید تعیین می‌کنه همهٔ مقدارهای یه کلید به محاسبهٔ مشترک برسن — قابش کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> shuffle تصادفی نیست؛ گروه‌بندیِ کلید تعیین می‌کنه همهٔ مقدارهای یه کلید به محاسبهٔ مشترک برسن</p>
 </div>
 </div>
   <div class="en"><p>MapReduce's processing pattern will look familiar — it's basically Section 2's log analysis in four steps:</p></div>
@@ -1005,7 +1004,7 @@
 
   <div class="callout">
     <div class="tag"><span class="fa">ریشه در برنامه‌نویسیِ تابعی</span><span class="en">Roots in functional programming</span></div>
-    <div class="fa">اگهچه MapReduce برای پردازشِ دسته‌ای به کار می‌ره، مدلِ برنامه‌نویسی‌ش از <b>برنامه‌نویسیِ تابعی</b> میاد: لیسپ <code>map</code> و <code>reduce</code> (یا fold) رو به‌عنوانِ توابعِ مرتبه‌بالا رو لیست‌ها معرفی کرد. اصلِ «پرهیز از state تغییرپذیر» دقیقاً همون چیزیه که اجرای موازی رو ممکن می‌کنه: چون هر فراخوانیِ mapper/reducer فقط به داده‌ای که framework صریحاً به تابع می‌ده وابسته‌ست، framework آزاده فراخوانی‌های مستقل رو رو نودهای مختلف موازی اجرا کنه — و اگه taskی شکست بخوره، همون mapper/reducer رو با همون ورودی دوباره رو یه نودِ دیگه صدا بزنه.</div>
+    <div class="fa">اگهچه MapReduce برای پردازشِ دسته‌ای به کار می‌ره، مدلِ برنامه‌نویسی‌ش از <b>برنامه‌نویسیِ تابعی</b> میاد: لیسپ <code>map</code> و <code>reduce</code> (یا fold) رو به‌عنوانِ توابعِ مرتبه‌بالا رو لیست‌ها معرفی کرد. اصلِ «پرهیز از state تغییرپذیر» دقیقاً همون چیزیه که اجرای موازی رو ممکن می‌کنه: چون هر فراخوانیِ mapper/reducer فقط به داده‌ای که framework صریحاً به تابع می‌ده وابسته‌ست، framework آزاده فراخوانی‌های مستقل رو روی نودهای مختلف موازی اجرا کنه — و اگه taskی شکست بخوره، همون mapper/reducer رو با همون ورودی دوباره رو یه نودِ دیگه صدا بزنه.</div>
     <div class="en">Though MapReduce serves batch processing, its programming model comes from <b>functional programming</b>: Lisp introduced <code>map</code> and <code>reduce</code> (or fold) as higher-order list functions. The “avoid mutable state” principle is exactly what enables parallel execution: since each mapper/reducer call depends only on data the framework explicitly passes in, the framework is free to run independent calls on different nodes — and if a task fails, to recall the same mapper/reducer with the same input on another node.</div>
   </div>
 
@@ -1053,9 +1052,9 @@
 <p>نکته‌ش اینجاست: موتور dataflow کلِ زنجیرهٔ تبدیل رو می‌بینه و می‌تونه مرحله‌ها رو ترکیب کنه یا دادهٔ میانی رو مناسب‌تر نگه داره. همهٔ مرحله‌ها الزاماً نباید به چند تا job مستقل شکسته بشن.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-16">
 <p class="example-title"><b>مثال فنی: ادغام عملگرهای متوالی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن مرحله‌های <code dir="ltr">filter → map → groupBy</code> رو داریم.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> مرحله‌های <code dir="ltr">filter → map → groupBy</code> رو داریم.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا موتور می‌تونه filter و map رو تو همون task اجرا کنه و پیش از groupBy داده رو shuffle کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> حذف مرزِ غیرضروریِ job، فایل میانی و راه‌اندازی رو کم می‌کنه؛ مرحلهٔ نیازمند توزیعِ دوباره هنوز شبکه می‌خواد — همینو می‌خواستیم.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> حذف مرزِ غیرضروریِ job، فایل میانی و راه‌اندازی رو کم می‌کنه؛ مرحلهٔ نیازمند توزیعِ دوباره هنوز شبکه می‌خواد</p>
 </div>
 </div>
   <div class="en"><p>To fix MapReduce's problems, several new execution engines were built, most famously <span class="ltr">Spark</span> and <span class="ltr">Flink</span>. Their designs differ but share one thing: they see the <b>whole workflow as one job</b>, not a set of independent subjobs. Since they explicitly model data flow across processing stages, they are called <b>dataflow engines</b>. Like MapReduce they have a low-level API calling user functions record by record, but also higher-level operators like join and group by; they parallelize by sharding input and carry each task's output over the network to the next task's input. Unlike MapReduce, operators needn't alternate in a rigid map/reduce pattern and compose more flexibly. The style's roots are the <span class="ltr">Dryad</span> and <span class="ltr">Nephele</span> research systems.</p></div>
@@ -1066,7 +1065,7 @@
   <div class="fa"><ul>
     <li>کارِ گرونی مثل مرتب‌سازی <b>فقط جایی</b> انجام می‌شه که واقعاً لازمه، نه همیشه بینِ هر map و reduce.</li>
     <li>اگه چند تا operator پشتِ سرِ هم shardingِ dataset رو عوض نکنن (مثل map یا filter)، می‌تونن تو <b>یه task</b> ادغام (<span class="ltr">fuse</span>) بشن و هزینهٔ کپیِ داده کم بشه.</li>
-    <li>چون همهٔ joinها و وابستگی‌های داده صریحاً اعلام می‌شن، scheduler تصویرِ کلی داره و می‌تونه <b>locality</b> رو بهینه کنه: مثلاً task مصرف‌کننده رو رو همون ماشینِ تولیدکننده بذاره تا داده از بافرِ حافظهٔ مشترک رد بشه، نه از شبکه.</li>
+    <li>چون همهٔ joinها و وابستگی‌های داده صریحاً اعلام می‌شن، scheduler تصویرِ کلی داره و می‌تونه <b>locality</b> رو بهینه کنه: مثلاً task مصرف‌کننده رو روی همون ماشینِ تولیدکننده بذاره تا داده از بافرِ حافظهٔ مشترک رد بشه، نه از شبکه.</li>
     <li>معمولاً state میانیِ بینِ operatorها رو می‌شه تو <b>حافظه یا دیسکِ محلی</b> نگه داشت — I/O خیلی کمتر از نوشتن تو DFS/object store (که باید چند نسخه و رو چند تا دیسک نوشته بشه). MapReduce این بهینه‌سازی رو برای خروجیِ mapper داشت؛ dataflow اون رو به همهٔ stateهای میانی تعمیم می‌ده.</li>
     <li>operatorها می‌تونن <b>به‌محضِ آماده شدنِ ورودی‌شون</b> شروع کنن؛ نیازی نیست کلِ مرحلهٔ قبل تموم بشه.</li>
     <li>پروسه‌های موجود برای اجرای operatorهای جدید <b>دوباره استفاده</b> می‌شن و هزینهٔ راه‌اندازی کم می‌شه (MapReduce برای هر task یه JVM تازه بالا می‌آره).</li>
@@ -1105,7 +1104,7 @@
       بندِ دوم «<span class="ltr">② Dataflow engine (Spark / Flink) — one job, one DAG: operators start as soon as their input is ready</span>»ـه: نوارِ <span class="ltr">map + filter</span> با توضیحِ «<span class="ltr">map+filter fused into one task</span>» (یادته فیوژنِ operatorها)، <span class="ltr">map 2</span> («<span class="ltr">read shard → map()</span>»)، و بعد نوارهای <span class="ltr">reduce 1</span> و <span class="ltr">reduce 2</span> که کنارِ <span class="ltr">reduce 1</span> نوشته «<span class="ltr">reduce 1 · starts as soon as input is ready</span>» — یعنی barrier نیست؛ هر کدوم به‌محضِ آماده شدنِ ورودی شروع می‌شن. نوارِ <span class="ltr">intermediate</span> با توضیحِ «<span class="ltr">intermediate state: memory / local disk</span>» نشون می‌ده دادهٔ میانی به DFS نمی‌ره؛ و فقط نوارِ پایانیِ <span class="ltr">output</span> با «<span class="ltr">final output → DFS / object store</span>» نوشتنِ پایدار داره. جمعِ این بند: «<span class="ltr">sort only where needed · whole DAG visible to the scheduler → data locality · reuse worker processes · lineage recompute / checkpoints instead of DFS writes</span>».
     </p>
     <p>
-      درسِ نمودار رو این‌جوری نگاه کن: تو بندِ اول، فاصلهٔ بینِ نوارهای سبز رو <b>نوارهای خاکستری و barrierها</b> پر کردن — یعنی وقتِ مصرف‌شده برای I/O فایلی و انتظار؛ تو بندِ دوم، نوارهای سبز رو هم سوارن و فقط یه نوشتنِ پایدارِ نهایی هست. همون تفاوتِ «pipelining نداریم» با «pipelining داریم» — همین.
+      درسِ نمودار رو این‌جوری نگاه کن: تو بندِ اول، فاصلهٔ بینِ نوارهای سبز رو <b>نوارهای خاکستری و barrierها</b> پر کردن — یعنی وقتِ مصرف‌شده برای I/O فایلی و انتظار؛ تو بندِ دوم، نوارهای سبز رو هم سوارن و فقط یه نوشتنِ پایدارِ نهایی هست. همون تفاوتِ «pipelining نداریم» با «pipelining داریم».
     </p></div>
     <div class="en"><p>This shared-timeline diagram — “<span class="ltr">Where the Time Goes — MapReduce vs a Dataflow Engine</span>” (“one shared time axis · green bars are compute tasks · grey bars are durable writes to the filesystem”) — has its color key on top: <span class="ltr">compute task</span> (green bar), <span class="ltr">durable write to DFS / object store</span> (grey bar) and <span class="ltr">stage barrier</span> (barrier line), with time running right (“<span class="ltr">time →</span>”, “not to scale”). Lane one, “<span class="ltr">① MapReduce — every stage finishes by writing files to the distributed filesystem</span>”: three green <span class="ltr">map 1/2/3</span> bars (“read shard → map()”) run in parallel, then a <span class="ltr">stage barrier</span>, then the grey <span class="ltr">DFS write</span> (“write intermediate to DFS (replicated, durable)”) — then another barrier, the <span class="ltr">reduce 1/2/3</span> bars, another barrier, and the <span class="ltr">output</span> bar (“write output”). Lane one's total reads: “<span class="ltr">file-based I/O between every stage · no pipelining · new JVM per task · sort happens between every map and reduce</span>”.</p>
     <p>Lane two, “<span class="ltr">② Dataflow engine (Spark / Flink) — one job, one DAG: operators start as soon as their input is ready</span>”: a <span class="ltr">map + filter</span> bar (“map+filter fused into one task” — operator fusion), <span class="ltr">map 2</span> (“read shard → map()”), then <span class="ltr">reduce 1</span> and <span class="ltr">reduce 2</span> — <span class="ltr">reduce 1</span> tagged “starts as soon as input is ready”: no barriers, each starts the moment its input exists. The <span class="ltr">intermediate</span> bar (“intermediate state: memory / local disk”) shows intermediate data skipping DFS; only the final <span class="ltr">output</span> bar (“final output → DFS / object store”) writes durably. Lane two's total: “<span class="ltr">sort only where needed · whole DAG visible to the scheduler → data locality · reuse worker processes · lineage recompute / checkpoints instead of DFS writes</span>”. See the lesson with your eyes: in lane one the gaps between green bars are filled with <b>grey bars and barriers</b> — time spent on file I/O and waiting; in lane two green bars overlap with a single durable write at the end. That is “no pipelining” vs “pipelining”.</p></div>
@@ -1117,9 +1116,9 @@
 <p>کارِ Shuffle اینه: داده دوباره بینِ وظیفه‌ها توزیع می‌شه تا رکوردهای مرتبط کنار هم قرار بگیرن. این جابه‌جایی معمولاً شبکه و مرتب‌سازی و گاهی دیسک رو درگیر می‌کنه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-17">
 <p class="example-title"><b>مثال فنی: Shuffle بر کلید مشتری</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سفارش‌های مشتری ۱۷ تو چند تا فایل و چند تا worker پراکنده‌ان.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> سفارش‌های مشتری ۱۷ تو چند تا فایل و چند تا worker پراکنده‌ان.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا partitioner همهٔ جفت‌های کلید ۱۷ رو به reducer همون کلید می‌فرسته؛ داده ممکنه رو شبکه منتقل و sort بشه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> تمرکزِ یه کلید برای تجمیع لازمه؛ مشتری خیلی بزرگ می‌تونه reducer داغ و زمان پایان طولانی بسازه — این دام معروفه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> تمرکزِ یه کلید برای تجمیع لازمه؛ مشتری خیلی بزرگ می‌تونه reducer داغ و زمان پایان طولانی بسازه</p>
 </div>
 </div>
   <div class="en"><p>Like you've seen, both the Unix example and MapReduce are built on sorting. Batch processors must sort <b>petabyte</b> datasets — data fitting no single machine — so they need a distributed sort whose input and output are both sharded. That algorithm is called <span class="ltr">shuffle</span>.</p></div>
@@ -1139,9 +1138,9 @@
 <p>داستان از این قراره: Join رکوردهای مرتبطِ دو مجموعه رو ترکیب می‌کنه و grouping رکوردهای یه مجموعه رو بر اساس کلید کنار هم می‌ذاره. روش اجرا به اندازهٔ داده و نحوهٔ توزیع و ترتیب اون بستگی داره.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-18">
 <p class="example-title"><b>مثال فنی: دو راهِ join</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن فروش یه میلیارد ردیف داره و جدول دسته‌بندی محصول فقط <code dir="ltr">5 MB</code>ـه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فروش یه میلیارد ردیف داره و جدول دسته‌بندی محصول فقط <code dir="ltr">5 MB</code>ـه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا جدول کوچیک رو می‌شه به workerها broadcast کرد؛ اگه هر دو طرف بزرگ باشن، تقسیم و sort-merge رو کلید مطرح می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اندازه و توزیع کلید تعیین‌کننده‌ان؛ broadcast جدول بزرگ می‌تونه حافظهٔ همهٔ workerها رو پر کنه — عددها خودشون حرف می‌زنن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اندازه و توزیع کلید تعیین‌کننده‌ان؛ broadcast جدول بزرگ می‌تونه حافظهٔ همهٔ workerها رو پر کنه</p>
 </div>
 </div>
   <div class="en"><p>Now see how sorted data simplifies distributed joins and aggregation. The classic example: on the left, the <b>logged-in users' event log</b> (called activity events or clickstream) and on the right, the <b>user database</b>. Think of this as part of a <b>star schema</b>: the event log is the <b>fact</b> table, the user database one <b>dimension</b>. To analyze with user info included (e.g. whether certain pages are more popular among younger or older users — via the birth-date field), you must <b>join</b> the two tables. Assuming both are big enough to shard, how?</p></div>
@@ -1168,7 +1167,7 @@
     <div class="fa">
 
 <p>
-      این dataflow پنج تا ستون داره: <span class="ltr">Sharded Inputs</span>، <span class="ltr">Map Phase</span>، <span class="ltr">Shuffle + Sort</span>، <span class="ltr">Join Reduce</span> و <span class="ltr">Group-By Job</span>. از راست: دو تا جعبهٔ ورودی — <span class="ltr">Clickstream</span> (زیرنویس: <span class="ltr">fact table</span>، تگِ <span class="ltr">user_id, ts, URL</span>) و <span class="ltr">User Profiles</span> (زیرنویس: <span class="ltr">dimension table</span>، تگِ <span class="ltr">user_id, DOB</span>) — دقیقاً نقش‌های star schema از متن. فلشِ «<span class="ltr">clickstream</span>» به <span class="ltr">Event Mapper</span> (زیرنویس: <span class="ltr">key: user_id</span>، تگِ <span class="ltr">URL + timestamp</span>) و فلشِ «<span class="ltr">profile records</span>» به <span class="ltr">Profile Mapper</span> (زیرنویس: <span class="ltr">key: user_id</span>، تگِ <span class="ltr">date of birth</span>) می‌ره.
+      این dataflow پنج تا ستون داره: <span class="ltr">Sharded Inputs</span>، <span class="ltr">Map Phase</span>، <span class="ltr">Shuffle + Sort</span>، <span class="ltr">Join Reduce</span> و <span class="ltr">Group-By Job</span>. دو تا جعبهٔ ورودی — <span class="ltr">Clickstream</span> (زیرنویس: <span class="ltr">fact table</span>، تگِ <span class="ltr">user_id, ts, URL</span>) و <span class="ltr">User Profiles</span> (زیرنویس: <span class="ltr">dimension table</span>، تگِ <span class="ltr">user_id, DOB</span>) — دقیقاً نقش‌های star schema از متن. فلشِ «<span class="ltr">clickstream</span>» به <span class="ltr">Event Mapper</span> (زیرنویس: <span class="ltr">key: user_id</span>، تگِ <span class="ltr">URL + timestamp</span>) و فلشِ «<span class="ltr">profile records</span>» به <span class="ltr">Profile Mapper</span> (زیرنویس: <span class="ltr">key: user_id</span>، تگِ <span class="ltr">date of birth</span>) می‌ره.
     </p>
     <p>
       دو تا فلشِ برجسته — «<span class="ltr">mapped events</span>» و «<span class="ltr">mapped profiles</span>» — به قلبِ نمودار می‌رسن: <span class="ltr">User-ID Shuffle</span> با زیرنویسِ <span class="ltr">group by user_id</span> و تگِ <span class="ltr">DOB first, then ts</span> — یعنی همون secondary sort: اول رکوردِ تاریخِ تولد، بعد رویدادها به ترتیبِ timestamp. فلشِ خروجی «<span class="ltr">one user's data</span>» با توضیحِ «<span class="ltr">secondary sort</span>» به <span class="ltr">Join Reducer</span> (زیرنویس: <span class="ltr">sort-merge join</span>، تگِ <span class="ltr">one user in RAM</span>) می‌ره.
@@ -1196,7 +1195,7 @@
     <div class="fa">
 
 <p>
-      از چپ شروع کن: این نمودارِ ساختاری (شکل‌های ۱۱-۲ و ۱۱-۳) سه تا ناحیه داره و زیرنویسش می‌گه: «<span class="ltr">left: the fact and dimension tables · middle: the shuffle gathers one user's records · right: the reducer and the next job</span>». از چپ شروع کن: جدولِ اول «<span class="ltr">activity events (clickstream)</span>»ـه با ستون‌های <span class="ltr">user_id url timestamp</span> و چند تا سطرِ نمونه: <span class="ltr">42 /news 10-01 09:12</span>، <span class="ltr">7 /blog 10-01 11:40</span>، <span class="ltr">42 /docs 10-01 10:05</span>، <span class="ltr">42 /news 10-02 08:20</span> — و یادداشتِ زیرش: «<span class="ltr">fact table of the star schema — sharded into multiple files, so many mappers process it in parallel</span>». جدولِ دوم «<span class="ltr">user profiles (dimension)</span>» با ستون‌های <span class="ltr">user_id date_of_birth</span> و سطرهای <span class="ltr">42 1990-07-14</span> و <span class="ltr">7 1985-02-03</span>؛ یادداشت: «<span class="ltr">dimension table of the star schema — also sharded, read row by row by its own mapper</span>».
+      این نمودارِ ساختاری (شکل‌های ۱۱-۲ و ۱۱-۳) سه تا ناحیه داره و زیرنویسش می‌گه: «<span class="ltr">left: the fact and dimension tables · middle: the shuffle gathers one user's records · right: the reducer and the next job</span>». ناحیهٔ چپ: جدولِ اول «<span class="ltr">activity events (clickstream)</span>»ـه با ستون‌های <span class="ltr">user_id url timestamp</span> و چند تا سطرِ نمونه: <span class="ltr">42 /news 10-01 09:12</span>، <span class="ltr">7 /blog 10-01 11:40</span>، <span class="ltr">42 /docs 10-01 10:05</span>، <span class="ltr">42 /news 10-02 08:20</span> — و یادداشتِ زیرش: «<span class="ltr">fact table of the star schema — sharded into multiple files, so many mappers process it in parallel</span>». جدولِ دوم «<span class="ltr">user profiles (dimension)</span>» با ستون‌های <span class="ltr">user_id date_of_birth</span> و سطرهای <span class="ltr">42 1990-07-14</span> و <span class="ltr">7 1985-02-03</span>؛ یادداشت: «<span class="ltr">dimension table of the star schema — also sharded, read row by row by its own mapper</span>».
     </p>
     <p>
       زیرِ جدول‌ها دو تا mapper نشسته: «<span class="ltr">mapper over events: emit (key=user_id, value=url)</span>» و «<span class="ltr">mapper over profiles: emit (key=user_id, value=DOB)</span>» — دقیقاً قراردادِ map. وسطِ نمودار، «<span class="ltr">shuffle by user_id — sorted reducer input for user_id = 42</span>»ـه: یه ستون از رکوردهای مرتب: اول «<span class="ltr">(42, dob=1990-07-14)</span>» با برچسبِ <span class="ltr">profile</span>، بعد سه تا رویداد: «<span class="ltr">(42, url=/news, 10-01 09:12)</span>»، «<span class="ltr">(42, url=/docs, 10-01 10:05)</span>» و «<span class="ltr">(42, url=/news, 10-02 08:20)</span>» — و یادداشتِ کنارش: «<span class="ltr">secondary sort: profile record first, then the user's events in timestamp order</span>».
@@ -1209,7 +1208,7 @@
       یعنی مقدارِ اول = تاریخِ تولد (همون رکوردِ پروفایل)، بعد پیمایشِ رویدادهای مرتب‌شده و انتشارِ (url, تاریخِ تولد) به‌ازای هر بازدید. زیرِ کد، یادداشتِ «<span class="ltr">Why it is a sort-merge join</span>»: «<span class="ltr">one user's record in memory at a time; no network calls during the join; mapper output is sorted by key; reducers merge the sorted lists from both sides</span>». و نوارِ پایینی نمودار، job بعدی رو نشون می‌ده: «<span class="ltr">next MapReduce job — group by + aggregation</span>» با «<span class="ltr">shuffle by url: the reducer sees all page views for one URL</span>»، «<span class="ltr">it keeps a counter of views per age group, one URL at a time</span>»، خروجیِ «<span class="ltr">emit (url, age_group, view_count)</span>» و جمع‌بندیِ «<span class="ltr">group by + aggregation — viewer age comes from date_of_birth</span>».
     </p>
     <p>
-      و راهنمای پایینِ تصویر رو هم نگاه کن: «<span class="ltr">pill = pipeline stage · box = record or code · dashed = why the join works · arrow = data flow</span>». درسِ این نمودار اینه که join «وحشتناک» به‌ظاهر، فقط یه پیمایشِ خطی رو ورودیِ مرتبه: به‌جای lookup شبکه‌ای به‌ازای هر رکورد، داده رو طوری می‌چینیم که هرآنچه لازمه کنارِ هم برسه — حفظ کن.
+      و راهنمای پایینِ تصویر رو هم نگاه کن: «<span class="ltr">pill = pipeline stage · box = record or code · dashed = why the join works · arrow = data flow</span>». درسِ این نمودار اینه که join «وحشتناک» به‌ظاهر، فقط یه پیمایشِ خطی رو ورودیِ مرتبه: به‌جای lookup شبکه‌ای به‌ازای هر رکورد، داده رو طوری می‌چینیم که هرآنچه لازمه کنارِ هم برسه.
     </p></div>
     <pre>dob = first value       # the profile record
     for e in events:        # sorted by timestamp
@@ -1225,9 +1224,9 @@
 <p>راستش زبون‌هایی مثل SQL نتیجهٔ موردنیاز رو بیان می‌کنن و بهینه‌ساز روشِ اجرا رو انتخاب می‌کنه. انتخابِ طرح اجرا می‌تونه مقدارِ دادهٔ خونده‌شده یا جابه‌جاشده رو خیلی تغییر بده.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-19">
 <p class="example-title"><b>مثال فنی: Optimizer چه تصمیمی می‌گیرد؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن SQL فروش رو به کالا join می‌کنه و فقط دستهٔ <code dir="ltr">book</code> رو نگه می‌داره.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> SQL فروش رو به کالا join می‌کنه و فقط دستهٔ <code dir="ltr">book</code> رو نگه می‌داره.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا optimizer می‌تونه فیلترِ دسته رو زودتر اعمال کنه و با آمار اندازه، نوع join رو انتخاب کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اعلانی بودن مسیر بهینه رو قابل‌انتخاب می‌کنه؛ آمار قدیمی یا skew می‌تونه طرح نامناسب بسازه — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اعلانی بودن مسیر بهینه رو قابل‌انتخاب می‌کنه؛ آمار قدیمی یا skew می‌تونه طرح نامناسب بسازه</p>
 </div>
 </div>
   <div class="en"><p>Distributed execution engines grew up: infrastructure is now strong enough to store and process tens of petabytes on 10,000+-machine clusters. With operations mostly solved, everyone's focus moved to the <b>programming model</b>. MapReduce, dataflow engines and cloud warehouses all adopted <span class="ltr">SQL</span> as batch processing's <b>lingua franca</b> — a natural pick: old warehouses had SQL, analytics and ETL tools already supported it, and every developer and analyst knows it.</p></div>
@@ -1258,9 +1257,9 @@
 <p>ماجرا از این قراره: انبارهای داده و چارچوب‌های پردازش، قابلیت‌های مشترک بیشتری پیدا کردن: ذخیره‌سازی جدا و SQL و اجرای موازی. با این حال محدودیت‌ها و هزینهٔ عملیاتیِ ابزارها هنوز متفاوته.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-20">
 <p class="example-title"><b>مثال فنی: انبار ابری هم پردازش توزیع‌شده دارد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن query رو صدها فایل ستونی، فروش روزانه رو جمع می‌زنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا سرویس، اسکن فایل‌ها و shuffle و aggregation رو بین workerها تقسیم می‌کنه و منابع اجرا رو مدیریت می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> رابط SQL خیلی از جزئیات رو پنهان می‌کنه؛ هزینهٔ اسکن و جابه‌جایی داده حذف نشده — جادو نیست.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> جدولِ ۱ ترابایتی فروش بر اساسِ روز partition شده و کوئری فقط یه روز رو می‌خواد؛ هر روز حدود ۸ گیگابایت است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا انبارِ ابری می‌تونه partition pruning کنه و فقط همون ۸ گیگابایت رو اسکن کنه؛ اگه جدول partition نشده بود، همون کوئری ۱ ترابایت اسکن می‌کرد و هزینهٔ bytes-scanned همون‌قدر بالا می‌رفت.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> رابطِ SQL جزئیاتِ اجرا رو پنهان می‌کنه، ولی هزینهٔ اسکن و جابه‌جایی داده حذف نشده؛ طرحِ partition و clustering همون هزینهٔ پنهان رو مشخص می‌کنه.</p>
 </div>
 </div>
   <div class="en"><p>Picture this: historically two separate streams existed — <b>data warehouses</b> on dedicated hardware running analytical SQL over relational data; and <b>batch frameworks</b> like MapReduce arriving for bigger scale and flexibility — with logic in general-purpose languages and reads/writes of arbitrary formats. Over time the two grew very alike:</p></div>
@@ -1308,9 +1307,9 @@
 <p>بذار ساده بگم: DataFrame نمایی جدولی برای تبدیل داده‌ست. تو اجرای توزیع‌شده، ترتیب ردیف‌ها و زمانِ واقعیِ اجرای عملیات ممکنه با جدولِ تو حافظهٔ یه برنامه فرق داشته باشه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-21">
 <p class="example-title"><b>مثال فنی: DataFrame محلی یا توزیع‌شده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دستور <code dir="ltr">df.filter(...).groupBy(...).sum()</code> نوشته شده.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> دستور <code dir="ltr">df.filter(...).groupBy(...).sum()</code> نوشته شده.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا تو موتور توزیع‌شده ممکنه فقط plan ساخته بشه و action اجرا رو شروع کنه؛ <code dir="ltr">collect()</code> تموم خروجی رو به driver می‌آره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> ظاهراً مشابه بودن API با جدول محلی به‌معنی یکسان بودن هزینه نیست؛ خروجی بزرگ می‌تونه حافظهٔ driver رو پر کنه — این دام معروفه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> ظاهراً مشابه بودن API با جدول محلی به‌معنی یکسان بودن هزینه نیست؛ خروجی بزرگ می‌تونه حافظهٔ driver رو پر کنه</p>
 </div>
 </div>
   <div class="en"><p>If you're a data scientist or statistician, you probably live in the <span class="ltr">DataFrame</span> data model of <span class="ltr">R</span> and <span class="ltr">Pandas</span>: something like a relational table — a set of rows with same-typed values per column — except instead of one big SQL query you call relational-operator functions: filter, join, sort, aggregation and the rest.</p></div>
@@ -1323,7 +1322,7 @@
       DataFrameهای محلی معمولاً <b>ایندکس‌شده و مرتب</b>‌ان؛ DataFrameهای توزیع‌شده معمولاً نه. مهاجرت به frameworkهای دسته‌ای می‌تونه به‌خاطرِ همین، «غافلگیریِ عملکرد» بیاره — کد اجرا می‌شه ولی نتیجه یا ترتیب، اون چیزی نیست که انتظار داشتی.
     </li>
     <li>
-      <b>eager در برابر lazy:</b> Pandas وقتی متدِ DataFrame صدا زده می‌شه، فوراً اجرا می‌کنه؛ Spark اول همهٔ فراخوانی‌های API رو به یه <b>query plan</b> ترجمه می‌کنه، بهینه‌سازی رو اجرا می‌کنه، و بعد workflow رو رو موتورِ dataflow توزیع‌شده‌ش می‌دَوونه.
+      <b>eager در برابر lazy:</b> Pandas وقتی متدِ DataFrame صدا زده می‌شه، فوراً اجرا می‌کنه؛ Spark اول همهٔ فراخوانی‌های API رو به یه <b>query plan</b> ترجمه می‌کنه، بهینه‌سازی رو اجرا می‌کنه، و بعد workflow رو روی موتورِ dataflow توزیع‌شده‌ش می‌دَوونه.
     </li>
     <li>
       <b>client/server:</b> frameworkهایی مثل Daft هر دو رو دارن: عملیاتِ کوچیکِ تو حافظه‌ای رو <b>client</b> اجرا می‌شن و datasetهای بزرگ رو <b>server</b>. قالب‌های ستونیِ مثل <span class="ltr">Apache Arrow</span> یه <b>مدلِ دادهٔ مشترک</b> می‌دن که هم موتورِ اجرایِ سمتِ client و هم سمتِ server می‌تونن به اشتراک بذارن.
@@ -1413,9 +1412,9 @@
 <p>پردازش دسته‌ای برای کارِ انبوه و تکرارپذیر مناسبه: تبدیل داده و تحلیل و ساختنِ خروجی‌های مشتق‌شده. معمولاً باید بینِ زمانِ آماده شدنِ نتیجه و هزینهٔ پردازش تعادل بذاریم.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-22">
 <p class="example-title"><b>مثال فنی: سه خروجی از ورودی مشترک</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن از فایل سفارش، گزارش مالی و ویژگی مدل و ایندکس جست‌وجو ساخته می‌شن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا هر job نسخهٔ ورودی و کدِ خودش رو ثبت می‌کنه و خروجی جدا می‌سازه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> شکستِ ساختنِ یه خروجی نباید مرجع رو خراب کنه؛ رابطهٔ نسخهٔ داده و محاسبه امکان تطبیق و تکرار رو می‌ده — یادت باشه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فایل سفارش یه ستون جدید <code dir="ltr">currency</code> می‌گیره؛ سه مصرف‌کننده داریم: گزارش مالی، ویژگی مدل و ایندکس جست‌وجو.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> هر job نسخهٔ schema و کدِ خودش رو ثبت می‌کنه: گزارش مالی ستون جدید رو می‌خونه، مدل با همون پنج ستون قبلی می‌مونه و ایندکس جست‌وجو ستون جدید رو نادیده می‌گیره؛ خروجی هر کدوم جدا بازسازی می‌شه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> یک تغییرِ schema نباید سه خروجی رو هم‌زمان عوض کنه؛ ثبتِ نسخهٔ schema و کد به هر مصرف‌کننده اجازه می‌ده فقط وقتی خودش آماده‌ست مهاجرت کنه.</p>
 </div>
 </div>
   <div class="en"><p>Now that you know the mechanism, let's see where it's used in practice. Batch jobs crush massive datasets but aren't built for low latency — so you'll find them wherever data is plenty and <b>data freshness doesn't matter</b>. Sounds limited? Honestly, a huge share of data processing fits this model: accounting and warehouse reconciliation, demand forecasting in manufacturing, recommender-model training in e-commerce and media, and many financial systems (the US banking network is almost entirely batch).</p></div>
@@ -1426,9 +1425,9 @@
 <p>تو ETL، داده استخراج و تبدیل می‌شه و بعد تو مقصد قرار می‌گیره. تبدیل باید قواعد کیفیت و معنای فیلدها رو هم پوشش بده، نه فقط تغییر قالبِ فایل.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-23">
 <p class="example-title"><b>مثال فنی: پاک‌سازی پیش از بارگذاری</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل فروش ردیف تکراری با <code dir="ltr">order_id=42</code> و مبلغ با دو تا واحد داره.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> فایل فروش ردیف تکراری با <code dir="ltr">order_id=42</code> و مبلغ با دو تا واحد داره.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا job با کلید مناسب deduplicate می‌کنه و واحدها رو یکسان می‌کنه؛ رکورد نامعتبر به مسیر خطا می‌ره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> ETL فقط جابه‌جایی فایل نیست؛ قواعد تکرار و واحد تو درستی گزارش نقش دارن — حفظ کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> ETL فقط جابه‌جایی فایل نیست؛ قواعد تکرار و واحد تو درستی گزارش نقش دارن</p>
 </div>
 </div>
   <div class="en"><p><span class="ltr">ETL</span> (Extract–Transform–Load) and <span class="ltr">ELT</span> mean a data-processing pipeline extracting data from the operational database, <b>transforming</b> it and <b>loading</b> the result into the downstream system (usually a warehouse). Batch jobs are perfect for this workload, especially with a warehouse downstream.</p></div>
@@ -1474,9 +1473,9 @@
 <p>تحلیل دسته‌ای با اسکن و تجمیعِ دادهٔ تاریخی، جوابِ سؤال‌های مدیریتی یا پژوهشی رو می‌سازه. اهمیتِ تازگیِ نتیجه باید متناسب با همون سؤال تعیین بشه.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-24">
 <p class="example-title"><b>مثال فنی: تحلیل روی مجموعهٔ مشخص</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن گزارشِ روزانه، سفارش‌های تأییدشده تا مرز زمانی مشخص رو لازم داره.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> گزارشِ روزانه، سفارش‌های تأییدشده تا مرز زمانی مشخص رو لازم داره.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا job همون ورودی نسخه‌دار رو فیلتر می‌کنه و مجموع رو حساب می‌کنه؛ زمان cutoff تو خروجی ثبت می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> بدون مرز ورودی، دو اجرای ظاهراً یکسان می‌تونن صرفاً به‌خاطر رسیدن دادهٔ تازه عدد متفاوت بدن — این دام معروفه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> بدون مرز ورودی، دو اجرای ظاهراً یکسان می‌تونن صرفاً به‌خاطر رسیدن دادهٔ تازه عدد متفاوت بدن</p>
 </div>
 </div>
   <div class="en"><p>Analytical (OLAP) queries often scan huge record counts and group and aggregate. Such a workload can run on the batch system alongside the other batch jobs: the analyst writes SQL, the query engine executes, reading and writing DFS/object store. Table metadata (mapping tables to files, names, types) is managed with a <b>table format</b> like <span class="ltr">Apache Iceberg</span> and a <b>catalog</b> like <span class="ltr">Unity</span> — this architecture is called <span class="ltr">data lakehouse</span>.</p></div>
@@ -1510,9 +1509,9 @@
 <p>پردازش دسته‌ای تو آماده‌سازی داده و ساختنِ ویژگی و آموزش مدل استفاده می‌شه. بازتولیدِ نتیجه به نسخهٔ ورودی و کد و تنظیمات وابسته‌ست.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-25">
 <p class="example-title"><b>مثال فنی: ویژگی مدل بدون نشت آینده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن برای پیش‌بینیِ روز ۱۰، مجموع خریدِ هفت روز قبل لازمه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> برای پیش‌بینیِ روز ۱۰، مجموع خریدِ هفت روز قبل لازمه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا job فقط رخدادهای پیش از روز ۱۰ رو join و aggregate می‌کنه؛ خرید روز ۱۱ نباید وارد ویژگیِ اون نمونه بشه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> pipeline درست باید مرز زمانی رو حفظ کنه؛ استفاده از snapshot امروز ممکنه اطلاعات آینده رو به آموزش نشت بده — حساب کن.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> pipeline درست باید مرز زمانی رو حفظ کنه؛ استفاده از snapshot امروز ممکنه اطلاعات آینده رو به آموزش نشت بده</p>
 </div>
 </div>
   <div class="en"><p>ML leans hard on batch processing: data scientists and ML/AI engineers discovering data patterns, transforming data and training models. Three common uses:</p></div>
@@ -1540,9 +1539,9 @@
 <p>خروجیِ دسته‌ای بهتره اول کامل و اعتبارسنجی بشه و بعد تو مسیرِ خوندن قرار بگیره. انتشارِ تدریجیِ فایل‌های نیمه‌کاره می‌تونه به کاربرها نتیجهٔ مخلوط بده.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch11-26">
 <p class="example-title"><b>مثال فنی: انتشار ایندکس کامل</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن job نسخهٔ <code dir="ltr">search-v2</code> رو تو مسیر تازه می‌سازه و تعداد و کیفیت رکوردها رو می‌سنجه.</p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> job نسخهٔ <code dir="ltr">search-v2</code> رو تو مسیر تازه می‌سازه و تعداد و کیفیت رکوردها رو می‌سنجه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بعد از موفقیتِ همهٔ بخش‌ها، اشاره‌گر خوندن از v1 به v2 عوض می‌شه؛ v1 برای بازگشت موقتاً می‌مونه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> کاربر مخلوطِ خروجی ناقص و قدیمی نمی‌بینه؛ نوشتن مستقیمِ هر task رو ایندکس فعال این مزیت رو سخت‌تر می‌کنه — یادت باشه.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> کاربر مخلوطِ خروجی ناقص و قدیمی نمی‌بینه؛ نوشتن مستقیمِ هر task رو ایندکس فعال این مزیت رو سخت‌تر می‌کنه</p>
 </div>
 </div>
   <div class="en"><p>Batch jobs often build precomputed or derived datasets: product recommendations, user-facing reports and ML-model features. These are usually served from a production database, key-value store or search engine; so data must travel from the batch processor's DFS/object store to the database answering live traffic.</p></div>
@@ -1644,7 +1643,7 @@
       سه تا کارت جمع‌بندی می‌کنن: «<span class="ltr">All-or-Nothing Output</span>» (موفقیتِ job یعنی هر task دقیقاً یه بار اجرا شده، حتی با شکست و بازتلاش؛ اگه کلِ job شکست بخوره اصلاً خروجی تولید نمی‌شه؛ shardهای ناقص تا پایانِ نوشتن از کوئری پنهون‌ان)، «<span class="ltr">Read-Committed Reveal</span>» (مصرف‌کننده‌ها داده رو تا اعلانِ پایانِ job نامرئی نگه می‌دارن؛ این آشکارسازی مثلِ commit یه تراکنش تو سطحِ read committedـه) و «<span class="ltr">Recovery and Time Travel</span>» (خروجیِ ناقصِ task شکسته حذف می‌شه و task از ورودیِ immutable بازتلاش می‌شه؛ خروجی‌های superseded برای rollback و time travel نگه داشته می‌شن؛ خروجیِ اجرای لغوشده حذف می‌شه یا هرگز اعلام نمی‌شه).
     </p>
     <p>
-      درسِ کلیِ نمودار: <b>مرزِ commit</b> تو پردازشِ دسته‌ای همون «اعلامِ پایانِ job»ـه. تا قبل از اون، هر چیزی قابلِ حذف و بازسازیه؛ بعد از اون، کلِ dataset یه‌جا برای خواننده‌ها واقعی می‌شه — اینو قاب کن.
+      درسِ کلیِ نمودار: <b>مرزِ commit</b> تو پردازشِ دسته‌ای همون «اعلامِ پایانِ job»ـه. تا قبل از اون، هر چیزی قابلِ حذف و بازسازیه؛ بعد از اون، کلِ dataset یه‌جا برای خواننده‌ها واقعی می‌شه.
     </p></div>
     <div class="en"><p>This <b>state machine</b> has three lanes: <span class="ltr">Job output</span> (the main path), <span class="ltr">Failure handling</span> and <span class="ltr">Terminal exits</span>. The main path has four numbered steps: <span class="ltr">01 Writing Shards</span> (“tasks writing shards”, “output hidden”) — tasks are writing output shards but output stays hidden — then “<span class="ltr">last task succeeds</span>” to <span class="ltr">02 Ready, Unpublished</span> (“all shards written”, “invisible”): all shards written, yet nobody sees them.</p>
     <p>The key step is the “<span class="ltr">job-complete notification</span>” arrow (“<span class="ltr">read-committed style reveal</span>”) to <span class="ltr">03 Published</span> (“consumers notified”, “serving queries”): the job-done announcement reveals the whole dataset at once — exactly the text's “read-committed reveal”. Then “<span class="ltr">next scheduled run publishes</span>” moves to <span class="ltr">04 Superseded</span> (“replaced by newer run”, “kept for rollback”) — the replaced version kept for rollback and time travel. The failure path: from Writing Shards the red “<span class="ltr">task fails / preempted</span>” reaches <span class="ltr">Task Failed</span> (“partial output deleted”, “retryable”), and “<span class="ltr">retry from input</span>” loops back to Writing Shards — partial output deleted, rebuilt from immutable input. From Ready, Unpublished, “<span class="ltr">job aborted</span>” goes to <span class="ltr">Discarded</span> (“deleted or never announced”, “terminal”): an aborted run is deleted or never announced downstream — and since never announced, nobody saw a thing.</p>
@@ -1775,14 +1774,14 @@
     <div class="en"><p>It's the ability to recover from your own code bugs: since input is immutable and output derived, you revert code to the previous version and rerun the job — or switch to the previous output (kept under another path). Transactional databases lack this: if buggy code writes bad data, reverting code never fixes the data.</p></div>
   </details>
 
-  <details><summary><span class="fa">۳. چرا در مثالِ pipeline، اول sort می‌کنیم و بعد uniq -c؟</span><span class="en">3. Why sort first and uniq -c after in the pipeline example?</span></summary>
+  <details><summary><span class="fa">۳. برای شمارشِ تکرارها چرا اول sort می‌کنیم و بعد uniq -c؟</span><span class="en">3. Why sort before uniq -c when counting duplicates?</span></summary>
     <div class="fa"><p>چون <span class="ltr">uniq</span> فقط تکرارهای کنارِ هم رو می‌شماره. مرتب‌سازی مقدارهای یکسان رو کنارِ هم می‌آره تا شمارشِ همهٔ رخدادها درست باشه.</p>
 </div>
     <div class="en"><p>Because uniq only drops adjacent duplicate lines. Sorting makes every n-times-seen URL appear n times in a row; then uniq -c turns each run into one counted line. Exactly MapReduce's implicit-sort role, bringing same-key records together for the reducer.</p></div>
   </details>
 
   <details><summary><span class="fa">۴. «مرتب‌سازی» چرا نسبت به «تجمیع در حافظه» مقیاس می‌خورد؟</span><span class="en">4. Why does “sorting” scale better than “in-memory aggregation”?</span></summary>
-    <div class="fa"><p>تجمیعِ هش‌محور به حافظهٔ متناسب با تعدادِ کلیدهای متفاوت نیاز داره. مرتب‌سازیِ بیرونی می‌تونه بخش‌ها رو رو دیسک مرتب و ادغام کنه؛ برای دادهٔ بزرگ‌تر از حافظه راهی قابل‌کنترل می‌ده.</p>
+    <div class="fa"><p>تجمیعِ هش‌محور به حافظهٔ متناسب با تعدادِ کلیدهای متفاوت نیاز داره. مرتب‌سازیِ بیرونی می‌تونه بخش‌ها رو روی دیسک مرتب و ادغام کنه؛ برای دادهٔ بزرگ‌تر از حافظه راهی قابل‌کنترل می‌ده.</p>
 </div>
     <div class="en"><p>Because it uses disk efficiently: chunks sort in memory, spill as segments, and merge via mergesort (sequential access). A hash table instead wants memory per distinct key (the working set); bigger than memory, it breaks. GNU sort spills and parallelizes by itself though; the bottleneck becomes the input read rate.</p></div>
   </details>
@@ -1790,7 +1789,7 @@
   <details><summary><span class="fa">۵. قیاسِ «framework دسته‌ای = سیستم‌عاملِ توزیع‌شده» یعنی چه؟</span><span class="en">5. What does the “batch framework = distributed OS” analogy mean?</span></summary>
     <div class="fa"><p>چارچوبِ دسته‌ای محلِ داده و منابع و اجرای وظیفه و بازیابی رو بین چند تا ماشین مدیریت می‌کنه. این نقش‌ها شبیه وظایفِ سیستم‌عامل‌ان، ولی هزینهٔ شبکه و خرابیِ جزئی هم هست.</p>
 </div>
-    <div class="en"><p>The same three Unix-machine parts exist distributed: storage (DFS/object store = filesystem), orchestration (scheduler and resource manager = the kernel deciding what runs where with what resources), and compute (isolated tasks = processes exchanging data via the filesystem).</p></div>
+    <div class="en"><p>The same three Unix-machine parts exist distributed. Storage is the DFS or object store (the filesystem); orchestration is the scheduler and resource manager (the kernel deciding what runs where with which resources); and compute is isolated tasks (processes exchanging data via the filesystem).</p></div>
   </details>
 
   <details><summary><span class="fa">۶. چرا بلاک‌های DFS این‌قدر بزرگ‌تر از بلاک‌های فایل‌سیستمِ محلی‌اند؟</span><span class="en">6. Why are DFS blocks so much bigger than local-filesystem blocks?</span></summary>
@@ -1857,7 +1856,7 @@
   <details><summary><span class="fa">۱۶. شش مزیتِ موتورِ dataflow بر MapReduce چیست؟</span><span class="en">16. What are dataflow's six advantages over MapReduce?</span></summary>
     <div class="fa"><p>شش تا امکانِ مهم: مرتب‌سازیِ فقطِ لازم و ترکیبِ عملگرها و برنامه‌ریزیِ نزدیکِ داده و نگه‌داریِ مناسبِ دادهٔ میانی و عبورِ جریانیِ خروجی به مرحلهٔ بعد و استفادهٔ مجدد از فرایندها. بهرهٔ واقعی به موتور و طرح بستگی داره.</p>
 </div>
-    <div class="en"><p>Sort only where needed; fusing same-sharding operators; locality optimization since the whole DAG is known; keeping intermediate state in memory/local disk; starting each operator as soon as its input is ready (pipelining); and reusing processes (MapReduce booted a fresh JVM per task).</p></div>
+    <div class="en"><p>Dataflow engines sort only where needed and fuse operators that share a sharding. Because the whole DAG is known up front, they can schedule work near the data, keep intermediate state in memory or local disk, pipeline each operator as soon as its input is ready, and reuse processes instead of booting a fresh JVM per task.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۷. چرا SQL به زبانِ مشترکِ پردازشِ دسته‌ای تبدیل شد و optimizer چه می‌کند؟</span><span class="en">17. Why did SQL become batch processing's common language, and what does the optimizer do?</span></summary>
