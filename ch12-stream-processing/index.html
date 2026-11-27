@@ -40,7 +40,7 @@
 <div class="meta-row reveal">
 <span><b><span class="fa">۱۳</span><span class="en">13</span></b> <span class="fa">نمودار تعاملی</span><span class="en">interactive diagrams</span></span><span class="dot">·</span>
 <span><span class="fa">محور: پیام‌رسانی · CDC · پنجره‌ها · joinها · exactly-once</span><span class="en">Theme: messaging · CDC · windows · joins · exactly-once</span></span><span class="dot">·</span>
-<span><span class="fa">منبع: فصل ۱۲ کتاب DDIA ویرایش ۲</span><span class="en">Source: DDIA 2nd Edition, Chapter 12</span></span>
+    <span><span class="fa">زمان مطالعه: حدود ۷۵ دقیقه</span><span class="en">Reading time: ~75 min</span></span><span class="dot">·</span><span><span class="fa">منبع: فصل ۱۲ کتاب DDIA ویرایش ۲</span><span class="en">Source: DDIA 2nd Edition, Chapter 12</span></span>
 </div>
 </section>
 
@@ -270,12 +270,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: مستقیم یا بروکر؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویسِ گزارش ۱۰ دقیقه خاموشه، ولی سفارش‌ها دارن میان.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> ارسالِ مستقیم بدون ذخیرهٔ پایدار می‌تونه پیام‌ها رو گم کنه؛ brokerِ پایدار طبق سیاست retention نگهشون می‌داره تا گزارش برگرده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> broker وابستگیِ زمانی رو کم می‌کنه؛ ظرفیتِ دیسک، دوام و مدتِ نگهداری هنوز باید کافی باشن. — حساب کن.</p>
-</div>
+
 
 <p>
       نمودار دو نیمِ جداست، هر کدوم تو یه قاب (<span class="ltr">region</span>). از نیمهٔ بالا شروع کن:
@@ -391,12 +386,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: حساب backlog</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تولید <code dir="ltr">1000 msg/s</code> داریم و مصرف <code dir="ltr">700 msg/s</code>.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> backlog هر ثانیه ۳۰۰ پیام و در ۱۰ دقیقه ۱۸۰ هزار پیام بزرگ می‌شه؛ بزرگ‌کردنِ بافر فقط زمان می‌خره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یا نرخِ تولید رو کم می‌کنی، یا ظرفیتِ مصرف رو زیاد، یا طبقِ نیازِ بخشی رو حذف می‌کنی؛ صفِ نامحدود راه‌حلِ پایدارِ اختلافِ نرخ نیست. — حساب کن.</p>
-</div>
+
 
 <p>سه کارتِ کنارِ هم سه راهِ بخشِ ۲.۱ رو نشون می‌دن: <span class="ltr">DROP</span> (صورتی — انداختنِ پیام وقتی عقبی؛ برای readingهای سنسور که یه نقطهٔ گم‌شده مهم نیست، ولی برای شمارش نه)، <span class="ltr">BUFFER</span> (زرد — صف تو حافظه و بعد دیسک؛ بروکرِ لاگ‌محور همون بافرِ حلقه‌ایِ غول‌پیکره ولی بالاخره پر می‌شه؛ <span class="ltr">lag</span> رو مانیتور کن)، و <span class="ltr">BACKPRESSURE</span> (سبز — متوقف‌کردنِ تولیدکننده مثلِ لولهٔ Unix و TCP با بافرِ کوچکِ ثابت؛ هیچ‌چیز گم نمی‌شه ولی کند می‌شه).</p>
 <p>نوارِ پایینی پرسشِ دوم رو جواب می‌ده: دوام یعنی نوشتن روی دیسک + replication و بهایش throughput و تأخیره — «به‌اندازهٔ کافی بادوام برای کارت، نه بیشتر و نه کمتر».</p>
@@ -431,12 +421,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: Retry ترتیب تکمیل را عوض می‌کند</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> پیامِ اول <code dir="ltr">set status=paid</code> تو worker A گیر کرده؛ پیامِ دوم <code dir="ltr">set status=shipped</code> تو B زودتر تموم می‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تحویلِ دوبارهٔ پیامِ اول می‌تونه بعداً وضعیت رو برگردونه به paid، اگه نسخه یا ترتیبِ هر سفارش کنترل نشه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> ترتیبِ تحویل با ترتیبِ پایانِ پردازش یکی نیست؛ برای همون موجودیت، کلیدگذاری، سریالی‌کردن یا کنترلِ نسخه لازمه. — این دام معروفه.</p>
-</div>
+
 
 <p>
       چهار ستون داری: <span class="ltr">Producer 1</span> (منبعِ مرتبِ رویداد)،
@@ -685,12 +670,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: Dual-write وسطِ کار می‌ترکه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> برنامه قیمتِ P7 رو تو مرجع ۱۲۰ می‌کنه و پیش از نوشتنِ ایندکس crash می‌کنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> مرجع ۱۲۰ و ایندکس ۱۰۰ می‌مونن؛ و تو دو ویرایشِ هم‌زمان، حتی ترتیبِ اعمالِ دو مقصد می‌تونه فرق کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> retryِ ساده همیشه ترتیب رو درست نمی‌کنه؛ یه لاگِ معتبرِ تغییر یا outbox مسیرِ بازپخش‌پذیر می‌ده. — این دام معروفه.</p>
-</div>
+
 
 <p>
       پنج ستون داری: <span class="ltr">Client 1</span> (می‌خواد X = A بشه)،
@@ -755,12 +735,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: CDC با مرز سازگار</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> snapshotِ جدول تا موقعیتِ لاگ ۵۰۰ گرفته شده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> snapshot میاد تو جست‌وجو و بعد تغییرهای پس از ۵۰۰ به‌ترتیبِ مناسب اعمال می‌شن؛ lag و gap کنترل می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اگه مرز اشتباه باشه، تغییرِ حینِ snapshot جا می‌افته یا نادرست تکرار می‌شه؛ صرفِ خوندنِ دوره‌ایِ کلِ جدول، CDC دقیق نیست. — حساب کن.</p>
-</div>
+
 
 <p>
       این یه <span class="ltr">dataflow</span> پنج‌ستونه‌ست: <span class="ltr">System of Record</span>،
@@ -881,12 +856,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: ساخت state از رخدادها</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> جریانِ کلید K به‌ترتیب <code dir="ltr">K=1,K=3,K=DELETE</code> هست.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اعمالِ این تغییرات state نهاییِ «K وجود نداره» رو می‌سازه؛ compaction می‌تونه برای بازسازیِ state آخرین تغییرِ لازمِ هر کلید رو نگه داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> stream تاریخچهٔ تغییره و state حاصلِ اعمالِ اون؛ حذف‌ها و retention باید تو bootstrap درست تفسیر بشن. — یادت باشه.</p>
-</div>
+
 
 <p>
       ستونِ چپ <span class="ltr">event stream / changelog</span>ه: شش سطر با offset از صفر تا پنج —
@@ -1105,12 +1075,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: سه join با سه state</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> کلیک و نمایشِ تبلیغ هر دو جریان‌ان؛ مشخصاتِ کاربر یه جدوله.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> stream-stream کلیک رو تو بازهٔ زمانی به نمایش وصل می‌کنه؛ stream-table مشخصاتِ کاربر رو هنگامِ رخداد می‌خونه؛ table-table دو نمای به‌روز رو هماهنگ می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> هر join زمانِ نگهداری و معنای نسخهٔ طرفِ مقابل رو می‌خواد؛ join دو streamِ نامحدود بدون محدودیتِ state، stateِ نامحدود می‌سازه. — این دام معروفه.</p>
-</div>
+
 
 <p>
       سه پنلِ کنارِ هم، هر کدوم با سربرگِ رنگی و ساختارِ «دو ورودی → عملگرِ stateدار → یک خروجی + نوارِ annotation».
@@ -1165,12 +1130,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: چهار پنجره با یک جریان</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> برای یه کلید، رخدادها تو <code dir="ltr">10:01,10:04,10:12</code> رسیدن و زمانِ خودِ رخداد ملاکه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> tumbling پنج‌دقیقه‌ای دو رخدادِ اول رو تو <code dir="ltr">[10:00,10:05)</code> می‌ذاره؛ hopping با اندازهٔ ۱۰ و گام ۵ اون‌ها رو تو دو پنجرهٔ هم‌پوشان می‌شمره؛ sliding ده‌دقیقه‌ای تو ۱۰:۱۲ فقط ۱۰:۰۴ و ۱۰:۱۲ رو داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> session با قانونِ «فاصلهٔ بیش از پنج دقیقه، نشستِ تازه» دو رخدادِ اول رو یه نشست و رخدادِ سوم رو نشستِ بعد می‌گیره؛ تعریفِ مرزِ هر پنجره باید مشخص باشه. — حساب کن.</p>
-</div>
+
 
 <p>
       چهار باندِ روی هم با یه مقیاسِ مشترکِ ۰ تا ۱۰ دقیقه و راهنمای «نقطه = رویداد، مستطیل = پنجره».
@@ -1245,12 +1205,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: رخداد دیر رسیده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> خرید تو <code dir="ltr">10:02</code> رخ داده، ولی به‌خاطرِ قطعِ دستگاه تو <code dir="ltr">10:12</code> به پردازشگر رسیده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> گزارشِ event-time اون رو تو بازهٔ <code dir="ltr">10:00–10:05</code> می‌ذاره؛ گزارشِ processing-time هم تو بازهٔ دریافت.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> برای گزارشِ رخدادِ واقعی به lateness و اصلاحِ نتیجه نیاز داری؛ دو ساعت، دو سؤالِ متفاوت رو جواب می‌دن. — حساب کن.</p>
-</div>
+
 
 <p>
       دو پنلِ روی هم. پنلِ بالا «زمانِ رویداد — خطِ زمانیِ واقعی»: نقطه‌های یکدستِ رویداد روی محورِ دقیقه‌ها،
@@ -1304,12 +1259,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: Watermark حکمِ قطعیِ نرسیدن نیست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> پنجره تا <code dir="ltr">10:05</code>ه و سیاست، اصلاح تا دو دقیقه بعد از پایانِ پنجره رو می‌پذیره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> watermark از ۱۰:۰۵ رد می‌شه و خروجیِ اولیه منتشر می‌شه؛ تا مرزِ مجاز، پیامِ دیررس می‌تونه نتیجه رو اصلاح کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> watermark برآوردِ پیشرفتِ event-timeه؛ سیاستِ دادهٔ دیرتر و پاک‌سازیِ state باید جدا تعریف بشه. — این دام معروفه.</p>
-</div>
+
 
 <p>
       ماشینِ وضعیت با سه ردیف: <span class="ltr">Event-time window</span> (مسیرِ اصلی)،
@@ -1427,12 +1377,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: یک تراکنش برای اثر و شناسه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تو مقصدِ SQL، <code dir="ltr">event_id=e7</code> uniqueه و جمعِ فروش باید ۲۰۰ زیاد بشه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> داخل یه تراکنش، شناسه ثبت و جمع زیاد می‌شه؛ اگه شناسه از قبل باشه، افزایشِ دوباره انجام نمی‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> commitِ offset جدا می‌تونه عقب بمونه و پیام تکرار بشه، ولی این مقصد اثر رو دوباره اعمال نمی‌کنه؛ حفظِ شناسه به افقِ replay وابسته‌ست. — یادت باشه.</p>
-</div>
+
 
 <p>دو ردیف رو جدا بخون. ردیفِ بالا «درونِ فریم‌ورک»ه — همون ترفندِ بچ: <span class="ltr">MICROBATCH</span> (اسپارک — بریدنِ استریم به بلوک‌های حدوداً یک‌ثانیه‌ای که هر کدوم مثلِ بچِ مینیاتوری اجرا می‌شن و بلوکِ شکسته restart می‌شه) و <span class="ltr">CHECKPOINT</span> (فلینک — snapshot غلتانِ state با barrier و restart از تازه‌ترین). ردیفِ پایین «اثرهای بیرونی»ه که فریم‌ورک نمی‌تونه پس بگیره: <span class="ltr">ATOMIC COMMIT</span> (state + پیام + offset با هم و همه‌یا‌هیچ‌کدام، درونِ یه فریم‌ورک) و <span class="ltr">IDEMPOTENT SINK</span> (نگه‌داشتنِ offset کافکا همراهِ write تا تکرار بی‌اثر بشه — با فرضِ بازپخشِ هم‌ترتیب و fencing).</p>
 <p>نوارِ پایینی حکم می‌ده: <span class="ltr">exactly-once = effectively-once</span> — اثرِ مرئی انگار یک‌بار، حتی اگه بازتلاش شده.</p>
@@ -1467,12 +1412,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: مرز تضمین را تا مقصد دنبال کن</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> پردازشگر از Kafka می‌خونه و روی topic دیگه‌ای می‌نویسه، یا به API پیامک زنگ می‌زنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تراکنشِ Kafka می‌تونه outputِ Kafka و offset رو تو دامنهٔ خودش هماهنگ کنه؛ API پیامک بیرون از اون به کلیدِ تکرارپذیری و قراردادِ خودش نیاز داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> exactly-once رو برای مسیرِ مشخص می‌گیم؛ تضمینِ داخلِ broker رو بی‌دلیل به هر اثرِ بیرونی تعمیم نمی‌دیم. — حساب کن.</p>
-</div>
+
 
 <p>
       درخت پنج ردیفه: <span class="ltr">Broker Decision</span>، <span class="ltr">AMQP / JMS Queue</span>،
@@ -1513,12 +1453,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: از پیام تا اثرِ پایدار</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> رویداد <code dir="ltr">e7</code> می‌گه سفارش ۴۲ به مبلغ ۲۰۰ ثبت شده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> مصرف‌کننده‌اش رو می‌خونه، جمعِ فروش رو عوض می‌کنه و موقعیتِ پیشرفت رو ذخیره می‌کنه؛ اگه crash بینِ همین دو تا بیفته، تکرار می‌سازه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> طراحیِ استریم باید دو چیز رو با هم روشن کنه: پیام کجا نگه داشته می‌شه، و اثر با پیشرفت چطور اتمی می‌شه. — یادت باشه.</p>
-</div>
+
 
 <p>گرهِ میانی <span class="ltr">STREAM PROCESSING</span>ه: رویدادهای نامحدود که همیشه روشن‌ان. ردیفِ بالا واحدها و حمله: رویداد و تاپیک (immutable + timestamp)، بروکرها (مستقیم در برابرِ صفی در برابرِ لاگ‌محور)، و تقسیمِ کار در برابرِ پخش (یکی در برابرِ همه). دو گرهِ کناری نظم می‌دن: لاگ و offset (ترتیبِ درونِ پارتیشن، بازپخش‌پذیر) و CDC (یه رهبر، چند دنباله‌رو). ردیفِ پایین پردازش و تضمینه: دوگانِ state/stream (انتگرال، مشتق، compaction)، پنجره‌ها و زمان (event time + watermark)، و exactly-once (اتمیک یا idempotent).</p>
 <p>برچسبِ یال‌ها مسیر رو می‌گه: واحدها حمل می‌شن، تقسیم می‌شن، مرتب می‌مونن، دنبال می‌شن، مشتق می‌شن، کران می‌گیرن و زنده می‌مونن. خطِ پایینی خلاصهٔ فصله: رویدادها با بروکر به state می‌رسن، پنجره‌ها و joinها شکلشون می‌دن و exactly-once صادقشون نگه می‌داره.</p>
@@ -1584,12 +1519,7 @@
 
 <details><summary><span class="fa">۱. رویداد، تاپیک، تولیدکننده و مصرف‌کننده را در یک خط تعریف کن.</span><span class="en">1. Define event, topic, producer and consumer in one line each.</span></summary>
 <div class="fa"><p>رویداد یعنی «این اتفاق افتاد»؛ تولیدکننده می‌نویسش، تاپیک دستهٔ منطقیِ همون رویدادهاست و مصرف‌کننده برای کارِ خودش می‌خونش. قالب و معنای رویداد باید بینِ همه یکی باشه. — همین چهار نقش، تمامِ مدلِ رویداده.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: چهار نقش، یک سفارش</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویسِ سفارش رویداد <code dir="ltr">{id:e7, order_id:42, amount:200}</code> رو می‌سازه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پیام تو topic سفارش‌ها ثبت می‌شه؛ مصرف‌کنندهٔ گزارش می‌خونش و جمع رو عوض می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نقش‌ها روشنن: تولیدکننده منشأِ پیام، topic جریانِ دسته‌بندی‌شده، مصرف‌کننده مجریِ پردازش. رویداد یه رخدادِ شناخته‌شده با هویت و زمانه. — چهار نقش، همین.</p>
-</div></div>
+</div>
 <div class="en">
 <p><b>Event:</b> a small self-contained immutable record of something that happened, plus a timestamp. <b>Topic:</b> a group of same-kind events — the filename equivalent. The <b>producer</b> writes it once; there may be several <b>consumers</b>, each doing its own thing. Four roles, one model.</p>
 </div>
@@ -1597,12 +1527,7 @@
 
 <details><summary><span class="fa">۲. چرا polling پایگاه داده برای استریم جواب نمی‌دهد؟</span><span class="en">2. Why doesn't database polling work for streams?</span></summary>
 <div class="fa"><p><span class="ltr">Polling</span> بارِ تکراری می‌سازه و هر تغییری که بینِ دو خوندن اتفاق بیفته از قلم می‌افته؛ حذف و ترتیب هم سخت‌تر دیده می‌شن. یه منبعِ تغییرِ پایدار، قراردادِ روشن‌تری می‌ده. — سنجش رو باید از خودِ لاگ گرفت، نه از وضعیتِ لحظه‌ای.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Polling چه رخدادی رو جا می‌ندازه؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> رکورد از <code dir="ltr">pending</code> می‌ره به <code dir="ltr">paid</code> و پیش از pollingِ بعدی به <code dir="ltr">shipped</code>.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> خوندنِ دوره‌ایِ وضعیت فقط shipped رو می‌بینه و رخدادِ paid رو بازسازی نمی‌کنه؛ لاگِ تغییر هر دو transition رو حمل می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> snapshotِ وضعیت با تاریخچهٔ همهٔ تغییرات یکی نیست؛ timestampِ آخرین تغییر هم رخدادهای حذف‌شده رو خودکار برنمی‌گردونه. — این دام معروفه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Because as you move toward low latency, most polls come back empty-handed and the overhead climbs; the consumer should just be notified instead. Database triggers are limited and marginal too — hence the specialized messenger. Polling reads a snapshot; a change stream tells you what actually happened.</p>
 </div>
@@ -1610,12 +1535,7 @@
 
 <details><summary><span class="fa">۳. وقتی تولید سریع‌تر از مصرف است، سه راه چیست؟ مثال بزن.</span><span class="en">3. When production outruns consumption, what are the three options? Give an example.</span></summary>
 <div class="fa"><p>سه راه: پیام رو بندازی، بافر کنی، یا فشارِ برگشتی بذاری و تولید رو کم کنی. ارزشِ داده، ظرفیت و پیامدِ انتظار تعیین می‌کنن کدوم پذیرفتنیه. — انتخاب با جوابه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: حساب backlog</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تولید <code dir="ltr">1000 msg/s</code> داریم و مصرف <code dir="ltr">700 msg/s</code>.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> backlog هر ثانیه ۳۰۰ پیام و در ۱۰ دقیقه ۱۸۰ هزار پیام بزرگ می‌شه؛ بزرگ‌کردنِ بافر فقط زمان می‌خره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یا نرخِ تولید رو کم می‌کنی، یا ظرفیتِ مصرف رو زیاد، یا طبقِ نیازِ بخشی رو حذف می‌کنی؛ صفِ نامحدود راه‌حلِ پایدارِ اختلافِ نرخ نیست. — حساب کن.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Drop it, buffer it, or push back (stalling the producer). Unix pipes and TCP take the third with a small fixed buffer; when it's full, the sender stays blocked until the receiver reads. The right one depends on what the message is worth.</p>
 </div>
@@ -1623,12 +1543,7 @@
 
 <details><summary><span class="fa">۴. پیام‌رسانیِ مستقیم چه فرضی دارد و کی می‌شکند؟</span><span class="en">4. What does direct messaging assume, and when does it break?</span></summary>
 <div class="fa"><p>ارتباطِ مستقیم بیشتر به حضور و توانِ هم‌زمانِ طرف‌ها وابسته‌ست. قطع شدنِ گیرنده و کند شدنِ مصرف‌کننده، بافر و تحویلِ صریح می‌خوانه. — فرض کن طرفین همیشه آنلاین‌ان.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: مستقیم یا بروکر؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویسِ گزارش ۱۰ دقیقه خاموشه، ولی سفارش‌ها دارن میان.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> ارسالِ مستقیم بدون ذخیرهٔ پایدار می‌تونه پیام‌ها رو گم کنه؛ brokerِ پایدار طبق سیاست retention نگهشون می‌داره تا گزارش برگرده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> broker وابستگیِ زمانی رو کم می‌کنه؛ ظرفیتِ دیسک، دوام و مدتِ نگهداری هنوز باید کافی باشن. — حساب کن.</p>
-</div></div>
+</div>
 <div class="en">
 <p>It assumes both sides are permanently online. An offline consumer loses the outage-time messages; and if the producer itself crashes, its retry buffer dies with it. So the fault tolerance is thin, and your app code has to accept that loss is possible (UDP multicast, ZeroMQ, StatsD, webhooks). The broker is the safety net you're paying for.</p>
 </div>
@@ -1636,12 +1551,7 @@
 
 <details><summary><span class="fa">۵. بروکر چه مشکلی را حل می‌کند و مصرف‌کننده‌اش چرا ناهمگام است؟</span><span class="en">5. What problem does a broker solve, and why is its consumer asynchronous?</span></summary>
 <div class="fa"><p>بروکر تولید و مصرف رو از نظرِ زمان و مکان جدا می‌کنه و طبقِ قرارداد پیام رو نگه می‌داره. مصرف‌کننده با سرعتِ خودش می‌خونه؛ ماندگاریِ واقعی به نوع و تنظیماتِ بروکر بستگی داره. — ناهمگام بودنِ مصرف‌کننده، بهای همین جداسازیه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: مستقیم یا بروکر؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> سرویسِ گزارش ۱۰ دقیقه خاموشه، ولی سفارش‌ها دارن میان.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> ارسالِ مستقیم بدون ذخیرهٔ پایدار می‌تونه پیام‌ها رو گم کنه؛ brokerِ پایدار طبق سیاست retention نگهشون می‌داره تا گزارش برگرده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> broker وابستگیِ زمانی رو کم می‌کنه؛ ظرفیتِ دیسک، دوام و مدتِ نگهداری هنوز باید کافی باشن. — حساب کن.</p>
-</div></div>
+</div>
 <div class="en">
 <p>By centralizing the data in the broker, client churn and crashes are easy to absorb, and durability moves into the broker (in-memory or on-disk, your call). The producer only waits for the buffering ack; delivery to the consumer happens at some unknown point in the future — hence asynchronous. That's the trade: you get the decoupling, and you inherit the broker's guarantees.</p>
 </div>
@@ -1649,12 +1559,7 @@
 
 <details><summary><span class="fa">۶. متعادل‌سازیِ بار و fan-out چه فرقی دارند؟ ترکیبشان چیست؟</span><span class="en">6. How do load balancing and fan-out differ? What combines them?</span></summary>
 <div class="fa"><p>تقسیمِ بار هر پیام رو بینِ اعضای یه گروه پخش می‌کنه؛ <span class="ltr">fan-out</span> همون خبر رو به گروه‌های مستقل می‌رسونه. می‌شه تو هر گروه چند مصرف‌کننده داشت. — دوتا رو قاطی نکن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: دو گروه، چند worker</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> topic سفارش‌ها ۴ پارتیشن داره؛ گروهِ ارسال دو worker داره و گروهِ تحلیل هم دو worker.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تو هر گروه پارتیشن‌ها تقسیم می‌شن؛ هر گروه مستقل، همهٔ جریان رو دنبال می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> load balancing تقسیمِ کارِ یه گروهه؛ fan-out رسوندنِ جریان به گروه‌های مستقل. — این دوتا رو قاطی نکن.</p>
-</div></div>
+</div>
 <div class="en">
 <p>In the first one each message reaches a single consumer (that splits expensive work, and you scale by adding consumers); in the second each message reaches everyone (an independent broadcast, like several batch jobs reading one file). Combine them and you get the Kafka consumer group: load balancing inside the group, fan-out across groups.</p>
 </div>
@@ -1662,12 +1567,7 @@
 
 <details><summary><span class="fa">۷. ack چیست و تحویلِ مجدد چطور ترتیب را به‌هم می‌زند؟</span><span class="en">7. What is an ack, and how does redelivery break ordering?</span></summary>
 <div class="fa"><p><span class="ltr">Ack</span> یعنی «رسیدگی شد، طبقِ قرارداد». اگه بعد از اثرگذاری گم بشه، پیام دوباره می‌رسه؛ و ممکنه پیام‌های بعدی زودتر اجرا شده باشن و ترتیبِ اثرها قاطی بشه. — این دام معروفه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Retry ترتیب تکمیل را عوض می‌کند</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> پیامِ اول <code dir="ltr">set status=paid</code> تو worker A گیر کرده؛ پیامِ دوم <code dir="ltr">set status=shipped</code> تو B زودتر تموم می‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تحویلِ دوبارهٔ پیامِ اول می‌تونه بعداً وضعیت رو برگردونه به paid، اگه نسخه یا ترتیبِ هر سفارش کنترل نشه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> ترتیبِ تحویل با ترتیبِ پایانِ پردازش یکی نیست؛ برای همون موجودیت، کلیدگذاری، سریالی‌کردن یا کنترلِ نسخه لازمه. — این دام معروفه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>The consumer has to explicitly say “done” so the message can leave the queue; no ack (closed connection or timeout) means redelivery to somebody else. Because the first consumer processed and acked the next message meanwhile, the redelivered one lands later — like m4 before m3. Even the JMS/AMQP ordering guarantees can't save you from “load balancing + redelivery”.</p>
 </div>
@@ -1675,12 +1575,7 @@
 
 <details><summary><span class="fa">۸. پیامِ سمی چیست و DLQ چه می‌کند؟</span><span class="en">8. What is a poison message, and what does a DLQ do?</span></summary>
 <div class="fa"><p>پیامِ سمی اون ورودی‌ایه که پردازشِ تکراری‌اش می‌شکنه. <span class="ltr">DLQ</span> جدا کردنش می‌کنه تا بقیه راهشون رو باز کنن؛ ولی اصلاح، ترتیب و بازگرداندن رو باید خودت برنامه‌ریزی کنی. — DLQِ بی‌رسیدگی، انبارِ کثافتِ داده‌ست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: پیامِ سمی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> پیامِ e7 نسخهٔ schema نامعتبر داره و هر بار decoder رو می‌شکنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> بعد از چند تلاشِ محدود، پیام با علتِ خطا و هویتِ اصلیش می‌ره تو DLQ؛ بعد از اصلاح هم یه بازپردازشِ کنترل‌شده انجام می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> retryِ بی‌پایان همون خطا رو تکرار می‌کنه و ممکنه پارتیشن رو معطل کنه؛ DLQ هم بدونِ رسیدگی، محلِ گم‌شدنِ خاموشِ داده می‌شه. — این دام معروفه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>A message that kills every consumer (say, JSON missing a required key) and, since no ack comes, retries forever — burning resources or wedging everything (with hard ordering). The DLQ moves it to a separate queue so the flow stays free; DLQs are monitored, and the operator decides: drop it, fix it by hand, or fix the code. A DLQ nobody watches is just a graveyard.</p>
 </div>
@@ -1688,12 +1583,7 @@
 
 <details><summary><span class="fa">۹. بروکرِ لاگ‌محور چطور کار می‌کند و مصرفش چرا تکرارپذیر است؟</span><span class="en">9. How does a log-based broker work, and why is its consumption repeatable?</span></summary>
 <div class="fa"><p>پیام‌ها تو لاگِ پارتیشن نگه داشته می‌شن و گروهِ مصرف‌کننده موقعیتِ خوندنش رو ثبت می‌کنه. تا وقتی تاریخچه هست، می‌شه دوباره بخونی؛ ولی بازپخشِ اثرهای بیرونی باید کنترل بشه. — خوندن، لاگ رو پاک نمی‌کنه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Offset جایگاهِ یک پارتیشن است</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> پیام <code dir="ltr">e7</code> تو پارتیشن ۲ با offset=۱۰۱ ثبت شده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> گروه A تا offset ۱۰۰ و گروه B تا ۹۰ پیش رفته؛ پیشرفتشون مستقل از همه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> offset شناسهٔ سراسریِ کلِ topic نیست؛ برای موقعیت، نامِ topic و partition هم لازمه. — یادت باشه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>The producer appends, the consumer reads sequentially and waits at the log tail for a notification (like tail -f). Reading doesn't change the log — only the offset advances, and that's the consumer's own business — so you can raise a copy of the consumer at yesterday's offset and replay the past.</p>
 </div>
@@ -1701,12 +1591,7 @@
 
 <details><summary><span class="fa">۱۰. offset چیست و چرا تکرارِ پیام پیش می‌آید؟</span><span class="en">10. What is an offset, and why do messages repeat?</span></summary>
 <div class="fa"><p><span class="ltr">Offset</span> جای پیام تو یه پارتیشنه. اگه اثر اعمال بشه ولی موقعیت ذخیره نشه، بعد از بازیابی همون پیام دوباره خونده می‌شه. — تکرار، بهای همین فاصله‌ست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: شکافِ اثر و offset</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> جمعِ فعلی ۱۰۰۰ئه و پیامِ ۱۰۱ مبلغِ ۲۰۰ داره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> worker جمع رو ۱۲۰۰ می‌کنه، ولی قبل از ذخیرهٔ پیشرفت crash می‌کنه؛ replayِ بی‌حفاظ دوباره می‌زنه و می‌رسه به ۱۴۰۰.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> «دقیقاً یک اثر» به اتمی‌بودنِ state و پیشرفت، یا dedupِ معتبر نیاز داره؛ فقط ack کردنِ پیام کافی نیست. — این دام معروفه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Each message's ascending number inside its partition (total order within a partition, none across them). The broker only records the offset periodically — no per-message ack — so after a crash you resume from the last recorded one, not the last seen, and the messages in between repeat. Same deal as the LSN in replication.</p>
 </div>
@@ -1714,12 +1599,7 @@
 
 <details><summary><span class="fa">۱۱. چرا تعدادِ مصرف‌کننده‌ها سقف دارد؟</span><span class="en">11. Why is the consumer count capped?</span></summary>
 <div class="fa"><p>تو مدلِ معمولِ گروهِ مصرف‌کنندهٔ لاگ، هر پارتیشن هم‌زمان به یه عضو واگذار می‌شه؛ تعدادِ اعضای فعالِ اون تاپیک به تعدادِ پارتیشن‌ها محدوده. ولی این سقفِ همهٔ مدل‌های پردازش نیست. — حساب کن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: سقفِ موازی‌سازیِ یه گروه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تو مدلِ معمولِ consumer group کافکا، topic چهار پارتیشن داره و گروه شش مصرف‌کننده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حداکثر چهار مصرف‌کننده هم‌زمان مالکِ پارتیشنِ فعال‌ان و دو تای دیگه بی‌تخصیص می‌مونن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اضافه‌کردنِ worker بیشتر از تعدادِ پارتیشن، تو این مدل ظرفیت رو خودکار زیاد نمی‌کنه؛ پردازشِ درون‌پارتیشن و حفظِ ترتیب هم محدودیت دارن. — حساب کن.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Because a whole shard goes to one node, and a topic's cooperating nodes are at most its shard count. If one message is slow, the rest of its shard waits behind it (head-of-line blocking). For expensive per-message work where order doesn't matter, a traditional broker is the better deal.</p>
 </div>
@@ -1727,12 +1607,7 @@
 
 <details><summary><span class="fa">۱۲. مسابقهٔ dual-write را با شکل توضیح بده.</span><span class="en">12. Explain the dual-write race with the figure.</span></summary>
 <div class="fa"><p>نوشتن تو مرجع و مقصدِ دوم جداست؛ یکی می‌تونه شکست بخوره یا دو تغییر به ترتیبِ متفاوت برسن. باید یه مسیرِ مشترکِ معتبرِ تغییر داشته باشی یا تصمیمی که هماهنگه. — رهبرِ واحد، راهِ کم‌دردسر.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Dual-write وسطِ کار می‌ترکه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> برنامه قیمتِ P7 رو تو مرجع ۱۲۰ می‌کنه و پیش از نوشتنِ ایندکس crash می‌کنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> مرجع ۱۲۰ و ایندکس ۱۰۰ می‌مونن؛ و تو دو ویرایشِ هم‌زمان، حتی ترتیبِ اعمالِ دو مقصد می‌تونه فرق کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> retryِ ساده همیشه ترتیب رو درست نمی‌کنه؛ یه لاگِ معتبرِ تغییر یا outbox مسیرِ بازپخش‌پذیر می‌ده. — این دام معروفه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Two clients concurrently want X as A and B; both write the database first, then the index. The database sees A then B (final: B) but the index sees B then A (final: A) — a permanent, silent divergence with no error at all. The cause is two independent leaders and no single order; without a version vector you don't even notice. The fix is one leader (the database) plus CDC.</p>
 </div>
@@ -1740,12 +1615,7 @@
 
 <details><summary><span class="fa">۱۳. CDC چیست و چه چیزهایی لازم دارد؟</span><span class="en">13. What is CDC, and what does it need?</span></summary>
 <div class="fa"><p><span class="ltr">CDC</span> تغییرها رو از مرجع به جریان تبدیل می‌کنه. تصویرِ شروع، نقطهٔ لاگ، حذف‌ها، ترتیبِ لازم، قراردادِ ساختار و تکرار باید مدیریت بشن تا نمای مقصد قابل‌بازیابی بمونه. — مرز رو درست انتخاب کن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: CDC با مرز سازگار</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> snapshotِ جدول تا موقعیتِ لاگ ۵۰۰ گرفته شده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> snapshot میاد تو جست‌وجو و بعد تغییرهای پس از ۵۰۰ به‌ترتیبِ مناسب اعمال می‌شن؛ lag و gap کنترل می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اگه مرز اشتباه باشه، تغییرِ حینِ snapshot جا می‌افته یا نادرست تکرار می‌شه؛ صرفِ خوندنِ دوره‌ایِ کلِ جدول، CDC دقیق نیست. — حساب کن.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Extracting the database change log as an ordered stream (Debezium, Kafka Connect) that derived systems apply in the same order — the database leads, the rest follow. It's asynchronous, so it has lag. For a fresh system: a consistent snapshot at a known offset and then applying from there (or a compacted log from offset zero). Stabilize the schema with the outbox (single-transaction dual write).</p>
 </div>
@@ -1753,12 +1623,7 @@
 
 <details><summary><span class="fa">۱۴. log compaction چطور جای snapshot را می‌گیرد؟</span><span class="en">14. How does log compaction replace the snapshot?</span></summary>
 <div class="fa"><p>تو لاگِ فشرده‌شده، نسخهٔ لازمِ هر کلید می‌تونه برای بازسازیِ وضعیتِ فعلی بمونه — به شرطِ قراردادِ درست برای حذف و نگهداری. ولی این کار همهٔ تاریخچه یا هر نوعِ <span class="ltr">snapshot</span> رو جایگزین نمی‌کنه. — حواست به tombstone باشه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Bootstrap با لاگِ compactشده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> برای کلیدها تغییرهای <code dir="ltr">A=1,A=2,B=5</code> ثبت شدن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> بعد از compaction، مصرف‌کننده می‌تونه با آخرینِ مقدارهای موجود stateِ A=2 و B=5 رو بسازه؛ tombstone و retention باید حذف‌ها رو پوشش بدن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> لاگِ compactشده snapshotِ خودکارِ یه نقطهٔ زمانی نیست؛ bootstrap و شروعِ مصرفِ پیوسته باید مرز و سیاستِ روشن داشته باشن. — حساب کن.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Only each key's latest value remains (deletes via tombstone), and the footprint depends only on the current content. A fresh consumer scans the whole log from offset zero and takes a full copy — no fresh snapshot needed from the source. (For event sourcing, where events are intents rather than replacements, it doesn't work.)</p>
 </div>
@@ -1766,12 +1631,7 @@
 
 <details><summary><span class="fa">۱۵. دوگانِ state و stream یعنی چه؟</span><span class="en">15. What does the state/stream duality mean?</span></summary>
 <div class="fa"><p>جریانِ تغییرها وضعیت رو با اعمالِ مرحله‌ای می‌سازه؛ وضعیتِ فعلی همهٔ گذشته رو نگه نمی‌داره. برای بازسازی یا تاریخچهٔ کافی می‌خوای یا تصویرِ شروعِ معتبر. — لاگ مبناست، state مشتق‌شده.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: ساخت state از رخدادها</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> جریانِ کلید K به‌ترتیب <code dir="ltr">K=1,K=3,K=DELETE</code> هست.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اعمالِ این تغییرات state نهاییِ «K وجود نداره» رو می‌سازه؛ compaction می‌تونه برای بازسازیِ state آخرین تغییرِ لازمِ هر کلید رو نگه داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> stream تاریخچهٔ تغییره و state حاصلِ اعمالِ اون؛ حذف‌ها و retention باید تو bootstrap درست تفسیر بشن. — یادت باشه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Mutable state and the immutable log are two sides of one coin: state = the event integral over time, the stream = the time-derivative of state. Treat the log as the record and state as derived — then replay, auditing and building several views from one log all come for free. (Gray and Reuter: the log has all the information.)</p>
 </div>
@@ -1779,12 +1639,7 @@
 
 <details><summary><span class="fa">۱۶. CEP و تحلیلِ استریم چه فرقی دارند؟</span><span class="en">16. How do CEP and stream analytics differ?</span></summary>
 <div class="fa"><p><span class="ltr">CEP</span> به الگوی رویدادهای مرتبط واکنش می‌ده؛ تحلیلِ جریانی معمولاً آمار و تجمیع می‌سازه. فرق تو خروجی و نیازِ ترتیب و زمانه. — CEP دنبالِ الگو می‌گرده، نه دنبالِ میانگین.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: CEP با جمع‌زدن فرق داره</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> برای یه حساب، سه ورودِ ناموفق و بعد یه ورودِ موفق تو دو دقیقه رخ داده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> CEP ترتیب و فاصلهٔ رخدادها رو برای یه الگو می‌سنجه؛ تحلیلِ معمولی می‌تونه فقط تعدادِ ورودِ ناموفقِ دقیقه رو جمع کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یه مجموعِ ساده ترتیبِ «سه شکست سپس موفقیت» رو نگه نمی‌داره؛ نوعِ سؤال، stateِ لازم رو تعیین می‌کنه. — حساب کن.</p>
-</div></div>
+</div>
 <div class="en">
 <p>CEP hunts specific multi-event patterns (like regex; long-lived queries, transient data — the database's inverse). Analytics hunts aggregation and metrics over windows (rates, rolling averages); its probabilistic algorithms are only an optimization, not the nature of streams. One asks “did this happen?”, the other asks “how much?”.</p>
 </div>
@@ -1792,12 +1647,7 @@
 
 <details><summary><span class="fa">۱۷. سه join استریمی را مقایسه کن.</span><span class="en">17. Compare the three stream joins.</span></summary>
 <div class="fa"><p>جریان–جریان رویدادهای دو جریان رو با محدودهٔ زمان ترکیب می‌کنه؛ جریان–جدول رویداد رو با وضعیت کامل می‌کنه؛ جدول–جدول تغییرهای دو وضعیت رو تو نمای مشترک منعکس می‌کنه. — هر سه، state از یه ورودی می‌سازن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: سه join با سه state</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> کلیک و نمایشِ تبلیغ هر دو جریان‌ان؛ مشخصاتِ کاربر یه جدوله.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> stream-stream کلیک رو تو بازهٔ زمانی به نمایش وصل می‌کنه؛ stream-table مشخصاتِ کاربر رو هنگامِ رخداد می‌خونه؛ table-table دو نمای به‌روز رو هماهنگ می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> هر join زمانِ نگهداری و معنای نسخهٔ طرفِ مقابل رو می‌خواد؛ join دو streamِ نامحدود بدون محدودیتِ state، stateِ نامحدود می‌سازه. — این دام معروفه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Stream–stream: two event streams inside a bounded window (search+click; expiry = unclicked). Stream–table: enrichment with a local copy plus CDC (an infinite window on the table side; fresh replaces old). Table–table: maintaining a materialized view from two changelogs with (u·v)′ = u′v + uv′. All three are “state from one input + lookup with the other” — and undefined cross-stream order makes a join nondeterministic.</p>
 </div>
@@ -1805,12 +1655,7 @@
 
 <details><summary><span class="fa">۱۸. event time و processing time چرا قاطی می‌شوند؟ راه چیست؟</span><span class="en">18. Why do event time and processing time get mixed? What's the fix?</span></summary>
 <div class="fa"><p>زمانِ وقوع با زمانِ رسیدن فرق داره. پنجرهٔ مبتنی بر زمانِ رویداد و سیاستِ پیامِ دیررس، نسبت‌دادنِ داده رو روشن می‌کنن؛ ولی <span class="ltr">watermark</span> تضمینِ نبودِ دیررس نیست. — قاطی نکن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: رخداد دیر رسیده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> خرید تو <code dir="ltr">10:02</code> رخ داده، ولی به‌خاطرِ قطعِ دستگاه تو <code dir="ltr">10:12</code> به پردازشگر رسیده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> گزارشِ event-time اون رو تو بازهٔ <code dir="ltr">10:00–10:05</code> می‌ذاره؛ گزارشِ processing-time هم تو بازهٔ دریافت.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> برای گزارشِ رخدادِ واقعی به lateness و اصلاحِ نتیجه نیاز داری؛ دو ساعت، دو سؤالِ متفاوت رو جواب می‌دن. — حساب کن.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Many frameworks window by the machine clock; under lag (restarts, backlogs) a flat rate turns into an artificial spike (Fig. 12-8). The fix: window by the event timestamp (deterministic and replayable) plus watermarks for closing, and for laggards either ignore them (with a metric) or correct (with a retraction). Device clocks are untrustworthy — use three timestamps.</p>
 </div>
@@ -1818,12 +1663,7 @@
 
 <details><summary><span class="fa">۱۹. چهار نوع پنجره را با مثال بگو.</span><span class="en">19. Describe the four window types with an example each.</span></summary>
 <div class="fa"><p>پنجرهٔ ثابت مرزِ جدا داره؛ پنجرهٔ لغزان تو فاصله‌های منظم روی بازه‌های هم‌پوشان خروجی می‌ده؛ پنجرهٔ متحرک فاصلهٔ زمانیِ رویدادها رو دنبال می‌کنه؛ نشست هم با سکوتِ میانِ فعالیت‌ها جدا می‌شه. — مرزها رو دقیق تعریف کن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: چهار پنجره با یک جریان</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> برای یه کلید، رخدادها تو <code dir="ltr">10:01,10:04,10:12</code> رسیدن و زمانِ خودِ رخداد ملاکه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> tumbling پنج‌دقیقه‌ای دو رخدادِ اول رو تو <code dir="ltr">[10:00,10:05)</code> می‌ذاره؛ hopping با اندازهٔ ۱۰ و گام ۵ اون‌ها رو تو دو پنجرهٔ هم‌پوشان می‌شمره؛ sliding ده‌دقیقه‌ای تو ۱۰:۱۲ فقط ۱۰:۰۴ و ۱۰:۱۲ رو داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> session با قانونِ «فاصلهٔ بیش از پنج دقیقه، نشستِ تازه» دو رخدادِ اول رو یه نشست و رخدادِ سوم رو نشستِ بعد می‌گیره؛ تعریفِ مرزِ هر پنجره باید مشخص باشه. — حساب کن.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Tumbling: the 10:03 minute is one window, no overlap. Hopping: 5-minute windows with a one-minute hop (that's the smoothing). Sliding: two events 4.5 minutes apart share a window (the window follows the events; needs a sorted buffer). Session: a user's activity cluster until 30 minutes idle (variable width, common in web analytics). Say the boundaries out loud — that's the part interviews test.</p>
 </div>
@@ -1831,12 +1671,7 @@
 
 <details><summary><span class="fa">۲۰. در استریم به exactly-once چطور می‌رسی؟</span><span class="en">20. How do you reach exactly-once in streams?</span></summary>
 <div class="fa"><p>وضعیت، محلِ خوندن و خروجی باید تو محدودهٔ تضمین هماهنگ بازیابی بشن، یا نوشتنِ تکراری اثرِ اضافه نذاره. مقصدِ بیرونی هم باید تو همین قرارداد باشه. — مرزِ تضمین رو تا مقصد دنبال کن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: مرز تضمین را تا مقصد دنبال کن</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> پردازشگر از Kafka می‌خونه و روی topic دیگه‌ای می‌نویسه، یا به API پیامک زنگ می‌زنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تراکنشِ Kafka می‌تونه outputِ Kafka و offset رو تو دامنهٔ خودش هماهنگ کنه؛ API پیامک بیرون از اون به کلیدِ تکرارپذیری و قراردادِ خودش نیاز داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> exactly-once رو برای مسیرِ مشخص می‌گیم؛ تضمینِ داخلِ broker رو بی‌دلیل به هر اثرِ بیرونی تعمیم نمی‌دیم. — حساب کن.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Like batch (retry + discarding the partial) but with no “end”: inside the framework with microbatch (~1 second) or rolling checkpoints (barriers); for external effects either an internal atomic commit (state + messages + offset together) or idempotent writes (the Kafka offset alongside the value; assumes same-order replay, determinism and fencing). The precise name for it is effectively-once.</p>
 </div>

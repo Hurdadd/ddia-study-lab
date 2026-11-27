@@ -40,7 +40,7 @@
   <div class="meta-row reveal">
     <span><b><span class="fa">۹</span><span class="en">9</span></b> <span class="fa">نمودار (۶ تعاملی + ۳ مفهومی)</span><span class="en">diagrams (6 interactive + 3 concept)</span></span><span class="dot">·</span>
     <span><span class="fa">محور: compatibility · protobuf · Avro · dataflow modes</span><span class="en">Theme: compatibility · protobuf · Avro · dataflow modes</span></span><span class="dot">·</span>
-    <span><span class="fa">زمان مطالعه: حدود ۶۰ دقیقه</span><span class="en">Reading time: ~60 min</span></span>
+    <span><span class="fa">زمان مطالعه: حدود ۶۵ دقیقه</span><span class="en">Reading time: ~65 min</span></span>
   </div>
 </section>
 
@@ -253,19 +253,9 @@
 <div class="teacher">
   <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
   <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: چهار ترکیب در rolling upgrade</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن نصف سرورها هنوز نسخهٔ ۱‌ان، نصف دیگه رفتن روی نسخهٔ ۲.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اول نسخهٔ ۲ رکورد قدیمی رو می‌خونه و حالشو می‌بره؛ بعد نوبت نسخهٔ ۱ـه که یه رکورد دست‌نویس نسخهٔ ۲ دستش می‌رسه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> تهش اینه: backward یعنی جدید قدیمی رو بخونه، forward یعنی قدیمی جدید رو نگه داره. rolling upgrade هر دو رو هم‌زمان می‌خواد، قاطی نکن.</p>
-</div>
+
 <p>جدول دو در دو رو این‌طوری بخون: سطرها «دادهٔ قدیمی» و «دادهٔ جدید»‌ان، ستون‌ها «کد قدیمی می‌خونه» و «کد جدید می‌خونه». خونهٔ «دادهٔ قدیمی + کد جدید» همون <span class="ltr">backward</span>ـه (جدید قدیمی رو می‌خونه). خونهٔ «دادهٔ جدید + کد قدیمی» همون <span class="ltr">forward</span>ـه (قدیم جدید رو می‌خونه و نگهش می‌داره). خونه‌های هم‌نسخه بی‌دردسرن. نوار پایین هم حرف آخر rolling upgradeـه: چون نسخه‌ها قاطی‌ان، هر دو سازگاری رو با هم می‌خوای.</p></div>
-  <div class="en"><div class="callout" data-en-example="example-ch5-2">
-<p class="example-title"><b>Example: Four combinations during a rolling upgrade</b></p>
-<p><b>Setup:</b> Half the servers run version 1 and half run version 2.</p>
-<p><b>Walk through it:</b> Version 2 reads a record from version 1. Version 1 then receives a record produced by version 2. Include both same-version paths in the test matrix too.</p>
-<p><b>What this tells you:</b> Backward means the new reader handles old data. Forward means the old reader handles new data, retaining required information if it rewrites it. Mixed versions need both checks.</p>
-</div>
+  <div class="en">
 <p>Read the 2×2 grid. Its rows are “Old data” and “New data”; its columns are “Old code reads” and “New code reads”. Old data with new code is <span class="ltr">backward</span>. New data with old code is <span class="ltr">forward</span>. The same-version cells complete the four combinations.</p><p>The bottom bar explains why both directions matter during a rolling upgrade. Test the mixed-version cells too, including a rewrite if the old reader will write the record back.</p></div>
 </div>
 
@@ -285,24 +275,14 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار ۱</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: چهار ترکیب در rolling upgrade</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن نصف سرورها هنوز نسخهٔ ۱‌ان، نصف دیگه رفتن روی نسخهٔ ۲.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اول نسخهٔ ۲ رکورد قدیمی رو می‌خونه و حالشو می‌بره؛ بعد نوبت نسخهٔ ۱ـه که یه رکورد دست‌نویس نسخهٔ ۲ دستش می‌رسه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> تهش اینه: backward یعنی جدید قدیمی رو بخونه، forward یعنی قدیمی جدید رو نگه داره. rolling upgrade هر دو رو هم‌زمان می‌خواد، قاطی نکن.</p>
-</div>
+
 
       تصور کن سه نفر از چپ به راست نشستن: <span class="ltr">«Service v2.2»</span>
       (زیرنویس: <span class="ltr">«new code, new field»</span> — همون کد جدید)، وسط
       <span class="ltr">«Record Store»</span> (زیرنویس: <span class="ltr">«shared database»</span>)، و سمت راست
       <span class="ltr">«Service v2.1»</span> (زیرنویس: <span class="ltr">«old code still live»</span> — همون قدیمی که هنوز زنده‌ست).
       زمان از بالا به پایین میره و سه نوار عنوان سمت چپ، سه پردهٔ داستان رو از هم جدا می‌کنن.
-    </div><div class="en"><div class="callout" data-en-example="example-ch5-2">
-<p class="example-title"><b>Example: Four combinations during a rolling upgrade</b></p>
-<p><b>Setup:</b> Half the servers run version 1 and half run version 2.</p>
-<p><b>Walk through it:</b> Version 2 reads a record from version 1. Version 1 then receives a record produced by version 2. Include both same-version paths in the test matrix too.</p>
-<p><b>What this tells you:</b> Backward means the new reader handles old data. Forward means the old reader handles new data, retaining required information if it rewrites it. Mixed versions need both checks.</p>
-</div>
+    </div><div class="en">
 <p>The participants run left to right: <span class="ltr">Service v2.2</span>, labelled <span class="ltr">new code, new field</span>; <span class="ltr">Record Store</span>, labelled <span class="ltr">shared database</span>; and <span class="ltr">Service v2.1</span>, labelled <span class="ltr">old code still live</span>. Time runs downward through three bands. The shared store lets you see what happens when both service versions touch the same record.</p></div>
     <div class="fa">
       پردهٔ اول، <span class="ltr">«Rolling upgrade»</span>: فلش پررنگ <span class="ltr">«write record with new field»</span>
@@ -369,24 +349,14 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار ۲</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: مقایسهٔ قالب روی همان رکورد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن همون رکورد <code dir="ltr">user_id=17, active=true</code> رو می‌خوای با چند تا قالب بنویسی.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن JSON اسم فیلدها رو دونه‌دونه با خودش حمل می‌کنه؛ ولی قالب schemaدار می‌تونه به‌جاش شناسه یا جای فیلد رو بذاره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه سیب با سیب مقایسه کن — همون داده، همون کتابخونه؛ باینری بودن به‌تنهایی نه یعنی کم‌حجم‌تر، نه یعنی تکامل بهتر.</p>
-</div>
+
 
       این نمودار رو این‌طوری بخون: چهار تا نوار افقی داری، از بالا به پایین:
       <span class="ltr">«Decision»</span> (سؤال‌ها)، <span class="ltr">«Language-Native»</span> (همونی که پس‌زمینه‌ش فرق داره — استثناست)،
       <span class="ltr">«Textual Formats»</span> و <span class="ltr">«Binary Schema-Driven»</span>.
       بالا هم دو تا فاز داری: <span class="ltr">«Scope»</span> روی دو ستون اول،
       و <span class="ltr">«Choose the format»</span> روی بقیه.
-    </div><div class="en"><div class="callout" data-en-example="example-ch5-3">
-<p class="example-title"><b>Example: Compare the same record</b></p>
-<p><b>Setup:</b> The record to encode is <code dir="ltr">user_id=17, active=true</code>.</p>
-<p><b>Walk through it:</b> JSON carries the field names. A schema-driven format can identify fields through numbers or their schema-defined positions.</p>
-<p><b>What this tells you:</b> Compare the same data with stated encoders and settings. A binary representation alone doesn't establish a smaller record or safer evolution.</p>
-</div>
+    </div><div class="en">
 <p>The four lanes are <span class="ltr">Decision</span>, <span class="ltr">Language-Native</span>, <span class="ltr">Textual Formats</span> and <span class="ltr">Binary Schema-Driven</span>. The language-native lane is marked as the exception. Above them, <span class="ltr">Scope</span> covers the opening questions and <span class="ltr">Choose the format</span> covers the format choices. Begin with the data's lifetime and audience.</p></div>
     <div class="fa">
       از جعبهٔ <span class="ltr">«Record to Encode»</span> (زیرنویس: <span class="ltr">«object to bytes»</span>) شروع کن.
@@ -637,22 +607,12 @@ message Person {
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار ۳</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: Resolution در Avro</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن writer فقط <code dir="ltr">name</code> داره، reader جدید اومده یه فیلد <code dir="ltr">country</code> با default مساوی <code dir="ltr">IR</code> اضافه کرده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا وقتی رکورد قدیمی رو می‌خونی، reader مقدار گمشدهٔ country رو از default برمی‌داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه default فقط جای خالی writer رو پر می‌کنه؛ به‌جای نوشتن اجباری تو schema نویسنده نمی‌شینه.</p>
-</div>
+
 
       چهار تا ستون داری، از چپ به راست: <span class="ltr">«Write Side»</span>،
       <span class="ltr">«Encoded Bytes»</span>، <span class="ltr">«Read Side»</span> و <span class="ltr">«Resolution»</span>.
       نوار بالا جریان اصلیه و نوار پایین «پشت صحنهٔ schema».
-    </div><div class="en"><div class="callout" data-en-example="example-ch5-7">
-<p class="example-title"><b>Example: Resolving an older Avro record</b></p>
-<p><b>Setup:</b> The writer has only <code dir="ltr">name</code>. A new reader adds <code dir="ltr">country</code>, with default <code dir="ltr">IR</code>.</p>
-<p><b>Walk through it:</b> When it reads the old record, the reader fills the missing country from its default.</p>
-<p><b>What this tells you:</b> A default fills a gap between writer and reader schemas. It doesn't make fields optional when encoding against the writer's schema.</p>
-</div>
+    </div><div class="en">
 <p>The columns are <span class="ltr">Write Side</span>, <span class="ltr">Encoded Bytes</span>, <span class="ltr">Read Side</span> and <span class="ltr">Resolution</span>. The upper lane follows the record. The lower lane supplies the schemas needed to interpret it. Follow both; the bytes alone don't identify the fields.</p></div>
     <div class="fa">
       نوار بالا رو دنبال کن: <span class="ltr">«Writer App»</span> (زیرنویس: <span class="ltr">«compiled with schema»</span>، برچسب
@@ -728,19 +688,9 @@ message Person {
 <div class="teacher">
   <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
   <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: مقایسهٔ قالب روی همان رکورد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن همون رکورد <code dir="ltr">user_id=17, active=true</code> رو می‌خوای با چند تا قالب بنویسی.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن JSON اسم فیلدها رو دونه‌دونه با خودش حمل می‌کنه؛ ولی قالب schemaدار می‌تونه به‌جاش شناسه یا جای فیلد رو بذاره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه سیب با سیب مقایسه کن — همون داده، همون کتابخونه؛ باینری بودن به‌تنهایی نه یعنی کم‌حجم‌تر، نه یعنی تکامل بهتر.</p>
-</div>
+
 <p>چهار تا میله رو از بالا بخون: <span class="ltr">JSON</span> با ۸۱ بایت (اسم فیلدها تو خود داده سفر می‌کنن)، <span class="ltr">MessagePack</span> با ۶۶ بایت (همون مدل، باینری، ولی هنوز بی‌<span class="ltr">schema</span>)، پروتوباف با ۳۳ بایت (اسم‌ها با شمارهٔ tag عوض شدن) و <span class="ltr">Avro</span> با ۳۲ بایت (فقط مقدارها؛ ترتیب از <span class="ltr">schema</span> میاد). حرف آخرش اینه: <span class="ltr">schema</span> اسم‌ها رو حذف می‌کنه و ۸۱ بایت رو می‌کنه ۳۲ بایت.</p></div>
-  <div class="en"><div class="callout" data-en-example="example-ch5-3">
-<p class="example-title"><b>Example: Compare the same record</b></p>
-<p><b>Setup:</b> The record to encode is <code dir="ltr">user_id=17, active=true</code>.</p>
-<p><b>Walk through it:</b> JSON carries the field names. A schema-driven format can identify fields through numbers or their schema-defined positions.</p>
-<p><b>What this tells you:</b> Compare the same data with stated encoders and settings. A binary representation alone doesn't establish a smaller record or safer evolution.</p>
-</div>
+  <div class="en">
 <p>Compare the four bars for <b>this record</b>. <span class="ltr">JSON</span> uses 81 bytes with field names included. <span class="ltr">MessagePack</span> uses 66, retaining names in a binary map. Protobuf uses 33, replacing names with tag numbers. <span class="ltr">Avro</span> uses 32, with field order supplied by the schema.</p><p>The example shows how schema information can remove repeated metadata. It doesn't predict the size of every record or include every possible framing cost.</p></div>
 </div>
 <div class="en"><div style="overflow-x:auto" tabindex="0" role="region" aria-label="Encoding format comparison"><table><thead><tr><th>Aspect</th><th>JSON / XML</th><th>MessagePack &amp; friends</th><th>Protocol Buffers</th><th>Avro</th></tr></thead><tbody>
@@ -794,24 +744,14 @@ message Person {
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار ۶</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: چرخهٔ حذف یک فیلد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن می‌خوای از <code dir="ltr">full_name</code> بری به <code dir="ltr">given_name, family_name</code>.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اول خواننده‌ها رو کاری کن هر دو شکل رو بخورن؛ بعد writerها رو یکی‌یکی عوض کن؛ حذف نهایی فقط وقتیه که مصرف‌کننده و دادهٔ قدیمی پوشش داده شدن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه حذف فیلد فقط دست بردن تو یه فایل schema نیست؛ عمر داده و همه readerها جزئی از مهاجرتن.</p>
-</div>
+
 
       این نمودار رو این‌طوری بخون: سه تا نوار (<span class="ltr">lane</span>) افقی داری، از بالا به پایین:
       <span class="ltr">«Field states»</span> (زندگی یه فیلد)، <span class="ltr">«Compatibility gates»</span>
       (دروازه‌های تصمیم سازگاری) و <span class="ltr">«Terminal»</span> (بن‌بست). پنج حالت نوار بالا شمارهٔ قدم دارن —
       <span class="ltr">«01»</span> تا <span class="ltr">«05»</span> — و مسیر عادی زندگی یه فیلد رو می‌سازن؛ دو تا
       لوزی نوار میانی «دروازه»‌ن و حالت قرمز نوار پایین، مقصد مسیر شکست.
-    </div><div class="en"><div class="callout" data-en-example="example-ch5-11">
-<p class="example-title"><b>Example: Retiring a field in stages</b></p>
-<p><b>Setup:</b> The application is moving from <code dir="ltr">full_name</code> to <code dir="ltr">given_name, family_name</code>.</p>
-<p><b>Walk through it:</b> Prepare readers to accept both forms. Upgrade writers gradually. Remove the old form only when remaining consumers and retained data are covered.</p>
-<p><b>What this tells you:</b> Removing a field is a migration across readers and data lifetimes. Editing one schema file doesn't finish that migration.</p>
-</div>
+    </div><div class="en">
 <p>Read the lanes from top to bottom: <span class="ltr">Field states</span>, <span class="ltr">Compatibility gates</span> and <span class="ltr">Terminal</span>. The top states, numbered <span class="ltr">01</span> through <span class="ltr">05</span>, show the normal lifecycle. Two diamonds ask whether a stronger assumption or final removal is safe. The red state marks a breaking change.</p></div>
     <div class="fa">
       از چپ نوار بالا شروع کن: <span class="ltr">«Proposed»</span> (قدم <span class="ltr">«01»</span>) با زیرنویس
@@ -919,20 +859,10 @@ message Person {
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار ۴</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: سه مسیر همان داده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن عوض شدن اسم کاربر رو میشه از سه‌جا خوند: رکورد دیتابیس، جواب API، یا پیام رویداد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن دیتابیس نسخه‌های قدیمی رو نگه داشته. API هنوز با کلاینت قدیمی حرف می‌زنه. صف هم ممکنه پیام قدیمی رو دوباره بده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه هر مسیر پنجره سازگاری خودش رو داره. تموم شدن deploy سرور یعنی تموم شدن داده قدیمی؟ نه! نکته ماندگار: داده از کد دیرتر می‌میره.</p>
-</div>
+
 
       تصور کن از چپ شروع می‌کنی: جعبه <span class="ltr">«Application Process»</span> با زیرنویس <span class="ltr">«in-memory objects»</span>. فلش پررنگ <span class="ltr">«encode object to bytes»</span> می‌رسه به قلب شکل: جعبه بزرگ <span class="ltr">«Encoder / Decoder»</span> (زیرنویس: <span class="ltr">«objects to bytes and back»</span>، برچسب <span class="ltr">«textual or schema-driven»</span>). یادت باشه همه‌چیز از همین‌جا رد میشه.
-    </div><div class="en"><div class="callout" data-en-example="example-ch5-12">
-<p class="example-title"><b>Example: The same data on three paths</b></p>
-<p><b>Setup:</b> A changed user name appears in a database record, an API response and an event message.</p>
-<p><b>Walk through it:</b> The database retains older records. The API still serves old clients. A queue can redeliver an older message.</p>
-<p><b>What this tells you:</b> Each path has its own compatibility window. Completing the server rollout doesn't retire all old data or readers.</p>
-</div>
+    </div><div class="en">
 <p>On the left, <span class="ltr">Application Process</span> holds <span class="ltr">in-memory objects</span>. Follow <span class="ltr">encode object to bytes</span> to <span class="ltr">Encoder / Decoder</span>, labelled <span class="ltr">objects to bytes and back</span> and <span class="ltr">textual or schema-driven</span>. This conversion sits between the application's memory structures and each of the four dataflow paths.</p></div>
     <div class="fa">
       فرض کن از راست این جعبه چهار فلش میره بیرون. هر چهار حالت تو یه قاب‌ان: <span class="ltr">«Bytes cross a process boundary — backward + forward compatibility required»</span>. نکته ماندگار: بایت از مرز process رد میشه، سازگاری دوطرفه می‌خواد.
@@ -1092,20 +1022,10 @@ message Person {
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار ۵</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: ادامهٔ workflow بعد از crash</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن workflow اول رزرو داره بعد صدور رسید. رزرو با شناسه <code dir="ltr">r7</code> موفق شده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن engine پیشرفت رو پایدار کرده. بعد از crash از روی تاریخچه ادامه میده. ولی فعالیتی که نتیجه‌ش ثبت نشده ممکنه دوباره صدا زده بشه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه اثر بیرونی رزرو باید با <code dir="ltr">r7</code> امن تکرار بشه. نکته ماندگار: دوام workflow یعنی «ادامه از تاریخچه»، نه «فقط یه‌بار اجرا».</p>
-</div>
+
 
       تصور کن شش شرکت‌کننده از چپ به راست‌ان: <span class="ltr">«Checkout»</span> (زیرنویس: <span class="ltr">«workflow trigger»</span>)، <span class="ltr">«Workflow Engine»</span> (زیرنویس: <span class="ltr">«workflow runtime»</span>)، <span class="ltr">«Durable Log»</span> (زیرنویس: <span class="ltr">«write-ahead log»</span>)، <span class="ltr">«Fraud Check»</span> (زیرنویس: <span class="ltr">«internal service»</span>)، <span class="ltr">«Card Network»</span> و <span class="ltr">«Bank Service»</span> (هر دو زیرنویس <span class="ltr">«third-party API»</span>). دو نوار عنوان هم تو چپه: <span class="ltr">«First execution»</span> و <span class="ltr">«Crash recovery and replay»</span>. یادت باشه اول اجرا، بعد نجات.
-    </div><div class="en"><div class="callout" data-en-example="example-ch5-16">
-<p class="example-title"><b>Example: Resuming a workflow after a crash</b></p>
-<p><b>Setup:</b> A workflow makes a reservation, then issues a receipt. The reservation with identifier <code dir="ltr">r7</code> succeeds.</p>
-<p><b>Walk through it:</b> The engine retains progress and resumes from history after a crash. An activity whose outcome wasn't recorded may be called again.</p>
-<p><b>What this tells you:</b> The external reservation must be safe to retry with <code dir="ltr">r7</code>. Durable execution resumes from history; it doesn't guarantee each activity executes once.</p>
-</div>
+    </div><div class="en">
 <p>Read the six participants from left to right: <span class="ltr">Checkout</span>, labelled <span class="ltr">workflow trigger</span>; <span class="ltr">Workflow Engine</span>, labelled <span class="ltr">workflow runtime</span>; <span class="ltr">Durable Log</span>, labelled <span class="ltr">write-ahead log</span>; <span class="ltr">Fraud Check</span>, labelled <span class="ltr">internal service</span>; then <span class="ltr">Card Network</span> and <span class="ltr">Bank Service</span>, both using a <span class="ltr">third-party API</span>.</p><p>The bands <span class="ltr">First execution</span> and <span class="ltr">Crash recovery and replay</span> separate the initial calls from recovery. Track which successful results reached the durable log before the crash.</p></div>
     <div class="fa">
       فرض کن تو اجرای اول <span class="ltr">«start payment workflow»</span> از Checkout میاد به موتور. موتور قدم‌ها رو یکی‌یکی می‌فرسته: <span class="ltr">«activity: check fraud»</span> به Fraud Check و جواب <span class="ltr">«not fraudulent»</span>. بعد <span class="ltr">«append step result»</span> به Durable Log (فلش چین‌چین — یعنی هر قدم موفق اول ثبت میشه). بعد <span class="ltr">«activity: debit card»</span> به Card Network و جواب <span class="ltr">«charged»</span> و دوباره ثبت تو لاگ. قدم سوم <span class="ltr">«activity: deposit funds»</span> به Bank Serviceئه که زیرش نوشته <span class="ltr">«worker crashes mid-step»</span> — همین‌جا worker می‌میره.
@@ -1184,19 +1104,9 @@ message Person {
 <div class="teacher">
   <div class="tag"><span class="fa">روایت مدرس از نقشهٔ فصل</span><span class="en">Chapter-map narration</span></div>
   <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: رکورد قدیمی زیر کد جدید</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن نسخه ۱ فقط رکورد <code dir="ltr">{name: &quot;Sara&quot;}</code> رو نوشته. بعد نسخه ۲ اومده یه فیلد <code dir="ltr">email</code> هم اضافه کرده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن خواننده جدید باید بلد باشه رکورد قدیمی بدون email رو بخوره. خواننده قدیمی هم نباید با دیدن فیلد جدید قاطی کنه، فقط تحملش کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه تست واقعی هر دو جهت رو می‌خواد. اینکه کد جدید با خودش حرف بزنه هنر نیست. نکته ماندگار: سازگاری دوطرفه‌ست یا هیچی نیست.</p>
-</div>
+
 <p>تصور کن گره میانی «کدگذاری و تکامل»ئه: از بالا «<span class="ltr">backward + forward</span>» (با یال «خواندن»)، «قالب‌های متنی» («بایت‌ها») و «پروتوباف + <span class="ltr">Avro</span>» («تگ‌ها»)؛ در میانه «رجیستری <span class="ltr">schema</span>» («بررسی») و «ارتقاهای تدریجی» («انتشار»)؛ و در پایین «سرویس‌ها + <span class="ltr">RPC</span>» («فراخوانی») و «رویدادها + <span class="ltr">workflow</span>ها» («جریان»). یادت باشه پیام نقشه اینه: قالب قراردادِ خوندنِ «کدِ هنوزنوشته‌نشده» از «داده دیروز»ئه. نکته ماندگار: قالب خوب یعنی آینده بتونه گذشته رو بخونه.</p></div>
-  <div class="en"><div class="callout" data-en-example="example-ch5-0">
-<p class="example-title"><b>Example: Old records under new code</b></p>
-<p><b>Setup:</b> Version 1 wrote only <code dir="ltr">{name: &quot;Sara&quot;}</code>. Version 2 adds <code dir="ltr">email</code>.</p>
-<p><b>Walk through it:</b> The new reader handles an old record without email. The old reader must also handle a new record with the added field according to the contract.</p>
-<p><b>What this tells you:</b> Test both mixed-version directions. A new version successfully reading its own output doesn't test compatibility.</p>
-</div>
+  <div class="en">
 <p>The hub is “Encoding &amp; Evolution”. Follow “Backward + forward” through “reads”, “Text formats” through “bytes”, and “Protobuf + Avro” through “tags”. Then connect “Schema registry” through “checks” and “Rolling upgrades” through “ships”. Below, “RPC + services” connects through “calls” and “Events + workflows” through “streams”.</p><p>The seven connections point to one long-lived contract: future code must understand retained data, while coexisting older readers must handle new writes safely.</p></div>
 </div>
 <div class="en"><div style="overflow-x:auto" tabindex="0" role="region" aria-label="Dataflow compatibility comparison"><table><thead><tr><th>Dataflow mode</th><th>Who encodes</th><th>Who decodes</th><th>Needed compatibility</th></tr></thead><tbody>
@@ -1241,323 +1151,123 @@ message Person {
 
   <details><summary><span class="fa">۱. backward و forward compatibility یعنی چه و در APIها چطور معنا می‌شوند؟</span><span class="en">1. What do backward and forward compatibility mean — and in APIs?</span></summary>
     <div class="fa"><p>backward یعنی کد جدید هنوز داده قدیمی رو بفهمه؛ forward یعنی کد قدیمی با داده جدید نترکه و نگهش داره. تو <span class="ltr">API</span> جدا حساب کن کی request رو می‌نویسه و کی response رو می‌خونه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: چهار ترکیب در rolling upgrade</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن نصف سرورها هنوز نسخهٔ ۱‌ان، نصف دیگه رفتن روی نسخهٔ ۲.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اول نسخهٔ ۲ رکورد قدیمی رو می‌خونه و حالشو می‌بره؛ بعد نوبت نسخهٔ ۱ـه که یه رکورد دست‌نویس نسخهٔ ۲ دستش می‌رسه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> تهش اینه: backward یعنی جدید قدیمی رو بخونه، forward یعنی قدیمی جدید رو نگه داره. rolling upgrade هر دو رو هم‌زمان می‌خواد، قاطی نکن.</p>
-</div></div><div class="en"><p><b>Backward:</b> new code reads old data. <b>Forward:</b> old code reads new data. If the old reader writes the record back, also test that it preserves required information.</p><p>For an old client and new server, requests need backward compatibility and responses need forward compatibility. Reverse the versions and reverse the directions. Identify the writer and reader for each payload.</p>
-<div class="callout" data-en-example="example-ch5-2">
-<p class="example-title"><b>Example: Four combinations during a rolling upgrade</b></p>
-<p><b>Setup:</b> Half the servers run version 1 and half run version 2.</p>
-<p><b>Walk through it:</b> Version 2 reads a record from version 1. Version 1 then receives a record produced by version 2. Include both same-version paths in the test matrix too.</p>
-<p><b>What this tells you:</b> Backward means the new reader handles old data. Forward means the old reader handles new data, retaining required information if it rewrites it. Mixed versions need both checks.</p>
-</div></div>
+</div><div class="en"><p><b>Backward:</b> new code reads old data. <b>Forward:</b> old code reads new data. If the old reader writes the record back, also test that it preserves required information.</p><p>For an old client and new server, requests need backward compatibility and responses need forward compatibility. Reverse the versions and reverse the directions. Identify the writer and reader for each payload.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۲. چرا rolling upgrade هر دو نوع سازگاری را لازم دارد؟</span><span class="en">2. Why does a rolling upgrade need both compatibilities?</span></summary>
     <div class="fa"><p>تو rolling upgrade همه nodeها با هم آپدیت نمی‌شن؛ یه مدت نسخه قدیم و جدید کنار هم کار می‌کنن و داده قدیم و جدید قاطی رد و بدل می‌شه. پس هر دو جهت خوندن رو لازم داری، نه فقط یکیش.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: چهار ترکیب در rolling upgrade</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن نصف سرورها هنوز نسخهٔ ۱‌ان، نصف دیگه رفتن روی نسخهٔ ۲.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> اول نسخهٔ ۲ رکورد قدیمی رو می‌خونه و حالشو می‌بره؛ بعد نوبت نسخهٔ ۱ـه که یه رکورد دست‌نویس نسخهٔ ۲ دستش می‌رسه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> تهش اینه: backward یعنی جدید قدیمی رو بخونه، forward یعنی قدیمی جدید رو نگه داره. rolling upgrade هر دو رو هم‌زمان می‌خواد، قاطی نکن.</p>
-</div></div><div class="en"><p>A rolling upgrade leaves old and new nodes running together. New code may read old records, and old code may receive new ones. Clients can remain on old releases longer still. Test both mixed-version directions for the paths that can actually meet.</p>
-<div class="callout" data-en-example="example-ch5-2">
-<p class="example-title"><b>Example: Four combinations during a rolling upgrade</b></p>
-<p><b>Setup:</b> Half the servers run version 1 and half run version 2.</p>
-<p><b>Walk through it:</b> Version 2 reads a record from version 1. Version 1 then receives a record produced by version 2. Include both same-version paths in the test matrix too.</p>
-<p><b>What this tells you:</b> Backward means the new reader handles old data. Forward means the old reader handles new data, retaining required information if it rewrites it. Mixed versions need both checks.</p>
-</div></div>
+</div><div class="en"><p>A rolling upgrade leaves old and new nodes running together. New code may read old records, and old code may receive new ones. Clients can remain on old releases longer still. Test both mixed-version directions for the paths that can actually meet.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۳. خطرِ شکل ۵-۱ کتاب چیست و چطور رفع می‌شود؟</span><span class="en">3. What is the book’s Figure 5-1 danger, and the fix?</span></summary>
     <div class="fa"><p>کد قدیمی فیلد ناشناخته رو نمی‌فهمه و می‌ندازتش دور؛ بعد که همون رکورد رو پس می‌نویسه، اون فیلد برای همیشه از داده اصلی می‌پره. راه حل: یا فیلد ناشناخته رو نگه دار، یا به‌جای بازنویسی کل رکورد فقط همون تیکه لازم رو update کن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: ویرایش نام، حذف email</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن نسخه ۲ رکورد <code dir="ltr">{name:Sara,email:a@b}</code> رو نوشته. ولی نسخه ۱ فقط name رو می‌شناسه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن نسخه ۱ کل شیء رو می‌خونه. name رو عوض می‌کنه. بعد بدون email پس می‌نویسه. مگه اینکه update رو فقط به name محدود کنی یا فیلد ناشناخته رو نگه داری.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه یه read-modify-write قدیمی می‌تونه داده جدید رو بی‌صدا ببلعه. حتی وقتی decode هیچ خطایی نداده. نکته ماندگار: decode موفق یعنی داده سالم؟ نه!</p>
-</div></div><div class="en"><p>Old code can decode a record successfully, keep only the fields it knows and then overwrite the original record. The new field disappears without a parse error.</p><p>Preserve unknown fields through the whole round trip, or update only the intended field. Protobuf binary messages support preservation, but JSON conversion or rebuilding a message from known fields can lose it. Test the update path the application really uses.</p>
-<div class="callout" data-en-example="example-ch5-13">
-<p class="example-title"><b>Example: Changing a name and losing an email</b></p>
-<p><b>Setup:</b> Version 2 writes <code dir="ltr">{name:Sara,email:a@b}</code>. Version 1 knows only name.</p>
-<p><b>Walk through it:</b> Version 1 reads the whole object, changes name and writes it back without email. It can avoid that loss by preserving unknown fields or updating only name.</p>
-<p><b>What this tells you:</b> An old read-modify-write path can silently delete new information. Successful decoding alone doesn't prove a safe update.</p>
-</div></div>
+</div><div class="en"><p>Old code can decode a record successfully, keep only the fields it knows and then overwrite the original record. The new field disappears without a parse error.</p><p>Preserve unknown fields through the whole round trip, or update only the intended field. Protobuf binary messages support preservation, but JSON conversion or rebuilding a message from known fields can lose it. Test the update path the application really uses.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۴. چهار مشکلِ اصلیِ کدگذاریِ ویژهٔ زبان (مثل Serializable و pickle) چیست؟</span><span class="en">4. What are the four core problems of language-native encoding (Serializable, pickle)?</span></summary>
     <div class="fa"><p>چهار تا دردسر بزرگ داره: به یه زبان و کلاس قفل می‌شی، بازسازی object از ورودی غریبه امنیت رو می‌ترکونه (RCE)، عوض کردن نسخه باهاش سخته، و برای تبادل داده تمیز نیست. برای ورودی نامطمئن؟ اصلاً سراغش نرو.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: نام کلاس، قرارداد پایدار نیست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل ذخیره‌شده‌ات به کلاس <code dir="ltr">OldUser</code> نسخهٔ قبلی چسبیده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا نسخهٔ جدید اون کلاس رو پاک کرده یا زبون عوض شده؛ decoder مخصوص اون زبون ممکنه اصلاً نتونه شیء رو بسازه و بترکه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه داده از کد بیشتر عمر می‌کنه؛ برای تبادل schema مستقل می‌خوای و ورودی مطمئن.</p>
-</div></div><div class="en"><p>Four concerns are language/class lock-in, unsafe object construction from untrusted bytes, weak version-evolution contracts, and encoding overhead such as Java serialization's size and speed costs. Use a separate, explicit exchange contract for long-lived data. Language-native convenience doesn't establish safe interoperability.</p>
-<div class="callout" data-en-example="example-ch5-4">
-<p class="example-title"><b>Example: A class name is a dependency</b></p>
-<p><b>Setup:</b> A stored file depends on the old <code dir="ltr">OldUser</code> class.</p>
-<p><b>Walk through it:</b> A new version removes the class, or another language needs the file. The native decoder may no longer be able to rebuild the object.</p>
-<p><b>What this tells you:</b> Data can outlive its original code. Use an independent exchange schema for that lifetime, and don't pass untrusted input to unsafe object decoders.</p>
-</div></div>
+</div><div class="en"><p>Four concerns are language/class lock-in, unsafe object construction from untrusted bytes, weak version-evolution contracts, and encoding overhead such as Java serialization's size and speed costs. Use a separate, explicit exchange contract for long-lived data. Language-native convenience doesn't establish safe interoperability.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۵. مشکلِ اعداد در JSON چیست؟</span><span class="en">5. What’s the numbers problem in JSON?</span></summary>
     <div class="fa"><p><span class="ltr">JSON</span> به هیچ خواننده‌ای قول دقت عدد نمی‌ده. مثلاً عدد معمولی <span class="ltr">JavaScript</span> عدد صحیح بزرگ رو دقیق نگه نمی‌داره و گرد می‌کنه. پس id بزرگ رو number نفرست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: شناسهٔ بزرگ در JSON</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن شناسهٔ <code dir="ltr">9007199254740993</code> به‌صورت JSON number می‌رسه دست JavaScript.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نگران نشو اگه دیدی تبدیلش به <code dir="ltr">Number</code> گرد شد به <code dir="ltr">9007199254740992</code>؛ اگه شناسه رو رشته‌ای قرارداد کنی رقم‌هاش سر جاش می‌مونه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه JSON قول دقت به همه نمی‌ده؛ نوع فیلد رو دو طرف شفاف قرارداد کن.</p>
-</div></div><div class="en"><p>JSON doesn't guarantee that every reader uses the same numeric precision. A normal JavaScript Number can't represent every integer beyond 2^53. The chapter's X example sends a 64-bit post ID as both a number and a string so the exact identifier remains available.</p><p>For an identifier that must retain all digits, agree on a string representation. XML and CSV text also need a type contract.</p>
-<div class="callout" data-en-example="example-ch5-5">
-<p class="example-title"><b>Example: A large JSON identifier</b></p>
-<p><b>Setup:</b> The identifier <code dir="ltr">9007199254740993</code> reaches JavaScript as a JSON number.</p>
-<p><b>Walk through it:</b> Converting it to <code dir="ltr">Number</code> rounds it to <code dir="ltr">9007199254740992</code>. An agreed string representation retains the original digits.</p>
-<p><b>What this tells you:</b> Readers don't all provide the same numeric precision. Choose the field's representation at both ends of the contract.</p>
-</div></div>
+</div><div class="en"><p>JSON doesn't guarantee that every reader uses the same numeric precision. A normal JavaScript Number can't represent every integer beyond 2^53. The chapter's X example sends a 64-bit post ID as both a number and a string so the exact identifier remains available.</p><p>For an identifier that must retain all digits, agree on a string representation. XML and CSV text also need a type contract.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۶. چرا برای داده‌های باینری در JSON از Base64 استفاده می‌کنند و هزینه‌اش چیست؟</span><span class="en">6. Why is Base64 used for binary data in JSON — at what cost?</span></summary>
     <div class="fa"><p><span class="ltr">Base64</span> فقط بایت رو می‌کنه متن که بشه تو JSON حملش کرد. هزینش حدود یه‌سوم حجم اضافه‌ست؛ این encoding ـه، نه رمز — هیچ محرمانگی نمی‌ده.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Base64 برای بایت در JSON</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن یه فایل باینری سه‌بایتی رو باید بچپونی تو یه فیلد متنی JSON.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن Base64 هر سه بایت رو می‌کنه چهار تا نویسه؛ برای ورودی بزرگ حدود یه‌سوم حجم می‌ره بالا، جدا از سربار خود JSON.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> این فقط راه حمل بایته تو رشته، فشرده‌سازی نیست؛ برای فایل بزرگ یه مسیر جدا بذار — سبک‌تر درمیای.</p>
-</div></div><div class="en"><p>JSON/XML text doesn't directly store arbitrary binary bytes. Base64 represents them as text, adding roughly one-third to the size plus conversion work. It provides neither compression nor confidentiality. A binary format can offer a byte-string type directly; large files may fit a separate transfer path better.</p>
-<div class="callout" data-en-example="review-6">
-<p class="example-title"><b>Example: Base64 inside JSON</b></p>
-<p><b>Setup:</b> A three-byte binary payload needs to fit into a JSON text field.</p>
-<p><b>Walk through it:</b> Base64 maps those three bytes to four characters. For large inputs, that adds about one-third to the size, before JSON framing.</p>
-<p><b>What this tells you:</b> This is a text representation of bytes, rather than compression. A large file may be better served through a separate transfer path.</p>
-</div></div>
+</div><div class="en"><p>JSON/XML text doesn't directly store arbitrary binary bytes. Base64 represents them as text, adding roughly one-third to the size plus conversion work. It provides neither compression nor confidentiality. A binary format can offer a byte-string type directly; large files may fit a separate transfer path better.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۷. content model باز و بسته در JSON Schema یعنی چه؟</span><span class="en">7. What are open and closed content models in JSON Schema?</span></summary>
     <div class="fa"><p>مدل باز فیلد اضافه رو قبول می‌کنه؛ مدل بسته ردش می‌کنه. باز باشی نسخه جدید راحت رد می‌شه ولی غلط ورودی رو نمی‌گیری؛ بسته باشی برعکس.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Schema باز یا بسته</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن قراردادت فقط <code dir="ltr">name</code> رو تعریف کرده ولی پیام تازه <code dir="ltr">email</code> هم آورده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن با <code dir="ltr">additionalProperties:false</code> همون‌جا validator فیلد اضافه رو رد می‌کنه؛ مدل باز می‌تونه قبولش کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اضافه کردن فیلد همیشه سازگار نیست؛ این سیاست خواننده‌ست که معلوم می‌کنه فیلد ناشناخته بمونه یا بپره.</p>
-</div></div><div class="en"><p>An open model permits extra fields; <code>additionalProperties: true</code> is the default behavior. A closed model can reject them. Rules such as patternProperties can constrain keys and values, while additionalProperties controls remaining fields.</p><p>That means “add a field” isn't automatically compatible. Check the old validator as well as the new writer.</p>
-<div class="callout" data-en-example="review-7">
-<p class="example-title"><b>Example: An open or closed schema</b></p>
-<p><b>Setup:</b> The contract defines only <code dir="ltr">name</code>. A new message also includes <code dir="ltr">email</code>.</p>
-<p><b>Walk through it:</b> With <code dir="ltr">additionalProperties:false</code>, the validator rejects that extra field. An open model can accept it.</p>
-<p><b>What this tells you:</b> Adding a field isn't always compatible. Check whether the reader accepts unknown fields, and separately whether a rewrite preserves them.</p>
-</div></div>
+</div><div class="en"><p>An open model permits extra fields; <code>additionalProperties: true</code> is the default behavior. A closed model can reject them. Rules such as patternProperties can constrain keys and values, while additionalProperties controls remaining fields.</p><p>That means “add a field” isn't automatically compatible. Check the old validator as well as the new writer.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۸. MessagePack چقدر فضا جبران می‌کند و چرا کتاب چندان تحویلش نمی‌گیرد؟</span><span class="en">8. How much space does MessagePack save — and why doesn’t the book rate it?</span></summary>
     <div class="fa"><p>تو مثال همین فصل <span class="ltr">MessagePack</span> فقط از ۸۱ رسیده به ۶۶ بایت؛ همین عدد رو همه‌جا تعمیم نده. چون schema نداره، اسم فیلدها هنوز تو داده سفر می‌کنه — صرف باینری بودن معجزه نمی‌کنه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: MessagePack چه چیزی را حذف می‌کند؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن شیء JSON اسم فیلد <code dir="ltr">customer_id</code> رو تو هر رکورد هی تکرار می‌کنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا MessagePack نوع و مقدار رو باینری‌تر می‌کنه، ولی تو استفادهٔ map معمولی اسم فیلد هنوز با هر رکورد سفر می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> سود حجم بستگی به داده داره؛ قالب schemaدار می‌تونه اسم‌ها رو از wire حذف کنه و قرارداد تکامل جدا بده — اون فرق اصلیه.</p>
-</div></div><div class="en"><p>The chapter's record uses 66 MessagePack bytes instead of 81 JSON bytes, about an 18% reduction. In the ordinary map encoding, field names remain inside each record.</p><p>The schema-driven examples use 32–33 bytes because they can omit those names. Keep the comparison attached to this record and encoding; another dataset can have a different result.</p>
-<div class="callout" data-en-example="review-8">
-<p class="example-title"><b>Example: What MessagePack still carries</b></p>
-<p><b>Setup:</b> Every JSON record repeats the field name <code dir="ltr">customer_id</code>.</p>
-<p><b>Walk through it:</b> MessagePack encodes types and values in binary form, but an ordinary map still carries that field name with each record.</p>
-<p><b>What this tells you:</b> The size saving depends on the data. A schema-driven format can remove names from each record and define its own evolution rules.</p>
-</div></div>
+</div><div class="en"><p>The chapter's record uses 66 MessagePack bytes instead of 81 JSON bytes, about an 18% reduction. In the ordinary map encoding, field names remain inside each record.</p><p>The schema-driven examples use 32–33 bytes because they can omit those names. Keep the comparison attached to this record and encoding; another dataset can have a different result.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۹. field tag در Protocol Buffers چیست و چه قوانینی دارد؟</span><span class="en">9. What is a field tag in Protocol Buffers — what are its rules?</span></summary>
     <div class="fa"><p>تگ همون شماره شناسنامه فیلد رو wire ـه. اسم فیلد رو هر وقت خواستی عوض کن، ولی شماره رو نه؛ شماره فیلد حذف‌شده رو هم به چیز جدید نده، reserve ـش کن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Tag هویت فیلد است</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن تو schema پیامت داری <code dir="ltr">string name = 1</code>، بعد اومدی <code dir="ltr">string email = 2</code> رو اضافه کردی.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> یادت باشه شمارهٔ ۱ همیشه مال name می‌مونه؛ اگه email رو حذف کردی، شمارهٔ ۲ رو نده به یه معنای دیگه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اسم عوض کردن با هویت wire فرق داره؛ reuse شماره یعنی دادهٔ قدیمی رو با معنای اشتباه می‌خونی — تهش می‌ترکه.</p>
-</div></div><div class="en"><p>A tag number identifies a protobuf field on the binary wire. A source-level rename can keep that identity, but changing or reusing the number can make old data mean something else. Reserve retired tags. A name used in JSON or application code may have its own compatibility requirements.</p>
-<div class="callout" data-en-example="example-ch5-6">
-<p class="example-title"><b>Example: A tag is the field’s wire identity</b></p>
-<p><b>Setup:</b> A message schema contains <code dir="ltr">string name = 1</code>, then adds <code dir="ltr">string email = 2</code>.</p>
-<p><b>Walk through it:</b> Number 1 continues to identify name. If email is removed, don't assign its number 2 to a different meaning.</p>
-<p><b>What this tells you:</b> A source-level name and binary wire identity are different. Reusing a number can make retained data look like another field.</p>
-</div></div>
+</div><div class="en"><p>A tag number identifies a protobuf field on the binary wire. A source-level rename can keep that identity, but changing or reusing the number can make old data mean something else. Reserve retired tags. A name used in JSON or application code may have its own compatibility requirements.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۰. قواعد تکاملِ schema در protobuf برای افزودن/حذف/تغییر نوع چیست؟</span><span class="en">10. What are protobuf’s schema-evolution rules for add/remove/retype?</span></summary>
     <div class="fa"><p>فیلد جدید فقط با شماره جدید؛ شماره حذف‌شده reserve می‌شه. تغییر نوع رو باید با جدول سازگاری wire چک کنی — حتی تغییر مجاز هم ممکنه بعضی مقدارها رو ببره (truncation). شماره ثابت به‌تنهایی یعنی معنا حفظ شده؟ نه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: تکامل protobuf با شمارهٔ ثابت</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فیلد <code dir="ltr">string name = 1</code> منتشر شده و پیام‌های قدیمی هنوز این‌ور اون‌ور هستن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا فیلد تازه رو فقط با شمارهٔ آزاد اضافه کن؛ حذف یعنی شماره و اسم لازم رو reserved کن؛ تغییر نوع هم باید قواعد wire و معنی مقدار رو رعایت کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> همون شماره رو از رشته بچرخونی به یه معنای عددی نامربوط، مهاجرت امن نیست؛ حفظ شماره به‌تنهایی حفظ معنا نیست — یادت باشه.</p>
-</div></div><div class="en"><p>Add fields with unused numbers. Reserve retired numbers, and names where needed. Check type changes against the wire-compatibility rules and the permitted values. A 64-bit value read into an older 32-bit field can truncate even when the bytes parse.</p><p>Stable numbers protect identity. They don't prove that every reader interprets the value correctly.</p>
-<div class="callout" data-en-example="review-10">
-<p class="example-title"><b>Example: Evolving protobuf with stable numbers</b></p>
-<p><b>Setup:</b> The field <code dir="ltr">string name = 1</code> has been published, and old messages remain in storage or transit.</p>
-<p><b>Walk through it:</b> Add a new field only with an unused number. Reserve retired numbers and the names needed by the contract. Check type changes against wire and value semantics.</p>
-<p><b>What this tells you:</b> Reusing a string field's number for an unrelated numeric meaning isn't a safe migration. A stable number alone doesn't preserve meaning either.</p>
-</div></div>
+</div><div class="en"><p>Add fields with unused numbers. Reserve retired numbers, and names where needed. Check type changes against the wire-compatibility rules and the permitted values. A 64-bit value read into an older 32-bit field can truncate even when the bytes parse.</p><p>Stable numbers protect identity. They don't prove that every reader interprets the value correctly.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۱. Avro هنگام decode از چه چیزی استفاده می‌کند و writer's schema از کجا می‌آید؟</span><span class="en">11. What does Avro decode with — and where does the writer’s schema come from?</span></summary>
     <div class="fa"><p><span class="ltr">Avro</span> موقع decode اسکیمای نویسنده و خواننده رو جفت می‌کنه (resolution). بایت خالی به‌تنهایی هیچی نیست؛ اسکیمای نویسنده یا تو سرآغاز فایله یا با id از registry میاد.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: پیدا کردن schema نویسنده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن پیام Avro یه شناسهٔ schema مساوی <code dir="ltr">23</code> داره به‌علاوه بایت‌های رکورد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا مصرف‌کننده می‌ره schema شماره ۲۳ رو از registry برمی‌داره و می‌ذاره کنار reader schema جلوی decoder.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه فقط reader schema کافی نیست؛ شناسه رو نگه دار و schemaهای قدیمی رو دور ننداز.</p>
-</div></div><div class="en"><p>Avro decodes with the writer's schema and resolves against the reader's expected schema, matching record fields by name.</p><p>The writer schema can be stored in an object container file header, identified per record through a registry such as Confluent's, or negotiated for an Avro RPC connection. Keep the identifier and the referenced schema available for retained data.</p>
-<div class="callout" data-en-example="example-ch5-9">
-<p class="example-title"><b>Example: Finding the writer schema</b></p>
-<p><b>Setup:</b> An Avro message carries schema identifier <code dir="ltr">23</code> alongside its record bytes.</p>
-<p><b>Walk through it:</b> The consumer fetches that schema from the registry and supplies it together with its reader schema to the decoder.</p>
-<p><b>What this tells you:</b> The reader schema alone doesn't describe the written bytes. Retain old schema definitions and the identifiers that reference them.</p>
-</div></div>
+</div><div class="en"><p>Avro decodes with the writer's schema and resolves against the reader's expected schema, matching record fields by name.</p><p>The writer schema can be stored in an object container file header, identified per record through a registry such as Confluent's, or negotiated for an Avro RPC connection. Keep the identifier and the referenced schema available for retained data.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۲. قواعدِ Avro دربارهٔ مقدارِ پیش‌فرض (default) چیست؟</span><span class="en">12. What are Avro’s default-value rules?</span></summary>
     <div class="fa"><p>اگه خواننده فیلدی بخواد که نویسنده نداره، باید تو اسکیمای خواننده <span class="ltr">default</span> باشه وگرنه decode می‌ترکه. حذف فیلد هم همینه و به قرارداد خواننده قدیمی برمی‌گرده. <span class="ltr">default</span> یعنی «جای خالی رو پر کن»، نه «نوشتن اختیاریه».</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Resolution در Avro</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن writer فقط <code dir="ltr">name</code> داره، reader جدید اومده یه فیلد <code dir="ltr">country</code> با default مساوی <code dir="ltr">IR</code> اضافه کرده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا وقتی رکورد قدیمی رو می‌خونی، reader مقدار گمشدهٔ country رو از default برمی‌داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه default فقط جای خالی writer رو پر می‌کنه؛ به‌جای نوشتن اجباری تو schema نویسنده نمی‌شینه.</p>
-</div>
+
 <p class="small">منبعِ توضیحِ فنی: <a href="https://avro.apache.org/docs/1.12.0/specification/#schema-resolution" target="_blank" rel="noopener">قواعدِ رسمیِ تطبیقِ اسکیمای Avro</a></p></div><div class="en"><p>If the reader expects a field absent from the writer's schema, the reader needs a valid default. Otherwise resolution fails. Adding a field therefore needs a new-reader default for old records; removing one needs a default in old readers that still expect it.</p><p>A default fills that resolution gap. It doesn't make the field optional when encoding against a writer schema that includes it.</p><p class="small">Source: <a href="https://avro.apache.org/docs/1.12.0/specification/#schema-resolution" target="_blank" rel="noopener">Avro's schema-resolution rules</a>.</p>
-<div class="callout" data-en-example="example-ch5-7">
-<p class="example-title"><b>Example: Resolving an older Avro record</b></p>
-<p><b>Setup:</b> The writer has only <code dir="ltr">name</code>. A new reader adds <code dir="ltr">country</code>, with default <code dir="ltr">IR</code>.</p>
-<p><b>Walk through it:</b> When it reads the old record, the reader fills the missing country from its default.</p>
-<p><b>What this tells you:</b> A default fills a gap between writer and reader schemas. It doesn't make fields optional when encoding against the writer's schema.</p>
-</div></div>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۳. چرا در Avro برای nullable بودن باید union نوشت؟</span><span class="en">13. Why must Avro nullability use a union?</span></summary>
     <div class="fa"><p>تو Avro هیچ فیلدی خودش null‌پذیر نیست؛ باید تو <span class="ltr">union</span> صریح بگی <span class="ltr">null</span> هم مجازه. نبودن فیلد، null بودن مقدار، و <span class="ltr">default</span> داشتن سه‌تای جدان — قاطیشون نکن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Nullable در Avro</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن <code dir="ltr">email</code> ممکنه رشته باشه یا null.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن schema باید union مثل <code dir="ltr">[&quot;null&quot;,&quot;string&quot;]</code> رو مجاز کنه؛ برای رکوردهای قدیمی هم می‌تونی تو reader یه default معتبر <code dir="ltr">null</code> بذاری.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نبودن فیلد با null بودن مقدار با default داشتن سه‌تای جداان؛ قاطیشون نکن، جدا طراحیشون کن.</p>
-</div></div><div class="en"><p>Declare every allowed type explicitly. For a nullable long, the example uses <code>union { null, long }</code>. A null-first union with a null default handles older writer schemas that lack the field.</p><p>Keep three concepts separate: a field absent from the writer's schema, a present field whose value is null, and a reader field with a default. Each answers a different question.</p>
-<div class="callout" data-en-example="review-13">
-<p class="example-title"><b>Example: An explicitly nullable Avro field</b></p>
-<p><b>Setup:</b> The <code dir="ltr">email</code> field may contain a string or null.</p>
-<p><b>Walk through it:</b> Permit both in a union such as <code dir="ltr">[&quot;null&quot;,&quot;string&quot;]</code>. A reader default of <code dir="ltr">null</code> can handle an older writer schema that lacks the field.</p>
-<p><b>What this tells you:</b> Absence from the writer schema, a null value and a reader default are three separate design choices.</p>
-</div></div>
+</div><div class="en"><p>Declare every allowed type explicitly. For a nullable long, the example uses <code>union { null, long }</code>. A null-first union with a null default handles older writer schemas that lack the field.</p><p>Keep three concepts separate: a field absent from the writer's schema, a present field whose value is null, and a reader field with a default. Each answers a different question.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۴. تغییر نامِ فیلد در Avro چرا فقط backward است؟</span><span class="en">14. Why is an Avro field rename backward-only?</span></summary>
     <div class="fa"><p>با <span class="ltr">alias</span> خواننده جدید اسم قدیمی نویسنده رو می‌فهمه — پس rename فقط backward می‌شه. خواننده قدیمی اسم جدید رو نمی‌شناسه، پس forward نداری. هر جهت رو جدا تست کن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: تغییر نام با alias</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن writer قدیمی <code dir="ltr">surname</code> نوشته و reader جدید <code dir="ltr">family_name</code> با alias مساوی <code dir="ltr">surname</code> داره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا reader جدید اسم قدیمی رو می‌فهمه و جفت می‌کنه؛ ولی reader قدیمی alias تازه رو نمی‌شناسه پس جهت برعکس خودش حل نمی‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> می‌بینی؟ backward می‌شه ولی forward نه؛ هر دو جهت رو جدا تست کن.</p>
-</div></div><div class="en"><p>A new reader can use an alias to recognize an old writer's field name. That supports the backward direction. An old reader doesn't know the new reader's alias, so the reverse direction doesn't follow automatically.</p><p>Adding a union branch has a similar risk: a new reader can accept old branches, while an old reader may reject a newly written branch. Test each direction.</p>
-<div class="callout" data-en-example="review-14">
-<p class="example-title"><b>Example: Renaming with a reader alias</b></p>
-<p><b>Setup:</b> An old writer uses <code dir="ltr">surname</code>. A new reader uses <code dir="ltr">family_name</code>, with alias <code dir="ltr">surname</code>.</p>
-<p><b>Walk through it:</b> The new reader matches the old name. The old reader doesn't know the new alias, so the reverse direction doesn't resolve automatically.</p>
-<p><b>What this tells you:</b> The alias supports the backward direction here. Test forward compatibility separately.</p>
-</div></div>
+</div><div class="en"><p>A new reader can use an alias to recognize an old writer's field name. That supports the backward direction. An old reader doesn't know the new reader's alias, so the reverse direction doesn't follow automatically.</p><p>Adding a union branch has a similar risk: a new reader can accept old branches, while an old reader may reject a newly written branch. Test each direction.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۵. مزایای قالب‌های باینریِ مبتنی بر schema نسبت به JSON چیست؟</span><span class="en">15. What advantages do schema-driven binary formats have over JSON?</span></summary>
     <div class="fa"><p>با schema اسم و نوع فیلد از تک‌تک رکوردها حذف می‌شه — هم حجم کم می‌شه، هم قرارداد شفافه، هم validation و codegen داری. ولی schema به‌خودی‌خود سازگاری نمیاره؛ قاعده تغییر و پیاده‌سازی درست می‌خواد.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: مقایسهٔ قالب روی همان رکورد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن همون رکورد <code dir="ltr">user_id=17, active=true</code> رو می‌خوای با چند تا قالب بنویسی.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن JSON اسم فیلدها رو دونه‌دونه با خودش حمل می‌کنه؛ ولی قالب schemaدار می‌تونه به‌جاش شناسه یا جای فیلد رو بذاره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه سیب با سیب مقایسه کن — همون داده، همون کتابخونه؛ باینری بودن به‌تنهایی نه یعنی کم‌حجم‌تر، نه یعنی تکامل بهتر.</p>
-</div></div><div class="en"><p>A schema can remove repeated field metadata, document structure and support generated code and compatibility checks. A registry lets you check proposed changes before deployment.</p><p>The costs include schema management and tools for inspecting binary data. A schema defines the structure; the change rules and the implementation determine whether evolution is safe.</p>
-<div class="callout" data-en-example="example-ch5-3">
-<p class="example-title"><b>Example: Compare the same record</b></p>
-<p><b>Setup:</b> The record to encode is <code dir="ltr">user_id=17, active=true</code>.</p>
-<p><b>Walk through it:</b> JSON carries the field names. A schema-driven format can identify fields through numbers or their schema-defined positions.</p>
-<p><b>What this tells you:</b> Compare the same data with stated encoders and settings. A binary representation alone doesn't establish a smaller record or safer evolution.</p>
-</div></div>
+</div><div class="en"><p>A schema can remove repeated field metadata, document structure and support generated code and compatibility checks. A registry lets you check proposed changes before deployment.</p><p>The costs include schema management and tools for inspecting binary data. A schema defines the structure; the change rules and the implementation determine whether evolution is safe.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۶. «data outlives code» یعنی چه و چه نتیجه‌ای دارد؟</span><span class="en">16. What does “data outlives code” mean — what follows?</span></summary>
     <div class="fa"><p>داده خیلی بیشتر از کد عمر می‌کنه. deploy جدید فایل و رکورد قدیمی رو خودش نو نمی‌کنه؛ باید از اول طراحی کنی کدِ ننوشته فردا داده امروز رو بخونه، یا مهاجرت جدا بذاری. تموم شدن deploy یعنی تموم شدن داده قدیمی؟ نه!</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: سه مسیر همان داده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن عوض شدن اسم کاربر رو میشه از سه‌جا خوند: رکورد دیتابیس، جواب API، یا پیام رویداد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن دیتابیس نسخه‌های قدیمی رو نگه داشته. API هنوز با کلاینت قدیمی حرف می‌زنه. صف هم ممکنه پیام قدیمی رو دوباره بده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه هر مسیر پنجره سازگاری خودش رو داره. تموم شدن deploy سرور یعنی تموم شدن داده قدیمی؟ نه! نکته ماندگار: داده از کد دیرتر می‌میره.</p>
-</div></div><div class="en"><p>A deployment taking minutes doesn't rewrite data stored in 2019. An engine may convert records later, for example during LSM compaction, or represent a nullable SQL column without rewriting every row. Other changes need a separate migration.</p><p>Design for future readers of today's records, and retained old records under tomorrow's code. Deployment and data migration have different lifetimes.</p>
-<div class="callout" data-en-example="example-ch5-12">
-<p class="example-title"><b>Example: The same data on three paths</b></p>
-<p><b>Setup:</b> A changed user name appears in a database record, an API response and an event message.</p>
-<p><b>Walk through it:</b> The database retains older records. The API still serves old clients. A queue can redeliver an older message.</p>
-<p><b>What this tells you:</b> Each path has its own compatibility window. Completing the server rollout doesn't retire all old data or readers.</p>
-</div></div>
+</div><div class="en"><p>A deployment taking minutes doesn't rewrite data stored in 2019. An engine may convert records later, for example during LSM compaction, or represent a nullable SQL column without rewriting every row. Other changes need a separate migration.</p><p>Design for future readers of today's records, and retained old records under tomorrow's code. Deployment and data migration have different lifetimes.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۷. سه تفاوتِ محوریِ فراخوانیِ شبکه‌ای با فراخوانیِ محلی چیست؟</span><span class="en">17. What are three core network-call vs local-call differences?</span></summary>
     <div class="fa"><p>فراخوانی شبکه سه‌تا فرق بزرگ با تابع محلی داره: ممکنه اصلاً نرسه، بعد از <span class="ltr">timeout</span> نمی‌دونی اجرا شد یا نه، و تأخیرش خیلی نوسان داره. تازه قالب تبادل بین برنامه‌ها رو هم باید حل کنی. شبیه بودن ظاهر <span class="ltr">RPC</span> به تابع محلی این‌ها رو پاک نمی‌کنه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: RPC ناموفق یا پاسخ نامعلوم؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن کلاینت <code dir="ltr">CreateOrder(request_id=r7)</code> رو فرستاده. سرور سفارش رو ثبت کرده ولی جواب وسط راه گم شده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن با همون شناسه retry می‌کنی، می‌رسی به همون نتیجه. ولی با شناسه تازه retry کنی ممکنه یه سفارش دوم بسازی.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه timeout یعنی «نمی‌دونم شد یا نه». نکته ماندگار: برخلاف تابع محلی، API باید خودش این ابهام رو مدیریت کنه.</p>
-</div></div><div class="en"><p>A remote request may never arrive. A timeout can leave its outcome unknown. Latency can vary widely. Retrying an uncertain result can repeat an action, so the API needs an idempotence policy.</p><p>Values also cross a format and sometimes a language boundary; pointers don't. An RPC wrapper can simplify the call syntax without removing any of those responsibilities.</p>
-<div class="callout" data-en-example="example-ch5-14">
-<p class="example-title"><b>Example: A timeout with an unknown outcome</b></p>
-<p><b>Setup:</b> A client sends <code dir="ltr">CreateOrder(request_id=r7)</code>. The server creates the order, but its response is lost.</p>
-<p><b>Walk through it:</b> With a matching idempotence contract, retrying the same identifier returns the same operation's result. Retrying with a new identifier can create a second order.</p>
-<p><b>What this tells you:</b> A timeout means the client doesn't know whether the action happened. The API must define how to resolve that uncertainty.</p>
-</div></div>
+</div><div class="en"><p>A remote request may never arrive. A timeout can leave its outcome unknown. Latency can vary widely. Retrying an uncertain result can repeat an action, so the API needs an idempotence policy.</p><p>Values also cross a format and sometimes a language boundary; pointers don't. An RPC wrapper can simplify the call syntax without removing any of those responsibilities.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۸. چرا در RPC فقط backward برای request و forward برای response کافی است؟</span><span class="en">18. Why is backward-on-request + forward-on-response enough in RPC?</span></summary>
     <div class="fa"><p>این دو جهت فقط وقتی کافیه که اول سرور آپدیت بشه بعد کلاینت: سرور جدید request قدیمی رو می‌خونه (backward)، کلاینت قدیمی response جدید رو تحمل می‌کنه (forward). اگه کلاینت جدید به سرور قدیمی بخوره، جهت‌های برعکس هم لازم داری — حکم کلی نده.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: API با سرور تازه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن کلاینت قدیمی درخواست نسخهٔ ۱ می‌فرسته و جواب تازه می‌گیره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا سرور باید request قدیمی رو بخوره، کلاینت هم باید response جدید رو تحمل کنه؛ اگه سرور قدیمی هنوز زنده‌ست request تازه هم باید براش قابل‌قبول بمونه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> جهت سازگاری بستگی داره کی نوشته کی خونده؛ یه حکم کلی برای همه rolloutها نداریم — حواست باشه.</p>
-</div></div><div class="en"><p>Only under a server-first rollout can you limit that transition to backward-compatible requests and forward-compatible responses. A new client reaching an old server needs the reverse checks too.</p><p>Across organizations, you don't control the client's upgrade date. Agree on a support period or parallel API versions. Check the actual deployment paths before choosing compatibility directions.</p>
-<div class="callout" data-en-example="review-18">
-<p class="example-title"><b>Example: An API with a newer server</b></p>
-<p><b>Setup:</b> An old client sends a version 1 request and receives a response from a new server.</p>
-<p><b>Walk through it:</b> The server must read the old request; the client must handle the new response. If old servers remain, new requests may need to work with them too.</p>
-<p><b>What this tells you:</b> Compatibility direction follows the writer-reader pair. One rollout assumption doesn't establish safety for every deployment order.</p>
-</div></div>
+</div><div class="en"><p>Only under a server-first rollout can you limit that transition to backward-compatible requests and forward-compatible responses. A new client reaching an old server needs the reverse checks too.</p><p>Across organizations, you don't control the client's upgrade date. Agree on a support period or parallel API versions. Check the actual deployment paths before choosing compatibility directions.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۹. تفاوتِ queue و topic (pub/sub) چیست؟</span><span class="en">19. What’s the queue vs topic (pub/sub) difference?</span></summary>
     <div class="fa"><p>تو queue هر پیام فقط به یه consumer می‌رسه — تقسیم کار. تو pub/sub هر گروه subscriber یه کپی از همون رویداد می‌گیره — تکثیر بین گروه‌ها؛ تازه داخل هر گروه می‌شه بار رو تقسیم کرد.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: رویداد مستقل از مصرف‌کننده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سفارش <code dir="ltr">42</code> رویداد <code dir="ltr">OrderPlaced</code> رو منتشر کرده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن هم گروه ارسال می‌گیرتش هم گروه تحلیل. تازه تو گروه ارسال چند worker کار رو بین خودشون تقسیم می‌کنن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه pub/sub یعنی تکثیر بین گروه‌ها، queue یعنی تقسیم کار تو گروه. نکته ماندگار: باز هم تکرار و خطا رو باید کنترل کنی.</p>
-</div></div><div class="en"><p>A queue shares work among consumers: one worker handles a delivery. Pub/sub gives independent subscriber groups access to the same event; workers can share work within each group. Redelivery can still occur, so neither pattern removes duplicate-handling requirements.</p><p>Choose a payload contract and, where useful, a schema registry. A forwarding consumer must retain unknown information that downstream readers still need.</p>
-<div class="callout" data-en-example="example-ch5-18">
-<p class="example-title"><b>Example: An event with independent consumers</b></p>
-<p><b>Setup:</b> Order <code dir="ltr">42</code> publishes <code dir="ltr">OrderPlaced</code>.</p>
-<p><b>Walk through it:</b> Shipping and analytics each consume it. Several shipping workers can share the work within their group.</p>
-<p><b>What this tells you:</b> Pub/sub distributes the event across groups; queue-style consumption shares work within a group. Both still need failure and duplicate handling.</p>
-</div></div>
+</div><div class="en"><p>A queue shares work among consumers: one worker handles a delivery. Pub/sub gives independent subscriber groups access to the same event; workers can share work within each group. Redelivery can still occur, so neither pattern removes duplicate-handling requirements.</p><p>Choose a payload contract and, where useful, a schema registry. A forwarding consumer must retain unknown information that downstream readers still need.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۲۰. durable execution چطور «دقیقاً یک‌بار» می‌دهد و چه محدودیت‌هایی دارد؟</span><span class="en">20. How does durable execution deliver “exactly once” — and its limits?</span></summary>
     <div class="fa"><p>موتور durable پیشرفت رو ذخیره می‌کنه و بعد از crash از روی تاریخچه ادامه می‌ده. ولی «دقیقاً یه‌بار» برای دنیای بیرون مفت نیست — مقصد باید idempotent باشه یا با id تکراری مهار بشه. دوام یعنی ادامه از تاریخچه، نه یه‌بار اجرا شدن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: ادامهٔ workflow بعد از crash</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن workflow اول رزرو داره بعد صدور رسید. رزرو با شناسه <code dir="ltr">r7</code> موفق شده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تصور کن engine پیشرفت رو پایدار کرده. بعد از crash از روی تاریخچه ادامه میده. ولی فعالیتی که نتیجه‌ش ثبت نشده ممکنه دوباره صدا زده بشه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه اثر بیرونی رزرو باید با <code dir="ltr">r7</code> امن تکرار بشه. نکته ماندگار: دوام workflow یعنی «ادامه از تاریخچه»، نه «فقط یه‌بار اجرا».</p>
-</div></div><div class="en"><p>Durable execution stores history and uses recorded results when execution resumes. It can skip calls whose success was recorded, while an activity with no recorded outcome may be retried.</p><p>Protect external effects with idempotence or stable IDs and deduplication. Keep workflow changes compatible with existing histories, preserve the expected decision order and use deterministic replay. Avoid uncontrolled clock reads, randomness or I/O in that replay path. Durable means resumable; it doesn't mean every activity runs only once.</p>
-<div class="callout" data-en-example="example-ch5-16">
-<p class="example-title"><b>Example: Resuming a workflow after a crash</b></p>
-<p><b>Setup:</b> A workflow makes a reservation, then issues a receipt. The reservation with identifier <code dir="ltr">r7</code> succeeds.</p>
-<p><b>Walk through it:</b> The engine retains progress and resumes from history after a crash. An activity whose outcome wasn't recorded may be called again.</p>
-<p><b>What this tells you:</b> The external reservation must be safe to retry with <code dir="ltr">r7</code>. Durable execution resumes from history; it doesn't guarantee each activity executes once.</p>
-</div></div>
+</div><div class="en"><p>Durable execution stores history and uses recorded results when execution resumes. It can skip calls whose success was recorded, while an activity with no recorded outcome may be retried.</p><p>Protect external effects with idempotence or stable IDs and deduplication. Keep workflow changes compatible with existing histories, preserve the expected decision order and use deterministic replay. Avoid uncontrolled clock reads, randomness or I/O in that replay path. Durable means resumable; it doesn't mean every activity runs only once.</p>
+</div>
   </details>
 </section>
 

@@ -40,7 +40,7 @@
   <div class="meta-row reveal">
     <span><b><span class="fa">۹</span><span class="en">9</span></b> <span class="fa">نمودار (۶ تعاملی + ۳ مفهومی)</span><span class="en">diagrams (6 interactive + 3 concept)</span></span><span class="dot">·</span>
     <span><span class="fa">محور: log-structured · B-tree · columnar · indexes</span><span class="en">Theme: log-structured · B-tree · columnar · indexes</span></span><span class="dot">·</span>
-    <span><span class="fa">زمان مطالعه: حدود ۶۰ دقیقه</span><span class="en">Reading time: ~60 min</span></span>
+    <span><span class="fa">زمان مطالعه: حدود ۷۰ دقیقه</span><span class="en">Reading time: ~70 min</span></span>
   </div>
 </section>
 
@@ -244,19 +244,9 @@ $ db_get 42</pre>
 <div class="teacher">
   <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
   <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: بهای ایندکسِ اضافه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن رو جدول سفارش، ایندکس <code dir="ltr">customer_id</code> ساختی.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا خوندن سفارش‌های مشتری ۱۷ دیگه کل جدول رو اسکن نمی‌کنه؛ ولی هر درج یا تغییر مشتری باید ایندکس رو هم اصلاح کنه. یه بام و دو هوا نیست.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس کم شدن هزینهٔ خوندن با فضای بیشتر و کار اضافهٔ نوشتن همراهه. ایندکس بلااستفاده مجانی نیست — یادت باشه.</p>
-</div>
+
 <p>شکل رو از چپ بخون: جعبهٔ «لاگ فقط‌افزودنی» (هر <span class="ltr">db_set</span> به انتها اضافه می‌شه؛ نوشتن <span class="ltr">O(1)</span> و ترتیبی) با فلش «نوشتن ارزون» می‌رسه به جعبهٔ «مشکل خوندن» (<span class="ltr">db_get</span> همهٔ خط‌ها رو می‌گرده؛ خوندن <span class="ltr">O(n)</span>). از اونجا فلش «خوندن کند» می‌ره به جعبهٔ «افزودن ایندکس مشتق‌شده» (ساختار مرتب بر اساس کلید؛ خوندن <span class="ltr">O(log n)</span>). پنل پایین حکم رو می‌گه: هر ایندکس خوندن رو سریع می‌کنه، ولی هر نوشتن باید اون رو هم به‌روز کنه و فضا می‌گیره — «ایندکس رایگان نداریم؛ با دونستن الگوی کوئری انتخاب کن».</p></div>
-  <div class="en"><div class="callout" data-en-example="example-ch4-2">
-<p class="example-title"><b>Example: The cost of another index</b></p>
-<p><b>Setup:</b> An orders table has an index on <code dir="ltr">customer_id</code>.</p>
-<p><b>Walk through it:</b> Reading customer 17's orders avoids a full table scan. Inserting an order or changing its customer also updates that index.</p>
-<p><b>What this tells you:</b> The saved read work comes with extra space and write maintenance. Even an unused index has a cost.</p>
-</div>
+  <div class="en">
 <p>Follow the three boxes from left to right. “Append-only log” shows <span class="ltr">db_set</span> adding a record at the end, with <span class="ltr">O(1)</span> sequential write work in this simple model. The “cheap writes” arrow reaches “The read problem”: <span class="ltr">db_get</span> searches the lines, giving <span class="ltr">O(n)</span> reads.</p><p>The “slow reads” arrow leads to “Add a derived index”. Its sorted structure gives <span class="ltr">O(log n)</span> lookup work. Read the bottom panel too: the extra access path needs storage and maintenance on writes. Pick it for a query you actually need.</p></div>
 </div>
 </section>
@@ -339,22 +329,12 @@ $ db_get 42</pre>
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار ۱</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: نسخه‌های تازه در LSM</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن <code dir="ltr">P7=100</code> تو SSTable قدیمیه و <code dir="ltr">P7=120</code> تو memtable نوشته می‌شه. دو جا، دو نسخه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا نوشتن WAL و حافظه رو به‌روز می‌کنه؛ flush فایل مرتب تازه می‌سازه و compaction نسخه‌های لازم رو ادغام می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس خواننده باید نسخهٔ قابل‌مشاهدهٔ تازه رو انتخاب کنه. پیدا شدن کلید تو یه فایل قدیمی برای توقف کافی نیست — تا تهش برو.</p>
-</div>
+
 
       این نمودار چهار تا ستون داره که از چپ به راست عنوان‌شون هست: <span class="ltr">«Write Requests»</span>،
       <span class="ltr">«Reads &amp; Memtable»</span>، <span class="ltr">«Sorted Segments»</span> و <span class="ltr">«Background Merge»</span>.
       دو تا نوار افقی داریم: نوار بالا مسیر <b>نوشتن</b>ـه و نوار پایین، مسیر <b>خوندن</b> و پشتیبانی.
-    </div><div class="en"><div class="callout" data-en-example="example-ch4-3">
-<p class="example-title"><b>Example: Newer values in an LSM</b></p>
-<p><b>Setup:</b> An old SSTable contains <code dir="ltr">P7=100</code>. A new write puts <code dir="ltr">P7=120</code> into the memtable.</p>
-<p><b>Walk through it:</b> The write updates the WAL and memory. A flush creates a new sorted file; compaction merges versions and retains the ones still needed.</p>
-<p><b>What this tells you:</b> The reader must return the newest visible version. Finding the key in an old file isn't enough if newer state exists elsewhere.</p>
-</div>
+    </div><div class="en">
 <p>Read the four columns: <span class="ltr">Write Requests</span>, <span class="ltr">Reads &amp; Memtable</span>, <span class="ltr">Sorted Segments</span> and <span class="ltr">Background Merge</span>. The top lane writes data; the lower lane reads it and supports recovery.</p><p>Start at <span class="ltr">Write</span>, labelled <span class="ltr">put(key, value)</span>. The <span class="ltr">update ordered map</span> arrow reaches <span class="ltr">Memtable</span>. The <span class="ltr">append + fsync</span> arrow reaches the <span class="ltr">Write-Ahead Log</span>. Its <span class="ltr">replay after crash</span> path rebuilds the in-memory state after a crash. The file and the memory map have different jobs.</p></div>
     <div class="fa">
       از جعبهٔ <span class="ltr">«Write»</span> با زیرنویسِ <span class="ltr">put(key, value)</span> شروع کن — بالا سمت چپ.
@@ -546,22 +526,12 @@ $ db_get 42</pre>
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار ۲</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: پیمایشِ B-tree</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ریشه کلید جداکنندهٔ <code dir="ltr">500</code> داره و برگ راست شامل <code dir="ltr">700,740,780</code>ـه. درخت رو تصور کن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا جست‌وجوی <code dir="ltr">740</code> با مقایسه تو ریشه می‌ره به فرزند راست و بعد برگ مربوط. پله‌پله پایین.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس هر سطح بازه رو محدود می‌کنه. لازم نیست برای یه کلید همهٔ صفحه‌ها خونده بشن — درخت یعنی نصف کردن راه.</p>
-</div>
+
 
       شکل رو از چپ شروع کن: جعبهٔ <span class="ltr">«Application»</span> با زیرنویسِ <span class="ltr">«lookup key 251»</span>.
       فلش پررنگِ <span class="ltr">«lookup key 251»</span> اون رو می‌رسونه به جعبهٔ <span class="ltr">«Root Page»</span>
       که زیرنویسش مرزهای درخته: <span class="ltr">«boundaries 200 | 300»</span> و برچسبِ کنارش <span class="ltr">«start here»</span>.
-    </div><div class="en"><div class="callout" data-en-example="example-ch4-8">
-<p class="example-title"><b>Example: Walking a B-tree</b></p>
-<p><b>Setup:</b> The root has separator <code dir="ltr">500</code>; a right-hand leaf contains <code dir="ltr">700,740,780</code>.</p>
-<p><b>Walk through it:</b> Looking for <code dir="ltr">740</code> chooses the right child at the root, then follows the relevant leaf path.</p>
-<p><b>What this tells you:</b> Each level narrows the range. Finding one key doesn't require reading every page.</p>
-</div>
+    </div><div class="en">
 <p>Start at <span class="ltr">Application</span>, labelled <span class="ltr">lookup key 251</span>. Follow <span class="ltr">lookup key 251</span> to the <span class="ltr">Root Page</span>. Its labels <span class="ltr">boundaries 200 | 300</span> and <span class="ltr">start here</span> tell you where the search begins.</p><p>Since 251 lies between the root's boundaries, take <span class="ltr">between 200 and 300</span>, then <span class="ltr">between 250 and 270</span> to the leaf <span class="ltr">holding key 251</span>. Each page narrows the range; you haven't searched every page.</p></div>
     <div class="fa">
       از ریشه دو تا فلش بیرون میاد: <span class="ltr">«between 200 and 300»</span> به «Internal Page» بالایی (بازهٔ ۲۰۰–۳۰۰) و
@@ -649,24 +619,14 @@ $ db_get 42</pre>
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار ۶</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: Crash وسطِ split</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دو تا صفحهٔ تازه ساخته شدن، ولی به‌روزرسانی والد هنوز رو دیسک نرفته. نصفه کاره!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا رکوردهای بازیابی موتور مشخص می‌کنن split چطور تکمیل یا اصلاح بشه. صرف نوشتن جداگانهٔ چند صفحه کافی نیست.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس ساختار درخت هم باید پس از crash معتبر بمونه. ماندگاری فقط حفظ مقدار یه رکورد نیست — اسکلت هم باید سرپا بمونه.</p>
-</div>
+
 
       این نمودار چهار تا خط (<span class="ltr">lane</span>) افقی داره که از بالا به پایین عنوان‌شون اینه:
       <span class="ltr">«Write path»</span>، <span class="ltr">«Buffers and caches»</span>،
       <span class="ltr">«Crash recovery»</span> و <span class="ltr">«Terminal»</span>.
       پنج تا حالتِ خطِ اول شمارهٔ گام دارن — <span class="ltr">«01»</span> تا <span class="ltr">«05»</span> — و مسیرِ عادیِ نوشتن رو می‌سازن؛
       سه تا حالتِ دیگه مسیرهای شکست و بازیابی‌ان.
-    </div><div class="en"><div class="callout" data-en-example="example-ch4-12">
-<p class="example-title"><b>Example: A crash during a split</b></p>
-<p><b>Setup:</b> Two new pages have been created, but the parent's update hasn't reached disk.</p>
-<p><b>Walk through it:</b> The engine uses its recovery records to complete or repair the split. Writing the pages separately isn't sufficient.</p>
-<p><b>What this tells you:</b> Recovery must restore a valid tree structure as well as record values. Keeping bytes is useful only if the keys remain reachable.</p>
-</div>
+    </div><div class="en">
 <p>Read the four lanes: <span class="ltr">Write path</span>, <span class="ltr">Buffers and caches</span>, <span class="ltr">Crash recovery</span> and <span class="ltr">Terminal</span>. The numbered states <span class="ltr">01</span> through <span class="ltr">05</span> form the normal write path. Three other states show what can fail and how recovery proceeds.</p></div>
     <div class="fa">
       مسیرِ اصلی رو قدم‌به‌قدم برو. از <span class="ltr">«Dirty Page»</span> شروع کن: زیرنویسش
@@ -841,19 +801,9 @@ $ db_get 42</pre>
 <div class="teacher">
   <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
   <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: ایندکس پوشاننده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن query فقط <code dir="ltr">amount</code> سفارش‌های مشتری ۱۷ رو می‌خواد. فقط مبلغ!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا ایندکس با کلید <code dir="ltr">customer_id</code> و دادهٔ مبلغ می‌تونه پاسخ رو از خود ایندکس بده؛ ایندکس صرفاً کلید، مراجعه به رکورد اصلی هم می‌خواد. یه ضرب یا دو ضرب؟</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس پوشوندن query خوندن رو کم می‌کنه، ولی مبلغ تو ایندکس هم جا می‌گیره و با تغییر اون باید به‌روز بشه — ناهار مجانی نیست.</p>
-</div>
+
 <p>سه تا ستون رو با یه پرس‌وجو مقایسه کن: «ردیف‌های <span class="ltr">user</span> شماره ۴۲». تو «ایندکس خوشه‌ای» خودِ ردیف داخل برگه (مثل کلید اصلی <span class="ltr">InnoDB</span>): خوندن با یه جست‌وجو، ولی جابه‌جایی گرون. تو «<span class="ltr">heap</span> + ایندکس» ایندکس فقط اشاره‌گر داره و ردیف‌ها بی‌نظم تو <span class="ltr">heap</span>‌ان (مثل <span class="ltr">PostgreSQL</span>): به‌روزرسانی ممکنه رکورد رو جابه‌جا کنه. تو «ایندکس پوششی» ستون‌ها داخل ایندکس کپی‌ان و پرس‌وجو بی‌نیاز از <span class="ltr">heap</span> جواب می‌گیره — به بهای فضا و نوشتن بیشتر. نوار پایین جمع‌بندیه: چیدمان، سرعت خوندن رو در برابر هزینهٔ نوشتن تصمیم می‌گیره.</p></div>
-  <div class="en"><div class="callout" data-en-example="example-ch4-14">
-<p class="example-title"><b>Example: Covering a query</b></p>
-<p><b>Setup:</b> A query needs only <code dir="ltr">amount</code> for customer 17's orders.</p>
-<p><b>Walk through it:</b> An index keyed by <code dir="ltr">customer_id</code> that also stores the amount can supply the needed values. A key-only index also needs a base-record lookup.</p>
-<p><b>What this tells you:</b> Covering the query can reduce reads, but the amount takes index space and its changes need index updates.</p>
-</div>
+  <div class="en">
 <p>Compare the columns with “find rows for user 42”. In “Clustered index”, the leaf holds the row, as with <span class="ltr">InnoDB</span> primary keys. Reads reach the data directly, while moving a record adds work.</p><p>In “Heap + index”, an index points to records in an unordered <span class="ltr">heap</span>, as in <span class="ltr">PostgreSQL</span>. An update may require another record location. In “Covering index”, the needed columns are already in the index, so this query can avoid the <span class="ltr">heap</span>. Those extra fields still take space and need updates. Follow the row location, then count the work.</p></div>
 </div>
 <div class="en"><p>Section 8 extends this idea to queries with several fields or dimensions. The order of a composite key matters there.</p></div>
@@ -962,22 +912,12 @@ $ db_get 42</pre>
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار ۳</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: compute موقت روی فایل مشترک</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل‌های ستونی فروش تو object store باقی‌ان و دو تا تیم query جدا دارن. انبار مشترکه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا هر تیم compute خودش رو بالا میاره و فایل مشترک رو می‌خونه؛ cache محلی ممکنه خوندن تکراری رو کم کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس جدایی storage و compute رقابت CPU رو کم می‌کنه، ولی هزینهٔ اسکن و انتقال داده باقی می‌مونه — دعوا کم شد، قبض نه.</p>
-</div>
+
 
       این شکل یه زنجیرهٔ افقی از چپ به راسته. اول جعبهٔ <span class="ltr">«Analyst / BI Tool»</span> با زیرنویسِ
       <span class="ltr">«SQL over big tables»</span>. فلش پررنگِ <span class="ltr">«SQL query»</span> اون رو به
       <span class="ltr">«Query Engine»</span> می‌رسونه (زیرنویس: <span class="ltr">«parse, optimize, execute»</span>، برچسب: <span class="ltr">Trino / Spark</span>).
-    </div><div class="en"><div class="callout" data-en-example="example-ch4-17">
-<p class="example-title"><b>Example: Temporary compute, shared files</b></p>
-<p><b>Setup:</b> Columnar sales files remain in an object store. Two teams run different queries.</p>
-<p><b>Walk through it:</b> Each team starts its own compute and reads the shared files. Local caches can reduce repeat reads.</p>
-<p><b>What this tells you:</b> Separating compute and storage reduces competition for CPU. Scanning and transferring the data still have costs.</p>
-</div>
+    </div><div class="en">
 <p>Begin on the left at <span class="ltr">Analyst / BI Tool</span>, labelled <span class="ltr">SQL over big tables</span>. Follow <span class="ltr">SQL query</span> to <span class="ltr">Query Engine</span>, where <span class="ltr">parse, optimize, execute</span> describes the work and <span class="ltr">Trino / Spark</span> gives examples. This box decides how to execute the query.</p></div>
     <div class="fa">
       از بالای موتور کوئری، فلش چین‌چینِ <span class="ltr">«resolve table metadata»</span> به جعبهٔ بالایی یعنی
@@ -1117,24 +1057,14 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار ۴</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: فقط مبلغ‌ها را بخوان</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ردیف‌ها شامل <code dir="ltr">id, address, description, amount</code> هستن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا برای <code dir="ltr">SUM(amount)</code> موتور ستونی فقط بلوک مبلغ رو می‌خونه و نشونی و توضیح رو کنار می‌ذاره. فقط همون که لازمه!</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس سود از کمتر خوندن میاد. اگه query همهٔ ستون‌های یه ردیف رو بخواد، همین مزیت الزاماً برقرار نیست — معجزهٔ همیشگی نداریم.</p>
-</div>
+
 
       چهار تا ستون داریم: <span class="ltr">«Source Table»</span>، <span class="ltr">«Column Layout»</span>،
       <span class="ltr">«Compression»</span> و <span class="ltr">«Execution»</span>. تو نوار بالا، جعبهٔ
       <span class="ltr">«Fact Table»</span> با زیرنویسِ <span class="ltr">«billions of rows, wide table»</span> نشسته؛
       فلش پررنگِ <span class="ltr">«split into blocks by date range»</span> اون رو به <span class="ltr">«Column Blocks»</span>
       می‌رسونه — جعبه‌ای با زیرنویسِ <span class="ltr">«one column per block»</span> و برچسبِ <span class="ltr">«sorted by date_key»</span>.
-    </div><div class="en"><div class="callout" data-en-example="example-ch4-19">
-<p class="example-title"><b>Example: Read only the amounts</b></p>
-<p><b>Setup:</b> Rows contain <code dir="ltr">id, address, description, amount</code>.</p>
-<p><b>Walk through it:</b> For <code dir="ltr">SUM(amount)</code>, a columnar engine reads the amount blocks and leaves the addresses and descriptions aside.</p>
-<p><b>What this tells you:</b> The benefit comes from reading fewer bytes. A query needing every field of one row doesn't necessarily get the same advantage.</p>
-</div>
+    </div><div class="en">
 <p>Read the columns from left to right: <span class="ltr">Source Table</span>, <span class="ltr">Column Layout</span>, <span class="ltr">Compression</span> and <span class="ltr">Execution</span>. In the top lane, <span class="ltr">Fact Table</span> is labelled <span class="ltr">billions of rows, wide table</span>. The <span class="ltr">split into blocks by date range</span> arrow reaches <span class="ltr">Column Blocks</span>, with <span class="ltr">one column per block</span> and <span class="ltr">sorted by date_key</span>. The data is grouped so a query can select the relevant columns and date blocks.</p></div>
     <div class="fa">
       نوار پایین، قصدِ کوئریـه: جعبهٔ <span class="ltr">«SQL Query»</span> با زیرنویسِ <span class="ltr">«3 of 100 columns»</span>.
@@ -1291,21 +1221,11 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار ۵</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: سه سؤال، سه ایندکس</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن باید سفارش مشتری رو بیابی، سند دارای واژه رو پیدا کنی و محصول مشابه تصویر رو پیشنهاد بدی. سه تا کار، سه تا ساز.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا B-tree برای کلید مرتب، ـی inverted index برای واژه و ANN برای بردار مسیرهای متفاوت دارن. هر کدوم یه کاره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس «ایندکس داریم» کافی نیست. نوع پرسش تعیین می‌کنه چه رابطه‌ای بین ورودی و محل داده لازمه — اول سؤال، بعد ابزار.</p>
-</div>
+
 
       این شکل سه تا ردیف داره، هر ردیف یه نوع پرس‌وجو، و سه تا ستون داره: <span class="ltr">«Query Shape»</span>،
       <span class="ltr">«Index Structure»</span> و <span class="ltr">«Specialized Engine»</span>. هر ردیف یه زنجیرهٔ افقیه.
-    </div><div class="en"><div class="callout" data-en-example="example-ch4-23">
-<p class="example-title"><b>Example: Three questions, three access structures</b></p>
-<p><b>Setup:</b> Find a customer's orders, a document containing a word, and products similar to an image.</p>
-<p><b>Walk through it:</b> A B-tree orders keys, an inverted index maps terms to documents, and ANN search follows vector similarity.</p>
-<p><b>What this tells you:</b> “We have an index” isn't enough. Explain how that index connects the query input to the relevant data.</p>
-</div>
+    </div><div class="en">
 <p>Read one horizontal row at a time. The three columns are <span class="ltr">Query Shape</span>, <span class="ltr">Index Structure</span> and <span class="ltr">Specialized Engine</span>. Each row starts with a different question, then connects it to an access structure and a search operation.</p></div>
     <div class="fa">
       ردیف بالا برای نقشه‌ست: جعبهٔ <span class="ltr">«Map Range Query»</span> (زیرنویس: <span class="ltr">«lat + lon window»</span>، برچسب: <span class="ltr">«2D range»</span>)
@@ -1345,20 +1265,10 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: ساختِ ایندکس جدا از سرو کردنِ کوئری</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن یه میلیارد بردار داری و می‌خوای هم ایندکسِ ANN بسازی، هم کوئری بزنی — بدون اینکه این دوتا همدیگه رو کند کنن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> نوار بالا مسیرِ ساخته: K-Means توزیع‌شده مرکزها رو می‌ده، PQ Encoder اون‌ها رو به ۴۸ زیر‌بردار فشرده تبدیل می‌کنه، Fragment Writer خروجیِ immutable می‌نویسه و codebook‌ها می‌رن توی ایندکسِ فشردهٔ داخل حافظه. نوار پایین مسیرِ کوئریه: کوئری می‌ره به اسکنِ فاصلهٔ PQ روی همون ایندکس فشرده و بعد بررسیِ دقیق روی fragmentهای کامل‌دقت توی object storage.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس ساخت و سرو دو سازِ جدا دارن: کلاسترِ موقتیِ Spark نسخه‌های immutable می‌سازه و سرویسِ آنلاین فقط نسخهٔ پین‌شده رو لود می‌کنه — همین جداسازیه که اجازه می‌ده هر کدوم با سازِ خودش scale بشه. عددِ ۴۵ گیگ به‌ازای هر میلیارد بردار هم گزارشِ همون منبعه.</p>
-</div>
+
 
       تو این نمودار پنج تا ایستگاه داری: <span class="ltr">«01 / Build (Spark)»</span>، <span class="ltr">«02 / Object Store»</span>، <span class="ltr">«03 / Parse»</span>، <span class="ltr">«04 / Search»</span> و <span class="ltr">«05 / Serve»</span>. نوار بالا مسیر آفلاینِ ساخته و نوار پایین مسیر آنلاینِ کوئریه؛ وسطشون دو تا ذخیره‌ست: <span class="ltr">«Compressed Index»</span> و <span class="ltr">«Vector Fragments»</span>. ایدهٔ کل شکل یه جمله‌ست: ساخت ایندکس رو از سرو دادن جدا کن تا هر کدوم با ساز خودش scale بشه.
-    </div><div class="en"><div class="callout" data-en-example="teacher-9">
-<p class="example-title"><b>Example: Build the index separately from serving</b></p>
-<p><b>Setup:</b> A billion vectors need an ANN index and an online query service without making the two workloads compete for the same compute.</p>
-<p><b>Walk through it:</b> In the upper lane, distributed K-Means supplies centroids. PQ encoding produces 48 compressed sub-vectors; Fragment Writer creates immutable output and the codebooks feed the in-memory index. In the lower lane, queries scan PQ distances, then check full-precision fragments from object storage.</p>
-<p><b>What this tells you:</b> A temporary Spark cluster builds immutable versions. The online service loads a pinned version. Each side can scale independently. The roughly 45 GiB per billion vectors is reported by the cited source, rather than independently measured here.</p>
-</div>
+    </div><div class="en">
 <p>The five stations are <span class="ltr">01 / Build (Spark)</span>, <span class="ltr">02 / Object Store</span>, <span class="ltr">03 / Parse</span>, <span class="ltr">04 / Search</span> and <span class="ltr">05 / Serve</span>. The top lane builds an index offline. The lower lane serves queries online. Between them sit <span class="ltr">Compressed Index</span> and <span class="ltr">Vector Fragments</span>.</p><p>Separating building from serving lets the two workloads scale independently. Follow which data each one produces or reads.</p></div>
     <div class="fa">
       داستان ساخت از این قراره: جعبهٔ <span class="ltr">«Distributed K-Means»</span> (زیرنویس: <span class="ltr">«Spark K-means + JAX»</span>، برچسب: <span class="ltr">«~32K partitions, sampled»</span>) با فلشِ <span class="ltr">«centroids»</span> می‌رسه به <span class="ltr">«PQ Encoder»</span> (زیرنویس: <span class="ltr">«48 sub-vectors, residual»</span>، برچسب: <span class="ltr">«64x compression»</span>). از اون‌جا دو تا فلش بیرون می‌زنه: <span class="ltr">«partition IDs»</span> به <span class="ltr">«Fragment Writer»</span> (زیرنویس: <span class="ltr">«partition-aligned write»</span>، برچسب: <span class="ltr">«immutable output»</span>)، و <span class="ltr">«PQ codebooks»</span> (چین‌چین) به <span class="ltr">«Compressed Index»</span> (زیرنویس: <span class="ltr">«~45 GiB per 1B vectors»</span>، برچسب: <span class="ltr">«in-memory ANN»</span>). بعد <span class="ltr">«Fragment Writer»</span> با فلشِ پررنگِ <span class="ltr">«immutable fragments»</span> می‌رسه به <span class="ltr">«Vector Fragments»</span> (زیرنویس: <span class="ltr">«full-precision columnar»</span>، برچسب: <span class="ltr">«object storage»</span>). این تکهٔ آفلاین روی کلاستر موقتی Spark اجرا می‌شه و خروجی‌ش یه نسخهٔ immutable همراه manifestـه — سرویس آنلاین فقط نسخهٔ مشخصی رو load می‌کنه.
@@ -1384,19 +1294,9 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 <div class="teacher">
   <div class="tag"><span class="fa">روایت مدرس از نقشهٔ فصل</span><span class="en">Chapter-map narration</span></div>
   <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: یک داده، دو مسیر خواندن</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن جدول سفارش با <code dir="ltr">id</code> خونده می‌شه و گزارش فروش فقط ستون <code dir="ltr">amount</code> رو جمع می‌زنه. دو تا کار جدا.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا lookup نقطه‌ای از ایندکس استفاده می‌کنه؛ اسکن تحلیلی از چیدمان ستونی سود می‌بره. هر کدوم ساز خودش رو می‌زنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس موتور ذخیره‌سازی رو باید با نوع خوندن و نوشتن سنجید. سریع بودن یه lookup دربارهٔ سرعت اسکن میلیاردی چیزی نمی‌گه — یادت باشه.</p>
-</div>
+
 <p>گرهٔ میانی «ذخیره‌سازی و بازیابی»ـه و هفت تا ایده دورش چیدن: از بالا «تریدآف لاگ و ایندکس» (با یال «افزودن»)، «موتور <span class="ltr">LSM</span>» («ادغام») و «موتور <span class="ltr">B-tree</span>» («صفحه‌ها»)؛ تو میانه «ایندکس‌های ثانویه» («اشاره») و «فروشگاه‌های درون‌حافظه‌ای» («حافظه»)؛ و تو پایین «تحلیل ستونی» («پیمایش») و «جست‌وجوی متنی و برداری» («یافتن»). پیام نقشه: هر گره پاسخی متفاوت به همون دو تا پرسشِ «نگه‌داشتن» و «پس‌دادن»ـه — با تریدآف خوندن/نوشتن/فضا.</p></div>
-  <div class="en"><div class="callout" data-en-example="example-ch4-0">
-<p class="example-title"><b>Example: One dataset, two read paths</b></p>
-<p><b>Setup:</b> An order lookup uses <code dir="ltr">id</code>; a sales report sums only <code dir="ltr">amount</code>.</p>
-<p><b>Walk through it:</b> The point lookup benefits from an index. A broad analytical scan benefits from a columnar layout that reads just the needed fields.</p>
-<p><b>What this tells you:</b> Judge an engine against its reads and writes. A fast lookup doesn't tell you how quickly it can scan a billion rows.</p>
-</div>
+  <div class="en">
 <p>Begin at “Storage &amp; Retrieval”. The top connections are “Log + index trade-off” through “appends”, “LSM-tree engine” through “merges”, and “B-tree engine” through “pages”. In the middle, “Secondary indexes” connects through “points” and “In-memory stores” through “RAM”. Below, “Columnar analytics” connects through “scans” and “Text + vector search” through “finds”.</p><p>Each of the seven ideas answers the same two questions: how do you keep data, and how do you find it again? Explain each answer in terms of read work, write work and space.</p></div>
 </div>
 
@@ -1437,322 +1337,122 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 
   <details><summary><span class="fa">۱. پایگاه داده در پایین‌ترین سطح چه وظیفه‌ای دارد؟</span><span class="en">1. What is a database’s job at the lowest level?</span></summary>
     <div class="fa"><p>موتور باید دادهٔ پذیرفته‌شده رو طبقِ تضمینِ ماندگاری نگه داره و بعداً بتونه اون رو پیدا کنه. ساختارهای این فصل راه‌های مختلفِ انجامِ همون دو تا کارن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: آخرین مقدار در لاگ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل به‌ترتیب <code dir="ltr">P7=100</code> و <code dir="ltr">P7=120</code> داره. تهش آخریه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا نوشتن فقط به انتهای فایل اضافه می‌کنه؛ خوندن بدون ایندکس باید آخرین رکورد <code dir="ltr">P7</code> رو تو فایل پیدا کنه. بگرد تا پیدا کنی!</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس append ساده‌ست، ولی خوندن با رشد فایل گرون می‌شه. ایندکس نشونی آخرین مقدار رو نگه می‌داره — آدرس رو یادداشت کن.</p>
-</div></div><div class="en"><p>Keep accepted data according to the promised durability guarantee, then find it when requested. Logs, indexes, LSM, B-trees and columnar layouts take different routes through those two jobs. Compare the work each one moves between writes and reads.</p>
-<div class="callout" data-en-example="example-ch4-1">
-<p class="example-title"><b>Example: Finding the latest log value</b></p>
-<p><b>Setup:</b> A file contains <code dir="ltr">P7=100</code>, followed by <code dir="ltr">P7=120</code>.</p>
-<p><b>Walk through it:</b> A write adds another line at the end. Without an index, reading <code dir="ltr">P7</code> means finding its last occurrence in the file.</p>
-<p><b>What this tells you:</b> Appending is simple, but the read work grows with the file. An index can remember where the latest value lives.</p>
-</div></div>
+</div><div class="en"><p>Keep accepted data according to the promised durability guarantee, then find it when requested. Logs, indexes, LSM, B-trees and columnar layouts take different routes through those two jobs. Compare the work each one moves between writes and reads.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۲. ایندکس چیست و تریدآف اصلی‌اش کدام است؟</span><span class="en">2. What is an index, and its core trade-off?</span></summary>
     <div class="fa"><p>ایندکس ساختاری اضافی برای پیدا کردنِ داده‌ست. خوندن رو سریع‌تر می‌کنه، ولی فضا می‌گیره و تغییرِ داده باید اون رو هم به‌روز کنه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: بهای ایندکسِ اضافه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن رو جدول سفارش، ایندکس <code dir="ltr">customer_id</code> ساختی.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا خوندن سفارش‌های مشتری ۱۷ دیگه کل جدول رو اسکن نمی‌کنه؛ ولی هر درج یا تغییر مشتری باید ایندکس رو هم اصلاح کنه. یه بام و دو هوا نیست.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس کم شدن هزینهٔ خوندن با فضای بیشتر و کار اضافهٔ نوشتن همراهه. ایندکس بلااستفاده مجانی نیست — یادت باشه.</p>
-</div></div><div class="en"><p>An index is extra structure derived from primary data to find records faster. It uses space, and writes affecting indexed fields must maintain it. Choose one by naming the query it helps and the extra write work it adds.</p>
-<div class="callout" data-en-example="example-ch4-2">
-<p class="example-title"><b>Example: The cost of another index</b></p>
-<p><b>Setup:</b> An orders table has an index on <code dir="ltr">customer_id</code>.</p>
-<p><b>Walk through it:</b> Reading customer 17's orders avoids a full table scan. Inserting an order or changing its customer also updates that index.</p>
-<p><b>What this tells you:</b> The saved read work comes with extra space and write maintenance. Even an unused index has a cost.</p>
-</div></div>
+</div><div class="en"><p>An index is extra structure derived from primary data to find records faster. It uses space, and writes affecting indexed fields must maintain it. Choose one by naming the query it helps and the extra write work it adds.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۳. چرا hash index به‌تنهایی کافی نیست؟</span><span class="en">3. Why isn’t a hash index enough on its own?</span></summary>
     <div class="fa"><p>تو مدلِ سادهٔ فصل، ایندکسِ هشِ درونِ حافظه جست‌وجوی کلید رو سریع می‌کنه، ولی خوندنِ بازه و ظرفیتِ حافظه و بازیابی و جمع‌آوریِ نسخه‌های قدیمی مسائلِ جداگانه‌ان.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: بلوکِ مناسب به‌جای کل فایل</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن SSTable کلیدهای مرتب <code dir="ltr">100…999</code> داره و ایندکس پراکنده شروع هر بلوک رو می‌شناسه. مثل فهرست کتاب.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا برای کلید <code dir="ltr">740</code> بلوکی که از <code dir="ltr">700</code> شروع می‌شه پیدا و همون بخش خونده می‌شه. فقط همون قفسه!</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس مرتب بودن هم جست‌وجوی بلوک و هم اسکن بازهٔ <code dir="ltr">740…760</code> رو ممکن می‌کنه. هش به‌تنهایی ترتیب بازه رو نمی‌ده — نظم قیمتیه.</p>
-</div></div><div class="en"><p>The simple hash map speeds up point lookups, but four issues remain: old log records consume space, restarts rebuild the map by scanning the log, the map must fit in memory, and it provides no sorted range access. Moving the hash to disk brings random-access and resizing costs.</p>
-<div class="callout" data-en-example="example-ch4-4">
-<p class="example-title"><b>Example: Read the relevant block</b></p>
-<p><b>Setup:</b> An SSTable holds sorted keys <code dir="ltr">100…999</code>. Its sparse index identifies the start of each block.</p>
-<p><b>Walk through it:</b> For key <code dir="ltr">740</code>, find the block beginning at <code dir="ltr">700</code>, then read that part of the file.</p>
-<p><b>What this tells you:</b> Sorted order supports both block lookup and a scan of <code dir="ltr">740…760</code>. A hash map alone doesn't supply that order.</p>
-</div></div>
+</div><div class="en"><p>The simple hash map speeds up point lookups, but four issues remain: old log records consume space, restarts rebuild the map by scanning the log, the map must fit in memory, and it provides no sorted range access. Moving the hash to disk brings random-access and resizing costs.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۴. SSTable چه مزیتی بر لاگ ساده دارد؟</span><span class="en">4. What advantage does an SSTable have over a plain log?</span></summary>
     <div class="fa"><p><span class="ltr">SSTable</span> کلیدها رو مرتب نگه می‌داره. این نظم امکانِ ایندکسِ پراکنده و ادغامِ فایل‌ها و خوندنِ بازه‌ای رو فراهم می‌کنه؛ لازم نیست نشونیِ هر کلید تو حافظه باشه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: بلوکِ مناسب به‌جای کل فایل</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن SSTable کلیدهای مرتب <code dir="ltr">100…999</code> داره و ایندکس پراکنده شروع هر بلوک رو می‌شناسه. مثل فهرست کتاب.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا برای کلید <code dir="ltr">740</code> بلوکی که از <code dir="ltr">700</code> شروع می‌شه پیدا و همون بخش خونده می‌شه. فقط همون قفسه!</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس مرتب بودن هم جست‌وجوی بلوک و هم اسکن بازهٔ <code dir="ltr">740…760</code> رو ممکن می‌کنه. هش به‌تنهایی ترتیب بازه رو نمی‌ده — نظم قیمتیه.</p>
-</div></div><div class="en"><p>Sorted keys let an SSTable use a sparse index: keep the first key of each multi-KB block, then jump to the right block and scan a few kilobytes. You can compress blocks, scan key ranges and merge sorted files with little working memory. You don't need every key's address in RAM.</p>
-<div class="callout" data-en-example="example-ch4-4">
-<p class="example-title"><b>Example: Read the relevant block</b></p>
-<p><b>Setup:</b> An SSTable holds sorted keys <code dir="ltr">100…999</code>. Its sparse index identifies the start of each block.</p>
-<p><b>Walk through it:</b> For key <code dir="ltr">740</code>, find the block beginning at <code dir="ltr">700</code>, then read that part of the file.</p>
-<p><b>What this tells you:</b> Sorted order supports both block lookup and a scan of <code dir="ltr">740…760</code>. A hash map alone doesn't supply that order.</p>
-</div></div>
+</div><div class="en"><p>Sorted keys let an SSTable use a sparse index: keep the first key of each multi-KB block, then jump to the right block and scan a few kilobytes. You can compress blocks, scan key ranges and merge sorted files with little working memory. You don't need every key's address in RAM.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۵. نقش memtable و WAL در موتور LSM چیست؟</span><span class="en">5. What do the memtable and WAL do in an LSM engine?</span></summary>
     <div class="fa"><p><span class="ltr">Memtable</span> تغییرهای تازه رو تو حافظهٔ مرتب جمع می‌کنه؛ <span class="ltr">WAL</span> اطلاعاتِ لازم برای بازیابیِ اون‌ها رو نگه می‌داره. پس از پر شدن، داده به <span class="ltr">SSTable</span> منتقل می‌شه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: نسخه‌های تازه در LSM</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن <code dir="ltr">P7=100</code> تو SSTable قدیمیه و <code dir="ltr">P7=120</code> تو memtable نوشته می‌شه. دو جا، دو نسخه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا نوشتن WAL و حافظه رو به‌روز می‌کنه؛ flush فایل مرتب تازه می‌سازه و compaction نسخه‌های لازم رو ادغام می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس خواننده باید نسخهٔ قابل‌مشاهدهٔ تازه رو انتخاب کنه. پیدا شدن کلید تو یه فایل قدیمی برای توقف کافی نیست — تا تهش برو.</p>
-</div></div><div class="en"><p>The memtable accepts fresh changes in a sorted in-memory map. A WAL retains the information needed to recover changes not yet flushed. When the memtable fills, it becomes an SSTable. Once that file is durable and recovery no longer needs the corresponding log section, the section can be retired.</p>
-<div class="callout" data-en-example="example-ch4-3">
-<p class="example-title"><b>Example: Newer values in an LSM</b></p>
-<p><b>Setup:</b> An old SSTable contains <code dir="ltr">P7=100</code>. A new write puts <code dir="ltr">P7=120</code> into the memtable.</p>
-<p><b>Walk through it:</b> The write updates the WAL and memory. A flush creates a new sorted file; compaction merges versions and retains the ones still needed.</p>
-<p><b>What this tells you:</b> The reader must return the newest visible version. Finding the key in an old file isn't enough if newer state exists elsewhere.</p>
-</div></div>
+</div><div class="en"><p>The memtable accepts fresh changes in a sorted in-memory map. A WAL retains the information needed to recover changes not yet flushed. When the memtable fills, it becomes an SSTable. Once that file is durable and recovery no longer needs the corresponding log section, the section can be retired.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۶. جست‌وجوی نقطه‌ای در LSM چطور انجام می‌شود؟</span><span class="en">6. How does LSM point lookup work?</span></summary>
     <div class="fa"><p>خوندن وضعیتِ تازه رو تو حافظه و فایل‌های مرتبط جست‌وجو می‌کنه. فیلترها و ایندکس‌ها فایل و بلوکِ لازم رو محدود می‌کنن؛ نسخه‌ها و علامتِ حذف تعیین می‌کنن چه نتیجه‌ای معتبره.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: نسخه‌های تازه در LSM</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن <code dir="ltr">P7=100</code> تو SSTable قدیمیه و <code dir="ltr">P7=120</code> تو memtable نوشته می‌شه. دو جا، دو نسخه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا نوشتن WAL و حافظه رو به‌روز می‌کنه؛ flush فایل مرتب تازه می‌سازه و compaction نسخه‌های لازم رو ادغام می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس خواننده باید نسخهٔ قابل‌مشاهدهٔ تازه رو انتخاب کنه. پیدا شدن کلید تو یه فایل قدیمی برای توقف کافی نیست — تا تهش برو.</p>
-</div></div><div class="en"><p>Check memory first, then relevant segments in newest-to-oldest order for this model. A Bloom filter can rule out a segment; otherwise its sparse index identifies the data block. Return the newest visible version, respecting tombstones. A missing key or an old unchanged key can require checking several segments, which is why filters matter.</p>
-<div class="callout" data-en-example="example-ch4-3">
-<p class="example-title"><b>Example: Newer values in an LSM</b></p>
-<p><b>Setup:</b> An old SSTable contains <code dir="ltr">P7=100</code>. A new write puts <code dir="ltr">P7=120</code> into the memtable.</p>
-<p><b>Walk through it:</b> The write updates the WAL and memory. A flush creates a new sorted file; compaction merges versions and retains the ones still needed.</p>
-<p><b>What this tells you:</b> The reader must return the newest visible version. Finding the key in an old file isn't enough if newer state exists elsewhere.</p>
-</div></div>
+</div><div class="en"><p>Check memory first, then relevant segments in newest-to-oldest order for this model. A Bloom filter can rule out a segment; otherwise its sparse index identifies the data block. Return the newest visible version, respecting tombstones. A missing key or an old unchanged key can require checking several segments, which is why filters matter.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۷. Bloom filter چطور کار می‌کند و false positive یعنی چه؟</span><span class="en">7. How does a Bloom filter work — what is a false positive?</span></summary>
     <div class="fa"><p>برای کلید، چند تا موقعیتِ بیت علامت می‌خوره. اگه بیتِ لازم صفر باشه، کلید نیست؛ اگه همه یک باشن، شاید هست، چون کلیدهای دیگه هم همون بیت‌ها رو علامت زدن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: شاید هست، قطعاً نیست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن برای یه SSTable، ـی Bloom filter می‌گه بیت لازم برای کلید <code dir="ltr">P99</code> صفره. یعنی نیست.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا فایل برای <code dir="ltr">P99</code> خونده نمی‌شه؛ ولی اگه همهٔ بیت‌ها یک باشن، فایل هنوز باید بررسی بشه. شاید هست، شاید نه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس پاسخ مثبت می‌تونه کاذب باشه. فیلتر سالم برای مجموعهٔ ساخته‌شده پاسخ منفی کاذب نمی‌ده و جای بررسی داده رو نمی‌گیره — «نه» قطعیه، «شاید» مشکوکه.</p>
-</div></div><div class="en"><p>Several hashes set positions in a bit array. One required 0 bit proves the key isn't in the set represented by a correctly built filter. All 1s mean “maybe”: another key may have set the same bits.</p><p>The chapter's approximation is 10 bits per key for about 1% false positives. In an LSM lookup, that false positive causes an extra check rather than an incorrect returned record. The filter doesn't store the value.</p>
-<div class="callout" data-en-example="example-ch4-5">
-<p class="example-title"><b>Example: Definitely absent, possibly present</b></p>
-<p><b>Setup:</b> A Bloom filter has a required bit at zero for key <code dir="ltr">P99</code> in an SSTable.</p>
-<p><b>Walk through it:</b> Skip reading that file for <code dir="ltr">P99</code>. If all required bits were one, you'd still need to check the actual data.</p>
-<p><b>What this tells you:</b> A correctly built filter has no false negatives for its represented set, but positive answers can be false. It rules files out; it doesn't return records.</p>
-</div></div>
+</div><div class="en"><p>Several hashes set positions in a bit array. One required 0 bit proves the key isn't in the set represented by a correctly built filter. All 1s mean “maybe”: another key may have set the same bits.</p><p>The chapter's approximation is 10 bits per key for about 1% false positives. In an LSM lookup, that false positive causes an extra check rather than an incorrect returned record. The filter doesn't store the value.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۸. دو استراتژی compaction را مقایسه کن.</span><span class="en">8. Compare the two compaction strategies.</span></summary>
     <div class="fa"><p>ادغامِ اندازه‌محور فایل‌های مشابه رو جمع می‌کنه و معمولاً فضای موقت و فایل‌های بیشتری داره. ادغامِ سطحی بازه‌ها رو منظم‌تر نگه می‌داره، ولی می‌تونه داده رو بیشتر بازنویسی کنه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: دو سیاست ادغام</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن چهار تا فایل <code dir="ltr">100 MB</code> داری که بعضی کلیدهاشون هم‌پوشانی داره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا size-tiered می‌تونه فایل‌های هم‌اندازه رو ادغام کنه؛ leveled فایل‌ها رو تو سطح‌ها و بازه‌های منظم‌تر نگه می‌داره. دو تا سلیقه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس اولی معمولاً فایل و فضای موقت بیشتری می‌خواد؛ دومی ممکنه بازنویسی بیشتری بسازه. نتیجه به بار و تنظیمات وابسته‌ست — برندهٔ ثابت نداریم.</p>
-</div></div><div class="en"><p>Size-tiered compaction merges similarly sized files, often favoring write throughput while keeping more runs and requiring temporary space. Leveled compaction organizes files into levels L0, L1, … with size limits and more controlled ranges. That can improve read and space costs but add rewriting.</p><p>Compare size-tiered for write-heavy traffic and leveled for read-heavy traffic as starting points. Workload and settings decide the actual result.</p>
-<div class="callout" data-en-example="example-ch4-6">
-<p class="example-title"><b>Example: Two merge policies</b></p>
-<p><b>Setup:</b> Four files of <code dir="ltr">100 MB</code> each have some overlapping keys.</p>
-<p><b>Walk through it:</b> Size-tiered compaction can merge similarly sized files. Leveled compaction keeps files in more controlled levels and ranges.</p>
-<p><b>What this tells you:</b> The first often needs more temporary space and more files to check. The second may rewrite more data. Compare the workload and settings.</p>
-</div></div>
+</div><div class="en"><p>Size-tiered compaction merges similarly sized files, often favoring write throughput while keeping more runs and requiring temporary space. Leveled compaction organizes files into levels L0, L1, … with size limits and more controlled ranges. That can improve read and space costs but add rewriting.</p><p>Compare size-tiered for write-heavy traffic and leveled for read-heavy traffic as starting points. Workload and settings decide the actual result.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۹. tombstone چیست و چه چالشی دارد؟</span><span class="en">9. What is a tombstone, and its challenge?</span></summary>
     <div class="fa"><p><span class="ltr">Tombstone</span> علامتِ حذفه تا خوندن و ادغام، نسخهٔ قدیمیِ رکورد رو دوباره زنده نکنن. حذفِ خودِ علامت فقط وقتی امنه که نسخه‌های پوشش‌داده‌شده دیگه برنگردن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: علامت حذفِ هنوز لازم</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل قدیمی <code dir="ltr">P7=100</code> داره و فایل تازه <code dir="ltr">P7=DELETE</code>. مرده، ولی دفنش نکن هنوز!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا خوندن علامت حذف رو می‌بینه و رکورد رو نشون نمی‌ده. compaction فقط وقتی حذف علامت امنه که نسخهٔ قدیمی مربوط دیگه برنگرده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس پاک کردن زودهنگام tombstone می‌تونه مقدار قدیمی رو دوباره زنده کنه — مرده برمی‌گرده! عجله نکن.</p>
-</div></div><div class="en"><p>A tombstone records deletion so reads and compaction don't expose an older value. Remove the marker only when the versions it suppresses can no longer reappear. Logical deletion can happen before those bytes are physically removed; a tombstone isn't proof of immediate final erasure.</p>
-<div class="callout" data-en-example="review-9">
-<p class="example-title"><b>Example: A tombstone you still need</b></p>
-<p><b>Setup:</b> An older file contains <code dir="ltr">P7=100</code>; a newer file contains <code dir="ltr">P7=DELETE</code>.</p>
-<p><b>Walk through it:</b> A read sees the delete marker and hides the value. Compaction can remove the marker only when the old versions it suppresses can no longer reappear.</p>
-<p><b>What this tells you:</b> Dropping the tombstone too soon can expose the old value again. Deleting the marker must preserve the meaning of the deletion.</p>
-</div></div>
+</div><div class="en"><p>A tombstone records deletion so reads and compaction don't expose an older value. Remove the marker only when the versions it suppresses can no longer reappear. Logical deletion can happen before those bytes are physically removed; a tombstone isn't proof of immediate final erasure.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۰. ساختار B-tree را در چند جمله توضیح بده.</span><span class="en">10. Explain the B-tree structure in a few sentences.</span></summary>
     <div class="fa"><p><span class="ltr">B-tree</span> درختی از صفحه‌های دارای کلید و اشاره‌گره. هر سطح بازه رو محدود می‌کنه؛ برگ‌ها کلیدهای مرتب رو نگه می‌دارن و محلِ رکورد به طراحیِ موتور بستگی داره.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: پیمایشِ B-tree</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ریشه کلید جداکنندهٔ <code dir="ltr">500</code> داره و برگ راست شامل <code dir="ltr">700,740,780</code>ـه. درخت رو تصور کن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا جست‌وجوی <code dir="ltr">740</code> با مقایسه تو ریشه می‌ره به فرزند راست و بعد برگ مربوط. پله‌پله پایین.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس هر سطح بازه رو محدود می‌کنه. لازم نیست برای یه کلید همهٔ صفحه‌ها خونده بشن — درخت یعنی نصف کردن راه.</p>
-</div></div><div class="en"><p>A B-tree consists of fixed-size pages, commonly illustrated here as 8–16 KB, linked by page references. The root and internal boundary keys narrow the range until you reach a leaf. A branching factor in the hundreds keeps large examples around 3–4 levels deep, with O(log n) depth. The engine decides whether leaves contain records or references to them.</p>
-<div class="callout" data-en-example="example-ch4-8">
-<p class="example-title"><b>Example: Walking a B-tree</b></p>
-<p><b>Setup:</b> The root has separator <code dir="ltr">500</code>; a right-hand leaf contains <code dir="ltr">700,740,780</code>.</p>
-<p><b>Walk through it:</b> Looking for <code dir="ltr">740</code> chooses the right child at the root, then follows the relevant leaf path.</p>
-<p><b>What this tells you:</b> Each level narrows the range. Finding one key doesn't require reading every page.</p>
-</div></div>
+</div><div class="en"><p>A B-tree consists of fixed-size pages, commonly illustrated here as 8–16 KB, linked by page references. The root and internal boundary keys narrow the range until you reach a leaf. A branching factor in the hundreds keeps large examples around 3–4 levels deep, with O(log n) depth. The engine decides whether leaves contain records or references to them.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۱. page split و WAL چه می‌کنند؟</span><span class="en">11. What do page splits and the WAL do?</span></summary>
     <div class="fa"><p><span class="ltr">Page</span> <span class="ltr">split</span> موقعِ پر شدنِ صفحه، اون رو تقسیم و راهنمای والد رو اصلاح می‌کنه. <span class="ltr">WAL</span> تغییرهای لازم رو برای بازیابیِ امنِ ساختار و داده ثبت می‌کنه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Crash وسطِ split</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دو تا صفحهٔ تازه ساخته شدن، ولی به‌روزرسانی والد هنوز رو دیسک نرفته. نصفه کاره!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا رکوردهای بازیابی موتور مشخص می‌کنن split چطور تکمیل یا اصلاح بشه. صرف نوشتن جداگانهٔ چند صفحه کافی نیست.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس ساختار درخت هم باید پس از crash معتبر بمونه. ماندگاری فقط حفظ مقدار یه رکورد نیست — اسکلت هم باید سرپا بمونه.</p>
-</div></div><div class="en"><p>A full page splits, and its parent gets the new routing boundary. A full parent can split too, reaching the root. Recovery must preserve a valid tree even if a crash interrupts those page changes. WAL records the required recovery information; with synchronous durability, fsync makes the needed log records safe before the corresponding dirty pages reach disk.</p>
-<div class="callout" data-en-example="example-ch4-12">
-<p class="example-title"><b>Example: A crash during a split</b></p>
-<p><b>Setup:</b> Two new pages have been created, but the parent's update hasn't reached disk.</p>
-<p><b>Walk through it:</b> The engine uses its recovery records to complete or repair the split. Writing the pages separately isn't sufficient.</p>
-<p><b>What this tells you:</b> Recovery must restore a valid tree structure as well as record values. Keeping bytes is useful only if the keys remain reachable.</p>
-</div></div>
+</div><div class="en"><p>A full page splits, and its parent gets the new routing boundary. A full parent can split too, reaching the root. Recovery must preserve a valid tree even if a crash interrupts those page changes. WAL records the required recovery information; with synchronous durability, fsync makes the needed log records safe before the corresponding dirty pages reach disk.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۲. مهم‌ترین تفاوت‌های B-tree و LSM چیست؟</span><span class="en">12. What are the key B-tree vs LSM differences?</span></summary>
     <div class="fa"><p><span class="ltr">B-tree</span> معمولاً با مسیرِ صفحه‌ایِ مرتب می‌خونه؛ <span class="ltr">LSM</span> تغییرها رو تو حافظه و فایل‌ها جمع و بعد ادغام می‌کنه. هزینهٔ نوشتن و خوندن و فضا و تأخیرِ پس‌زمینه به بار و پیاده‌سازی وابسته‌ست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: بارِ نوشتن و خواندن</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن بار A عمدتاً ورود رویداده؛ بار B عمدتاً lookup و تغییر رکوردهای کوچیکه. دو تا دنیای جدا.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا LSM نوشتن‌ها رو جمع می‌کنه و هزینهٔ compaction می‌ده؛ B-tree صفحه‌ها رو به‌روز می‌کنه و ساختار خوندن مرتب داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس انتخاب با اندازه‌گیری write/read/space amplification و tail latency رو همون بار انجام می‌شه. برندهٔ ثابت نداریم — اندازه بگیر، حدس نزن.</p>
-</div></div><div class="en"><p>B-trees follow a short page path for point reads and sorted leaves for ranges. LSM gathers changes in memory and immutable files, then merges them. Reads may check several runs; range reads merge their ordered results.</p><p>Compare writes, space and latency too. LSM compression can save space, but old versions and compaction need room. B-tree pages can fragment. Snapshots and final deletion follow different paths. Measure the real workload instead of declaring a universal winner.</p>
-<div class="callout" data-en-example="example-ch4-13">
-<p class="example-title"><b>Example: Compare two workloads</b></p>
-<p><b>Setup:</b> Workload A mostly ingests events. Workload B mostly looks up and changes small records.</p>
-<p><b>Walk through it:</b> LSM buffers writes and later pays for compaction. A B-tree updates pages and keeps an ordered read path.</p>
-<p><b>What this tells you:</b> Measure read, write and space amplification, plus tail latency, on those workloads. Neither structure wins every comparison.</p>
-</div></div>
+</div><div class="en"><p>B-trees follow a short page path for point reads and sorted leaves for ranges. LSM gathers changes in memory and immutable files, then merges them. Reads may check several runs; range reads merge their ordered results.</p><p>Compare writes, space and latency too. LSM compression can save space, but old versions and compaction need room. B-tree pages can fragment. Snapshots and final deletion follow different paths. Measure the real workload instead of declaring a universal winner.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۳. write amplification چیست و چرا مهم است؟</span><span class="en">13. What is write amplification, and why does it matter?</span></summary>
     <div class="fa"><p>افزایشِ نوشتن یعنی مقدارِ واقعیِ نوشته‌شده بر رسانه، از دادهٔ تازهٔ برنامه بیشتر باشه. لاگ و صفحه‌ها و ایندکس و ادغام تو این هزینه نقش دارن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: حسابِ write amplification</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن برنامه تو یه بازه <code dir="ltr">1 GB</code> دادهٔ تازه می‌نویسه، ولی لاگ و compaction مجموعاً <code dir="ltr">6 GB</code> رو رسانه می‌نویسن. شش برابر!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا نسبت نوشتن واقعی به ورودی تو این اندازه‌گیری <code dir="ltr">6×</code>ـه. دامنهٔ اندازه‌گیری، از جمله WAL، باید مشخص باشه — چی رو شمردی؟</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس توان و عمر رسانه از بایت واقعی اثر می‌گیره. تنها نرخ دادهٔ ورودی کافی نیست — قبض رو بایت واقعی می‌ده.</p>
-</div></div><div class="en"><p>Write amplification is the ratio of bytes actually written to the medium to the application's input data bytes. State what you count, including logs, indexes and compaction.</p><p>In the simple B-tree illustration, a change is written at least 2× through WAL and page writes, sometimes rewriting a whole page for a few bytes. LSM writes through WAL, flush and repeated compaction. Those physical bytes affect bandwidth and SSD wear. Run benchmarks long enough to include background work.</p>
-<div class="callout" data-en-example="review-13">
-<p class="example-title"><b>Example: Calculating write amplification</b></p>
-<p><b>Setup:</b> An application writes <code dir="ltr">1 GB</code> of new data during an interval, while logging and compaction write <code dir="ltr">6 GB</code> to the medium.</p>
-<p><b>Walk through it:</b> The measured ratio is <code dir="ltr">6×</code>. State the measurement scope, including whether WAL is counted.</p>
-<p><b>What this tells you:</b> Bandwidth and media wear depend on physical bytes written. The input rate alone doesn't capture that cost.</p>
-</div></div>
+</div><div class="en"><p>Write amplification is the ratio of bytes actually written to the medium to the application's input data bytes. State what you count, including logs, indexes and compaction.</p><p>In the simple B-tree illustration, a change is written at least 2× through WAL and page writes, sometimes rewriting a whole page for a few bytes. LSM writes through WAL, flush and repeated compaction. Those physical bytes affect bandwidth and SSD wear. Run benchmarks long enough to include background work.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۴. چرا SSD هم برای نوشتن ترتیبی سریع‌تر است؟</span><span class="en">14. Why are sequential writes faster even on SSDs?</span></summary>
     <div class="fa"><p>فلش واحدهای خوندن و نوشتن و پاک‌کردنِ متفاوت داره و کنترل‌کننده داده رو جابه‌جا می‌کنه. نوشتنِ ترتیبی می‌تونه کارِ مدیریتِ رسانه رو کمتر کنه، ولی اثرش به دستگاه و بار وابسته‌ست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: چرا نوشتن SSD رایگان نیست؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن برنامه بلوک‌های کوچیک و پراکنده رو مرتب بازنویسی می‌کنه. ریزریز و همه جا!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا کنترل‌کننده برای پاک‌سازی بلوک‌های بزرگ‌تر ممکنه دادهٔ زنده رو جابه‌جا کنه. نوشتن منظم می‌تونه این فشار رو کم کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس اثر به دستگاه و فضای آزاد و بار بستگی داره. SSD داشتن هزینهٔ garbage collection و write amplification رو حذف نمی‌کنه — SSD جادو نیست، یادت باشه.</p>
-</div></div><div class="en"><p>Flash can erase a larger block, such as the chapter's 512KB example, only after its live pages are preserved elsewhere. That relocation is garbage collection. Sequential writes can reduce the device's management work; scattered rewrites can increase copying and wear. The result depends on the device, available space and workload. SSD doesn't mean writes have no cost.</p>
-<div class="callout" data-en-example="review-14">
-<p class="example-title"><b>Example: SSDs still have write costs</b></p>
-<p><b>Setup:</b> An application repeatedly rewrites small, scattered blocks.</p>
-<p><b>Walk through it:</b> To erase larger blocks, the controller may need to move live data. A more sequential pattern can reduce that pressure.</p>
-<p><b>What this tells you:</b> The effect depends on the device, free space and load. An SSD still performs garbage collection and can amplify writes.</p>
-</div></div>
+</div><div class="en"><p>Flash can erase a larger block, such as the chapter's 512KB example, only after its live pages are preserved elsewhere. That relocation is garbage collection. Sequential writes can reduce the device's management work; scattered rewrites can increase copying and wear. The result depends on the device, available space and workload. SSD doesn't mean writes have no cost.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۵. clustered index، heap file و covering index چه تفاوتی دارند؟</span><span class="en">15. How do clustered, heap and covering indexes differ?</span></summary>
     <div class="fa"><p>تو ایندکسِ خوشه‌ای، داده با نظمِ ایندکس نگه‌داری می‌شه؛ تو <span class="ltr">heap</span>، ایندکس محلِ رکورد رو معرفی می‌کنه. ایندکسِ پوشاننده فیلدهای لازمِ پرس‌وجو رو هم داره.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: رکورد پشت ایندکس کجاست؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن query شمارهٔ سفارش ۴۲ رو پیدا می‌کنه و مبلغش رو می‌خواد. ساده به نظر میاد، نه؟</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا تو heap، ایندکس می‌تونه محل ردیف رو بده؛ تو الگوی clustered، داده با ترتیب کلید خوشه‌ای نگه داشته می‌شه؛ covering index خود مبلغ لازم رو هم داره. سه تا راه جدا.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس تعداد مراجعه‌ها و هزینهٔ تغییر رکورد فرق داره. معنای دقیق clustered و سازمان صفحه‌ها رو باید تو همون موتور بررسی کرد — اسم مشترک، رفتار مشترک نیست.</p>
-</div></div><div class="en"><p>A clustered layout keeps rows in the index's key order, as with an InnoDB primary key. A heap layout stores records separately and uses the index to locate them, as in PostgreSQL. A covering index also holds the fields a particular query needs, potentially avoiding that base-record fetch. Extra fields cost space and maintenance; check the engine's exact layout and access rules.</p>
-<div class="callout" data-en-example="review-15">
-<p class="example-title"><b>Example: Where is the record behind the index?</b></p>
-<p><b>Setup:</b> A query finds order 42 and asks for its amount.</p>
-<p><b>Walk through it:</b> With a heap, the index can point to a row location. A clustered layout keeps rows in clustered-key order. A covering index already has the amount this query needs.</p>
-<p><b>What this tells you:</b> The number of accesses and update costs differ. Check the engine's exact clustered layout and page organization.</p>
-</div></div>
+</div><div class="en"><p>A clustered layout keeps rows in the index's key order, as with an InnoDB primary key. A heap layout stores records separately and uses the index to locate them, as in PostgreSQL. A covering index also holds the fields a particular query needs, potentially avoiding that base-record fetch. Extra fields cost space and maintenance; check the engine's exact layout and access rules.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۶. چرا ذخیره‌سازی ستونی برای تحلیل بهتر است؟</span><span class="en">16. Why is columnar storage better for analytics?</span></summary>
     <div class="fa"><p>تحلیل اغلب تعدادِ زیادی ردیف ولی چند تا ستون رو می‌خواد. چیدمانِ ستونی خوندنِ بخشِ لازم و فشرده‌سازیِ مقدارهای مشابه رو راحت می‌کنه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: فقط مبلغ‌ها را بخوان</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ردیف‌ها شامل <code dir="ltr">id, address, description, amount</code> هستن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا برای <code dir="ltr">SUM(amount)</code> موتور ستونی فقط بلوک مبلغ رو می‌خونه و نشونی و توضیح رو کنار می‌ذاره. فقط همون که لازمه!</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس سود از کمتر خوندن میاد. اگه query همهٔ ستون‌های یه ردیف رو بخواد، همین مزیت الزاماً برقرار نیست — معجزهٔ همیشگی نداریم.</p>
-</div></div><div class="en"><p>An analytical query may need only 3–5 of a table's 100+ columns. Columnar storage can read just those columns. Similar values compress well with methods such as bitmap and RLE encoding; sorting complete rows builds longer runs. Filter bitmaps can combine with AND/OR, and operators can process batches. Retrieving one complete row has a different access pattern.</p>
-<div class="callout" data-en-example="example-ch4-19">
-<p class="example-title"><b>Example: Read only the amounts</b></p>
-<p><b>Setup:</b> Rows contain <code dir="ltr">id, address, description, amount</code>.</p>
-<p><b>Walk through it:</b> For <code dir="ltr">SUM(amount)</code>, a columnar engine reads the amount blocks and leaves the addresses and descriptions aside.</p>
-<p><b>What this tells you:</b> The benefit comes from reading fewer bytes. A query needing every field of one row doesn't necessarily get the same advantage.</p>
-</div></div>
+</div><div class="en"><p>An analytical query may need only 3–5 of a table's 100+ columns. Columnar storage can read just those columns. Similar values compress well with methods such as bitmap and RLE encoding; sorting complete rows builds longer runs. Filter bitmaps can combine with AND/OR, and operators can process batches. Retrieving one complete row has a different access pattern.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۷. column-oriented با wide-column چه فرقی دارد؟</span><span class="en">17. How does column-oriented differ from wide-column?</span></summary>
     <div class="fa"><p><span class="ltr">Column-oriented</span> روشِ چیدنِ فیزیکیِ داده برای خوندنِ ستون‌هاست. <span class="ltr">Wide-column</span> یه مدلِ داده برای ردیف‌ها و خانواده‌های ستونه؛ شباهتِ اسم به‌معنی رفتارِ یکسان نیست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: ستونی با wide-column فرق دارد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن یه انبار تحلیلی مبلغ همهٔ سفارش‌ها رو ستونی نگه می‌داره؛ سامانه‌ای دیگه کلید <code dir="ltr">customer_id</code> و ردیف‌های دارای ستون‌های متغیر داره. اسم هر دو column داره!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا اولی چیدمان فیزیکی برای اسکن ستونه؛ دومی مدل wide-column برای دسترسی به ردیف‌ها و خانواده‌های ستونه. دو تا دنیای جدا.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس اشتراک واژهٔ column به‌معنی یکسان بودن الگوی query یا موتور ذخیره‌سازی نیست — هم‌اسم بودن یعنی هم‌خانواده بودن؟ نه!</p>
-</div></div><div class="en"><p>Column-oriented describes physical placement: values from the same column sit together for scans. Wide-column, as in Bigtable and HBase, describes rows and column families in a data model. Their row-oriented access in this comparison doesn't give them the same column-scan layout. Read the access pattern behind the name.</p>
-<div class="callout" data-en-example="review-17">
-<p class="example-title"><b>Example: Column-oriented and wide-column</b></p>
-<p><b>Setup:</b> An analytical store groups all order amounts by column. Another system uses <code dir="ltr">customer_id</code> and rows with variable columns.</p>
-<p><b>Walk through it:</b> The first is a physical column-scan layout. The second is a wide-column model for access to rows and column families.</p>
-<p><b>What this tells you:</b> The word “column” doesn't imply the same query patterns or storage engine behavior.</p>
-</div></div>
+</div><div class="en"><p>Column-oriented describes physical placement: values from the same column sit together for scans. Wide-column, as in Bigtable and HBase, describes rows and column families in a data model. Their row-oriented access in this comparison doesn't give them the same column-scan layout. Read the access pattern behind the name.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۸. تفاوت query compilation و vectorized processing؟</span><span class="en">18. Query compilation vs vectorized processing?</span></summary>
     <div class="fa"><p>کامپایلِ پرس‌وجو بخشی از منطق رو به کدِ اجرایی تبدیل می‌کنه. پردازشِ برداری عملیات رو رو دسته‌ای از مقدارها انجام می‌ده؛ این دو تا روش می‌تونن کنارِ هم استفاده بشن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: برداری در برابر کامپایل</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن query باید یه میلیون مبلغ رو جمع کنه. یه میلیون!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا اجرای برداری دسته‌های مثلاً ۱۰۲۴تایی رو به عملگر می‌ده؛ کامپایل منطق query رو به کد اجرایی تخصصی تبدیل می‌کنه. دو تا ترفند جدا.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس یکی شکل پردازش دسته‌ای مقدارهاست و دیگری روش اجرای منطق. می‌شه هر دو رو هم‌زمان داشت — چرا یکیشون؟ هر دو!</p>
-</div></div><div class="en"><p>Compilation turns query logic into executable code, using tools such as LLVM, similar to JIT. Vectorized execution gives operators batches of values. An equality test can produce a bitmap, then bitwise AND combines filters.</p><p>The two choices can work together. Both can benefit from sequential memory access, tight loops, SIMD and operations on compressed data.</p>
-<div class="callout" data-en-example="example-ch4-21">
-<p class="example-title"><b>Example: Batching and compilation</b></p>
-<p><b>Setup:</b> A query sums a million amounts.</p>
-<p><b>Walk through it:</b> Vectorized execution can pass batches of, say, 1,024 values to an operator. Compilation turns query logic into specialized executable code.</p>
-<p><b>What this tells you:</b> One changes the unit of processing; the other changes how the logic executes. An engine can combine both.</p>
-</div></div>
+</div><div class="en"><p>Compilation turns query logic into executable code, using tools such as LLVM, similar to JIT. Vectorized execution gives operators batches of values. An equality test can produce a bitmap, then bitwise AND combines filters.</p><p>The two choices can work together. Both can benefit from sequential memory access, tight loops, SIMD and operations on compressed data.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۱۹. inverted index چیست و چطور «سیب قرمز» را جواب می‌دهد؟</span><span class="en">19. What is an inverted index — how does it answer “red apples”?</span></summary>
     <div class="fa"><p>ایندکسِ معکوس هر واژه رو به سندهای دارای اون وصل می‌کنه. برای وجودِ هر دو تا واژه، فهرست‌ها مشترک‌گیری می‌شن؛ برای عبارتِ دقیق، موقعیتِ واژه‌ها هم لازمه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: تقاطع فهرست اسناد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فهرست <code dir="ltr">سیب</code> برابر <code dir="ltr">[1,3,7]</code> و <code dir="ltr">قرمز</code> برابر <code dir="ltr">[3,5,7]</code>ـه. دو تا لیست.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا اشتراک فهرست‌ها سندهای <code dir="ltr">3,7</code> رو می‌ده؛ ولی برای عبارت دقیق باید موقعیت واژه‌ها هم پشت‌سرهم باشه. همسایگی مهمه!</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس داشتن هر دو واژه با داشتن عبارت «سیب قرمز» یکی نیست. ایندکس باید اطلاعات لازم همون سؤال رو نگه داره — سؤال رو بفهم، بعد ایندکس بساز.</p>
-</div></div><div class="en"><p>An inverted index maps a term to document IDs, its postings list. Intersect the lists for “red” and “apples” to find documents with both. With bitmap postings, bit n refers to document n in each bitmap, so bitwise AND computes that intersection. An exact phrase also needs the words' positions. Lucene, used by Elasticsearch/Solr, and PostgreSQL's GIN use postings-based structures.</p>
-<div class="callout" data-en-example="example-ch4-25">
-<p class="example-title"><b>Example: Intersecting document lists</b></p>
-<p><b>Setup:</b> The postings for <code dir="ltr">سیب</code>, meaning “apple”, are <code dir="ltr">[1,3,7]</code>. For <code dir="ltr">قرمز</code>, meaning “red”, they're <code dir="ltr">[3,5,7]</code>.</p>
-<p><b>Walk through it:</b> Intersect them to get documents <code dir="ltr">3,7</code>. An exact phrase match also requires the words to occur in adjacent positions.</p>
-<p><b>What this tells you:</b> Having both words isn't the same as containing “red apple” as a phrase. Keep the information the particular query needs.</p>
-</div></div>
+</div><div class="en"><p>An inverted index maps a term to document IDs, its postings list. Intersect the lists for “red” and “apples” to find documents with both. With bitmap postings, bit n refers to document n in each bitmap, so bitwise AND computes that intersection. An exact phrase also needs the words' positions. Lucene, used by Elasticsearch/Solr, and PostgreSQL's GIN use postings-based structures.</p>
+</div>
   </details>
 
   <details><summary><span class="fa">۲۰. IVF و HNSW چه تفاوتی با هم دارند و «تقریبی» یعنی چه؟</span><span class="en">20. How do IVF and HNSW differ — what does “approximate” mean?</span></summary>
     <div class="fa"><p><span class="ltr">IVF</span> جست‌وجو رو به چند تا خوشه محدود می‌کنه؛ <span class="ltr">HNSW</span> رو گرافِ همسایگی مسیرِ جست‌وجو می‌سازه. تقریبی بودن یعنی ممکنه نزدیک‌ترین نتیجهٔ واقعی پیدا نشه؛ سرعت و دقت تنظیم می‌شن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: جست‌وجوی تقریبی بردار</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن query برداری نزدیک به محصول <code dir="ltr">P7</code>ـه، ولی فقط چند تا خوشه یا بخشی از گراف بررسی می‌شه. نه همه جا!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا IVF خوشه‌های منتخب رو می‌کاوه؛ HNSW مسیر همسایه‌ها رو رو گراف طی می‌کنه. گسترش جست‌وجو معمولاً کار بیشتری می‌خواد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس ممکنه نزدیک‌ترین همسایهٔ واقعی جا بمونه. recall باید با جست‌وجوی دقیق رو نمونهٔ مرجع سنجیده بشه — تقریب یعنی گاهی اشتباه، یادت باشه.</p>
-</div></div><div class="en"><p>Flat search compares every vector and finds exact neighbors under the chosen measure. IVF probes selected clusters; HNSW follows a layered proximity graph from sparse upper layers toward the denser base.</p><p>IVF and HNSW are approximate: either may miss the true nearest result. Increasing probes or graph search effort usually improves recall while increasing work. Measure recall against an exact reference alongside latency.</p>
-<div class="callout" data-en-example="example-ch4-26">
-<p class="example-title"><b>Example: Approximate vector search</b></p>
-<p><b>Setup:</b> A query vector is near product <code dir="ltr">P7</code>, but the search explores only selected clusters or part of a graph.</p>
-<p><b>Walk through it:</b> IVF probes chosen clusters. HNSW follows graph neighbors. Exploring more generally takes more work.</p>
-<p><b>What this tells you:</b> The true nearest neighbor can be missed. Measure recall against exact search on a reference sample, together with the latency.</p>
-</div></div>
+</div><div class="en"><p>Flat search compares every vector and finds exact neighbors under the chosen measure. IVF probes selected clusters; HNSW follows a layered proximity graph from sparse upper layers toward the denser base.</p><p>IVF and HNSW are approximate: either may miss the true nearest result. Increasing probes or graph search effort usually improves recall while increasing work. Measure recall against an exact reference alongside latency.</p>
+</div>
   </details>
 
   <h3 id="s9-3"><span class="fa">۹.۳ اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">9.3 Common interview mistakes</span></h3>

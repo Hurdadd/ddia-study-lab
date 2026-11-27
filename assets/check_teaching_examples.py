@@ -8,12 +8,14 @@ from pathlib import Path
 import re
 import sys
 
-# Published topic coverage: losing even one example is a regression.
+# Published topic coverage: one teaching example per core concept. FAQ answers and
+# diagram narrations carry prose only; duplicating a body example there is the
+# regression this gate now prevents.
 EXPECTED = {
-    1: (19, 17, 8), 2: (19, 20, 10), 3: (18, 17, 11), 4: (27, 20, 10),
-    5: (19, 20, 9), 6: (21, 20, 10), 7: (16, 20, 10), 8: (23, 22, 12),
-    9: (20, 20, 12), 10: (20, 20, 13), 11: (27, 20, 15),
-    12: (25, 20, 13), 13: (29, 18, 14), 14: (19, 18, 13),
+    1: (19, 0, 0), 2: (19, 0, 0), 3: (18, 0, 0), 4: (27, 0, 0),
+    5: (19, 0, 0), 6: (21, 0, 0), 7: (16, 0, 0), 8: (23, 0, 0),
+    9: (20, 0, 0), 10: (20, 0, 0), 11: (27, 0, 0),
+    12: (25, 0, 0), 13: (29, 0, 0), 14: (19, 0, 0),
 }
 
 
@@ -87,8 +89,10 @@ def check(path):
     page = Examples(path.read_text(encoding='utf-8'))
     assert not page.duplicate_ids, f'duplicate anchors: {sorted(page.duplicate_ids)}'
     assert page.core > 0, 'chapter explanations have no marked examples'
-    assert page.questions > 0 and page.review == page.questions, f'{page.review} examples for {page.questions} review questions'
-    assert page.guides == page.teachers and page.guides > 0, f'{page.guides} guides for {page.teachers} diagram narrations'
+    assert page.questions > 0, 'no interview questions'
+    assert page.review == 0, f'{page.review} duplicate review examples remain'
+    assert page.guides == 0, f'{page.guides} duplicate diagram-guide examples remain'
+    assert page.teachers > 0, 'no diagram narrations'
     assert all(link in page.example_targets for link in page.links), 'an example link does not reach an example'
     ch = re.match(r'ch(\d+)-', path.parent.name)
     if ch:

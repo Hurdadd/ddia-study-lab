@@ -40,7 +40,7 @@
   <div class="meta-row reveal">
     <span><b><span class="fa">۱۱</span><span class="en">11</span></b> <span class="fa">۱۲ نمودار + روایت گام‌به‌گام</span><span class="en">diagrams with step-by-step narration</span></span><span class="dot">·</span>
     <span><span class="fa">محور: batch · ابزارهای Unix · MapReduce · shuffle · dataflow · workflowها</span><span class="en">Focus: batch · Unix tools · MapReduce · shuffle · dataflow · workflows</span></span><span class="dot">·</span>
-    <span><span class="fa">منبع: فصل ۱۱ کتاب DDIA ویرایش ۲</span><span class="en">Source: DDIA 2nd Edition, Chapter 11</span></span>
+    <span><span class="fa">زمان مطالعه: حدود ۹۵ دقیقه</span><span class="en">Reading time: ~95 min</span></span><span class="dot">·</span><span><span class="fa">منبع: فصل ۱۱ کتاب DDIA ویرایش ۲</span><span class="en">Source: DDIA 2nd Edition, Chapter 11</span></span>
   </div>
 </section>
 
@@ -284,12 +284,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: پاسخ کاربر یا پایان job</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن API وضعیت سفارش باید تو چندصد میلی‌ثانیه جواب بده؛ گزارش کل سال ممکنه نیم ساعت طول بکشه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا API درخواست محدود رو همون لحظه انجام می‌ده؛ job دسته‌ای ورودیِ کران‌دار رو کامل می‌خونه و خروجی رو منتشر می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> معیار آنلاین بیشتر latency هر درخواسته و معیار batch بیشتر زمان پایان و هزینهٔ کل پردازش — همین.</p>
-</div>
+
 <p>دو تا ستون دو تا جهان‌ان: آنلاین (بپرس، سریع جواب بگیر؛ معیار تأخیر پاسخ؛ دادهٔ زنده mutate می‌شه) و دسته‌ای (ورودی immutable، خروجی derived؛ معیار throughput؛ خروجی هر بار از صفر). نوار پایین سه هدیهٔ همون قرارداد رو می‌گه: سفر در زمان به خروجی‌های قدیمی، تحمل خطای انسانی و بازتلاش امن taskها.</p></div>
     <div class="en"><p>Two columns, two worlds: online (ask, get a fast answer; response-time metric; live data gets mutated) versus batch (immutable input, derived output; throughput metric; output rebuilt from scratch). And the bottom strip? It names the same contract's three gifts: time travel to older outputs, human fault tolerance, and safe task retries.</p></div>
   </div>
@@ -393,12 +388,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۱ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: چرا sort قبل از uniq؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن مسیرهای ورودی <code dir="ltr">/a,/b,/a</code> هستن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا <code dir="ltr">uniq -c</code> فقط تکرارهای مجاور رو می‌شماره و بدون sort سه تا گروه می‌بینه؛ sort دو تا <code dir="ltr">/a</code> رو کنار هم می‌آره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> مرتب‌سازی تو این pipeline برای درستیِ شمارش لازمه، نه فقط برای قشنگی خروجی — اینو قاب کن.</p>
-</div>
+
 <p>
       حالا این نمودار رو با هم بخونیم: یه <span class="ltr">dataflow</span> با پنج تا ستونه که بالاشون نام‌گذاری شده:
       <span class="ltr">Source</span>، <span class="ltr">Extract</span>، <span class="ltr">External Sort</span>،
@@ -547,12 +537,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۲ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: سه مسئولیتِ چارچوب</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن job به خوندن فایل و اجرای ۱۰۰ تا task و انتقال دادهٔ بین مرحله‌ها نیاز داره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا لایهٔ ذخیره فایل رو نگه می‌داره؛ scheduler منابع می‌ده؛ موتور اجرا task و retry و shuffle رو مدیریت می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> قیاس با سیستم‌عامل یعنی برنامه همهٔ جزئیات ماشین‌ها رو خودش اداره نکنه؛ مرز هر لایه هنوز باید روشن باشه — حکش کن تو ذهنت.</p>
-</div>
+
 <p>
       نمودارِ معماری سه تا ناحیهٔ رنگی داره که بالاشون نوشته: <span class="ltr">Orchestration layer</span>، <span class="ltr">Compute layer</span> و <span class="ltr">Storage layer</span> — دقیقاً همون سه لایهٔ متن. از بیرونِ خوشه شروع کن: جعبهٔ <span class="ltr">Job client</span> (زیرنویس: <span class="ltr">submits the workflow</span> با تگِ <span class="ltr">outside the cluster</span>). فلشِ «<span class="ltr">submit workflow (DAG of jobs)</span>» اون رو به <span class="ltr">Workflow scheduler</span> (زیرنویس: <span class="ltr">DAG of jobs</span>، تگِ <span class="ltr">Airflow-style</span>) تو لایهٔ هماهنگ‌سازی می‌رسونه.
     </p>
@@ -774,12 +759,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۳ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: دو job روی ۱۶۰ هسته</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دو تا job که هرکدوم ۱۰۰ تا task تک‌هسته‌ایِ هم‌زمان تو مرحلهٔ جاری می‌خوان.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا با تقسیم ۸۰/۸۰ هر دو مرحله منتظر دو موج‌ان؛ تخصیصِ متفاوت می‌تونه یه job رو زودتر تموم کنه و منابعش رو آزاد کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> انصاف لحظه‌ای و کمینه کردن زمان پایان همیشه یکی نیستن؛ اندازهٔ مرحله و امکان preemption تو تصمیم اثر دارن — همینه.</p>
-</div>
+
 <p>
       خوب، این یه <b>درختِ تصمیم</b> با چهار تا laneـه: <span class="ltr">Decision</span> (سوال‌ها)، <span class="ltr">Gang Scheduling</span>، <span class="ltr">Preemption</span> و <span class="ltr">Heuristic Policies</span>. از جعبهٔ شروعِ وسطِ lane اول بخون: <span class="ltr">5 Nodes, 160 Cores</span> با زیرنویسِ <span class="ltr">two jobs want 100 cores each</span> و تگِ <span class="ltr">fairness vs efficiency</span> — دقیقاً همون معمای متن.
     </p>
@@ -876,12 +856,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۴ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: خروجی attempt ناموفق را منتشر نکن</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن task قسمتی از فایل رو نوشته و پیش از پایان crash کرده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا خروجی تو مسیر موقتِ attempt می‌مونه؛ سازوکار commit فقط خروجی موفق رو تو نسخهٔ job وارد می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> retry نباید فایل ناقص و فایل کامل رو با هم به‌عنوان خروجی معتبر نشون بده؛ I/O مستقیم به مقصد بیرونی سخت‌تره — قول می‌دم به کارت میاد.</p>
-</div>
+
 <p>
       حالا این نمودار رو بگیر: یه <span class="ltr">sequence</span> با پنج تا شرکت‌کننده از چپ به راسته: <span class="ltr">Job Client</span> (زیرنویس: <span class="ltr">workflow scheduler</span>)، <span class="ltr">Resource Manager</span> (<span class="ltr">task scheduler + cluster state</span>)، <span class="ltr">Executor A</span> (<span class="ltr">Node 1</span>)، <span class="ltr">Executor B</span> (<span class="ltr">Node 2</span>) و <span class="ltr">Distributed FS</span> (زیرنویس: <span class="ltr">object store + intermediate data</span>). بالای نمودار سه تا فاز شماره‌گذاری شده: «<span class="ltr">1 · Job submission and task allocation</span>»، «<span class="ltr">2 · Intermediate data strategies</span>» و «<span class="ltr">3 · Failure, task-level retry, all-or-nothing commit</span>».
     </p>
@@ -913,12 +888,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۵ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: Task دوباره زمان‌بندی می‌شود</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن از ۱۰۰ تا task، workerِ اجرای task ۳۷ خاموش می‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا scheduler task ۳۷ رو رو یه worker دیگه اجرا می‌کنه و خروجیِ attempt موفق رو می‌پذیره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> کلِ job لازم نیست از صفر تکرار بشه، اگه ورودی و وابستگی‌های لازم برای همون task در دسترس باشن — غصه نخور.</p>
-</div>
+
 <p>
       تو این نمودار یه <b>ماشینِ وضعیت</b> با چهار تا lane هست: <span class="ltr">Task attempt</span> (مسیرِ اصلی)، <span class="ltr">Preemption — not a fault</span>، <span class="ltr">Faults and retries</span> و <span class="ltr">Terminal outcomes</span>. مسیرِ اصلی چهار تا گامِ شماره‌دار داره. <span class="ltr">01 Queued</span> (زیرنویس: <span class="ltr">waiting in the job queue</span>، تگِ <span class="ltr">no resources yet</span>) — با فلشِ «<span class="ltr">scheduler assigns task</span>» به <span class="ltr">02 Assigned</span> (<span class="ltr">executor picked on a node</span>، تگِ <span class="ltr">locality preferred</span>)، بعد با «<span class="ltr">fetch code, start process</span>» به <span class="ltr">03 Running</span> (<span class="ltr">intermediate output written</span>، تگِ <span class="ltr">heartbeat flowing</span>)، و با «<span class="ltr">all records processed</span>» به <span class="ltr">04 Succeeded</span> (<span class="ltr">task output written</span>، تگِ <span class="ltr">all records processed</span>).
     </p>
@@ -946,12 +916,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: Object یک فایل POSIX کامل نیست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن خروجی job با کلید <code dir="ltr">reports/run-42/part-1</code> تو object store نوشته می‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا برای انتشارِ نسخهٔ کامل، manifest یا اشاره‌گر نسخهٔ معتبر عوض می‌شه؛ نباید rename اتمیکِ دایرکتوری رو بدون پشتیبانی فرض کرد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> API و تضمین عملیات object store باید جدا بررسی بشه؛ شبیه بودن اسم «فایل» رفتار یکسان نمی‌سازه — این دام معروفه.</p>
-</div>
+
 <p>سه تا ستون سه تا خونه‌ان: فایل‌سیستم محلی (بلاک 4KB و rename اتمی و قفل، فقط یه ماشین)، فایل‌سیستم توزیع‌شده (بلاک 128MB و متادیتای متمرکز، اجرای task نزدیک داده) و object store (bucket و key و immutable، بدون قفل و link، مقیاس مستقل compute). نوار پایین ریزنکته‌ها رو هشدار می‌ده: rename یعنی کپی و حذف غیراتمیک، و دایرکتوری خالی ناممکنه.</p></div>
     <div class="en"><p>The three columns are three homes: the local filesystem (4KB blocks, atomic rename and locks, one machine only), the distributed filesystem (128MB blocks, centralized metadata, tasks near data) and the object store (bucket and key, immutable, no locks or links, independently-scaling compute). The bottom strip warns the fine print: rename means non-atomic copy plus delete, and empty directories are impossible.</p></div>
   </div>
@@ -1061,12 +1026,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۶ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: Map، shuffle، reduce</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن متن‌های <code dir="ltr">red blue</code> و <code dir="ltr">red</code> ورودی‌ان.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا map جفت‌های <code dir="ltr">(red,1),(blue,1),(red,1)</code> رو می‌ده؛ shuffle redها رو کنار هم می‌فرسته؛ reduce جمع <code dir="ltr">red=2,blue=1</code> رو می‌سازه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> shuffle تصادفی نیست؛ گروه‌بندیِ کلید تعیین می‌کنه همهٔ مقدارهای یه کلید به محاسبهٔ مشترک برسن — قابش کن.</p>
-</div>
+
 <p>
       این dataflow پنج تا ستون داره: <span class="ltr">Input Shards</span>، <span class="ltr">Map Tasks</span>، <span class="ltr">Map Output</span>، <span class="ltr">Shuffle + Reduce</span> و <span class="ltr">Output Dataset</span> — همون شکلِ ۱۱-۱ کتاب با سه تا mapper و سه تا reducer. از راست شروع کن: سه تا جعبهٔ <span class="ltr">Shard m1</span> و <span class="ltr">Shard m2</span> و <span class="ltr">Shard m3</span> با زیرنویسِ <span class="ltr">HDFS file/object</span> و تگِ <span class="ltr">input dataset</span> — یعنی ورودی از قبل shard شده. فلش‌های «<span class="ltr">m1 records</span>» و «<span class="ltr">m2 records</span>» و «<span class="ltr">m3 records</span>» با توضیحِ «<span class="ltr">record by record</span>» به سه تا <span class="ltr">Map Task</span> می‌رسن (زیرنویسِ هر کدوم: <span class="ltr">emits (key,value)</span>، تگِ <span class="ltr">one per shard</span>).
     </p>
@@ -1134,12 +1094,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۷ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: ادغام عملگرهای متوالی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن مرحله‌های <code dir="ltr">filter → map → groupBy</code> رو داریم.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا موتور می‌تونه filter و map رو تو همون task اجرا کنه و پیش از groupBy داده رو shuffle کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> حذف مرزِ غیرضروریِ job، فایل میانی و راه‌اندازی رو کم می‌کنه؛ مرحلهٔ نیازمند توزیعِ دوباره هنوز شبکه می‌خواد — همینو می‌خواستیم.</p>
-</div>
+
 <p>
       یه تایم‌لاینِ مشترک جلوته: «<span class="ltr">Where the Time Goes — MapReduce vs a Dataflow Engine</span>» و زیرنویسش می‌گه «<span class="ltr">one shared time axis · green bars are compute tasks · grey bars are durable writes to the filesystem</span>». راهنمای رنگ‌ها بالای نموداره: <span class="ltr">compute task</span> (نوارِ سبز)، <span class="ltr">durable write to DFS / object store</span> (نوارِ خاکستری) و <span class="ltr">stage barrier</span> (خطِ مانعِ مرحله). محورِ زمان با فلشِ «<span class="ltr">time →</span>» به سمتِ راست می‌ره و برچسبِ «<span class="ltr">not to scale</span>» می‌گه مقیاس دقیق نیست.
     </p>
@@ -1211,12 +1166,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۸ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: دو راهِ join</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن فروش یه میلیارد ردیف داره و جدول دسته‌بندی محصول فقط <code dir="ltr">5 MB</code>ـه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا جدول کوچیک رو می‌شه به workerها broadcast کرد؛ اگه هر دو طرف بزرگ باشن، تقسیم و sort-merge رو کلید مطرح می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اندازه و توزیع کلید تعیین‌کننده‌ان؛ broadcast جدول بزرگ می‌تونه حافظهٔ همهٔ workerها رو پر کنه — عددها خودشون حرف می‌زنن.</p>
-</div>
+
 <p>
       این dataflow پنج تا ستون داره: <span class="ltr">Sharded Inputs</span>، <span class="ltr">Map Phase</span>، <span class="ltr">Shuffle + Sort</span>، <span class="ltr">Join Reduce</span> و <span class="ltr">Group-By Job</span>. از راست: دو تا جعبهٔ ورودی — <span class="ltr">Clickstream</span> (زیرنویس: <span class="ltr">fact table</span>، تگِ <span class="ltr">user_id, ts, URL</span>) و <span class="ltr">User Profiles</span> (زیرنویس: <span class="ltr">dimension table</span>، تگِ <span class="ltr">user_id, DOB</span>) — دقیقاً نقش‌های star schema از متن. فلشِ «<span class="ltr">clickstream</span>» به <span class="ltr">Event Mapper</span> (زیرنویس: <span class="ltr">key: user_id</span>، تگِ <span class="ltr">URL + timestamp</span>) و فلشِ «<span class="ltr">profile records</span>» به <span class="ltr">Profile Mapper</span> (زیرنویس: <span class="ltr">key: user_id</span>، تگِ <span class="ltr">date of birth</span>) می‌ره.
     </p>
@@ -1244,12 +1194,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۹ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: Sort-merge join روی دو جدول بزرگ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن فروش و مشتری هر دو بر <code dir="ltr">customer_id</code> تقسیم و مرتب شدن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا دو تا جریان مرتب هم‌قدم خونده می‌شن؛ همهٔ فروش‌های کلید ۱۷ کنار ردیف مشتری ۱۷ قرار می‌گیرن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> جدول hash کامل لازم نیست، ولی هزینهٔ sort/shuffle و کلیدهای خیلی پرتکرار هنوز هست — خلاص.</p>
-</div>
+
 <p>
       از چپ شروع کن: این نمودارِ ساختاری (شکل‌های ۱۱-۲ و ۱۱-۳) سه تا ناحیه داره و زیرنویسش می‌گه: «<span class="ltr">left: the fact and dimension tables · middle: the shuffle gathers one user's records · right: the reducer and the next job</span>». از چپ شروع کن: جدولِ اول «<span class="ltr">activity events (clickstream)</span>»ـه با ستون‌های <span class="ltr">user_id url timestamp</span> و چند تا سطرِ نمونه: <span class="ltr">42 /news 10-01 09:12</span>، <span class="ltr">7 /blog 10-01 11:40</span>، <span class="ltr">42 /docs 10-01 10:05</span>، <span class="ltr">42 /news 10-02 08:20</span> — و یادداشتِ زیرش: «<span class="ltr">fact table of the star schema — sharded into multiple files, so many mappers process it in parallel</span>». جدولِ دوم «<span class="ltr">user profiles (dimension)</span>» با ستون‌های <span class="ltr">user_id date_of_birth</span> و سطرهای <span class="ltr">42 1990-07-14</span> و <span class="ltr">7 1985-02-03</span>؛ یادداشت: «<span class="ltr">dimension table of the star schema — also sharded, read row by row by its own mapper</span>».
     </p>
@@ -1416,12 +1361,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۱۰ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: یک محاسبه، چند مدل اجرا</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ورودی فروش باید فیلتر بشه، با کالا join بخوره و بر دسته تجمیع بشه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا می‌شه اون رو به jobهای MapReduce یا DAG عملگرها یا SQL رو موتور توزیع‌شده بیان کرد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اختلاف تو کنترل و بهینه‌سازی اجراست؛ برای مقایسه باید همون semanticsِ join و null و نوع عدد حفظ بشن — نقطه.</p>
-</div>
+
 <p>
       نقشهٔ کلاسی رو بگیر: ۱۳ تا جعبه با سه تا chip شماره‌گذاری شدن: «<span class="ltr">1 · processing models</span>» بالای صفحه، «<span class="ltr">2 · storage</span>» پایین‌چپ و «<span class="ltr">3 · orchestration</span>» پایین‌راست. کنارِ صفحه هم legend سه نوع پیکان رو جدا می‌کنه: <b>inheritance</b> (مثلثِ توخالی)، <b>association</b> (پیکانِ ساده) و «<span class="ltr">compile to</span>» (پیکانِ خط‌چین).
     </p>
@@ -1659,12 +1599,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۱۱ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: انتشار ایندکس کامل</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن job نسخهٔ <code dir="ltr">search-v2</code> رو تو مسیر تازه می‌سازه و تعداد و کیفیت رکوردها رو می‌سنجه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بعد از موفقیتِ همهٔ بخش‌ها، اشاره‌گر خوندن از v1 به v2 عوض می‌شه؛ v1 برای بازگشت موقتاً می‌مونه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> کاربر مخلوطِ خروجی ناقص و قدیمی نمی‌بینه؛ نوشتن مستقیمِ هر task رو ایندکس فعال این مزیت رو سخت‌تر می‌کنه — یادت باشه.</p>
-</div>
+
 <p>
       از ریشه شروع کن: یه <b>درختِ تصمیم</b> که از چپ به راست و از بالا به پایین خونده می‌شه. ریشه، جعبهٔ <span class="ltr">01 Batch Output Ready</span>ـه (زیرنویس: <span class="ltr">derived dataset on disk</span>، تگِ <span class="ltr">serve it to prod</span>) — یعنی dataset مشتق‌شده آماده رو دیسکه و حالا باید به دستِ کاربرهای واقعی برسه. فلشِ «<span class="ltr">assess</span>» به اولین سوال می‌ره.
     </p>
@@ -1695,12 +1630,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۱۲ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: انتشار ایندکس کامل</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن job نسخهٔ <code dir="ltr">search-v2</code> رو تو مسیر تازه می‌سازه و تعداد و کیفیت رکوردها رو می‌سنجه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بعد از موفقیتِ همهٔ بخش‌ها، اشاره‌گر خوندن از v1 به v2 عوض می‌شه؛ v1 برای بازگشت موقتاً می‌مونه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> کاربر مخلوطِ خروجی ناقص و قدیمی نمی‌بینه؛ نوشتن مستقیمِ هر task رو ایندکس فعال این مزیت رو سخت‌تر می‌کنه — یادت باشه.</p>
-</div>
+
 <p>
       این نمودار هم یه <b>ماشینِ وضعیت</b>ـه با سه تا lane: <span class="ltr">Job output</span> (مسیرِ اصلی)، <span class="ltr">Failure handling</span> و <span class="ltr">Terminal exits</span>. مسیرِ اصلی چهار تا گامِ شماره‌دار داره. <span class="ltr">01 Writing Shards</span> (زیرنویس: <span class="ltr">tasks writing shards</span>، تگِ <span class="ltr">output hidden</span>) — یعنی taskها دارن shardهای خروجی رو می‌نویسن ولی خروجی هنوز پنهونه. فلشِ «<span class="ltr">last task succeeds</span>» به <span class="ltr">02 Ready, Unpublished</span> می‌ره (<span class="ltr">all shards written</span>، تگِ <span class="ltr">invisible</span>) — همهٔ shardها نوشته شدن ولی هنوز هیچ‌کس نمی‌بیندشون.
     </p>
@@ -1732,12 +1662,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: بازمحاسبهٔ گزارش از ورودی ثابت</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل فروش ۱۴ مهر بسته شده و نسخهٔ ورودی معلومه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا job مجموع فروش هر شعبه رو تو خروجی نسخهٔ <code dir="ltr">v2</code> می‌نویسه؛ اگه فرمول غلط بود، با کد اصلاح‌شده از همون ورودی دوباره اجراش می‌کنیم.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> ورودی immutable و خروجی نسخه‌داره، پس خطای محاسبه قابل‌بازسازیه؛ بازنویسی مستقیمِ دادهٔ مرجع همچین آزادی‌ای نمی‌ده — همین.</p>
-</div>
+
 <p>گره مرکزی قرارداد فصله: ورودی immutable و خروجی derived. سه تا مفهوم بالا ریشه‌ها و موتورهان: pipeline یونیکس (لوله رو یه ماشین) و سیستم‌عامل توزیع‌شده (ذخیره‌سازی و زمان‌بندها و taskها) و MapReduce (map و sort ضمنی و reduce). سه تا مفهوم پایین مقیاس و مصرف‌ان: shuffle (مرتب‌سازی توزیع‌شده) و dataflow و SQL (یه job با pipelining) و سرویس‌دهی خروجی (جریان‌ها و all-or-nothing).</p><p>درس یه‌خطی نقشه: همه‌چیز از همون قرارداد ساده میاد — خروجی رو از صفر بساز تا بازتلاش امن و بازیابی ممکن و انتشار اتمیک بشه؛ و برای مقیاس، کار رو با shuffle بین taskهای مستقل پخش کن.</p></div>
     <div class="en"><p>The center node is the chapter's contract: immutable in, derived out. Up top sit the roots and engines: the Unix pipeline (pipes on one machine), the distributed OS (storage, schedulers, tasks) and MapReduce (map, implicit sort, reduce). Down below are scale and consumption: shuffle (the distributed sort), dataflow and SQL (one pipelined job) and serving the output (streams, all-or-nothing).</p><p>The map's one-line lesson: everything flows from the same simple contract — build output from scratch so retries stay safe, recovery stays possible and publication stays atomic; and for scale, spread the work with shuffle across independent tasks.</p></div>
   </div>
@@ -1840,222 +1765,122 @@
 
   <details><summary><span class="fa">۱. پردازشِ دسته‌ای و آنلاین در یک جمله چه تفاوتی دارند؟</span><span class="en">1. How do batch and online processing differ in one sentence?</span></summary>
     <div class="fa"><p>جوابش کوتاهه: آنلاین برای درخواستِ همون لحظه جواب می‌سازه؛ دسته‌ای رو ورودیِ محدود کار می‌کنه و خروجی رو بعداً آماده می‌کنه. تأخیرِ هدف و روشِ انتشارِ نتیجه فرق دارن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: پاسخ کاربر یا پایان job</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن API وضعیت سفارش باید تو چندصد میلی‌ثانیه جواب بده؛ گزارش کل سال ممکنه نیم ساعت طول بکشه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا API درخواست محدود رو همون لحظه انجام می‌ده؛ job دسته‌ای ورودیِ کران‌دار رو کامل می‌خونه و خروجی رو منتشر می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> معیار آنلاین بیشتر latency هر درخواسته و معیار batch بیشتر زمان پایان و هزینهٔ کل پردازش — همین.</p>
-</div></div>
+</div>
     <div class="en"><p>Here's the short version. Online: ask, get a fast answer — response time is the metric. Batch: process a bounded immutable dataset from scratch into derived output — throughput is the metric. Batch input never changes and output is rebuilt every time.</p></div>
   </details>
 
   <details><summary><span class="fa">۲. منظور از «human fault tolerance» چیست؟</span><span class="en">2. What does “human fault tolerance” mean?</span></summary>
     <div class="fa"><p>تعریفش اینه: تحملِ خطای انسانی یعنی با حفظِ ورودی و جداسازیِ خروجی، منطقِ اشتباه رو اصلاح کنیم و محاسبه رو دوباره اجرا کنیم. این امکان به تغییرناپذیری و کنترلِ اثرهای جانبی وابسته‌ست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: بازمحاسبهٔ گزارش از ورودی ثابت</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل فروش ۱۴ مهر بسته شده و نسخهٔ ورودی معلومه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا job مجموع فروش هر شعبه رو تو خروجی نسخهٔ <code dir="ltr">v2</code> می‌نویسه؛ اگه فرمول غلط بود، با کد اصلاح‌شده از همون ورودی دوباره اجراش می‌کنیم.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> ورودی immutable و خروجی نسخه‌داره، پس خطای محاسبه قابل‌بازسازیه؛ بازنویسی مستقیمِ دادهٔ مرجع همچین آزادی‌ای نمی‌ده — همین.</p>
-</div></div>
+</div>
     <div class="en"><p>It's the ability to recover from your own code bugs: since input is immutable and output derived, you revert code to the previous version and rerun the job — or switch to the previous output (kept under another path). Transactional databases lack this: if buggy code writes bad data, reverting code never fixes the data.</p></div>
   </details>
 
   <details><summary><span class="fa">۳. چرا در مثالِ pipeline، اول sort می‌کنیم و بعد uniq -c؟</span><span class="en">3. Why sort first and uniq -c after in the pipeline example?</span></summary>
     <div class="fa"><p>چون <span class="ltr">uniq</span> فقط تکرارهای کنارِ هم رو می‌شماره. مرتب‌سازی مقدارهای یکسان رو کنارِ هم می‌آره تا شمارشِ همهٔ رخدادها درست باشه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: چرا sort قبل از uniq؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن مسیرهای ورودی <code dir="ltr">/a,/b,/a</code> هستن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا <code dir="ltr">uniq -c</code> فقط تکرارهای مجاور رو می‌شماره و بدون sort سه تا گروه می‌بینه؛ sort دو تا <code dir="ltr">/a</code> رو کنار هم می‌آره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> مرتب‌سازی تو این pipeline برای درستیِ شمارش لازمه، نه فقط برای قشنگی خروجی — اینو قاب کن.</p>
-</div></div>
+</div>
     <div class="en"><p>Because uniq only drops adjacent duplicate lines. Sorting makes every n-times-seen URL appear n times in a row; then uniq -c turns each run into one counted line. Exactly MapReduce's implicit-sort role, bringing same-key records together for the reducer.</p></div>
   </details>
 
   <details><summary><span class="fa">۴. «مرتب‌سازی» چرا نسبت به «تجمیع در حافظه» مقیاس می‌خورد؟</span><span class="en">4. Why does “sorting” scale better than “in-memory aggregation”?</span></summary>
     <div class="fa"><p>تجمیعِ هش‌محور به حافظهٔ متناسب با تعدادِ کلیدهای متفاوت نیاز داره. مرتب‌سازیِ بیرونی می‌تونه بخش‌ها رو رو دیسک مرتب و ادغام کنه؛ برای دادهٔ بزرگ‌تر از حافظه راهی قابل‌کنترل می‌ده.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: تجمیع بیرون از RAM</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ورودی یه میلیارد کلید متفاوت داره و جدول hashِ شمارنده‌ها تو RAM جا نمی‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا external sort تکه‌هایی که تو حافظه جا می‌شن رو مرتب می‌کنه و رو دیسک می‌نویسه، بعد ادغامشون می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> مرتب‌سازی می‌تونه با دیسک و حافظهٔ محدود ادامه بده؛ hash aggregation هم ممکنه spill داشته باشه، پس برتریِ مطلق مطرح نیست — روشنه، نه؟</p>
-</div></div>
+</div>
     <div class="en"><p>Because it uses disk efficiently: chunks sort in memory, spill as segments, and merge via mergesort (sequential access). A hash table instead wants memory per distinct key (the working set); bigger than memory, it breaks. GNU sort spills and parallelizes by itself though; the bottleneck becomes the input read rate.</p></div>
   </details>
 
   <details><summary><span class="fa">۵. قیاسِ «framework دسته‌ای = سیستم‌عاملِ توزیع‌شده» یعنی چه؟</span><span class="en">5. What does the “batch framework = distributed OS” analogy mean?</span></summary>
     <div class="fa"><p>چارچوبِ دسته‌ای محلِ داده و منابع و اجرای وظیفه و بازیابی رو بین چند تا ماشین مدیریت می‌کنه. این نقش‌ها شبیه وظایفِ سیستم‌عامل‌ان، ولی هزینهٔ شبکه و خرابیِ جزئی هم هست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: سه مسئولیتِ چارچوب</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن job به خوندن فایل و اجرای ۱۰۰ تا task و انتقال دادهٔ بین مرحله‌ها نیاز داره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا لایهٔ ذخیره فایل رو نگه می‌داره؛ scheduler منابع می‌ده؛ موتور اجرا task و retry و shuffle رو مدیریت می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> قیاس با سیستم‌عامل یعنی برنامه همهٔ جزئیات ماشین‌ها رو خودش اداره نکنه؛ مرز هر لایه هنوز باید روشن باشه — حکش کن تو ذهنت.</p>
-</div></div>
+</div>
     <div class="en"><p>The same three Unix-machine parts exist distributed: storage (DFS/object store = filesystem), orchestration (scheduler and resource manager = the kernel deciding what runs where with what resources), and compute (isolated tasks = processes exchanging data via the filesystem).</p></div>
   </details>
 
   <details><summary><span class="fa">۶. چرا بلاک‌های DFS این‌قدر بزرگ‌تر از بلاک‌های فایل‌سیستمِ محلی‌اند؟</span><span class="en">6. Why are DFS blocks so much bigger than local-filesystem blocks?</span></summary>
     <div class="fa"><p>بلوکِ بزرگ‌تر نسبتِ سربارِ هماهنگی و جست‌وجو به انتقالِ انبوه رو کم می‌کنه و برای خوندنِ ترتیبی مناسبه. اندازهٔ مناسب به بار و پیاده‌سازی وابسته‌ست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: بلاک بزرگِ فایل توزیع‌شده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل <code dir="ltr">1 GB</code> با بلاک فرضی <code dir="ltr">128 MB</code> به هشت بخش تقسیم شده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا metadata محل کپی هر بلاک رو می‌ده و worker از یه کپی سالم می‌خونه؛ اندازهٔ بلاک رو تعداد metadata و موازی‌سازی اثر داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> بلاکِ درشت برای اسکن ترتیبی و کاهش سربار مناسبه؛ با page کوچیکِ موتور پایگاه داده هدف یکسانی نداره — همین.</p>
-</div></div>
+</div>
     <div class="en"><p>Two reasons: less metadata to track (a big deal on petabyte datasets), and cheaper seeks relative to block reads. And since a DFS is implemented on the nodes' OS filesystems, the “write whole blocks” requirement vanishes: a 900MB file with 128MB blocks means seven 128MB blocks and one 4MB block.</p></div>
   </details>
 
   <details><summary><span class="fa">۷. object store چه تفاوت‌هایی با فایل‌سیستم دارد؟</span><span class="en">7. How does an object store differ from a filesystem?</span></summary>
     <div class="fa"><p>مخزنِ شیء با کلید و <span class="ltr">API</span> داده رو نگه می‌داره؛ فایل‌سیستم قراردادِ فایل و پوشه و عملیاتِ متفاوتی داره. تغییرِ جزئی و تغییرنام و تضمین‌های سازگاری رو باید برای محصولِ مشخص بررسی کرد.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Object یک فایل POSIX کامل نیست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن خروجی job با کلید <code dir="ltr">reports/run-42/part-1</code> تو object store نوشته می‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا برای انتشارِ نسخهٔ کامل، manifest یا اشاره‌گر نسخهٔ معتبر عوض می‌شه؛ نباید rename اتمیکِ دایرکتوری رو بدون پشتیبانی فرض کرد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> API و تضمین عملیات object store باید جدا بررسی بشه؛ شبیه بودن اسم «فایل» رفتار یکسان نمی‌سازه — این دام معروفه.</p>
-</div></div>
+</div>
     <div class="en"><p>Objects are immutable after writing (updates = full puts); no directories exist and paths are just key-naming conventions; prefix listing is recursive like ls -R and empty directories are impossible; no links or locks, and rename is non-atomic (copy+delete). And unlike HDFS, compute and storage usually stay apart — no locality, but CPU/memory scale independently.</p></div>
   </details>
 
   <details><summary><span class="fa">۸. resource manager چه می‌کند و چه ریسکی دارد؟</span><span class="en">8. What does the resource manager do, and what is its risk?</span></summary>
     <div class="fa"><p>مدیرِ منابع سهمِ حافظه و پردازنده و محلِ اجرای کارها رو تعیین می‌کنه. تصمیمِ نامناسب می‌تونه گرسنگیِ کار و مصرفِ اضافی یا توقفِ هماهنگی بسازه؛ بازیابیِ خودِ مدیر هم مهمه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: CPU آزاد، RAM ناکافی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن job برای هر task یه هسته و ۴ گیگابایت RAM درخواست می‌کنه؛ ماشین ۸ هسته و ۱۶ گیگابایت RAM داره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا resource manager با این درخواست‌ها حداکثر چهار تا task رو هم‌زمان جا می‌ده، هرچند چهار تا هسته بیکار بمونه؛ درخواستِ کمتر از مصرف واقعی می‌تونه OOM بسازه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> تخصیص منبع فقط شمردن هسته نیست؛ سهم حافظه و محدودیت هم‌زمانی و بازپس‌گیری منابع تو زمان‌بندی اثر دارن — حساب کن.</p>
-</div></div>
+</div>
     <div class="en"><p>It keeps each node's metadata (available hardware, task states, network position) and gives the cluster's global view; the scheduler decides from exactly this view. Risk: its centrality can bottleneck scalability and availability; hence state is written to a coordination service like ZooKeeper or etcd.</p></div>
   </details>
 
   <details><summary><span class="fa">۹. معمای ۱۶۰ هسته و دو job صدتایی چه چیزی را نشان می‌دهد؟</span><span class="en">9. What does the 160-cores, two-100-core-jobs puzzle show?</span></summary>
     <div class="fa"><p>وقتی دو تا کارِ صدهسته‌ای با ۱۶۰ تا هسته رقابت می‌کنن، منابع برای خواستهٔ کاملِ هر دو کافی نیست. تقسیمِ عادلانه و پایانِ سریعِ یه کار و استفادهٔ کامل از منابع هدف‌های متفاوت‌ان.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: دو job روی ۱۶۰ هسته</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دو تا job که هرکدوم ۱۰۰ تا task تک‌هسته‌ایِ هم‌زمان تو مرحلهٔ جاری می‌خوان.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا با تقسیم ۸۰/۸۰ هر دو مرحله منتظر دو موج‌ان؛ تخصیصِ متفاوت می‌تونه یه job رو زودتر تموم کنه و منابعش رو آزاد کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> انصاف لحظه‌ای و کمینه کردن زمان پایان همیشه یکی نیستن؛ اندازهٔ مرحله و امکان preemption تو تصمیم اثر دارن — همینه.</p>
-</div></div>
+</div>
     <div class="en"><p>The fairness/efficiency balance: an 80-80 split, gang scheduling (idleness and deadlock risk), waiting for 100 free cores (starvation), or preemption (killing tasks and resuming). And at large scale optimal allocation is NP-hard; so schedulers make reasonable-but-suboptimal calls with heuristics like FIFO, DRF, priority queues, quotas and bin-packing.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۰. preemption چه تفاوتی با خرابیِ task دارد؟</span><span class="en">10. How does preemption differ from task failure?</span></summary>
     <div class="fa"><p>فرقشون ساده‌ست: <span class="ltr">Preemption</span> گرفتنِ برنامه‌ریزی‌شدهٔ منابع از یه وظیفه برای اولویتِ دیگه‌ست؛ خرابی توقفِ ناخواسته‌ست. هر دو ممکنه به بازیابی یا تکرار نیاز داشته باشن، ولی علت و سیاست فرق دارن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Preemption یعنی پس‌گرفتن منابع</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن scheduler برای job فوری، task کم‌اولویت رو متوقف می‌کنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا task متوقف‌شده بعداً از checkpoint یا ابتدا ادامه پیدا می‌کنه؛ مثل crash باید اثر خروجی نیمه‌کاره کنترل بشه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> علت توقف سیاست زمان‌بندیه، نه خرابی ماشین؛ ولی قرارداد retry و پاک‌سازی هنوز لازمه — یادت باشه.</p>
-</div></div>
+</div>
     <div class="en"><p>Both take a task out of Running, but preemption is no error: the preempted task requeues penalty-free and eats no retry budget; a Failed task (crash or lost heartbeat) has its partial output deleted, spends budget, and with attempts exhausted reaches Failed Permanently. And in practice preemption (via spot capacity and priorities) is far more common than hardware faults.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۱. چرا بازتلاش در سطحِ task کافی است و کلِ job را دوباره اجرا نمی‌کنیم؟</span><span class="en">11. Why is task-level retry enough instead of rerunning the whole job?</span></summary>
     <div class="fa"><p>اگه ورودی و خروجیِ وظیفه‌ها جدا و قابل‌بازیابی باشن، قسمتِ شکست‌خورده دوباره اجرا می‌شه. وابستگی‌ها ممکنه بخشی از کارِ بالادستی رو هم تکرار کنن؛ همیشه فقط یه وظیفه نیست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Task دوباره زمان‌بندی می‌شود</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن از ۱۰۰ تا task، workerِ اجرای task ۳۷ خاموش می‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا scheduler task ۳۷ رو رو یه worker دیگه اجرا می‌کنه و خروجیِ attempt موفق رو می‌پذیره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> کلِ job لازم نیست از صفر تکرار بشه، اگه ورودی و وابستگی‌های لازم برای همون task در دسترس باشن — غصه نخور.</p>
-</div></div>
+</div>
     <div class="en"><p>Because tasks read immutable input and carry no outside side effects; rerunning them is safe. Only the broken task is rescheduled on another machine, rebuilding its output from scratch — so results never duplicate and the previous attempt's partial output was deleted.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۲. سه استراتژیِ مدیریتِ داده‌ی intermediate کدام‌اند؟</span><span class="en">12. What are the three intermediate-data strategies?</span></summary>
     <div class="fa"><p>سه تا راهِ کلی: پایدار کردنِ خروجیِ مرحله‌ها، نگه داشتنِ موقتِ داده همراه با امکانِ محاسبهٔ مجدد، یا ثبتِ نقطهٔ بازیابی. دادهٔ میانیِ <span class="ltr">mapper</span> تو <span class="ltr">Hadoop</span> لزوماً تو <span class="ltr">HDFS</span> نیست؛ خروجیِ <span class="ltr">job</span> و دادهٔ <span class="ltr">shuffle</span> فرق دارن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: نگهداری دادهٔ میانی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن مرحلهٔ B به خروجی A نیاز داره و workerِ A ممکنه خاموش بشه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا راه اول خروجی پایدار رو storageـه؛ راه دوم کپی رو چند تا worker؛ راه سوم بازساخت A از lineage.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اولی I/O بیشتر، دومی هزینهٔ کپی و سومی هزینهٔ محاسبهٔ دوباره داره؛ انتخاب به هزینه و نرخ خرابی بستگی داره — حساب کن.</p>
-</div>
+
 <p class="small">منبعِ توضیحِ فنی: <a href="https://hadoop.apache.org/docs/current/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html" target="_blank" rel="noopener">راهنمایِ اجرا و خروجیِ میانیِ Hadoop</a></p></div>
     <div class="en"><p>MapReduce: write all intermediate data to DFS and wait for the write to complete — resilient but I/O-heavy. Spark: in memory (spilling to local disk) + only the final result in DFS; recovery from lineage. Flink: periodic task-state checkpoints instead of materializing every intermediate record.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۳. MapReduce چهار گامش چیست و نقشِ mapper و reducer چیست؟</span><span class="en">13. What are MapReduce's four steps, and what do mapper and reducer do?</span></summary>
     <div class="fa"><p>چهار تا گامِ اصلی: خوندنِ ورودی، <span class="ltr">map</span> به کلید–مقدار، توزیع و گروه‌بندی بر کلید، و <span class="ltr">reduce</span> برای خروجیِ هر گروه. چارچوب زمان‌بندی و انتقال رو مدیریت می‌کنه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Map، shuffle، reduce</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن متن‌های <code dir="ltr">red blue</code> و <code dir="ltr">red</code> ورودی‌ان.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا map جفت‌های <code dir="ltr">(red,1),(blue,1),(red,1)</code> رو می‌ده؛ shuffle redها رو کنار هم می‌فرسته؛ reduce جمع <code dir="ltr">red=2,blue=1</code> رو می‌سازه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> shuffle تصادفی نیست؛ گروه‌بندیِ کلید تعیین می‌کنه همهٔ مقدارهای یه کلید به محاسبهٔ مشترک برسن — قابش کن.</p>
-</div></div>
+</div>
     <div class="en"><p>1) Read files and break into records; 2) mapper: extract (key, value) per record, stateless, parallel; 3) implicit sort by key; 4) reducer: one call per key with an iterator over its values. The mapper prepares data for sorting; the reducer processes sorted data. A second sort = a second job.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۴. «shuffle» چیست و چرا نامش گمراه‌کننده است؟</span><span class="en">14. What is “shuffle” and why is the name misleading?</span></summary>
     <div class="fa"><p><span class="ltr">Shuffle</span> تصادفی‌کردنِ داده نیست؛ توزیعِ دوباره بر اساسِ کلیده تا رکوردهای مرتبط به پردازشگرِ مناسب برسن. معمولاً شبکه و گاهی دیسک رو مصرف می‌کنه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Shuffle بر کلید مشتری</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سفارش‌های مشتری ۱۷ تو چند تا فایل و چند تا worker پراکنده‌ان.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا partitioner همهٔ جفت‌های کلید ۱۷ رو به reducer همون کلید می‌فرسته؛ داده ممکنه رو شبکه منتقل و sort بشه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> تمرکزِ یه کلید برای تجمیع لازمه؛ مشتری خیلی بزرگ می‌تونه reducer داغ و زمان پایان طولانی بسازه — این دام معروفه.</p>
-</div></div>
+</div>
     <div class="en"><p>The distributed-sort algorithm with sharded input and output, for petabyte data. Misleading because shuffle output is sorted, not random (unlike shuffling cards). In MapReduce: each mapper writes one sorted file per reducer (m1r2), routing by hash(key), and reducers mergesort their share. Newer engines do it in memory or with an external-sort service (with replication).</p></div>
   </details>
 
   <details><summary><span class="fa">۱۵. <span class="ltr">sort-merge</span> <span class="ltr">join</span> چگونه کار می‌کند و چه زمانی مناسب است؟</span><span class="en">15. How does sort-merge join work, and why prefer it to hash join?</span></summary>
     <div class="fa"><p>تو <span class="ltr">sort-merge</span>، دو تا ورودی بر کلید مرتب می‌شن و بعد هماهنگ پیمایش می‌شن. برای ورودیِ مرتب یا دادهٔ بزرگ مناسبه؛ <span class="ltr">hash</span> <span class="ltr">join</span> هم بسته به اندازه و حافظه و طرحِ اجرا می‌تونه بهتر باشه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Sort-merge join روی دو جدول بزرگ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن فروش و مشتری هر دو بر <code dir="ltr">customer_id</code> تقسیم و مرتب شدن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا دو تا جریان مرتب هم‌قدم خونده می‌شن؛ همهٔ فروش‌های کلید ۱۷ کنار ردیف مشتری ۱۷ قرار می‌گیرن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> جدول hash کامل لازم نیست، ولی هزینهٔ sort/shuffle و کلیدهای خیلی پرتکرار هنوز هست — خلاص.</p>
-</div></div>
+</div>
     <div class="en"><p>Both mappers publish user_id keys; shuffle brings one user's every record to one reducer, with secondary sort putting the profile (DOB) record first and events timestamp-ordered after. The reducer holds just one user record in memory and makes one streaming pass — no network lookups. Hash join must hold one whole side in a hash table; but shuffle output arrives pre-sorted, so merging is free and sort-join is the on-disk default.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۶. شش مزیتِ موتورِ dataflow بر MapReduce چیست؟</span><span class="en">16. What are dataflow's six advantages over MapReduce?</span></summary>
     <div class="fa"><p>شش تا امکانِ مهم: مرتب‌سازیِ فقطِ لازم و ترکیبِ عملگرها و برنامه‌ریزیِ نزدیکِ داده و نگه‌داریِ مناسبِ دادهٔ میانی و عبورِ جریانیِ خروجی به مرحلهٔ بعد و استفادهٔ مجدد از فرایندها. بهرهٔ واقعی به موتور و طرح بستگی داره.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: ادغام عملگرهای متوالی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن مرحله‌های <code dir="ltr">filter → map → groupBy</code> رو داریم.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا موتور می‌تونه filter و map رو تو همون task اجرا کنه و پیش از groupBy داده رو shuffle کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> حذف مرزِ غیرضروریِ job، فایل میانی و راه‌اندازی رو کم می‌کنه؛ مرحلهٔ نیازمند توزیعِ دوباره هنوز شبکه می‌خواد — همینو می‌خواستیم.</p>
-</div></div>
+</div>
     <div class="en"><p>Sort only where needed; fusing same-sharding operators; locality optimization since the whole DAG is known; keeping intermediate state in memory/local disk; starting each operator as soon as its input is ready (pipelining); and reusing processes (MapReduce booted a fresh JVM per task).</p></div>
   </details>
 
   <details><summary><span class="fa">۱۷. چرا SQL به زبانِ مشترکِ پردازشِ دسته‌ای تبدیل شد و optimizer چه می‌کند؟</span><span class="en">17. Why did SQL become batch processing's common language, and what does the optimizer do?</span></summary>
     <div class="fa"><p><span class="ltr">SQL</span> نتیجه رو به زبونِ مشترکِ خیلی از تحلیلگرها بیان می‌کنه. بهینه‌ساز ترتیب و روشِ اجرا رو با توجه به آمار و هزینه انتخاب می‌کنه، ولی کیفیتِ طرح به اطلاعاتِ موجود وابسته‌ست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Optimizer چه تصمیمی می‌گیرد؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن SQL فروش رو به کالا join می‌کنه و فقط دستهٔ <code dir="ltr">book</code> رو نگه می‌داره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا optimizer می‌تونه فیلترِ دسته رو زودتر اعمال کنه و با آمار اندازه، نوع join رو انتخاب کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اعلانی بودن مسیر بهینه رو قابل‌انتخاب می‌کنه؛ آمار قدیمی یا skew می‌تونه طرح نامناسب بسازه — همین.</p>
-</div></div>
+</div>
     <div class="en"><p>Because old warehouses had SQL, analytics and ETL tools supported it and everybody knew it — plus it enabled interactive querying. The cost-based optimizer translates queries into physical operators, picks the best join algorithm and even reorders joins to minimize intermediate state (Hive/Trino/Spark/Flink).</p></div>
   </details>
 
   <details><summary><span class="fa">۱۸. تفاوت‌های semantic بینِ DataFrame محلی و توزیع‌شده چیست؟</span><span class="en">18. What semantic differences separate local and distributed DataFrames?</span></summary>
     <div class="fa"><p>تو <span class="ltr">DataFrame</span> توزیع‌شده، ترتیبِ سراسری و محلِ داده و زمانِ اجرا ممکنه ضمنی نباشن. عملیاتِ ظاهراً مشابه می‌تونه تنبل و موازی یا نیازمندِ <span class="ltr">shuffle</span> باشه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: DataFrame محلی یا توزیع‌شده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دستور <code dir="ltr">df.filter(...).groupBy(...).sum()</code> نوشته شده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا تو موتور توزیع‌شده ممکنه فقط plan ساخته بشه و action اجرا رو شروع کنه؛ <code dir="ltr">collect()</code> تموم خروجی رو به driver می‌آره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> ظاهراً مشابه بودن API با جدول محلی به‌معنی یکسان بودن هزینه نیست؛ خروجی بزرگ می‌تونه حافظهٔ driver رو پر کنه — این دام معروفه.</p>
-</div></div>
+</div>
     <div class="en"><p>The local version (R/Pandas) is usually indexed and ordered; the distributed one usually isn't — so migration can surprise ordering and performance. Plus Pandas is eager (immediate execution) while Spark is lazy (query plan + optimizer), and Daft has both: small ops on the client, big datasets on the server, with Arrow as the shared data model.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۹. چرا نوشتنِ مستقیمِ خروجیِ job به پایگاه دادهِ تولیدی بد است و راهِ بهتر چیست؟</span><span class="en">19. Why is writing job output straight to the production database bad, and what is better?</span></summary>
     <div class="fa"><p>نوشتنِ مستقیم می‌تونه خروجیِ نیمه‌کاره و اثرِ تکراری و بارِ زیاد بسازه. نتیجه رو جدا می‌سازیم و اعتبارسنجی می‌کنیم و بعد نسخهٔ کامل رو تو مسیرِ خوندن قرار می‌دیم.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: انتشار ایندکس کامل</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن job نسخهٔ <code dir="ltr">search-v2</code> رو تو مسیر تازه می‌سازه و تعداد و کیفیت رکوردها رو می‌سنجه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بعد از موفقیتِ همهٔ بخش‌ها، اشاره‌گر خوندن از v1 به v2 عوض می‌شه؛ v1 برای بازگشت موقتاً می‌مونه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> کاربر مخلوطِ خروجی ناقص و قدیمی نمی‌بینه؛ نوشتن مستقیمِ هر task رو ایندکس فعال این مزیت رو سخت‌تر می‌کنه — همین.</p>
-</div></div>
+</div>
     <div class="en"><p>One network request per record (slow), drowning the database with parallel tasks, and destroying the all-or-nothing guarantee (outside side effects + retried-output duplication). Better: push to Kafka — sequential writes, buffering/rate control, multi-system consumption, a DMZ security boundary — plus a job-done announcement so consumers hide data like a read-committed transaction until completion is announced. The other pattern: bulk-load a fresh database + an atomic dataset-version switch.</p></div>
   </details>
 
   <details><summary><span class="fa">۲۰. اگر قرار باشد فقط یک جمله از این فصل بگویی، کدام است؟</span><span class="en">20. If you had one sentence from this chapter, which?</span></summary>
     <div class="fa"><p>پردازشِ دسته‌ای ورودیِ مشخص رو به خروجیِ قابل‌بازسازی تبدیل می‌کنه. جداسازیِ تلاش‌های ناقص و انتشارِ نسخهٔ کامل، به تحملِ خرابی و اصلاحِ منطق کمک می‌کنه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: بازمحاسبهٔ گزارش از ورودی ثابت</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل فروش ۱۴ مهر بسته شده و نسخهٔ ورودی معلومه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا job مجموع فروش هر شعبه رو تو خروجی نسخهٔ <code dir="ltr">v2</code> می‌نویسه؛ اگه فرمول غلط بود، با کد اصلاح‌شده از همون ورودی دوباره اجراش می‌کنیم.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> ورودی immutable و خروجی نسخه‌داره، پس خطای محاسبه قابل‌بازسازیه؛ بازنویسی مستقیمِ دادهٔ مرجع همچین آزادی‌ای نمی‌ده — همین.</p>
-</div></div>
+</div>
     <div class="en"><p>“Batch processing means turning immutable input into derived output from scratch; that contract makes task retries safe, errors recoverable and publication all-or-nothing — and for scale, spread the work with shuffle (distributed sorting) across independent tasks.”</p></div>
   </details>
 

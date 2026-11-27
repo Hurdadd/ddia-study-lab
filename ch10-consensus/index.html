@@ -40,7 +40,7 @@
   <div class="meta-row reveal">
     <span><b><span class="fa">۱۰</span><span class="en">10</span></b> <span class="fa">۱۰ نمودار + روایت گام‌به‌گام</span><span class="en">diagrams with step-by-step narration</span></span><span class="dot">·</span>
     <span><span class="fa">محور: linearizability · ساعت منطقی · consensus · Raft/Paxos · ZooKeeper</span><span class="en">Focus: linearizability · logical clocks · consensus · Raft/Paxos · ZooKeeper</span></span><span class="dot">·</span>
-    <span><span class="fa">منبع: فصل ۱۰ کتاب DDIA ویرایش ۲</span><span class="en">Source: DDIA 2nd Edition, Chapter 10</span></span>
+    <span><span class="fa">زمان مطالعه: حدود ۶۵ دقیقه</span><span class="en">Reading time: ~65 min</span></span><span class="dot">·</span><span><span class="fa">منبع: فصل ۱۰ کتاب DDIA ویرایش ۲</span><span class="en">Source: DDIA 2nd Edition, Chapter 10</span></span>
   </div>
 </section>
 
@@ -278,12 +278,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۱ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: عملیات هم‌پوشان</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن خوندن x وقتی شروع می‌شه که نوشتن <code dir="ltr">x=1</code> هنوز جواب نداده؛ مقدارِ قبلی هم ۰ـه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بسته به نقطه خطی‌شدن، خوندن می‌تونه ۰ یا ۱ برگردونه؛ ولی بعد از دیدنِ نوشتنِ تموم‌شده، خوندنِ بعدی — بدونِ نوشتنِ جدید — به ۰ برنمی‌گرده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> باید کلِ تاریخچه با یه ترتیبِ لحظه‌ایِ درست جور دربیاد؛ ساعتِ روی دستِ کلاینت‌ها ملاک نیست — یادت باشه.</p>
-</div>
+
 <p>
       تو این نمودار دو تا بند داری. بندِ بالا با عنوانِ «یه اجرای خطی‌پذیر» شروع می‌شه: سه تا ردیفِ رنگی داری به اسم‌های
       <span class="ltr">client A</span> و <span class="ltr">client B</span> و <span class="ltr">client C</span>.
@@ -439,12 +434,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۲ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: رقابت برای نام کاربری</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن A و B هر دو می‌خوان <code dir="ltr">sara</code> رو ثبت کنن. یه اسم، دو تا مشتری.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا هر دو رو یه مرجعِ هماهنگ <code dir="ltr">compare-and-set(empty, owner)</code> می‌زنن یا با قیدِ درست درج می‌کنن؛ فقط یکیشون موفق می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اول «خالیه» بخونی بعد جداگونه رو دو تا replica بنویسی، یکتایی رو قول نمی‌ده — حساب کن.</p>
-</div>
+
 <p>
       تو این نمودار یه <span class="ltr">sequence</span> داری: پنج‌تا شرکت‌کننده از چپ به راست ردیف شدن —
       <span class="ltr">Web App</span> (مرورگرِ کاربر)، <span class="ltr">Web Server</span> (هندلرِ آپلود)،
@@ -554,12 +544,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۳ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: رهبرِ هنوز معتبر؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن A قبلاً رهبر بوده ولی از اکثریت جدا شده و B رهبرِ تازه شده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا خوندنِ محلیِ A می‌تونه قدیمی باشه؛ پروتکل باید قبل از جوابِ خطی‌پذیر هم اعتبارِ رهبری رو چک کنه هم رسیدنِ state به نقطه لازم رو.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> single-leader بودن فقط اسمِ معماریه؛ خوندن از هر رهبرِ سابقی بدونِ چکِ اعتبار خطی‌پذیر نمی‌شه — رهبرِ سابق، بازنشسته‌ست.</p>
-</div>
+
 <p>
       خطِ افقی وسط رو بگیر — بالای نمودار، ردیفِ بنفشِ <span class="ltr">writer</span> رو می‌بینی با نوارِ
       <span class="ltr">write(x, 1) → sent to all three replicas (w = 3)</span>.
@@ -629,12 +614,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: بهای قطع ارتباط</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن دو تا مرکز داده سیمشون قطع شده و هر دو می‌خوان یه اسمِ یکتا رو تغییر بدن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا اگه هر دو جداگونه جوابِ موفق بدن، یکتایی می‌شکنه؛ مسیری که تصمیمِ واحد می‌خواد تو بخشی از شبکه باید صبر کنه یا خطا بده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> CAP همین انتخابِ موقعِ partition رو توصیف می‌کنه؛ تو حالتِ سالم هم هماهنگیِ راه‌دور خرجِ تأخیر داره — قبضش رو حساب کن.</p>
-</div>
+
 <p>نمودار سه‌تا وضعیت رو می‌ذاره کنارِ هم: شبکه سالم (هم سازگار هم در دسترس — انتخابی لازم نیست)، پارتیشن (خطا، نه انتخاب: یا CP یا AP)، و حالتِ سالمِ PACELC (تأخیرِ کم یا سازگاری — سریع یا تازه، هیچ‌وقت هر دو). نوارِ پایین سقف رو می‌ذاره: جواب‌زمانیِ خطی‌پذیر دست‌کم به اندازه عدمِ قطعیتِ تأخیرِ شبکه‌ست و الگوریتمِ سریع‌تری وجود نداره.</p></div>
     <div class="en"><p>The diagram lines up three situations side by side: a healthy network (consistent and available — no choice to make), a partition (a fault, not a choice: CP or AP), and the healthy PACELC case (low latency or consistency — fast or fresh, never both). And the bottom strip sets the floor: linearizable latency is at least the network's delay uncertainty, and no faster algorithm exists.</p></div>
   </div>
@@ -683,12 +663,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۴ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: یکتا لزوماً مرتب نیست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن دو تا نود بازه‌های <code dir="ltr">1…1000</code> و <code dir="ltr">1001…2000</code> رو گرفتن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا نودِ دوم ممکنه زودتر ۱۰۰۱ بده و نودِ اول بعداً ۱ بده؛ شناسه‌ها هنوز یکتان.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> بلوک گرفتن خرجِ هماهنگیِ هر تخصیص رو کم می‌کنه، ولی ترتیبِ عددیِ شناسه دیگه ترتیبِ واقعیِ درخواست‌ها نیست — یکتا آره، مرتب نه.</p>
-</div>
+
 <p>
       نمودار سه‌تا ستون داره. ستونِ اول با عنوانِ «① Single node» دو تا کارت داره:
       <span class="ltr">Autoincrement counter</span> (یکتا + ترتیبِ کامل + خطی‌پذیر، ولی SPOF و گلوگاه) و
@@ -751,12 +726,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۵ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: Lamport روی ارسال پیام</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن شمارنده A عددِ ۵ـه و پیام رو با برچسبِ ۶ می‌فرسته؛ B هم رو عددِ ۳ـه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا B موقعِ گرفتن مقدار رو می‌رسونه به <code dir="ltr">max(3,6)+1=7</code>. HLC هم همین منطقِ ترتیب رو با تیکه زمانِ دیواری قاطی می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اگه a علتِ b باشه برچسبِ a کوچیک‌تره؛ ولی کوچیک‌تر بودنِ برچسب به‌تنهایی ثابت نمی‌کنه a علتِ b بوده — این دام معروفه.</p>
-</div>
+
 <p>
       سه شرکت‌کننده داریم: <span class="ltr">User A</span> و <span class="ltr">User B</span> و <span class="ltr">User C</span>
 <p>
@@ -892,12 +862,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۶ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: تصمیم مشترکِ معتبر</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن سه تا رأی‌دهنده پیشنهادهای A و B رو واسه رهبر دارن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا تصمیمِ نهایی باید از پیشنهادِ معتبر باشه، نودها نباید تصمیمِ ناجور بدن و با فرض‌های پیشرفت بالاخره باید تصمیم گرفته شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> خاصیت‌های agreement و validity و integrity و termination با هم قول رو می‌سازن؛ فقط پیامِ رأی داشتن کافی نیست — یادت باشه.</p>
-</div>
+
 <p>
       این نمودارِ ساختاری یه قلب و چند تا بازو داره. قلب، جعبه بزرگِ وسطه با عنوانِ
       <span class="ltr">CONSENSUS</span> و دو تا زیرنویس: «یه مقدارِ توافق‌شده، یه ترتیبِ توافق‌شده» و
@@ -991,12 +956,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۷ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: همان لاگ، همان state</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن لاگِ commitشده <code dir="ltr">set(x,1)</code> و بعدش <code dir="ltr">increment(x)</code> رو داره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا هر replica سالم هر دو رو با همون ترتیب اعمال می‌کنه و می‌رسه به <code dir="ltr">x=2</code>.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> state machine باید واسه همون ورودی‌ها همون خروجی رو بده؛ <code dir="ltr">NOW()</code> یا شانسِ جدا تو apply می‌تونه replicaها رو ناجور کنه — قطعی بمون.</p>
-</div>
+
 <p>
       این یه <span class="ltr">dataflow</span>ـه: جریانِ داده از چپ به راست تو پنج‌تا مرحله می‌ره
       که بالای نمودار شماره خوردن: <span class="ltr">01 / Propose</span>، <span class="ltr">02 / Append</span>،
@@ -1050,12 +1010,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۸ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: وجود روی یک نود، commit نیست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن رهبر entry رو رو خودش نوشته ولی قبل از تأییدِ quorum قطع می‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا entry ممکنه تو لاگِ رهبرِ جدید نباشه و بعداً جایگزین شه؛ جوابِ موفق رو فقط باید طبقِ قانونِ commit پروتکل داد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> هر entry محلی ماندگارِ نهایی نیست؛ شرطِ commit و شرطِ انتخابِ رهبر با هم از تاریخچه پذیرفته‌شده محافظت می‌کنن — زود قول نده.</p>
-</div>
+
 <p>
       این نمودار یه <b>ماشینِ وضعیت</b>ـه با سه‌تا گروه که بالاشون اسم نوشته شده:
       <span class="ltr">Entry lifecycle</span> (مسیرِ اصلی)، <span class="ltr">Slow quorum and term change</span> (مسیرِ خطاها)
@@ -1135,12 +1090,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: اجماع با 2PC فرق دارد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن تو consensus سه تا replica از پنج‌تا می‌تونن با خرابیِ دو عضو جلو برن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا تو 2PC، participant آماده‌ای که تصمیمِ coordinator رو نداره ممکنه معطل بمونه؛ رأیِ yes همه واسه مسیرِ commit لازمه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> هر دو پیام‌های چندمرحله‌ای دارن، ولی یکیش تصمیمِ تکراریِ مقاوم به خرابیه اون یکی commit مشترکِ منابع رو می‌خواد — دو تا بازیِ جدا.</p>
-</div>
+
 <p>دو تا ستون رو بذار کنارِ هم: تو consensus هر دو دور (انتخابِ رهبر و تصویبِ entry) فقط quorum می‌خوان و هر نودی می‌تونه شروع کنه — یه نودِ ساکت مشکلی نیست. تو 2PC فقط هماهنگ‌کننده رأی می‌گیره و به تک‌تکِ شرکت‌کننده‌ها نیاز داره — یه سکوت همه‌چی رو می‌خوابونه. تهش تو نوارِ پایینه: هماهنگ‌کننده نقطه تکیِ خرابی می‌مونه، مگر اینکه با consensus سفت شه.</p></div>
     <div class="en"><p>Put the two columns side by side: in consensus both rounds (leader election and entry approval) need only a quorum, and any node may kick things off — one silent node, no problem. In 2PC only the coordinator collects votes and needs every participant — one silence and everything naps. The bottom strip lands the punch: the coordinator stays a single point of failure unless consensus hardens it.</p></div>
   </div>
@@ -1201,12 +1151,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۹ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: قفل و تنظیمات روی etcd</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن کلید <code dir="ltr">/jobs/J7/owner</code> و نسخه پیکربندی تو سرویسِ هماهنگی نگه داشته می‌شن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا عملیاتِ شرطی مالک رو معلوم می‌کنه و watch تغییر رو خبر می‌ده؛ مصرف‌کننده بعد از قطعِ اتصال باید وضعیت رو دوباره همگام کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> watch فقط خبرِ تغییره، خودش مجوزِ اثر نیست؛ کارگر هنوز به lease و fencingِ مناسبِ منبعِ کار نیاز داره — خبر با مجوز فرق داره.</p>
-</div>
+
 <p>
       حالا این نمودار رو از چپ بخون: یه ناحیه به اسمِ <span class="ltr">App cluster — many nodes</span>
       با سه تا نودِ نمونه: «App node A — holds a lease»، «App node B — sends heartbeats»، «App node C — registers endpoint».
@@ -1316,12 +1261,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس — نمودار ۱۰ را با صدای بلند بخوانیم</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: تضمین را برای هر مسیر انتخاب کن</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن ثبتِ اسمِ کاربری یکتاییِ فوری می‌خواد، ولی شمارنده بازدید می‌تونه چند ثانیه عقب باشه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا مسیرِ اول هماهنگی و قیدِ سفت می‌گیره؛ مسیرِ دوم جمعِ غیرهم‌زمان با کنترلِ تکرار داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> قولِ قوی رو بر اساسِ قانونِ همون عملیات انتخاب می‌کنی؛ یه برچسبِ consistency واسه همه تیکه‌های محصول کافی نیست — یه برچسب واسه همه کافی نیست.</p>
-</div>
+
 <p>
       نوبتی هم باشه نوبت درخته: یه درختِ تصمیم با چهار تا خط (lane) که بالاشون شماره خورده:
       <span class="ltr">01 / Decision</span> (سوال‌ها)، <span class="ltr">02 / Linearizable</span>،
@@ -1392,12 +1332,7 @@
   <div class="teacher">
     <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
     <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: کدام خواندن باید تازه باشد؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن کاربر اسم <code dir="ltr">sara</code> رو ثبت کرده و جوابِ موفق هم گرفته. اسم مالِ اونه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا یه کلاینتِ دیگه میاد همون اسم رو ثبت کنه؛ نباید با تکیه به نسخه قدیمی دوباره جوابِ موفق بگیره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> این مسیر یه تصمیمِ هماهنگ درباره یکتایی می‌خواد؛ ولی نمایشِ تعدادِ بازدید تأخیر رو تحمل می‌کنه و قولِ دیگه‌ای می‌خواد — هر مسیر قولِ خودش.</p>
-</div>
+
 <p>خوب، نقشه رو یه نگاه بنداز: گرهِ وسطی همون حرفِ فصلـه — consensus و سازگاری. سه‌تا مفهومِ بالا ورودی‌های تصمیم‌ان: خطی‌پذیری (هدفِ تازگی)، ساعت‌های منطقی (ابزارِ ترتیب) و CAP/PACELC (قبضِ تازگی). سه‌تای پایین هم خروجی‌های تصمیم‌ان: لاگِ مشترک (یه ترتیبِ واحد)، replication ماشینِ وضعیت (یه وضعیتِ نهاییِ یکسان) و سرویسِ هماهنگی (قفل، fencing، خبر).</p><p>درسِ یه‌خطیِ نقشه: اول ضعیف‌ترین قولِ کافی رو بخواه — ساعتِ منطقی و مدل‌های شل‌تر؛ فقط قیدِ سفت (قفل، اسمِ یکتا، موجودی) consensus و quorum می‌خواد — همین یه خط رو نگه دار.</p></div>
     <div class="en"><p>Take a good look at the map, friend: the center node is the chapter's whole point — consensus and consistency. The three concepts up top feed the decision: linearizability (the freshness goal), logical clocks (the ordering tool), and CAP/PACELC (freshness's bill). The three below are what comes out: the shared log (one order), state machine replication (one final state), and the coordination service (locks, fencing, notifications).</p><p>The map's one-line lesson: ask for the weakest guarantee that does the job first — logical clocks and looser models; only hard constraints (locks, unique names, balances) call for consensus and quorums.</p></div>
   </div>
@@ -1476,221 +1411,121 @@
 
   <details><summary><span class="fa">۱. linearizability دقیقاً چه چیزی را تضمین می‌کند؟</span><span class="en">1. What exactly does linearizability guarantee?</span></summary>
     <div class="fa"><p>تعریفش اینه: هر عملیات انگار دقیقاً تو یه لحظه — بینِ شروع و پایانش — رو یه نسخه واحد انجام می‌شه. عملیاتی که بعد از پاسخِ نوشتن شروع شه، یا همون نوشتن رو می‌بینه یا تغییرِ بعدی رو — کهنه‌بینی ممنوع.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: پس از پاسخ موفق</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن <code dir="ltr">SET x=1</code> کامل شده؛ بعدش یه کلاینتِ دیگه <code dir="ltr">GET x</code> رو شروع می‌کنه و نوشتنِ تازه‌ای هم تو کار نیست.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا خوندنِ خطی‌پذیر باید ۱ ببینه؛ replica عقب‌مونده‌ای که ۰ بده این قول رو شکسته.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس خطی‌پذیری ترتیبِ واقعیِ عملیاتِ جدا از هم رو نگه می‌داره، نه فقط همگراییِ آخرش رو — زمان مهمه.</p>
-</div></div>
+</div>
     <div class="en"><p>Think of it like this, friend: every operation lands at one instant between its start and finish, on a single copy. Anything starting after a write's response sees that write or something newer — stale views banned.</p></div>
   </details>
 
   <details><summary><span class="fa">۲. تفاوتِ linearizability و serializability چیست؟</span><span class="en">2. What is the difference between linearizability and serializability?</span></summary>
     <div class="fa"><p>فرقشون ساده‌ست: خطی‌پذیری ساعتِ عملیات رو با زمانِ واقعی جفت می‌کنه؛ سریال‌پذیری فقط می‌گه نتیجه تراکنش‌ها انگار پشتِ سرِ هم اجرا شدن — ولی اون پشتِ سرِ هم بودن لزوماً همون ترتیبِ واقعی نیست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: تراکنش serial با خواندن کهنه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دو تا تراکنشِ انتقال رو می‌شه با یه ترتیبِ serial توضیح داد.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا یه خوندنِ جدا که بعد از جوابِ commit شروع شده، ممکنه از replica قدیمی بیاد — اگه سیستم فقط serializability قول داده باشه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> serializability دعواش سرِ قاطی شدنِ تراکنش‌هاست؛ linearizability ترتیبِ واقعیِ عملیات رو می‌خواد. ترکیبِ درستشون می‌رسه به strict serializability — هر دو با هم.</p>
-</div></div>
+</div>
     <div class="en"><p>Here's the split: linearizability syncs operation order with real time; serializability only says transactions look sequential — but that sequence doesn't have to match real time.</p></div>
   </details>
 
   <details><summary><span class="fa">۳. چرا شرطِ <span class="ltr">w</span> + <span class="ltr">r</span> &gt; <span class="ltr">n</span> به‌تنهایی خطی‌پذیری را تضمین نمی‌کند؟</span><span class="en">3. Why isn't a quorum with w + r &gt; n linearizable?</span></summary>
     <div class="fa"><p>داستان اینه: هم‌پوشانیِ جواب‌ها فقط یه شرطشه. نوشتنِ نصفه، تغییرِ هم‌زمان، تشخیصِ نسخه و ترتیبِ خوندن‌ها هم باید سرِ جاشون باشن؛ پروتکلِ خطی‌پذیر چند تا قانونِ دیگه هم رو میز می‌ذاره.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Quorumِ ناقص در تاریخچه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن <code dir="ltr">n=3,w=2,r=2</code>ـه؛ نوشتنِ تازه فقط به A رسیده و هنوز کامل نشده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا خوندنِ اول از A و B نسخه تازه می‌بینه؛ خوندنِ دوم از B و C می‌تونه قدیمی ببینه — اگه پروتکل فقط بزرگ‌ترین جواب رو برگردونه و ترمیمِ لازم رو نخواد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> شرطِ هم‌پوشانیِ نوشتنِ کامل واسه کلِ تاریخچه کافی نیست؛ رفتارِ نوشتنِ نصفه و خوندن‌ها هم باید تعریف شه — quorum به‌تنهایی قول نیست.</p>
-</div></div>
+</div>
     <div class="en"><p>Because overlapping replies are just one ingredient. Half-done writes, concurrent changes, version detection, and read ordering all need rules too — a linearizable protocol puts several more rules on the table.</p></div>
   </details>
 
   <details><summary><span class="fa">۴. خطی‌پذیری چه قیمتی دارد؟</span><span class="en">4. What does linearizability cost?</span></summary>
     <div class="fa"><p>قضیه‌ش اینه: خطی‌پذیری خرج داره — هماهنگی و نسخه معتبر می‌خواد، و هماهنگی هم تأخیر داره. موقعِ قطعی هم ممکنه بعضی درخواست‌ها نتونن طبقِ قول جوابِ موفق بگیرن — قبضش رو باید حساب کنی.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: بهای قطع ارتباط</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن دو تا مرکز داده سیمشون قطع شده و هر دو می‌خوان یه اسمِ یکتا رو تغییر بدن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا اگه هر دو جداگونه جوابِ موفق بدن، یکتایی می‌شکنه؛ مسیری که تصمیمِ واحد می‌خواد تو بخشی از شبکه باید صبر کنه یا خطا بده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> CAP همین انتخابِ موقعِ partition رو توصیف می‌کنه؛ تو حالتِ سالم هم هماهنگیِ راه‌دور خرجِ تأخیر داره — قبضش رو حساب کن.</p>
-</div></div>
+</div>
     <div class="en"><p>Because freshness has a bill attached: coordination plus a trusted copy, and coordination costs latency. During a cut, some requests just can't succeed under the guarantee — you've got to pay that bill.</p></div>
   </details>
 
   <details><summary><span class="fa">۵. CAP را در یک جمله توضیح بده و ایرادش چیست؟</span><span class="en">5. Explain CAP in one sentence, and what's wrong with it?</span></summary>
     <div class="fa"><p>جوابش کوتاهه: موقعِ جداییِ شبکه نمی‌شه هم خطی‌پذیر موند هم به همه نودهای سالم جوابِ موفق داد. ایراد CAP هم اینه که خرجِ حالتِ عادی و تنوعِ قول‌ها رو نشون نمی‌ده.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: بهای قطع ارتباط</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن دو تا مرکز داده سیمشون قطع شده و هر دو می‌خوان یه اسمِ یکتا رو تغییر بدن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا اگه هر دو جداگونه جوابِ موفق بدن، یکتایی می‌شکنه؛ مسیری که تصمیمِ واحد می‌خواد تو بخشی از شبکه باید صبر کنه یا خطا بده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> CAP همین انتخابِ موقعِ partition رو توصیف می‌کنه؛ تو حالتِ سالم هم هماهنگیِ راه‌دور خرجِ تأخیر داره — قبضش رو حساب کن.</p>
-</div></div>
+</div>
     <div class="en"><p>Short version: during a network split you can't stay linearizable and keep every healthy node answering successfully. And CAP's blind spot? It hides normal-case costs and the variety of guarantees.</p></div>
   </details>
 
   <details><summary><span class="fa">۶. چرا نمی‌توانیم برای همه‌چیز از یک مولدِ شمارنده‌ی تک‌نودی استفاده کنیم؟</span><span class="en">6. Why can't we use one single-node counter for everything?</span></summary>
     <div class="fa"><p>راستش، مولدِ مرکزی هم گلوگاهه هم نقطه وابستگی. واسه اینکه موقعِ خرابی جاش پر شه، وضعیتِ شمارنده باید سالم بمونه؛ ضمناً ترتیبِ صدورِ شناسه با ترتیبِ commit یکی نیست — قاطی‌شون نکن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: شمارندهٔ یکتا روی یک نود</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سرور عددهای <code dir="ltr">100,101,102</code> رو به‌ترتیب پخش می‌کنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا اگه نود بپره — بدونِ ذخیره پایدار و بازیابیِ درست — یا تکرار پیش میاد یا توقف؛ صفِ درخواست‌ها هم سقفِ همون مسیر رو تنگ می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> شمارنده ساده‌ست ولی دوام و failover و throughputـش طراحی می‌خواد؛ یکتا بودن با بی‌وقفه بودن یکی نیست — دو تا چیزِ جدا.</p>
-</div></div>
+</div>
     <div class="en"><p>Honestly, a central generator is both a bottleneck and a single leg to stand on. Filling its shoes after a crash means keeping counter state intact — and issue order isn't commit order. Don't mix those up.</p></div>
   </details>
 
   <details><summary><span class="fa">۷. Lamport clock چگونه کار می‌کند و چه چیزی را تضمین نمی‌کند؟</span><span class="en">7. How does a Lamport clock work, and what doesn't it guarantee?</span></summary>
     <div class="fa"><p>ایده‌ش ساده‌ست: هر نود شمارنده‌ش رو زیاد می‌کنه و موقعِ گرفتنِ پیام، خودش رو به شمارنده پیام می‌رسونه. علت عددِ کوچیک‌تر از معلول می‌گیره، ولی عددِ کوچیک‌تر دیدی دلیل نمی‌شه علتش باشه — این دام معروفه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Lamport روی ارسال پیام</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن شمارنده A عددِ ۵ـه و پیام رو با برچسبِ ۶ می‌فرسته؛ B هم رو عددِ ۳ـه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا B موقعِ گرفتن مقدار رو می‌رسونه به <code dir="ltr">max(3,6)+1=7</code>. HLC هم همین منطقِ ترتیب رو با تیکه زمانِ دیواری قاطی می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اگه a علتِ b باشه برچسبِ a کوچیک‌تره؛ ولی کوچیک‌تر بودنِ برچسب به‌تنهایی ثابت نمی‌کنه a علتِ b بوده — این دام معروفه.</p>
-</div></div>
+</div>
     <div class="en"><p>The idea's simple: each node bumps its counter and jumps to the message's counter on receive. Causes sort smaller than effects — but a smaller number doesn't prove causation. Classic trap.</p></div>
   </details>
 
   <details><summary><span class="fa">۸. HLC چه چیزی را به Lamport اضافه می‌کند؟</span><span class="en">8. What does HLC add to Lamport?</span></summary>
     <div class="fa"><p>HLC زمانِ دیواری رو با منطقِ Lamport قاطی می‌کنه تا عددِ ساعت هم به زمانِ واقعی نزدیک بمونه هم وابستگی‌ها حفظ شن. ولی حواست باشه: این هنوز قولِ ترتیبِ کاملِ واقعی نیست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Lamport روی ارسال پیام</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن شمارنده A عددِ ۵ـه و پیام رو با برچسبِ ۶ می‌فرسته؛ B هم رو عددِ ۳ـه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا B موقعِ گرفتن مقدار رو می‌رسونه به <code dir="ltr">max(3,6)+1=7</code>. HLC هم همین منطقِ ترتیب رو با تیکه زمانِ دیواری قاطی می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اگه a علتِ b باشه برچسبِ a کوچیک‌تره؛ ولی کوچیک‌تر بودنِ برچسب به‌تنهایی ثابت نمی‌کنه a علتِ b بوده — این دام معروفه.</p>
-</div></div>
+</div>
     <div class="en"><p>HLC blends wall-clock time with Lamport logic, so the number stays near real time and keeps causality. But heads up: that's still no promise of true total order.</p></div>
   </details>
 
   <details><summary><span class="fa">۹. کی به vector clock نیاز داریم؟</span><span class="en">9. When do we need a vector clock?</span></summary>
     <div class="fa"><p>وقتی لازمه بفهمی دو تا تغییر به هم وصلن یا مستقل و متعارضن، بردار به کارت میاد. یه عددِ مرتبِ ساده هم‌زمانیِ منطقی رو لو نمی‌ده — اینو قاب کن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: دو تصمیمِ concurrent</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن بردارِ رخدادِ اول <code dir="ltr">{A:2,B:1}</code>ـه و دومی <code dir="ltr">{A:1,B:2}</code>.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا بردارها incomparableـن و concurrent بودن لو می‌ره؛ یه Lamport scalar فقط می‌تونه بینشون ترتیبِ عددی بسازه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> وقتی تشخیصِ نبودِ رابطه علّی لازمه، ترتیبِ کلیِ عددی اطلاعاتِ کافی نمی‌ده — اینجا بردار حرف می‌زنه.</p>
-</div></div>
+</div>
     <div class="en"><p>You'll want vectors when you must tell linked changes from independent, conflicting ones. A single sorted number can't expose logical concurrency — frame that one.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۰. چهار خاصیتِ consensus کدام‌اند؟</span><span class="en">10. What are the four consensus properties?</span></summary>
     <div class="fa"><p>حفظ کن: توافقِ تصمیم‌ها، یه‌بار تعیین شدنِ تصمیم، معتبر بودنِ مقدارِ پیشنهادی، و تموم شدنِ تصمیم‌گیری تو شرایطِ لازم. سه‌تای اول ایمنی‌ان، آخری پیشرفت.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: تصمیم مشترکِ معتبر</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن سه تا رأی‌دهنده پیشنهادهای A و B رو واسه رهبر دارن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا تصمیمِ نهایی باید از پیشنهادِ معتبر باشه، نودها نباید تصمیمِ ناجور بدن و با فرض‌های پیشرفت بالاخره باید تصمیم گرفته شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> خاصیت‌های agreement و validity و integrity و termination با هم قول رو می‌سازن؛ فقط پیامِ رأی داشتن کافی نیست — یادت باشه.</p>
-</div></div>
+</div>
     <div class="en"><p>Memorize these four: agreeing decisions, deciding only once, deciding only proposed values, and actually finishing under the right conditions. The first three are safety; the last one is liveness.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۱. نتیجه‌ی FLP یعنی consensus ناممکن است؟</span><span class="en">11. Does the FLP result mean consensus is impossible?</span></summary>
     <div class="fa"><p>نه! FLP فقط سقفِ قولِ همیشگیِ پیشرفتِ اجماعِ قطعی رو تو مدلِ کاملاً ناهمگام با ریسکِ crash نشون می‌ده. سیستم‌های واقعی با فرض‌هایی مثل همگامیِ نهایی یا شانس کار می‌کنن؛ timeout به‌تنهایی سندِ حل نیست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: FLP و پیامِ نامعلومِ دیررس</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن تو مدلِ کاملاً asynchronous زمانِ رسیدنِ پیام سقفِ مشخصی نداره و یه فرایند هم ممکنه crash کنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا الگوریتمِ قطعی نمی‌تونه تو همه زمان‌بندی‌ها هم توافق رو نگه داره هم پایانِ تصمیم رو قول بده؛ نرسیدنِ پیام معلوم نمی‌کنه فرایند مرده یا فقط دیره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> این نتیجه اجرای عملیِ اجماع رو رد نمی‌کنه؛ پروتکل‌های واقعی safety رو نگه می‌دارن و پیشرفت رو به فرض‌هایی مثل بهتر شدنِ ارتباط و رهبریِ پایدار وصل می‌کنن — تئوری یه چی می‌گه، عمل یه چی.</p>
-</div></div>
+</div>
     <div class="en"><p>Nope — FLP only caps the always-finish promise of deterministic consensus in fully async models with crash risk. Real systems lean on eventual synchrony or luck; a timeout alone proves nothing.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۲. اجماع، لاگِ مشترک و عملیاتِ اتمیک چه ارتباط و چه تفاوتی دارند؟</span><span class="en">12. What does “consensus has many equivalent faces” mean?</span></summary>
     <div class="fa"><p>قضیه اینه که توافق رو مقدار، ترتیبِ معتبرِ لاگ و بعضی عملیاتِ شرطیِ قوی — با فرض‌های درست — به هم وصلن. ولی هر ابزارِ اتمیکی هم‌قدرت نیست و commit اتمیک همون مسئله اجماع نیست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: یک تصمیم با چند اسم</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن سه تا نود باید معلوم کنن کی مالکِ job <code dir="ltr">J7</code>ـه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا انتخابِ رهبر و نوشتنِ مالک تو لاگِ توافق‌شده و اعمالِ همون تصمیم به state هر نود، شکل‌های مرتبطِ همین مسئله‌ان.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> هر نود یه مالکِ جدا قبول کنه و اسمش «اجماع» باشه؟ نه! پروتکل باید یه تصمیمِ معتبرِ مشترک بده.</p>
-</div></div>
+</div>
     <div class="en"><p>The thing is, value agreement, a valid log order, and some strong conditional ops all connect under the right assumptions. But not every atomic tool is equally strong — and atomic commit isn't the same problem as consensus.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۳. epoch یا term چه نقشی در جلوگیری از split brain دارد؟</span><span class="en">13. How do epochs/terms prevent split brain?</span></summary>
     <div class="fa"><p>دوره رهبری پیامِ قدیمی رو از تصمیمِ تازه جدا می‌کنه. نودها دوره و قانون‌های رأی رو رعایت می‌کنن تا رهبرِ قدیمی نتونه نوشته معتبرِ جدید بسازه — رهبرِ سابق، بازنشسته‌ست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: term بالاتر و رأی اکثریت</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن تو گروهِ پنج‌نودی، A تو term ۷ بوده و B با سه تا رأی تو term ۸ انتخاب می‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا رأی‌دهنده تو هر term طبقِ پروتکل رأی می‌ده و پیامِ term قدیمی رد می‌شه؛ نامزدِ انتخاب هم باید شرطِ تازگیِ لاگ رو رعایت کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> term قدیمی حقِ ادامه رهبری نمی‌ده؛ شرطِ رأی و لاگ جلوی دو تا تاریخچه پذیرفته‌شده ناجور رو می‌گیره — بزرگ‌تر می‌بره.</p>
-</div></div>
+</div>
     <div class="en"><p>A leadership era separates old messages from fresh decisions. Nodes honor eras and voting rules so an old leader can't mint valid new writes — yesterday's leader stays retired.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۴. تفاوتِ دو دورِ رأیِ consensus با 2PC چیست؟</span><span class="en">14. How do consensus's two votes differ from 2PC?</span></summary>
     <div class="fa"><p>تو اجماع رأی مالِ انتخابِ رهبر و سفت کردنِ ورودیِ معتبره؛ تو 2PC شرکت‌کننده‌ها اول آمادگی‌شون رو اعلام می‌کنن بعد تصمیمِ مشترکِ commit یا abort رو اجرا می‌کنن. دو تا بازیِ جدا.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: اجماع با 2PC فرق دارد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن تو consensus سه تا replica از پنج‌تا می‌تونن با خرابیِ دو عضو جلو برن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا تو 2PC، participant آماده‌ای که تصمیمِ coordinator رو نداره ممکنه معطل بمونه؛ رأیِ yes همه واسه مسیرِ commit لازمه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> هر دو پیام‌های چندمرحله‌ای دارن، ولی یکیش تصمیمِ تکراریِ مقاوم به خرابیه اون یکی commit مشترکِ منابع رو می‌خواد — دو تا بازیِ جدا.</p>
-</div></div>
+</div>
     <div class="en"><p>In consensus, votes elect leaders and nail down valid entries; in 2PC, participants first declare readiness, then carry out the joint commit-or-abort call. Two different games.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۵. state machine replication چیست و چرا مهم است؟</span><span class="en">15. What is state machine replication and why does it matter?</span></summary>
     <div class="fa"><p>نسخه‌ها دستورهای لاگِ معتبر رو با همون ترتیب رو وضعیتِ یکسان اجرا می‌کنن. اجرای قطعی خروجی رو یکسان نگه می‌داره؛ ورودیِ غیرقطعی رو باید تو قرارداد کنترل کنی — قرارداد رو جدی بگیر.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: همان لاگ، همان state</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن لاگِ commitشده <code dir="ltr">set(x,1)</code> و بعدش <code dir="ltr">increment(x)</code> رو داره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا هر replica سالم هر دو رو با همون ترتیب اعمال می‌کنه و می‌رسه به <code dir="ltr">x=2</code>.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> state machine باید واسه همون ورودی‌ها همون خروجی رو بده؛ <code dir="ltr">NOW()</code> یا شانسِ جدا تو apply می‌تونه replicaها رو ناجور کنه — قطعی بمون.</p>
-</div></div>
+</div>
     <div class="en"><p>Replicas run the valid log's commands in the same order on the same state. Deterministic execution keeps outputs identical — but you've got to fence non-deterministic inputs in the contract. Remember that.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۶. چرا رهبرِ جدید نباید داده‌ی کهنه داشته باشد؟</span><span class="en">16. Why mustn't the new leader hold stale data?</span></summary>
     <div class="fa"><p>چون رهبرِ تازه باید چیزایی که واسه نگه داشتنِ ورودی‌های تأییدشده لازمه رو داشته باشه. انتخابِ نسخه عقب‌افتاده بدونِ قانون‌های لاگ ممکنه داده پذیرفته‌شده رو نابود کنه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: وجود روی یک نود، commit نیست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن رهبر entry رو رو خودش نوشته ولی قبل از تأییدِ quorum قطع می‌شه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا entry ممکنه تو لاگِ رهبرِ جدید نباشه و بعداً جایگزین شه؛ جوابِ موفق رو فقط باید طبقِ قانونِ commit پروتکل داد.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> هر entry محلی ماندگارِ نهایی نیست؛ شرطِ commit و شرطِ انتخابِ رهبر با هم از تاریخچه پذیرفته‌شده محافظت می‌کنن — زود قول نده.</p>
-</div></div>
+</div>
     <div class="en"><p>A fresh leader must carry what it takes to preserve acknowledged entries. Electing a lagging copy without log rules can wipe out accepted data.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۷. در خواندنِ خطی‌پذیر چگونه مطمئن می‌شویم رهبر هنوز معتبر است؟</span><span class="en">17. Why vote even for a linearizable read?</span></summary>
     <div class="fa"><p>قبل از خوندنِ قوی باید مطمئن شی رهبر هنوز مجوز داره و وضعیتِ لازم اعمال شده. تماس با اکثریت یا lease با فرض‌های معتبر از راه‌هاشه؛ ولی رأیِ جدا واسه هر خوندن قانونِ عمومی نیست.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: رهبرِ هنوز معتبر؟</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن A قبلاً رهبر بوده ولی از اکثریت جدا شده و B رهبرِ تازه شده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا خوندنِ محلیِ A می‌تونه قدیمی باشه؛ پروتکل باید قبل از جوابِ خطی‌پذیر هم اعتبارِ رهبری رو چک کنه هم رسیدنِ state به نقطه لازم رو.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> single-leader بودن فقط اسمِ معماریه؛ خوندن از هر رهبرِ سابقی بدونِ چکِ اعتبار خطی‌پذیر نمی‌شه — رهبرِ سابق، بازنشسته‌ست.</p>
-</div></div>
+</div>
     <div class="en"><p>Before a strong read, make sure the leader's mandate is still good and the needed state is applied. Asking the majority or holding a valid lease both work — but a separate vote per read isn't the general rule.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۸. چرا consensus را همه‌جا به کار نمی‌بریم؟</span><span class="en">18. Why not use consensus everywhere?</span></summary>
     <div class="fa"><p>آخه اجماع پیام و ذخیره و هماهنگی می‌خواد و پیشرفتش به تعدادِ کافیِ اعضا گره خورده. بهتره خرجش کنی واسه تصمیم‌هایی که اختلافشون قابل‌قبول نیست — حساب کن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: سه نود، تحمل یک خرابی</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن گروهِ سه‌عضوی واسه عملیاتِ اکثریتی به دو تا عضوِ در دسترس نیاز داره.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا خرابیِ یه عضو قابل‌تحمله؛ با خرابیِ دو عضو پیشرفت می‌خوابه تا اکثریت برگرده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اضافه کردنِ اعضا خرجِ replication و هماهنگی داره؛ اجماع معمولاً مالِ تصمیم‌های لازمه، نه هر حسابِ مستقل — حساب کن.</p>
-</div></div>
+</div>
     <div class="en"><p>Since consensus eats messages, storage, and coordination, and progress hangs on having enough members around. Spend it on decisions where disagreement isn't an option. Do the math.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۹. سرویسِ هماهنگی دقیقاً چه چیزی روی consensus می‌سازد؟</span><span class="en">19. What exactly does a coordination service build on consensus?</span></summary>
     <div class="fa"><p>سرویسِ هماهنگی رو توافقِ معتبر، چیزایی مثل نگاشت و پیکربندی و خبرِ تغییر و مالکیتِ زمان‌دار می‌سازه. ولی مصرف‌کننده هنوز باید قطعِ ارتباط و مالکیتِ قدیمی رو خودش جمع کنه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: قفل و تنظیمات روی etcd</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن کلید <code dir="ltr">/jobs/J7/owner</code> و نسخه پیکربندی تو سرویسِ هماهنگی نگه داشته می‌شن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا عملیاتِ شرطی مالک رو معلوم می‌کنه و watch تغییر رو خبر می‌ده؛ مصرف‌کننده بعد از قطعِ اتصال باید وضعیت رو دوباره همگام کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> watch فقط خبرِ تغییره، خودش مجوزِ اثر نیست؛ کارگر هنوز به lease و fencingِ مناسبِ منبعِ کار نیاز داره — خبر با مجوز فرق داره.</p>
-</div></div>
+</div>
     <div class="en"><p>A coordination service builds mappings, config, change news, and timed ownership on top of valid agreement. But you, the consumer, still clean up disconnects and stale ownership yourself.</p></div>
   </details>
 
   <details><summary><span class="fa">۲۰. اگر مجبور باشی یک جمله از این فصل را در مصاحبه بگویی، کدام است؟</span><span class="en">20. If you had one sentence from this chapter in an interview, which?</span></summary>
     <div class="fa"><p>تضمین رو از رو عاقبتِ خطا انتخاب کن: تازگیِ خوندن و وابستگیِ رویداد و تصمیمِ مشترک سه‌تا نیازِ جدان. اسمِ ابزار هیچ‌وقت جای مشخص کردنِ قانونِ لازم رو نمی‌گیره — اینو قاب کن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: تضمین را برای هر مسیر انتخاب کن</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن ثبتِ اسمِ کاربری یکتاییِ فوری می‌خواد، ولی شمارنده بازدید می‌تونه چند ثانیه عقب باشه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا مسیرِ اول هماهنگی و قیدِ سفت می‌گیره؛ مسیرِ دوم جمعِ غیرهم‌زمان با کنترلِ تکرار داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> قولِ قوی رو بر اساسِ قانونِ همون عملیات انتخاب می‌کنی؛ یه برچسبِ consistency واسه همه تیکه‌های محصول کافی نیست — یه برچسب واسه همه کافی نیست.</p>
-</div></div>
+</div>
     <div class="en"><p>Pick the guarantee from the failure's fallout: read freshness, event dependence, and joint decisions are three separate needs. A tool's name never replaces naming the rule you need — frame that one.</p></div>
   </details>
 

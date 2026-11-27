@@ -230,12 +230,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار ۱</span><span class="en">Teacher narration of diagram 1</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: تقسیم داده با تکثیر فرق دارد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن کلیدهای <code dir="ltr">1…1000</code> رو نصف کردی: نصفش دست shard A، نصفش دست shard B.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا برای هر shard سه‌تا replica بذار؛ روی هم شش‌تا کپی فیزیکی داری. ولی قاطی نکن: A و B دو تیکهٔ فرق‌دار از دیتان، نه دو کپی از یه چیز.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> می‌بینی؟ sharding ظرفیت رو زیاد می‌کنه، replication جونت رو موقع خرابی نجات می‌ده. دوتا کار جدا ولی رفیق‌ان که کنار هم میان. اینو یادت نره.</p>
-</div>
+
 
 <p>
       سمت راست شکل رو ببین، یه قاب گنده‌ست که روش نوشته:
@@ -435,12 +430,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار ۲</span><span class="en">Teacher narration of diagram 2</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: بازهٔ زمانی و shard داغ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ایونت‌های ساعت ۱۰ تا ۱۱ رفتن رو shard آخر، و همه ایونت‌های تازه هم مال همین الانه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> بازه‌های قدیمی خلوتن، ولی shard بازه جاری همه writeها رو می‌خوره. اگه بازه جاری رو ریزتر کنی یا کلید رو با bucket قاطی کنی، فشار پخش می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه range sharding اسکن زمانی رو راحت می‌کنه، ولی کلید پشت سر هم همه writeها رو یه‌جا جمع می‌کنه.</p>
-</div>
+
 
 <p>
       تصور کن این شکل یه درخت تصمیمه که از راست به چپ جلو میره و چهار تا lane داره:
@@ -522,12 +512,7 @@
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار ۳</span><span class="en">Teacher narration of diagram 3</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: تلهٔ تغییرِ مقسوم‌علیه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن hash یه کلید <code dir="ltr">10</code> شده؛ با سه سرور مقصد می‌شه <code dir="ltr">10 % 3 = 1</code>.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا سرور چهارم رو اضافه کن، می‌شه <code dir="ltr">10 % 4 = 2</code>. خیلی از کلیدهای دیگه هم باهاش جابه‌جا می‌شن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نکته ماندگار: shard منطقی رو از سرور فیزیکی جدا کن، تا اضافه شدن ماشین مجبورت نکنه همه کلیدها رو دوباره پخش کنی.</p>
-</div>
+
 
 <p>
       تصور کن شکل دو تا خط موازی داره تو چهار مرحله: <span class="ltr">«Partition Key»</span>، <span class="ltr">«Hash»</span>،
@@ -678,12 +663,7 @@ node_of  = assign_shards_to_nodes(N_SHARDS, nodes)   # a few whole shards move w
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار مفهومی</span><span class="en">Teacher narration of the concept sketch</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: شکستن شمارندهٔ داغ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن شمارنده بازدید <code dir="ltr">p9</code> گیر کرده رو یه کلید و همون شده گلوگاه؛ همه صف کشیدن پشتش!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> فرض کن نوشتن‌ها رو می‌پاشی رو ۱۶ تا کلید <code dir="ltr">p9:0…15</code>؛ موقع خواندن باید هر ۱۶ تا رو جمع بزنی و جواب بدی.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> بار نوشتن پخش می‌شه، ولی خواندن گرون می‌شه و گرفتن یه snapshot مشترک سخت می‌شه. برای موجودی جدی، بی‌گدار به آب نزن و همین‌جوری از این الگو استفاده نکن.</p>
-</div>
+
 
 <p>تصور کن سه تا ستون داری، هر کدوم یه جواب به این سؤال: «بار یه hot key رو کجا ببریم؟» ستون اول: کلید داغ رو تنها بنداز تو یه shard، حتی یه ماشین دربست بده بهش — راحته، ولی اول باید پیداش کنی و یادت باشه گرما با زمان جابه‌جا می‌شه. ستون وسط: با یه پسوند تصادفی، نوشتن یه کلید رو پخش کن رو ۱۰۰ تا کلید — ولی فقط <b>نوشتن</b> پخش می‌شه؛ موقع خواندن باید هر ۱۰۰ تا رو بخونی و قاطی کنی.</p>
 <p>ستون سوم: مدیریت تطبیقی ابری (مثل DynamoDB) خودش بار رو جابه‌جا می‌کنه — بی‌دردسر ولی تو نمی‌فهمی پشت پرده چی شد. نکته ماندگار پانوشت: hash کلیدها رو پخش می‌کنه، نه بار رو! و «داغ نوشتنی» با «داغ خواندنی» دو تا درمان متفاوت می‌خوان.</p>
@@ -785,12 +765,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار مفهومی</span><span class="en">Teacher narration of the concept sketch</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: مهاجرت در وقت نامناسب</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن یه node کند شده و کنترل‌گر هوس کرده همون موقع <code dir="ltr">200 GB</code> داده‌ش رو جابه‌جا کنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> این انتقال شبکه و دیسک رو می‌بلعه و کندی رو بدتر می‌کنه؛ اول علت کندی رو پیدا کن، بعد با محدودیت نرخ حرکت کن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه کندی موقتی همیشه rebalance نمی‌خواد؛ حلقه خودکارِ بدون مهار فقط ازدحام رو بیشتر می‌ترکونه.</p>
-</div>
+
 
 <p>تصور کن سه تا ستون داری از «بی‌دخالت‌ترین» تا «پردخالت‌ترین»: کاملاً خودکار (بی‌زحمت ولی غیرقابل‌پیش‌بینی)، پیشنهاد خودکار با تأیید انسان (پیش‌فرض امن‌تر، مثل Couchbase و Riak) و دستی (فرمون دست خودته برای rebalancing پیشگیرانه قبل از ایونت پربار). سطرهای «مزیت» و «بها» رو ستون‌به‌ستون مقایسه کن تا بفهمی هر حالت چی می‌ده و چی می‌گیره.</p>
 <p>نوار صورتی پایین رو جدی بگیر؛ حرف اصلی بخشه: قاطی کردن «rebalancing خودکار» با «تشخیص خودکار خرابی» خرابی آبشاری می‌سازه — node کند رو «مرده» اعلام می‌کنی، خوشه بارش رو جابه‌جا می‌کنه و فشار رو فشار می‌شینه. تهش چی؟ سیستم می‌ترکه. برای همین تو عمل «انسان در حلقه» امن‌تره.</p>
@@ -855,12 +830,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار ۴</span><span class="en">Teacher narration of diagram 4</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: سه راه پیدا کردن shard</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن نقشه می‌گه کلید <code dir="ltr">17</code> الان رو B نشسته.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کلاینتِ shard-aware یه‌راست می‌ره سراغ B؛ proxy مسیرش می‌ده؛ یا نودی که درخواست بهش خورده forwardش می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> هر راه یه جور تاوان می‌ده و نقشه یه جا نگه داشته می‌شه. یادت باشه service discovery فقط می‌گه کدوم instance زنده‌ست، نمی‌گه صاحب کلید کیه.</p>
-</div>
+
 
 <p>
       فرض کن جلوی یه sequence وایسادی با پنج خط زندگی: <span class="ltr">«Client»</span>، <span class="ltr">«Routing Tier»</span> (زیرنویس: <span class="ltr">«shard-aware balancer»</span>)،
@@ -991,12 +961,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار ۶</span><span class="en">Teacher narration of diagram 6</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: Cutover بدون گم‌شدنِ نوشتن</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن shard داره از A می‌ره به B؛ snapshot تا موقعیت <code dir="ltr">500</code> کپی شده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تغییرهای بعدی تا <code dir="ltr">560</code> می‌رسن؛ با سازوکار پروتکل، نوشتن نهایی همگام می‌شه و مالکیت می‌ره به epoch تازه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اگه نقشه زودتر از رسیدن تغییرها عوض بشه، B دادهٔ قدیمی نشون می‌ده؛ اگه دو طرف بنویسن، تعارض می‌ترکه.</p>
-</div>
+
 
 <p>
       یادت باشه این نمودار مثل نمودار ۴ یه <span class="ltr">sequence</span> نیست، یه <span class="ltr">lifecycle</span> ـه:
@@ -1080,12 +1045,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار</span><span class="en">Teacher narration</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: بازشاردینگِ دو فازه با دروازهٔ برگشت</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن دیتابیس یه میزبانه و هر query می‌ره همون‌جا؛ می‌خوای زود بزرگش کنی ولی نمی‌خوای یه‌شبه‌همه‌چیز رو ببری زیر ترافیکِ واقعی.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> فازِ اول منطقیه: viewها ترافیک رو با hash مسیریابی می‌کنن و جدول هنوز فیزیکی تکون نخورده — اول سربارِ viewها رو اندازه می‌گیری. اگه تو بودجه موند، فازِ دوم فیزیکی میاد: کپیِ کامل به N هاست، بعد دروازهٔ cutover که هم سلامت رو چک می‌کنه هم تأخیر رو.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس هر فاز راهِ برگشتِ خودش رو داره: تو فازِ منطقی فقط یه flagِ مسیریابی برمی‌گرده (ثانیه‌ای)، تو فازِ فیزیکی باید writeهای دو طرف رو آشتی بدی. درسش یه جمله‌ست: هرچه دیرتر بترکه، برگشتن گرون‌تره — پس گیت بذار قبل از هر قدمِ بی‌بازگشت.</p>
-</div>
+
 
 <p>
 تو این نمودار چهار نوار افقی داری: <span class="ltr">«Shard rollout»</span> بالا که مسیر اصلیه، <span class="ltr">«Validation»</span> برای تأییدها،
@@ -1174,12 +1134,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نمودار ۵</span><span class="en">Teacher narration of diagram 5</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: محلی یا جهانی برای رنگ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن کالای <code dir="ltr">P7</code> رو A قرمزه و کالای <code dir="ltr">P9</code> رو B قرمزه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا ایندکس محلی برای query قرمز نیاز به خوندن A و B داره؛ ایندکس جهانی قرمز هر دو شناسه رو بغل هم نگه می‌داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس جهانی خوندن رو متمرکزتر می‌کنه، ولی تغییر رنگ یا حذف کالا باید ایندکس احتمالاً دوردست رو هم اصلاح کنه — راحتی حالا، خرج بعداً.</p>
-</div>
+
 
 <p>
       تصور کن شکل دو تا خط موازی داره تو چهار مرحله: <span class="ltr">«Write»</span>، <span class="ltr">«Index Maintenance»</span>،
@@ -1313,12 +1268,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 <div class="teacher">
 <div class="tag"><span class="fa">روایت مدرس از نقشه فصل</span><span class="en">Teacher narration of the chapter map</span></div>
 <div class="fa">
-<div class="technical-example teacher-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی برای خواندنِ نمودار: محلی یا جهانی برای رنگ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن کالای <code dir="ltr">P7</code> رو A قرمزه و کالای <code dir="ltr">P9</code> رو B قرمزه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا ایندکس محلی برای query قرمز نیاز به خوندن A و B داره؛ ایندکس جهانی قرمز هر دو شناسه رو بغل هم نگه می‌داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس جهانی خوندن رو متمرکزتر می‌کنه، ولی تغییر رنگ یا حذف کالا باید ایندکس احتمالاً دوردست رو هم اصلاح کنه — راحتی حالا، خرج بعداً.</p>
-</div>
+
 
 <p>فرض کن وسط نقشه <span class="ltr">Sharding</span> نشسته و ۶ تا سیم بهش وصله: بازه کلید، hash، consistent hashing، hotspot، مسیریابی، ایندکس ثانویه. یادت باشه هر سیم قراردادشو تو دو کلمه می‌گه — اگه یه سیم ساکتت کرد، همون بخش می‌لنگه!</p>
 <p>تصور کن این نقشه چک‌لیست مروره: برای هر یال یه پاراگراف بگو — تعریف + مثال + بهاش. هرجا لکنت گرفتی، همون‌جا رو دوباره بخون بعد برو سراغ بسته مصاحبه.</p>
@@ -1404,12 +1354,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۱. sharding با replication چه تفاوتی دارد و چگونه با هم ترکیب می‌شوند؟</span><span class="en">1. How do sharding and replication differ, and how do they combine?</span></summary>
 <div class="fa"><p>تصور کن replication یعنی فتوکپی از همون داده — node ترکید، کپی هست. sharding یعنی داده رو تیکه کن، هر تیکه یه shard متفاوت. یادت باشه ترکیبشون معموله: هر shard چند تا replica داره — هم ظرفیت می‌ترکه بالا، هم خرابی رو تحمل می‌کنی.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: تقسیم داده با تکثیر فرق دارد</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن کلیدهای <code dir="ltr">1…1000</code> رو نصف کردی: نصفش دست shard A، نصفش دست shard B.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا برای هر shard سه‌تا replica بذار؛ روی هم شش‌تا کپی فیزیکی داری. ولی قاطی نکن: A و B دو تیکهٔ فرق‌دار از دیتان، نه دو کپی از یه چیز.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> می‌بینی؟ sharding ظرفیت رو زیاد می‌کنه، replication جونت رو موقع خرابی نجات می‌ده. دوتا کار جدا ولی رفیق‌ان که کنار هم میان. اینو یادت نره.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Replication means a copy of the same data on several nodes (failure tolerance and read scaling); sharding means splitting data into different pieces with each piece on a different node (more writes and volume). Combined, each shard has several copies; each shard's leader sits on one node and followers on others, and each node can lead some shards and follow others.</p>
 </div>
@@ -1417,12 +1362,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۲. چه زمانی نباید sharding کرد؟</span><span class="en">2. When should you not shard?</span></summary>
 <div class="fa"><p>فرض کن یه ماشین هنوز جواب میده — امروز یه ماشین خیلی کار می‌کنه! sharding نکن؛ فقط routing و query چند shardی و operation رو قاطی می‌کنی. نکته ماندگار: اول اندازه بگیر، بعد تیکه کن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: هزینهٔ تقسیمِ زودهنگام</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن کل دیتاست فقط <code dir="ltr">20 GB</code>ـه و یه سرور به‌راحتی بار رو جواب می‌ده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا تیکه‌اش کن به چهار shard؛ گزارش همهٔ سفارش‌ها باید چهارتا جواب رو جمع کنه و مهاجرت دیتا هم قاطی‌پاتی می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> تا وقتی محدودیت واقعی ندیدی، sharding فقط مسیر ساده رو گرون می‌کنه؛ replica هم قصهٔ جداست و برای تحمل خرابیه. قاطیشون نکن.</p>
-</div></div>
+</div>
 <div class="en">
 <p>When one machine handles the data and writes — and one machine today does a lot. Sharding brings complexity: picking the partition key, hard scheme changes, costlier joins and multi-object writes (distributed transactions). If only reads are heavy, replication suffices.</p>
 </div>
@@ -1430,12 +1370,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۳. key-range sharding چه مزیت و چه خطری دارد؟ چطور hotspot زمانی را درمان می‌کنند؟</span><span class="en">3. Key-range sharding's advantage and risk? How are temporal hotspots cured?</span></summary>
 <div class="fa"><p>یادت باشه key-range برای range scan عالیه ولی تله داره: کلیدهای پشت سر هم مثل timestamp همه می‌ریزن رو shard «این ماه» و می‌ترکه. فرض کن sensor_id رو بچسبونی اول کلید — بار پخش می‌شه ولی query چند سنسور گرون می‌شه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: بازهٔ زمانی و shard داغ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ایونت‌های ساعت ۱۰ تا ۱۱ رفتن رو shard آخر، و همه ایونت‌های تازه هم مال همین الانه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> بازه‌های قدیمی خلوتن، ولی shard بازه جاری همه writeها رو می‌خوره. اگه بازه جاری رو ریزتر کنی یا کلید رو با bucket قاطی کنی، فشار پخش می‌شه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه range sharding اسکن زمانی رو راحت می‌کنه، ولی کلید پشت سر هم همه writeها رو یه‌جا جمع می‌کنه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Advantage: ordered keys per shard, so fast range scans and composite indexes. Risk: nearby-key writes (like timestamps) heat one shard. Cure: prefixing keys with a sensor or tenant ID to spread writes — price: a multi-sensor range needs several separate queries.</p>
 </div>
@@ -1443,12 +1378,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۴. چرا <code>hash(key) % N</code> برای sharding بد است؟</span><span class="en">4. Why is <code>hash(key) % N</code> bad for sharding?</span></summary>
 <div class="fa"><p>تصور کن <span class="ltr">hash</span>(<span class="ltr">key</span>) % <span class="ltr">N</span> گذاشتی و N از ۳ شد ۴ — تقریباً همه کلیدها جابه‌جا می‌شن، فاجعه! یادت باشه shard منطقی رو از سرور فیزیکی جدا کن تا اضافه شدن ماشین فقط مالکیت رو عوض کنه، نه جای کلیدها.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: تلهٔ تغییرِ مقسوم‌علیه</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن hash یه کلید <code dir="ltr">10</code> شده؛ با سه سرور مقصد می‌شه <code dir="ltr">10 % 3 = 1</code>.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا سرور چهارم رو اضافه کن، می‌شه <code dir="ltr">10 % 4 = 2</code>. خیلی از کلیدهای دیگه هم باهاش جابه‌جا می‌شن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> نکته ماندگار: shard منطقی رو از سرور فیزیکی جدا کن، تا اضافه شدن ماشین مجبورت نکنه همه کلیدها رو دوباره پخش کنی.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Because N is the node count, and adding or removing one node changes every key's division — nearly all records must move. Good rebalancing means minimal moves; so key-to-shard mapping must be independent of node count (fixed shard count, hash ranges, or consistent hashing).</p>
 </div>
@@ -1456,12 +1386,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۵. طرحِ «تعدادِ ثابتِ shard» چطور کار می‌کند و بهایش چیست؟</span><span class="en">5. How does the “fixed shard count” scheme work, and its price?</span></summary>
 <div class="fa"><p>فرض کن از اول ۱۰۰۰ تا shard ثابت داری، هر node مثلاً ۱۰۰ تاشو می‌گیره. node جدید اومد؟ فقط چندتا whole shard جابه‌جا می‌شن. یادت باشه بهاش: اگه تعداد shard کم حدس بزنی، بعداً resharding می‌ترکه تو صورتت.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: شارد منطقی ثابت</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن ۱۰۲۴ تا bucket منطقی داری که بین چهار تا ماشین پخش شدن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا با اضافه شدن ماشین پنجم، بخشی از bucketها منتقل می‌شن ولی تابع تعیین bucket عوض نمی‌شه — تابع سر جاشه، فقط خونه‌ها عوض می‌شن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس جابه‌جایی محدودتر می‌شه؛ ولی تعداد و اندازهٔ bucketها و نقشهٔ مالکیت و hot key هنوز باید مدیریت بشن — کار تموم نشده.</p>
-</div></div>
+</div>
 <div class="en">
 <p>E.g. 1000 shards are created up front and several reach each node; a key goes to shard <code>hash(key) % 1000</code> and the shard→node map is kept separately. Cluster changes move only a few whole shards. Price: if the shard count comes out small (more nodes than shards), expensive resharding is required; and picking the “right” shard count is hard when data volume varies wildly.</p>
 </div>
@@ -1469,12 +1394,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۶. hash-range sharding چه تفاوتی با key-range دارد؟</span><span class="en">6. How does hash-range sharding differ from key-range?</span></summary>
 <div class="fa"><p>یادت باشه فرقش ساده‌ست: key-range یعنی Ali و Sara اگه پشت سر هم باشن کنار همان. hash-range یعنی اول hashشون کن بعد بازه hash رو تیکه کن — بار پخش می‌شه ولی ترتیب اصلی می‌پره. نکته ماندگار: نظم رو می‌دی، پخشی رو می‌گیری.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: range روی hash، نه روی نام</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن اسم‌های <code dir="ltr">Ali</code> و <code dir="ltr">Sara</code> اول hash می‌شن و بازه‌های hash می‌رسن به shardها.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا lookup هر اسم می‌ره به یه مقصد؛ ولی اسم‌های شروع‌شونده با <code dir="ltr">Sa</code> تو hash بغل هم نیستن — پخش و پلان.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس hash-range برای پخش بار مناسب‌تره، ولی نظم کلید اصلی و اسکن prefix رو نگه نمی‌داره — یه چیزی می‌دی، یه چیزی می‌گیری.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Instead of a key range, each shard gets a range of hash values; so nearby keys (consecutive timestamps) scatter and temporal hotspots vanish. Growth splits/merges like key-range. Price: range queries on the partition key itself go inefficient; the composite-key trick (partition in the first column) rescues in-shard range reads.</p>
 </div>
@@ -1482,12 +1402,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۷. consistent hashing چه دو ویژگی‌ای دارد و «consistent» به چه معناست؟</span><span class="en">7. Consistent hashing's two properties, and what does “consistent” mean?</span></summary>
 <div class="fa"><p>تصور کن node جدید اومد و فقط همسایه‌هاش تکون خوردن — اینه consistent hashing. یادت باشه consistent اینجا ربطی به <span class="ltr">replica</span> یا <span class="ltr">ACID</span> نداره؛ یعنی «کلید سر جاش می‌مونه». توازن دقیق هم مجانی نیست، virtual node می‌خواد.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: دایرهٔ hash و مالک جدید</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن توکن‌های A و B رو حلقه‌ان و هر کلید میره سراغ مالک بعدی.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> با اضافه شدن C فقط بازه‌هایی که C مالکشون می‌شه جابه‌جا می‌شن؛ virtual nodeها هم می‌تونن تقسیم ظرفیت رو ریزتر کنن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه consistent اینجا یعنی نگاشت سر جاش می‌مونه موقع تغییر اعضا؛ ربطی به consistency خوندن و نوشتن نداره.</p>
-</div></div>
+</div>
 <div class="en">
 <p>1) Each shard holds roughly as many keys; 2) when the shard count changes, the fewest keys move. “Consistent” means a key's tendency to stay in its own shard — not replica consistency, not ACID. Its family members: rendezvous hashing and jump consistent hashing. Cassandra and ScyllaDB hold randomly bounded ranges with several ranges per node (16 and 256).</p>
 </div>
@@ -1495,12 +1410,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۸. rebalancing چیست و چهار روشِ رایجِ انجامش کدامند؟</span><span class="en">8. What is rebalancing, and four common ways to do it?</span></summary>
 <div class="fa"><p>فرض کن cluster تکون خورد — باید rebalancing کنی. چهار مدل داری: whole shard رو جابه‌جا کن، بازه رو split/merge کن، با consistent hashing چند کلید پراکنده بده به تازه‌وارد، یا کلاً resharding کن. یادت باشه آخری خیلی گرونه!</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: چهار راه rebalance</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن کلیدها و سرورهای مقصد باید بین اعضا دوباره تقسیم بشن. اسباب‌کشی!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا می‌تونی shardهای ثابت رو منتقل کنی، بازه‌های بزرگ رو بشکنی، تعداد بخش‌ها رو متناسب با نودها نگه داری یا توکن‌های حلقه رو جابه‌جا کنی — چهار تا راه داری.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس هر طرح اندازهٔ واحد انتقال و میزان عوض شدن نقشهٔ کلاینت رو عوض می‌کنه؛ «خودکار» اسم الگوریتم تقسیم نیست — گول اسم رو نخور.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Respreading data when the cluster changes. Ways: moving whole shards between nodes (fixed shard count), splitting/merging ranges (key-range or hash-range), reassigning scattered keys to the fresh node (consistent hashing), and full resharding (changing the shard count — very expensive, sometimes needing write pauses).</p>
 </div>
@@ -1508,12 +1418,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۹. چرا rebalancing کاملاً خودکار می‌تواند خطرناک باشد؟</span><span class="en">9. Why can fully automatic rebalancing be dangerous?</span></summary>
 <div class="fa"><p>یادت باشه move داده مجانی نیست — شبکه و دیسک می‌خوره. تصور کن یه node فقط کند شده، تو به‌غلط مرده حسابش کنی و 200GB روش خالی کنی — فشار رو فشار می‌ذاری و cascading failure می‌سازی. نکته ماندگار: کندی موقت همیشه rebalance نمی‌خواد!</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: مهاجرت در وقت نامناسب</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن یه node کند شده و کنترل‌گر هوس کرده همون موقع <code dir="ltr">200 GB</code> داده‌ش رو جابه‌جا کنه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> این انتقال شبکه و دیسک رو می‌بلعه و کندی رو بدتر می‌کنه؛ اول علت کندی رو پیدا کن، بعد با محدودیت نرخ حرکت کن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> یادت باشه کندی موقتی همیشه rebalance نمی‌خواد؛ حلقه خودکارِ بدون مهار فقط ازدحام رو بیشتر می‌ترکونه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Rebalancing is expensive (rerouting requests and moving lots of data) and may swamp the network or nodes. The worst mix is automatic failure detection: a slow node is declared “dead”, the cluster moves load, and the extra pressure builds a cascading failure. Hence often “human in the loop” or preventive rebalancing (before heavy events) is advised.</p>
 </div>
@@ -1521,12 +1426,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۱۰. یک hotspot (کلیدِ داغ) را با چه راه‌هایی می‌توان خنثی کرد؟</span><span class="en">10. How can one neutralize a hotspot (hot key)?</span></summary>
 <div class="fa"><p>تصور کن یه کلید celebrity ترکیده — hash هم نجاتش نمی‌ده چون باز همون یه shard می‌ره! سه راه داری: بندازش تو shard اختصاصی، با suffix تصادفی write رو بین ۱۰۰ کلید پخش کن، یا بده adaptive capacity ابری جمعش کنه. یادت باشه راه دوم فقط write رو پخش می‌کنه، read باید هر ۱۰۰ تا رو merge کنه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: شکستن شمارندهٔ داغ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن شمارنده بازدید <code dir="ltr">p9</code> گیر کرده رو یه کلید و همون شده گلوگاه؛ همه صف کشیدن پشتش!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> فرض کن نوشتن‌ها رو می‌پاشی رو ۱۶ تا کلید <code dir="ltr">p9:0…15</code>؛ موقع خواندن باید هر ۱۶ تا رو جمع بزنی و جواب بدی.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> بار نوشتن پخش می‌شه، ولی خواندن گرون می‌شه و گرفتن یه snapshot مشترک سخت می‌شه. برای موجودی جدی، بی‌گدار به آب نزن و همین‌جوری از این الگو استفاده نکن.</p>
-</div></div>
+</div>
 <div class="en">
 <p>In range-based schemes, put the hot key in a dedicated shard or even a dedicated machine. At application level, adding a random prefix/suffix (two digits → 100 keys) spreads writes but reads must merge them all — and only writes spread. You must also know which keys are hot and manage their lifecycle. Hot keys change over time, and “write-hot” differs from “read-hot”.</p>
 </div>
@@ -1534,12 +1434,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۱۱. request routing چیست و چه تفاوتی با service discovery دارد؟</span><span class="en">11. What is request routing, and how does it differ from service discovery?</span></summary>
 <div class="fa"><p>فرض کن service discovery فقط می‌گه کدوم instance زنده‌ست — چون stateless هستن هرکدوم جواب میده. ولی request routing باید بگه مالک کلید 17 دقیقاً کدوم shardه! یادت باشه shard اشتباه یعنی داده اشتباه — نقشه key→shard→node رو باید داشته باشی.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: سه راه پیدا کردن shard</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن نقشه می‌گه کلید <code dir="ltr">17</code> الان رو B نشسته.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کلاینتِ shard-aware یه‌راست می‌ره سراغ B؛ proxy مسیرش می‌ده؛ یا نودی که درخواست بهش خورده forwardش می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> هر راه یه جور تاوان می‌ده و نقشه یه جا نگه داشته می‌شه. یادت باشه service discovery فقط می‌گه کدوم instance زنده‌ست، نمی‌گه صاحب کلید کیه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Finding a key's owning node. In service discovery, service instances are stateless and any answers; in sharding, only the owning shard's replica nodes can. So routing must know and track the key→shard and shard→node maps.</p>
 </div>
@@ -1547,12 +1442,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۱۲. سه روشِ مسیریابیِ درخواست را مقایسه کن.</span><span class="en">12. Compare three request-routing styles.</span></summary>
 <div class="fa"><p>تصور کن سه مدل داری: هر node خودش forward کنه — ساده ولی یه hop اضافه. routing tier بذاری — مثل mongos، کار تمیز ولی یه قطعه اضافه. کلاینت shard-aware باشه — سریع‌ترین ولی کلاینت باید نقشه رو کش کنه و تازه نگه داره. نکته ماندگار: هر سه با map قدیمی می‌لنگن!</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: سه راه پیدا کردن shard</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن نقشه می‌گه کلید <code dir="ltr">17</code> الان رو B نشسته.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> کلاینتِ shard-aware یه‌راست می‌ره سراغ B؛ proxy مسیرش می‌ده؛ یا نودی که درخواست بهش خورده forwardش می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> هر راه یه جور تاوان می‌ده و نقشه یه جا نگه داشته می‌شه. یادت باشه service discovery فقط می‌گه کدوم instance زنده‌ست، نمی‌گه صاحب کلید کیه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>1) Any node: a request reaches any node and, if not the owner, is forwarded with the answer returned — simple, no extra component. 2) Routing tier: a component that only routes (a shard-aware load balancer) — separated duties, but more components. 3) Shard-aware client: straight to the right node — fastest, but every client must know and refresh the map.</p>
 </div>
@@ -1560,12 +1450,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۱۳. نقشِ ZooKeeper/etcd در مسیریابی چیست و جایگزینِ Riak چه فرقی دارد؟</span><span class="en">13. What is ZooKeeper/etcd's routing role, and how does Riak's alternative differ?</span></summary>
 <div class="fa"><p>یادت باشه ZooKeeper/etcd نقشه معتبر shard→node رو نگه می‌دارن و با consensus جلوی split brain رو می‌گیرن. ولی gossip مثل Riak؟ گره‌ها همین‌جوری بین خودشون پچ‌پچ می‌کنن — مدتی دیدشون قاطی می‌شه و split brain ممکنه. نکته ماندگار: ارزونی gossip به قیمت شلی consistency تموم می‌شه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: مالکیت با epoch</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن نقشهٔ قدیمی shard S رو با epoch ۷ رو A نشون می‌ده و نقشهٔ تازه با epoch ۸ رو B.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> مقصد باید write مالکیت منقضی رو رد کنه یا forward کنه؛ نباید دو تا نقشه دو تا نویسندهٔ معتبر بسازن.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> سرویس هماهنگی نقشه رو هماهنگ می‌کنه، ولی یادت باشه fencing تو مسیر داده هم لازمه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>These services keep the authoritative shard→node map, nodes register themselves, and every ownership change notifies subscribers; their consensus shields against split brain. Riak instead gossips between nodes: weaker consistency and possible split brain — acceptable for a leaderless database since it promises weaker guarantees anyway.</p>
 </div>
@@ -1573,12 +1458,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۱۴. هنگامِ جابه‌جاییِ shard، «پنجرهٔ cutover» چه مشکلی دارد؟</span><span class="en">14. When moving a shard, what's wrong with the “cutover window”?</span></summary>
 <div class="fa"><p>تصور کن shard از A داره می‌ره B — وسط راه snapshot تا 500 رفته ولی writeها تا 560 اومدن! یادت باشه <span class="ltr">Cutover</span> همون لحظه سوییچه: B باید catch-up کرده باشه، request در پرواز باید forward یا reject بشه، وگرنه write گم می‌شه یا دو طرف می‌نویسن و قاطی می‌شه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Cutover بدون گم‌شدنِ نوشتن</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن shard داره از A می‌ره به B؛ snapshot تا موقعیت <code dir="ltr">500</code> کپی شده.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> تغییرهای بعدی تا <code dir="ltr">560</code> می‌رسن؛ با سازوکار پروتکل، نوشتن نهایی همگام می‌شه و مالکیت می‌ره به epoch تازه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اگه نقشه زودتر از رسیدن تغییرها عوض بشه، B دادهٔ قدیمی نشون می‌ده؛ اگه دو طرف بنویسن، تعارض می‌ترکه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Data transfer takes time, and during transfer the old map must serve. When the fresh owner takes over, requests still fly to the old owner; they must be forwarded or rejected so clients get a definite answer. Mismanaging that window builds cryptic “lost write” errors.</p>
 </div>
@@ -1586,12 +1466,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۱۵. چرا ایندکسِ ثانویه در دادهٔ شاردشده به طراحیِ جدا نیاز دارد؟</span><span class="en">15. Why is a secondary index incompatible with sharding?</span></summary>
 <div class="fa"><p>فرض کن با product_id shard کردی ولی کاربر color=red می‌خواد — این شرط هیچ shard رو لو نمی‌ده! یادت باشه secondary index مشکلش همینه: جوابش ممکنه تو همه shardها پخش باشه، پس باید local یا global رو از اول طراحی کنی.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: query با کلیدِ متفاوت</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن کالاها بر <code dir="ltr">product_id</code> تقسیم شدن، ولی کاربر <code dir="ltr">color=red</code> می‌خواد. کلیدها با هم نمی‌خونن!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا این شرط shard کالا رو معلوم نمی‌کنه؛ یا هر shard ایندکس محلی خودش رو می‌خونه یا ایندکس جهانی مقصدها رو معرفی می‌کنه — دو راه داری.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس ایندکس ثانویه طرح جدا می‌خواد، چون کلید جست‌وجو با کلید تقسیم یکی نیست — یادت باشه.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Because it doesn't identify via the partition key, and matching records may scatter across all shards. The “value→shard” map isn't as simple as the primary key; hence two fix families: local (document-partitioned) and global (term-partitioned).</p>
 </div>
@@ -1599,12 +1474,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۱۶. local secondary index چگونه کار می‌کند و چه بهایی دارد؟</span><span class="en">16. How does a local secondary index work, and its price?</span></summary>
 <div class="fa"><p>تصور کن local index یعنی هر shard ایندکس خودشو داره؛ write فقط یه shard رو لمس می‌کنه، ارزون! ولی query قرمز؟ باید به A و B هر دو سر بزنی و merge کنی — scatter-gather می‌ترکه و tail latency بالا می‌ره. نکته ماندگار: نوشتن ارزون، خواندن گرون.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: محلی یا جهانی برای رنگ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن کالای <code dir="ltr">P7</code> رو A قرمزه و کالای <code dir="ltr">P9</code> رو B قرمزه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا ایندکس محلی برای query قرمز نیاز به خوندن A و B داره؛ ایندکس جهانی قرمز هر دو شناسه رو بغل هم نگه می‌داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس جهانی خوندن رو متمرکزتر می‌کنه، ولی تغییر رنگ یا حذف کالا باید ایندکس احتمالاً دوردست رو هم اصلاح کنه — راحتی حالا، خرج بعداً.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Each shard indexes only its own records; writes engage just one shard. Keyless reads must go to all shards with merging answers (scatter-gather), amplifying tail latency; with more shards, query throughput doesn't grow. MongoDB, Cassandra, Elasticsearch and VoltDB all use this.</p>
 </div>
@@ -1612,12 +1482,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۱۷. global secondary index چگونه کار می‌کند و چه بهایی دارد؟</span><span class="en">17. How does a global secondary index work, and its price?</span></summary>
 <div class="fa"><p>فرض کن global index خودش بر اساس term shard شده — قرمزها همه کنار همان. postings list رو از یه shard می‌خونی، تمیز! ولی یه write ممکنه چند index shard رو درگیر کنه و distributed transaction بخواد. یادت باشه DynamoDB حتی async آپدیت می‌کنه — ممکنه کهنه بخونی.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: محلی یا جهانی برای رنگ</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن کالای <code dir="ltr">P7</code> رو A قرمزه و کالای <code dir="ltr">P9</code> رو B قرمزه.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا ایندکس محلی برای query قرمز نیاز به خوندن A و B داره؛ ایندکس جهانی قرمز هر دو شناسه رو بغل هم نگه می‌داره.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس جهانی خوندن رو متمرکزتر می‌کنه، ولی تغییر رنگ یا حذف کالا باید ایندکس احتمالاً دوردست رو هم اصلاح کنه — راحتی حالا، خرج بعداً.</p>
-</div></div>
+</div>
 <div class="en">
 <p>The index is global and sharded separately by term; reading one condition's postings list wants just one shard. Price: fetching records still spans shards; a multi-term AND means intersecting long lists over the network; and writing one record may update several index shards (needing multi-object transactions). DynamoDB updates that index asynchronously, so reading it may be stale.</p>
 </div>
@@ -1625,12 +1490,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۱۸. چرا پیاده‌سازیِ دستیِ ایندکسِ ثانویه در کدِ برنامه خطرناک است؟</span><span class="en">18. Why is hand-rolling a secondary index in application code dangerous?</span></summary>
 <div class="fa"><p>تصور کن رنگ P7 رو آبی کردی ولی قبل از آپدیت ایندکس crash کردی — سرچ هنوز قرمز نشونت میده، قاطی شد! یادت باشه دو تا write مستقل atomic نیستن؛ بدون multi-object transaction ایندکس دستی تو کد زود می‌ترکه.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: یک تغییر، ایندکس جا‌مانده</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن برنامه رنگ <code dir="ltr">P7</code> رو تو مرجع از قرمز به آبی تغییر می‌ده و قبل نوشتن ایندکس crash می‌کنه. بدشانسی!</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا جست‌وجو هنوز <code dir="ltr">P7</code> رو قرمز می‌دونه؛ log تغییر یا تراکنش مناسب باید راه همگام‌سازی و ترمیم رو بده.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس دو تا نوشتن مستقل تو کد برنامه atomicity یا ترتیب یکسان ایندکس و مرجع رو تضمین نمی‌کنن — دو تا قول جدا، هیچ تضمینی.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Because the index (the value-to-ID map) must always stay consistent with the primary data; race conditions and partial writes (part stored, part not) easily corrupt it. Without multi-object transactions (Chapter 8) consistency can't be guaranteed.</p>
 </div>
@@ -1638,12 +1498,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۱۹. چرا «هر tenant یک shard» در چندمستاجری جذاب است و چه محدودیتی دارد؟</span><span class="en">19. Why is “one shard per tenant” attractive in multitenancy, and its limits?</span></summary>
 <div class="fa"><p>فرض کن هر tenant یه shard خودشو داره — بکاپ و restore و GDPR و data residence تمیز می‌شه، tenant غول هم بقیه رو اذیت نمی‌کنه. ولی یادت باشه tenantها هم‌قد نیستن! یه غول ۶۰٪ بار بسازه کل معادله می‌ترکه و باید خودشو هم shard کنی.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: یک tenant، یک محل</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> تصور کن مشتری سازمانی <code dir="ltr">tenant_id=17</code> افتاده رو shard A.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> بیشتر queryهای همین tenant محلی‌ان و سر جاشون جواب می‌گیرن؛ ولی اگه یه tenant به‌تنهایی ۶۰٪ بار بسازه، باید جابه‌جاش کنی یا دیتاش رو بشکنی.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> می‌بینی؟ tenant کلید طبیعی جداسازیه، ولی اندازه و بار tenantها مساوی نیست؛ «یه tenant یه shard» همیشه متعادل نمی‌مونه. اینو یادت نره.</p>
-</div></div>
+</div>
 <div class="en">
 <p>Separate resources and access, cell-based fault isolation, separate backup/recovery, GDPR/CCPA compatibility (simple export and delete), data residence, and gradual schema rollout. Limits: each tenant must fit on one machine (a giant tenant must shard inside itself), many small tenants carry overhead, and cross-tenant features get hard.</p>
 </div>
@@ -1651,12 +1506,7 @@ result = merge(values)                    # e.g. summing counters</pre>
 
 <details><summary><span class="fa">۲۰. در انباره‌های داده، partition و cluster columns چه می‌کنند؟</span><span class="en">20. In data warehouses, what do partition and cluster columns do?</span></summary>
 <div class="fa"><p>تصور کن تو BigQuery با <span class="ltr">Partition</span> <span class="ltr">column</span> می‌گی هر رکورد کدوم تیکه بره، با <span class="ltr">clustering</span> می‌گی تو اون تیکه چه ترتیبی بچینه تا بلوک اضافه نخونی. یادت باشه جزئیاتش موتور به موتور فرق می‌کنه — Snowflake و Delta Lake هرکدوم یه سازی می‌زنن.</p>
-<div class="technical-example concept-example review-example" data-example-version="technical-v2">
-<p class="example-title"><b>مثال فنی: Partition و cluster در گزارش</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> فرض کن فایل‌های فروش بر روز partition شدن و تو هر روز بر <code dir="ltr">customer_id</code> مرتب یا خوشه‌بندی شدن.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا فیلتر روز فقط partition مربوط رو می‌خونه؛ فیلتر مشتری تو همون روز می‌تونه بلوک‌های بیشتری رو رد کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> پس partition حجم درشت خوندن و clustering حذف بلوک‌های داخلش رو هدف می‌گیرن؛ اثر دقیقش بستگی به موتور داره — موتور رو بشناس.</p>
-</div></div>
+</div>
 <div class="en">
 <p>The partition key (like BigQuery's) decides which partition a record lands in, and cluster columns order inside the partition; Snowflake uses automatic micro-partitions with a cluster key, Delta Lake has both. Result: faster range scans, and sometimes better compression and filtering.</p>
 </div>
