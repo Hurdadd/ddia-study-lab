@@ -199,9 +199,9 @@
   <div class="fa">
 <p>وقتی جواب نمی‌رسه، شش حالت ممکنه و سکوت شبکه از هم جداشون نمی‌کنه — هیچ‌جوره!</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch9-2">
-<p class="example-title"><b>مثال فنی: سه سرنوشت همان درخواست</b></p>
-<p data-example-part="setup"><b>وضعیت اولیه:</b> <code dir="ltr">CreateOrder(r7)</code> ارسال شده و پاسخ timeout شده است.</p>
-<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالت اول: نرسیده و هیچ سفارش نیست؛ دوم: در حال اجراست؛ سوم: سفارش ۴۲ ثبت شده اما پاسخ گم شده است.</p>
+<p class="example-title"><b>مثال فنی: سه سرنوشت یک تأیید</b></p>
+<p data-example-part="setup"><b>وضعیت اولیه:</b> <code dir="ltr">ApproveRefund(p8)</code> ارسال شده و پاسخ timeout شده است.</p>
+<p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالت اول: نرسیده و تأییدی نیست؛ دوم: در حال اجراست؛ سوم: بازپرداخت ۵۵ ثبت شده اما پاسخ گم شده است.</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> retry با همان هویت باید این حالت‌ها را امن پوشش دهد؛ ساخت هویت تازه احتمالِ دو اثر را بالا می‌برد.</p>
 </div>
 </div><div class="en"><p>Think of Ethernet and the internet as <b>asynchronous packet networks</b>: they promise you nothing about delivery time — or delivery at all. You send a request, hear nothing back, and six identical-looking things may've happened:</p></div>
@@ -915,8 +915,8 @@
   </details>
 
   <details><summary><span class="fa">۱۲. آیا «خاموش‌کردنِ زامبی» (STONITH) کافی است؟</span><span class="en">12. Is “shooting the zombie” (STONITH) enough?</span></summary>
-    <div class="fa"><p>نه. خاموش‌کردن مالک قدیمی می‌تونه یک لایه باشه، ولی درخواستی که در راهه ممکنه بعد از مرگ مالک برسه. خودِ کشتن هم اکثریت می‌خواد، وگرنه دو طرف همدیگه رو می‌کشن؛ و تا زامبی لو بره داده خراب شده. <span class="ltr">Fencing</span> این شکاف رو در لایهٔ ذخیره‌سازی می‌بنده و دائمی‌است، برخلاف <span class="ltr">OCC</span> که می‌تونه retry کنه.</p>
-</div><div class="en"><p>No. Killing the old owner can be one layer, but a request already in flight may still land after it dies. The killing itself needs a quorum behind it, or both sides kill each other, and by the time you spot the zombie your data is corrupt. Fencing closes that gap at the storage layer and is permanent, unlike OCC, which can retry.</p></div>
+    <div class="fa"><p>نه. خاموش‌کردن مالک قدیمی می‌تونه یک لایه باشه، ولی درخواستی که در راهه ممکنه بعد از مرگ مالک برسه. اختیارِ کشتن باید از یک مرجعِ معتبر (اغلب با quorum) هماهنگ شه، وگرنه دو طرف همدیگه رو می‌کشن؛ و تا زامبی لو بره داده خراب شده. <span class="ltr">Fencing</span> این شکاف رو در لایهٔ ذخیره‌سازی می‌بنده و دائمی‌است، برخلاف <span class="ltr">OCC</span> که می‌تونه retry کنه.</p>
+</div><div class="en"><p>No. Killing the old owner can be one layer, but a request already in flight may still land after it dies. Fencing authority must be arbitrated (often by a quorum), or both sides kill each other, and by the time you spot the zombie your data is corrupt. Fencing closes that gap at the storage layer and is permanent, unlike OCC, which can retry.</p></div>
   </details>
 
   <details><summary><span class="fa">۱۳. quorum چه تضمینی می‌دهد؟</span><span class="en">13. What guarantee does quorum give?</span></summary>

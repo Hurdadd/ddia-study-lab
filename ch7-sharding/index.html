@@ -482,7 +482,7 @@
 
 <div class="fa"><ul>
     <li>یادت باشه hash لازم نیست رمزنگارانه باشه: <span class="ltr">MongoDB</span> از <span class="ltr">MD5</span> استفاده می‌کنه و <span class="ltr">Cassandra</span>/<span class="ltr">ScyllaDB</span> از <span class="ltr">Murmur3</span>.</li>
-    <li>hash خود زبون برنامه‌نویسی بین پروسه‌ها عوض شه (<code>Object.hashCode()</code> تو Java، <code>Object#hash</code> تو Ruby). اینا برای sharding به درد نمی‌خورن.</li>
+    <li>hash خودِ زبون برنامه‌نویسی ممکنه بین پروسه‌ها عوض شه (<code>Object.hashCode()</code> تو Java، <code>Object#hash</code> تو Ruby)؛ اینا برای sharding قابل‌اتکا نیستن.</li>
     <li><b>تلهٔ <code>hash(key) % N</code>:</b> ظاهرش ساده‌ست، ولی با عوض شدن N تقریباً همه کلیدها جابه‌جا می‌شن (از ۳ node بری به ۴، بیشتر کلیدها node عوض می‌کنن). rebalancing باید کمترین جابه‌جایی رو بکنه، پس mod N مردوده.</li>
     <li><b>تعدادِ ثابتِ shard:</b> از اول ۱۰۰۰ تا shard داری، رو ۱۰ تا node هرکدوم ۱۰۰ تا. کلید میره به shard <code>hash(key) % 1000</code> و فقط «نگاشت shard به node» عوض می‌شه. با اومدن node جدید فقط چندتا shard کامل جابه‌جا می‌شن — خیلی ارزون‌تر از split. عددی انتخاب کن که مقسوم‌علیه زیاد داشته باشه، و به node قوی‌تر shard بیشتر بده (<span class="ltr">Citus</span>، <span class="ltr">Riak</span>، <span class="ltr">Elasticsearch</span>، <span class="ltr">Couchbase</span>).</li>
     <li><b>بهای تعدادِ ثابت:</b> اگه تعداد shard کم بذاری و بعد node بیشتر بخوای، <b>resharding</b> گرون رو دستته (شکافتن هر shard و بازنویسی فایل‌ها؛ بعضی سیستم‌ها موقع write اصلاً اجازه نمیدن).</li>

@@ -1133,7 +1133,7 @@
 
 
 <p>
-      چهار باندِ روی هم با یه مقیاسِ مشترکِ ۰ تا ۱۰ دقیقه و راهنمای «نقطه = رویداد، مستطیل = پنجره».
+      چهار باندِ روی هم با یه مقیاسِ شماتیکِ ۰ تا ۱۰ دقیقه (شکافِ ۳۰دقیقه‌ایِ نشست به نسبت کشیده نشده؛ قانونِ متن ۳۰ دقیقه است) و راهنمای «نقطه = رویداد، مستطیل = پنجره».
       بخشِ اول <span class="ltr">Tumbling</span> (اندازهٔ ثابت، بدونِ هم‌پوشانی): مستطیل‌های پشتِ سرِ همِ
       <span class="ltr">[0,1)</span>، <span class="ltr">[1,2)</span> تا <span class="ltr">[9,10)</span> —
       یادداشت می‌گه هر رویداد دقیقاً به یه پنجره می‌رسه (پیاده‌سازی: round-down کردنِ timestamp به دقیقه).
@@ -1152,7 +1152,7 @@
     </p>
 </div>
 <div class="en">
-<p>Four stacked bands sharing a 0–10 minute scale, with the legend “dot = event, rectangle = window”. Band 1, <span class='ltr'>Tumbling</span> (fixed size, no overlap): back-to-back rectangles <span class='ltr'>[0,1)</span>, <span class='ltr'>[1,2)</span> through <span class='ltr'>[9,10)</span> — the note says each event lands in exactly one window (implementation: rounding the timestamp down to the minute). Band 2, <span class='ltr'>Hopping</span> (fixed size, fixed hop): overlapping 5-minute rectangles <span class='ltr'>[0,5)</span>, <span class='ltr'>[1,6)</span> through <span class='ltr'>[5,10)</span> advancing one minute at a time — smoothing via overlap (first one-minute tumbling windows, then aggregating several neighbors).</p><p>Band 3, <span class='ltr'>Sliding</span>: two events 4.5 minutes apart share a sliding window although no fixed one-minute tumbling window would hold them together (“the window follows the events”) — implementation: a sorted event buffer with expiry evicting the stale. Band 4, <span class='ltr'>Session</span>: one user's event clusters in variable-width rectangles, with the “30 minutes idle → session ends” gap closing the window — no fixed duration. Lesson: tumbling and hopping have fixed boundaries and are cheap; a session boundary is set by the idle gap; sliding needs floating state, and with big windows or high throughput it needs lots of temporary machine state (memory or disk).</p>
+<p>Four stacked bands sharing a schematic 0–10 minute scale (the 30-minute session gap is not drawn to scale; the prose rule is 30 minutes), with the legend “dot = event, rectangle = window”. Band 1, <span class='ltr'>Tumbling</span> (fixed size, no overlap): back-to-back rectangles <span class='ltr'>[0,1)</span>, <span class='ltr'>[1,2)</span> through <span class='ltr'>[9,10)</span> — the note says each event lands in exactly one window (implementation: rounding the timestamp down to the minute). Band 2, <span class='ltr'>Hopping</span> (fixed size, fixed hop): overlapping 5-minute rectangles <span class='ltr'>[0,5)</span>, <span class='ltr'>[1,6)</span> through <span class='ltr'>[5,10)</span> advancing one minute at a time — smoothing via overlap (first one-minute tumbling windows, then aggregating several neighbors).</p><p>Band 3, <span class='ltr'>Sliding</span>: two events 4.5 minutes apart share a sliding window although no fixed one-minute tumbling window would hold them together (“the window follows the events”) — implementation: a sorted event buffer with expiry evicting the stale. Band 4, <span class='ltr'>Session</span>: one user's event clusters in variable-width rectangles, with the “30 minutes idle → session ends” gap closing the window — no fixed duration. Lesson: tumbling and hopping have fixed boundaries and are cheap; a session boundary is set by the idle gap; sliding needs floating state, and with big windows or high throughput it needs lots of temporary machine state (memory or disk).</p>
 </div>
 
 <div class="fa"><ul>
@@ -1534,7 +1534,7 @@
 </details>
 
 <details><summary><span class="fa">۳. وقتی تولید سریع‌تر از مصرف است، سه راه چیست؟ مثال بزن.</span><span class="en">3. When production outruns consumption, what are the three options? Give an example.</span></summary>
-<div class="fa"><p>سه راه: پیام رو بندازی، بافر کنی، یا فشارِ برگشتی بذاری و تولید رو کم کنی. ارزشِ داده، ظرفیت و پیامدِ انتظار تعیین می‌کنن کدوم پذیرفتنیه.</p>
+<div class="fa"><p>سه راه: پیام رو بندازی، بافر کنی، یا فشارِ برگشتی بذاری و تولید رو کم کنی. ارزشِ داده، ظرفیت و پیامدِ انتظار تعیین می‌کنن کدوم پذیرفتنیه؛ مثلاً pipe یونیکس و TCP با یه بافرِ کوچیکِ ثابت راهِ سوم رو برمی‌گزینن.</p>
 </div>
 <div class="en">
 <p>Drop it, buffer it, or push back (stalling the producer). Unix pipes and TCP take the third with a small fixed buffer; when it's full, the sender stays blocked until the receiver reads. The right one depends on what the message is worth.</p>

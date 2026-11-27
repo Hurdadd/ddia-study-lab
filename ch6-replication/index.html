@@ -277,9 +277,9 @@
 <div class="fa"><p>
     تکثیر مبتنی بر leader در PostgreSQL، MySQL، Oracle و SQL Server و replica setهای MongoDB دیده می‌شود. Kafka و سیستم‌های مبتنی بر Raft مثل
     CockroachDB، TiDB و etcd هم برای لاگِ تکثیرشده از leader استفاده می‌کنند، ولی تضمین ack و سازگاری‌شان با هم یکی نیست؛ پروتکل و تنظیمات واقعی هر سیستم را جدا بررسی کن.
-    DynamoDB طور دیگری کار می‌کند: یک coordinator درخواست را می‌پذیرد و به replicaها می‌نویسد، و این coordinator رهبر نیست.
+    DynamoDB هم از leader استفاده می‌کند، ولی به‌ازای هر partition و پشتِ یک coordinator بی‌حالت؛ خودِ coordinator رهبر نیست.
   </p></div>
-<div class="en"><p>Leader-based replication appears in PostgreSQL, MySQL, Oracle and SQL Server, and in MongoDB replica sets. Kafka and Raft-based systems such as CockroachDB, TiDB and etcd also use leaders for replicated logs, but their acknowledgment and consistency guarantees differ; identify the actual protocol and settings. DynamoDB is a different case: a coordinator accepts each request and writes to replicas, and that coordinator is not a leader.</p></div>
+<div class="en"><p>Leader-based replication appears in PostgreSQL, MySQL, Oracle and SQL Server, and in MongoDB replica sets. Kafka and Raft-based systems such as CockroachDB, TiDB and etcd also use leaders for replicated logs, but their acknowledgment and consistency guarantees differ; identify the actual protocol and settings. DynamoDB also uses leaders, per partition, behind a stateless request coordinator; the coordinator itself is not the leader.</p></div>
 
 <h3><span class="fa">هم‌زمان در برابر ناهمزمان</span><span class="en">Synchronous vs asynchronous</span></h3>
 
@@ -1175,7 +1175,7 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> گرفتن دو پاسخ یعنی quorum پر شده است، نه اینکه تعارض حل شده یا تازه‌ترین version در دست توست.</p>
 </div>
 </div>
-<div class="en"><p>In <b>leaderless replication</b>, clients or a <b>coordinator</b> send writes to several replicas without one leader imposing a common log order. The chapter follows the Dynamo family, named after Amazon's 2007 paper, with examples such as Riak, Cassandra and ScyllaDB.</p><p>The original Dynamo design and the later DynamoDB service aren't the same system. DynamoDB writes through a coordinator, and that role alone doesn't make it a leader.</p>
+<div class="fa"><p>در <b>تکثیرِ بدون‌رهبر</b>، کلاینت یا یک <b>coordinator</b> نوشتن را به چند replica می‌فرستد، بدون اینکه یک رهبر ترتیبِ مشترک تحمیل کند. این فصل خانوادهٔ Dynamo را دنبال می‌کند (مقالهٔ ۲۰۰۷ آمازون) با مثال‌هایی مثل Riak، Cassandra و ScyllaDB.</p><p>طرحِ اصلی Dynamo و سرویسِ بعدیِ DynamoDB یکی نیستن. DynamoDB از طریق یک coordinator می‌نویسد، ولی این نقش به‌تنهایی رهبر نیست؛ رهبرِ هر partition جداست.</p></div><div class="en"><p>In <b>leaderless replication</b>, clients or a <b>coordinator</b> send writes to several replicas without one leader imposing a common log order. The chapter follows the Dynamo family, named after Amazon's 2007 paper, with examples such as Riak, Cassandra and ScyllaDB.</p><p>The original Dynamo design and the later DynamoDB service aren't the same system. DynamoDB writes through a coordinator, and that role alone doesn't make it a leader; each partition still has its own leader.</p>
 <div class="callout" data-en-example="example-ch6-16">
 <p class="example-title"><b>Example: A write without one leader</b></p>
 <p><b>Setup:</b> Key K is replicated on A, B and C. The client requires two write acknowledgments.</p>
@@ -1614,9 +1614,9 @@
 </details>
 
 <details><summary><span class="fa">۱۸. quorum چیست و شرطِ <code>w + r > n</code> چه می‌دهد؟</span><span class="en">18. What is a quorum, and what does <code>w + r &gt; n</code> buy?</span></summary>
-<div class="fa"><p>با n نسخهٔ ثابت، w تأیید نوشتن و r پاسخ خواندن، شرط w + r > n مجموعه‌ها را مجبور به هم‌پوشانی می‌کند. در این حالت برای نوشتن کامل، حداقل یک replica از مجموعهٔ ack در خواندن دیده می‌شود و majority با تحمل ⌊n/2⌋ خرابی یکی از انتخاب‌های رایج است. با w + r ≤ n خواندن می‌تواند همهٔ دارنده‌های نوشتن را از دست بدهد، و هم‌پوشانی به‌تنهایی linearizability نمی‌سازد؛ به version، membership و پروتکل درست هم نیاز داری.</p>
+<div class="fa"><p>با n نسخهٔ ثابت، w تأیید نوشتن و r پاسخ خواندن، شرط w + r > n مجموعه‌ها را مجبور به هم‌پوشانی می‌کند. در این حالت برای نوشتن کامل، حداقل یک replica از مجموعهٔ ack در خواندن دیده می‌شود و majority با تحمل ⌊(n−1)/2⌋ خرابی یکی از انتخاب‌های رایج است. با w + r ≤ n خواندن می‌تواند همهٔ دارنده‌های نوشتن را از دست بدهد، و هم‌پوشانی به‌تنهایی linearizability نمی‌سازد؛ به version، membership و پروتکل درست هم نیاز داری.</p>
 </div>
-<div class="en"><p>With n fixed replicas, w write acknowledgments and r read responses, w + r > n forces the sets to overlap. Under those assumptions a completed write is seen by at least one queried replica, and majorities with ⌊n/2⌋ tolerance are a common choice. With w + r ≤ n a read can miss every holder of the write, and overlap alone doesn't establish linearizability: version handling, membership and the read/write protocol matter too.</p>
+<div class="en"><p>With n fixed replicas, w write acknowledgments and r read responses, w + r > n forces the sets to overlap. Under those assumptions a completed write is seen by at least one queried replica, and majorities with ⌊(n−1)/2⌋ tolerance are a common choice. With w + r ≤ n a read can miss every holder of the write, and overlap alone doesn't establish linearizability: version handling, membership and the read/write protocol matter too.</p>
 </div>
 </details>
 
