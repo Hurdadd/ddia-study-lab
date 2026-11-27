@@ -775,7 +775,7 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> قولِ خطی‌پذیر یعنی درخواستی که بعد از پایانِ حذف شروع شده شناسهٔ بزرگ‌تر می‌گیره؛ برای همین ترتیبِ تخصیص باید هماهنگ شه، نه اینکه هر شارد شمارندهٔ محلی داشته باشه.</p>
 </div>
 </div>
-  <div class="en"><p>So why isn't Lamport enough, friend? Because linearizability plays by a <b>real-time</b> rule: if A's work finished and B's started after, B must take home the bigger ID — even if those two nodes never spoke. The book's example: a user first flips their account private, then posts a photo from a laptop; but photos and settings live on different shards and the photo shard's counter lags. Net effect: the photo takes the smaller timestamp, and in MVCC a viewer whose timestamp lands between the two still sees the account as “public” next to the private photo! The same shape shows up with deletion: a completed account deletion takes ID 107, then a later report request from a lagging shard gets a smaller stamp and its snapshot still sees deleted rows. The simple fix for both: a <b>linearizable ID oracle</b>.</p></div>
+  <div class="en"><p>So why isn't Lamport enough, friend? Because linearizability plays by a <b>real-time</b> rule: if A's work finished and B's started after, B must take home the bigger ID — even if those two nodes never spoke. A completed account deletion takes ID 107; then a later report request from a lagging shard gets a smaller stamp and its snapshot still sees deleted rows. The fix: a <b>linearizable ID oracle</b>, so a request that starts after the deletion finishes cannot receive a smaller ID.</p></div>
 
   <div class="fa"><p>ساده‌ترین پیاده‌سازی همون «تک‌نودِ مطمئن»ـه: شمارنده اتمی + پایدارسازی + replication تک‌رهبری.
     تو عمل بهش <span class="ltr">timestamp oracle</span> می‌گن (الگوی <span class="ltr">Percolator</span> تو TiKV).
@@ -836,7 +836,7 @@
   <h3 id="s3-2"><span class="fa">۳.۲. چهره‌های مختلف consensus و خواص چهارگانه</span><span class="en">3.2. The many faces of consensus and the four properties</span></h3>
 
   <div class="fa">
-<p>اگه تو مصاحبه پرسیدن consensus یعنی چی، این چهارتا رو ردیف کن: توافقِ سرِ نتیجه، معتبر بودنِ پیشنهاد، عوض نشدنِ تصمیمِ نهایی و رسیدن به تصمیم تو شرایطِ لازم. شرایطِ پیشرفتش به مدلِ خرابی و شبکه گره خورده.</p>
+<p>اگه تو مصاحبه پرسیدن consensus یعنی چی، این چهارتا رو ردیف کن: توافقِ سرِ نتیجه، معتبر بودنِ پیشنهاد، عوض نشدنِ تصمیمِ نهایی و رسیدن به تصمیم تو شرایطِ لازم. شرایطِ پیشرفتش به مدلِ خرابی و شبکه گره خورده. چهره‌های هم‌ارزشش با فرض‌های درست CAS، لاگِ مشترک و commit اتمیک‌اند؛ fetch-and-add ضعیف‌تر است (consensus number 2) و فقط بین دو پیشنهاددهنده تصمیم می‌گیرد.</p>
 <div class="technical-example concept-example callout" data-example-version="technical-v2" id="example-ch10-12">
 <p class="example-title"><b>مثال فنی: وتو در commit اتمیک</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> سه سرویس باید یک تراکنش رو یا همه commit کنن یا همه abort؛ هماهنگ‌کننده از هر سه آمادگی می‌گیره و سرویسِ سوم veto می‌ده.</p>
@@ -844,7 +844,7 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> agreement و validity و integrity با وتو و تصمیمِ یکسان حفظ می‌شن؛ termination ولی به جوابِ همه گره خورده — برای همین 2PCِ ساده با consensusِ مقاوم در برابر خرابی فرق داره، حتی اگه قدرتِ حلِ مسئله هم‌ارز باشه.</p>
 </div>
 </div>
-  <div class="en"><p>Consensus has many faces, friend: agreeing on <b>one value</b> (like atomic CAS), building an <b>append-only log</b> (a.k.a. <span class="ltr">total order broadcast</span>), the <b>fetch-and-add</b> op, and <b>atomic commitment</b> of a distributed transaction. And the deep bit: they're all <b>equivalent</b> — crack one and you've cracked them all.</p></div>
+  <div class="en"><p>Consensus has many faces: agreeing on <b>one value</b> (atomic CAS), building an <b>append-only log</b> (<span class="ltr">total order broadcast</span>), and <b>atomic commitment</b> of a distributed transaction. Under the right assumptions these are <b>equivalent</b> — crack one and you've cracked them all. <b>Fetch-and-add</b> is weaker (consensus number 2) and is not part of that equivalence; it decides only between two proposers.</p></div>
 
   <div class="diagram">
     <div class="cap">

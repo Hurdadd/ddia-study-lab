@@ -177,6 +177,12 @@
 <p>مثال‌های این فصل قصه‌های کلاسین از کارهای روزمره‌ست، نه افشای معماری یه شرکت خاص. عددها رو برای فهم انتخاب کردیم.</p></div>
     <div class="en">
 <p>Read the four bars from top to bottom: <span class="ltr">L1 App objects</span> holds people and orders in code. <span class="ltr">L2 Storage model</span> expresses them as JSON, tables or a graph, which is this chapter's subject. <span class="ltr">L3 Storage engine</span> turns that model into bytes on disk and in memory; you'll study it in Chapter 4. <span class="ltr">L4 Hardware</span> represents those bytes through current, light and magnetism.</p><p>The three labels on the right, <span class="ltr">abstracts / encodes / embodies</span>, name the connections: abstractions hide lower-level details, the engine encodes the storage model, and hardware physically represents the bytes. The application object and the disk layout don't need to have the same shape.</p>
+<div class="callout" data-en-example="example-ch3-1">
+<p class="example-title"><b>Example: Model choice starts with the question</b></p>
+<p><b>Setup:</b> The data covers people, companies and work history.</p>
+<p><b>Walk through it:</b> Rendering a full résumé is a nested read; finding “a friend of a colleague” is a multi-relationship traversal.</p>
+<p><b>What this tells you:</b> A document fits the first read and a graph fits the second. The shape of the question is part of the model choice — ask first.</p>
+</div>
 </div>
   </div>
 
@@ -460,7 +466,7 @@
   <div class="fa"><ul>
     <li><b>Snowflake:</b> بعدها می‌شکنن به زیربعد (برند و دسته جدول جدا) — نرمال‌تر، ولی تحلیلگر با star راحت‌تره.</li>
     <li><b>OBT (One Big Table):</b> جدول‌های بعد کلاً حذف و اطلاعاتشون تا می‌شه تو ستون‌های دنرمال — جای بیشتر، گاهی کوئری تندتر.</li>
-    <li>دنرمال کردن تو تحلیل بی‌دردسره: داده تاریخچهٔ تغییرناپذیره و دغدغهٔ سازگاری نوشتن OLTP رو نداره — راحت باش.</li>
+    <li>دادهٔ تاریخی اغلب از به‌روزرسانی‌های مکرر وضعیت فعلی OLTP دوری می‌کنه؛ ولی هنوز باید مشخص کنی هر فیلد «مقدار در لحظه» است یا «مقدار فعلی» — مثال فروش نشون می‌ده چرا این کپی‌ها رفتار متفاوت می‌خوان.</li>
     <li>جدول واقعیت می‌تونه پتابایتی بشه؛ چون هر رویداد رو جدا نگه می‌دارن، بعداً دستت برای تحلیل بازتره.</li>
   </ul></div>
   <div class="en"><ul>

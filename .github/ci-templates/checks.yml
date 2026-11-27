@@ -20,6 +20,13 @@ jobs:
       - run: git diff --exit-code -- index.html final-project
       - run: python3 assets/check_publication.py
       - run: python3 assets/check_final_project.py
+      - run: python3 assets/check_teaching_examples.py
+      - run: python3 assets/check_solutions.py
+      - run: python3 assets/check_exercise_audit.py
+      - run: python3 assets/check_glossary.py
+      - run: python3 assets/check_links.py
+      - run: node assets/check_studio_engine.cjs
+      - run: node assets/check_studio_revision.cjs
       - run: python3 assets/structcheck.py index.html final-project/index.html
       - run: python3 assets/build_site.py
       - run: python3 assets/check_publication.py --export

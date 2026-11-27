@@ -104,7 +104,7 @@
 <h2 class="reveal"><span class="secnum"><span class="fa">۰</span><span class="en">0</span></span> <span class="fa">نقشهٔ راه فصل</span><span class="en">Chapter roadmap</span></h2>
 <aside class="callout fa example-index" id="chapter-examples" aria-label="مثال‌های فنی فصل ۱۳">
 <div class="tag">مثال‌های فنی فصل ۱۳</div>
-<p>هر مثال سه‌تیکه‌ست: وضعیت اولیه، ترتیبِ عملیات، نتیجه. عددها و داده‌ها فرضِ آموزشی‌انشون نباشه. نامِ ابزارها هم فقط وقتی اومده که رفتارِ همون ابزار خودش موضوعِ بحثه.</p>
+<p>هر مثال سه‌تیکه‌ست: وضعیت اولیه، ترتیبِ عملیات، نتیجه. عددها و داده‌ها فرضِ آموزشی‌اند. نامِ ابزارها هم فقط وقتی اومده که رفتارِ همون ابزار خودش موضوعِ بحثه.</p>
 <details><summary>فهرستِ مثال‌ها؛ رفتن مستقیم به هر موضوع</summary><ul>
 <li><a href="#example-ch13-0">همون یک تغییر، چند نمای عقب‌مانده</a></li>
 <li><a href="#example-ch13-1">یک مرجع، سه خروجی</a></li>
@@ -184,7 +184,7 @@
     <tr>
       <td>قیدِ یکتایی در سیستمِ توزیع‌شده</td>
       <td>یا اجماع، یا شل‌کردنِ آگاهانه</td>
-      <td>رهبرِ واحد برای هر shard، یا compensating transaction و جبران</td>
+      <td>رهبرِ واحد برای هر shard، یا compensating transaction و پذیرش/جبران</td>
     </tr>
     <tr>
       <td>تراکنشِ چندshardی، بدونِ 2PC</td>
@@ -474,7 +474,7 @@
 <p class="example-title"><b>مثال فنی: یه سفارش، یه اصلاح</b></p>
 <p data-example-part="setup"><b>وضعیت اولیه:</b> گزارشِ روزانه جمعِ ۱۰۰۰ داره و مبلغِ سفارش ۴۲ از ۲۰۰ به ۲۵۰ اصلاح می‌شه.</p>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> پردازشگر سهمِ قبلی رو کم می‌کنه و سهمِ جدید رو اضافه می‌کنه، یا تفاوتِ ۵۰ رو طبقِ نسخهٔ معتبر اعمال می‌کنه.</p>
-<p data-example-part="result"><b>نتیجه و دلیل:</b> اضافه‌کردنِ کورکورانهٔ ۲۵۰، گزارش رو ۱۲۵۰ می‌کنه؛ نگه‌داشتنِ نمایِ مشتق یعنی update و deleteِ دقیق — غصه نخور.</p>
+<p data-example-part="result"><b>نتیجه و دلیل:</b> اضافه‌کردنِ کورکورانهٔ ۲۵۰، گزارش رو ۱۲۵۰ می‌کنه؛ نگه‌داشتنِ نمایِ مشتق یعنی update و deleteِ دقیق .</p>
 </div>
 </div>
 <div class="en"><p>Integration's goal is data sitting in the right shape in all the right places: taking input, transforming, joining, filtering, aggregating, training models, evaluating, and writing to the right output. The tools are Chapters 11–12's batch and stream processors, and their outputs are those derived datasets: search indexes, materialized views, recommendations, aggregate metrics. You already know their fundamental difference: stream input is <b>unbounded</b>, batch input bounded and known.</p></div>
@@ -1013,7 +1013,7 @@
 <p data-example-part="result"><b>نتیجه و دلیل:</b> خواندنِ سریع، در عوضِ نوشتن و ترمیمِ پرهزینه‌تره؛ و اگه query عوض بشه، نمایِ قدیمی ممکنه کافی نباشه — این رو نگه دار.</p>
 </div>
 </div>
-<div class="en"><p>The previous section's dataflow systems give you a process for building derived datasets and keeping them fresh — call it the <b>write path</b>: whenever information is written, it may pass several batch and stream stages until all derived datasets update; Fig. 13-1 shows search-index updating as an example. But why build a derived dataset at all? Because you'll probably want to query it later — that is the <b>read path</b>: when serving a user request, you read from the derivative, perhaps process further and build the answer. Together, the whole data journey from collection moment to consumption moment (probably by another human). The write path is the journey's precomputed part — eager, as soon as data arrives, unasked; the read path is the part happening only when someone asks (lazy). If you know functional languages, the write path resembles eager evaluation and the read path lazy evaluation.</p></div>
+<div class="en"><p>The previous section's dataflow systems give you a process for building derived datasets and keeping them fresh — call it the <b>write path</b>: whenever information is written, it may pass several batch and stream stages until all derived datasets update; Diagram 1 shows search-index updating as an example. But why build a derived dataset at all? Because you'll probably want to query it later — that is the <b>read path</b>: when serving a user request, you read from the derivative, perhaps process further and build the answer. Together, the whole data journey from collection moment to consumption moment (probably by another human). The write path is the journey's precomputed part — eager, as soon as data arrives, unasked; the read path is the part happening only when someone asks (lazy). If you know functional languages, the write path resembles eager evaluation and the read path lazy evaluation.</p></div>
 
 <div class="fa"><p>
     dataset مشتق جاییه که دو مسیر به هم می‌رسن. پس یه بده‌بستان بینِ «چقدر کار موقعِ نوشتن» و «چقدر کار موقعِ خواندن»
@@ -1186,7 +1186,7 @@
     بعد از فرستادنِ COMMIT و قبل از شنیدنِ پاسخ، قطعیِ شبکه و timeout بخوره، نمی‌دونه تراکنش commit شده یا
     abort (همون وضعیتِ شکلِ ۹-۱).
   </p></div>
-<div class="en"><p>The same “duplicate suppression” pattern appears elsewhere. TCP orders packets with sequence numbers, resends lost ones and drops duplicates — but only inside one TCP connection. Suppose the TCP connection is a client-to-database connection running Example 13-1's transaction (in many databases a transaction is tied to the client connection, since several queries on the same connection mean the same transaction). If the client, after sending COMMIT and before hearing the reply, hits a network break and timeout, it doesn't know whether the transaction committed or aborted (the same situation as Fig. 9-1).</p></div>
+<div class="en"><p>The same “duplicate suppression” pattern appears elsewhere. TCP orders packets with sequence numbers, resends lost ones and drops duplicates — but only inside one TCP connection. Suppose the TCP connection is a client-to-database connection running Example 13-1's transaction (in many databases a transaction is tied to the client connection, since several queries on the same connection mean the same transaction). If the client, after sending COMMIT and before hearing the reply, hits a network break and timeout, it doesn't know whether the transaction committed or aborted (the same request/response ambiguity as Chapter 9).</p></div>
 
 <pre>BEGIN TRANSACTION;
 UPDATE accounts SET balance = balance + 11.00 WHERE account_id = 1234;
@@ -1319,6 +1319,7 @@ COMMIT;</pre>
 </div>
 
 <h3 id="s5-2"><span class="fa">۵.۲. قیدها: اجماع یا پذیرش و جبران</span><span class="en">5.2. Constraints: consensus or accept-and-compensate</span></h3>
+<p class="small"><span class="fa">در این فصل «پذیرش و جبران» (در متن انگلیسی: apology) یعنی پذیرشِ نقضِ قید و جبرانِ آن، نه گفتنِ «متأسفم» به کاربر.</span><span class="en">In this chapter “apology” means accepting the constraint violation and compensating for it, not saying “sorry” to the user.</span></p>
 
 <div class="fa">
 <p>برای بعضی قیدها باید پیش از پذیرش هماهنگ بشیم؛ برای بعضی دیگه می‌شه خطای محدود رو پذیرفت و جبران کرد. این یه تصمیمِ روشنِ محصوله، نه حذفِ بی‌خبرِ تضمین.</p>
@@ -1365,7 +1366,7 @@ COMMIT;</pre>
 
 <div class="diagram">
 <div class="cap">
-<b><span class="fa">نمودار ۸ — enforce قید: اجماع یا عذرخواهی؟</span><span class="en">Diagram 8 · Enforcing constraints: consensus or apology?</span></b>
+<b><span class="fa">نمودار ۸ — enforce قید: اجماع یا پذیرش و جبران؟</span><span class="en">Diagram 8 · Enforcing constraints: consensus or apology?</span></b>
 <a class="open" href="diagrams/constraint-enforcement-choice.html" target="_blank"><span class="fa">باز کردن در صفحه جدا ↗</span><span class="en">Open standalone ↗</span></a>
 </div>
 <iframe src="diagrams/constraint-enforcement-choice.html" title="Decision tree for enforcing constraints: consensus versus compensation" loading="lazy"></iframe>
@@ -1386,7 +1387,7 @@ COMMIT;</pre>
     </p>
 <p>
       اگه تضمینِ سخت لازم نیست، سؤالِ دوم: <span class="ltr">Can You Compensate Later?</span>
-      («<span class="ltr">viable apology path?</span>» — آیا مسیرِ عذرخواهیِ شدنی داری؟). بله یعنی برگِ
+      («<span class="ltr">viable apology path?</span>» — آیا مسیرِ پذیرش و جبرانِ شدنی داری؟). بله یعنی برگِ
       <span class="ltr">Apologize and Compensate</span> («<span class="ltr">write first, fix up later</span>» —
       «<span class="ltr">refunds, overbooking</span>») — خوش‌بینانه بنویس و بعد درستش کن.
     </p>
@@ -1650,7 +1651,7 @@ COMMIT;</pre>
 <div class="en"><p>Enforcing a uniqueness constraint needs consensus, which usually means funnelling one shard's every event through one node — and if you want the traditional form of the uniqueness constraint, that limit is unavoidable and stream processing doesn't bypass it. But many real apps have a business need that permits violating what you think of as a “hard constraint”:</p></div>
 
 <div class="fa"><ul>
-    <li>اگه مشتری بیشتر از موجودیِ انبار سفارش داد، می‌شه بیشتر سفارش داد، برای تأخیر عذر خواست و تخفیف داد — همون کاری که اگه لیفتراک روی کالاهای انبار می‌رفت و موجودی از تصور کمتر می‌شد هم باید می‌کردی. و workflow عذرخواهی به‌هرحال برای چنین حادثه‌هایی باید بخشی از فرآیندِ کسب‌وکار باشه و قیدِ سختِ روی تعدادِ موجودی انبار شاید لازم نباشه.</li>
+    <li>اگه مشتری بیشتر از موجودیِ انبار سفارش داد، می‌شه بیشتر سفارش داد، برای تأخیر عذر خواست و تخفیف داد — همون کاری که اگه لیفتراک روی کالاهای انبار می‌رفت و موجودی از تصور کمتر می‌شد هم باید می‌کردی. و workflow پذیرش و جبران به‌هرحال برای چنین حادثه‌هایی باید بخشی از فرآیندِ کسب‌وکار باشه و قیدِ سختِ روی تعدادِ موجودی انبار شاید لازم نباشه.</li>
     <li>خیلی ایرلاین‌ها با فرضِ این‌که بعضی مسافرها به پرواز نمی‌رسن <b>overbook</b> می‌کنن، و خیلی هتل‌ها اتاق رو overbook می‌کنن با فرضِ کنسلیِ بعضی مهمان‌ها. این‌جا قیدِ «یک نفر برای هر صندلی» عمداً برای دلیلِ کسب‌وکاری نقض می‌شه و فرآیندِ جبران (refund، ارتقا، اتاقِ رایگان در هتلِ همسایه) برای تقاضای بیش از عرضه گذاشته می‌شه. حتی بدونِ overbook هم فرآیندِ عذر و جبران برای رویدادهایی مثلِ کنسلیِ پرواز به‌خاطرِ هوای بد یا اعتصاب لازم بود — بازیابی از این مسائل فقط بخشیِ عادیِ کسب‌وکار است.</li>
     <li>اگه کسی بیشتر از موجودیِ حسابش برداشت کرد، بانک می‌تونه کارمزدِ overdraft بگیره و بخواد بدهی رو پس بده؛ و با محدودکردنِ کلِ برداشتِ روزانه، ریسکِ بانک محدود می‌مونه.</li>
     <li>توی سیستم‌هایی که داده رو بینِ سازمان‌ها یکپارچه می‌کنن، ناسازگاری ناگزیر پیش میاد و مکانیزمِ اصلاح لازمه؛ تسویهٔ پرداخت بینِ بانک‌ها (فصلِ ۱۱) نمونه‌شه.</li>
@@ -1658,12 +1659,12 @@ COMMIT;</pre>
 <div class="en"><ul><li>If a customer orders beyond warehouse stock, you can oversell, apologize for the delay and discount — the same thing you'd do if a forklift drove into the warehouse goods and stock fell short of imagination. So the apology workflow must be part of the business process for such incidents anyway, and a hard constraint on stock count may be unnecessary.</li><li>Many airlines overbook assuming some passengers miss the flight, and many hotels overbook rooms assuming some guests cancel. Here the “one person per seat” constraint is deliberately violated for business reasons, with a compensation process (refunds, upgrades, a free room at the neighboring hotel) laid on for over-demand. Even without overbooking, apology-and-compensation processes were needed for events like weather- or strike-cancelled flights — recovering from such issues is just an ordinary part of business.</li><li>If someone withdraws beyond their account balance, the bank can charge an overdraft fee and ask the debt repaid; and by capping total daily withdrawals the bank's risk stays bounded.</li><li>In systems integrating data across organizations, inconsistency inevitably arises and a correction mechanism is needed; inter-bank payment settlement (Chapter 11) is an example.</li></ul></div>
 
 <div class="fa"><p>
-    توی خیلی زمینه‌های کسب‌وکاری پس قابلِ قبوله که قید رو <b>موقتاً نقض کنی و بعد با عذرخواهی درستش کنی</b> — «عذرخواهی» این‌جا یعنی پذیرشِ نقضِ قید و جبرانِ آن، نه گفتنِ «متأسفم» به کاربر.
-    این جنس اصلاحِ اشتباه <span class="ltr">compensating transaction</span> نامیده می‌شه. هزینهٔ عذرخواهی
+    توی خیلی زمینه‌های کسب‌وکاری پس قابلِ قبوله که قید رو <b>موقتاً نقض کنی و بعد با پذیرش و جبران درستش کنی</b> — «پذیرش و جبران» این‌جا یعنی پذیرشِ نقضِ قید و جبرانِ آن، نه گفتنِ «متأسفم» به کاربر (در متن انگلیسی این مفهوم apology نام دارد).
+    این جنس اصلاحِ اشتباه <span class="ltr">compensating transaction</span> نامیده می‌شه. هزینهٔ جبران
     (پول یا اعتبار) فرق می‌کنه ولی اغلب کمه: ایمیلِ فرستاده‌شده رو نمی‌شه پس گرفت، ولی می‌شه ایمیلِ اصلاحیِ بعدی فرستاد؛ اگه
     کارت رو دوبار شارژ کردی، می‌شه یکیش رو refund کرد و هزینه‌فقط کارمزدِ پردازش و شاید شکایتِ مشتری است. (پولی که از
     ATM بیرون رفته رو مستقیم نمی‌شه پس گرفت — هرچند در اصل می‌شه برای حسابِ منفی مانده مأمورِ وصول فرستاد.)
-    این‌که هزینهٔ عذرخواهی قابلِ قبوله یا نه، <b>تصمیمِ کسب‌وکاری</b> است. اگه قابلِ قبول باشه، مدلِ سنتیِ «چک‌کردنِ
+    این‌که هزینهٔ جبران قابلِ قبوله یا نه، <b>تصمیمِ کسب‌وکاری</b> است. اگه قابلِ قبول باشه، مدلِ سنتیِ «چک‌کردنِ
     همهٔ قیدها قبل از حتی نوشتنِ داده» بی‌جهت محدودکننده‌ست؛ کاملاً ممکنه معقول باشه که خوش‌بینانه بنویسی و قید رو
     <b>بعداً</b> چک کنی. هنوز می‌شه validation رو قبل از actionهایی گذاشت که بازیابی‌شون گرانه — ولی این به این معنا
     نیست که باید قبل از حتی نوشتنِ داده validate کنی. این اپ‌ها integrity می‌خوان (نمی‌خوای رزرو گم بشه یا پول با
@@ -1685,8 +1686,8 @@ COMMIT;</pre>
     به‌عنوانِ بخشی از نگه‌داریِ state مشتق مفیده، ولی می‌شه توی scope کوچکی اجرایش کرد که خوب جواب می‌ده؛ تراکنشِ
     توزیع‌شدهٔ ناهمگنِ سبکِ XA لازم نیست. هماهنگیِ همگام رو هنوز می‌شه جاهایی که لازمه آورد (مثلاً enforce قیدِ سخت
     قبل از عملیاتی که بازیابی ازش ممکن نیست)، ولی لازم نیست همه‌چیز هزینهٔ هماهنگی رو بده اگه فقط بخشِ کوچکی از اپ به
-    اون نیاز داشته باشه. نگاهِ دیگه به هماهنگی و قیدها اینه که تعدادِ عذرخواهی‌ها برای ناسازگاری رو کم می‌کنن ولی
-    بالقوه عملکرد و دسترس‌پذیریِ سیستم رو کم می‌کنن و پس بالقوه تعدادِ عذرخواهی‌ها برای outage رو زیاد می‌کنن. نمی‌شه
+    اون نیاز داشته باشه. نگاهِ دیگه به هماهنگی و قیدها اینه که تعدادِ جبران‌ها برای ناسازگاری رو کم می‌کنن ولی
+    بالقوه عملکرد و دسترس‌پذیریِ سیستم رو کم می‌کنن و پس بالقوه تعدادِ جبران‌ها برای outage رو زیاد می‌کنن. نمی‌شه
     تعدادِ عذرها رو به صفر رسوند، ولی می‌شه بهترین بده‌بستان رو برای نیازت پیدا کنی — نقطهٔ بهینه‌ای که نه ناسازگاریِ زیاد
     داره نه مشکلِ دسترس‌پذیریِ زیاد.
   </p></div>
@@ -1707,7 +1708,7 @@ COMMIT;</pre>
 
 <p>
       نمودار یه <b>نمودارِ تعادلِ x-y</b> است. محورِ افقی «هماهنگیِ همگام» است: از چپ (هیچ) تا راست (کامل —
-      رهبرِ واحد، consensus، XA برای هر عملیات). محورِ عمودی «عذرخواهی‌هایی که باید بکنی» است. دو منحنی روی
+      رهبرِ واحد، consensus، XA برای هر عملیات). محورِ عمودی «جبران‌هایی که باید بکنی» است. دو منحنی روی
       نمودارن که با هم یه U می‌سازن: منحنیِ نزولیِ «عذر برای <b>ناسازگاری</b> (نقضِ قید، به‌روزرسانیِ
       گم‌شده)» که سمتِ چپ بالاست و به راست می‌افته؛ و منحنیِ صعودیِ «عذر برای <b>outage</b> (دردسترس‌نبودن،
       توقفِ بین-regionی، سرایتِ خطا)» که سمتِ چپ پایینه و به راست بالا می‌ره. منحنیِ سومِ خط‌چین، جمعِ اون دوست —
@@ -2054,7 +2055,7 @@ COMMIT;</pre>
 </details>
 
 <details><summary><span class="fa">۱۵. timeliness و integrity چه فرقی دارند و کدام مهم‌تر است؟</span><span class="en">15. How do timeliness and integrity differ, and which matters more?</span></summary>
-<div class="fa"><p>تازگی زمانِ رسیدنِ نتیجه‌ست؛ یکپارچگی حفظِ قواعدِ معتبر و جلوگیری از گم‌شدن یا تکراره. اهمیتِ هرکدوم به کاربرد وابسته‌ست؛ جبرانِ نتیجهٔ غلط معمولاً سخت‌تره.</p>
+<div class="fa"><p>تازگی زمانِ رسیدنِ نتیجه‌ست؛ یکپارچگی حفظِ قواعدِ معتبر و جلوگیری از گم‌شدن یا تکراره. نقضِ یکپارچگی دائمی است و باید صریح بررسی و ترمیم شود؛ پس یکپارچگی مهم‌تر است.</p>
 </div>
 <div class="en">
 <p>Timeliness means “the user sees up-to-date state” — its violation is temporary, fixed by waiting/retrying (like a 24h-missing card transaction). Integrity means “no loss, no contradiction” — its violation is permanent, wanting explicit check/repair (like balance ≠ transaction sums). Integrity matters more. Dataflow systems don't guarantee the former but give the latter with four mechanisms: an atomic single message, a deterministic derivation function, an end-to-end ID, immutability + reprocessing (Diagram 10).</p>
@@ -2085,7 +2086,7 @@ COMMIT;</pre>
 </div>
 </details>
 
-<h3 id="s6-3"><span class="fa">۶.۳. اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">6.3. 6.3 Common interview mistakes</span></h3>
+<h3 id="s6-3"><span class="fa">۶.۳. اشتباهات رایج در جواب‌های مصاحبه</span><span class="en">6.3. Common interview mistakes</span></h3>
 
 <div class="fa"><ol>
     <li>«تراکنشِ serializable داریم پس اپ‌مان درسته» — باگِ اپ و استفادهٔ غلط از پایگاه داده رو تراکنش پوشش نمی‌ده.</li>
@@ -2103,7 +2104,7 @@ COMMIT;</pre>
   </ol></div>
 <div class="en"><ol><li>“We have serializable transactions so our app is correct” — transactions don't cover app bugs or database misuse.</li><li>“The stream processor's exactly-once means users can't double-submit” — its scope is message processing only; a user's retry is a separate request, and it needs an end-to-end ID.</li><li>“TCP drops duplicates so retry is safe” — only inside one connection; a fresh connection is a fresh scope.</li><li>“Eventual consistency means giving up on correctness” — no: you must keep integrity (permanent); only timeliness (temporary) gets relaxed.</li><li>“We enforce uniqueness in the app with check-then-insert” — breaks under non-serializable isolation; you need a database constraint, or a shard plus a sequential check.</li><li>“Async multi-leader + hard uniqueness” — impossible together; different leaders concurrently accept conflicting writes.</li><li>“We integrate with dual writes” — with no ordering authority you get permanent divergence.</li><li>“CDC or event sourcing, no difference” — true for the “decide the total order” principle, but each carries its own operational tradeoffs; say the full sentence.</li><li>“We solve everything with one integrated database” — great if one technology covers all your needs; but the unbundle debate is breadth (workload range), not depth — don't mistake the metric.</li><li>“For more timeliness, add coordination” without accounting for the outage apologies — the sweet spot is two-sided.</li><li>“Logical timestamps fully solve causal ordering” — no: the receiver must still tolerate unordered delivery, and external effects (notifications) stay unfixed.</li><li>“We have backups so data is safe” — until you've tested a restore, you don't know the backup is healthy; blind trust is banned.</li></ol></div>
 
-<h3 id="s6-4"><span class="fa">۶.۴. چک‌لیستِ ۵ دقیقه‌ای قبل از مصاحبه</span><span class="en">6.4. 6.4 Five-minute checklist</span></h3>
+<h3 id="s6-4"><span class="fa">۶.۴. چک‌لیستِ ۵ دقیقه‌ای قبل از مصاحبه</span><span class="en">6.4. Five-minute checklist</span></h3>
 
 <div class="fa"><ol>
     <li>مبنا در برابر مشتق رو با یه مثال (پایگاه داده + ایندکسِ جستجو + CDC) در ۳۰ ثانیه بگو.</li>

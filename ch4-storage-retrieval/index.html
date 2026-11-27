@@ -277,7 +277,7 @@ $ db_get 42</pre>
 <p><b>Walk through it:</b> The write updates the WAL and memory. A flush creates a new sorted file; compaction merges versions and retains the ones still needed.</p>
 <p><b>What this tells you:</b> The reader must return the newest visible version. Finding the key in an old file isn't enough if newer state exists elsewhere.</p>
 </div></div>
-  <div class="fa">ولی این طرح سه تا مشکل جدی داره:</div><div class="en"><p>Check four limits of this simple hash-index design:</p></div>
+  <div class="fa">ولی این طرح چهار تا مشکل جدی داره:</div><div class="en"><p>Check four limits of this simple hash-index design:</p></div>
   <div class="fa">
 <ul>    <li>فضای رکوردهای بازنویسی‌شده هرگز آزاد نمی‌شه؛ با نوشتن مداوم، دیسک پر می‌شه.</li>
     <li>hash map پایدار نیست و بعد از restart باید با اسکن کل لاگ بازسازی بشه (restart کند).</li>
@@ -481,9 +481,9 @@ $ db_get 42</pre>
 <ul>    <li>برخلاف سگمنت‌های با اندازهٔ متغیر و تغییرناپذیرِ LSM، B-tree پایگاه داده رو به <b>صفحات با اندازهٔ ثابت</b> (page) می‌شکنه که می‌تونن <b>درجا بازنویسی</b> بشن. اندازهٔ سنتی ۴ کیلوبایته؛ PostgreSQL حالا ۸ کیلوبایته و MySQL به‌طور پیش‌فرض ۱۶ کیلوبایت.</li>
     <li>هر صفحه شماره داره و صفحه‌ها با شماره به هم ارجاع می‌دن (مثل pointer، ولی رو دیسک). اگه همه تو یه فایل باشن، شماره × اندازهٔ صفحه = offset بایتی.</li>
     <li>یه صفحه <b>root</b>ـه و هر جست‌وجو از همون شروع می‌شه. هر صفحهٔ داخلی چند تا کلید و ارجاع به فرزند داره و هر فرزند مسئول یه <b>بازهٔ پیوسته</b> از کلیدهاست؛ کلیدهای بین ارجاع‌ها مرز بازه‌ها رو مشخص می‌کنن. (گاهی B+ tree می‌نامنش.)</li>
-    <li>تعداد ارجاع‌های هر صفحه = <b>branching factor</b>؛ تو عمل چند صدتاییه. به‌همین‌دلیل عمق درخت همیشه ۳ تا ۴ سطح می‌مونه (درخت ۴ سطحی با صفحات ۴KB و عامل انشعاب ۵۰۰ تا ۲۵۰ ترابایت رو نگه می‌داره).</li>
+    <li>تعداد ارجاع‌های هر صفحه = <b>branching factor</b>؛ تو عمل چند صدتاییه. به‌همین‌دلیل عمق درخت می‌تونه فقط ۳ تا ۴ سطح باشه (درخت ۴ سطحی با صفحات ۴KB و عامل انشعاب ۵۰۰ تا ۲۵۶ ترابایت رو نگه می‌داره).</li>
     <li>برگ‌ها (leaf page) کلیدهای تکی رو دارن: یا مقدار رو inline نگه می‌دارن یا ارجاع به جایی که مقدار هست.</li>
-  </ul></div><div class="en"><ul><li>A B-tree uses <b>fixed-size pages</b> that can be <b>rewritten in place</b>. Compare that with LSM's immutable, variable-size segments. The chapter gives traditional 4 KB pages, PostgreSQL's 8 KB pages and MySQL's 16 KB default.</li><li>Pages reference other pages by number. In a single-file layout, page number × page size gives the byte offset.</li><li>Lookups begin at the <b>root</b>. Each internal page holds boundary keys and child references. Each child covers a <b>contiguous key range</b>. The leaf-based arrangement is often called a B+ tree.</li><li>The number of child references is the <b>branching factor</b>, often in the hundreds. That's why large trees can be only 3–4 levels deep. The chapter illustrates a four-level tree with 4KB pages and branching factor 500 holding up to 250 TB.</li><li><b>Leaf pages</b> contain individual keys, with either the value itself or a reference to its record.</li></ul>
+  </ul></div><div class="en"><ul><li>A B-tree uses <b>fixed-size pages</b> that can be <b>rewritten in place</b>. Compare that with LSM's immutable, variable-size segments. The chapter gives traditional 4 KB pages, PostgreSQL's 8 KB pages and MySQL's 16 KB default.</li><li>Pages reference other pages by number. In a single-file layout, page number × page size gives the byte offset.</li><li>Lookups begin at the <b>root</b>. Each internal page holds boundary keys and child references. Each child covers a <b>contiguous key range</b>. The leaf-based arrangement is often called a B+ tree.</li><li>The number of child references is the <b>branching factor</b>, often in the hundreds. That's why large trees can be only 3–4 levels deep. The chapter illustrates a four-level tree with 4KB pages and branching factor 500 holding up to 256 TB.</li><li><b>Leaf pages</b> contain individual keys, with either the value itself or a reference to its record.</li></ul>
 <div class="callout" data-en-example="example-ch4-9">
 <p class="example-title"><b>Example: A small change to a fixed-size page</b></p>
 <p><b>Setup:</b> A hypothetical engine uses <code dir="ltr">8 KB</code> pages, and the target record is in one of them.</p>
@@ -951,12 +951,7 @@ $ db_get 42</pre>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس دادهٔ هم‌نوع و مشابه بهتر فشرده می‌شه. این سود با مخلوط شدن همهٔ فیلدهای یه ردیف کمتر قابل‌استفاده‌ست — همسایهٔ خوب، فشردهٔ خوب.</p>
 </div>
 </div><div class="en"><p>A fact table can have 100+ columns while a report needs only 4–5. Reading <code>SELECT *</code> is rarely necessary for that analytical query. Look at the book's example and identify the columns it actually uses:</p>
-<div class="callout" data-en-example="example-ch4-19">
-<p class="example-title"><b>Example: Read only the amounts</b></p>
-<p><b>Setup:</b> Rows contain <code dir="ltr">id, address, description, amount</code>.</p>
-<p><b>Walk through it:</b> For <code dir="ltr">SUM(amount)</code>, a columnar engine reads the amount blocks and leaves the addresses and descriptions aside.</p>
-<p><b>What this tells you:</b> The benefit comes from reading fewer bytes. A query needing every field of one row doesn't necessarily get the same advantage.</p>
-</div></div>
+</div>
 <pre>SELECT dim_date.weekday, dim_product.category,
        SUM(fact_sales.quantity) AS quantity_sold
 FROM fact_sales
@@ -994,7 +989,12 @@ GROUP BY dim_date.weekday, dim_product.category;</pre>
 <p data-example-part="steps"><b>اجرای مرحله‌به‌مرحله:</b> حالا برای <code dir="ltr">SUM(amount)</code> موتور ستونی فقط بلوک مبلغ رو می‌خونه و نشونی و توضیح رو کنار می‌ذاره. فقط همون که لازمه!</p>
 <p data-example-part="result"><b>نتیجه و دلیل:</b> پس سود از کمتر خوندن میاد. اگه query همهٔ ستون‌های یه ردیف رو بخواد، همین مزیت الزاماً برقرار نیست — معجزهٔ همیشگی نداریم.</p>
 </div>
-</div><div class="en"><p><b>Column-oriented</b> describes a physical layout for reading columns. <b>Wide-column</b>, or column-family, describes a data model, as in Bigtable, Accumulo and HBase, where rows can have many variable columns. Those systems use row-oriented access in the comparison here. The shared word “column” doesn't give them the same analytical scan behavior.</p></div>
+</div><div class="en"><p><b>Column-oriented</b> describes a physical layout for reading columns. <b>Wide-column</b>, or column-family, describes a data model, as in Bigtable, Accumulo and HBase, where rows can have many variable columns. Those systems use row-oriented access in the comparison here. The shared word “column” doesn't give them the same analytical scan behavior.</p><div class="callout" data-en-example="example-ch4-19">
+<p class="example-title"><b>Example: Read only the amounts</b></p>
+<p><b>Setup:</b> Rows contain <code dir="ltr">id, address, description, amount</code>.</p>
+<p><b>Walk through it:</b> For <code dir="ltr">SUM(amount)</code>, a columnar engine reads the amount blocks and leaves the addresses and descriptions aside.</p>
+<p><b>What this tells you:</b> The benefit comes from reading fewer bytes. A query needing every field of one row doesn't necessarily get the same advantage.</p>
+</div></div>
   </div>
 
   <h3><span class="fa">ترتیب مرتب‌سازی و نوشتن</span><span class="en">Sort order and writes</span></h3>
